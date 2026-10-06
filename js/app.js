@@ -313,7 +313,10 @@ function seatLabel(seat) {
   if (g && seat === g.contract.decl) tags.push('<span class="tag">Decl</span>');
   if (g && seat === g.dummy) tags.push('<span class="tag">Dummy</span>');
   const nm = online() && Net.st.names[seat];
-  const who = seat === U() ? "You" : (g && userControls(seat) ? "You play" : nm ? nm : "Robot");
+  // your own seat shows your name (the one you use at online tables), other seats the player's name or "Robot"
+  let myNm = ""; try { myNm = localStorage.getItem("bridge-table-name") || ""; } catch (e) {}
+  const mine = (online() && Net.st.names[U()]) || myNm;
+  const who = seat === U() ? (mine || "You") : nm ? nm + (g && userControls(seat) ? " (you play)" : "") : (g && userControls(seat) ? "You play" : "Robot");
   const turn = (G.phase === 'bid' && bidTurn() === seat) || (G.phase === 'play' && g.turn === seat);
   return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> · ${who} ${tags.join('')}</span>`;
 }
