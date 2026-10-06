@@ -100,7 +100,18 @@ const CONVS = [
   { k: 'splinter', n: 'Splinters', d: 'A double jump in a new suit over a major opening = 4+ card support, a singleton or void in the bid suit, 12-15 points, game forcing. Shows slam potential.' },
   { k: 'texas', n: 'Texas Transfers', d: 'Over 1NT/2NT: 4♦ → 4♥, 4♥ → 4♠. A 6+ card major with game values; the strong hand (opener) declares.' },
   { k: 'leb', n: 'Lebensohl', d: 'After our 1NT is overcalled at the two level: 2NT forces opener to bid 3♣ (to sign off in a suit or as a slow show). A direct three-level suit is forcing. A direct 3NT denies a stopper; 2NT then 3NT shows one.' },
+  { k: 'invMin', n: 'Inverted Minors', off: 1, d: 'Over 1♣/1♦: a raise to 2 of the minor is strong (10+ points, 4+ support, no 4-card major) and forcing; a jump raise to 3 is preemptive (0-9 points, 5+ support).' },
+  { k: 'drury', n: 'Drury', off: 1, d: 'A passed hand answers partner\'s third/fourth-seat 1♥/1♠ with 2♣ = 3+ card support and 10-12 points. Opener bids 2 of the major with a light opening, 4 of the major with a full one.' },
+  { k: 'nmf', n: 'New Minor Forcing', off: 1, d: 'After 1m–1M–1NT, responder\'s 2 of the other minor is artificial and forcing (11+): it asks opener for 3-card support of responder\'s major or the other 4-card major.' },
+  { k: 'fsf', n: 'Fourth Suit Forcing', off: 1, d: 'When three suits have been bid by our side, responder\'s bid of the fourth suit is artificial and game forcing; it asks opener to describe further (stopper, support or extra length).' },
+  { k: 'ogust', n: 'Ogust', off: 1, d: 'Over partner\'s weak two, 2NT asks: 3♣ = minimum, bad suit; 3♦ = minimum, good suit; 3♥ = maximum, bad suit; 3♠ = maximum, good suit; 3NT = solid suit (AKQ).' },
+  { k: 'supx', n: 'Support Double', off: 1, d: 'After 1m–(P)–1M–(overcall below 2M), opener\'s double shows exactly three-card support for responder\'s major; a direct raise shows four.' },
+  { k: 'respx', n: 'Responsive Double', off: 1, d: 'After their opening, partner\'s takeout double and their raise, a double by advancer is for takeout: 8+ points and both unbid suits (usually the majors), no clear bid.' },
+  { k: 'sjs', n: 'Strong Jump Shifts', off: 1, x: 'wjs', d: 'A single jump in a new suit by responder shows a strong hand (19+ points) with a good suit and slam interest. Replaces Weak Jump Shifts.' },
+  { k: 'dont', n: 'DONT', off: 1, x: 'capp', d: 'Over their 1NT: X = a one-suiter (6+), 2♣ = clubs and a higher suit, 2♦ = diamonds and a major, 2♥ = both majors, 2♠ = spades only. Replaces Cappelletti.' },
+  { k: 'gamb', n: 'Gambling 3NT', off: 1, d: 'A 3NT opening shows a solid 7+ card minor (AKQ at the top) with no ace or king outside. Partner passes with stoppers, otherwise bids 4♣ (pass or correct).' },
 ];
+CONVS.forEach(c => { if (c.x) { const o = CONVS.find(y => y.k === c.x); if (o) o.x = c.k; } });
 const XINFO = {
   jtr: { n: 'Jacoby Transfer', d: 'Over 1NT, 2♦ asks opener to bid hearts and 2♥ asks for spades, so the strong hand declares.' },
   bw: { n: 'Blackwood', d: '4NT asks for aces: 5♣ = 0 or 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.' },
@@ -114,8 +125,9 @@ const XINFO = {
   pre: { n: 'Preempt', d: 'An opening at the three or four level: a long suit (7+) and a weak hand, taking bidding space from the opponents.' },
   runout: { n: 'Escape after 1NT doubled', d: 'When our 1NT is doubled, a weak responder runs to a 5+ card suit; redouble shows values (9+).' },
 };
-const ALL_ON = Object.fromEntries(CONVS.map(c => [c.k, true]));
-const SAYC = { twoOverOne: false, rkc: false, gerber: true, bergen: false, capp: false, j2nt: true, wjs: false, stayman: true, fourWay: false, smolen: false, michaels: false, splinter: false, texas: false, leb: false };
+/* default card = the player's own card; conventions marked off start disabled */
+const ALL_ON = Object.fromEntries(CONVS.map(c => [c.k, !c.off]));
+const SAYC = Object.fromEntries(CONVS.map(c => [c.k, ['gerber', 'j2nt', 'stayman'].includes(c.k)]));
 const convInfo = k => CONVS.find(c => c.k === k) || XINFO[k] || null;
 
 Object.assign(E, { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealerOf, callTxt, popc, rnd, shuffle, dealKey,

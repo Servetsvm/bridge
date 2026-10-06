@@ -123,31 +123,63 @@ function applyField(e, f) {
 }
 
 /* ================= game flow ================= */
-function freshDeal() {
-  for (let i = 0; i < 50; i++) {
+/* a never-seen deal; in practice mode, one where our side gets to use the chosen convention */
+function freshDeal(dealer) {
+  const want = SET.practice, cards = sideCards(), t0 = performance.now();
+  let fallback = null;
+  for (let i = 0; i < 20000; i++) {
     const d = E.shuffle([...Array(52).keys()]);
     const deal = [0, 1, 2, 3].map(k => d.slice(k * 13, k * 13 + 13));
     const key = E.dealKey(deal);
-    if (!SEEN.has(key)) { SEEN.add(key); saveSeen(); return deal; }
+    if (SEEN.has(key)) continue;
+    if (want) {
+      const auc = [];
+      while (!auctionOver(auc) && auc.length < 60) { const t = (dealer + auc.length) % 4; const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); }
+      const mine = auc.some(e => e.seat === U() && e.m && e.m.cv === want);
+      const ours = auc.some(e => sideOf(e.seat) === sideOf(U()) && e.m && e.m.cv === want);
+      if (!mine && !ours) { if (performance.now() - t0 < 4000) continue; }
+      else if (!mine) { if (!fallback) fallback = { deal, key }; if (performance.now() - t0 < 2500) continue; }
+      if (!mine && !ours && fallback) { SEEN.add(fallback.key); saveSeen(); return fallback.deal; }
+      if (!mine && !ours) flash('No practice deal found quickly — here is a normal deal', 2500);
+    }
+    SEEN.add(key); saveSeen(); return deal;
   }
   throw new Error('could not find an unseen deal');
 }
-function newBoard(replay) {
+/* replay: a deal to play again or an entered deal; boardNo: board number for an entered deal (sets dealer and vulnerability) */
+function newBoard(replay, boardNo) {
   clearTimeout(timer);
   if (!replay) BOARD++;
-  const deal = replay ? replay.map(h => h.slice()) : freshDeal();
-  G = { id: Date.now().toString(36) + E.rnd(1e6).toString(36), board: BOARD, dealer: dealerOf(BOARD), deal, auction: [], phase: 'bid', play: null, result: null, claimed: false, field: null, cards: sideCards() };
+  const bn = boardNo || BOARD;
+  const deal = replay ? replay.map(h => h.slice()) : freshDeal(dealerOf(bn));
+  UNDO.length = 0;
+  G = { id: Date.now().toString(36) + E.rnd(1e6).toString(36), board: bn, dealer: dealerOf(bn), deal, auction: [], phase: 'bid', play: null, result: null, claimed: false, field: null, cards: sideCards() };
   Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null });
   $('ov').hidden = true;
   Field.start(G);
   save(); render(); tick();
 }
 const bidTurn = () => (G.dealer + G.auction.length) % 4;
+
+/* ---- undo: a snapshot is taken right before each call or card of yours ---- */
+const UNDO = [];
+function pushUndo() { const { field, ...rest } = G; UNDO.push(JSON.stringify(rest)); if (UNDO.length > 80) UNDO.shift(); }
+function undo() {
+  if (!UNDO.length) return;
+  clearTimeout(timer);
+  const wasDone = G.phase === 'done', id = G.id;
+  G = JSON.parse(UNDO.pop());
+  G.field = Field.live[id] ? Field.live[id].f : null;
+  if (wasDone) { HIST = HIST.filter(h => h.id !== id); closeOv(); }
+  Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, toast: null });
+  save(); render(); tick();
+}
 function makeCall(seat, call, m) {
-  if (G.phase !== 'bid' || bidTurn() !== seat || !isLegal(G.auction, seat, call)) return;
+  if (G.phase !== "bid" || bidTurn() !== seat || !isLegal(G.auction, seat, call)) return;
+  if (seat === U()) pushUndo();
   if (!m) m = E.explainCall(G.auction, seat, call, G.cards);
   G.auction.push({ seat, call, m });
-  ui.lastExpl = G.auction.length - 1; ui.selLvl = 0; ui.hintBid = null;
+  ui.selLvl = 0; ui.hintBid = null;
   if (auctionOver(G.auction)) {
     const c = contractOf(G.auction);
     if (!c) { finishBoard(); return; }
@@ -164,7 +196,8 @@ function userControls(seat) {
 }
 function playCard(seat, c) {
   const g = G.play;
-  if (G.phase !== 'play' || g.turn !== seat || g.trick.length >= 4 || !E.legalFor(g, seat).includes(c)) return;
+  if (G.phase !== "play" || g.turn !== seat || g.trick.length >= 4 || !E.legalFor(g, seat).includes(c)) return;
+  if (userControls(seat)) pushUndo();
   E.applyCard(g, seat, c); ui.hintCard = null;
   save(); render(); tick();
 }
@@ -277,6 +310,7 @@ function renderBar() {
    <div class="spacer"></div>
    <div class="tools">
      <button class="btn new${ui.confirmNew > Date.now() ? ' warn' : ''}" id="bNew">${ui.confirmNew > Date.now() ? 'Sure?' : 'New Deal'}</button>
+     <button class="btn" id="bUndo" ${UNDO.length ? "" : "disabled"}>Undo</button>
      <button class="btn gold" id="bHint">Hint</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>Claim</button>
      <button class="btn" id="bSet">Settings</button>
@@ -297,8 +331,10 @@ function auctionTable(auction, phaseBid) {
   return o + '</tr></tbody></table>';
 }
 function auctionPanel() {
-  const ex = ui.hintBid ? explHtml({ call: ui.hintBid.call, m: ui.hintBid.m }, 'Suggestion:') : explHtml(ui.lastExpl != null ? G.auction[ui.lastExpl] : null);
-  return `<div class="auction">${auctionTable(G.auction, G.phase === 'bid')}</div>${SET.expl ? `<div class="expl">${ex}</div>` : ''}`;
+  // the explanation appears only when you tap a call (or ask for a hint); tap again to close it
+  const e = ui.hintBid ? { call: ui.hintBid.call, m: ui.hintBid.m } : (ui.lastExpl != null ? G.auction[ui.lastExpl] : null);
+  const ex = e ? explHtml(e, ui.hintBid ? 'Suggestion:' : null) : '';
+  return `<div class="auction">${auctionTable(G.auction, G.phase === 'bid')}</div>${e && SET.expl ? `<div class="expl" id="dExpl" role="button" tabindex="0">${ex}</div>` : `<div class="muted tap">Tap a call to see what it means</div>`}`;
 }
 function renderTable() {
   for (let seat = 0; seat < 4; seat++) {
@@ -384,8 +420,10 @@ function showAuction() {
 }
 function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
-  const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b><small>${symText(c.d)}</small></span></label>`).join('');
+  const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">replaces ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
   openOv('set', `<h2>Settings</h2>
+   <div class="grp"><span>Practice a convention</span><select id="sPractice" class="sel"><option value="">Off — normal random deals</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.</div></div>
+   <div class="grp"><span>Play a specific deal</span><button class="btn" id="sDeal">Enter a deal (from a photo or a hand record)</button></div>
    <div class="grp"><span>Your seat</span>${seg('seat', [[0, 'North'], [1, 'East'], [2, 'South'], [3, 'West']], SET.seat)}</div>
    <div class="grp"><span>Scoring</span>${seg('mode', [['IMP', 'IMP'], ['MP', 'Matchpoints (%)']], SET.mode)}</div>
    <div class="grp"><span>Opponents' system</span>${seg('opp', [['same', 'Same as ours'], ['sayc', 'Standard (SAYC)']], SET.opp)}</div>
@@ -398,6 +436,60 @@ function showSettings() {
    <div class="muted">Changes apply from the next deal.${Store.online ? ' Settings and scores are saved to your account.' : ' Scores are saved on this device.'} Every deal you get is new — a deal is never dealt to you twice.</div>
    <div class="row2"><button class="btn gold" id="oClose">Close</button><button class="btn" id="sReset">Delete score history</button></div>`);
 }
+/* ---- entering a deal (hand record, PBN, or the code Claude reads from a photo) ---- */
+const RANKS = { A: 12, K: 11, Q: 10, J: 9, T: 8, '9': 7, '8': 6, '7': 5, '6': 4, '5': 3, '4': 2, '3': 1, '2': 0 };
+/* "AKQ2.K73.J5.T942" (spades.hearts.diamonds.clubs) or "S AKQ2 H K73 D J5 C T942" / "♠AKQ2 ♥K73 …" */
+function parseHand(txt) {
+  txt = String(txt || '').toUpperCase().replace(/10/g, 'T').trim();
+  if (!txt) return null;
+  const out = [], put = (s, str) => { for (const ch of str.replace(/[^AKQJT2-9]/g, '')) out.push(s * 13 + RANKS[ch]); };
+  if (txt.includes('.')) { const parts = txt.split('.'); if (parts.length !== 4) throw new Error('Use four groups separated by dots: spades.hearts.diamonds.clubs'); [3, 2, 1, 0].forEach((s, i) => put(s, parts[i])); }
+  else {
+    const map = { S: 3, '♠': 3, H: 2, '♥': 2, D: 1, '♦': 1, C: 0, '♣': 0 };
+    const re = /([SHDC♠♥♦♣])\s*:?\s*([AKQJT2-9\-—]*)/g; let m, any = false;
+    while ((m = re.exec(txt))) { any = true; put(map[m[1]], m[2]); }
+    if (!any) throw new Error('Could not read "' + txt + '"');
+  }
+  return out;
+}
+function parsePBN(txt) {
+  const m = String(txt).match(/([NESW])\s*:\s*(\S+)\s+(\S+)\s+(\S+)\s+(\S+)/i); if (!m) return null;
+  const first = 'NESW'.indexOf(m[1].toUpperCase()), hands = [[], [], [], []];
+  for (let i = 0; i < 4; i++) hands[(first + i) % 4] = m[i + 2] === '-' ? null : parseHand(m[i + 2]);
+  return hands;
+}
+function showDealEntry(err) {
+  const v = ui.dealForm || { pbn: '', h: ['', '', '', ''], dealer: 0, vul: 0 };
+  ui.dealForm = v;
+  const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([val, l]) => `<button data-v="${val}" class="${String(cur) === String(val) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  openOv('deal', `<h2>Enter a deal</h2>
+   <div class="muted">Have a photo of a played board? Send it to Claude in the chat and ask for the PBN code, then paste it here. You can also type the hands: spades.hearts.diamonds.clubs, e.g. <b>AKQ2.K73.J5.T942</b> (T = 10). Leave one hand empty and it is filled with the remaining cards.</div>
+   <div class="grp"><span>PBN code (optional)</span><input id="dPbn" class="tok wide" placeholder="N:AKQ2.K73.J5.T942 ..." value="${v.pbn.replace(/"/g, '&quot;')}"></div>
+   ${[0, 1, 2, 3].map(s => `<div class="grp"><span>${SEAT[s]}</span><input id="dH${s}" class="tok wide" placeholder="AKQ2.K73.J5.T942" value="${v.h[s].replace(/"/g, '&quot;')}"></div>`).join('')}
+   <div class="grp"><span>Dealer</span>${seg('ddealer', [[0, 'North'], [1, 'East'], [2, 'South'], [3, 'West']], v.dealer)}</div>
+   <div class="grp"><span>Vulnerable</span>${seg('dvul', [[0, 'None'], [1, 'N-S'], [2, 'E-W'], [3, 'Both']], v.vul)}</div>
+   ${err ? `<div class="err">${err}</div>` : ''}
+   <div class="row2"><button class="btn gold" id="dPlay">Play this deal</button><button class="btn" id="oClose">Cancel</button></div>`);
+}
+function readDealForm() {
+  const v = ui.dealForm; if (!$('dPbn')) return v;
+  v.pbn = $('dPbn').value; for (let s = 0; s < 4; s++) v.h[s] = $('dH' + s).value; return v;
+}
+function startEnteredDeal() {
+  const v = readDealForm();
+  try {
+    let hands = v.pbn.trim() ? parsePBN(v.pbn) : v.h.map(parseHand);
+    if (!hands) throw new Error('Could not read the PBN code. It should look like N:AKQ2.K73.J5.T942 … with four hands.');
+    const used = new Set(), empty = [];
+    hands.forEach((h, s) => { if (!h) { empty.push(s); return; } for (const c of h) { if (used.has(c)) throw new Error('The card ' + RTXT[R(c)] + SUIT[S(c)] + ' appears twice.'); used.add(c); } });
+    if (empty.length === 1) hands[empty[0]] = [...Array(52).keys()].filter(c => !used.has(c));
+    else if (empty.length) throw new Error('Enter at least three hands.');
+    hands.forEach((h, s) => { if (h.length !== 13) throw new Error(SEAT[s] + ' has ' + h.length + ' cards, it needs 13.'); });
+    let bn = 1; for (let b = 1; b <= 16; b++) if (dealerOf(b) === v.dealer && vulOf(b, 0) === (v.vul === 1 || v.vul === 3) && vulOf(b, 1) === (v.vul === 2 || v.vul === 3)) { bn = b; break; }
+    closeOv(); newBoard(hands, bn);
+  } catch (e) { showDealEntry(e.message); }
+}
+
 function showResults() {
   const per = Store.periods(HIST), isImp = SET.mode === 'IMP', tab = ui.resTab;
   let body;
@@ -414,18 +506,27 @@ function showResults() {
 /* ================= events ================= */
 document.addEventListener('change', e => {
   const t = e.target;
-  if (t.dataset.conv) { SET.conv[t.dataset.conv] = t.checked; Store.saveSettings(SET); save(); }
+  if (t.dataset.conv) {
+    const k = t.dataset.conv, c = E.CONVS.find(y => y.k === k);
+    SET.conv[k] = t.checked;
+    if (t.checked && c && c.x) SET.conv[c.x] = false;
+    if (!t.checked && SET.practice === k) SET.practice = "";
+    Store.saveSettings(SET); save(); showSettings();
+  }
+  if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {
-  const t = ev_.target.closest('button,[data-c],[data-ai],#toast'); if (!t) return;
+  const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;
+  if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
   if (t.id === 'toast') { ui.toast = null; render(); return; }
-  if (t.dataset.ai != null) { ui.lastExpl = +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
+  if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
   if (t.dataset.call != null && G.phase === 'bid' && bidTurn() === U()) { const v = t.dataset.call; const c = (v === 'P' || v === 'X' || v === 'XX') ? v : +v; if (c !== -1) makeCall(U(), c); return; }
   if (t.dataset.c != null && t.classList.contains('play')) { const c = +t.dataset.c; const seat = G.play.turn; if (G.play.hands[seat].includes(c)) playCard(seat, c); return; }
   if (t.closest('.seg')) {
     const seg = t.closest('.seg').dataset.seg, v = t.dataset.v;
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
+    if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === 'seat') SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
     if (seg === 'mode') SET.mode = v; if (seg === 'opp') SET.opp = v;
     Store.saveSettings(SET); save(); showSettings(); render(); return;
@@ -441,7 +542,11 @@ document.addEventListener('click', ev_ => {
       if (G.phase === 'bid' && bidTurn() === U()) { ui.hintBid = E.aiBid(G.auction, U(), G.deal[U()], G.cards); SET.expl = true; render(); }
       else if (G.phase === 'play' && userControls(G.play.turn) && G.play.trick.length < 4) { ui.hintCard = E.aiPlay(G.play, G.play.turn); render(); }
       break;
-    case 'bClaim': claim(); break;
+    case "bClaim": claim(); break;
+    case "bUndo": undo(); break;
+    case "sDeal": showDealEntry(); break;
+    case "dPlay": startEnteredDeal(); break;
+    case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;
     case 'bSet': showSettings(); break;
     case 'bRes': showResults(); break;
     case 'oClose': closeOv(); break;
