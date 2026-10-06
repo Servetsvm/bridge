@@ -3,7 +3,7 @@
 const E = {}; for (const f of window.BRIDGE) f(E);
 const { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealerOf, callTxt, legalCalls, isLegal, auctionOver, contractOf, ev, scoreOf } = E;
 
-let SET = { seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', conv: { ...E.ALL_ON } };
+let SET = { style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', conv: { ...E.ALL_ON } };
 let G = null, HIST = [], BOARD = 0, timer = null;
 const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, confirmNew: 0, overlay: null, resTab: 'stats' };
 const U = () => SET.seat;
@@ -111,7 +111,7 @@ const Field = {
     }
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; }
     if (m.type === 'error') f.done = true;
-    if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); renderBar(); }
+    if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
 };
 function applyField(e, f) {
@@ -220,7 +220,7 @@ function finishBoard() {
   G.result = e; G.phase = 'done';
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
   Store.saveRec(e);
-  save(); render(); showEnd();
+  save(); render();
   scheduleSync();
 }
 function tick() {
@@ -254,9 +254,9 @@ function cardHtml(c, cls) {
   const s = S(c), r = R(c), face = r >= 9 && r <= 11;
   return `<div class="card${red(s) ? ' rd' : ''}${face ? ' face' : ''}${cls ? ' ' + cls : ''}" data-c="${c}"><span class="ix"><b>${RTXT[r]}</b><i>${SUIT[s]}</i></span><span class="pip">${face ? `<em>${RTXT[r]}</em>` : ''}${SUIT[s]}</span></div>`;
 }
-const handsNow = () => G.phase === 'play' ? G.play.hands : G.phase === 'bid' ? G.deal : [[], [], [], []];
+const handsNow = () => G.phase === "play" ? G.play.hands : G.deal;
 function isVisible(seat) {
-  if (seat === U()) return true;
+  if (seat === U() || G.phase === "done") return true;
   if (G.phase !== 'play') return false;
   const g = G.play;
   if (seat === g.dummy && g.dummyShown) return true;
@@ -276,7 +276,7 @@ function vHand(seat) {
   let o = '<div class="vh">';
   for (const s of ORDER) {
     const cs = E.desc(E.inSuit(handsNow()[seat], s));
-    o += `<div class="row"><span class="sy${red(s) ? ' red' : ''}">${SUIT[s]}</span>${cs.map(c => `<span class="mini${red(s) ? ' rd' : ''}${ctl ? (leg.includes(c) ? ' play' : ' dim') : ''}${c === ui.hintCard ? ' hint' : ''}" data-c="${c}">${RTXT[R(c)]}</span>`).join('')}</div>`;
+    o += `<div class="row"><span class="sy${red(s) ? ' red' : ''}">${SUIT[s]}</span>${cs.map(c => `<span class="mini${red(s) ? " rd" : ""}${ctl ? (leg.includes(c) ? " play" : " dim") : ""}${c === ui.hintCard ? " hint" : ""}" data-c="${c}">${RTXT[R(c)]}<i>${SUIT[s]}</i></span>`).join('')}</div>`;
   }
   return o + '</div>';
 }
@@ -351,7 +351,11 @@ function renderTable() {
   else if (G.phase === 'play') {
     const tr = G.play.trick, w = tr.length === 4 ? E.trickWinner(tr, G.play.trump) : -1;
     C.innerHTML = '<div class="trick">' + tr.map(x => cardHtml(x.c, 'tc p' + rel(x.s) + (x.s === w ? ' win' : ''))).join('') + '</div>';
-  } else C.innerHTML = `<div class="donebox"><b>${G.result ? resultLine(G.result) : ''}</b><button class="btn gold" id="oNext2">New Deal</button><button class="btn" id="oShow">Show result</button></div>`;
+  } else {
+    // end of board: all four hands stay open on the table, the result sits in a banner in the middle
+    const e = G.result;
+    C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${SET.mode === 'IMP' ? fmtSigned(e.imp) + ' IMP' : e.mp + '% MP'}</small>` : ''}<small>Tap for details</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">Next deal</button>` : '';
+  }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans();
 }
@@ -359,6 +363,7 @@ function layoutFans() {
   document.querySelectorAll('.fan').forEach(el => {
     const n = el.children.length; if (!n) return;
     const W = el.clientWidth, max = +el.dataset.max || 70;
+    if (SET.style !== "modern") { const cw = Math.max(20, Math.min(60, (W - (n - 1)) / n)); el.style.setProperty("--cw", cw + "px"); el.style.setProperty("--ov", "1px"); return; }
     const cw = Math.max(28, Math.min(max, W / (1 + (n - 1) * 0.44)));
     const step = n > 1 ? Math.min(cw * 1.04, (W - cw) / (n - 1)) : 0;
     el.style.setProperty('--cw', cw + 'px'); el.style.setProperty('--ov', (step - cw) + 'px');
@@ -379,7 +384,7 @@ function renderStatus() {
   else s = 'Board finished';
   $('status').textContent = s;
 }
-function render() { if (!G) return; renderBar(); renderTable(); renderBidbox(); renderStatus(); }
+function render() { if (!G) return; document.body.classList.toggle("classic", SET.style !== "modern"); renderBar(); renderTable(); renderBidbox(); renderStatus(); }
 
 /* ================= overlays ================= */
 function suitLine(cards, s) { const cs = E.desc(E.inSuit(cards, s)); return `${symHtml(s)} ${cs.length ? cs.map(c => RTXT[R(c)]).join(' ') : '—'}`; }
@@ -424,6 +429,7 @@ function showSettings() {
   openOv('set', `<h2>Settings</h2>
    <div class="grp"><span>Practice a convention</span><select id="sPractice" class="sel"><option value="">Off — normal random deals</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.</div></div>
    <div class="grp"><span>Play a specific deal</span><button class="btn" id="sDeal">Enter a deal (from a photo or a hand record)</button></div>
+   <div class="grp"><span>Card style</span>${seg("style", [["classic", "Classic tiles"], ["modern", "Modern fan"]], SET.style || "classic")}</div>
    <div class="grp"><span>Your seat</span>${seg('seat', [[0, 'North'], [1, 'East'], [2, 'South'], [3, 'West']], SET.seat)}</div>
    <div class="grp"><span>Scoring</span>${seg('mode', [['IMP', 'IMP'], ['MP', 'Matchpoints (%)']], SET.mode)}</div>
    <div class="grp"><span>Opponents' system</span>${seg('opp', [['same', 'Same as ours'], ['sayc', 'Standard (SAYC)']], SET.opp)}</div>
@@ -528,7 +534,8 @@ document.addEventListener('click', ev_ => {
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === 'seat') SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
-    if (seg === 'mode') SET.mode = v; if (seg === 'opp') SET.opp = v;
+    if (seg === "style") SET.style = v;
+    if (seg === "mode") SET.mode = v; if (seg === 'opp') SET.opp = v;
     Store.saveSettings(SET); save(); showSettings(); render(); return;
   }
   switch (t.id) {
@@ -568,7 +575,7 @@ function start(data) {
   if (!G || !G.deal || !G.cards) newBoard();
   else {
     if (!G.field || !G.field.done) Field.start(G); else Field.live[G.id] = { f: G.field, deal: G.deal, board: G.board };
-    render(); if (G.phase === 'done') showEnd(); tick();
+    render(); tick();
   }
   Store.initCloud(mergeCloud);
   syncNow(true);

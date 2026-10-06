@@ -241,3 +241,46 @@ button.box{box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
   .box b{font-size:20px}
   .box .tr{font-size:14px}
 }
+
+/* ================= Classic look (default): flat tiles like club bridge apps ================= */
+body.classic{background:#000;font-family:Roboto,"Segoe UI",Arial,sans-serif}
+body.classic #app{padding-inline:2px;gap:4px}
+body.classic #table{background:#1f7a2e;border-radius:0;box-shadow:none;padding:4px 0;gap:4px}
+body.classic .lbl{background:rgba(0,0,0,.35);font-size:12px}
+/* score strip */
+body.classic .vulbox{background:#9fd3d6;color:#10292b;border-radius:8px}
+body.classic .box{background:#9fd3d6;color:#10292b;border-radius:4px}
+body.classic .box small{opacity:.8}
+body.classic .btn{background:linear-gradient(#f4f4f4,#d9d9d9);color:#111;border:1px solid #9a9a9a;border-radius:3px;box-shadow:none}
+body.classic .btn.gold{background:linear-gradient(#ffe27a,#f2c230);border-color:#b8901a}
+body.classic .btn.new{background:linear-gradient(#5fbf6a,#2e8b3a);color:#fff;border-color:#226b2c}
+/* card tiles */
+body.classic .card{border-radius:3px;border:1px solid #8c8c8c;background:#fff;box-shadow:none;height:calc(var(--cw)*1.78);font-family:Roboto,"Arial Narrow",Arial,sans-serif;color:#000}
+body.classic .card.rd{color:#d0021b}
+body.classic .card .pip{display:none}
+body.classic .card .ix{position:static;width:auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;padding-top:calc(var(--cw)*.06);line-height:1}
+body.classic .card .ix b{font-size:calc(var(--cw)*.82);font-weight:700;letter-spacing:-.06em}
+body.classic .card .ix i{font-size:calc(var(--cw)*.9);margin-top:calc(var(--cw)*.04)}
+body.classic .card.face{background:#fff}
+body.classic .fan{padding-top:10px}
+body.classic .fan .card{margin-left:1px}
+body.classic .fan .card:first-child{margin-left:0}
+body.classic .fan .card.play{transform:translateY(-6px)}
+body.classic .fan .card.dim{filter:none;background:#e6e6e6}
+body.classic .card.tc{--cw:clamp(40px,11vw,58px);border:1px solid #666}
+/* side hands: one row of small tiles per suit */
+body.classic .vh{gap:2px}
+body.classic .vh .sy{display:none}
+body.classic .mini{display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-start;min-width:0;width:26px;height:46px;padding:2px 0 0;margin-left:-6px;border:1px solid #8c8c8c;border-radius:3px;background:#fff;box-shadow:-1px 0 2px rgba(0,0,0,.25);font:700 19px/1 Roboto,Arial,sans-serif;color:#000;letter-spacing:-.06em}
+body.classic .vh .row .mini:first-of-type{margin-left:0}
+body.classic .mini.rd{color:#d0021b}
+body.classic .mini i{font-style:normal;font-size:19px;margin-top:2px}
+body.classic .mini.dim{filter:none;background:#e6e6e6}
+/* end of board: yellow banner over the open deal */
+body.classic .donebox,.donebanner{background:linear-gradient(#ffd84a,#f2b705);color:#111;border:2px solid #8a6a00;border-radius:6px;padding:10px 14px;text-align:center;font:700 20px/1.25 Roboto,Arial,sans-serif;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.4);max-width:92%;align-self:center}
+.donebanner small{display:block;font-size:14px;font-weight:600;margin-top:4px}
+.donebanner .pos{color:#0b5d1e}.donebanner .neg{color:#9b0d0d}
+body:not(.classic) .mini i{display:none}
+body.classic .card{height:calc(var(--cw)*1.95)}
+.donebanner{font-size:17px;border:2px solid #8a6a00}
+@media (max-width:560px){.donebanner{font-size:15px;padding:8px 10px}}

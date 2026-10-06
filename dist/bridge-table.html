@@ -257,6 +257,49 @@ button.box{box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
   .box .tr{font-size:14px}
 }
 
+/* ================= Classic look (default): flat tiles like club bridge apps ================= */
+body.classic{background:#000;font-family:Roboto,"Segoe UI",Arial,sans-serif}
+body.classic #app{padding-inline:2px;gap:4px}
+body.classic #table{background:#1f7a2e;border-radius:0;box-shadow:none;padding:4px 0;gap:4px}
+body.classic .lbl{background:rgba(0,0,0,.35);font-size:12px}
+/* score strip */
+body.classic .vulbox{background:#9fd3d6;color:#10292b;border-radius:8px}
+body.classic .box{background:#9fd3d6;color:#10292b;border-radius:4px}
+body.classic .box small{opacity:.8}
+body.classic .btn{background:linear-gradient(#f4f4f4,#d9d9d9);color:#111;border:1px solid #9a9a9a;border-radius:3px;box-shadow:none}
+body.classic .btn.gold{background:linear-gradient(#ffe27a,#f2c230);border-color:#b8901a}
+body.classic .btn.new{background:linear-gradient(#5fbf6a,#2e8b3a);color:#fff;border-color:#226b2c}
+/* card tiles */
+body.classic .card{border-radius:3px;border:1px solid #8c8c8c;background:#fff;box-shadow:none;height:calc(var(--cw)*1.78);font-family:Roboto,"Arial Narrow",Arial,sans-serif;color:#000}
+body.classic .card.rd{color:#d0021b}
+body.classic .card .pip{display:none}
+body.classic .card .ix{position:static;width:auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100%;padding-top:calc(var(--cw)*.06);line-height:1}
+body.classic .card .ix b{font-size:calc(var(--cw)*.82);font-weight:700;letter-spacing:-.06em}
+body.classic .card .ix i{font-size:calc(var(--cw)*.9);margin-top:calc(var(--cw)*.04)}
+body.classic .card.face{background:#fff}
+body.classic .fan{padding-top:10px}
+body.classic .fan .card{margin-left:1px}
+body.classic .fan .card:first-child{margin-left:0}
+body.classic .fan .card.play{transform:translateY(-6px)}
+body.classic .fan .card.dim{filter:none;background:#e6e6e6}
+body.classic .card.tc{--cw:clamp(40px,11vw,58px);border:1px solid #666}
+/* side hands: one row of small tiles per suit */
+body.classic .vh{gap:2px}
+body.classic .vh .sy{display:none}
+body.classic .mini{display:inline-flex;flex-direction:column;align-items:center;justify-content:flex-start;min-width:0;width:26px;height:46px;padding:2px 0 0;margin-left:-6px;border:1px solid #8c8c8c;border-radius:3px;background:#fff;box-shadow:-1px 0 2px rgba(0,0,0,.25);font:700 19px/1 Roboto,Arial,sans-serif;color:#000;letter-spacing:-.06em}
+body.classic .vh .row .mini:first-of-type{margin-left:0}
+body.classic .mini.rd{color:#d0021b}
+body.classic .mini i{font-style:normal;font-size:19px;margin-top:2px}
+body.classic .mini.dim{filter:none;background:#e6e6e6}
+/* end of board: yellow banner over the open deal */
+body.classic .donebox,.donebanner{background:linear-gradient(#ffd84a,#f2b705);color:#111;border:2px solid #8a6a00;border-radius:6px;padding:10px 14px;text-align:center;font:700 20px/1.25 Roboto,Arial,sans-serif;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.4);max-width:92%;align-self:center}
+.donebanner small{display:block;font-size:14px;font-weight:600;margin-top:4px}
+.donebanner .pos{color:#0b5d1e}.donebanner .neg{color:#9b0d0d}
+body:not(.classic) .mini i{display:none}
+body.classic .card{height:calc(var(--cw)*1.95)}
+.donebanner{font-size:17px;border:2px solid #8a6a00}
+@media (max-width:560px){.donebanner{font-size:15px;padding:8px 10px}}
+
 </style>
 
 <div id="app">
@@ -1794,7 +1837,7 @@ const GitSync = (() => {
 const E = {}; for (const f of window.BRIDGE) f(E);
 const { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealerOf, callTxt, legalCalls, isLegal, auctionOver, contractOf, ev, scoreOf } = E;
 
-let SET = { seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', conv: { ...E.ALL_ON } };
+let SET = { style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', conv: { ...E.ALL_ON } };
 let G = null, HIST = [], BOARD = 0, timer = null;
 const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, confirmNew: 0, overlay: null, resTab: 'stats' };
 const U = () => SET.seat;
@@ -1902,7 +1945,7 @@ const Field = {
     }
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; }
     if (m.type === 'error') f.done = true;
-    if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); renderBar(); }
+    if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
 };
 function applyField(e, f) {
@@ -2011,7 +2054,7 @@ function finishBoard() {
   G.result = e; G.phase = 'done';
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
   Store.saveRec(e);
-  save(); render(); showEnd();
+  save(); render();
   scheduleSync();
 }
 function tick() {
@@ -2045,9 +2088,9 @@ function cardHtml(c, cls) {
   const s = S(c), r = R(c), face = r >= 9 && r <= 11;
   return `<div class="card${red(s) ? ' rd' : ''}${face ? ' face' : ''}${cls ? ' ' + cls : ''}" data-c="${c}"><span class="ix"><b>${RTXT[r]}</b><i>${SUIT[s]}</i></span><span class="pip">${face ? `<em>${RTXT[r]}</em>` : ''}${SUIT[s]}</span></div>`;
 }
-const handsNow = () => G.phase === 'play' ? G.play.hands : G.phase === 'bid' ? G.deal : [[], [], [], []];
+const handsNow = () => G.phase === "play" ? G.play.hands : G.deal;
 function isVisible(seat) {
-  if (seat === U()) return true;
+  if (seat === U() || G.phase === "done") return true;
   if (G.phase !== 'play') return false;
   const g = G.play;
   if (seat === g.dummy && g.dummyShown) return true;
@@ -2067,7 +2110,7 @@ function vHand(seat) {
   let o = '<div class="vh">';
   for (const s of ORDER) {
     const cs = E.desc(E.inSuit(handsNow()[seat], s));
-    o += `<div class="row"><span class="sy${red(s) ? ' red' : ''}">${SUIT[s]}</span>${cs.map(c => `<span class="mini${red(s) ? ' rd' : ''}${ctl ? (leg.includes(c) ? ' play' : ' dim') : ''}${c === ui.hintCard ? ' hint' : ''}" data-c="${c}">${RTXT[R(c)]}</span>`).join('')}</div>`;
+    o += `<div class="row"><span class="sy${red(s) ? ' red' : ''}">${SUIT[s]}</span>${cs.map(c => `<span class="mini${red(s) ? " rd" : ""}${ctl ? (leg.includes(c) ? " play" : " dim") : ""}${c === ui.hintCard ? " hint" : ""}" data-c="${c}">${RTXT[R(c)]}<i>${SUIT[s]}</i></span>`).join('')}</div>`;
   }
   return o + '</div>';
 }
@@ -2142,7 +2185,11 @@ function renderTable() {
   else if (G.phase === 'play') {
     const tr = G.play.trick, w = tr.length === 4 ? E.trickWinner(tr, G.play.trump) : -1;
     C.innerHTML = '<div class="trick">' + tr.map(x => cardHtml(x.c, 'tc p' + rel(x.s) + (x.s === w ? ' win' : ''))).join('') + '</div>';
-  } else C.innerHTML = `<div class="donebox"><b>${G.result ? resultLine(G.result) : ''}</b><button class="btn gold" id="oNext2">New Deal</button><button class="btn" id="oShow">Show result</button></div>`;
+  } else {
+    // end of board: all four hands stay open on the table, the result sits in a banner in the middle
+    const e = G.result;
+    C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${SET.mode === 'IMP' ? fmtSigned(e.imp) + ' IMP' : e.mp + '% MP'}</small>` : ''}<small>Tap for details</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">Next deal</button>` : '';
+  }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans();
 }
@@ -2150,6 +2197,7 @@ function layoutFans() {
   document.querySelectorAll('.fan').forEach(el => {
     const n = el.children.length; if (!n) return;
     const W = el.clientWidth, max = +el.dataset.max || 70;
+    if (SET.style !== "modern") { const cw = Math.max(20, Math.min(60, (W - (n - 1)) / n)); el.style.setProperty("--cw", cw + "px"); el.style.setProperty("--ov", "1px"); return; }
     const cw = Math.max(28, Math.min(max, W / (1 + (n - 1) * 0.44)));
     const step = n > 1 ? Math.min(cw * 1.04, (W - cw) / (n - 1)) : 0;
     el.style.setProperty('--cw', cw + 'px'); el.style.setProperty('--ov', (step - cw) + 'px');
@@ -2170,7 +2218,7 @@ function renderStatus() {
   else s = 'Board finished';
   $('status').textContent = s;
 }
-function render() { if (!G) return; renderBar(); renderTable(); renderBidbox(); renderStatus(); }
+function render() { if (!G) return; document.body.classList.toggle("classic", SET.style !== "modern"); renderBar(); renderTable(); renderBidbox(); renderStatus(); }
 
 /* ================= overlays ================= */
 function suitLine(cards, s) { const cs = E.desc(E.inSuit(cards, s)); return `${symHtml(s)} ${cs.length ? cs.map(c => RTXT[R(c)]).join(' ') : '—'}`; }
@@ -2215,6 +2263,7 @@ function showSettings() {
   openOv('set', `<h2>Settings</h2>
    <div class="grp"><span>Practice a convention</span><select id="sPractice" class="sel"><option value="">Off — normal random deals</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.</div></div>
    <div class="grp"><span>Play a specific deal</span><button class="btn" id="sDeal">Enter a deal (from a photo or a hand record)</button></div>
+   <div class="grp"><span>Card style</span>${seg("style", [["classic", "Classic tiles"], ["modern", "Modern fan"]], SET.style || "classic")}</div>
    <div class="grp"><span>Your seat</span>${seg('seat', [[0, 'North'], [1, 'East'], [2, 'South'], [3, 'West']], SET.seat)}</div>
    <div class="grp"><span>Scoring</span>${seg('mode', [['IMP', 'IMP'], ['MP', 'Matchpoints (%)']], SET.mode)}</div>
    <div class="grp"><span>Opponents' system</span>${seg('opp', [['same', 'Same as ours'], ['sayc', 'Standard (SAYC)']], SET.opp)}</div>
@@ -2319,7 +2368,8 @@ document.addEventListener('click', ev_ => {
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === 'seat') SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
-    if (seg === 'mode') SET.mode = v; if (seg === 'opp') SET.opp = v;
+    if (seg === "style") SET.style = v;
+    if (seg === "mode") SET.mode = v; if (seg === 'opp') SET.opp = v;
     Store.saveSettings(SET); save(); showSettings(); render(); return;
   }
   switch (t.id) {
@@ -2359,7 +2409,7 @@ function start(data) {
   if (!G || !G.deal || !G.cards) newBoard();
   else {
     if (!G.field || !G.field.done) Field.start(G); else Field.live[G.id] = { f: G.field, deal: G.deal, board: G.board };
-    render(); if (G.phase === 'done') showEnd(); tick();
+    render(); tick();
   }
   Store.initCloud(mergeCloud);
   syncNow(true);
