@@ -305,7 +305,7 @@ function renderTable() {
     const r = rel(seat), el = $('pos' + r);
     if (r === 0) { el.innerHTML = fanHtml(seat, 78) + seatLabel(seat); continue; }
     let inner = '';
-    if (isVisible(seat)) inner = r === 2 ? fanHtml(seat, 50) : vHand(seat);
+    if (isVisible(seat)) inner = r === 2 ? fanHtml(seat, 78) : vHand(seat);
     else if (G.phase === 'play') inner = backs(G.play.hands[seat].length);
     el.innerHTML = seatLabel(seat) + inner;
   }

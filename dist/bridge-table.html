@@ -211,6 +211,31 @@ button.box{box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
 .card.tc{--cw:clamp(42px,11vw,58px)}
 .fan{padding-top:6px}
 
+/* ---- card face v2: big clear corner index, clean overlaps ---- */
+.card{background:linear-gradient(170deg,#ffffff 0%,#fbf8f0 60%,#f1ebdb 100%);border:1px solid #b9b09a;border-radius:calc(var(--cw)*.09);box-shadow:-3px 0 6px rgba(0,0,0,.22)}
+.card .ix{top:calc(var(--cw)*.05);left:calc(var(--cw)*.04);width:calc(var(--cw)*.42)}
+.card .ix b{font-size:calc(var(--cw)*.44);letter-spacing:-.08em;font-weight:700}
+.card .ix i{font-size:calc(var(--cw)*.42);margin-top:-.06em}
+.fan .card:not(:last-child) .pip{display:none}
+.card.face .pip{background:linear-gradient(160deg,rgba(217,178,92,.28),rgba(217,178,92,.08))}
+/* playable cards rise, others stay calm instead of turning grey */
+.fan .card.play{transform:translateY(-7px)}
+.fan .card.play:hover{transform:translateY(-12px)}
+.fan .card.dim{filter:none;opacity:.78}
+.fan .card.dim .ix{opacity:.7}
+.card.hint{transform:translateY(-14px)!important}
+/* side dummy: small overlapping real cards */
+.vh .row{flex-wrap:nowrap}
+.vh .sy{width:16px;font-size:17px}
+.mini{min-width:26px;height:38px;padding:3px 4px 0;place-items:start center;font:700 16px var(--f-card);border:1px solid #b9b09a;border-radius:4px;background:linear-gradient(170deg,#fff,#f1ebdb);box-shadow:-2px 0 4px rgba(0,0,0,.22);margin-left:-9px}
+.vh .row .sy+.mini{margin-left:2px}
+.mini.play{transform:translateY(-4px)}
+.mini.dim{filter:none;opacity:.75}
+.fan{padding-top:14px}
+.fan .card.dim{opacity:1;filter:brightness(.9) saturate(.55)}
+.fan .card.dim .ix{opacity:1}
+.mini.dim{opacity:1;filter:brightness(.9) saturate(.55)}
+
 </style>
 
 <div id="app">
@@ -1927,7 +1952,7 @@ function renderTable() {
     const r = rel(seat), el = $('pos' + r);
     if (r === 0) { el.innerHTML = fanHtml(seat, 78) + seatLabel(seat); continue; }
     let inner = '';
-    if (isVisible(seat)) inner = r === 2 ? fanHtml(seat, 50) : vHand(seat);
+    if (isVisible(seat)) inner = r === 2 ? fanHtml(seat, 78) : vHand(seat);
     else if (G.phase === 'play') inner = backs(G.play.hands[seat].length);
     el.innerHTML = seatLabel(seat) + inner;
   }
