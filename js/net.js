@@ -6,7 +6,7 @@
 const Net = (() => {
   'use strict';
   const PREFIX = 'bridgetable-', LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
-  const st = { on: false, host: false, guest: false, me: 'local', seat: 2, code: null, peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, savedG: null, msg: '', wake: null, want: 'partner' };
+  const st = { chat: [], unread: 0, on: false, host: false, guest: false, me: 'local', seat: 2, code: null, peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, savedG: null, msg: '', wake: null, want: 'partner' };
   const NAME_KEY = 'bridge-table-name';
   const myName = () => { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } };
   const setName = n => { try { localStorage.setItem(NAME_KEY, n); } catch (e) {} };
@@ -80,18 +80,25 @@ const Net = (() => {
       const s = pref.length ? pref[0] : free[0];
       if (s == null) { conn.send({ t: 'full' }); setTimeout(() => conn.close(), 500); return; }
       st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
-      conn.send({ t: 'welcome', seat: s, id: conn.peer, code: st.code });
+      conn.send({ t: "welcome", seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
+      addChat(null, st.names[s] + " joined as " + SEAT[s]);
       broadcast(); panelRefresh(); render(); tick();
       return;
     }
     const seat = seatOf(conn.peer); if (Number.isNaN(seat)) return;
-    if (d.t === 'call' && G.phase === 'bid' && owner(bidTurn()) === conn.peer) makeCall(bidTurn(), d.call);
+    const who = st.names[seat] || SEAT[seat];
+    if (d.t === "chat") { addChat(who, d.text); return; }
+    if (d.t === "undo") { if (undo(conn.peer)) addChat(null, who + " took back their last " + (G.phase === "bid" ? "call" : "move")); return; }
+    if (d.t === "claim") { if (G.phase === "play" && !G.play.trick.length && owner(G.play.turn) === conn.peer) { addChat(null, who + " claimed the rest"); claim(seat); } return; }
+    if (d.t === "replay") { if (G.phase === "done") { addChat(null, who + " asked to replay this deal"); replayDeal(); } return; }
+    if (d.t === "hint") { if (G.phase === "play" && owner(G.play.turn) === conn.peer && G.play.trick.length < 4) conn.send({ t: "hint", c: E.aiPlay(G.play, G.play.turn), id: G.id }); return; }
+    if (d.t === "call" && G.phase === "bid" && owner(bidTurn()) === conn.peer) makeCall(bidTurn(), d.call);
     else if (d.t === 'card' && G.phase === 'play' && owner(G.play.turn) === conn.peer) playCard(G.play.turn, d.c);
     else if (d.t === 'next' && G.phase === 'done') newBoard();
   }
   function drop(conn) {
     const s = Object.keys(st.seats).find(k => st.seats[k] === conn.peer);
-    if (s != null) { delete st.seats[s]; delete st.names[s]; }
+    if (s != null) { addChat(null, (st.names[s] || SEAT[s]) + " left — a robot plays " + SEAT[s]); delete st.seats[s]; delete st.names[s]; }
     st.conns.delete(conn.peer);
     if (st.host) { broadcast(); panelRefresh(); render(); tick(); }
   }
@@ -120,16 +127,19 @@ const Net = (() => {
         if (!d) return;
         if (d.t === 'welcome') {
           welcomed = true; clearTimeout(timer);
-          Object.assign(st, { peer, conn, on: true, guest: true, host: false, me: peer.id, seat: d.seat, code, msg: '', savedG: st.savedG || G });
+          Object.assign(st, { peer, conn, on: true, guest: true, host: false, me: peer.id, seat: d.seat, code, msg: "", savedG: st.savedG || G, chat: d.chat || [], unread: 0 });
           closeOv(); wakeOn();
         } else if (d.t === 'state') applyState(d.v);
-        else if (d.t === 'full') fail('That table is full.');
+        else if (d.t === "full") fail("That table is full.");
+        else if (d.t === "chat") gotChat(d.m);
+        else if (d.t === "hint" && G && d.id === G.id && G.phase === "play") { ui.hintCard = d.c; render(); }
       });
       conn.on('close', () => { if (st.guest) leave('The host closed the table.'); });
     } catch (e) { st.msg = e.message; showJoin(code); }
   }
   function applyState(v) {
     clearTimeout(timer);
+    if (v.phase !== "done") HIST = HIST.filter(h => !(h.id === v.id && h.online)); // a finished board was taken back
     st.ctl = v.ctl; st.names = v.names || {};
     G = v;
     if (G.phase === 'done' && G.result) {
@@ -153,6 +163,39 @@ const Net = (() => {
     Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null });
     G = back; if (!G) newBoard(); else { render(); tick(); }
     if (msg) flash(msg, 3000);
+  }
+
+  /* ---- chat (the host relays every message to the whole table) ---- */
+  const myTableName = () => st.names[st.guest ? st.seat : SET.seat] || myName() || 'Me';
+  function addChat(from, text) {
+    text = String(text || '').trim().slice(0, 200); if (!text || !st.host) return;
+    const m = { from, text, ts: Date.now() };
+    st.chat.push(m); if (st.chat.length > 200) st.chat.shift();
+    for (const c of st.conns.values()) if (c.open) { try { c.send({ t: 'chat', m }); } catch (e) {} }
+    gotChat(m, true);
+  }
+  function gotChat(m, mine) {
+    if (!mine) { st.chat.push(m); if (st.chat.length > 200) st.chat.shift(); }
+    if (ui.overlay === 'chat') { chatPanel(); return; }
+    if (m.from !== myTableName()) { st.unread++; flash((m.from ? m.from + ': ' : '') + m.text, 2600); }
+    renderBar();
+  }
+  function sendChat(text) {
+    text = String(text || '').trim(); if (!text) return;
+    if (st.host) addChat(myTableName(), text); else send({ t: 'chat', text });
+  }
+  const QUICK = ['Hi!', 'Well played', 'Thanks partner', 'Sorry partner', 'Good luck', 'Ready?', 'One more?', '👍', '😂', '🙈'];
+  function chatPanel() {
+    const draft = document.getElementById('nMsg'); if (draft) st.draft = draft.value;
+    st.unread = 0;
+    const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const list = st.chat.slice(-60).map(m => m.from ? `<div class="cm${m.from === myTableName() ? ' me' : ''}"><b>${esc(m.from)}</b> ${esc(m.text)}<small>${t(m.ts)}</small></div>` : `<div class="cm sys">${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') || '<div class="muted">No messages yet — say hello!</div>';
+    openOv('chat', `<h2>Table chat</h2><div class="chatlist" id="nList">${list}</div>
+      <div class="quick">${QUICK.map(q => `<button data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+      <div class="row2"><input class="tok" id="nMsg" maxlength="200" placeholder="Write a message…" value="${esc(st.draft || '')}"><button class="btn gold" id="nSend">Send</button></div>
+      <div class="row2"><button class="btn" id="oClose">Close</button></div>`);
+    const L = document.getElementById('nList'); if (L) L.scrollTop = L.scrollHeight;
+    renderBar();
   }
 
   /* ---- screens ---- */
@@ -192,9 +235,12 @@ const Net = (() => {
 
   document.addEventListener('click', ev => {
     const t = ev.target.closest('button'); if (!t) return;
+    if (t.dataset.q) { sendChat(t.dataset.q); return; }
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {
-      case 'bNet': panel(); break;
+      case "bNet": panel(); break;
+      case "bChat": chatPanel(); break;
+      case "nSend": { const i = document.getElementById("nMsg"); if (i && i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } break; }
       case 'nStart': { const n = document.getElementById('nName'); setName((n && n.value.trim()) || 'Host'); host(); break; }
       case 'nStop': stop(); closeOv(); break;
       case 'nLeave': leave(); closeOv(); break;
@@ -202,6 +248,7 @@ const Net = (() => {
       case 'nJoin': { const n = document.getElementById('nName'); const name = (n && n.value.trim()) || 'Guest'; st.msg = ''; join(st.joinCode, name, st.want); break; }
     }
   });
+  document.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target && ev.target.id === "nMsg") { ev.preventDefault(); const i = ev.target; if (i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } } });
   // opened through an invite link
   function boot() {
     const m = location.hash.match(/^#join-([A-Z0-9]{6})$/i);
@@ -209,5 +256,5 @@ const Net = (() => {
   }
   boot();
   window.addEventListener('hashchange', boot);
-  return { st, owner, broadcast, send, panel, get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, broadcast, send, panel, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

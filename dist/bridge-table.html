@@ -309,6 +309,14 @@ body.classic .card{height:calc(var(--cw)*1.95)}
 .seg2 button{flex:1;border:1px solid #c7c9bd;background:#fff;border-radius:6px;padding:8px 6px;font-weight:600;color:#222}
 .seg2 button.on{background:var(--felt);color:#fff;border-color:var(--felt)}
 .bigcode{font:700 34px/1.1 ui-monospace,Consolas,monospace;letter-spacing:.18em;color:#14532d}
+.chatlist{max-height:46vh;min-height:120px;overflow:auto;display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid #dcdccf;border-radius:8px;padding:8px}
+.cm{background:#eef3ec;border-radius:10px;padding:6px 10px;max-width:85%;align-self:flex-start;font-size:15px;line-height:1.3;word-break:break-word}
+.cm.me{background:#d9f0d3;align-self:flex-end}
+.cm.sys{background:none;color:#5d6a60;font-style:italic;font-size:13px;align-self:center;text-align:center}
+.cm small{display:block;font-size:11px;color:#7a857c;margin-top:2px}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.quick button{border:1px solid #c7c9bd;background:#fff;border-radius:999px;padding:5px 10px;font-size:14px;color:#222}
+#nMsg{flex:3}
 
 </style>
 
@@ -2454,21 +2462,30 @@ const bidTurn = () => (G.dealer + G.auction.length) % 4;
 
 /* ---- undo: a snapshot is taken right before each call or card of yours ---- */
 const UNDO = [];
-function pushUndo() { const { field, ...rest } = G; UNDO.push(JSON.stringify(rest)); if (UNDO.length > 80) UNDO.shift(); }
-function undo() {
-  if (!UNDO.length || online()) return;
+const ME = () => (online() ? Net.me : "local");
+// who acted at a seat: a human id ("local" offline) or "robot"
+const actor = seat => (online() ? Net.owner(seat) : (G.phase === "bid" ? (seat === U() ? "local" : "robot") : (userControls(seat) ? "local" : "robot")));
+function pushUndo(by) { const { field, ...rest } = G; UNDO.push({ by: by || "local", s: JSON.stringify(rest) }); if (UNDO.length > 120) UNDO.shift(); }
+/* take back the last call or card of player "who" (and everything played after it) */
+function undo(who) {
+  who = who || ME();
+  if (guest()) { Net.send({ t: "undo" }); return; }
+  let i = UNDO.length - 1; while (i >= 0 && UNDO[i].by !== who) i--;
+  if (i < 0) return false;
   clearTimeout(timer);
-  const wasDone = G.phase === 'done', id = G.id;
-  G = JSON.parse(UNDO.pop());
+  const wasDone = G.phase === "done", id = G.id, snap = UNDO[i];
+  UNDO.length = i;
+  G = JSON.parse(snap.s);
   G.field = Field.live[id] ? Field.live[id].f : null;
   if (wasDone) { HIST = HIST.filter(h => h.id !== id); closeOv(); }
   Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, toast: null });
   save(); render(); tick();
+  return true;
 }
 function makeCall(seat, call, m) {
   if (guest()) { if (bidTurn() === seat && userControls(seat)) Net.send({ t: "call", call }); return; }
   if (G.phase !== "bid" || bidTurn() !== seat || !isLegal(G.auction, seat, call)) return;
-  if (seat === U()) pushUndo();
+  { const who = actor(seat); if (who !== "robot") pushUndo(who); }
   if (!m) m = E.explainCall(G.auction, seat, call, G.cards);
   G.auction.push({ seat, call, m });
   ui.selLvl = 0; ui.hintBid = null;
@@ -2491,7 +2508,7 @@ function playCard(seat, c) {
   const g = G.play;
   if (guest()) { if (userControls(seat)) Net.send({ t: "card", c }); return; }
   if (G.phase !== "play" || g.turn !== seat || g.trick.length >= 4 || !E.legalFor(g, seat).includes(c)) return;
-  if (userControls(seat)) pushUndo();
+  { const who = actor(seat); if (who !== "robot") pushUndo(who); }
   // explain the signal when your robot partner (on defence) discards or encourages
   if (!userControls(seat) && g.history.length < 3 && sideOf(seat) === sideOf(U()) && sideOf(g.contract.decl) !== sideOf(U())) { const t = E.signalText(g, seat, c); if (t) ui.signal = t; }
   else if (userControls(seat) && !g.trick.length) ui.signal = null;
@@ -2534,14 +2551,20 @@ function tick() {
     else { const leg = E.legalFor(g, g.turn); if (leg.length === 1 && g.trick.length > 0 && SET.auto) timer = setTimeout(() => playCard(g.turn, leg[0]), 450); }
   }
 }
-function claim() {
-  const g = G.play; if (!g || G.phase !== 'play' || g.trick.length) return;
-  const side = sideOf(U());
+function claim(seat) {
+  if (guest()) { Net.send({ t: "claim" }); return; }
+  const g = G.play; if (!g || G.phase !== "play" || g.trick.length) return;
+  const side = sideOf(seat == null ? U() : seat);
   const v = E.ddFull(g.hands, g.leader, side, g.trump, 3e6);
   if (v == null) { flash('Could not work it out yet — play a little longer', 1500); return; }
   const left = g.hands[g.leader].length;
   g.tricks[side] += v; g.tricks[1 - side] += left - v; g.hands = g.hands.map(() => []); G.claimed = true;
   finishBoard();
+}
+/* play the same deal again (at an online table: for everyone) */
+function replayDeal() {
+  if (guest()) { Net.send({ t: "replay" }); HIST = HIST.filter(h => h.id !== G.id); closeOv(); return; }
+  const d = G.deal; HIST = HIST.filter(h => h.id !== G.id); BOARD = G.board; newBoard(d);
 }
 function flash(msg, ms) { ui.toast = msg; render(); setTimeout(() => { if (ui.toast === msg) { ui.toast = null; render(); } }, ms); }
 
@@ -2599,7 +2622,7 @@ function renderBar() {
   let con = '—', tr = '';
   if (G.play) { const c = G.play.contract; con = `${callHtml(B(c.level, c.strain))}${c.dbl === 1 ? ' X' : c.dbl === 2 ? ' XX' : ''} <span class="sm">${SEAT[c.decl]}</span>`; const us = sideOf(u); tr = `Us ${G.play.tricks[us]} · Them ${G.play.tricks[1 - us]}`; }
   const g = G.play;
-  const canClaim = !online() && G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
+  const canClaim = G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
   const last = HIST.length ? HIST[HIST.length - 1] : null;
   const lastTxt = last ? (last.imp != null ? (SET.mode === 'IMP' ? fmtSigned(last.imp) + ' IMP' : last.mp + '%') : fmtSigned(last.us || 0)) : '&nbsp;';
   const per = Store.periods(HIST)[0];
@@ -2611,7 +2634,7 @@ function renderBar() {
    <div class="spacer"></div>
    <div class="tools">
      <button class="btn new${ui.confirmNew > Date.now() ? ' warn' : ''}" id="bNew">${ui.confirmNew > Date.now() ? 'Sure?' : 'New Deal'}</button>
-     <button class="btn" id="bUndo" ${UNDO.length && !online() ? "" : "disabled"}>Undo</button>
+     <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>Undo</button>${online() ? `<button class="btn${Net.st.unread ? " gold" : ""}" id="bChat">Chat${Net.st.unread ? " (" + Net.st.unread + ")" : ""}</button>` : ""}
      <button class="btn gold" id="bHint">Hint</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>Claim</button>
      <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? "Online ●" : "Online"}</button>
@@ -2883,12 +2906,12 @@ document.addEventListener('click', ev_ => {
     case 'bAuc': showAuction(); break;
     case 'oShow': showEnd(); break;
     case 'bHint':
-      if (guest() && G.phase === "play") { flash("Hints during play are not available at an online table", 1800); break; }
+      if (guest() && G.phase === "play") { if (userControls(G.play.turn) && G.play.trick.length < 4) Net.send({ t: "hint" }); break; } // the host works it out
       if (G.phase === 'bid' && bidTurn() === U()) { ui.hintBid = E.aiBid(G.auction, U(), G.deal[U()], G.cards); SET.expl = true; render(); }
       else if (G.phase === 'play' && userControls(G.play.turn) && G.play.trick.length < 4) { ui.hintCard = E.aiPlay(G.play, G.play.turn); render(); }
       break;
-    case "bClaim": claim(); break;
-    case "bUndo": undo(); break;
+    case "bClaim": if (online() && !guest()) Net.note((Net.st.names[SET.seat] || "Host") + " claimed the rest"); claim(); break;
+    case "bUndo": { const ok = undo(); if (ok === false) flash("Nothing of yours to take back", 1500); else if (ok && online() && !guest()) Net.note((Net.st.names[SET.seat] || "Host") + " took back their last move"); break; }
     case "sDeal": showDealEntry(); break;
     case "dPlay": startEnteredDeal(); break;
     case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;
@@ -2901,7 +2924,7 @@ document.addEventListener('click', ev_ => {
     case "sNow": syncNow(); break;
     case "sOff": GitSync.setToken(null); syncState.msg = ""; showSettings(); break;
     case "oNext": if (guest()) { Net.send({ t: "next" }); closeOv(); } else newBoard(); break;
-    case "oReplay": if (online()) { flash("Replay is not available at an online table", 1800); break; } { const d = G.deal; HIST = HIST.filter(h => h.id !== G.id); BOARD = G.board; newBoard(d); break; }
+    case "oReplay": replayDeal(); break;
   }
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
@@ -2940,7 +2963,7 @@ window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude
 const Net = (() => {
   'use strict';
   const PREFIX = 'bridgetable-', LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
-  const st = { on: false, host: false, guest: false, me: 'local', seat: 2, code: null, peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, savedG: null, msg: '', wake: null, want: 'partner' };
+  const st = { chat: [], unread: 0, on: false, host: false, guest: false, me: 'local', seat: 2, code: null, peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, savedG: null, msg: '', wake: null, want: 'partner' };
   const NAME_KEY = 'bridge-table-name';
   const myName = () => { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } };
   const setName = n => { try { localStorage.setItem(NAME_KEY, n); } catch (e) {} };
@@ -3014,18 +3037,25 @@ const Net = (() => {
       const s = pref.length ? pref[0] : free[0];
       if (s == null) { conn.send({ t: 'full' }); setTimeout(() => conn.close(), 500); return; }
       st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
-      conn.send({ t: 'welcome', seat: s, id: conn.peer, code: st.code });
+      conn.send({ t: "welcome", seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
+      addChat(null, st.names[s] + " joined as " + SEAT[s]);
       broadcast(); panelRefresh(); render(); tick();
       return;
     }
     const seat = seatOf(conn.peer); if (Number.isNaN(seat)) return;
-    if (d.t === 'call' && G.phase === 'bid' && owner(bidTurn()) === conn.peer) makeCall(bidTurn(), d.call);
+    const who = st.names[seat] || SEAT[seat];
+    if (d.t === "chat") { addChat(who, d.text); return; }
+    if (d.t === "undo") { if (undo(conn.peer)) addChat(null, who + " took back their last " + (G.phase === "bid" ? "call" : "move")); return; }
+    if (d.t === "claim") { if (G.phase === "play" && !G.play.trick.length && owner(G.play.turn) === conn.peer) { addChat(null, who + " claimed the rest"); claim(seat); } return; }
+    if (d.t === "replay") { if (G.phase === "done") { addChat(null, who + " asked to replay this deal"); replayDeal(); } return; }
+    if (d.t === "hint") { if (G.phase === "play" && owner(G.play.turn) === conn.peer && G.play.trick.length < 4) conn.send({ t: "hint", c: E.aiPlay(G.play, G.play.turn), id: G.id }); return; }
+    if (d.t === "call" && G.phase === "bid" && owner(bidTurn()) === conn.peer) makeCall(bidTurn(), d.call);
     else if (d.t === 'card' && G.phase === 'play' && owner(G.play.turn) === conn.peer) playCard(G.play.turn, d.c);
     else if (d.t === 'next' && G.phase === 'done') newBoard();
   }
   function drop(conn) {
     const s = Object.keys(st.seats).find(k => st.seats[k] === conn.peer);
-    if (s != null) { delete st.seats[s]; delete st.names[s]; }
+    if (s != null) { addChat(null, (st.names[s] || SEAT[s]) + " left — a robot plays " + SEAT[s]); delete st.seats[s]; delete st.names[s]; }
     st.conns.delete(conn.peer);
     if (st.host) { broadcast(); panelRefresh(); render(); tick(); }
   }
@@ -3054,16 +3084,19 @@ const Net = (() => {
         if (!d) return;
         if (d.t === 'welcome') {
           welcomed = true; clearTimeout(timer);
-          Object.assign(st, { peer, conn, on: true, guest: true, host: false, me: peer.id, seat: d.seat, code, msg: '', savedG: st.savedG || G });
+          Object.assign(st, { peer, conn, on: true, guest: true, host: false, me: peer.id, seat: d.seat, code, msg: "", savedG: st.savedG || G, chat: d.chat || [], unread: 0 });
           closeOv(); wakeOn();
         } else if (d.t === 'state') applyState(d.v);
-        else if (d.t === 'full') fail('That table is full.');
+        else if (d.t === "full") fail("That table is full.");
+        else if (d.t === "chat") gotChat(d.m);
+        else if (d.t === "hint" && G && d.id === G.id && G.phase === "play") { ui.hintCard = d.c; render(); }
       });
       conn.on('close', () => { if (st.guest) leave('The host closed the table.'); });
     } catch (e) { st.msg = e.message; showJoin(code); }
   }
   function applyState(v) {
     clearTimeout(timer);
+    if (v.phase !== "done") HIST = HIST.filter(h => !(h.id === v.id && h.online)); // a finished board was taken back
     st.ctl = v.ctl; st.names = v.names || {};
     G = v;
     if (G.phase === 'done' && G.result) {
@@ -3087,6 +3120,39 @@ const Net = (() => {
     Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null });
     G = back; if (!G) newBoard(); else { render(); tick(); }
     if (msg) flash(msg, 3000);
+  }
+
+  /* ---- chat (the host relays every message to the whole table) ---- */
+  const myTableName = () => st.names[st.guest ? st.seat : SET.seat] || myName() || 'Me';
+  function addChat(from, text) {
+    text = String(text || '').trim().slice(0, 200); if (!text || !st.host) return;
+    const m = { from, text, ts: Date.now() };
+    st.chat.push(m); if (st.chat.length > 200) st.chat.shift();
+    for (const c of st.conns.values()) if (c.open) { try { c.send({ t: 'chat', m }); } catch (e) {} }
+    gotChat(m, true);
+  }
+  function gotChat(m, mine) {
+    if (!mine) { st.chat.push(m); if (st.chat.length > 200) st.chat.shift(); }
+    if (ui.overlay === 'chat') { chatPanel(); return; }
+    if (m.from !== myTableName()) { st.unread++; flash((m.from ? m.from + ': ' : '') + m.text, 2600); }
+    renderBar();
+  }
+  function sendChat(text) {
+    text = String(text || '').trim(); if (!text) return;
+    if (st.host) addChat(myTableName(), text); else send({ t: 'chat', text });
+  }
+  const QUICK = ['Hi!', 'Well played', 'Thanks partner', 'Sorry partner', 'Good luck', 'Ready?', 'One more?', '👍', '😂', '🙈'];
+  function chatPanel() {
+    const draft = document.getElementById('nMsg'); if (draft) st.draft = draft.value;
+    st.unread = 0;
+    const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const list = st.chat.slice(-60).map(m => m.from ? `<div class="cm${m.from === myTableName() ? ' me' : ''}"><b>${esc(m.from)}</b> ${esc(m.text)}<small>${t(m.ts)}</small></div>` : `<div class="cm sys">${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') || '<div class="muted">No messages yet — say hello!</div>';
+    openOv('chat', `<h2>Table chat</h2><div class="chatlist" id="nList">${list}</div>
+      <div class="quick">${QUICK.map(q => `<button data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+      <div class="row2"><input class="tok" id="nMsg" maxlength="200" placeholder="Write a message…" value="${esc(st.draft || '')}"><button class="btn gold" id="nSend">Send</button></div>
+      <div class="row2"><button class="btn" id="oClose">Close</button></div>`);
+    const L = document.getElementById('nList'); if (L) L.scrollTop = L.scrollHeight;
+    renderBar();
   }
 
   /* ---- screens ---- */
@@ -3126,9 +3192,12 @@ const Net = (() => {
 
   document.addEventListener('click', ev => {
     const t = ev.target.closest('button'); if (!t) return;
+    if (t.dataset.q) { sendChat(t.dataset.q); return; }
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {
-      case 'bNet': panel(); break;
+      case "bNet": panel(); break;
+      case "bChat": chatPanel(); break;
+      case "nSend": { const i = document.getElementById("nMsg"); if (i && i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } break; }
       case 'nStart': { const n = document.getElementById('nName'); setName((n && n.value.trim()) || 'Host'); host(); break; }
       case 'nStop': stop(); closeOv(); break;
       case 'nLeave': leave(); closeOv(); break;
@@ -3136,6 +3205,7 @@ const Net = (() => {
       case 'nJoin': { const n = document.getElementById('nName'); const name = (n && n.value.trim()) || 'Guest'; st.msg = ''; join(st.joinCode, name, st.want); break; }
     }
   });
+  document.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target && ev.target.id === "nMsg") { ev.preventDefault(); const i = ev.target; if (i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } } });
   // opened through an invite link
   function boot() {
     const m = location.hash.match(/^#join-([A-Z0-9]{6})$/i);
@@ -3143,7 +3213,7 @@ const Net = (() => {
   }
   boot();
   window.addEventListener('hashchange', boot);
-  return { st, owner, broadcast, send, panel, get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, broadcast, send, panel, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

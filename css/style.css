@@ -294,3 +294,11 @@ body.classic .card{height:calc(var(--cw)*1.95)}
 .seg2 button{flex:1;border:1px solid #c7c9bd;background:#fff;border-radius:6px;padding:8px 6px;font-weight:600;color:#222}
 .seg2 button.on{background:var(--felt);color:#fff;border-color:var(--felt)}
 .bigcode{font:700 34px/1.1 ui-monospace,Consolas,monospace;letter-spacing:.18em;color:#14532d}
+.chatlist{max-height:46vh;min-height:120px;overflow:auto;display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid #dcdccf;border-radius:8px;padding:8px}
+.cm{background:#eef3ec;border-radius:10px;padding:6px 10px;max-width:85%;align-self:flex-start;font-size:15px;line-height:1.3;word-break:break-word}
+.cm.me{background:#d9f0d3;align-self:flex-end}
+.cm.sys{background:none;color:#5d6a60;font-style:italic;font-size:13px;align-self:center;text-align:center}
+.cm small{display:block;font-size:11px;color:#7a857c;margin-top:2px}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.quick button{border:1px solid #c7c9bd;background:#fff;border-radius:999px;padding:5px 10px;font-size:14px;color:#222}
+#nMsg{flex:3}
