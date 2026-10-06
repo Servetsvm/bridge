@@ -154,7 +154,7 @@ function newBoard(replay, boardNo) {
   const deal = replay ? replay.map(h => h.slice()) : freshDeal(dealerOf(bn));
   UNDO.length = 0;
   G = { id: Date.now().toString(36) + E.rnd(1e6).toString(36), board: bn, dealer: dealerOf(bn), deal, auction: [], phase: 'bid', play: null, result: null, claimed: false, field: null, cards: sideCards() };
-  Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null });
+  Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null, photoMsg: null, photoHands: null });
   $('ov').hidden = true;
   Field.start(G);
   save(); render(); tick();
@@ -469,13 +469,31 @@ function showDealEntry(err) {
   ui.dealForm = v;
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([val, l]) => `<button data-v="${val}" class="${String(cur) === String(val) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   openOv('deal', `<h2>Enter a deal</h2>
-   <div class="muted">Have a photo of a played board? Send it to Claude in the chat and ask for the PBN code, then paste it here. You can also type the hands: spades.hearts.diamonds.clubs, e.g. <b>AKQ2.K73.J5.T942</b> (T = 10). Leave one hand empty and it is filled with the remaining cards.</div>
+   <div class="row2"><label class="btn gold" for="dPhoto" role="button">📷 Read from a photo or screenshot</label><input type="file" id="dPhoto" accept="image/*" hidden></div>
+   <div class="muted">Works with the end-of-board screen of your bridge app (four open hands) and with hand records that list ♠ ♥ ♦ ♣ for each hand. The cards it reads appear below as a code — check them before you play. You can also type the hands: spades.hearts.diamonds.clubs, e.g. <b>AKQ2.K73.J5.T942</b> (T = 10). Leave one hand empty and it is filled with the remaining cards.</div>
+   ${ui.photoMsg ? `<div class="${ui.photoErr ? "err" : "okmsg"}">${ui.photoMsg}</div>` : ""}
+   ${ui.photoHands ? dealHtml(ui.photoHands.map(h => h || []), U()) : ""}
    <div class="grp"><span>PBN code (optional)</span><input id="dPbn" class="tok wide" placeholder="N:AKQ2.K73.J5.T942 ..." value="${v.pbn.replace(/"/g, '&quot;')}"></div>
    ${[0, 1, 2, 3].map(s => `<div class="grp"><span>${SEAT[s]}</span><input id="dH${s}" class="tok wide" placeholder="AKQ2.K73.J5.T942" value="${v.h[s].replace(/"/g, '&quot;')}"></div>`).join('')}
    <div class="grp"><span>Dealer</span>${seg('ddealer', [[0, 'North'], [1, 'East'], [2, 'South'], [3, 'West']], v.dealer)}</div>
    <div class="grp"><span>Vulnerable</span>${seg('dvul', [[0, 'None'], [1, 'N-S'], [2, 'E-W'], [3, 'Both']], v.vul)}</div>
    ${err ? `<div class="err">${err}</div>` : ''}
    <div class="row2"><button class="btn gold" id="dPlay">Play this deal</button><button class="btn" id="oClose">Cancel</button></div>`);
+}
+async function readPhoto(file) {
+  readDealForm();
+  ui.photoMsg = "Reading the picture…"; ui.photoErr = false; ui.photoHands = null; showDealEntry();
+  await new Promise(r => setTimeout(r, 30));
+  try {
+    const r = await Photo.read(file);
+    const counts = r.hands.map((h, s) => SEAT[s] + ' ' + (h ? h.length : 0));
+    const total = r.hands.reduce((a, h) => a + (h ? h.length : 0), 0);
+    ui.dealForm.pbn = r.pbn; ui.dealForm.h = ["", "", "", ""]; ui.photoHands = r.hands;
+    const full = r.hands.filter(h => h && h.length === 13).length;
+    ui.photoErr = full < 3;
+    ui.photoMsg = (full >= 3 ? `Read ${total} cards (${counts.join(', ')}). Check the code, then press Play this deal.` : `Only part of the deal could be read (${counts.join(', ')}). Fix the code below before playing.`);
+  } catch (e) { ui.photoErr = true; ui.photoMsg = e.message; }
+  showDealEntry();
 }
 function readDealForm() {
   const v = ui.dealForm; if (!$('dPbn')) return v;
@@ -519,6 +537,7 @@ document.addEventListener('change', e => {
     if (!t.checked && SET.practice === k) SET.practice = "";
     Store.saveSettings(SET); save(); showSettings();
   }
+  if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {
