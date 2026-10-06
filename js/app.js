@@ -49,6 +49,23 @@ function mergeCloud(recs, settings) {
   save(); render();
 }
 
+/* ================= device sync (GitHub gist) ================= */
+let syncTimer = null;
+const syncState = { msg: "" };
+function syncNow(quiet) {
+  if (!GitSync.enabled) return;
+  if (!navigator.onLine) { syncState.msg = "Offline — will sync when back online"; return; }
+  syncState.msg = "Syncing…"; if (ui.overlay === "set") showSettings();
+  GitSync.sync({ hist: HIST, seen: [...SEEN] }).then(m => {
+    if (!m) return;
+    HIST = m.hist; SEEN = new Set(m.seen); saveSeen();
+    BOARD = Math.max(BOARD, ...HIST.map(h => h.board || 0));
+    syncState.msg = "Synced " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    save(); renderBar(); if (ui.overlay === "set") showSettings(); else if (ui.overlay === "res") showResults();
+  }).catch(e => { syncState.msg = e.message === "offline" ? "Offline — will sync when back online" : "Sync failed: " + e.message; if (ui.overlay === "set") showSettings(); });
+}
+function scheduleSync() { clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(true), 2500); }
+
 /* ================= virtual field (background worker) ================= */
 const Field = {
   worker: null, live: {},
@@ -90,7 +107,7 @@ const Field = {
       f.normC = best;
       if (best) this.dd(m.id, 'norm', L.deal, best);
       const e = HIST.find(h => h.id === m.id);
-      if (e) { applyField(e, f); Store.saveRec(e); }
+      if (e) { applyField(e, f); Store.saveRec(e); scheduleSync(); }
     }
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; }
     if (m.type === 'error') f.done = true;
@@ -171,6 +188,7 @@ function finishBoard() {
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
   Store.saveRec(e);
   save(); render(); showEnd();
+  scheduleSync();
 }
 function tick() {
   clearTimeout(timer); if (!G) return;
@@ -375,6 +393,8 @@ function showSettings() {
    <div class="grp"><span>Bid explanations</span>${seg('expl', [[1, 'Show'], [0, 'Hide']], SET.expl ? 1 : 0)}</div>
    <div class="grp"><span>Play a forced card automatically</span>${seg('auto', [[1, 'On'], [0, 'Off']], SET.auto ? 1 : 0)}</div>
    <div class="grp"><span>Our convention card (with partner)</span><div class="muted">Base system: 5-card majors, 15-17 1NT, weak twos, strong 2♣, Jacoby transfers, negative and takeout doubles.</div>${convs}</div>
+   <div class="grp"><span>Sync between devices (GitHub)</span><div class="muted">Scores, statistics and the list of deals you have seen are kept in a private gist on your GitHub account. Play offline on any device; everything merges when it is online again.</div>
+   ${GitSync.enabled ? `<div><b>Connected.</b> ${syncState.msg || (GitSync.last ? "Last sync " + new Date(GitSync.last).toLocaleString() : "")}</div><div class="row2"><button class="btn gold" id="sNow">Sync now</button><button class="btn" id="sOff">Disconnect</button></div>` : `<div class="muted">1. Open <a href="https://github.com/settings/tokens/new?scopes=gist&description=Bridge%20Table" target="_blank" rel="noopener">github.com → new token</a> (scope: <b>gist</b> only, expiration: no expiration) and copy the token.<br>2. Paste it here on each device (PC and phone).</div><div class="row2"><input id="syncToken" type="password" autocomplete="off" placeholder="ghp_…" class="tok"><button class="btn gold" id="sSave">Connect</button></div>${syncState.msg ? `<div class="muted">${syncState.msg}</div>` : ""}`}</div>
    <div class="muted">Changes apply from the next deal.${Store.online ? ' Settings and scores are saved to your account.' : ' Scores are saved on this device.'} Every deal you get is new — a deal is never dealt to you twice.</div>
    <div class="row2"><button class="btn gold" id="oClose">Close</button><button class="btn" id="sReset">Delete score history</button></div>`);
 }
@@ -426,6 +446,9 @@ document.addEventListener('click', ev_ => {
     case 'bRes': showResults(); break;
     case 'oClose': closeOv(); break;
     case 'sReset': HIST = []; save(); showSettings(); render(); break;
+    case "sSave": { const v = ($("syncToken") || {}).value; if (v) { GitSync.setToken(v); syncState.msg = ""; syncNow(); showSettings(); } break; }
+    case "sNow": syncNow(); break;
+    case "sOff": GitSync.setToken(null); syncState.msg = ""; showSettings(); break;
     case 'oNext': newBoard(); break;
     case 'oReplay': { const d = G.deal; HIST = HIST.filter(h => h.id !== G.id); BOARD = G.board; newBoard(d); break; }
   }
@@ -443,8 +466,10 @@ function start(data) {
     render(); if (G.phase === 'done') showEnd(); tick();
   }
   Store.initCloud(mergeCloud);
+  syncNow(true);
+  window.addEventListener("online", () => syncNow(true));
   // installable/offline app when served from a normal web address
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && document.querySelector('link[rel=manifest]') && /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 window.claude?.hot?.snapshot?.(() => ({ SET, G, HIST, BOARD }));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});

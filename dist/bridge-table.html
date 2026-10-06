@@ -200,6 +200,7 @@ button.box{box-shadow:inset 0 -2px 0 rgba(0,0,0,.15)}
 #table.bidding #pos1,#table.bidding #pos3{display:none}
 #table.bidding #center{grid-column:1/4}
 #table.bidding .auction,#table.bidding .expl{width:min(100%,560px);align-self:center}
+.tok{flex:2;min-width:0;border:1px solid #c7c9bd;border-radius:6px;padding:8px;font:inherit;background:#fff;color:#222}
 
 </style>
 
@@ -1529,7 +1530,83 @@ const Store = (() => {
       return { name, n: rs.length, scored: sc.length, impSum: Math.round(impSum * 10) / 10, impAvg: sc.length ? Math.round(impSum / sc.length * 100) / 100 : null, mpAvg: mpAvg == null ? null : Math.round(mpAvg * 10) / 10, pts: rs.reduce((a, h) => a + (h.us || 0), 0) };
     });
   }
-  return { loadLocal, saveLocal, initCloud, saveRec, saveSettings, periods, get online() { return !!cloud; } };
+  return { loadLocal, saveLocal, initCloud, saveRec, saveSettings, periods, compact, get online() { return !!cloud; } };
+})();
+
+/* Sync between devices through a private GitHub gist (works offline; merges when the device is back online).
+   Needs a GitHub token with the "gist" scope, entered once per device in Settings. */
+const GitSync = (() => {
+  'use strict';
+  const KEY = 'bridge-table-sync', FILE = 'bridge-table-data.json';
+  let cfg = {}; try { cfg = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { cfg = {}; }
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch (e) {} };
+  async function api(path, opt) {
+    opt = opt || {};
+    const headers = { Authorization: 'Bearer ' + cfg.token, Accept: 'application/vnd.github+json' };
+    if (opt.body) headers['Content-Type'] = 'application/json';
+    const r = await fetch('https://api.github.com' + path, { method: opt.method || 'GET', headers, body: opt.body, cache: 'no-store' });
+    if (r.status === 401) throw new Error('GitHub did not accept the token. Create a new one with the "gist" scope.');
+    if (!r.ok) throw new Error('GitHub error ' + r.status);
+    return r.json();
+  }
+  async function findGist() {
+    if (cfg.gistId) return cfg.gistId;
+    for (let page = 1; page <= 10; page++) {
+      const list = await api('/gists?per_page=100&page=' + page);
+      const g = list.find(x => x.files && x.files[FILE]);
+      if (g) { cfg.gistId = g.id; persist(); return g.id; }
+      if (list.length < 100) break;
+    }
+    const g = await api('/gists', { method: 'POST', body: JSON.stringify({ description: 'Bridge Table — scores synced by the app', public: false, files: { [FILE]: { content: '{"v":1,"hist":[],"seen":[]}' } } }) });
+    cfg.gistId = g.id; persist(); return g.id;
+  }
+  async function readRemote(id) {
+    let g;
+    try { g = await api('/gists/' + id); } catch (e) { if (/404/.test(e.message)) { cfg.gistId = null; persist(); return readRemote(await findGist()); } throw e; }
+    const f = g.files && g.files[FILE]; if (!f) return { hist: [], seen: [] };
+    const txt = f.truncated ? await fetch(f.raw_url, { cache: 'no-store' }).then(r => r.text()) : f.content;
+    try { const d = JSON.parse(txt); return { hist: d.hist || [], seen: d.seen || [] }; } catch (e) { return { hist: [], seen: [] }; }
+  }
+  function merge(local, remote) {
+    const map = new Map();
+    for (const r of remote.hist) map.set(r.id, r);
+    for (const l of local.hist) {
+      const r = map.get(l.id);
+      if (!r) { map.set(l.id, l); continue; }
+      const m = { ...r, ...l };
+      if (l.imp == null && r.imp != null) { m.imp = r.imp; m.mp = r.mp; m.norm = r.norm; }
+      map.set(l.id, m);
+    }
+    const hist = [...map.values()].sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    const seen = [...new Set([...remote.seen, ...local.seen])].slice(-40000);
+    return { hist, seen };
+  }
+  let running = null;
+  /* local = { hist, seen }; resolves with the merged data, or null when sync is not set up */
+  function sync(local) {
+    if (!cfg.token) return Promise.resolve(null);
+    if (!navigator.onLine) return Promise.reject(new Error('offline'));
+    if (running) return running;
+    running = (async () => {
+      const id = await findGist();
+      const remote = await readRemote(id);
+      const merged = merge(local, remote);
+      const changed = merged.hist.length !== remote.hist.length || merged.seen.length !== remote.seen.length || merged.hist.some(h => h.imp != null && !remote.hist.find(r => r.id === h.id && r.imp != null));
+      if (changed) {
+        const body = { v: 1, updated: Date.now(), hist: merged.hist.map(Store.compact), seen: merged.seen };
+        await api('/gists/' + id, { method: 'PATCH', body: JSON.stringify({ files: { [FILE]: { content: JSON.stringify(body) } } }) });
+      }
+      cfg.last = Date.now(); persist();
+      return merged;
+    })().finally(() => { running = null; });
+    return running;
+  }
+  return {
+    sync,
+    setToken(t) { cfg = { token: (t || '').trim() || null, gistId: null, last: null }; persist(); },
+    get enabled() { return !!cfg.token; },
+    get last() { return cfg.last || null; },
+  };
 })();
 
 </script>
@@ -1585,6 +1662,23 @@ function mergeCloud(recs, settings) {
   save(); render();
 }
 
+/* ================= device sync (GitHub gist) ================= */
+let syncTimer = null;
+const syncState = { msg: "" };
+function syncNow(quiet) {
+  if (!GitSync.enabled) return;
+  if (!navigator.onLine) { syncState.msg = "Offline — will sync when back online"; return; }
+  syncState.msg = "Syncing…"; if (ui.overlay === "set") showSettings();
+  GitSync.sync({ hist: HIST, seen: [...SEEN] }).then(m => {
+    if (!m) return;
+    HIST = m.hist; SEEN = new Set(m.seen); saveSeen();
+    BOARD = Math.max(BOARD, ...HIST.map(h => h.board || 0));
+    syncState.msg = "Synced " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    save(); renderBar(); if (ui.overlay === "set") showSettings(); else if (ui.overlay === "res") showResults();
+  }).catch(e => { syncState.msg = e.message === "offline" ? "Offline — will sync when back online" : "Sync failed: " + e.message; if (ui.overlay === "set") showSettings(); });
+}
+function scheduleSync() { clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(true), 2500); }
+
 /* ================= virtual field (background worker) ================= */
 const Field = {
   worker: null, live: {},
@@ -1626,7 +1720,7 @@ const Field = {
       f.normC = best;
       if (best) this.dd(m.id, 'norm', L.deal, best);
       const e = HIST.find(h => h.id === m.id);
-      if (e) { applyField(e, f); Store.saveRec(e); }
+      if (e) { applyField(e, f); Store.saveRec(e); scheduleSync(); }
     }
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; }
     if (m.type === 'error') f.done = true;
@@ -1707,6 +1801,7 @@ function finishBoard() {
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
   Store.saveRec(e);
   save(); render(); showEnd();
+  scheduleSync();
 }
 function tick() {
   clearTimeout(timer); if (!G) return;
@@ -1911,6 +2006,8 @@ function showSettings() {
    <div class="grp"><span>Bid explanations</span>${seg('expl', [[1, 'Show'], [0, 'Hide']], SET.expl ? 1 : 0)}</div>
    <div class="grp"><span>Play a forced card automatically</span>${seg('auto', [[1, 'On'], [0, 'Off']], SET.auto ? 1 : 0)}</div>
    <div class="grp"><span>Our convention card (with partner)</span><div class="muted">Base system: 5-card majors, 15-17 1NT, weak twos, strong 2♣, Jacoby transfers, negative and takeout doubles.</div>${convs}</div>
+   <div class="grp"><span>Sync between devices (GitHub)</span><div class="muted">Scores, statistics and the list of deals you have seen are kept in a private gist on your GitHub account. Play offline on any device; everything merges when it is online again.</div>
+   ${GitSync.enabled ? `<div><b>Connected.</b> ${syncState.msg || (GitSync.last ? "Last sync " + new Date(GitSync.last).toLocaleString() : "")}</div><div class="row2"><button class="btn gold" id="sNow">Sync now</button><button class="btn" id="sOff">Disconnect</button></div>` : `<div class="muted">1. Open <a href="https://github.com/settings/tokens/new?scopes=gist&description=Bridge%20Table" target="_blank" rel="noopener">github.com → new token</a> (scope: <b>gist</b> only, expiration: no expiration) and copy the token.<br>2. Paste it here on each device (PC and phone).</div><div class="row2"><input id="syncToken" type="password" autocomplete="off" placeholder="ghp_…" class="tok"><button class="btn gold" id="sSave">Connect</button></div>${syncState.msg ? `<div class="muted">${syncState.msg}</div>` : ""}`}</div>
    <div class="muted">Changes apply from the next deal.${Store.online ? ' Settings and scores are saved to your account.' : ' Scores are saved on this device.'} Every deal you get is new — a deal is never dealt to you twice.</div>
    <div class="row2"><button class="btn gold" id="oClose">Close</button><button class="btn" id="sReset">Delete score history</button></div>`);
 }
@@ -1962,6 +2059,9 @@ document.addEventListener('click', ev_ => {
     case 'bRes': showResults(); break;
     case 'oClose': closeOv(); break;
     case 'sReset': HIST = []; save(); showSettings(); render(); break;
+    case "sSave": { const v = ($("syncToken") || {}).value; if (v) { GitSync.setToken(v); syncState.msg = ""; syncNow(); showSettings(); } break; }
+    case "sNow": syncNow(); break;
+    case "sOff": GitSync.setToken(null); syncState.msg = ""; showSettings(); break;
     case 'oNext': newBoard(); break;
     case 'oReplay': { const d = G.deal; HIST = HIST.filter(h => h.id !== G.id); BOARD = G.board; newBoard(d); break; }
   }
@@ -1979,8 +2079,10 @@ function start(data) {
     render(); if (G.phase === 'done') showEnd(); tick();
   }
   Store.initCloud(mergeCloud);
+  syncNow(true);
+  window.addEventListener("online", () => syncNow(true));
   // installable/offline app when served from a normal web address
-  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && document.querySelector('link[rel=manifest]') && /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 window.claude?.hot?.snapshot?.(() => ({ SET, G, HIST, BOARD }));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
