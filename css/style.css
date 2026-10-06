@@ -290,3 +290,7 @@ body.classic .card{height:calc(var(--cw)*1.95)}
 .helprow{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #dcdccf;border-radius:8px;padding:8px 10px}
 .helprow span{flex:1}
 .helprow .btn{text-decoration:none}
+.seg2{display:flex;gap:4px;flex-wrap:wrap}
+.seg2 button{flex:1;border:1px solid #c7c9bd;background:#fff;border-radius:6px;padding:8px 6px;font-weight:600;color:#222}
+.seg2 button.on{background:var(--felt);color:#fff;border-color:var(--felt)}
+.bigcode{font:700 34px/1.1 ui-monospace,Consolas,monospace;letter-spacing:.18em;color:#14532d}

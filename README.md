@@ -36,3 +36,4 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 | `manifest.webmanifest`, `sw.js`, `icons/` | installable / offline app |
 | `guide-en.html`, `guide-no.html`, `guide.html` | user guide in English, Norwegian and Turkish (Help button) |
 | `js/photo.js` | reads a deal from a photo or screenshot, on the device |
+| `js/net.js` | online table with friends (one device hosts, others join by link) |

@@ -6,7 +6,9 @@ const { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealer
 let SET = { style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', conv: { ...E.ALL_ON } };
 let G = null, HIST = [], BOARD = 0, timer = null;
 const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, confirmNew: 0, overlay: null, resTab: 'stats' };
-const U = () => SET.seat;
+const online = () => typeof Net !== "undefined" && Net.on;
+const guest = () => typeof Net !== "undefined" && Net.guest;
+const U = () => (guest() ? Net.st.seat : SET.seat);
 const delay = () => [1100, 650, 250][SET.speed];
 const $ = id => document.getElementById(id);
 const red = s => s === 1 || s === 2;
@@ -29,8 +31,9 @@ let SEEN = new Set();
 function loadSeen() { try { SEEN = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch (e) { SEEN = new Set(); } }
 function saveSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify([...SEEN].slice(-30000))); } catch (e) {} }
 function save() {
+  if (online() && Net.host) Net.broadcast();
   const slim = HIST.map((h, i) => (i < HIST.length - 60 ? { ...h, deal: undefined, fieldList: undefined } : h));
-  Store.saveLocal({ SET, G, HIST: slim, BOARD });
+  Store.saveLocal({ SET, G: guest() ? Net.st.savedG : G, HIST: slim, BOARD });
 }
 function load(d) {
   d = d || Store.loadLocal();
@@ -165,7 +168,7 @@ const bidTurn = () => (G.dealer + G.auction.length) % 4;
 const UNDO = [];
 function pushUndo() { const { field, ...rest } = G; UNDO.push(JSON.stringify(rest)); if (UNDO.length > 80) UNDO.shift(); }
 function undo() {
-  if (!UNDO.length) return;
+  if (!UNDO.length || online()) return;
   clearTimeout(timer);
   const wasDone = G.phase === 'done', id = G.id;
   G = JSON.parse(UNDO.pop());
@@ -175,6 +178,7 @@ function undo() {
   save(); render(); tick();
 }
 function makeCall(seat, call, m) {
+  if (guest()) { if (bidTurn() === seat && userControls(seat)) Net.send({ t: "call", call }); return; }
   if (G.phase !== "bid" || bidTurn() !== seat || !isLegal(G.auction, seat, call)) return;
   if (seat === U()) pushUndo();
   if (!m) m = E.explainCall(G.auction, seat, call, G.cards);
@@ -191,11 +195,13 @@ function makeCall(seat, call, m) {
   save(); render(); tick();
 }
 function userControls(seat) {
+  if (online()) return Net.owner(seat) === Net.me;
   if (!G.play) return seat === U();
   return seat === U() || (sideOf(G.play.contract.decl) === sideOf(U()) && sideOf(seat) === sideOf(U()));
 }
 function playCard(seat, c) {
   const g = G.play;
+  if (guest()) { if (userControls(seat)) Net.send({ t: "card", c }); return; }
   if (G.phase !== "play" || g.turn !== seat || g.trick.length >= 4 || !E.legalFor(g, seat).includes(c)) return;
   if (userControls(seat)) pushUndo();
   // explain the signal when your robot partner (on defence) discards or encourages
@@ -227,14 +233,16 @@ function finishBoard() {
   scheduleSync();
 }
 function tick() {
-  clearTimeout(timer); if (!G) return;
-  if (G.phase === 'bid') {
+  clearTimeout(timer); if (!G || guest()) return; // when you are a guest, the host runs the table
+  const robot = s => online() ? Net.owner(s) === "robot" : (G.phase === "bid" ? s !== U() : !userControls(s));
+  if (G.phase === "bid") {
     const t = bidTurn();
-    if (t !== U()) timer = setTimeout(() => { const r = E.aiBid(G.auction, t, G.deal[t], G.cards); makeCall(t, r.call, r.m); }, delay());
+    if (robot(t)) timer = setTimeout(() => { const r = E.aiBid(G.auction, t, G.deal[t], G.cards); makeCall(t, r.call, r.m); }, delay());
   } else if (G.phase === 'play') {
     const g = G.play;
     if (g.trick.length === 4) timer = setTimeout(collectTrick, Math.max(700, delay() + 300));
-    else if (!userControls(g.turn)) { const t = g.turn; timer = setTimeout(() => playCard(t, E.aiPlay(g, t)), delay()); }
+    else if (robot(g.turn)) { const t = g.turn; timer = setTimeout(() => playCard(t, E.aiPlay(g, t)), delay()); }
+    else if (!userControls(g.turn)) { /* a friend is to play */ }
     else { const leg = E.legalFor(g, g.turn); if (leg.length === 1 && g.trick.length > 0 && SET.auto) timer = setTimeout(() => playCard(g.turn, leg[0]), 450); }
   }
 }
@@ -259,6 +267,7 @@ function cardHtml(c, cls) {
 }
 const handsNow = () => G.phase === "play" ? G.play.hands : G.deal;
 function isVisible(seat) {
+  if (guest()) return handsNow()[seat].every(c => c >= 0); // the host only sends the cards you may see
   if (seat === U() || G.phase === "done") return true;
   if (G.phase !== 'play') return false;
   const g = G.play;
@@ -288,7 +297,8 @@ function seatLabel(seat) {
   if (seat === G.dealer && G.phase === 'bid') tags.push('<span class="tag">D</span>');
   if (g && seat === g.contract.decl) tags.push('<span class="tag">Decl</span>');
   if (g && seat === g.dummy) tags.push('<span class="tag">Dummy</span>');
-  const who = seat === U() ? 'You' : (g && userControls(seat) ? 'You play' : 'Robot');
+  const nm = online() && Net.st.names[seat];
+  const who = seat === U() ? "You" : (g && userControls(seat) ? "You play" : nm ? nm : "Robot");
   const turn = (G.phase === 'bid' && bidTurn() === seat) || (G.phase === 'play' && g.turn === seat);
   return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> · ${who} ${tags.join('')}</span>`;
 }
@@ -301,7 +311,7 @@ function renderBar() {
   let con = '—', tr = '';
   if (G.play) { const c = G.play.contract; con = `${callHtml(B(c.level, c.strain))}${c.dbl === 1 ? ' X' : c.dbl === 2 ? ' XX' : ''} <span class="sm">${SEAT[c.decl]}</span>`; const us = sideOf(u); tr = `Us ${G.play.tricks[us]} · Them ${G.play.tricks[1 - us]}`; }
   const g = G.play;
-  const canClaim = G.phase === 'play' && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
+  const canClaim = !online() && G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
   const last = HIST.length ? HIST[HIST.length - 1] : null;
   const lastTxt = last ? (last.imp != null ? (SET.mode === 'IMP' ? fmtSigned(last.imp) + ' IMP' : last.mp + '%') : fmtSigned(last.us || 0)) : '&nbsp;';
   const per = Store.periods(HIST)[0];
@@ -313,9 +323,10 @@ function renderBar() {
    <div class="spacer"></div>
    <div class="tools">
      <button class="btn new${ui.confirmNew > Date.now() ? ' warn' : ''}" id="bNew">${ui.confirmNew > Date.now() ? 'Sure?' : 'New Deal'}</button>
-     <button class="btn" id="bUndo" ${UNDO.length ? "" : "disabled"}>Undo</button>
+     <button class="btn" id="bUndo" ${UNDO.length && !online() ? "" : "disabled"}>Undo</button>
      <button class="btn gold" id="bHint">Hint</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>Claim</button>
+     <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? "Online ●" : "Online"}</button>
      <button class="btn" id="bHelp">Help</button>
      <button class="btn" id="bSet">Settings</button>
      <button class="btn" id="bRes">Results</button>
@@ -382,9 +393,11 @@ function renderBidbox() {
   bb.innerHTML = `<div class="row"><button data-call="P" class="pass">Pass</button><button data-call="X" class="dbl" ${L.includes('X') ? '' : 'disabled'}>Double</button><button data-call="XX" class="rdbl" ${L.includes('XX') ? '' : 'disabled'}>Redouble</button></div><div class="row">${lv}</div><div class="row">${sts}</div>`;
 }
 function renderStatus() {
-  let s = '';
-  if (G.phase === 'bid') s = bidTurn() === U() ? 'Your call' : `${SEAT[bidTurn()]} is thinking…`;
-  else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = 'Gathering the trick…'; else if (userControls(g.turn)) s = g.turn === U() ? 'Your turn: play a card' : `Play from ${SEAT[g.turn]}'s hand`; else s = `${SEAT[g.turn]} is playing…`; }
+  let s = "";
+  // at an online table the player's name is shown when a friend (not a robot) is to act
+  const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
+  if (G.phase === 'bid') s = bidTurn() === U() ? 'Your call' : `${nameOf(bidTurn())} is thinking…`;
+  else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = 'Gathering the trick…'; else if (userControls(g.turn)) s = g.turn === U() ? 'Your turn: play a card' : `Play from ${SEAT[g.turn]}'s hand`; else s = `${nameOf(g.turn)} is playing…`; }
   else s = 'Board finished';
   $("status").innerHTML = s + (ui.signal && G.phase === "play" ? `<div class="sig">${symText(ui.signal)}</div>` : "");
 }
@@ -567,19 +580,22 @@ document.addEventListener('click', ev_ => {
     const seg = t.closest('.seg').dataset.seg, v = t.dataset.v;
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
-    if (seg === 'seat') SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
+    if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
+    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
     if (seg === "style") SET.style = v;
     if (seg === "mode") SET.mode = v; if (seg === 'opp') SET.opp = v;
     Store.saveSettings(SET); save(); showSettings(); render(); return;
   }
   switch (t.id) {
-    case 'bNew': case 'oNext2':
-      if (t.id === 'oNext2' || G.phase === 'done' || ui.confirmNew > Date.now()) { ui.confirmNew = 0; newBoard(); }
+    case "bNew": case "oNext2":
+      if (guest()) { if (G.phase === "done") Net.send({ t: "next" }); else flash("Only the host can deal a new board during play", 1800); break; }
+      if (t.id === "oNext2" || G.phase === "done" || ui.confirmNew > Date.now()) { ui.confirmNew = 0; newBoard(); }
       else { ui.confirmNew = Date.now() + 3000; renderBar(); setTimeout(renderBar, 3100); }
       break;
     case 'bAuc': showAuction(); break;
     case 'oShow': showEnd(); break;
     case 'bHint':
+      if (guest() && G.phase === "play") { flash("Hints during play are not available at an online table", 1800); break; }
       if (G.phase === 'bid' && bidTurn() === U()) { ui.hintBid = E.aiBid(G.auction, U(), G.deal[U()], G.cards); SET.expl = true; render(); }
       else if (G.phase === 'play' && userControls(G.play.turn) && G.play.trick.length < 4) { ui.hintCard = E.aiPlay(G.play, G.play.turn); render(); }
       break;
@@ -596,8 +612,8 @@ document.addEventListener('click', ev_ => {
     case "sSave": { const v = ($("syncToken") || {}).value; if (v) { GitSync.setToken(v); syncState.msg = ""; syncNow(); showSettings(); } break; }
     case "sNow": syncNow(); break;
     case "sOff": GitSync.setToken(null); syncState.msg = ""; showSettings(); break;
-    case 'oNext': newBoard(); break;
-    case 'oReplay': { const d = G.deal; HIST = HIST.filter(h => h.id !== G.id); BOARD = G.board; newBoard(d); break; }
+    case "oNext": if (guest()) { Net.send({ t: "next" }); closeOv(); } else newBoard(); break;
+    case "oReplay": if (online()) { flash("Replay is not available at an online table", 1800); break; } { const d = G.deal; HIST = HIST.filter(h => h.id !== G.id); BOARD = G.board; newBoard(d); break; }
   }
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
