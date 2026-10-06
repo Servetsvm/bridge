@@ -16,7 +16,7 @@ function simulateTable(deal, board, cards, agg, opt) {
   }
   const c = contractOf(auc);
   if (!c) return { passed: true, ns: 0 };
-  const g = E.newPlayState(deal, c, auc);
+  const g = E.newPlayState(deal, c, auc, cs);
   while (!E.handsEmpty(g) || g.trick.length) {
     if (g.trick.length === 4) { E.collect(g); continue; }
     const s = g.turn; E.applyCard(g, s, E.aiPlay(g, s, opt || FIELD_OPT));

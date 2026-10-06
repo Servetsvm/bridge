@@ -154,7 +154,7 @@ function newBoard(replay, boardNo) {
   const deal = replay ? replay.map(h => h.slice()) : freshDeal(dealerOf(bn));
   UNDO.length = 0;
   G = { id: Date.now().toString(36) + E.rnd(1e6).toString(36), board: bn, dealer: dealerOf(bn), deal, auction: [], phase: 'bid', play: null, result: null, claimed: false, field: null, cards: sideCards() };
-  Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null, photoMsg: null, photoHands: null });
+  Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null, photoMsg: null, photoHands: null, signal: null });
   $('ov').hidden = true;
   Field.start(G);
   save(); render(); tick();
@@ -183,7 +183,7 @@ function makeCall(seat, call, m) {
   if (auctionOver(G.auction)) {
     const c = contractOf(G.auction);
     if (!c) { finishBoard(); return; }
-    G.play = E.newPlayState(G.deal, c, G.auction); G.phase = 'play';
+    G.play = E.newPlayState(G.deal, c, G.auction, G.cards); G.phase = 'play';
     Field.dd(G.id, 'you', G.deal, c);
     const us = sideOf(c.decl) === sideOf(U());
     flash(us ? (c.decl === U() ? 'You are declarer' : 'Partner is declarer — you play both hands') : 'You are defending', 1800);
@@ -198,6 +198,9 @@ function playCard(seat, c) {
   const g = G.play;
   if (G.phase !== "play" || g.turn !== seat || g.trick.length >= 4 || !E.legalFor(g, seat).includes(c)) return;
   if (userControls(seat)) pushUndo();
+  // explain the signal when your robot partner (on defence) discards or encourages
+  if (!userControls(seat) && g.history.length < 3 && sideOf(seat) === sideOf(U()) && sideOf(g.contract.decl) !== sideOf(U())) { const t = E.signalText(g, seat, c); if (t) ui.signal = t; }
+  else if (userControls(seat) && !g.trick.length) ui.signal = null;
   E.applyCard(g, seat, c); ui.hintCard = null;
   save(); render(); tick();
 }
@@ -382,7 +385,7 @@ function renderStatus() {
   if (G.phase === 'bid') s = bidTurn() === U() ? 'Your call' : `${SEAT[bidTurn()]} is thinking…`;
   else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = 'Gathering the trick…'; else if (userControls(g.turn)) s = g.turn === U() ? 'Your turn: play a card' : `Play from ${SEAT[g.turn]}'s hand`; else s = `${SEAT[g.turn]} is playing…`; }
   else s = 'Board finished';
-  $('status').textContent = s;
+  $("status").innerHTML = s + (ui.signal && G.phase === "play" ? `<div class="sig">${symText(ui.signal)}</div>` : "");
 }
 function render() { if (!G) return; document.body.classList.toggle("classic", SET.style !== "modern"); renderBar(); renderTable(); renderBidbox(); renderStatus(); }
 

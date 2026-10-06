@@ -13,7 +13,13 @@ const vulOf = (board, seat) => { const v = VULT[(board - 1) % 16]; return v === 
 const dealerOf = b => (b - 1) % 4;
 const callTxt = c => c === 'P' ? 'Pass' : c === 'X' ? 'X' : c === 'XX' ? 'XX' : LV(c) + STR[ST(c)];
 const popc = x => { let n = 0; while (x) { x &= x - 1; n++; } return n; };
-function rnd(n) { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+/* random numbers; tests can fix the sequence with E.seed(n) so two versions see the same luck */
+let SEED = null;
+function seed(n) { SEED = n == null ? null : (n >>> 0) || 1; }
+function rnd(n) {
+  if (SEED !== null) { SEED ^= SEED << 13; SEED >>>= 0; SEED ^= SEED >>> 17; SEED ^= SEED << 5; SEED >>>= 0; return SEED % n; }
+  const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n;
+}
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 /* order-independent fingerprint of a deal (who holds which card) */
 function dealKey(deal) { const o = new Array(52); deal.forEach((h, s) => h.forEach(c => { o[c] = s; })); let k = ''; for (let i = 0; i < 52; i += 3) k += String.fromCharCode(65 + o[i] * 16 + (o[i + 1] ?? 0) * 4 + (o[i + 2] ?? 0)); return k; }
@@ -100,6 +106,7 @@ const CONVS = [
   { k: 'splinter', n: 'Splinters', d: 'A double jump in a new suit over a major opening = 4+ card support, a singleton or void in the bid suit, 12-15 points, game forcing. Shows slam potential.' },
   { k: 'texas', n: 'Texas Transfers', d: 'Over 1NT/2NT: 4♦ → 4♥, 4♥ → 4♠. A 6+ card major with game values; the strong hand (opener) declares.' },
   { k: 'leb', n: 'Lebensohl', d: 'After our 1NT is overcalled at the two level: 2NT forces opener to bid 3♣ (to sign off in a suit or as a slow show). A direct three-level suit is forcing. A direct 3NT denies a stopper; 2NT then 3NT shows one.' },
+  { k: "lav", n: "Lavinthal Discards", d: "Defensive carding. The suit you discard is the one you do not want; a high card asks for the higher of the two other suits, a low card for the lower (trumps and the suit led are left out). On partner's lead a high spot card encourages, the lowest discourages." },
   { k: 'invMin', n: 'Inverted Minors', off: 1, d: 'Over 1♣/1♦: a raise to 2 of the minor is strong (10+ points, 4+ support, no 4-card major) and forcing; a jump raise to 3 is preemptive (0-9 points, 5+ support).' },
   { k: 'drury', n: 'Drury', off: 1, d: 'A passed hand answers partner\'s third/fourth-seat 1♥/1♠ with 2♣ = 3+ card support and 10-12 points. Opener bids 2 of the major with a light opening, 4 of the major with a full one.' },
   { k: 'nmf', n: 'New Minor Forcing', off: 1, d: 'After 1m–1M–1NT, responder\'s 2 of the other minor is artificial and forcing (11+): it asks opener for 3-card support of responder\'s major or the other 4-card major.' },
@@ -130,6 +137,6 @@ const ALL_ON = Object.fromEntries(CONVS.map(c => [c.k, !c.off]));
 const SAYC = Object.fromEntries(CONVS.map(c => [c.k, ['gerber', 'j2nt', 'stayman'].includes(c.k)]));
 const convInfo = k => CONVS.find(c => c.k === k) || XINFO[k] || null;
 
-Object.assign(E, { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealerOf, callTxt, popc, rnd, shuffle, dealKey,
+Object.assign(E, { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealerOf, callTxt, popc, rnd, seed, shuffle, dealKey,
   aState, legalCalls, isLegal, auctionOver, contractOf, ev, scoreOf, imps, compare, CONVS, XINFO, ALL_ON, SAYC, convInfo });
 });

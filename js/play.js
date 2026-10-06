@@ -4,8 +4,9 @@
 const { S, R, pd, sideOf, isNum, ST, rnd, shuffle, popc } = E;
 
 /* ---- play state ---- */
-function newPlayState(hands, contract, auction) {
+function newPlayState(hands, contract, auction, cards) {
   return {
+    lav: cards ? [0, 1].map(i => !(cards[i] && cards[i].conv && cards[i].conv.lav === false)) : [true, true],
     hands: hands.map(h => h.slice()), auction: auction || [], contract, trump: contract.strain < 4 ? contract.strain : -1,
     dummy: pd(contract.decl), dummyShown: false, leader: (contract.decl + 1) % 4, turn: (contract.decl + 1) % 4,
     trick: [], history: [], tricks: [0, 0], voids: [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
@@ -72,12 +73,13 @@ function heurPlay(g, seat) {
       let gap = 0; for (let r = R(d[1]) + 1; r < R(d[0]); r++) { const k = ls * 13 + r; if (!pl.has(k) && !own.has(k)) gap++; }
       if (gap === 1 && isMaster(g, d[0], seat)) return d[1];
     }
-    if (pos === 3) return pdWin ? low : (bt[0] ?? low);
+    const pLed = trick[0].s === pd(seat) && !declSide;
+    if (pos === 3) return pdWin ? (pLed ? attitudeCard(g, seat, leg) : low) : (bt[0] ?? (pLed ? attitudeCard(g, seat, leg) : low));
     if (pos === 2) {
       const fourth = (seat + 1) % 4, fourthVis = g.dummyShown && fourth === g.dummy;
       if (pdWin) {
         if (fourthVis) { const fh = inSuit(g.hands[fourth], ls); const fv = fh.length ? fh : g.hands[fourth].filter(c => S(c) === tr); if (!fv.some(c => beats(c, wc, tr))) return low; }
-        else if (isMaster(g, wc, seat) || R(wc) >= 9) return low;
+        else if (isMaster(g, wc, seat) || R(wc) >= 9) return pLed ? attitudeCard(g, seat, leg) : low;
       }
       if (bt.length) {
         if (fourthVis) { const fh = inSuit(g.hands[fourth], ls); const top = fh.length ? desc(fh)[0] : -1; const over = bt.filter(c => top < 0 || R(c) > R(top)); return over.length ? over[0] : bt[0]; }
@@ -85,7 +87,7 @@ function heurPlay(g, seat) {
         for (let i = 1; i < d.length; i++) { let eq = true; for (let r = R(d[i]) + 1; r < R(pick); r++) { if (!pl.has(ls * 13 + r)) { eq = false; break; } } if (eq) pick = d[i]; else break; }
         return pick;
       }
-      return low;
+      return pLed ? attitudeCard(g, seat, leg) : low;
     }
     if (R(trick[0].c) >= 9 && bt.length) { const hon = bt.filter(c => R(c) >= 9); if (hon.length) return hon[0]; }
     if (bt.length && isMaster(g, desc(bt)[0], seat) && g.hands[seat].length <= 3) return desc(bt)[0];
@@ -96,6 +98,7 @@ function heurPlay(g, seat) {
     const safe = pdWin && (pos === 3 || isMaster(g, wc, seat));
     if (!safe) { const win = trumps.filter(c => beats(c, wc, tr)); if (win.length) return win[0]; }
   }
+  if (sideOf(seat) !== sideOf(g.contract.decl) && lavOn(g, seat)) { const c = lavDiscard(g, seat, leg, ls); if (c != null) return c; }
   return discard(g, seat, leg);
 }
 function discard(g, seat, leg) {
@@ -108,6 +111,86 @@ function discard(g, seat, leg) {
   }
   return best ?? asc(leg)[0];
 }
+/* ---- defensive signals ----
+   Attitude: on partner's lead a high spot card encourages, the lowest discourages.
+   Lavinthal discards: the suit discarded is not wanted; a high card asks for the higher of the two
+   remaining suits (trumps and the suit led left out), a low card for the lower one. */
+const DEFF = { lav: true, att: true, sig: true, dd: true };
+const lavOn = (g, seat) => DEFF.lav && (!g.lav || g.lav[sideOf(seat)] !== false);
+const HON = r => (r === 12 ? 4 : r === 11 ? 3 : r === 10 ? 2 : r === 9 ? 1 : 0);
+/* the suit this defender would like partner to lead (needs real strength there) */
+function wantSuit(g, seat, exclude) {
+  let best = -1, bs = 4.5;
+  for (let s = 0; s < 4; s++) {
+    if (s === g.trump || exclude.includes(s)) continue;
+    const cs = desc(inSuit(g.hands[seat], s)); if (!cs.length) continue;
+    const r = cs.map(R);
+    let sc = cs.filter(c => isMaster(g, c, seat)).length * 4 + r.reduce((a, x) => a + HON(x), 0) + cs.length * 0.4;
+    if (r[0] === 11 && r[1] === 10) sc += 2;
+    if (sc > bs) { bs = sc; best = s; }
+  }
+  return best;
+}
+function lavCandidates(g, x, ls) { return [0, 1, 2, 3].filter(s => s !== x && s !== g.trump && s !== ls); }
+function lavDiscard(g, seat, leg, ls) {
+  const want = wantSuit(g, seat, [ls]);
+  let best = -1, bs = 1e9;
+  for (let s = 0; s < 4; s++) {
+    if (s === g.trump || s === want) continue; const cs = inSuit(leg, s); if (!cs.length) continue;
+    const masters = cs.filter(c => isMaster(g, c, seat)).length;
+    // keep length where dummy has a long suit we must guard
+    const dl = g.dummyShown && sideOf(g.dummy) !== sideOf(seat) ? inSuit(g.hands[g.dummy], s).length : 0;
+    const sc = masters * 10 + R(desc(cs)[0]) - cs.length * 0.6 + (dl >= cs.length && dl >= 3 ? 6 : 0);
+    if (sc < bs) { bs = sc; best = s; }
+  }
+  if (best < 0) return null;
+  const cs = asc(inSuit(leg, best)).filter(c => !isMaster(g, c, seat)), pool = cs.length ? cs : asc(inSuit(leg, best));
+  const cand = lavCandidates(g, best, ls);
+  if (want >= 0 && cand.length === 2 && cand.includes(want)) {
+    const high = want === Math.max(...cand);
+    const spots = pool.filter(c => R(c) <= 6);
+    return high ? (spots.length ? spots[spots.length - 1] : pool[pool.length - 1]) : pool[0];
+  }
+  return pool[0];
+}
+/* attitude card when partner led the suit and we are not trying to win the trick */
+function attitudeCard(g, seat, follow) {
+  const ls = S(g.trick[0].c), mine = asc(follow);
+  if (mine.length < 2 || !DEFF.att) return mine[0];
+  const myAll = inSuit(g.hands[seat], ls).map(R);
+  const like = myAll.some(r => r >= 10 && isMaster(g, ls * 13 + r, seat)) || (myAll.includes(10) && myAll.includes(9)) ||
+    (g.trump >= 0 && ls !== g.trump && mine.length === 2 && inSuit(g.hands[seat], g.trump).length > 0);
+  if (!like) return mine[0];
+  const spots = mine.filter(c => R(c) <= 8 && !isMaster(g, c, seat));
+  return spots.length >= 2 ? spots[spots.length - 1] : mine[0];
+}
+/* what partner's cards told us: a suit to lead, or "continue the suit I led" */
+function readSignals(g, seat) {
+  const p = pd(seat), tr = g.trump;
+  for (let i = g.history.length - 1; i >= 0; i--) {
+    const t = g.history[i], ls = S(t.cards[0].c), pc = t.cards.find(x => x.s === p); if (!pc) continue;
+    if (S(pc.c) !== ls && S(pc.c) !== tr && lavOn(g, p)) {
+      const cand = lavCandidates(g, S(pc.c), ls), r = R(pc.c);
+      if (cand.length === 1) return { suit: cand[0], why: 'lav' };
+      if (cand.length === 2 && (r >= 5 || r <= 3)) return { suit: r >= 5 ? Math.max(...cand) : Math.min(...cand), why: 'lav' };
+    }
+    if (t.leader === seat && S(pc.c) === ls && t.w !== p) return { suit: R(pc.c) >= 5 && R(pc.c) <= 8 ? ls : -1, why: 'att', led: ls };
+  }
+  return null;
+}
+/* text for the screen: what a partner's card means */
+function signalText(g, seat, c) {
+  if (!g.trick.length) return null;
+  const ls = S(g.trick[0].c), s = S(c), r = R(c), SU = ['♣', '♦', '♥', '♠'], RT = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+  if (s !== ls && s !== g.trump && lavOn(g, seat)) {
+    const cand = lavCandidates(g, s, ls);
+    if (cand.length === 2 && (r >= 5 || r <= 3)) return `Partner discards ${RT[r]}${SU[s]} (Lavinthal): ${r >= 5 ? 'high — asks for the higher suit ' + SU[Math.max(...cand)] : 'low — asks for the lower suit ' + SU[Math.min(...cand)]}`;
+    if (cand.length === 1) return `Partner discards ${RT[r]}${SU[s]} (Lavinthal): asks for ${SU[cand[0]]}`;
+    return `Partner discards ${RT[r]}${SU[s]}: not interested in ${SU[s]}`;
+  }
+  if (s === ls && g.trick[0].s === pd(seat) && r <= 8) return `Partner plays ${RT[r]}${SU[s]} on your lead: ${r >= 5 ? 'high — encourages, continue the suit' : 'low — discourages'}`;
+  return null;
+}
 const bidSuitsOf = (g, seat) => g.auction.filter(e => e.seat === seat && isNum(e.call) && ST(e.call) < 4 && !(e.m && e.m.cv && e.m.cv !== 'twoOverOne')).map(e => ST(e.call));
 function leadCardFrom(cs, nt) {
   cs = desc(cs); const n = cs.length; if (n === 1) return cs[0];
@@ -115,33 +198,71 @@ function leadCardFrom(cs, nt) {
   if (r[0] === 12 && r[1] === 11) return cs[0];
   if (r[0] >= 9 && r[1] === r[0] - 1) return cs[0];
   if (n >= 3 && r[0] >= 8 && r[1] === r[0] - 2 && r[2] === r[0] - 1) return cs[1];
+  // interior sequence (KJ10x, AJ10x, Q109x, K109x): lead the top of the inner sequence
+  if (n >= 3 && r[1] >= 8 && r[2] === r[1] - 1 && r[0] >= r[1] + 2 && (nt || r[0] !== 12)) return cs[1];
   if (n === 2) return cs[0];
   if (r[0] >= 9) return n >= 4 ? cs[3] : cs[n - 1];
   return n >= 4 && nt ? cs[3] : cs[0];
 }
 function defLead(g, seat) {
   const H = g.hands[seat], tr = g.trump, nt = tr < 0, first = g.history.length === 0, p = pd(seat);
+  const decl = g.contract.decl, dm = g.dummy, lho = (seat + 1) % 4;
+  const D = g.dummyShown ? g.hands[dm] : [];
+  const declHasTrumps = tr >= 0 && !g.voids[decl][tr];
+  // a lead that gives a ruff-and-discard: declarer and dummy are both out of the suit and still hold trumps
+  const sluff = s => tr >= 0 && s !== tr && g.dummyShown && g.voids[decl][s] && !inSuit(D, s).length && (inSuit(D, tr).length > 0 || declHasTrumps);
+  const ruffable = s => tr >= 0 && s !== tr && ((g.dummyShown && !inSuit(D, s).length && inSuit(D, tr).length > 0) || (g.voids[decl][s] && declHasTrumps));
+  const avoid = new Set();
   if (!first) {
     const myLed = g.history.filter(t => t.leader === seat).map(t => S(t.cards[0].c));
-    const pLed = g.history.filter(t => t.leader === p).map(t => S(t.cards[0].c)).filter(s => s !== tr);
-    for (let s = 0; s < 4; s++) { if (s === tr) continue; const cs = desc(inSuit(H, s)); if (cs.length && isMaster(g, cs[0], seat) && (!nt || cs.length >= 2 || myLed.includes(s))) return cs[0]; }
+    // 1. cash the setting tricks when we can see them
+    const need = 14 - (g.contract.level + 6) - g.tricks[sideOf(seat)];
+    let sure = 0; const cash = [];
+    for (let s = 0; s < 4; s++) {
+      if (s === tr || ruffable(s)) continue;
+      const cs = desc(inSuit(H, s)); let k = 0; for (const c of cs) { if (isMaster(g, c, seat)) k++; else break; }
+      if (k) { sure += Math.min(k, nt ? k : Math.min(k, g.dummyShown ? Math.max(1, inSuit(D, s).length) : k)); cash.push(cs[0]); }
+    }
+    if (cash.length && (sure >= need || !nt)) return cash[0];
+    if (nt) for (const s of myLed) { const cs = desc(inSuit(H, s)); if (cs.length && isMaster(g, cs[0], seat)) return cs[0]; }
+    // 2. follow partner's signal
+    const sig = DEFF.sig ? readSignals(g, seat) : null;
+    if (sig && sig.suit >= 0 && sig.suit !== tr && !sluff(sig.suit)) { const cs = desc(inSuit(H, sig.suit)); if (cs.length) return isMaster(g, cs[0], seat) || cs.length <= 2 ? cs[0] : cs[cs.length - 1]; }
+    if (sig && sig.why === 'att' && sig.suit === -1) avoid.add(sig.led);
+    // 3. return partner's suit, 4. keep setting up our long suit in notrump
+    const pLed = g.history.filter(t => t.leader === p).map(t => S(t.cards[0].c)).filter(s => s !== tr && !sluff(s));
     if (pLed.length) { const cs = inSuit(H, pLed[pLed.length - 1]); if (cs.length) return desc(cs)[0]; }
-    if (nt && myLed.length) { const cs = inSuit(H, myLed[0]); if (cs.length) return leadCardFrom(cs, nt); }
+    if (nt && myLed.length && !avoid.has(myLed[0])) { const cs = inSuit(H, myLed[0]); if (cs.length) return leadCardFrom(cs, nt); }
   }
-  const ps = bidSuitsOf(g, p).filter(s => s !== tr);
+  const ps = bidSuitsOf(g, p).filter(s => s !== tr && !sluff(s));
   for (let i = ps.length - 1; i >= 0; i--) { const cs = inSuit(H, ps[i]); if (cs.length) { const d = desc(cs); return cs.length >= 3 && R(d[0]) >= 9 && R(d[0]) !== 12 ? d[d.length - 1] : d[0]; } }
   const oppS = new Set([...bidSuitsOf(g, (seat + 1) % 4), ...bidSuitsOf(g, (seat + 3) % 4)]);
-  let best = null, bs = -1e9; const myTr = tr >= 0 ? inSuit(H, tr).length : 0;
+  const slam = g.contract.level >= 6, myTr = tr >= 0 ? inSuit(H, tr).length : 0;
+  let best = null, bs = -1e9;
   for (let s = 0; s < 4; s++) {
     if (s === tr) continue; const cs = desc(inSuit(H, s)); if (!cs.length) continue; const r = cs.map(R);
     let sc = nt ? cs.length * 2 : cs.length;
     if (r.length >= 2 && r[0] >= 9 && r[1] === r[0] - 1) sc += 8 + r[0] / 4;
+    if (r.length >= 3 && r[1] >= 8 && r[2] === r[1] - 1 && r[0] >= r[1] + 2) sc += 4;
     if (r[0] === 12 && r[1] === 11) sc += 6;
-    if (!nt && r[0] === 12 && r[1] !== 11) sc -= 5;
+    if (!nt && r[0] === 12 && r[1] !== 11) sc -= slam && g.contract.level === 6 ? -2 : 5;
     if (!nt && r[0] === 11 && r[1] !== 10) sc -= 3;
-    if (!nt && cs.length === 1 && myTr >= 1 && myTr <= 3) sc += 4;
+    if (nt && r[0] === 12 && r[1] !== 11 && cs.length <= 3) sc -= 2;
+    if (!nt && cs.length === 1 && myTr >= 1 && myTr <= 3 && !slam) sc += 4;
     if (oppS.has(s)) sc -= 4;
+    if (sluff(s)) sc -= 30;
+    if (avoid.has(s)) sc -= 8;
+    if (g.dummyShown) {
+      const dh = desc(inSuit(D, s)).map(R);
+      if (dm === lho) { if (dh.length && dh[0] >= 9 && dh[0] < 12) sc += 3; }           // lead through dummy's honours
+      else { if (dh.includes(12) && (dh.includes(10) || dh.includes(11))) sc -= 6; else if (!dh.length || dh[0] < 9) sc += 2; } // not into a tenace, up to weakness
+    }
     if (sc > bs) { bs = sc; best = s; }
+  }
+  // a trump lead: when every side suit is a dangerous lead, against a grand slam, or after partner's penalty double
+  if (tr >= 0 && myTr >= 1 && myTr <= 3 && !inSuit(H, tr).some(c => R(c) >= 9)) {
+    const pX = g.auction.some(e => e.seat === p && e.call === 'X') && g.contract.dbl === 1;
+    if (bs < 0 || g.contract.level === 7 || pX) return asc(inSuit(H, tr))[0];
   }
   if (best === null) return asc(H)[0];
   return leadCardFrom(inSuit(H, best), nt);
@@ -417,9 +538,10 @@ const PLAY_OPT = { budget: 900, maxSamples: 40, ddTricks: 9 };
 function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;
   const leg = legalFor(g, seat); if (leg.length === 1) return leg[0];
-  if (g.hands[seat].length <= opt.ddTricks) { const r = ddChoose(g, seat, leg, opt); if (r != null) return r; }
+  const ddLim = opt.ddTricks + (DEFF.dd && sideOf(seat) !== sideOf(g.contract.decl) ? 1 : 0);
+  if (g.hands[seat].length <= ddLim) { const r = ddChoose(g, seat, leg, opt); if (r != null) return r; }
   return heurPlay(g, seat);
 }
 
-Object.assign(E, { DD, DDF, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
+Object.assign(E, { DD, DDF, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
 });
