@@ -102,7 +102,9 @@ function cands(x) {
     add('P', () => true, { t: 'Pass' });
     return L;
   }
-  if (pJust && rhoPass && (pm.tag === 'trm' || pm.tag === 'texas')) { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the transfer' }); return L; }
+  if (pJust && rhoPass && pm.tag === 'trm') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the transfer' }); return L; }
+  // Texas is completed even if the next opponent doubles it
+  if (pJust && (rhoPass || x.rhoCall === 'X') && pm.tag === 'texas') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the Texas transfer' }); return L; }
   if (pLast && pm.tag === 'wjs' && pJust) { add('P', () => true, { t: 'Passing partner\'s weak suit' }); return L; }
   /* Gambling 3NT: pass or correct */
   if (pJust && pm.tag === 'poc') { add(B(4, 1), h => h.len[1] >= 7, { t: 'My long suit is diamonds' }); add('P', () => true, { t: 'My long suit is clubs' }); return L; }
@@ -281,6 +283,15 @@ function cands(x) {
     const o = opening.call, os = ST(o), ol = LV(o);
     const fresh = opening === pLast && cleanAfter(auc, auc.indexOf(opening));
     if ((o === B(1, 4) || o === B(2, 4)) && rhoPass && fresh) { ntResponses(x, add, ol); return L; }
+    // Texas after interference: 4♦/4♥ stay transfers over a double or a 2-3 level overcall (not in their own suit)
+    if (o === B(1, 4) && opening === pLast && pJust && C.texas && C.texasInt && (x.rhoCall === 'X' || (isNum(x.rhoCall) && LV(x.rhoCall) <= 3 && ST(x.rhoCall) < 4))) {
+      const obs = isNum(x.rhoCall) ? ST(x.rhoCall) : -1;
+      // no transfer into their suit, and none using their suit as the transfer bid; then bid the major game directly
+      if (obs === 1 || obs === 2) add(B(4, 2), h => obs !== 2 && h.len[2] >= 6 && h.hcp >= 8 && h.hcp <= 15, { min: 8, len: { 2: 6 }, cv: "texasInt", t: "Natural: 6+ ♥, game (Texas not possible over their suit)" });
+      if (obs === 2 || obs === 3) add(B(4, 3), h => obs !== 3 && h.len[3] >= 6 && h.hcp >= 8 && h.hcp <= 15, { min: 8, len: { 3: 6 }, cv: "texasInt", t: "Natural: 6+ ♠, game (Texas not possible over their suit)" });
+      if (obs !== 1 && obs !== 2 && (x.rhoCall === "X" || B(4, 1) > x.rhoCall)) add(B(4, 1), h => h.len[2] >= 6 && h.hcp >= 8 && h.hcp <= 15, { min: 8, len: { 2: 6 }, tag: 'texas', to: B(4, 2), cv: 'texasInt', t: 'Texas transfer (after interference): 6+ ♥, game — opener bids 4♥' });
+      if (obs !== 2 && obs !== 3 && (x.rhoCall === "X" || B(4, 2) > x.rhoCall)) add(B(4, 2), h => h.len[3] >= 6 && h.hcp >= 8 && h.hcp <= 15, { min: 8, len: { 3: 6 }, tag: 'texas', to: B(4, 3), cv: 'texasInt', t: 'Texas transfer (after interference): 6+ ♠, game — opener bids 4♠' });
+    }
     if (o === B(1, 4) && opening === pLast && pJust && x.rhoCall === 'X') {
       add('XX', h => h.hcp >= 9, { min: 9, cv: 'runout', t: 'Redouble: 9+ HCP, we have the balance of strength' });
       for (const s of [3, 2, 1, 0]) add(B(2, s), h => h.len[s] >= 5 && h.hcp <= 8 && h.len[s] >= h.len[h.longest], { max: 8, len: { [s]: 5 }, tag: 'run', cv: 'runout', t: 'Escape: 5+ ' + SUIT[s] + ', weak' });
