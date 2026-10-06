@@ -34,3 +34,5 @@ powershell -ExecutionPolicy Bypass -File build.ps1
 | `js/app.js` | screen, game flow, settings |
 | `css/style.css` | look and layout |
 | `manifest.webmanifest`, `sw.js`, `icons/` | installable / offline app |
+| `guide.html` | settings guide in Turkish (downloadable from Settings) |
+| `js/photo.js` | reads a deal from a photo or screenshot, on the device |

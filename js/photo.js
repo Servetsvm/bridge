@@ -55,16 +55,20 @@ const Photo = (() => {
     const W = Math.round(img.naturalWidth * s), H = Math.round(img.naturalHeight * s);
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const cx = cv.getContext("2d", { willReadFrequently: true });
     cx.imageSmoothingQuality = "high"; cx.drawImage(img, 0, 0, W, H);
-    return { W, H, d: cx.getImageData(0, 0, W, H).data, img, s };
+    const d = cx.getImageData(0, 0, W, H).data;
+    cv.width = cv.height = 0; // free the canvas memory at once
+    return { W, H, d, img, s };
   }
   function loadImage(file) {
     return new Promise((res, rej) => {
       const url = URL.createObjectURL(file), img = new Image();
       img.onload = () => {
         const W = img.naturalWidth;
-        res(raster(img, W > 1400 ? 1400 / W : W < 520 ? 2 : 1));
+        const im = raster(img, W > 1400 ? 1400 / W : W < 520 ? 2 : 1);
+        URL.revokeObjectURL(url);
+        res(im);
       };
-      img.onerror = () => rej(new Error('This file could not be opened as a picture.'));
+      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("This file could not be opened as a picture.")); };
       img.src = url;
     });
   }
@@ -284,8 +288,12 @@ const Photo = (() => {
     const RT = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
     return 'N:' + hands.map(h => h ? [3, 2, 1, 0].map(s => h.filter(c => ((c / 13) | 0) === s).map(c => c % 13).sort((a, b) => b - a).map(r => RT[r]).join('')).join('.') : '-').join(' ');
   }
+  /* the picture is only held in memory while it is read; nothing is written anywhere and every copy is released at the end */
   async function read(file) {
     const im = await loadImage(file);
+    try { return readIm(im); } finally { im.d = null; if (im.img) { im.img.removeAttribute("src"); im.img = null; } }
+  }
+  function readIm(im) {
     let res = readTiles(im);
     const okT = res && toCards(res).filter(h => h && h.length === 13).length >= 3;
     if (!okT) {
@@ -294,6 +302,7 @@ const Photo = (() => {
       const f = Math.min(3, Math.max(1, 32 / Math.max(8, medH)));
       const im2 = f > 1.15 ? raster(im.img, im.s * f) : im;
       const r2 = readRecord(im2); if (r2) res = r2;
+      if (im2 !== im) im2.d = null;
     }
     if (!res) throw new Error('No hands found in this picture. Use the end-of-board screen of the app, or a hand record with ♠ ♥ ♦ ♣ lines.');
     const hands = toCards(res);

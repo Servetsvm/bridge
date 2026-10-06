@@ -286,3 +286,4 @@ body.classic .card{height:calc(var(--cw)*1.95)}
 @media (max-width:560px){.donebanner{font-size:15px;padding:8px 10px}}
 .okmsg{background:#e3f4e6;color:#14532d;border-radius:6px;padding:8px;font-size:14px}
 #status .sig{margin-top:3px;background:#fff6cf;color:#3d2f00;border-radius:6px;padding:4px 8px;font-size:14px;display:inline-block}
+.btn.guide{display:block;text-align:center;text-decoration:none}

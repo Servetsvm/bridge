@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bridge Table — Kullanım Kılavuzu</title>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--red:#c4122f;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:16px/1.55 "Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:28px;margin:0 0 4px}
+  h2{font-size:21px;margin:34px 0 8px;padding-top:12px;border-top:2px solid var(--felt)}
+  h3{font-size:17px;margin:20px 0 4px}
+  p{margin:6px 0}
+  .lead{color:var(--muted)}
+  code,.k{font-family:Consolas,ui-monospace,monospace;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:14px}
+  .k{font-family:inherit;font-weight:600}
+  .r{color:var(--red)}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  .note{background:#fff8dc;border-left:4px solid var(--gold);padding:8px 12px;border-radius:4px;margin:10px 0}
+  nav{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:16px 0}
+  nav a{color:var(--felt);text-decoration:none}
+  nav ol{margin:4px 0;padding-left:20px}
+  ol li,ul li{margin:3px 0}
+  @media print{h2{break-before:auto}nav{display:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Bridge Table — Kullanım Kılavuzu</h1>
+<p class="lead">Ayarlar (Settings) ekranındaki her seçeneğin ve üst çubuktaki düğmelerin açıklaması. Uygulamanın adresi: <code>https://servetsvm.github.io/bridge/</code></p>
+
+<nav><b>İçindekiler</b>
+<ol>
+<li><a href="#bar">Üst çubuk ve düğmeler</a></li>
+<li><a href="#practice">Practice a convention — konvansiyon alıştırması</a></li>
+<li><a href="#deal">Play a specific deal — el girme ve fotoğraftan okuma</a></li>
+<li><a href="#basic">Card style, seat, scoring, opponents, speed…</a></li>
+<li><a href="#card">Our convention card — konvansiyon kartı</a></li>
+<li><a href="#sync">Sync between devices — cihazlar arası eşitleme</a></li>
+<li><a href="#results">Results — sonuçlar ve istatistik</a></li>
+<li><a href="#install">Telefona ve PC'ye kurma</a></li>
+</ol></nav>
+
+<h2 id="bar">1. Üst çubuk ve düğmeler</h2>
+<table>
+<tr><th>Bölüm</th><th>Ne işe yarar</th></tr>
+<tr><td><span class="k">Board kutusu</span></td><td>Board numarası. Kırmızı kenarlar zonda (vulnerable) olan tarafı, <b>D</b> dağıtıcıyı gösterir.</td></tr>
+<tr><td><span class="k">Contract</span></td><td>Oynanan kontrat ve deklaran; altında “Us / Them” alınan löve sayıları. Dokununca bütün teklifler açıklamalarıyla görünür.</td></tr>
+<tr><td><span class="k">Today</span></td><td>Bugünkü toplam IMP (ya da MP ortalaması) ve son elin sonucu.</td></tr>
+<tr><td><span class="k">New Deal</span></td><td>Yeni el dağıtır. El ortasındaysan yanlışlıkla basmaman için ikinci dokunuşta onay ister (“Sure?”).</td></tr>
+<tr><td><span class="k">Undo</span></td><td>Son teklifini ya da son oynadığın kartı (robotların ondan sonraki hamleleriyle birlikte) geri alır. Üst üste basarak daha geriye gidebilirsin.</td></tr>
+<tr><td><span class="k">Hint</span></td><td>Yapay zekânın senin yerinde ne yapacağını gösterir: teklifte önerilen teklif ve anlamı, oyunda önerilen kart (yukarı kalkar).</td></tr>
+<tr><td><span class="k">Claim</span></td><td>Son 8 löve kaldığında açılır. Kalan löveler en iyi oyuna (çift kukla) göre hesaplanır ve el biter.</td></tr>
+<tr><td><span class="k">Settings</span> / <span class="k">Results</span></td><td>Ayarlar ve sonuç/istatistik ekranları.</td></tr>
+</table>
+<p><b>Teklif açıklaması:</b> Teklif tablosunda bir teklife dokun → anlamı ve konvansiyonun tanımı açılır. Tekrar dokununca kapanır. Altı noktalı çizgili teklifler konvansiyonludur.</p>
+<p><b>El sonunda:</b> dört el masada açık kalır, ortadaki sarı kutuda sonuç ve IMP yazar. Sarı kutuya dokununca ayrıntılar (robot masaları, normal kontrat, çift kukla sonucu), <span class="k">Next deal</span> ile yeni el.</p>
+<p><b>Savunmada partnerin işareti:</b> Robot partnerin ilk lövelerde işaret verirse (Lavinthal atışı ya da yüksek/küçük kart) ne istediği ekranın altında sarı bir satırda yazar.</p>
+
+<h2 id="practice">2. Practice a convention — konvansiyon alıştırması</h2>
+<p>Menüden bir konvansiyon seç (ör. <b>Cappelletti</b>). Bundan sonra gelen eller, senin (ya da partnerinin) o konvansiyonu kullanacağı şekilde seçilir. Seçtiğin konvansiyon kartında kapalıysa kendiliğinden açılır.</p>
+<ul>
+<li>Sık çıkan konvansiyonlar anında gelir; nadir olanlarda (Smolen, Gerber…) el aramak 2-3 saniye sürebilir.</li>
+<li>Uygun el bulunamazsa normal bir el gelir ve kısa bir uyarı çıkar.</li>
+<li>Normal ellere dönmek için <span class="k">Off — normal random deals</span>.</li>
+</ul>
+
+<h2 id="deal">3. Play a specific deal — el girme ve fotoğraftan okuma</h2>
+<h3>Fotoğraftan / ekran görüntüsünden</h3>
+<ol>
+<li><span class="k">Enter a deal</span> → <span class="k">📷 Read from a photo or screenshot</span> → galeriden resmi seç.</li>
+<li>Okunan dört el önizlemede görünür. Yanlış kart varsa alttaki kodu düzelt.</li>
+<li><span class="k">Play this deal</span>.</li>
+</ol>
+<p>Okuyabildiği resimler: oynadığın bridge uygulamasının <b>el sonu ekranı</b> (dört el açık, kutucuk kartlar) ve <b>el kaydı sayfaları</b> (her elde ♠ <span class="r">♥ ♦</span> ♣ satırları; 10 “T” ya da “10” yazılabilir).</p>
+<div class="note"><b>Gizlilik ve hafıza:</b> Resim sadece telefonunda okunur; hiçbir yere kaydedilmez, yüklenmez, uygulamada saklanmaz. Kartlar okunduktan hemen sonra resim hafızadan silinir. Eli başlatınca ya da pencereyi kapatınca okunan sonuç da silinir. (Galerindeki ekran görüntüsünü istersen kendin silebilirsin; uygulama ona dokunmaz.)</div>
+<h3>Elle yazarak</h3>
+<p>Her el: <code>maça.kupa.karo.sinek</code>, ör. <code>AKQ2.K73.J5.T942</code> (T = 10). Üç eli yazman yeterli; boş bıraktığın dördüncü el kalan kartlarla dolar. Ya da PBN kodu yapıştır: <code>N:AKQ2.K73.J5.T942 …</code> (Kuzey'den başlayıp saat yönünde dört el). <span class="k">Dealer</span> ve <span class="k">Vulnerable</span> ile dağıtıcı ve zonu seç.</p>
+
+<h2 id="basic">4. Temel ayarlar</h2>
+<table>
+<tr><th>Ayar</th><th>Açıklama</th></tr>
+<tr><td><span class="k">Card style</span></td><td><b>Classic tiles</b>: üst üste binmeyen beyaz kutucuk kartlar (kulüp uygulamaları gibi). <b>Modern fan</b>: yelpaze görünüm.</td></tr>
+<tr><td><span class="k">Your seat</span></td><td>Oturduğun yer (Kuzey, Doğu, Güney, Batı). Senin elin her zaman altta görünür. Kontratı senin tarafın alırsa partnerinin elini de sen oynarsın.</td></tr>
+<tr><td><span class="k">Scoring</span></td><td>Her el 8 robot masasında da oynanır. <b>IMP</b>: sonucun her masayla karşılaştırılıp IMP'e çevrilir, ortalaması alınır (takım puanlaması). <b>Matchpoints (%)</b>: kaç masadan iyi yaptığın yüzde olarak (çift turnuvası puanlaması).</td></tr>
+<tr><td><span class="k">Opponents' system</span></td><td><b>Same as ours</b>: rakipler senin kartınla oynar. <b>Standard (SAYC)</b>: rakipler sade standart sistem (Stayman, Jacoby 2NT, Gerber; Lavinthal yok). Rakibin teklifleri kendi sistemine göre açıklanır.</td></tr>
+<tr><td><span class="k">Robot speed</span></td><td>Robotların teklif ve kart hızı.</td></tr>
+<tr><td><span class="k">Bid explanations</span></td><td>Teklife dokununca açıklama gösterilsin mi.</td></tr>
+<tr><td><span class="k">Play a forced card automatically</span></td><td>Tek oynanabilir kartın varsa kendiliğinden oynanır.</td></tr>
+<tr><td><span class="k">Delete score history</span></td><td>Bu cihazdaki bütün skor geçmişini siler (geri alınamaz).</td></tr>
+</table>
+<p>Ayar değişiklikleri bir sonraki elde geçerli olur. Aynı el sana <b>asla ikinci kez</b> dağıtılmaz (“Replay this deal” ile bilerek tekrar oynamak hariç).</p>
+
+<h2 id="card">5. Our convention card — konvansiyon kartı</h2>
+<p>Temel sistem: 5'li majör, 15-17 1NT, zayıf ikiler, güçlü 2♣, Jacoby transfer, negatif ve takeout kontr. Aşağıdakiler tek tek açılıp kapatılabilir; ✓ işaretliler varsayılan olarak açıktır. “↔” ile gösterilen ikililer birbirinin alternatifidir, biri açılınca diğeri kapanır.</p>
+<table>
+<tr><th>Konvansiyon</th><th>Kısa açıklama</th></tr>
+<tr><td>✓ 2/1 Game Force</td><td>Majör açışa (pas geçmemiş) 2. seviyede yeni renk oyuna kadar forsing (12+). 1NT cevabı bir tur forsing (6-12).</td></tr>
+<tr><td>✓ RKCB 1430</td><td>4NT beş anahtar kartı sorar: 5♣ = 1/4, 5♦ = 3/0, 5♥ = 2 koz kızı yok, 5♠ = 2 + koz kızı.</td></tr>
+<tr><td>✓ Gerber</td><td>1NT/2NT'den hemen sonra 4♣ as sorar: 4♦ 0/4, 4♥ 1, 4♠ 2, 4NT 3.</td></tr>
+<tr><td>✓ Bergen Raises</td><td>1M açışa 3♣ = 4 kart destek 7-9, 3♦ = 4 kart 10-12, 3M = 4 kart 0-6 (engelleyici).</td></tr>
+<tr><td>✓ Cappelletti ↔ DONT</td><td>Rakibin 1NT açışına: X ceza 15+, 2♣ tek renk, 2♦ iki majör, 2♥ = ♥ + minör, 2♠ = ♠ + minör, 2NT iki minör.</td></tr>
+<tr><td>✓ Jacoby 2NT</td><td>Majör açışa 4+ destek, 13+, oyun forsu.</td></tr>
+<tr><td>✓ Weak Jump Shifts ↔ Strong Jump Shifts</td><td>Cevapçının tek sıçramalı yeni rengi: 6+ kart, 0-5 puan (oynamak için).</td></tr>
+<tr><td>✓ Stayman</td><td>1NT'ye 2♣ (2NT'ye 3♣) 4'lü majör sorar.</td></tr>
+<tr><td>✓ 4-Way Transfers</td><td>1NT'ye 2♦→♥, 2♥→♠, 2♠→♣, 2NT→♦.</td></tr>
+<tr><td>✓ Smolen</td><td>1NT–2♣–2♦ sonrası 5-4 majörle 3. seviyede 4'lü majör (güçlü el deklaran olur).</td></tr>
+<tr><td>✓ Michaels / Unusual 2NT</td><td>Rakibin rengine cue-bid = 5-5 iki renk; sıçramalı 2NT = en düşük iki boş renk.</td></tr>
+<tr><td>✓ Splinters</td><td>Majör açışa çift sıçrama = 4+ destek, o renkte tek kart/renksizlik, 12-15.</td></tr>
+<tr><td>✓ Texas Transfers</td><td>1NT/2NT'ye 4♦→4♥, 4♥→4♠ (6+ majör, oyun).</td></tr>
+<tr><td>✓ Lebensohl</td><td>1NT açışımıza 2. seviye araya girişte 2NT açanı 3♣'e zorlar; hızlı 3NT durdurucuyu inkâr eder.</td></tr>
+<tr><td>✓ Lavinthal Discards</td><td>Savunma işaretleri: atılan renk istenmez; yüksek kart kalan iki renkten yükseğini, küçük kart düşüğünü ister (koz ve oynanan renk hariç). Partnerin atağına yüksek küçük kart “devam”, en küçük “istemiyorum”.</td></tr>
+<tr><td>Inverted Minors</td><td>Minör açışa 2m = 10+ güçlü destek (forsing), 3m = engelleyici.</td></tr>
+<tr><td>Drury</td><td>Pas geçmiş el, partnerin 3./4. el majör açışına 2♣ = 3+ destek, 10-12.</td></tr>
+<tr><td>New Minor Forcing</td><td>1m–1M–1NT sonrası diğer minör = yapay forsing, majör uyumunu sorar.</td></tr>
+<tr><td>Fourth Suit Forcing</td><td>Üç renk söylendikten sonra dördüncü renk = yapay, oyun forsu.</td></tr>
+<tr><td>Ogust</td><td>Partnerin zayıf ikisine 2NT sorar: 3♣ min/kötü renk, 3♦ min/iyi, 3♥ max/kötü, 3♠ max/iyi, 3NT AKQ.</td></tr>
+<tr><td>Support Double</td><td>1m–(P)–1M–(araya giriş) sonrası açanın kontrü = tam 3 kart destek.</td></tr>
+<tr><td>Responsive Double</td><td>Partnerin takeout kontrüne rakip renk yükseltince kontr = 8+ ve iki boş renk.</td></tr>
+<tr><td>Strong Jump Shifts ↔ Weak Jump Shifts</td><td>Cevapçının sıçramalı yeni rengi 19+ güçlü el, şlem ilgisi.</td></tr>
+<tr><td>DONT ↔ Cappelletti</td><td>Rakibin 1NT'sine: X tek renk, 2♣ ♣+üst renk, 2♦ ♦+majör, 2♥ iki majör, 2♠ maça.</td></tr>
+<tr><td>Gambling 3NT</td><td>3NT açış = sağlam 7+ minör, dışarıda as/papaz yok.</td></tr>
+</table>
+
+<h2 id="sync">6. Sync between devices — cihazlar arası eşitleme</h2>
+<p>Skorlar, istatistikler ve görülmüş el listesi GitHub hesabındaki <b>gizli</b> bir dosyada tutulur; PC ve telefon kendiliğinden birleşir. İnternetsiz oynadığında her şey cihazda saklanır, internet gelince eşitlenir.</p>
+<ol>
+<li><code>github.com/settings/tokens/new?scopes=gist</code> sayfasını aç. <b>Expiration</b>: <i>No expiration</i>. Sadece <b>gist</b> işaretli olsun. <span class="k">Generate token</span>.</li>
+<li><code>ghp_…</code> ile başlayan kodu kopyala (GitHub bir kez gösterir).</li>
+<li>Uygulamada Settings → Sync bölümüne yapıştır → <span class="k">Connect</span>. Aynısını diğer cihazda da yap.</li>
+</ol>
+<div class="note">Bu kod bir şifre gibidir; kimseyle paylaşma. <span class="k">Disconnect</span> ile cihazdaki bağlantıyı kaldırabilirsin.</div>
+
+<h2 id="results">7. Results — sonuçlar ve istatistik</h2>
+<p><b>Statistics</b> sekmesi: Bugün, Bu hafta, Bu ay, Bu yıl ve Tümü için oynanan el sayısı, toplam ve el başı IMP (ya da MP %) ve toplam puan. <b>Boards</b> sekmesi: son 100 elin tarihi, kontratı, löve sayısı, puanı ve IMP/MP'si.</p>
+<p>El sonu ayrıntılarında: <b>Normal contract</b> (robot masalarında en çok oynanan kontrat), senin kontratın ve normal kontratın <b>çift kukla</b> sonucu (kusursuz oyunda kaç löve yapılır) ve 8 robot masasının tek tek sonuçları.</p>
+
+<h2 id="install">8. Telefona ve PC'ye kurma</h2>
+<ul>
+<li><b>Telefon:</b> Chrome'da adresi aç → ⋮ menüsü → <i>Ana ekrana ekle</i>. Simgeden açılır, internetsiz de çalışır.</li>
+<li><b>PC:</b> Chrome/Edge'de adres çubuğundaki “Yükle” simgesi.</li>
+<li><b>Güncelleme:</b> Yeni sürüm yayınlandığında uygulamayı iki kez kapatıp aç (ilk açılışta indirir, ikincide gösterir).</li>
+</ul>
+</main>
+</body>
+</html>

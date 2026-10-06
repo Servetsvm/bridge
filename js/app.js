@@ -401,7 +401,7 @@ function resultLine(e) {
   return `${conKey(c)} · ${e.tricks} tricks (${d >= 0 ? (d ? '+' + d : '=') : d}) · <span class="${e.us >= 0 ? 'pos' : 'neg'}">${fmtSigned(e.us)}</span>`;
 }
 function openOv(name, html) { ui.overlay = name; $('ov').innerHTML = `<div class="sheet">${html}</div>`; $('ov').hidden = false; }
-function closeOv() { ui.overlay = null; $('ov').hidden = true; }
+function closeOv() { if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } ui.overlay = null; $('ov').hidden = true; }
 function showEnd() {
   const e = G.result; if (!e) return;
   const f = G.field || { tables: [], done: false, dd: {} };
@@ -429,7 +429,9 @@ function showAuction() {
 function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">replaces ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
+  const guideUrl = /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname) ? "guide.html" : "https://servetsvm.github.io/bridge/guide.html";
   openOv('set', `<h2>Settings</h2>
+   <a class="btn gold guide" href="${guideUrl}" download="Bridge-Table-Guide.html" target="_blank" rel="noopener">📘 Download the settings guide (Turkish)</a>
    <div class="grp"><span>Practice a convention</span><select id="sPractice" class="sel"><option value="">Off — normal random deals</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.</div></div>
    <div class="grp"><span>Play a specific deal</span><button class="btn" id="sDeal">Enter a deal (from a photo or a hand record)</button></div>
    <div class="grp"><span>Card style</span>${seg("style", [["classic", "Classic tiles"], ["modern", "Modern fan"]], SET.style || "classic")}</div>
@@ -473,7 +475,7 @@ function showDealEntry(err) {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([val, l]) => `<button data-v="${val}" class="${String(cur) === String(val) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   openOv('deal', `<h2>Enter a deal</h2>
    <div class="row2"><label class="btn gold" for="dPhoto" role="button">📷 Read from a photo or screenshot</label><input type="file" id="dPhoto" accept="image/*" hidden></div>
-   <div class="muted">Works with the end-of-board screen of your bridge app (four open hands) and with hand records that list ♠ ♥ ♦ ♣ for each hand. The cards it reads appear below as a code — check them before you play. You can also type the hands: spades.hearts.diamonds.clubs, e.g. <b>AKQ2.K73.J5.T942</b> (T = 10). Leave one hand empty and it is filled with the remaining cards.</div>
+   <div class="muted">Works with the end-of-board screen of your bridge app (four open hands) and with hand records that list ♠ ♥ ♦ ♣ for each hand. The picture is only read on this device: it is not saved or uploaded, and it is cleared from memory as soon as the cards are read. The cards it reads appear below as a code — check them before you play. You can also type the hands: spades.hearts.diamonds.clubs, e.g. <b>AKQ2.K73.J5.T942</b> (T = 10). Leave one hand empty and it is filled with the remaining cards.</div>
    ${ui.photoMsg ? `<div class="${ui.photoErr ? "err" : "okmsg"}">${ui.photoMsg}</div>` : ""}
    ${ui.photoHands ? dealHtml(ui.photoHands.map(h => h || []), U()) : ""}
    <div class="grp"><span>PBN code (optional)</span><input id="dPbn" class="tok wide" placeholder="N:AKQ2.K73.J5.T942 ..." value="${v.pbn.replace(/"/g, '&quot;')}"></div>
@@ -513,6 +515,7 @@ function startEnteredDeal() {
     else if (empty.length) throw new Error('Enter at least three hands.');
     hands.forEach((h, s) => { if (h.length !== 13) throw new Error(SEAT[s] + ' has ' + h.length + ' cards, it needs 13.'); });
     let bn = 1; for (let b = 1; b <= 16; b++) if (dealerOf(b) === v.dealer && vulOf(b, 0) === (v.vul === 1 || v.vul === 3) && vulOf(b, 1) === (v.vul === 2 || v.vul === 3)) { bn = b; break; }
+    ui.photoHands = null; ui.photoMsg = null; ui.dealForm = null;
     closeOv(); newBoard(hands, bn);
   } catch (e) { showDealEntry(e.message); }
 }
