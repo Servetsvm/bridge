@@ -1,0 +1,37 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Bridge Table</title>
+<meta name="theme-color" content="#0c1a14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bridge">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Bitter:wght@600;700&family=Cinzel:wght@700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+
+<div id="app">
+  <div id="bar"></div>
+  <div id="table">
+    <div id="pos2" class="top"></div>
+    <div id="pos1"></div>
+    <div id="center"></div>
+    <div id="pos3"></div>
+  </div>
+  <div id="status"></div>
+  <div id="bidbox"></div>
+  <div id="pos0"></div>
+</div>
+<div id="ov" class="ov" hidden></div>
+
+<!-- engine modules (order matters): core, bidding, card play, virtual field -->
+<script src="js/core.js"></script>
+<script src="js/bidding.js"></script>
+<script src="js/play.js"></script>
+<script src="js/field.js"></script>
+<!-- screen and storage -->
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>

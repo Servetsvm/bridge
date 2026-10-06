@@ -1,0 +1,15 @@
+{
+  "name": "Bridge Table",
+  "short_name": "Bridge",
+  "description": "Play bridge against robots: any seat, full convention card, IMP/MP scoring against a virtual field.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c1a14",
+  "theme_color": "#0c1a14",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
