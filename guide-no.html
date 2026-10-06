@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bridge Table — Brukerveiledning</title>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--red:#c4122f;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:16px/1.55 "Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:28px;margin:0 0 4px}
+  h2{font-size:21px;margin:34px 0 8px;padding-top:12px;border-top:2px solid var(--felt)}
+  h3{font-size:17px;margin:20px 0 4px}
+  p{margin:6px 0}
+  .lead{color:var(--muted)}
+  code,.k{font-family:Consolas,ui-monospace,monospace;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:14px}
+  .k{font-family:inherit;font-weight:600}
+  .r{color:var(--red)}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  .note{background:#fff8dc;border-left:4px solid var(--gold);padding:8px 12px;border-radius:4px;margin:10px 0}
+  nav{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:16px 0}
+  nav a{color:var(--felt);text-decoration:none}
+  nav ol{margin:4px 0;padding-left:20px}
+  ol li,ul li{margin:3px 0}
+  @media print{nav{display:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Bridge Table — Brukerveiledning</h1>
+<p class="lead">Forklaring av alle valg under Settings og alle knappene i toppfeltet. Appen finnes på <code>https://servetsvm.github.io/bridge/</code> &nbsp;·&nbsp; <a href="guide-en.html">English</a> · <a href="guide.html">Türkçe</a></p>
+
+<nav><b>Innhold</b>
+<ol>
+<li><a href="#bar">Toppfeltet og knappene</a></li>
+<li><a href="#practice">Practice a convention — øve på en konvensjon</a></li>
+<li><a href="#deal">Play a specific deal — legge inn et spill eller lese et bilde</a></li>
+<li><a href="#basic">Kortstil, plass, tellemåte, motstandere, fart…</a></li>
+<li><a href="#card">Systemkortet vårt</a></li>
+<li><a href="#sync">Synkronisering mellom enheter</a></li>
+<li><a href="#results">Resultater og statistikk</a></li>
+<li><a href="#install">Installere på mobil og PC</a></li>
+</ol></nav>
+
+<h2 id="bar">1. Toppfeltet og knappene</h2>
+<table>
+<tr><th>Del</th><th>Hva den gjør</th></tr>
+<tr><td><span class="k">Spillnummer</span></td><td>Spillnummeret. Røde kanter viser hvem som er i faresonen, <b>D</b> viser hvem som giver.</td></tr>
+<tr><td><span class="k">Contract</span></td><td>Kontrakten og spilleføreren, med stikk tatt (“Us / Them”). Trykk for å se hele meldingsforløpet med forklaringer.</td></tr>
+<tr><td><span class="k">Today</span></td><td>Dagens sum i IMP (eller snitt i MP) og resultatet av siste spill.</td></tr>
+<tr><td><span class="k">New Deal</span></td><td>Gir et nytt spill. Midt i et spill spør den én gang til (“Sure?”), så du ikke mister spillet ved et uhell.</td></tr>
+<tr><td><span class="k">Undo</span></td><td>Angrer din siste melding eller ditt siste kort, sammen med robotenes trekk etterpå. Trykk igjen for å gå lenger tilbake.</td></tr>
+<tr><td><span class="k">Hint</span></td><td>Viser hva roboten ville gjort i din plass: foreslått melding med betydning, eller foreslått kort (det løftes i hånden).</td></tr>
+<tr><td><span class="k">Claim</span></td><td>Tilgjengelig når 8 eller færre stikk gjenstår. Resten avgjøres med perfekt (dobbel-dummy) spill, og spillet avsluttes.</td></tr>
+<tr><td><span class="k">Help</span></td><td>Åpner denne veiledningen (norsk, engelsk eller tyrkisk).</td></tr>
+<tr><td><span class="k">Settings</span> / <span class="k">Results</span></td><td>Innstillinger, og resultat-/statistikkskjermen.</td></tr>
+</table>
+<p><b>Meldingsforklaringer:</b> trykk på en melding i meldingstabellen for å se hva den betyr og hvilken konvensjon den hører til; trykk igjen for å lukke. Meldinger med prikket understrek er konvensjonelle.</p>
+<p><b>Når spillet er ferdig:</b> alle fire hender ligger åpne på bordet, og det gule feltet viser resultatet og IMP. Trykk på feltet for detaljer (robotbord, normalkontrakt, dobbel-dummy-resultat); <span class="k">Next deal</span> starter et nytt spill.</p>
+<p><b>Makkers signaler i forsvar:</b> når robotmakker signaliserer i de første stikkene (Lavinthal-avkast, eller høyt/lavt kort på ditt utspill), forteller en gul linje under bordet hva makker ber om.</p>
+
+<h2 id="practice">2. Practice a convention — øve på en konvensjon</h2>
+<p>Velg en konvensjon i menyen (f.eks. <b>Cappelletti</b>). Fra da av velges hvert nytt spill slik at du (eller makker) får bruke den. Er den slått av på kortet ditt, slås den på automatisk.</p>
+<ul>
+<li>Vanlige konvensjoner kommer med en gang; sjeldne (Smolen, Gerber…) kan ta 2-3 sekunder å finne.</li>
+<li>Finnes det ikke et passende spill raskt, får du et vanlig spill og en kort melding.</li>
+<li>Velg <span class="k">Off — normal random deals</span> for å gå tilbake til vanlige spill.</li>
+</ul>
+
+<h2 id="deal">3. Play a specific deal — spille et bestemt spill</h2>
+<h3>Fra et bilde eller en skjermdump</h3>
+<ol>
+<li><span class="k">Enter a deal</span> → <span class="k">📷 Read from a photo or screenshot</span> → velg bildet.</li>
+<li>De fire hendene som ble lest vises. Er et kort feil, rett det i koden under.</li>
+<li><span class="k">Play this deal</span>.</li>
+</ol>
+<p>Den leser <b>sluttbildet</b> i bridge-appen din (fire åpne hender tegnet som kortbrikker) og <b>spillestensiler</b> som viser ♠ <span class="r">♥ ♦</span> ♣ for hver hånd (tieren skrevet som “T” eller “10”).</p>
+<div class="note"><b>Personvern og minne:</b> bildet leses bare på enheten din. Det blir aldri lagret, lastet opp eller tatt vare på av appen, og det fjernes fra minnet så snart kortene er lest. Kortene som ble lest glemmes når du starter spillet eller lukker vinduet. (Skjermdumpen i galleriet ditt røres ikke — slett den selv om du vil.)</div>
+<h3>Skrive inn hendene</h3>
+<p>Hver hånd som <code>spar.hjerter.ruter.kløver</code>, f.eks. <code>AKQ2.K73.J5.T942</code> (T = 10). Tre hender holder — la den fjerde stå tom, så fylles den med de resterende kortene. Eller lim inn en PBN-kode: <code>N:AKQ2.K73.J5.T942 …</code> (fire hender med klokka fra Nord). Velg <span class="k">Dealer</span> (giver) og <span class="k">Vulnerable</span> (sone).</p>
+
+<h2 id="basic">4. Grunninnstillinger</h2>
+<table>
+<tr><th>Innstilling</th><th>Forklaring</th></tr>
+<tr><td><span class="k">Card style</span></td><td><b>Classic tiles</b>: flate hvite kortbrikker side om side, som i klubbens bridge-apper. <b>Modern fan</b>: kort i vifte.</td></tr>
+<tr><td><span class="k">Your seat</span></td><td>Hvor du sitter (Nord, Øst, Sør, Vest). Hånden din vises alltid nederst. Når din side spiller kontrakten, spiller du også makkers hånd.</td></tr>
+<tr><td><span class="k">Scoring</span></td><td>Hvert spill spilles også ved 8 robotbord. <b>IMP</b>: resultatet ditt sammenlignes med hvert bord, regnes om til IMP og snittes (lagtelling). <b>Matchpoints (%)</b>: prosent av bordene du slo (partelling).</td></tr>
+<tr><td><span class="k">Opponents' system</span></td><td><b>Same as ours</b>: motstanderne bruker ditt kort. <b>Standard (SAYC)</b>: et enkelt standardsystem (Stayman, Jacoby 2NT, Gerber; ikke Lavinthal). Meldingene deres forklares etter deres eget system.</td></tr>
+<tr><td><span class="k">Robot speed</span></td><td>Hvor fort robotene melder og spiller.</td></tr>
+<tr><td><span class="k">Bid explanations</span></td><td>Om trykk på en melding viser forklaringen.</td></tr>
+<tr><td><span class="k">Play a forced card automatically</span></td><td>Spiller ditt eneste lovlige kort for deg.</td></tr>
+<tr><td><span class="k">Delete score history</span></td><td>Sletter resultathistorikken på denne enheten (kan ikke angres).</td></tr>
+</table>
+<p>Endringer gjelder fra neste spill. Et spill blir <b>aldri gitt deg to ganger</b> (bortsett fra når du velger “Replay this deal”).</p>
+
+<h2 id="card">5. Systemkortet vårt</h2>
+<p>Grunnsystem: 5-korts major, 1NT 15-17, svake toere, sterk 2♣, Jacoby-overføringer, negativ og opplysningsdobling. Hver konvensjon under kan slås av og på; ✓ = på som standard. Par merket “↔” erstatter hverandre: slår du på den ene, slås den andre av.</p>
+<table>
+<tr><th>Konvensjon</th><th>Kort beskrivelse</th></tr>
+<tr><td>✓ 2/1 Game Force</td><td>Etter majoråpning er svarers nye farge på 2-trinnet (ikke passet hånd) utgangskrav (12+). 1NT er krav én runde (6-12).</td></tr>
+<tr><td>✓ RKCB 1430</td><td>4NT spør etter fem nøkkelkort: 5♣ = 1/4, 5♦ = 3/0, 5♥ = 2 uten trumfdame, 5♠ = 2 med trumfdame.</td></tr>
+<tr><td>✓ Gerber</td><td>Rett etter 1NT/2NT spør 4♣ etter ess: 4♦ 0/4, 4♥ 1, 4♠ 2, 4NT 3.</td></tr>
+<tr><td>✓ Bergen Raises</td><td>Over 1M: 3♣ = 4-korts støtte 7-9, 3♦ = 4-korts 10-12, 3M = 4-korts 0-6 (sperre).</td></tr>
+<tr><td>✓ Cappelletti ↔ DONT</td><td>Over motpartens 1NT: X straff 15+, 2♣ énfarget, 2♦ begge majorer, 2♥ = ♥ + en minor, 2♠ = ♠ + en minor, 2NT begge minorer.</td></tr>
+<tr><td>✓ Jacoby 2NT</td><td>Over majoråpning: 4+ støtte, 13+, utgangskrav.</td></tr>
+<tr><td>✓ Weak Jump Shifts ↔ Strong Jump Shifts</td><td>Svarers enkelthopp i ny farge: 6+ kort, 0-5 hp, for å spilles.</td></tr>
+<tr><td>✓ Stayman</td><td>2♣ over 1NT (3♣ over 2NT) spør etter 4-korts major.</td></tr>
+<tr><td>✓ 4-Way Transfers</td><td>Over 1NT: 2♦→♥, 2♥→♠, 2♠→♣, 2NT→♦.</td></tr>
+<tr><td>✓ Smolen</td><td>Etter 1NT–2♣–2♦, 5-4 i majorene med utgangsverdier: meld 4-kortsmajoren på 3-trinnet, så den sterke hånden blir spillefører.</td></tr>
+<tr><td>✓ Michaels / Unusual 2NT</td><td>Cue-bid i deres farge = 5-5 tofarget; hopp til 2NT = de to laveste umeldte fargene.</td></tr>
+<tr><td>✓ Splinters</td><td>Dobbelthopp over majoråpning = 4+ støtte, singleton eller renons i fargen, 12-15.</td></tr>
+<tr><td>✓ Texas Transfers</td><td>Over 1NT/2NT: 4♦→4♥, 4♥→4♠ (6+ major, utgang).</td></tr>
+<tr><td>✓ Lebensohl</td><td>Når vår 1NT blir innmeldt på 2-trinnet, tvinger 2NT åpner til 3♣; rask 3NT benekter stopper.</td></tr>
+<tr><td>✓ Lavinthal Discards</td><td>Forsvarssignaler: fargen du kaster er ikke ønsket; høyt kort ber om den høyeste av de to andre fargene, lavt kort om den laveste (trumf og utspilt farge holdes utenfor). På makkers utspill oppmuntrer et høyt småkort, det laveste avviser.</td></tr>
+<tr><td>Inverted Minors</td><td>Over minoråpning: 2m = sterk høyning, 10+ (krav); 3m = sperre.</td></tr>
+<tr><td>Drury</td><td>Passet hånd svarer på 1M i 3./4. hånd med 2♣ = 3+ støtte, 10-12.</td></tr>
+<tr><td>New Minor Forcing</td><td>Etter 1m–1M–1NT er den andre minoren kunstig og krav; spør etter majortilpasning.</td></tr>
+<tr><td>Fourth Suit Forcing</td><td>Når tre farger er meldt, er den fjerde fargen kunstig og utgangskrav.</td></tr>
+<tr><td>Ogust</td><td>Over makkers svake to spør 2NT: 3♣ min/dårlig farge, 3♦ min/god, 3♥ maks/dårlig, 3♠ maks/god, 3NT AKQ.</td></tr>
+<tr><td>Support Double</td><td>Etter 1m–(P)–1M–(innmelding) viser åpners dobling nøyaktig tre-korts støtte.</td></tr>
+<tr><td>Responsive Double</td><td>Etter makkers opplysningsdobling og deres høyning: dobling = 8+ med begge umeldte farger.</td></tr>
+<tr><td>Strong Jump Shifts ↔ Weak Jump Shifts</td><td>Svarers hopp i ny farge = 19+, sleminteresse.</td></tr>
+<tr><td>DONT ↔ Cappelletti</td><td>Over deres 1NT: X énfarget, 2♣ ♣ + høyere farge, 2♦ ♦ + major, 2♥ begge majorer, 2♠ spar.</td></tr>
+<tr><td>Gambling 3NT</td><td>3NT-åpning = solid 7+ korts minor uten ess eller konge ved siden.</td></tr>
+</table>
+
+<h2 id="sync">6. Synkronisering mellom enheter</h2>
+<p>Resultater, statistikk og listen over spill du har sett lagres i en <b>privat</b> fil på GitHub-kontoen din, så mobil og PC slås sammen automatisk. Uten nett lagres alt på enheten og synkroniseres når du er på nett igjen.</p>
+<ol>
+<li>Åpne <code>github.com/settings/tokens/new?scopes=gist</code>. <b>Expiration</b>: <i>No expiration</i>. Bare <b>gist</b> avkrysset. <span class="k">Generate token</span>.</li>
+<li>Kopier koden som starter med <code>ghp_…</code> (GitHub viser den bare én gang).</li>
+<li>I appen: Settings → Sync → lim inn → <span class="k">Connect</span>. Gjør det samme på den andre enheten.</li>
+</ol>
+<div class="note">Koden virker som et passord — del den aldri. <span class="k">Disconnect</span> fjerner den fra enheten.</div>
+
+<h2 id="results">7. Resultater og statistikk</h2>
+<p>Fanen <b>Statistics</b>: antall spill, sum og snitt per spill i IMP (eller MP %), og poengsum for i dag, denne uken, denne måneden, dette året og totalt. Fanen <b>Boards</b>: dato, kontrakt, stikk, score og IMP/MP for de siste 100 spillene.</p>
+<p>I detaljene etter spillet: <b>normalkontrakten</b> (den vanligste ved robotbordene), <b>dobbel-dummy</b>-resultatet for din kontrakt og normalkontrakten (stikk med perfekt spill), og resultatet ved hvert robotbord.</p>
+
+<h2 id="install">8. Installere på mobil og PC</h2>
+<ul>
+<li><b>Mobil:</b> åpne adressen i Chrome → ⋮-menyen → <i>Legg til på startskjermen</i>. Den åpnes fra ikonet og virker uten nett.</li>
+<li><b>PC:</b> “Installer”-ikonet i adressefeltet i Chrome eller Edge.</li>
+<li><b>Oppdateringer:</b> nye versjoner installerer seg selv neste gang du åpner appen.</li>
+</ul>
+</main>
+</body>
+</html>

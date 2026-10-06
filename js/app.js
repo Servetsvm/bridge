@@ -316,6 +316,7 @@ function renderBar() {
      <button class="btn" id="bUndo" ${UNDO.length ? "" : "disabled"}>Undo</button>
      <button class="btn gold" id="bHint">Hint</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>Claim</button>
+     <button class="btn" id="bHelp">Help</button>
      <button class="btn" id="bSet">Settings</button>
      <button class="btn" id="bRes">Results</button>
    </div>`;
@@ -429,9 +430,8 @@ function showAuction() {
 function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">replaces ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
-  const guideUrl = /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname) ? "guide.html" : "https://servetsvm.github.io/bridge/guide.html";
   openOv('set', `<h2>Settings</h2>
-   <a class="btn gold guide" href="${guideUrl}" download="Bridge-Table-Guide.html" target="_blank" rel="noopener">📘 Download the settings guide (Turkish)</a>
+   <button class="btn gold guide" id="bHelp2">📘 User guide — English · Norsk · Türkçe</button>
    <div class="grp"><span>Practice a convention</span><select id="sPractice" class="sel"><option value="">Off — normal random deals</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.</div></div>
    <div class="grp"><span>Play a specific deal</span><button class="btn" id="sDeal">Enter a deal (from a photo or a hand record)</button></div>
    <div class="grp"><span>Card style</span>${seg("style", [["classic", "Classic tiles"], ["modern", "Modern fan"]], SET.style || "classic")}</div>
@@ -446,6 +446,15 @@ function showSettings() {
    ${GitSync.enabled ? `<div><b>Connected.</b> ${syncState.msg || (GitSync.last ? "Last sync " + new Date(GitSync.last).toLocaleString() : "")}</div><div class="row2"><button class="btn gold" id="sNow">Sync now</button><button class="btn" id="sOff">Disconnect</button></div>` : `<div class="muted">1. Open <a href="https://github.com/settings/tokens/new?scopes=gist&description=Bridge%20Table" target="_blank" rel="noopener">github.com → new token</a> (scope: <b>gist</b> only, expiration: no expiration) and copy the token.<br>2. Paste it here on each device (PC and phone).</div><div class="row2"><input id="syncToken" type="password" autocomplete="off" placeholder="ghp_…" class="tok"><button class="btn gold" id="sSave">Connect</button></div>${syncState.msg ? `<div class="muted">${syncState.msg}</div>` : ""}`}</div>
    <div class="muted">Changes apply from the next deal.${Store.online ? ' Settings and scores are saved to your account.' : ' Scores are saved on this device.'} Every deal you get is new — a deal is never dealt to you twice.</div>
    <div class="row2"><button class="btn gold" id="oClose">Close</button><button class="btn" id="sReset">Delete score history</button></div>`);
+}
+/* ---- user guide in three languages: open it, or download it to read offline ---- */
+function showHelp() {
+  const base = /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname) ? "" : "https://servetsvm.github.io/bridge/";
+  const row = (file, name, flag) => `<div class="helprow"><span>${flag} <b>${name}</b></span><a class="btn" href="${base}${file}" target="_blank" rel="noopener">Open</a><a class="btn gold" href="${base}${file}" download="${file.replace(".html", "")}-bridge-table.html">Download</a></div>`;
+  openOv("help", `<h2>User guide</h2>
+   <div class="muted">Explains every button and every option in Settings, the convention card, reading a deal from a photo, and syncing your phone and PC. Download it to keep it on your device and read it offline.</div>
+   ${row("guide-en.html", "English", "🇬🇧")}${row("guide-no.html", "Norsk", "🇳🇴")}${row("guide.html", "Türkçe", "🇹🇷")}
+   <div class="row2"><button class="btn gold" id="oClose">Close</button></div>`);
 }
 /* ---- entering a deal (hand record, PBN, or the code Claude reads from a photo) ---- */
 const RANKS = { A: 12, K: 11, Q: 10, J: 9, T: 8, '9': 7, '8': 6, '7': 5, '6': 4, '5': 3, '4': 2, '3': 1, '2': 0 };
@@ -579,7 +588,8 @@ document.addEventListener('click', ev_ => {
     case "sDeal": showDealEntry(); break;
     case "dPlay": startEnteredDeal(); break;
     case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;
-    case 'bSet': showSettings(); break;
+    case "bHelp": case "bHelp2": showHelp(); break;
+    case "bSet": showSettings(); break;
     case 'bRes': showResults(); break;
     case 'oClose': closeOv(); break;
     case 'sReset': HIST = []; save(); showSettings(); render(); break;
@@ -606,7 +616,12 @@ function start(data) {
   syncNow(true);
   window.addEventListener("online", () => syncNow(true));
   // installable/offline app when served from a normal web address
-  if ('serviceWorker' in navigator && document.querySelector('link[rel=manifest]') && /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname)) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator && document.querySelector('link[rel=manifest]') && /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname)) {
+    // when a new version has been installed, switch to it right away (the game in progress is kept)
+    const hadController = !!navigator.serviceWorker.controller; let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !reloaded) { reloaded = true; save(); location.reload(); } });
+    navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});
+  }
 }
 window.claude?.hot?.snapshot?.(() => ({ SET, G, HIST, BOARD }));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});

@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bridge Table — User Guide</title>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--red:#c4122f;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:16px/1.55 "Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:28px;margin:0 0 4px}
+  h2{font-size:21px;margin:34px 0 8px;padding-top:12px;border-top:2px solid var(--felt)}
+  h3{font-size:17px;margin:20px 0 4px}
+  p{margin:6px 0}
+  .lead{color:var(--muted)}
+  code,.k{font-family:Consolas,ui-monospace,monospace;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:14px}
+  .k{font-family:inherit;font-weight:600}
+  .r{color:var(--red)}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  .note{background:#fff8dc;border-left:4px solid var(--gold);padding:8px 12px;border-radius:4px;margin:10px 0}
+  nav{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:16px 0}
+  nav a{color:var(--felt);text-decoration:none}
+  nav ol{margin:4px 0;padding-left:20px}
+  ol li,ul li{margin:3px 0}
+  @media print{nav{display:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Bridge Table — User Guide</h1>
+<p class="lead">What every option in Settings and every button in the top bar does. The app lives at <code>https://servetsvm.github.io/bridge/</code> &nbsp;·&nbsp; <a href="guide-no.html">Norsk</a> · <a href="guide.html">Türkçe</a></p>
+
+<nav><b>Contents</b>
+<ol>
+<li><a href="#bar">Top bar and buttons</a></li>
+<li><a href="#practice">Practice a convention</a></li>
+<li><a href="#deal">Play a specific deal — typing it in or reading a photo</a></li>
+<li><a href="#basic">Card style, seat, scoring, opponents, speed…</a></li>
+<li><a href="#card">Our convention card</a></li>
+<li><a href="#sync">Sync between devices</a></li>
+<li><a href="#results">Results and statistics</a></li>
+<li><a href="#install">Installing on phone and PC</a></li>
+</ol></nav>
+
+<h2 id="bar">1. Top bar and buttons</h2>
+<table>
+<tr><th>Part</th><th>What it does</th></tr>
+<tr><td><span class="k">Board box</span></td><td>The board number. Red edges mark the vulnerable side, <b>D</b> marks the dealer.</td></tr>
+<tr><td><span class="k">Contract</span></td><td>The contract and declarer, with tricks taken (“Us / Them”). Tap it to see the whole auction with explanations.</td></tr>
+<tr><td><span class="k">Today</span></td><td>Today's IMP total (or MP average) and the result of the last board.</td></tr>
+<tr><td><span class="k">New Deal</span></td><td>Deals a new board. In the middle of a board it asks once more (“Sure?”) so you cannot lose a board by accident.</td></tr>
+<tr><td><span class="k">Undo</span></td><td>Takes back your last call or card, together with the robots' moves after it. Tap again to go further back.</td></tr>
+<tr><td><span class="k">Hint</span></td><td>Shows what the robot would do in your place: the suggested call with its meaning, or the suggested card (it rises in your hand).</td></tr>
+<tr><td><span class="k">Claim</span></td><td>Available with 8 tricks or fewer left. The remaining tricks are settled by perfect (double-dummy) play and the board ends.</td></tr>
+<tr><td><span class="k">Help</span></td><td>Opens this guide (English or Turkish).</td></tr>
+<tr><td><span class="k">Settings</span> / <span class="k">Results</span></td><td>Settings, and the results/statistics screen.</td></tr>
+</table>
+<p><b>Bid explanations:</b> tap any call in the auction table to see what it means and which convention it belongs to; tap again to close. Calls with a dotted underline are conventional.</p>
+<p><b>End of the board:</b> all four hands stay open on the table and the yellow banner shows the result and IMPs. Tap the banner for details (robot tables, normal contract, double-dummy result); <span class="k">Next deal</span> starts a new board.</p>
+<p><b>Partner's signals on defence:</b> when your robot partner signals in the first tricks (a Lavinthal discard, or a high/low card on your lead), a yellow line under the table tells you what it asks for.</p>
+
+<h2 id="practice">2. Practice a convention</h2>
+<p>Pick a convention from the menu (e.g. <b>Cappelletti</b>). From then on every new deal is chosen so that you (or your partner) get to use it. If it is switched off in your card it is switched on automatically.</p>
+<ul>
+<li>Common conventions come up at once; rare ones (Smolen, Gerber…) can take 2-3 seconds to find.</li>
+<li>If no suitable deal is found quickly, you get a normal deal and a short notice.</li>
+<li>Choose <span class="k">Off — normal random deals</span> to go back to normal play.</li>
+</ul>
+
+<h2 id="deal">3. Play a specific deal</h2>
+<h3>From a photo or screenshot</h3>
+<ol>
+<li><span class="k">Enter a deal</span> → <span class="k">📷 Read from a photo or screenshot</span> → choose the picture.</li>
+<li>The four hands it read are shown. If a card is wrong, fix it in the code below.</li>
+<li><span class="k">Play this deal</span>.</li>
+</ol>
+<p>It reads the <b>end-of-board screen</b> of your bridge app (four open hands drawn as card tiles) and <b>hand records</b> that list ♠ <span class="r">♥ ♦</span> ♣ for each hand (ten written as “T” or “10”).</p>
+<div class="note"><b>Privacy and memory:</b> the picture is read on your device only. It is never saved, uploaded or kept by the app, and it is cleared from memory as soon as the cards are read. The cards that were read are forgotten when you start the deal or close the window. (The screenshot in your gallery is untouched — delete it yourself if you like.)</div>
+<h3>Typing the hands</h3>
+<p>Each hand as <code>spades.hearts.diamonds.clubs</code>, e.g. <code>AKQ2.K73.J5.T942</code> (T = 10). Three hands are enough — leave the fourth empty and it is filled with the remaining cards. Or paste a PBN code: <code>N:AKQ2.K73.J5.T942 …</code> (four hands clockwise from North). Choose <span class="k">Dealer</span> and <span class="k">Vulnerable</span>.</p>
+
+<h2 id="basic">4. Basic settings</h2>
+<table>
+<tr><th>Setting</th><th>Explanation</th></tr>
+<tr><td><span class="k">Card style</span></td><td><b>Classic tiles</b>: flat white card tiles side by side, like club bridge apps. <b>Modern fan</b>: overlapping fanned cards.</td></tr>
+<tr><td><span class="k">Your seat</span></td><td>Where you sit (North, East, South, West). Your hand is always at the bottom. When your side declares you play partner's hand too.</td></tr>
+<tr><td><span class="k">Scoring</span></td><td>Every board is also played at 8 robot tables. <b>IMP</b>: your score is compared with each table and converted to IMPs, then averaged (teams scoring). <b>Matchpoints (%)</b>: the percentage of tables you beat (pairs scoring).</td></tr>
+<tr><td><span class="k">Opponents' system</span></td><td><b>Same as ours</b>: the opponents use your card. <b>Standard (SAYC)</b>: a plain standard system (Stayman, Jacoby 2NT, Gerber; no Lavinthal). Their calls are explained by their own system.</td></tr>
+<tr><td><span class="k">Robot speed</span></td><td>How fast the robots bid and play.</td></tr>
+<tr><td><span class="k">Bid explanations</span></td><td>Whether tapping a call shows its explanation.</td></tr>
+<tr><td><span class="k">Play a forced card automatically</span></td><td>Plays your only legal card for you.</td></tr>
+<tr><td><span class="k">Delete score history</span></td><td>Deletes the score history on this device (cannot be undone).</td></tr>
+</table>
+<p>Changes apply from the next deal. A deal is <b>never dealt to you twice</b> (except when you choose “Replay this deal”).</p>
+
+<h2 id="card">5. Our convention card</h2>
+<p>Base system: 5-card majors, 15-17 1NT, weak twos, strong 2♣, Jacoby transfers, negative and takeout doubles. Each convention below can be switched on or off; ✓ = on by default. Pairs marked “↔” replace each other: switching one on switches the other off.</p>
+<table>
+<tr><th>Convention</th><th>Short description</th></tr>
+<tr><td>✓ 2/1 Game Force</td><td>Over a major opening, an unpassed responder's new suit at the two level is game forcing (12+). 1NT is forcing for one round (6-12).</td></tr>
+<tr><td>✓ RKCB 1430</td><td>4NT asks for five key cards: 5♣ = 1/4, 5♦ = 3/0, 5♥ = 2 without the trump queen, 5♠ = 2 with it.</td></tr>
+<tr><td>✓ Gerber</td><td>Directly over 1NT/2NT, 4♣ asks for aces: 4♦ 0/4, 4♥ 1, 4♠ 2, 4NT 3.</td></tr>
+<tr><td>✓ Bergen Raises</td><td>Over 1M: 3♣ = 4-card support 7-9, 3♦ = 4-card 10-12, 3M = 4-card 0-6 (preemptive).</td></tr>
+<tr><td>✓ Cappelletti ↔ DONT</td><td>Over their 1NT: X penalty 15+, 2♣ one-suiter, 2♦ both majors, 2♥ = ♥ + a minor, 2♠ = ♠ + a minor, 2NT both minors.</td></tr>
+<tr><td>✓ Jacoby 2NT</td><td>Over a major opening: 4+ support, 13+, game forcing.</td></tr>
+<tr><td>✓ Weak Jump Shifts ↔ Strong Jump Shifts</td><td>Responder's single jump in a new suit: 6+ cards, 0-5 HCP, to play.</td></tr>
+<tr><td>✓ Stayman</td><td>2♣ over 1NT (3♣ over 2NT) asks for a 4-card major.</td></tr>
+<tr><td>✓ 4-Way Transfers</td><td>Over 1NT: 2♦→♥, 2♥→♠, 2♠→♣, 2NT→♦.</td></tr>
+<tr><td>✓ Smolen</td><td>After 1NT–2♣–2♦, 5-4 in the majors with game values: bid the 4-card major at the three level, so the strong hand declares.</td></tr>
+<tr><td>✓ Michaels / Unusual 2NT</td><td>A cue bid of their suit = 5-5 two-suiter; a jump to 2NT = the two lowest unbid suits.</td></tr>
+<tr><td>✓ Splinters</td><td>Double jump over a major opening = 4+ support, singleton or void in that suit, 12-15.</td></tr>
+<tr><td>✓ Texas Transfers</td><td>Over 1NT/2NT: 4♦→4♥, 4♥→4♠ (6+ major, game).</td></tr>
+<tr><td>✓ Lebensohl</td><td>After our 1NT is overcalled at the two level, 2NT forces opener to 3♣; a fast 3NT denies a stopper.</td></tr>
+<tr><td>✓ Lavinthal Discards</td><td>Defensive signals: the suit discarded is not wanted; a high card asks for the higher of the two other suits, a low card for the lower (trumps and the suit led excluded). On partner's lead a high spot card encourages, the lowest discourages.</td></tr>
+<tr><td>Inverted Minors</td><td>Over a minor opening: 2m = strong raise, 10+ (forcing); 3m = preemptive.</td></tr>
+<tr><td>Drury</td><td>A passed hand answers a third/fourth-seat 1M with 2♣ = 3+ support, 10-12.</td></tr>
+<tr><td>New Minor Forcing</td><td>After 1m–1M–1NT, the other minor is artificial and forcing, asking about a major fit.</td></tr>
+<tr><td>Fourth Suit Forcing</td><td>After three suits have been bid, the fourth suit is artificial and game forcing.</td></tr>
+<tr><td>Ogust</td><td>Over partner's weak two, 2NT asks: 3♣ min/bad suit, 3♦ min/good, 3♥ max/bad, 3♠ max/good, 3NT AKQ.</td></tr>
+<tr><td>Support Double</td><td>After 1m–(P)–1M–(overcall), opener's double = exactly three-card support.</td></tr>
+<tr><td>Responsive Double</td><td>After partner's takeout double and their raise, double = 8+ with both unbid suits.</td></tr>
+<tr><td>Strong Jump Shifts ↔ Weak Jump Shifts</td><td>Responder's jump in a new suit = 19+, slam interest.</td></tr>
+<tr><td>DONT ↔ Cappelletti</td><td>Over their 1NT: X a one-suiter, 2♣ ♣ + a higher suit, 2♦ ♦ + a major, 2♥ both majors, 2♠ spades.</td></tr>
+<tr><td>Gambling 3NT</td><td>A 3NT opening = a solid 7+ card minor with no outside ace or king.</td></tr>
+</table>
+
+<h2 id="sync">6. Sync between devices</h2>
+<p>Scores, statistics and the list of deals you have seen are kept in a <b>private</b> file on your GitHub account, so your phone and PC merge automatically. Offline, everything is kept on the device and merges when it is online again.</p>
+<ol>
+<li>Open <code>github.com/settings/tokens/new?scopes=gist</code>. <b>Expiration</b>: <i>No expiration</i>. Only <b>gist</b> ticked. <span class="k">Generate token</span>.</li>
+<li>Copy the code starting with <code>ghp_…</code> (GitHub shows it only once).</li>
+<li>In the app: Settings → Sync → paste → <span class="k">Connect</span>. Do the same on your other device.</li>
+</ol>
+<div class="note">The code works like a password — never share it. <span class="k">Disconnect</span> removes it from the device.</div>
+
+<h2 id="results">7. Results and statistics</h2>
+<p><b>Statistics</b> tab: boards played, total and per-board IMPs (or MP %), and total points for Today, This week, This month, This year and All time. <b>Boards</b> tab: date, contract, tricks, score and IMP/MP of the last 100 boards.</p>
+<p>In the end-of-board details: the <b>normal contract</b> (the most common one at the robot tables), the <b>double-dummy</b> result of your contract and of the normal contract (tricks with perfect play), and each robot table's result.</p>
+
+<h2 id="install">8. Installing on phone and PC</h2>
+<ul>
+<li><b>Phone:</b> open the address in Chrome → ⋮ menu → <i>Add to Home screen</i>. It opens from its icon and works offline.</li>
+<li><b>PC:</b> the “Install” icon in the address bar of Chrome or Edge.</li>
+<li><b>Updates:</b> new versions install themselves the next time you open the app.</li>
+</ul>
+</main>
+</body>
+</html>
