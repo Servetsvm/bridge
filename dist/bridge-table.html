@@ -318,6 +318,11 @@ body.classic .card{height:calc(var(--cw)*1.95)}
 .quick button{border:1px solid #c7c9bd;background:#fff;border-radius:999px;padding:5px 10px;font-size:14px;color:#222}
 #nMsg{flex:3}
 .resscroll{overflow-x:auto}
+#center{cursor:pointer}
+.trick.lasttrick .card.tc{filter:saturate(.85);box-shadow:0 0 0 2px rgba(255,255,255,.5),0 3px 8px rgba(0,0,0,.4)}
+.trick.lasttrick .card.tc.win{box-shadow:0 0 0 3px var(--brass),0 3px 8px rgba(0,0,0,.4)}
+.lastlbl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);color:#fff;font-weight:700;font-size:13px;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.lasthint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.55);font-size:12px;white-space:nowrap;pointer-events:none}
 
 </style>
 
@@ -2544,7 +2549,7 @@ function playCard(seat, c) {
   // explain the signal when your robot partner (on defence) discards or encourages
   if (!userControls(seat) && g.history.length < 3 && sideOf(seat) === sideOf(U()) && sideOf(g.contract.decl) !== sideOf(U())) { const t = E.signalText(g, seat, c); if (t) ui.signal = t; }
   else if (userControls(seat) && !g.trick.length) ui.signal = null;
-  E.applyCard(g, seat, c); ui.hintCard = null;
+  E.applyCard(g, seat, c); ui.hintCard = null; ui.showLast = false;
   save(); render(); tick();
 }
 function collectTrick() {
@@ -2710,8 +2715,10 @@ function renderTable() {
   const C = $('center');
   if (G.phase === 'bid') C.innerHTML = auctionPanel();
   else if (G.phase === 'play') {
-    const tr = G.play.trick, w = tr.length === 4 ? E.trickWinner(tr, G.play.trump) : -1;
-    C.innerHTML = '<div class="trick">' + tr.map(x => cardHtml(x.c, 'tc p' + rel(x.s) + (x.s === w ? ' win' : ''))).join('') + '</div>';
+    // tap the table to look at the last finished trick; tap again (or wait) to come back
+    const H = G.play.history, last = ui.showLast && H.length ? H[H.length - 1] : null;
+    const tr = last ? last.cards : G.play.trick, w = last ? last.w : (tr.length === 4 ? E.trickWinner(tr, G.play.trump) : -1);
+    C.innerHTML = `<div class="trick${last ? " lasttrick" : ""}" id="trickArea">` + tr.map(x => cardHtml(x.c, "tc p" + rel(x.s) + (x.s === w ? " win" : ""))).join("") + (last ? `<div class="lastlbl">Last trick (${H.length}) — won by ${SEAT[last.w]}</div>` : (H.length && !tr.length ? `<div class="lasthint">Tap here to see the last trick</div>` : "")) + "</div>";
   } else {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
@@ -2915,6 +2922,10 @@ document.addEventListener('change', e => {
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {
+  if (G && G.phase === "play" && ev_.target.closest("#center") && !ev_.target.closest("[data-c].play,button")) {
+    if (G.play.history.length) { ui.showLast = !ui.showLast; clearTimeout(ui.lastTimer); if (ui.showLast) ui.lastTimer = setTimeout(() => { ui.showLast = false; render(); }, 4000); render(); }
+    return;
+  }
   const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
   if (t.id === 'toast') { ui.toast = null; render(); return; }

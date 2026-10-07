@@ -233,7 +233,7 @@ function playCard(seat, c) {
   // explain the signal when your robot partner (on defence) discards or encourages
   if (!userControls(seat) && g.history.length < 3 && sideOf(seat) === sideOf(U()) && sideOf(g.contract.decl) !== sideOf(U())) { const t = E.signalText(g, seat, c); if (t) ui.signal = t; }
   else if (userControls(seat) && !g.trick.length) ui.signal = null;
-  E.applyCard(g, seat, c); ui.hintCard = null;
+  E.applyCard(g, seat, c); ui.hintCard = null; ui.showLast = false;
   save(); render(); tick();
 }
 function collectTrick() {
@@ -399,8 +399,10 @@ function renderTable() {
   const C = $('center');
   if (G.phase === 'bid') C.innerHTML = auctionPanel();
   else if (G.phase === 'play') {
-    const tr = G.play.trick, w = tr.length === 4 ? E.trickWinner(tr, G.play.trump) : -1;
-    C.innerHTML = '<div class="trick">' + tr.map(x => cardHtml(x.c, 'tc p' + rel(x.s) + (x.s === w ? ' win' : ''))).join('') + '</div>';
+    // tap the table to look at the last finished trick; tap again (or wait) to come back
+    const H = G.play.history, last = ui.showLast && H.length ? H[H.length - 1] : null;
+    const tr = last ? last.cards : G.play.trick, w = last ? last.w : (tr.length === 4 ? E.trickWinner(tr, G.play.trump) : -1);
+    C.innerHTML = `<div class="trick${last ? " lasttrick" : ""}" id="trickArea">` + tr.map(x => cardHtml(x.c, "tc p" + rel(x.s) + (x.s === w ? " win" : ""))).join("") + (last ? `<div class="lastlbl">Last trick (${H.length}) — won by ${SEAT[last.w]}</div>` : (H.length && !tr.length ? `<div class="lasthint">Tap here to see the last trick</div>` : "")) + "</div>";
   } else {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
@@ -604,6 +606,10 @@ document.addEventListener('change', e => {
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {
+  if (G && G.phase === "play" && ev_.target.closest("#center") && !ev_.target.closest("[data-c].play,button")) {
+    if (G.play.history.length) { ui.showLast = !ui.showLast; clearTimeout(ui.lastTimer); if (ui.showLast) ui.lastTimer = setTimeout(() => { ui.showLast = false; render(); }, 4000); render(); }
+    return;
+  }
   const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
   if (t.id === 'toast') { ui.toast = null; render(); return; }

@@ -303,3 +303,8 @@ body.classic .card{height:calc(var(--cw)*1.95)}
 .quick button{border:1px solid #c7c9bd;background:#fff;border-radius:999px;padding:5px 10px;font-size:14px;color:#222}
 #nMsg{flex:3}
 .resscroll{overflow-x:auto}
+#center{cursor:pointer}
+.trick.lasttrick .card.tc{filter:saturate(.85);box-shadow:0 0 0 2px rgba(255,255,255,.5),0 3px 8px rgba(0,0,0,.4)}
+.trick.lasttrick .card.tc.win{box-shadow:0 0 0 3px var(--brass),0 3px 8px rgba(0,0,0,.4)}
+.lastlbl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.6);color:#fff;font-weight:700;font-size:13px;padding:4px 10px;border-radius:999px;white-space:nowrap}
+.lasthint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:rgba(255,255,255,.55);font-size:12px;white-space:nowrap;pointer-events:none}
