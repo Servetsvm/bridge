@@ -9,6 +9,8 @@ const Net = (() => {
   const st = { chat: [], unread: 0, on: false, host: false, guest: false, me: 'local', seat: 2, code: null, peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, savedG: null, msg: '', wake: null, want: 'partner' };
   const NAME_KEY = 'bridge-table-name';
   const myName = () => { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } };
+  // a random id for this tab (kept across reloads), so a host can recognise a returning player
+  const devTok = () => { try { let t = sessionStorage.getItem('bridge-table-tok'); if (!t) { t = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('bridge-table-tok', t); } return t; } catch (e) { return st.tok || (st.tok = Math.random().toString(36).slice(2)); } };
   const setName = n => { try { localStorage.setItem(NAME_KEY, n); } catch (e) {} };
   const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -78,11 +80,16 @@ const Net = (() => {
       const hs = SET.seat, away = st.away || (st.away = {});
       const free = [0, 1, 2, 3].filter(s => !st.seats[s]);
       // a player coming back after a dropped connection gets the seat that was kept for them
-      const back = d.seat != null && away[d.seat] ? +d.seat : null;
+      // (recognised by the device token, even before this side has noticed the old connection died)
+      const toks = st.toks || (st.toks = {});
+      const byTok = d.tok ? Object.keys(toks).find(k => toks[k] === d.tok && st.seats[k] && st.seats[k] !== 'host') : null;
+      const back = byTok != null ? +byTok : d.seat != null && away[d.seat] ? +d.seat : null;
+      if (back != null) { const old = st.conns.get(st.seats[back]); st.conns.delete(st.seats[back]); if (old && old !== conn) { try { old.close(); } catch (e) {} } }
       const pref = (d.want === 'partner' ? [(hs + 2) % 4] : d.want === 'opp' ? [(hs + 1) % 4, (hs + 3) % 4] : []).filter(s => free.includes(s));
       const s = back != null ? back : d.seat != null && free.includes(+d.seat) ? +d.seat : pref.length ? pref[0] : free[0];
       if (s == null) { conn.send({ t: 'full' }); setTimeout(() => conn.close(), 500); return; }
-      if (back != null) { clearTimeout(away[s].t); delete away[s]; st.conns.delete(st.seats[s]); }
+      if (back != null && away[s]) { clearTimeout(away[s].t); delete away[s]; }
+      if (d.tok) { for (const k in toks) if (toks[k] === d.tok) delete toks[k]; toks[s] = d.tok; }
       st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
       conn.send({ t: "welcome", seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
       addChat(null, st.names[s] + (back != null ? " is back" : " joined as " + SEAT[s]));
@@ -141,7 +148,7 @@ const Net = (() => {
       setTimeout(() => { if (!welcomed) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
       peer.on('error', e => { if (e.type === 'peer-unavailable') fail('No table with code ' + code + ' is open right now.'); });
       peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
-      conn.on('open', () => conn.send({ t: 'hello', name, want, seat: retry ? st.seat : undefined }));
+      conn.on('open', () => conn.send({ t: 'hello', name, want, tok: devTok(), seat: retry ? st.seat : undefined }));
       conn.on('data', d => {
         if (!d) return;
         if (d.t === 'welcome') {
