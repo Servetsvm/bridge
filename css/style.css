@@ -353,3 +353,11 @@ body.inlobby #pos0{display:none}
 .lobby .row2 .btn{font-size:16px;padding:10px}
 .lseat.req{background:#fff6d6;border-color:var(--brass,#c9a227)}
 .lseat.req .btn{padding:6px 10px}
+
+/* Results: tap a board to look back at it */
+tr.rev{cursor:pointer}
+tr.rev:hover td,tr.rev:active td{background:#f3efdd}
+.res.play td,.res.play th{text-align:center;padding:4px 6px}
+.res.play td.win{font-weight:800;background:#fff3c4}
+.res.play td.lead{text-decoration:underline;text-underline-offset:3px}
+.res.play .sym{font-size:1.15em}

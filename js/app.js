@@ -32,7 +32,7 @@ function loadSeen() { try { SEEN = new Set(JSON.parse(localStorage.getItem(SEEN_
 function saveSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify([...SEEN].slice(-30000))); } catch (e) {} }
 function save() {
   if (online() && Net.host) Net.broadcast();
-  const slim = HIST.map((h, i) => (i < HIST.length - 60 ? { ...h, deal: undefined, fieldList: undefined } : h));
+  const slim = HIST.map((h, i) => (i < HIST.length - 60 ? { ...h, deal: undefined, fieldList: undefined, auc: undefined, pl: undefined } : h));
   Store.saveLocal({ SET, G: guest() ? Net.st.savedG : (G && G.phase === "idle" ? ui.saved || null : G), HIST: slim, BOARD });
 }
 function load(d) {
@@ -252,6 +252,10 @@ function finishBoard() {
     e = { id: G.id, ts: Date.now(), board: G.board, seat: U(), c: { ...c }, tricks: dt, ns, us: sideOf(U()) === 0 ? ns : -ns };
   }
   e.deal = G.deal;
+  // the auction and the cards played trick by trick, for looking back at the board from Results
+  e.dealer = G.dealer;
+  e.auc = G.auction.map(a => [a.seat, a.call]);
+  if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
   G.result = e; G.phase = 'done';
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
@@ -373,11 +377,12 @@ function explHtml(e, prefix) {
   const m = e.m || {}, ci = m.cv ? E.convInfo(m.cv) : null;
   return `<b>${prefix || SEAT[e.seat] + ':'} ${callHtml(e.call)}</b> — ${symText(m.t)}${ci ? `<div class="cv"><span>${ci.n}</span>${symText(ci.d)}</div>` : ''}`;
 }
-function auctionTable(auction, phaseBid) {
-  const cols = [3, 0, 1, 2];
-  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(G.board, s) ? 'v' : ''} ${s === U() ? 'me' : ''}">${SEAT[s]}</th>`).join('') + '</tr></thead><tbody><tr>';
-  let col = cols.indexOf(G.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
-  auction.forEach((e, i) => { o += `<td><span class="c${i === ui.lastExpl ? ' sel' : ''}${e.m && e.m.cv ? ' cvb' : ''}" data-ai="${i}">${callHtml(e.call)}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
+// rv: a finished board from Results ({ board, dealer, seat, sel }): its calls are tapped with data-ri
+function auctionTable(auction, phaseBid, rv) {
+  const cols = [3, 0, 1, 2], board = rv ? rv.board : G.board, me = rv ? rv.seat : U(), sel = rv ? rv.sel : ui.lastExpl;
+  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}">${SEAT[s]}</th>`).join('') + '</tr></thead><tbody><tr>';
+  let col = cols.indexOf(rv ? rv.dealer : G.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
+  auction.forEach((e, i) => { o += `<td><span class="c${i === sel ? ' sel' : ''}${e.m && e.m.cv ? ' cvb' : ''}" ${rv ? 'data-ri' : 'data-ai'}="${i}">${callHtml(e.call)}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
   if (phaseBid) o += '<td>?</td>';
   return o + '</tr></tbody></table>';
 }
@@ -620,10 +625,44 @@ function showResults() {
     body = `<div class="resscroll"><table class="res"><thead><tr><th>Period</th><th class="n">Boards</th><th class="n">IMPs</th><th class="n">IMP/bd</th><th class="n">MP %</th><th class="n">Points</th></tr></thead><tbody>${per.map(p => `<tr><td>${p.name}</td><td class="n">${p.n}</td><td class="n">${p.scored ? fmtSigned(p.impSum) : "—"}</td><td class="n">${p.impAvg != null ? fmtSigned(p.impAvg) : "—"}</td><td class="n">${p.mpAvg != null ? p.mpAvg : "—"}</td><td class="n">${fmtSigned(p.pts)}</td></tr>`).join("")}</tbody></table></div>
      <div class="muted">Every board is also played at 10 expert robot tables. IMP: your result against each table, averaged (cross-IMPs). MP: the percentage of the field you beat.</div>`;
   } else {
-    const rows = HIST.slice(-100).reverse().map(e => `<tr><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.passed ? 'Pass' : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
-    body = `<div class="resscroll"><table class="res"><thead><tr><th>Date</th><th>Bd</th><th>Contract</th><th>Tr</th><th class="n">Score</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || "<tr><td colspan=\"7\">No boards played yet.</td></tr>"}</tbody></table></div>`;
+    const rows = HIST.slice(-100).reverse().map(e => `<tr class="rev" data-rev="${e.id}"><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.passed ? 'Pass' : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
+    body = `<div class="muted">Tap a board to see the auction and how it was played.</div><div class="resscroll"><table class="res"><thead><tr><th>Date</th><th>Bd</th><th>Contract</th><th>Tr</th><th class="n">Score</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || "<tr><td colspan=\"7\">No boards played yet.</td></tr>"}</tbody></table></div>`;
   }
   openOv('res', `<h2>Results</h2><div class="seg" data-seg="restab"><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">Statistics</button><button data-v="list" class="${tab === 'list' ? 'on' : ''}">Boards</button></div>${body}<div class="row2"><button class="btn gold" id="oClose">Close</button></div>`);
+}
+
+/* a finished board from Results: the four hands, the auction (tap a call for its meaning) and every trick */
+function showReview(id, sel) {
+  const e = HIST.find(h => h.id === id); if (!e) return;
+  ui.revId = id;
+  const dealer = e.dealer != null ? e.dealer : dealerOf(e.board);
+  const auc = (e.auc || []).map(([seat, call]) => ({ seat, call }));
+  const cards = sideCards();
+  auc.forEach((a, i) => { a.m = E.explainCall(auc.slice(0, i), a.seat, a.call, cards); });
+  const aucHtml = e.auc
+    ? `<div class="auction">${auctionTable(auc, false, { board: e.board, dealer, seat: e.seat, sel })}</div>` +
+      (sel != null && auc[sel] ? `<div class="expl">${explHtml(auc[sel])}</div>` : '<div class="muted tap">Tap a call to see what it means</div>')
+    : '<div class="muted">The auction was not saved for this board (played before this feature was added).</div>';
+  let playHtml = '';
+  if (e.pl && e.pl.length && e.c) {
+    const trump = e.c.strain < 4 ? e.c.strain : -1, decl = sideOf(e.c.decl);
+    const cardTxt = c => `${RTXT[R(c)]}${symHtml(S(c))}`;
+    let t1 = 0, t2 = 0;
+    const rows = e.pl.map((t, i) => {
+      const w = E.trickWinner(t.map(([s, c]) => ({ s, c })), trump), lead = t[0][0];
+      if (sideOf(w) === decl) t1++; else t2++;
+      const at = s => { const x = t.find(y => y[0] === s); return x ? `<td class="${s === w ? 'win' : ''}${s === lead ? ' lead' : ''}">${cardTxt(x[1])}</td>` : '<td></td>'; };
+      return `<tr><td>${i + 1}</td>${[0, 1, 2, 3].map(at).join('')}<td class="n">${t1}–${t2}</td></tr>`;
+    }).join('');
+    const rest = e.claimedAt != null || e.pl.length < 13 ? `<div class="muted">The remaining tricks were settled by claim.</div>` : '';
+    playHtml = `<div class="grp"><span>The play (underlined = led, bold = won the trick; tricks declarer–defence)</span>
+      <div class="resscroll"><table class="res play"><thead><tr><th>#</th>${[0, 1, 2, 3].map(s => `<th>${SEAT[s][0]}</th>`).join('')}<th class="n">Tricks</th></tr></thead><tbody>${rows}</tbody></table></div>${rest}</div>`;
+  } else if (!e.passed) playHtml = '<div class="muted">The play was not saved for this board (played before this feature was added).</div>';
+  openOv('rev', `<h2>Board ${e.board}</h2><div class="big">${resultLine(e)}</div>
+    ${e.deal ? dealHtml(e.deal, e.seat) : ''}
+    <div class="grp"><span>Auction</span>${aucHtml}</div>
+    ${playHtml}
+    <div class="row2"><button class="btn" id="oRevBack">Back to the list</button><button class="btn gold" id="oClose">Close</button></div>`);
 }
 
 /* ================= events ================= */
@@ -644,6 +683,10 @@ document.addEventListener('click', ev_ => {
     if (G.play.history.length) { ui.showLast = !ui.showLast; clearTimeout(ui.lastTimer); if (ui.showLast) ui.lastTimer = setTimeout(() => { ui.showLast = false; render(); }, 4000); render(); }
     return;
   }
+  // Results: open a finished board, tap its calls, or go back to the list
+  const rv = ev_.target.closest('[data-rev]'); if (rv) { ui.revSel = null; showReview(rv.dataset.rev); return; }
+  const ri = ev_.target.closest('[data-ri]'); if (ri) { const i = +ri.dataset.ri; showReview(ui.revId, ui.revSel === i ? null : i); ui.revSel = ui.revSel === i ? null : i; return; }
+  if (ev_.target.closest('#oRevBack')) { ui.resTab = 'list'; showResults(); return; }
   const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
   if (t.id === 'toast') { ui.toast = null; render(); return; }
