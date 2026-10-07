@@ -371,3 +371,10 @@ tr.rev:hover td,tr.rev:active td{background:#f3efdd}
 .rstat{text-align:center;font-weight:700;margin:6px 0 4px}
 .rctl{display:flex;gap:6px;justify-content:center}
 .rctl .btn{min-width:46px;font-size:17px}
+/* phones: tool buttons wrap onto a second row instead of scrolling sideways, and the table sits right
+   under the top bar (no empty space above it) while bidding and while playing */
+@media (max-width:560px){
+  #bar .tools{flex-wrap:wrap;overflow-x:visible}
+  #bar .tools .btn{flex:1 0 auto;padding:7px 8px}
+  #table{margin-top:0}
+}
