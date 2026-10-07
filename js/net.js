@@ -123,6 +123,13 @@ const Net = (() => {
   function sit(s) { if (st.guest) send({ t: 'sit', s }); }
   /* seat a player: back is the seat a returning player gets back, otherwise a free seat is chosen
      (the partner's or an opponent's seat as they asked, or any free one) */
+  // names are unique at a table: "Servet", "SERVET" and "Sérvet" count as the same name
+  const nameKey = n => String(n || '').trim().toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').replace(/\s+/g, '');
+  function nameTaken(n, except) {
+    const k = nameKey(n || 'Guest');
+    const used = Object.keys(st.names).filter(s => +s !== except).map(s => st.names[s]).concat(Object.values(st.pending || {}).map(p => p.d.name));
+    return used.some(u => nameKey(u) === k);
+  }
   function seatPlayer(conn, d, back) {
     const hs = SET.seat, away = st.away || (st.away = {}), toks = st.toks || (st.toks = {});
     if (back != null) { const old = st.conns.get(st.seats[back]); st.conns.delete(st.seats[back]); if (old && old !== conn) { try { old.close(); } catch (e) {} } }
@@ -141,6 +148,7 @@ const Net = (() => {
   // the host answers a join request
   function accept(id) {
     const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
+    if (nameTaken(p.d.name)) { try { p.conn.send({ t: 'nametaken' }); } catch (e) {} setTimeout(() => { try { p.conn.close(); } catch (e) {} }, 500); panelRefresh(); render(); return; }
     if (p.conn.open) seatPlayer(p.conn, p.d, null); else { panelRefresh(); render(); }
   }
   function decline(id) {
@@ -172,6 +180,7 @@ const Net = (() => {
       const back = byTok != null ? +byTok : d.seat != null && away[d.seat] ? +d.seat : null;
       // a new player waits until the host accepts them
       if (back == null) {
+        if (nameTaken(d.name)) { conn.send({ t: 'nametaken' }); setTimeout(() => conn.close(), 500); return; }
         (st.pending || (st.pending = {}))[conn.peer] = { conn, d };
         conn.send({ t: 'wait' });
         conn.on('close', () => { if (st.pending && st.pending[conn.peer]) { delete st.pending[conn.peer]; panelRefresh(); render(); } });
@@ -249,6 +258,7 @@ const Net = (() => {
         else if (d.t === "chat") gotChat(d.m);
         else if (d.t === "seat") { st.seat = d.seat; render(); }
         else if (d.t === "wait") { waiting = true; st.waiting = true; st.msg = 'Waiting for the host to accept you…'; showJoin(code); }
+        else if (d.t === "nametaken") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The name ' + name + ' is already used at this table. Choose another name.'; showJoin(code); }
         else if (d.t === "declined") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The host did not accept the request.'; showJoin(code); }
         else if (d.t === "kick") { st.rejoin = null; if (st.guest) leave('The host removed you from the table.'); else { st.msg = 'The host removed you from this table.'; showJoin(code); } }
         else if (d.t === "bye") { st.rejoin = null; if (st.guest) leave('The host closed the table.'); }
