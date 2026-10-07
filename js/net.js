@@ -75,13 +75,18 @@ const Net = (() => {
     if (!d || !d.t) return;
     const seatOf = id => +Object.keys(st.seats).find(s => st.seats[s] === id);
     if (d.t === 'hello') {
-      const hs = SET.seat, free = [0, 1, 2, 3].filter(s => !st.seats[s]);
+      const hs = SET.seat, away = st.away || (st.away = {});
+      const free = [0, 1, 2, 3].filter(s => !st.seats[s]);
+      // a player coming back after a dropped connection gets the seat that was kept for them
+      const back = d.seat != null && away[d.seat] ? +d.seat : null;
       const pref = (d.want === 'partner' ? [(hs + 2) % 4] : d.want === 'opp' ? [(hs + 1) % 4, (hs + 3) % 4] : []).filter(s => free.includes(s));
-      const s = pref.length ? pref[0] : free[0];
+      const s = back != null ? back : d.seat != null && free.includes(+d.seat) ? +d.seat : pref.length ? pref[0] : free[0];
       if (s == null) { conn.send({ t: 'full' }); setTimeout(() => conn.close(), 500); return; }
+      if (back != null) { clearTimeout(away[s].t); delete away[s]; st.conns.delete(st.seats[s]); }
       st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
       conn.send({ t: "welcome", seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
-      addChat(null, st.names[s] + " joined as " + SEAT[s]);
+      addChat(null, st.names[s] + (back != null ? " is back" : " joined as " + SEAT[s]));
+      ping();
       broadcast(); panelRefresh(); render(); tick();
       return;
     }
@@ -96,47 +101,94 @@ const Net = (() => {
     else if (d.t === 'card' && G.phase === 'play' && owner(G.play.turn) === conn.peer) playCard(G.play.turn, d.c);
     else if (d.t === 'next' && G.phase === 'done') newBoard();
   }
+  // a guest's connection dropped: keep the seat for 45 s (phones drop when the screen locks), then a robot takes over
   function drop(conn) {
+    if (st.conns.get(conn.peer) !== conn) return;
     const s = Object.keys(st.seats).find(k => st.seats[k] === conn.peer);
-    if (s != null) { addChat(null, (st.names[s] || SEAT[s]) + " left — a robot plays " + SEAT[s]); delete st.seats[s]; delete st.names[s]; }
     st.conns.delete(conn.peer);
-    if (st.host) { broadcast(); panelRefresh(); render(); tick(); }
+    if (s == null || !st.host) return;
+    const away = st.away || (st.away = {}), who = st.names[s] || SEAT[s];
+    addChat(null, who + " lost the connection — waiting for them to come back");
+    away[s] = { t: setTimeout(() => {
+      if (!away[s] || st.seats[s] !== conn.peer) return;
+      delete away[s]; delete st.seats[s]; delete st.names[s];
+      addChat(null, who + " did not come back — a robot plays " + SEAT[s]);
+      broadcast(); panelRefresh(); render(); tick();
+    }, 45000) };
+    broadcast(); panelRefresh(); render();
   }
   function stop() {
-    for (const c of st.conns.values()) { try { c.close(); } catch (e) {} }
-    try { st.peer && st.peer.destroy(); } catch (e) {}
+    for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
+    for (const a of Object.values(st.away || {})) clearTimeout(a.t); st.away = {};
+    const cs = [...st.conns.values()], pr = st.peer;   // close a moment later so the goodbye arrives first
+    setTimeout(() => { for (const c of cs) { try { c.close(); } catch (e) {} } try { pr && pr.destroy(); } catch (e) {} }, 500);
     wakeOff();
     Object.assign(st, { on: false, host: false, guest: false, me: 'local', peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, code: null, msg: '' });
     render(); tick();
   }
 
   /* ---- guest ---- */
-  async function join(code, name, want) {
+  // retry: reconnecting after a dropped connection (screen locked, app switched, network blip) — same seat, no join screen
+  async function join(code, name, want, retry) {
     setName(name);
-    st.msg = 'Connecting to table ' + code + '…'; showJoin(code);
+    if (!retry) { st.msg = 'Connecting to table ' + code + '…'; showJoin(code); }
     try {
       await loadLib();
       const peer = await new Promise((res, rej) => { const p = new Peer(); p.on('open', () => res(p)); p.on('error', e => rej(new Error('Could not reach the connection service (' + (e.type || 'error') + ').'))); });
       const conn = peer.connect(PREFIX + code, { reliable: true });
-      let welcomed = false;
-      const fail = msg => { try { peer.destroy(); } catch (e) {} if (!welcomed) { st.msg = msg; showJoin(code); } };
-      setTimeout(() => { if (!welcomed) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, 15000);
+      let welcomed = false, failed = false;
+      const fail = msg => { if (welcomed || failed) return; failed = true; try { peer.destroy(); } catch (e) {} if (retry) { retry(false); return; } st.msg = msg; showJoin(code); };
+      setTimeout(() => { if (!welcomed) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
       peer.on('error', e => { if (e.type === 'peer-unavailable') fail('No table with code ' + code + ' is open right now.'); });
-      conn.on('open', () => conn.send({ t: 'hello', name, want }));
+      peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
+      conn.on('open', () => conn.send({ t: 'hello', name, want, seat: retry ? st.seat : undefined }));
       conn.on('data', d => {
         if (!d) return;
         if (d.t === 'welcome') {
           welcomed = true; clearTimeout(timer);
-          Object.assign(st, { peer, conn, on: true, guest: true, host: false, me: peer.id, seat: d.seat, code, msg: "", savedG: st.savedG || G, chat: d.chat || [], unread: 0 });
-          closeOv(); wakeOn();
+          Object.assign(st, { peer, conn, on: true, guest: true, host: false, me: peer.id, seat: d.seat, code, msg: "", savedG: st.savedG || G, chat: d.chat || st.chat || [], unread: 0, rejoin: { code, name, want } });
+          if (retry) retry(true); else closeOv();
+          wakeOn(); ping();
         } else if (d.t === 'state') applyState(d.v);
         else if (d.t === "full") fail("That table is full.");
         else if (d.t === "chat") gotChat(d.m);
+        else if (d.t === "bye") { st.rejoin = null; if (st.guest) leave('The host closed the table.'); }
         else if (d.t === "hint" && G && d.id === G.id && G.phase === "play") { ui.hintCard = d.c; render(); }
       });
-      conn.on('close', () => { if (st.guest) leave('The host closed the table.'); });
-    } catch (e) { st.msg = e.message; showJoin(code); }
+      conn.on('close', () => { if (st.guest && st.conn === conn) lost(); });
+    } catch (e) { if (retry) retry(false); else { st.msg = e.message; showJoin(code); } }
   }
+  // the connection dropped: keep the table on screen and try to get back in for two minutes
+  function lost() {
+    if (st.reconnecting || !st.rejoin) { if (!st.reconnecting) leave('The connection to the table was lost.'); return; }
+    st.reconnecting = true; st.conn = null;
+    const until = Date.now() + 120000, r = st.rejoin;
+    const tryOnce = () => {
+      if (!st.guest) { st.reconnecting = false; return; }
+      if (Date.now() > until) { st.reconnecting = false; leave('Could not get back to the table. Open the invite link again to rejoin.'); return; }
+      flash('Connection lost — reconnecting…', 2500);
+      try { st.peer && st.peer.destroy(); } catch (e) {}
+      join(r.code, r.name, r.want, ok => { if (ok) { st.reconnecting = false; flash('Back at the table', 1500); } else setTimeout(tryOnce, 2500); });
+    };
+    tryOnce();
+  }
+  // a small message every 10 s keeps mobile networks from closing an idle connection
+  let pingT = null;
+  function ping() {
+    clearInterval(pingT);
+    pingT = setInterval(() => {
+      if (st.guest) { if (st.conn && st.conn.open) { try { st.conn.send({ t: 'ping' }); } catch (e) {} } }
+      else if (st.host) { for (const c of st.conns.values()) if (c.open) { try { c.send({ t: 'ping' }); } catch (e) {} } }
+      else clearInterval(pingT);
+    }, 10000);
+  }
+  // back from the lock screen or another app: reconnect at once if the line went dead meanwhile
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    if (st.guest && !st.reconnecting && !(st.conn && st.conn.open)) lost();
+    if ((st.guest || st.host) && (!st.wake || st.wake.released)) wakeOn();
+    if (st.host && st.peer && st.peer.disconnected && !st.peer.destroyed) { try { st.peer.reconnect(); } catch (e) {} }
+  });
   function applyState(v) {
     clearTimeout(timer);
     if (v.phase !== "done") HIST = HIST.filter(h => !(h.id === v.id && h.online)); // a finished board was taken back
@@ -160,7 +212,7 @@ const Net = (() => {
     try { st.peer && st.peer.destroy(); } catch (e) {}
     wakeOff();
     const back = st.savedG;
-    Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null });
+    Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null, rejoin: null, reconnecting: false });
     G = back; if (!G) newBoard(); else { render(); tick(); }
     if (msg) flash(msg, 3000);
   }

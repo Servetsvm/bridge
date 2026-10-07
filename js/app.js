@@ -204,7 +204,7 @@ function undo(who) {
   return true;
 }
 function makeCall(seat, call, m) {
-  if (guest()) { if (bidTurn() === seat && userControls(seat)) Net.send({ t: "call", call }); return; }
+  if (guest()) { if (bidTurn() === seat && userControls(seat)) { ui.selLvl = 0; ui.hintBid = null; Net.send({ t: "call", call }); } return; }
   if (G.phase !== "bid" || bidTurn() !== seat || !isLegal(G.auction, seat, call)) return;
   { const who = actor(seat); if (who !== "robot") pushUndo(who); }
   if (!m) m = E.explainCall(G.auction, seat, call, G.cards);
