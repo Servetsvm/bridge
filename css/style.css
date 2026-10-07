@@ -381,3 +381,19 @@ tr.rev:hover td,tr.rev:active td{background:#f3efdd}
 .tables{display:flex;flex-direction:column;gap:6px}
 .tables .lseat b{width:auto;min-width:52px}
 .lobby .helprow{display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+/* lobby and waiting room: each table drawn as a small card table with the players round it */
+.tbls{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.tbl{display:grid;grid-template-columns:1fr 1.25fr 1fr;grid-template-rows:auto auto auto;gap:6px;align-items:center;justify-items:center;background:#0f3d18;border-radius:12px;padding:8px}
+.tbl .tseat{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;color:#fff;min-width:0;max-width:100%;font-size:14px;line-height:1.2}
+.tbl .tseat small{font-size:11px;letter-spacing:.06em;text-transform:uppercase;opacity:.7}
+.tbl .tseat b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.tbl .tseat i{opacity:.75}
+.tbl .tseat em{font-size:11px;font-style:normal;color:#ffd76a}
+.tbl .tseat .btn{padding:4px 8px;font-size:12.5px;margin-top:2px}
+.tbl .tseat.n{grid-column:2;grid-row:1}.tbl .tseat.w{grid-column:1;grid-row:2}.tbl .tseat.e{grid-column:3;grid-row:2}.tbl .tseat.s{grid-column:2;grid-row:3}
+.tbl .tmid{grid-column:2;grid-row:2;background:#1f7a2e;border-radius:10px;min-height:96px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:8px;text-align:center;color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.12)}
+.tbl .tmid .tname{font-weight:800}
+.tbl .tmid .tstate{font-size:12px;opacity:.85}
+.tbl .tmid .muted{color:#e7efe5}
+.tbl .tmid .btn{padding:6px 10px}

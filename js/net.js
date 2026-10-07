@@ -34,7 +34,8 @@ const Net = (() => {
   /* who plays a seat: a human's id, or 'robot'. The declaring side's humans also play the dummy. */
   function owner(seat) {
     if (st.guest) return st.ctl ? st.ctl[seat] : 'robot';
-    const at = s => st.seats[s] || null;
+    // a player whose connection dropped keeps the seat, but a robot plays it until they are back
+    const at = s => (st.seats[s] && !(st.away && st.away[s]) ? st.seats[s] : null);
     if (G && G.phase === 'play' && G.play) { const d = G.play.contract.decl, dm = G.play.dummy; if (seat === d || seat === dm) return at(d) || at(dm) || 'robot'; }
     return at(seat) || 'robot';
   }
@@ -78,7 +79,7 @@ const Net = (() => {
   }
   // what the lobby sees of this table
   function tableInfo() {
-    return { t: 'info', k: st.slot ? st.slot.k : 0, host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0 };
+    return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0 };
   }
   function onSlotData(conn, d) {
     if (!d || !d.t) return;
@@ -112,10 +113,13 @@ const Net = (() => {
   // the lobby list, used on the start screen and in the Online panel
   function tablesHtml() {
     const L = st.tables;
-    const rows = !L ? '' : L.length ? L.map(t => {
-      const players = Object.values(t.names || {}).filter(Boolean);
-      return `<div class="lseat"><b>${t.online ? 'Online' : 'Alone'}</b><span>${esc(t.host)}'s table${t.online ? ' · ' + players.map(esc).join(', ') : ' · playing with robots'}</span><button class="btn gold" data-jt="${t.k}">Ask to join</button></div>`;
-    }).join('') : '<div class="muted">No other tables are open right now.</div>';
+    // each table is drawn as a table: the player's name or "Robot" at every side
+    const rows = !L ? '' : L.length ? `<div class="tbls">${L.map(t => {
+      const nm = t.names || {}, away = t.away || [];
+      const cells = [0, 1, 2, 3].map(s => nm[s] ? `<b>${esc(nm[s])}</b>${away.includes(s) ? '<em>away · robot plays</em>' : ''}` : '<i>Robot</i>');
+      const mid = `<div class="tname">${esc(t.host)}'s table</div><div class="tstate">${t.online ? 'online' : 'playing with robots'}${t.phase === 'lobby' ? ' · waiting to start' : t.board ? ' · board ' + t.board : ''}</div><button class="btn gold" data-jt="${t.k}">Ask to join</button>`;
+      return seatTable(cells, mid, 2);
+    }).join('')}</div>` : '<div class="muted">No other tables are open right now.</div>';
     return `<div class="tables">${rows}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? 'Looking for tables…' : L ? 'Refresh the list' : 'Show open tables'}</button></div>`;
   }
   // this player's own table goes online: they become its host (requests are accepted one by one)
@@ -152,7 +156,7 @@ const Net = (() => {
     broadcast(); panelRefresh(); render(); tick();
   }
   // a seated guest moves to another empty seat while the table waits for Start
-  function sit(s) { if (st.guest) send({ t: 'sit', s }); }
+  function sit(s) { if (st.guest) { send({ t: 'sit', s }); flash('Asked the host to move you to ' + SEAT[s], 2000); } }
   /* seat a player: back is the seat a returning player gets back, otherwise a free seat is chosen
      (the partner's or an opponent's seat as they asked, or any free one) */
   // names are unique at a table: "Servet", "SERVET" and "Sérvet" count as the same name
@@ -194,15 +198,12 @@ const Net = (() => {
   function onHostData(conn, d) {
     if (!d || !d.t) return;
     const seatOf = id => +Object.keys(st.seats).find(s => st.seats[s] === id);
+    // a seated player asks to move to an empty seat: the host decides (between boards or in the waiting room)
     if (d.t === 'sit') {
       const from = seatOf(conn.peer), to = +d.s;
-      if (G && G.phase === 'lobby' && !Number.isNaN(from) && to >= 0 && to < 4 && !st.seats[to]) {
-        st.seats[to] = st.seats[from]; st.names[to] = st.names[from]; delete st.seats[from]; delete st.names[from];
-        const toks = st.toks || {}; if (toks[from]) { toks[to] = toks[from]; delete toks[from]; }
-        try { conn.send({ t: 'seat', seat: to }); } catch (e) {}
-        addChat(null, st.names[to] + ' moved to ' + SEAT[to]);
-        broadcast(); panelRefresh(); render();
-      }
+      if (Number.isNaN(from) || !(to >= 0 && to < 4) || st.seats[to] || !G || !(G.phase === 'lobby' || G.phase === 'done')) { try { conn.send({ t: 'movedeclined' }); } catch (e) {} return; }
+      (st.moves || (st.moves = {}))[conn.peer] = { from, to };
+      flash((st.names[from] || SEAT[from]) + ' wants to move to ' + SEAT[to], 3000); panel(); render();
       return;
     }
     if (d.t === 'hello') {
@@ -236,21 +237,36 @@ const Net = (() => {
     else if (d.t === 'card' && G.phase === 'play' && owner(G.play.turn) === conn.peer) playCard(G.play.turn, d.c);
     else if (d.t === 'next' && G.phase === 'done') newBoard();
   }
-  // a guest's connection dropped: keep the seat for 45 s (phones drop when the screen locks), then a robot takes over
+  // a guest's connection dropped: a robot plays the seat at once, and the seat is kept for them for 10 minutes
+  // (they get it back without asking when they return)
   function drop(conn) {
     if (st.conns.get(conn.peer) !== conn) return;
     const s = Object.keys(st.seats).find(k => st.seats[k] === conn.peer);
     st.conns.delete(conn.peer);
     if (s == null || !st.host) return;
     const away = st.away || (st.away = {}), who = st.names[s] || SEAT[s];
-    addChat(null, who + " lost the connection — waiting for them to come back");
+    if (st.moves) delete st.moves[conn.peer];
+    addChat(null, who + ' lost the connection — a robot plays ' + SEAT[s] + ' until they are back');
     away[s] = { t: setTimeout(() => {
       if (!away[s] || st.seats[s] !== conn.peer) return;
-      delete away[s]; delete st.seats[s]; delete st.names[s];
-      addChat(null, who + " did not come back — a robot plays " + SEAT[s]);
+      delete away[s]; delete st.seats[s]; delete st.names[s]; if (st.toks) delete st.toks[s];
+      addChat(null, who + ' did not come back — the seat is free');
       broadcast(); panelRefresh(); render(); tick();
-    }, 45000) };
-    broadcast(); panelRefresh(); render();
+    }, 600000) };
+    broadcast(); panelRefresh(); render(); tick();
+  }
+  // the host answers a request to change seats
+  function moveAnswer(id, ok) {
+    const m = st.moves && st.moves[id]; if (!m) return; delete st.moves[id];
+    const c = st.conns.get(id);
+    if (ok && !st.seats[m.to] && st.seats[m.from] === id && G && (G.phase === 'lobby' || G.phase === 'done')) {
+      const from = m.from, to = m.to;
+      st.seats[to] = st.seats[from]; st.names[to] = st.names[from]; delete st.seats[from]; delete st.names[from];
+      const toks = st.toks || {}; if (toks[from]) { toks[to] = toks[from]; delete toks[from]; }
+      try { c && c.send({ t: 'seat', seat: to }); } catch (e) {}
+      addChat(null, st.names[to] + ' moved to ' + SEAT[to]);
+    } else { try { c && c.send({ t: 'movedeclined' }); } catch (e) {} }
+    broadcast(); panelRefresh(); render(); tick();
   }
   function stop() {
     for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
@@ -291,6 +307,7 @@ const Net = (() => {
         else if (d.t === "full") fail("That table is full.");
         else if (d.t === "chat") gotChat(d.m);
         else if (d.t === "seat") { st.seat = d.seat; render(); }
+        else if (d.t === "movedeclined") flash('The host did not agree to the move', 2500);
         else if (d.t === "wait") { waiting = true; st.waiting = true; st.msg = 'Waiting for the host to accept you…'; showJoin(code); }
         else if (d.t === "nametaken") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The name ' + name + ' is already used at this table. Choose another name.'; showJoin(code); }
         else if (d.t === "declined") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The host did not accept the request.'; showJoin(code); }
@@ -396,12 +413,15 @@ const Net = (() => {
   /* ---- screens ---- */
   // players asking to join this table, each with Accept / Decline
   function pendHtml() {
-    const pend = Object.entries(st.pending || {});
-    return pend.length ? `<div class="grp"><span>Asking to join</span>${pend.map(([id, p]) => `<div class="helprow"><span><b>${esc(String(p.d.name || 'Guest').slice(0, 20))}</b> ${p.d.want === 'opp' ? '(opponent)' : '(partner)'}</span><span><button class="btn gold" data-accept="${esc(id)}">Accept</button> <button class="btn" data-decline="${esc(id)}">Decline</button></span></div>`).join('')}</div>` : '';
+    const pend = Object.entries(st.pending || {}), mv = Object.entries(st.moves || {});
+    const moves = mv.length ? `<div class="grp"><span>Asking to change seats</span>${mv.map(([id, m]) => `<div class="helprow"><span><b>${esc(st.names[m.from] || SEAT[m.from])}</b> ${SEAT[m.from]} → ${SEAT[m.to]}</span><span><button class="btn gold" data-mva="${esc(id)}">Accept</button> <button class="btn" data-mvd="${esc(id)}">Decline</button></span></div>`).join('')}</div>` : '';
+    const join = pend.length ? `<div class="grp"><span>Asking to join</span>${pend.map(([id, p]) => `<div class="helprow"><span><b>${esc(String(p.d.name || 'Guest').slice(0, 20))}</b> ${p.d.want === 'opp' ? '(opponent)' : '(partner)'}</span><span><button class="btn gold" data-accept="${esc(id)}">Accept</button> <button class="btn" data-decline="${esc(id)}">Decline</button></span></div>`).join('')}</div>` : '';
+    return moves + join;
   }
   function panel() {
     if (st.guest) {
       openOv('net', `<h2>Online table ${esc(st.code)}</h2><div>You sit <b>${SEAT[st.seat]}</b>. The host's device runs the table; robots fill the empty seats.</div>
+        ${G && (G.phase === 'lobby' || G.phase === 'done') ? `<div class="grp"><span>Move to another seat (the host decides)</span><div class="row2">${[0, 1, 2, 3].filter(s => s !== st.seat && !(st.names || {})[s]).map(s => `<button class="btn" data-sit="${s}">${SEAT[s]}</button>`).join('') || '<span class="muted">No free seat</span>'}</div></div>` : ''}
         <div class="row2"><button class="btn" id="nLeave">Leave the table</button><button class="btn gold" id="oClose">Close</button></div>`);
       return;
     }
@@ -444,6 +464,8 @@ const Net = (() => {
     if (t.dataset.kick != null) { kick(+t.dataset.kick); return; }
     if (t.dataset.accept) { accept(t.dataset.accept); return; }
     if (t.dataset.decline) { decline(t.dataset.decline); return; }
+    if (t.dataset.mva) { moveAnswer(t.dataset.mva, true); return; }
+    if (t.dataset.mvd) { moveAnswer(t.dataset.mvd, false); return; }
     if (t.dataset.jt) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jt); st.offer = tb || null; st.msg = ''; showJoin('room-' + t.dataset.jt); return; }
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {

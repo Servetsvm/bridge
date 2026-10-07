@@ -413,14 +413,23 @@ function lobbyG() {
   const bn = BOARD + 1;
   return { id: "lobby-" + Date.now().toString(36), board: bn, dealer: dealerOf(bn), deal: [[], [], [], []], auction: [], phase: "lobby", play: null, result: null, claimed: false, field: null, cards: sideCards() };
 }
+/* a small card table: who sits at each side (cells by seat) and something on the felt in the middle;
+   bottom: the seat drawn at the bottom */
+function seatTable(cells, mid, bottom) {
+  const pos = s => ["s", "w", "n", "e"][(s - bottom + 4) % 4];
+  return `<div class="tbl">${[0, 1, 2, 3].map(s => `<div class="tseat ${pos(s)}"><small>${SEAT[s]}</small>${cells[s]}</div>`).join("")}<div class="tmid">${mid}</div></div>`;
+}
+// the waiting room of an online table, drawn as the table itself
 function lobbyHtml() {
-  const nm = Net.st.names || {}, me = U();
-  const order = [2, 3, 0, 1].map(r => (me + r) % 4);   // partner at the top, you near the bottom
-  const row = s => { const who = nm[s]; const free = !who; return `<div class="lseat${s === me ? " me" : ""}"><b>${SEAT[s]}</b><span>${who ? esc(who) + (s === me ? " (you)" : "") : "Empty — a robot plays"}</span>${free && guest() ? `<button class="btn" data-sit="${s}">Sit here</button>` : ""}${!free && !guest() && s !== me ? `<button class="btn" data-kick="${s}">Remove</button>` : ""}</div>`; };
-  const pend = guest() ? [] : Object.entries(Net.st.pending || {});
-  const req = pend.map(([id, p]) => `<div class="lseat req"><b>Join?</b><span>${esc(String(p.d.name || "Guest").slice(0, 20))} ${p.d.want === "opp" ? "(opponent)" : "(partner)"}</span><button class="btn gold" data-accept="${esc(id)}">Accept</button><button class="btn" data-decline="${esc(id)}">Decline</button></div>`).join("");
-  return `<div class="lobby"><h3>Online table</h3>${req}${order.map(row).join("")}
-    ${guest() ? `<div class="muted">Tap “Sit here” to change seats. The host starts the game.</div>` : `<div class="row2"><button class="btn" id="bNet">Share link</button><button class="btn new" id="bStart">Start</button></div>`}</div>`;
+  const nm = Net.st.names || {}, me = U(), away = Net.st.away || {};
+  const cell = s => {
+    const who = nm[s];
+    if (!who) return `<i>Robot</i>${guest() ? `<button class="btn" data-sit="${s}">Sit here</button>` : ""}`;
+    return `<b>${esc(who)}${s === me ? " (you)" : ""}</b>${away[s] ? "<em>away · robot plays</em>" : ""}${!guest() && s !== me ? `<button class="btn" data-kick="${s}">Remove</button>` : ""}`;
+  };
+  const mid = guest() ? `<div class="muted">Waiting for the host to start.<br>“Sit here” asks the host to move you.</div>`
+    : `<button class="btn new" id="bStart">Start</button><button class="btn" id="bNet">Online</button>`;
+  return `<div class="lobby"><h3>Online table</h3>${guest() ? "" : Net.pendHtml()}${seatTable([0, 1, 2, 3].map(cell), mid, me)}</div>`;
 }
 function renderTable() {
   for (let seat = 0; seat < 4; seat++) {
