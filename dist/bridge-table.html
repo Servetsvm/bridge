@@ -869,6 +869,11 @@ function cands(x) {
     }
   }
 
+  /* ===== 1NT overcaller: "systems on" — answer Stayman, complete transfers, judge invitations as after a 1NT opening ===== */
+  if (oppOpened && my.length === 1 && my[0].call === B(1, 4) && pa.length === 1 && isNum(pa[0].call) && pJust && (rhoPass || x.rhoCall === "X")) {
+    if (openerRebid(x, add, B(1, 4), pa[0])) return L;
+  }
+
   /* ===== opener's rebid ===== */
   if (!oppOpened && opening.seat === x.seat && my.length === 1 && pa.length === 1 && isNum(pa[0].call)) {
     const tail = auc.slice(auc.indexOf(opening) + 1);
@@ -960,18 +965,18 @@ function cands(x) {
 function ntResponses(x, add, lv) {
   const C = x.C, off = lv - 1;
   if (C.texas) {
-    add(B(4, 1), h => h.len[2] >= 6 && h.hcp >= (lv === 1 ? 10 : 4) && h.hcp <= (lv === 1 ? 15 : 11), { min: lv === 1 ? 10 : 4, len: { 2: 6 }, tag: 'texas', to: B(4, 2), cv: 'texas', t: 'Texas transfer: 6+ ♥, game (opener bids 4♥)' });
-    add(B(4, 2), h => h.len[3] >= 6 && h.hcp >= (lv === 1 ? 10 : 4) && h.hcp <= (lv === 1 ? 15 : 11), { min: lv === 1 ? 10 : 4, len: { 3: 6 }, tag: 'texas', to: B(4, 3), cv: 'texas', t: 'Texas transfer: 6+ ♠, game (opener bids 4♠)' });
+    add(B(4, 1), h => h.len[2] >= 6 && h.hcp >= (lv === 1 ? 10 : 4) && h.hcp <= (lv === 1 ? 15 : 11), { min: lv === 1 ? 10 : 4, len: { 2: 6 }, tag: 'texas', to: B(4, 2), cv: 'texas', t: 'Texas transfer: 6+ ♥, game (partner bids 4♥)' });
+    add(B(4, 2), h => h.len[3] >= 6 && h.hcp >= (lv === 1 ? 10 : 4) && h.hcp <= (lv === 1 ? 15 : 11), { min: lv === 1 ? 10 : 4, len: { 3: 6 }, tag: 'texas', to: B(4, 3), cv: 'texas', t: 'Texas transfer: 6+ ♠, game (partner bids 4♠)' });
   }
   if (C.gerber) add(B(4, 0), h => h.hcp >= (lv === 1 ? 18 : 13) && h.semi, { min: lv === 1 ? 18 : 13, tag: 'gerb', cv: 'gerber', t: 'Gerber: asking for aces (slam interest)' });
   if (C.stayman) add(B(2 + off, 0), h => h.len[2] >= 4 && h.len[3] >= 4 && h.hcp >= (lv === 1 ? 8 : 4), { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
-  add(B(2 + off, 1), h => h.len[2] >= 5 && h.len[2] >= h.len[3], { len: { 2: 5 }, tag: 'tr', cv: 'jtr', t: 'Transfer: 5+ ♥ (opener bids hearts)', f: 1 });
-  add(B(2 + off, 2), h => h.len[3] >= 5, { len: { 3: 5 }, tag: 'tr', cv: 'jtr', t: 'Transfer: 5+ ♠ (opener bids spades)', f: 1 });
+  add(B(2 + off, 1), h => h.len[2] >= 5 && h.len[2] >= h.len[3], { len: { 2: 5 }, tag: 'tr', cv: 'jtr', t: 'Transfer: 5+ ♥ (partner bids hearts)', f: 1 });
+  add(B(2 + off, 2), h => h.len[3] >= 5, { len: { 3: 5 }, tag: 'tr', cv: 'jtr', t: 'Transfer: 5+ ♠ (partner bids spades)', f: 1 });
   if (C.stayman) add(B(2 + off, 0), h => h.hcp >= (lv === 1 ? 8 : 4) && (h.len[2] === 4 || h.len[3] === 4) && h.pat !== '4333', { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
   if (lv === 1) {
     if (C.fourWay) {
-      add(B(2, 3), h => h.len[0] >= 6 && h.hcp <= 7, { max: 7, len: { 0: 6 }, tag: 'trm', to: B(3, 0), cv: 'fourWay', t: '4-way transfer: 6+ ♣ (opener bids 3♣)' });
-      add(B(2, 4), h => h.len[1] >= 6 && h.hcp <= 7, { max: 7, len: { 1: 6 }, tag: 'trm', to: B(3, 1), cv: 'fourWay', t: '4-way transfer: 6+ ♦ (opener bids 3♦)' });
+      add(B(2, 3), h => h.len[0] >= 6 && h.hcp <= 7, { max: 7, len: { 0: 6 }, tag: 'trm', to: B(3, 0), cv: 'fourWay', t: '4-way transfer: 6+ ♣ (partner bids 3♣)' });
+      add(B(2, 4), h => h.len[1] >= 6 && h.hcp <= 7, { max: 7, len: { 1: 6 }, tag: 'trm', to: B(3, 1), cv: 'fourWay', t: '4-way transfer: 6+ ♦ (partner bids 3♦)' });
       if (C.stayman) add(B(2, 0), h => h.hcp >= 8 && h.hcp <= 9, { min: 8, tag: 'stay', cv: 'stayman', t: 'Stayman (may be a balanced invitation)', f: 1 });
     } else add(B(2, 4), h => h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, t: 'Invitational: 8-9 HCP' });
     add(B(3, 4), h => h.hcp >= 10 && h.hcp <= 15, { min: 10, max: 15, t: 'Game: 10-15 HCP' });
