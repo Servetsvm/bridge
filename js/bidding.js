@@ -36,7 +36,18 @@ const ourOnly = x => x.auc.every(e => sideOf(e.seat) === sideOf(x.seat) || e.cal
 const otherMajor = s => s === 2 ? 3 : 2;
 const BAL = { 0: 2, 1: 2, 2: 2, 3: 2 };
 
+/* 2♣–2♦–2NT is treated like a 2NT opening (systems on): drop the 2♣ and 2♦ round and bid as over 2NT */
+function virt2N(x) {
+  const o = x.opening, a = x.auc; if (!o || o.call !== B(2, 0) || sideOf(o.seat) !== sideOf(x.seat)) return null;
+  const i = a.indexOf(o);
+  if (a.length <= i + 4 || a[i + 1].call !== 'P' || a[i + 2].call !== B(2, 1) || a[i + 3].call !== 'P' || a[i + 4].call !== B(2, 4)) return null;
+  if (!ourOnly(x)) return null;
+  const cfg = { conv: x.C, agg: x.agg };
+  return ctxOf(a.slice(0, i).concat(a.slice(i + 4)), x.seat, [cfg, cfg]);
+}
+
 function cands(x) {
+  const v = virt2N(x); if (v) return cands(v);
   const L = []; const add = (call, test, m) => L.push({ call, test, m: m || {} });
   const { auc, p, my, pa, opening, st, C } = x;
   const pLast = pa.length ? pa[pa.length - 1] : null, myLast = my.length ? my[my.length - 1] : null;
@@ -53,7 +64,7 @@ function cands(x) {
       add(B(5, 0), h => h.kc(t) === 1 || h.kc(t) === 4, { tag: 'bwr', kc: 1, cv: 'rkc', t: 'RKCB reply: 1 or 4 key cards' });
       add(B(5, 1), h => h.kc(t) === 0 || h.kc(t) === 3, { tag: 'bwr', kc: 0, cv: 'rkc', t: 'RKCB reply: 0 or 3 key cards' });
       add(B(5, 2), h => h.kc(t) === 2 && !h.has(t, 10), { tag: 'bwr', kc: 2, cv: 'rkc', t: 'RKCB reply: 2 key cards, no trump queen' });
-      add(B(5, 3), h => h.kc(t) >= 2, { tag: 'bwr', kc: 2, q: 1, cv: 'rkc', t: 'RKCB reply: 2 key cards + trump queen' });
+      add(B(5, 3), h => h.kc(t) === 2 || h.kc(t) === 5, { tag: 'bwr', kc: 2, q: 1, cv: 'rkc', t: 'RKCB reply: 2 key cards + trump queen' });
     } else {
       [B(5, 0), B(5, 1), B(5, 2), B(5, 3)].forEach((c, k) => add(c, h => k === 0 ? (h.aces === 0 || h.aces === 4) : h.aces === k, { tag: 'bwr', kc: k, cv: 'bw', t: 'Blackwood reply: ' + (k === 0 ? '0 or 4' : k) + ' ace' + (k === 1 ? '' : 's') }));
     }
@@ -96,10 +107,16 @@ function cands(x) {
   if (pJust && rhoPass && pm.tag === 'leb') { add(B(3, 0), () => true, { tag: 'lebr', cv: 'leb', t: 'Lebensohl: forced 3♣ relay' }); return L; }
   if (myLast && mm.tag === 'leb' && pLast && pm.tag === 'lebr' && rhoPass) {
     const os = mm.os;
+    if (os < 4 && (mm.um || []).length) add(B(3, os), h => h.hcp >= 10 && mm.um.some(s => h.len[s] === 4), { min: 10, len: Object.fromEntries(mm.um.map(s => [s, 4])), tag: 'lebcue', cv: 'leb', t: 'Lebensohl slow cue bid: Stayman with a ' + SUIT[os] + ' stopper', f: 1, gf: 1 });
     add(B(3, 4), h => h.hcp >= 10, { min: 10, cv: 'leb', t: 'Lebensohl slow show: game values with a ' + SUIT[os] + ' stopper' });
     add('P', h => h.longest === 0, { t: 'To play in clubs' });
     for (const s of [1, 2, 3]) if (s !== os) add(B(3, s), h => h.longest === s, { len: { [s]: 5 }, t: 'To play in ' + SUIT[s] + ' (sign-off)' });
     add('P', () => true, { t: 'Pass' });
+    return L;
+  }
+  if (pJust && rhoPass && pm.tag === 'lebcue') {
+    for (const s of [2, 3]) if (pm.len && pm.len[s]) add(B(3, s) > pLast.call ? B(3, s) : B(4, s), h => h.len[s] >= 4, { len: { [s]: 4 }, cv: 'leb', t: 'Reply to Lebensohl Stayman: four ' + SUIT[s] });
+    add(B(3, 4), () => true, { cv: 'leb', t: 'Reply to Lebensohl Stayman: no four-card major' });
     return L;
   }
   if (pJust && rhoPass && pm.tag === 'trm') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the transfer' }); return L; }
@@ -157,8 +174,10 @@ function cands(x) {
       add(B(2, 1), () => rhoPass, { tag: 'relay', cv: 'capp', t: 'Cappelletti relay: name your suit' });
     }
     if (pm.tag === 'cappM') {
-      add(B(4, 3), h => h.len[3] >= 4 && h.len[3] >= h.len[2] && h.hcp >= 11, { t: 'Game with a spade fit' });
-      add(B(4, 2), h => h.len[2] >= 4 && h.hcp >= 11, { t: 'Game with a heart fit' });
+      add(B(4, 3), h => h.len[3] >= 4 && h.len[3] >= h.len[2] && h.sup(3) >= 13, { t: 'Game with a spade fit' });
+      add(B(4, 2), h => h.len[2] >= 4 && h.sup(2) >= 13, { t: 'Game with a heart fit' });
+      add(B(3, 3), h => h.len[3] >= 4 && h.len[3] >= h.len[2] && h.sup(3) >= 10, { min: 10, max: 12, len: { 3: 4 }, t: 'Jump in ♠: invitational, 10-12' });
+      add(B(3, 2), h => h.len[2] >= 4 && h.sup(2) >= 10, { min: 10, max: 12, len: { 2: 4 }, t: 'Jump in ♥: invitational, 10-12' });
       add(B(cheap(3), 3), h => h.len[3] > h.len[2], { t: 'Choosing the longer major: ♠' });
       add(B(cheap(2), 2), () => true, { t: 'Choosing the longer major: ♥' });
     }
@@ -300,10 +319,16 @@ function cands(x) {
     }
     if (o === B(1, 4) && opening === pLast && isNum(x.rhoCall) && LV(x.rhoCall) === 2 && ST(x.rhoCall) < 4 && C.leb) {
       const ob = x.rhoCall, obs = ST(ob);
+      const um = [2, 3].filter(s => s !== obs);   // unbid major(s) for cue-bid Stayman
+      const has4M = h => um.some(s => h.len[s] === 4);
+      // a five-card major (or a good minor) game force comes first
+      for (const s of [3, 2]) if (s !== obs) add(B(3, s), h => h.len[s] >= 5 && h.hcp >= 10, { min: 10, len: { [s]: 5 }, cv: 'leb', t: 'Lebensohl: direct three-level bid, 5+ ' + SUIT[s] + ', game forcing', f: 1, gf: 1 });
+      // cue bid = Stayman without a stopper ("fast denies"); 2NT then cue = Stayman with a stopper
+      if (um.length && obs < 4) add(B(3, obs), h => h.hcp >= 10 && has4M(h) && !h.stop(obs), { min: 10, len: Object.fromEntries(um.map(s => [s, 4])), tag: 'lebcue', cv: 'leb', t: 'Lebensohl cue bid: Stayman, no ' + SUIT[obs] + ' stopper (fast denies)', f: 1, gf: 1 });
       add(B(3, 4), h => h.hcp >= 10 && !h.stop(obs), { min: 10, cv: 'leb', t: 'Lebensohl fast 3NT: game values, no ' + SUIT[obs] + ' stopper' });
-      for (const s of [3, 2, 1, 0]) if (s !== obs) add(B(3, s), h => h.len[s] >= 5 && h.hcp >= 10, { min: 10, len: { [s]: 5 }, cv: 'leb', t: 'Lebensohl: direct three-level bid, 5+ ' + SUIT[s] + ', game forcing', f: 1, gf: 1 });
+      for (const s of [1, 0]) if (s !== obs) add(B(3, s), h => h.len[s] >= 5 && h.hcp >= 10 && !h.stop(obs), { min: 10, len: { [s]: 5 }, cv: 'leb', t: 'Lebensohl: direct three-level bid, 5+ ' + SUIT[s] + ', game forcing', f: 1, gf: 1 });
       for (const s of [3, 2, 1, 0]) if (s !== obs && B(2, s) > ob) add(B(2, s), h => h.len[s] >= 5 && h.hcp <= 9, { max: 9, len: { [s]: 5 }, t: 'Competing: 5+ ' + SUIT[s] + ', to play' });
-      add(B(2, 4), h => (h.hcp >= 10 && h.stop(obs)) || (h.hcp <= 8 && h.len[h.longest] >= 6 && h.longest !== obs), { tag: 'leb', os: obs, cv: 'leb', t: 'Lebensohl 2NT: forces opener to bid 3♣', f: 1 });
+      add(B(2, 4), h => (h.hcp >= 10 && h.stop(obs)) || (h.hcp <= 8 && h.len[h.longest] >= 5 && h.longest !== obs && B(2, h.longest) < ob), { tag: 'leb', os: obs, um, cv: 'leb', t: 'Lebensohl 2NT: forces opener to bid 3♣ (weak sign-off, or slow: shows a stopper)', f: 1 });
       add('X', h => h.hcp >= 8, { min: 8, t: 'Double: 8+ HCP, penalty-oriented' });
       add('P', () => true, { t: 'Pass' });
       return L;
@@ -377,6 +402,57 @@ function cands(x) {
     if (openerRebid(x, add, B(1, 4), pa[0])) return L;
   }
 
+  /* ===== 2♣–2♦–(suit): responder's second call; 3♣ over a major is the second negative ===== */
+  if (!oppOpened && opening.call === B(2, 0) && opening.seat === p && my.length === 1 && my[0].call === B(2, 1) && pa.length === 2 && pJust && rhoPass && ourOnly(x) && ST(pa[1].call) < 4) {
+    const r = pa[1].call, s = ST(r);
+    if (s >= 2) {
+      add(B(4, s), h => h.len[s] >= 3 && h.hcp <= 4 && h.lp + h.hcp <= 5 && h.aces === 0, { max: 4, len: { [s]: 3 }, t: 'Support, but nothing else (fast arrival)' });
+      add(B(3, s), h => h.len[s] >= 3, { min: 3, len: { [s]: 3 }, t: 'Support for ' + SUIT[s] + ': slam try', f: 1 });
+      if (r === B(2, 2)) add(B(2, 3), h => h.len[3] >= 5 && h.hcp >= 4, { min: 4, len: { 3: 5 }, t: '5+ ♠, some values', f: 1 });
+      add(B(3, 0), h => h.hcp <= 3, { max: 3, tag: '2neg', cv: 'strong2c', t: 'Second negative: 0-3 HCP' });
+      for (const t of [1, 0]) add(B(3, t), h => h.len[t] >= 5 && h.hcp >= 4, { min: 4, len: { [t]: 5 }, t: '5+ ' + SUIT[t] + ', some values', f: 1 });
+      add(B(2, 4), () => true, { min: 4, t: 'Natural: no fit, some values', f: 1 });
+      return L;
+    }
+    add(B(3, 2), h => h.len[2] >= 5 && h.hcp >= 3, { len: { 2: 5 }, t: '5+ ♥', f: 1 });
+    add(B(3, 3), h => h.len[3] >= 5 && h.hcp >= 3, { len: { 3: 5 }, t: '5+ ♠', f: 1 });
+    add(B(4, s), h => h.len[s] >= 4, { len: { [s]: 4 }, t: 'Support for ' + SUIT[s], f: 1 });
+    add(B(3, 4), () => true, { t: 'Natural: no fit', f: 1 });
+    return L;
+  }
+  if (!oppOpened && opening.call === B(2, 0) && opening.seat === x.seat && my.length === 2 && pJust && rhoPass && pm.tag === '2neg') {
+    const s = ST(myLast.call);
+    add(B(4, s), h => h.hcp >= 25 || h.len[s] >= 7, { t: 'Game opposite a bust' });
+    add(B(3, s), () => true, { len: { [s]: 6 }, t: 'Rebidding the suit: not forcing' });
+    return L;
+  }
+  if (!oppOpened && opening.call === B(2, 0) && opening.seat === p && my.length === 2 && mm.tag === '2neg' && pJust && rhoPass && LV(pLast.call) === 3) {
+    const s = ST(pLast.call);
+    add(B(4, s), h => h.len[s] >= 2 && (h.hcp >= 2 || h.len[s] >= 3), { t: 'Raising to game' });
+    add('P', () => true, { t: 'Bust: pass' });
+    return L;
+  }
+
+  /* ===== opener after partner's negative double ===== */
+  if (!oppOpened && opening.seat === x.seat && my.length === 1 && pa.length === 1 && pa[0].call === 'X' && pJust && rhoPass && pm.cv === 'nego') {
+    const os = ST(opening.call), obs = x.oppSuits.length ? x.oppSuits[0] : -1;
+    const cheap = s => (ST(st.last) < s ? LV(st.last) : LV(st.last) + 1);
+    for (const s of [3, 2]) if (s !== obs && s !== os && pm.len && pm.len[s]) {
+      const l = cheap(s);
+      if (l + 1 <= 4) add(B(l + 1 === 4 ? 4 : l + 1, s), h => h.len[s] >= 4 && h.sup(s) >= 17, { min: 16, len: { [s]: 4 }, t: 'Jump in ' + SUIT[s] + ': four-card support, 17+ points' });
+      add(B(l, s), h => h.len[s] >= 4, { min: 12, max: 16, len: { [s]: 4 }, t: 'Four ' + SUIT[s] + ' for partner\'s double' });
+    }
+    if (obs >= 0) {
+      if (cheap(4) <= 1) add(B(1, 4), h => h.stop(obs) && h.bal && h.hcp <= 14, { min: 12, max: 14, t: 'Balanced 12-14 with a ' + SUIT[obs] + ' stopper' });
+      add(B(cheap(4) + (cheap(4) <= 1 ? 1 : 0), 4), h => h.stop(obs) && h.bal && h.hcp >= 18, { min: 18, max: 19, t: 'Balanced 18-19 with a stopper' });
+    }
+    add(B(cheap(os), os), h => h.len[os] >= 6 || (h.len[os] >= 5 && h.hcp <= 15), { len: { [os]: 5 }, t: 'Rebidding my suit' });
+    for (let s = 0; s < 4; s++) if (s !== os && s !== obs && cheap(s) <= 2) add(B(cheap(s), s), h => h.len[s] >= 4, { len: { [s]: 4 }, t: '4+ ' + SUIT[s] });
+    add('P', h => h.len[obs] >= 4 && h.top5(obs) >= 3, { t: 'Converting to penalties' });
+    add(B(cheap(os), os), () => true, { t: 'Cheapest rebid in my suit' });
+    return L;
+  }
+
   /* ===== opener's rebid ===== */
   if (!oppOpened && opening.seat === x.seat && my.length === 1 && pa.length === 1 && isNum(pa[0].call)) {
     const tail = auc.slice(auc.indexOf(opening) + 1);
@@ -423,17 +499,27 @@ function cands(x) {
           add(B(4, aS), h => h.len[aS] >= 4 && (lv === 2 || h.hcp >= 10) && h.hcp <= 15, { min: lv === 1 ? 10 : 4, len: { [aS]: 4 }, t: 'Major fit: game' });
           if (lv === 1) add(B(3, aS), h => h.len[aS] >= 4 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { [aS]: 4 }, t: 'Major fit: invitational' });
         }
-        if (aS === 1 && C.smolen && lv === 1) {
-          add(B(3, 2), h => h.len[2] === 4 && h.len[3] >= 5 && h.hcp >= 10, { min: 10, len: { 2: 4, 3: 5 }, tag: 'smolen', five: 3, cv: 'smolen', t: 'Smolen: 4♥ + 5♠, game forcing', f: 1, gf: 1 });
-          add(B(3, 3), h => h.len[3] === 4 && h.len[2] >= 5 && h.hcp >= 10, { min: 10, len: { 3: 4, 2: 5 }, tag: 'smolen', five: 2, cv: 'smolen', t: 'Smolen: 4♠ + 5♥, game forcing', f: 1, gf: 1 });
+        if (aS === 1 && C.smolen) {
+          const g = lv === 1 ? 10 : 4;
+          add(B(3, 2), h => h.len[2] === 4 && h.len[3] >= 5 && h.hcp >= g, { min: g, len: { 2: 4, 3: 5 }, tag: 'smolen', five: 3, cv: 'smolen', t: 'Smolen: 4♥ + 5♠, game forcing', f: 1, gf: 1 });
+          add(B(3, 3), h => h.len[3] === 4 && h.len[2] >= 5 && h.hcp >= g, { min: g, len: { 3: 4, 2: 5 }, tag: 'smolen', five: 2, cv: 'smolen', t: 'Smolen: 4♠ + 5♥, game forcing', f: 1, gf: 1 });
         }
+        // 5-4 in the majors, invitational: bid the five-card major at the two level
+        if (aS === 1 && lv === 1) for (const M of [3, 2]) add(B(2, M), h => h.len[M] >= 5 && h.len[otherMajor(M)] >= 4 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { [M]: 5, [otherMajor(M)]: 4 }, cv: 'stayman', t: 'Five ' + SUIT[M] + ' and four ' + SUIT[otherMajor(M)] + ', invitational' });
         if (aS === 2 && lv === 1) add(B(2, 3), h => h.len[3] >= 4 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { 3: 4 }, t: 'Four spades, invitational' });
         if (lv === 1) add(B(2, 4), h => h.hcp <= 9, { min: 8, max: 9, t: 'Invitational: 8-9 HCP' });
         add(B(3, 4), h => h.hcp <= 15, { min: lv === 1 ? 10 : 4, max: 15, t: 'Game' });
       } else {
         const M = ST(ans);
-        if (lv === 1) {
+        if (lv === 1 && ans === B(3, M)) {
+          add(B(4, M), h => h.hcp >= 6, { t: 'Partner super-accepted: game' });
+          add('P', () => true, { t: 'Weak: stop in three' });
+        } else if (lv === 1) {
           add('P', h => h.hcp <= 7, { max: 7, t: 'Weak: play the transfer suit' });
+          // 5-5 majors (after ♥ transfer, 2♠ is invitational; after ♠, 3♥ is game forcing)
+          if (M === 2) add(B(2, 3), h => h.len[3] >= 5 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { 2: 5, 3: 5 }, t: '5-5 in the majors, invitational' });
+          // a second suit at the three level: natural, game forcing
+          for (const s of [0, 1, 2]) if (s !== M && B(3, s) > ans) add(B(3, s), h => h.len[s] >= (s === 2 ? 5 : 4) && h.hcp >= 10 && h.hcp <= 15 && !(h.bal && h.len[M] === 5), { min: 10, len: { [M]: 5, [s]: s === 2 ? 5 : 4 }, t: 'Second suit: 4+ ' + SUIT[s] + ', game forcing', f: 1, gf: 1 });
           add(B(3, M), h => h.len[M] >= 6 && h.hcp <= 9, { min: 8, max: 9, len: { [M]: 6 }, t: 'Six-card suit, invitational' });
           add(B(4, M), h => h.len[M] >= 6 && h.hcp <= 15, { min: 10, max: 15, len: { [M]: 6 }, t: 'Six-card suit, game' });
           add(B(2, 4), h => h.hcp <= 9, { min: 8, max: 9, len: { [M]: 5 }, t: 'Five-card major, invitational' });
@@ -445,6 +531,29 @@ function cands(x) {
         }
       }
       if (L.length) return L;
+    }
+    // opener after Stayman: responder's 2NT/3NT/2♠ may hide the other major (responder promised one)
+    if (opening.seat === x.seat && my.length === 2 && pa.length === 2 && pa[0].m && pa[0].m.tag === 'stay' && ST(my[1].call) === 2) {
+      const r2 = pa[1].call, top = lv === 1 ? 16 : 21;
+      if (r2 === B(3, 4)) { add(B(4, 3), h => h.len[3] >= 4, { len: { 3: 4 }, t: 'Four spades too: partner has them' }); add('P', () => true, { t: 'Pass' }); return L; }
+      if (r2 === B(2, 4)) {
+        add(B(4, 3), h => h.len[3] >= 4 && h.hcp >= top, { min: top, len: { 3: 4 }, t: 'Four spades too, maximum' });
+        add(B(3, 3), h => h.len[3] >= 4, { len: { 3: 4 }, t: 'Four spades too, minimum' });
+        add(B(3, 4), h => h.hcp >= top, { min: top, t: 'Maximum: accepting' }); add('P', () => true, { t: 'Minimum' }); return L;
+      }
+      if (r2 === B(2, 3)) {
+        add(B(4, 3), h => h.len[3] >= 4 && h.hcp >= top, { min: top, t: 'Spade fit, maximum: game' });
+        add(B(3, 3), h => h.len[3] >= 4, { t: 'Spade fit, minimum' });
+        add(B(3, 4), h => h.hcp >= top, { min: top, t: 'No spade fit, maximum' }); add(B(2, 4), () => true, { t: 'No spade fit, minimum' }); return L;
+      }
+    }
+    if (opening.seat === x.seat && lv === 1 && my.length === 2 && pa.length === 2 && pa[0].m && pa[0].m.tag === 'stay' && my[1].call === B(2, 1) && (pa[1].call === B(2, 2) || pa[1].call === B(2, 3))) {
+      const M = ST(pa[1].call);
+      add(B(4, M), h => h.len[M] >= 3 && h.hcp >= 16, { t: 'Fit and maximum: game' });
+      add('P', h => h.len[M] >= 3, { t: 'Fit, minimum: pass' });
+      add(B(3, 4), h => h.hcp >= 16, { t: 'No fit, maximum' });
+      add(B(2, 4), () => true, { t: 'No fit, minimum' });
+      return L;
     }
     if (opening.seat === x.seat && pLast && pm.tag === 'smolen' && pJust) {
       const F = pm.five;
@@ -502,19 +611,19 @@ function suitResponses(x, add, o, os) {
   const two1 = C.twoOverOne && un;
   if (rhoX) add('XX', h => h.hcp >= 10, { min: 10, t: 'Redouble: 10+ HCP' });
   if (maj) {
-    if (C.drury && x.passed && !rhoX && x.auc.indexOf(x.opening) >= 2) add(B(2, 0), h => h.len[os] >= 3 && h.sup(os) >= 10 && h.sup(os) <= 12, { min: 10, max: 11, len: { [os]: 3 }, tag: "drury", cv: "drury", t: "Drury: 3+ " + SUIT[os] + " support, 10-12 points (passed hand)", f: 1 });
+    if (C.drury && x.passed && !rhoX && x.auc.indexOf(x.opening) >= 2) add(B(2, 0), h => h.len[os] >= 3 && h.sup(os) >= 10, { min: 10, max: 11, len: { [os]: 3 }, tag: "drury", cv: "drury", t: "Drury: 3+ " + SUIT[os] + " support, 10-12 points (passed hand)", f: 1 });
     if (C.splinter && un && !rhoX) for (const s of [0, 1, 2, 3]) {
       if (s === os) continue; const n = B(1, s) > o ? 1 : 2; const lvl = n + 2; if (lvl > 4) continue;
       add(B(lvl, s), h => h.len[os] >= 4 && h.len[s] <= 1 && h.hcp >= 11 && h.hcp <= 15, { min: 11, max: 15, len: { [os]: 4 }, tag: 'splinter', cv: 'splinter', t: 'Splinter: 4+ ' + SUIT[os] + ' support, singleton or void in ' + SUIT[s] + ', game forcing', f: 1, gf: 1 });
     }
-    if (C.j2nt && un && !rhoX) add(B(2, 4), h => h.len[os] >= 4 && h.hcp >= 13, { min: 13, len: { [os]: 4 }, tag: 'j2nt', cv: 'j2nt', t: 'Jacoby 2NT: 4+ support, 13+ points, game forcing', f: 1, gf: 1 });
+    if (C.j2nt && un && !rhoX) add(B(2, 4), h => h.len[os] >= 4 && h.hcp >= 11 && h.sup(os) >= 13, { min: 12, len: { [os]: 4 }, tag: 'j2nt', cv: 'j2nt', t: 'Jacoby 2NT: 4+ support, 13+ points, game forcing', f: 1, gf: 1 });
     if (C.bergen && !rhoX) {
       add(B(3, os), h => h.len[os] >= 4 && h.hcp <= 6, { max: 6, len: { [os]: 4 }, tag: 'bergenP', cv: 'bergen', t: 'Bergen: 4+ support, 0-6 points (preemptive)' });
-      add(B(3, 1), h => h.len[os] >= 4 && h.sup(os) >= 10 && h.sup(os) <= 12, { min: 9, max: 12, len: { [os]: 4 }, tag: 'bergen10', cv: 'bergen', t: 'Bergen 3♦: 4+ support, 10-12 points (limit raise)', f: 1 });
+      add(B(3, 1), h => h.len[os] >= 4 && h.sup(os) >= 10 && (h.sup(os) <= 12 || h.hcp <= 10), { min: 9, max: 12, len: { [os]: 4 }, tag: 'bergen10', cv: 'bergen', t: 'Bergen 3♦: 4+ support, 10-12 points (limit raise)', f: 1 });
       add(B(3, 0), h => h.len[os] >= 4 && h.sup(os) >= 7 && h.sup(os) <= 9, { min: 7, max: 9, len: { [os]: 4 }, tag: 'bergen7', cv: 'bergen', t: 'Bergen 3♣: 4+ support, 7-9 points', f: 1 });
     } else {
       add(B(4, os), h => h.len[os] >= 5 && h.hcp < 10, { max: 9, len: { [os]: 5 }, t: 'Preemptive: 5+ support, weak hand' });
-      add(B(3, os), h => h.len[os] >= 4 && h.sup(os) >= 10 && h.sup(os) <= 12, { min: 9, max: 12, len: { [os]: 4 }, t: 'Limit raise: 4+ support, 10-12 points' });
+      add(B(3, os), h => h.len[os] >= 4 && h.sup(os) >= 10 && (h.sup(os) <= 12 || h.hcp <= 10), { min: 9, max: 12, len: { [os]: 4 }, t: 'Limit raise: 4+ support, 10-12 points' });
       add(B(2, os), h => h.len[os] >= 4 && h.sup(os) >= 6 && h.sup(os) <= 9, { min: 6, max: 9, len: { [os]: 4 }, t: 'Single raise: support, 6-9 points' });
     }
     if (os === 2) add(B(1, 3), h => h.len[3] >= 4 && h.hcp >= 6, { min: 6, len: { 3: 4 }, t: '4+ ♠, 6+ HCP', f: 1 });
@@ -537,7 +646,7 @@ function suitResponses(x, add, o, os) {
     if (s <= os) continue;
     add(B(2, s), h => h.len[s] >= 6 && h.hcp <= 5 && h.top5(s) >= 1, { max: 5, len: { [s]: 6 }, tag: 'wjs', cv: 'wjs', t: 'Weak jump shift: 6+ ' + SUIT[s] + ', 0-5 HCP' });
   }
-  if (maj && two1) add(B(1, 4), h => h.hcp >= 6 && h.hcp <= 12 && !(h.len[os] >= 3 && h.hcp <= 9), { min: 6, max: 12, tag: 'nt1f', cv: 'twoOverOne', t: 'Forcing 1NT: 6-12 HCP', f: 1 });
+  if (maj && two1) add(B(1, 4), h => h.hcp >= 6 && h.hcp <= 12 && h.len[os] <= 3 && !(h.len[os] === 3 && h.sup(os) <= 9), { min: 6, max: 12, tag: 'nt1f', cv: 'twoOverOne', t: 'Forcing 1NT: 6-12 HCP', f: 1 });
   else add(B(1, 4), h => h.hcp >= 6 && h.hcp <= 10 && !(maj && h.len[os] >= 3), { min: 6, max: 10, t: '6-10 HCP, no fit' });
   for (const s of [3, 2, 1, 0]) {
     if (s === os || B(1, s) > o) continue;
@@ -560,11 +669,14 @@ function competitiveResponses(x, add, os) {
   const cheap = s => (ST(ob) < s ? LV(ob) : LV(ob) + 1);
   const cl = cheap(os), need = maj ? 3 : 4;
   if (obs < 4 && cl + 1 <= 4) add(B(cheap(obs), obs), h => h.len[os] >= need && h.sup(os) >= 11, { min: 11, len: { [os]: need }, cv: 'cue', t: 'Cue bid: support, limit raise or better', f: 1 });
-  if (cl <= 3) add(B(cl, os), h => h.len[os] >= need && h.sup(os) >= 6 && h.sup(os) <= 10, { min: 6, max: 10, len: { [os]: need }, t: 'Raise: 6-10 points' });
+  const raise = () => { if (cl <= 3) add(B(cl, os), h => h.len[os] >= need && h.sup(os) >= 6 && h.sup(os) <= 10, { min: 6, max: 10, len: { [os]: need }, t: 'Raise: 6-10 points' }); };
+  if (maj) raise();
+  for (const s of [3, 2]) if (s !== os && s !== obs && cheap(s) === 1) add(B(1, s), h => h.len[s] >= 5 && h.hcp >= 6, { min: 6, len: { [s]: 5 }, t: 'Natural: 5+ ' + SUIT[s] + ', 6+ HCP', f: 1 });
   if (LV(ob) <= 2 && obs < 4) {
     const um = [2, 3].filter(s => s !== os && s !== obs);
     if (um.length) add('X', h => h.hcp >= (LV(ob) === 1 ? 6 : 8) && um.some(s => h.len[s] >= 4), { min: 6, len: Object.fromEntries(um.map(s => [s, 4])), cv: 'nego', t: 'Negative double: four cards in the unbid major' });
   }
+  if (!maj) raise();
   for (const s of [3, 2, 1, 0]) { if (s === os || s === obs) continue; const l = cheap(s); if (l > 3) continue; add(B(l, s), h => h.len[s] >= 5 && h.hcp >= (l === 1 ? 6 : 10), { min: l === 1 ? 6 : 10, len: { [s]: 5 }, t: 'Natural: 5+ ' + SUIT[s] + ', ' + (l === 1 ? 6 : 10) + '+ HCP', f: 1 }); }
   if (obs < 4) {
     const nl = cheap(4);
@@ -586,7 +698,13 @@ function openerRebid(x, add, o, resp) {
       add(B(2 + off, 1), () => true, { cv: 'stayman', t: 'Stayman reply: no 4-card major' });
       return true;
     }
-    if (rm.tag === 'tr') { const M = r === B(2 + off, 1) ? 2 : 3; add(B(2 + off, M), () => true, { tag: 'trc', cv: 'jtr', t: 'Completing the transfer to ' + SUIT[M] }); return true; }
+    if (rm.tag === 'tr') {
+      const M = r === B(2 + off, 1) ? 2 : 3;
+      // super-accept: four-card support and a maximum
+      if (ol === 1) add(B(3, M), h => h.len[M] >= 4 && h.hcp >= 17, { tag: 'trc', min: 17, max: 17, len: { [M]: 4 }, cv: 'jtr', t: 'Super-accept: four ' + SUIT[M] + ' and a maximum' });
+      add(B(2 + off, M), () => true, { tag: 'trc', cv: 'jtr', t: 'Completing the transfer to ' + SUIT[M] });
+      return true;
+    }
     if (rm.tag === 'q') { add(B(6, 4), h => h.hcp >= (ol === 1 ? 17 : 21), { t: 'Accepting the invitation' }); add('P', () => true, { t: 'Minimum: declining' }); return true; }
     if (r === B(2, 4) && ol === 1 && !rm.tag) { add(B(3, 4), h => h.hcp >= 16, { min: 16, t: 'Maximum: accepting the invitation' }); add('P', () => true, { max: 15, t: 'Minimum' }); return true; }
     if (r === B(3, 4) || (r >= B(4, 3) && !rm.tag)) { add('P', () => true, { t: 'Pass' }); return true; }
@@ -595,7 +713,7 @@ function openerRebid(x, add, o, resp) {
   if (o === B(2, 0) && r === B(2, 1)) {
     add(B(2, 4), h => h.bal && h.hcp <= 24, { min: 22, max: 24, t: 'Balanced 22-24 HCP' });
     add(B(3, 4), h => h.bal && h.hcp >= 25, { min: 25, max: 27, t: 'Balanced 25-27 HCP' });
-    for (const s of [3, 2]) add(B(2, s), h => h.longest === s || (h.len[s] >= 5 && h.len[s] >= h.len[h.longest]), { min: 22, len: { [s]: 5 }, t: '5+ ' + SUIT[s] + ', game forcing', f: 1, gf: 1 });
+    for (const s of [3, 2]) add(B(2, s), h => h.longest === s || (h.len[s] >= 5 && h.len[s] >= h.len[h.longest]), { min: 22, len: { [s]: 5 }, t: '5+ ' + SUIT[s] + ', forcing (3♣ by partner = second negative)', f: 1 });
     for (const s of [0, 1]) add(B(3, s), h => h.longest === s, { min: 22, len: { [s]: 5 }, t: '5+ ' + SUIT[s] + ', game forcing', f: 1, gf: 1 });
     return true;
   }
@@ -614,8 +732,14 @@ function openerRebid(x, add, o, resp) {
     return true;
   }
   if (rm.tag === 'j2nt') {
-    add(B(4, os), h => h.hcp <= 14, { min: 12, max: 14, cv: 'j2nt', t: 'Jacoby 2NT reply: minimum, stop in game' });
-    add(B(3, os), () => true, { min: 15, cv: 'j2nt', t: 'Jacoby 2NT reply: extras, slam interest', f: 1 });
+    const sides = [0, 1, 2, 3].filter(s => s !== os);
+    // 4 of a new suit: a good five-card side suit
+    for (const s of sides) if (s < os) add(B(4, s), h => h.len[s] >= 5 && h.top5(s) >= 2 && h.hcp >= 12, { min: 12, len: { [s]: 5 }, tag: 'j2r', cv: 'j2nt', t: 'Jacoby 2NT reply: a good five-card ' + SUIT[s] + ' side suit', f: 1 });
+    // 3 of a new suit: singleton or void there
+    for (const s of sides) add(B(3, s), h => h.len[s] <= 1, { len: { [os]: 5 }, tag: 'j2r', cv: 'j2nt', t: 'Jacoby 2NT reply: singleton or void in ' + SUIT[s], f: 1 });
+    add(B(3, os), h => h.hcp >= 18, { min: 18, tag: 'j2r', cv: 'j2nt', t: 'Jacoby 2NT reply: 18+, no shortness, slam interest', f: 1 });
+    add(B(3, 4), h => h.hcp >= 15, { min: 15, max: 17, tag: 'j2r', cv: 'j2nt', t: 'Jacoby 2NT reply: 15-17, no shortness', f: 1 });
+    add(B(4, os), () => true, { min: 12, max: 14, cv: 'j2nt', t: 'Jacoby 2NT reply: minimum, no shortness' });
     return true;
   }
   if (rm.tag === 'bergen7') { add(B(4, os), h => h.sup(os) >= 16, { min: 15, t: 'After Bergen: game' }); add(B(3, os), () => true, { max: 15, cv: 'bergen', t: 'After Bergen: minimum, stop at the three level' }); return true; }
@@ -641,6 +765,11 @@ function openerRebid(x, add, o, resp) {
       add(B(4, rs), h => h.len[rs] >= 4 && h.sup(rs) >= 19, { min: 18, len: { [rs]: 4 }, t: 'Four-card support, game: 19+ points' });
       add(B(3, rs), h => h.len[rs] >= 4 && h.sup(rs) >= 16, { min: 16, max: 18, len: { [rs]: 4 }, t: 'Jump raise: 16-18 points' });
       add(B(2, rs), h => h.len[rs] >= 4, { min: 12, max: 15, len: { [rs]: 4 }, t: 'Four-card support: 12-15 points' });
+    }
+    // jump shift: 19+ with a second suit, forcing to game
+    for (const s of [0, 1, 2, 3]) {
+      if (s === os || s === rs) continue; const l = (B(1, s) > r ? 1 : 2) + 1;
+      if (l <= 3) add(B(l, s), h => h.len[s] >= 4 && h.hcp >= 19 && !h.bal && h.len[os] >= 5 && !(rs >= 2 && h.len[rs] >= 4), { min: 19, len: { [s]: 4 }, t: 'Jump shift: 4+ ' + SUIT[s] + ', 19+ HCP, game forcing', f: 1, gf: 1 });
     }
     for (let s = rs + 1; s <= 3; s++) if (s !== os) add(B(1, s), h => h.len[s] >= 4, { min: 11, max: 18, len: { [s]: 4 }, t: '4+ ' + SUIT[s] + ', 12-18 HCP' });
     add(B(1, 4), h => h.bal && h.hcp <= 14, { min: 12, max: 14, t: 'Balanced, 12-14 HCP' });
@@ -688,7 +817,7 @@ function partnerForcing(x) {
 function generic(x, h) {
   const P = pInfo(x), st = x.st, last = st.last, me = x.seat;
   const forced = partnerForcing(x);
-  const gf = x.auc.some(e => sideOf(e.seat) === sideOf(me) && e.m && e.m.gf);
+  const gf = x.auc.some(e => sideOf(e.seat) === sideOf(me) && e.m && e.m.gf) && !x.auc.some(e => e.m && e.m.tag === '2neg');
   let majorFit = -1, minorFit = -1, mfl = 0, nfl = 0;
   for (const s of [3, 2]) { const t = h.len[s] + P.len[s]; if (t >= 8 && t > mfl) { majorFit = s; mfl = t; } }
   for (const s of [1, 0]) { const t = h.len[s] + P.len[s]; if (t >= 8 && t > nfl) { minorFit = s; nfl = t; } }
@@ -723,6 +852,8 @@ function generic(x, h) {
   const range = { min: Math.max(0, h.hcp - 1), max: h.hcp + 2 };
   const lenm = t < 4 ? { [t]: Math.min(h.len[t], 6) } : undefined;
   let call = null, m = {};
+  // partner chose 3NT: respect it unless we have slam values or a known 8-card major fit
+  if (last === B(3, 4) && st.lastSeat === x.p && st.dbl === 0 && goal < 6 && !(t >= 2 && t < 4 && fitLen >= 8) && !(t < 4 && h.len[t] >= 7)) return { call: 'P', m: { t: 'Accepting partner\'s 3NT' } };
   if (goal >= 6) {
     if (!bwUsed && last < B(4, 4) && t < 4 && (t !== 0 || h.aces >= 2)) { call = B(4, 4); m = { tag: 'bw', trump: t, rkc: x.C.rkc ? 1 : 0, cv: x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc ? 'RKCB 1430: asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?', ...range }; }
     else if (B(goal, t) > last) { call = B(goal, t); m = { t: (goal === 7 ? 'Grand' : 'Small') + ' slam', ...range, len: lenm }; }
@@ -760,6 +891,20 @@ function explainCall(auc, seat, call, cards) {
   const x = ctxOf(auc, seat, cards);
   for (const c of cands(x)) if (c.call === call) return c.m;
   if (call === 'P') return { t: 'Pass' };
+  // 4NT after our side has bid a suit (and not notrump last) asks for key cards, whoever bids it
+  if (call === B(4, 4)) {
+    const ours = auc.filter(e => sideOf(e.seat) === sideOf(seat) && isNum(e.call));
+    const lastOur = ours[ours.length - 1];
+    if (lastOur && ST(lastOur.call) < 4 && !ours.some(e => e.m && ['bw', 'gerb'].includes(e.m.tag))) {
+      const P = pInfo(x), mine = [0, 0, 0, 0], pl = [0, 0, 0, 0];
+      ours.forEach(e => { if (ST(e.call) < 4 && !(e.m && (e.m.cv === 'jtr' || e.m.cv === 'stayman' || e.m.tag === 'texas' || e.m.tag === 'trm' || e.m.tag === 'bergen7' || e.m.tag === 'bergen10' || e.m.tag === 'splinter' || e.m.tag === 'drury'))) (e.seat === seat ? mine : pl)[ST(e.call)]++; });
+      let t = -1; for (const s of [3, 2, 1, 0]) if (mine[s] && pl[s]) { t = s; break; }
+      if (t < 0 && ours.some(e => ST(e.call) === 4 && e.m && (e.m.tag === 'nt1' || e.m.tag === 'nt2'))) return { tag: 'q', cv: 'q', min: 16, t: 'Quantitative 4NT: slam invitation' };
+      if (t < 0) for (let s = 0; s < 4; s++) if (P.len[s] >= 4 && (t < 0 || P.len[s] > P.len[t])) t = s;
+      if (t < 0) t = ST(lastOur.call);
+      return { tag: 'bw', trump: t, rkc: x.C.rkc ? 1 : 0, cv: x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc ? 'RKCB 1430: asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?' };
+    }
+  }
   if (call === 'X') return { t: 'Double' };
   if (call === 'XX') return { t: 'Redouble' };
   const s = ST(call);
