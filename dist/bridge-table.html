@@ -393,6 +393,9 @@ tr.rev:hover td,tr.rev:active td{background:#f3efdd}
   #bar .tools .btn{flex:1 0 auto;padding:7px 8px}
   #table{margin-top:0}
 }
+.tables{display:flex;flex-direction:column;gap:6px}
+.tables .lseat b{width:auto;min-width:52px}
+.lobby .helprow{display:flex;justify-content:space-between;align-items:center;gap:8px}
 
 </style>
 
@@ -2942,7 +2945,8 @@ function resume() {
 function idleHtml() {
   const cont = ui.saved && ui.saved.phase !== "done";
   return `<div class="lobby"><h3>Bridge Table</h3><div class="muted">Nothing is dealt yet. ${cont ? "Your last board is waiting." : ""}</div>
-    <div class="row2"><button class="btn new" id="bGo">${cont ? "Continue" : "Start"}</button><button class="btn" id="bNet">Online table</button></div></div>`;
+    <div class="row2"><button class="btn new" id="bGo">${cont ? "Continue" : "Start"}</button><button class="btn" id="bNet">Online</button></div>
+    ${typeof Net !== "undefined" ? Net.pendHtml() + `<h3>Open tables</h3>` + Net.tablesHtml() : ""}</div>`;
 }
 function lobbyG() {
   const bn = BOARD + 1;
@@ -3331,15 +3335,18 @@ window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude
    they are allowed to see. */
 const Net = (() => {
   'use strict';
-  const PREFIX = 'bridgetable-', OWNER_CODE = '1726', LOBBY = 'bridgetable-open-table', LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+  const PREFIX = 'bridgetable-', OWNER_CODE = '1726', LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+  /* Every open app holds one of ROOMS fixed addresses ("rooms"): its table, played alone with robots, is then
+     listed in everyone's lobby. When someone asks to join and the player accepts, that table goes online
+     and the player is its host. */
+  const ROOMS = 20, ROOM = k => PREFIX + 'room-' + k;
   const st = { chat: [], unread: 0, on: false, host: false, guest: false, me: 'local', seat: 2, code: null, peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, savedG: null, msg: '', wake: null, want: 'partner' };
   const NAME_KEY = 'bridge-table-name';
   const myName = () => { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } };
   // a random id for this tab (kept across reloads), so a host can recognise a returning player
   const devTok = () => { try { let t = sessionStorage.getItem('bridge-table-tok'); if (!t) { t = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('bridge-table-tok', t); } return t; } catch (e) { return st.tok || (st.tok = Math.random().toString(36).slice(2)); } };
-  const PIN_KEY = 'bridge-table-pin';
-  const myPin = () => { try { return localStorage.getItem(PIN_KEY) || ''; } catch (e) { return ''; } };
-  const setPin = p => { try { localStorage.setItem(PIN_KEY, p); } catch (e) {} };
+  // the host code is never stored: it has to be typed each time (an older version kept it; forget that copy)
+  try { localStorage.removeItem('bridge-table-pin'); } catch (e) {}
   const setName = n => { try { localStorage.setItem(NAME_KEY, n); } catch (e) {} };
   const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -3351,7 +3358,6 @@ const Net = (() => {
       document.head.appendChild(s);
     });
   }
-  const newCode = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 6; i++) s += A[E.rnd(A.length)]; return s; };
   // players join from the plain app address; the host accepts each one
   const link = () => location.origin + location.pathname.replace(/[^/]*$/, '');
 
@@ -3382,57 +3388,87 @@ const Net = (() => {
   async function wakeOn() { try { st.wake = await navigator.wakeLock.request('screen'); } catch (e) {} }
   function wakeOff() { try { st.wake && st.wake.release(); } catch (e) {} st.wake = null; }
 
+  /* ---- your table's address (room) and the lobby ---- */
+  async function claimSlot() {
+    if (st.slot || st.claiming || !navigator.onLine) return; st.claiming = true;
+    try { await loadLib(); } catch (e) { st.claiming = false; return; }
+    for (let k = 1; k <= ROOMS && !st.slot; k++) {
+      const p = await new Promise(res => {
+        const p = new Peer(ROOM(k)), t = setTimeout(() => { try { p.destroy(); } catch (e) {} res(null); }, 8000);
+        p.on('open', () => { clearTimeout(t); res(p); });
+        p.on('error', () => { clearTimeout(t); try { p.destroy(); } catch (e) {} res(null); });   // taken by another player: try the next room
+      });
+      if (!p) continue;
+      st.slot = { peer: p, k };
+      p.on('connection', conn => { conn.on('data', d => onSlotData(conn, d)); conn.on('close', () => drop(conn)); conn.on('error', () => drop(conn)); });
+      p.on('disconnected', () => { try { if (!p.destroyed) p.reconnect(); } catch (e) {} });
+      p.on('close', () => { if (st.slot && st.slot.peer === p) st.slot = null; });
+    }
+    st.claiming = false;
+  }
+  // what the lobby sees of this table
+  function tableInfo() {
+    return { t: 'info', k: st.slot ? st.slot.k : 0, host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0 };
+  }
+  function onSlotData(conn, d) {
+    if (!d || !d.t) return;
+    if (d.t === 'info') { try { conn.send(tableInfo()); } catch (e) {} setTimeout(() => { try { conn.close(); } catch (e) {} }, 1500); return; }
+    if (d.t === 'hello' && st.guest) { try { conn.send({ t: 'declined' }); } catch (e) {} return; }   // sitting at someone else's table
+    onHostData(conn, d);
+  }
+  // the tables in the lobby: ask every room who is there (rooms nobody holds simply do not answer)
+  async function findTables() {
+    if (st.finding) return; st.finding = true; render(); panelRefresh();
+    const out = [];
+    try {
+      await loadLib();
+      const p = await new Promise(res => { const p = new Peer(); p.on('open', () => res(p)); p.on('error', () => res(null)); setTimeout(() => res(null), 8000); });
+      if (p) {
+        await new Promise(res => {
+          for (let k = 1; k <= ROOMS; k++) {
+            if (st.slot && st.slot.k === k) continue;
+            const c = p.connect(ROOM(k), { reliable: true });
+            c.on('open', () => c.send({ t: 'info' }));
+            c.on('data', d => { if (d && d.t === 'info' && !d.busy && !out.some(o => o.k === d.k)) out.push(d); try { c.close(); } catch (e) {} });
+          }
+          setTimeout(res, 5000);
+        });
+        try { p.destroy(); } catch (e) {}
+      }
+    } catch (e) {}
+    st.tables = out.sort((a, b) => a.k - b.k); st.tablesAt = Date.now(); st.finding = false;
+    render(); panelRefresh();
+  }
+  // the lobby list, used on the start screen and in the Online panel
+  function tablesHtml() {
+    const L = st.tables;
+    const rows = !L ? '' : L.length ? L.map(t => {
+      const players = Object.values(t.names || {}).filter(Boolean);
+      return `<div class="lseat"><b>${t.online ? 'Online' : 'Alone'}</b><span>${esc(t.host)}'s table${t.online ? ' · ' + players.map(esc).join(', ') : ' · playing with robots'}</span><button class="btn gold" data-jt="${t.k}">Ask to join</button></div>`;
+    }).join('') : '<div class="muted">No other tables are open right now.</div>';
+    return `<div class="tables">${rows}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? 'Looking for tables…' : L ? 'Refresh the list' : 'Show open tables'}</button></div>`;
+  }
+  // this player's own table goes online: they become its host (requests are accepted one by one)
+  function becomeHost() {
+    if (st.host || !st.slot) return !!st.host;
+    Object.assign(st, { peer: st.slot.peer, on: true, host: true, guest: false, me: 'host', code: 'room-' + st.slot.k, seats: { [SET.seat]: 'host' }, names: { [SET.seat]: myName() || 'Host' }, msg: '' });
+    wakeOn(); ping();
+    if (!G || G.phase === 'idle') { clearTimeout(timer); G = lobbyG(); }
+    save(); return true;
+  }
+
   /* ---- host ---- */
+  // the table owner opens an empty waiting room on purpose (with the host code)
   async function host() {
     st.msg = 'Opening the table…'; panel();
     try {
-      await loadLib();
-      let peer = null;
-      for (let i = 0; i < 3 && !peer; i++) {
-        st.code = i === 0 ? OWNER_CODE : newCode();   // the owner's table uses the fixed code; a random one if it is still taken
-        peer = await new Promise(res => { const p = new Peer(PREFIX + st.code); p.on('open', () => res(p)); p.on('error', () => { p.destroy(); res(null); }); });
-      }
-      if (!peer) throw new Error('Could not reach the connection service. Try again in a moment.');
-      Object.assign(st, { peer, on: true, host: true, guest: false, me: 'host', seats: { [SET.seat]: 'host' }, names: { [SET.seat]: myName() || 'Host' }, msg: '' });
-      peer.on('connection', conn => {
-        conn.on('data', d => onHostData(conn, d));
-        conn.on('close', () => drop(conn)); conn.on('error', () => drop(conn));
-      });
-      peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
-      wakeOn(); ping();
+      await claimSlot();
+      if (!st.slot) throw new Error('Could not reach the connection service. Try again in a moment.');
+      becomeHost();
       // the table starts as an empty waiting room: no cards until everyone is seated and the host presses Start
       clearTimeout(timer); G = lobbyG(); save();
-      openAlias();
     } catch (e) { st.msg = e.message; }
     panel(); render(); tick();
-  }
-  /* The open table also answers on a fixed address, so someone who opens the plain app link
-     (…/bridge/ without a code) is offered this table and can join it. */
-  function openAlias() {
-    const p = new Peer(LOBBY);
-    p.on('open', () => { if (st.host) st.alias = p; else p.destroy(); });
-    p.on('error', () => { try { p.destroy(); } catch (e) {} });   // another table already uses the address
-    p.on('connection', conn => conn.on('data', d => {
-      if (d && d.t === 'info' && st.host) conn.send({ t: 'info', code: st.code, host: st.names[SET.seat] || 'Host', names: st.names });
-      setTimeout(() => { try { conn.close(); } catch (e) {} }, 1500);
-    }));
-  }
-  // on start-up (no invite code in the link): is there an open table to join?
-  async function probe(manual) {
-    if (st.on || (st.probed && !manual) || !navigator.onLine) { if (manual) flash('You are offline', 1500); return; } st.probed = true;
-    try { await loadLib(); } catch (e) { return; }
-    const p = new Peer(); let done = false, found = false;
-    const end = () => { if (done) return; done = true; try { p.destroy(); } catch (e) {} if (manual && !found) flash('No table is open right now', 2000); };
-    setTimeout(end, 10000);
-    p.on('error', end);
-    p.on('open', () => {
-      const c = p.connect(LOBBY, { reliable: true });
-      c.on('open', () => c.send({ t: 'info' }));
-      c.on('data', d => {
-        if (!d || d.t !== 'info' || !d.code || st.on || ui.overlay) { end(); return; }
-        found = true; end(); st.msg = ''; st.offer = d; showJoin(d.code);
-      });
-    });
   }
   // the host removes a player: a robot takes the seat and that player cannot come back to this table
   function kick(s) {
@@ -3453,7 +3489,8 @@ const Net = (() => {
   const nameKey = n => String(n || '').trim().toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').replace(/\s+/g, '');
   function nameTaken(n, except) {
     const k = nameKey(n || 'Guest');
-    const used = Object.keys(st.names).filter(s => +s !== except).map(s => st.names[s]).concat(Object.values(st.pending || {}).map(p => p.d.name));
+    const names = st.host ? st.names : { [SET.seat]: myName() || 'Player' };   // before going online, only the player is at the table
+    const used = Object.keys(names).filter(s => +s !== except).map(s => names[s]).concat(Object.values(st.pending || {}).map(p => p.d.name));
     return used.some(u => nameKey(u) === k);
   }
   function seatPlayer(conn, d, back) {
@@ -3475,7 +3512,9 @@ const Net = (() => {
   function accept(id) {
     const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
     if (nameTaken(p.d.name)) { try { p.conn.send({ t: 'nametaken' }); } catch (e) {} setTimeout(() => { try { p.conn.close(); } catch (e) {} }, 500); panelRefresh(); render(); return; }
-    if (p.conn.open) seatPlayer(p.conn, p.d, null); else { panelRefresh(); render(); }
+    if (!p.conn.open) { panelRefresh(); render(); return; }
+    becomeHost();   // the first accepted player turns this table into an online table
+    seatPlayer(p.conn, p.d, null);
   }
   function decline(id) {
     const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
@@ -3546,9 +3585,8 @@ const Net = (() => {
   function stop() {
     for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
     for (const a of Object.values(st.away || {})) clearTimeout(a.t); st.away = {};
-    try { st.alias && st.alias.destroy(); } catch (e) {} st.alias = null;
-    const cs = [...st.conns.values()], pr = st.peer;   // close a moment later so the goodbye arrives first
-    setTimeout(() => { for (const c of cs) { try { c.close(); } catch (e) {} } try { pr && pr.destroy(); } catch (e) {} }, 500);
+    const cs = [...st.conns.values()];   // close a moment later so the goodbye arrives first (the room address is kept)
+    setTimeout(() => { for (const c of cs) { try { c.close(); } catch (e) {} } }, 500);
     wakeOff();
     Object.assign(st, { on: false, host: false, guest: false, me: 'local', peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, code: null, msg: '' });
     if (G && G.phase === "lobby") { G = idleG(); render(); return; }   // nobody started: back to the start screen
@@ -3568,7 +3606,7 @@ const Net = (() => {
       let welcomed = false, failed = false, waiting = false;
       const fail = msg => { if (welcomed || failed) return; failed = true; try { peer.destroy(); } catch (e) {} if (retry) { retry(false); return; } st.msg = msg; showJoin(code); };
       setTimeout(() => { if (!welcomed && !waiting) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
-      peer.on('error', e => { if (e.type === 'peer-unavailable') fail('No table with code ' + code + ' is open right now.'); });
+      peer.on('error', e => { if (e.type === 'peer-unavailable') fail('That table is not open any more.'); });
       peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
       conn.on('open', () => conn.send({ t: 'hello', name, want, tok: devTok(), seat: retry ? st.seat : undefined }));
       conn.on('data', d => {
@@ -3686,6 +3724,11 @@ const Net = (() => {
   }
 
   /* ---- screens ---- */
+  // players asking to join this table, each with Accept / Decline
+  function pendHtml() {
+    const pend = Object.entries(st.pending || {});
+    return pend.length ? `<div class="grp"><span>Asking to join</span>${pend.map(([id, p]) => `<div class="helprow"><span><b>${esc(String(p.d.name || 'Guest').slice(0, 20))}</b> ${p.d.want === 'opp' ? '(opponent)' : '(partner)'}</span><span><button class="btn gold" data-accept="${esc(id)}">Accept</button> <button class="btn" data-decline="${esc(id)}">Decline</button></span></div>`).join('')}</div>` : '';
+  }
   function panel() {
     if (st.guest) {
       openOv('net', `<h2>Online table ${esc(st.code)}</h2><div>You sit <b>${SEAT[st.seat]}</b>. The host's device runs the table; robots fill the empty seats.</div>
@@ -3694,9 +3737,8 @@ const Net = (() => {
     }
     if (st.host) {
       const L = link(), wa = 'https://wa.me/?text=' + encodeURIComponent('Bridge: open ' + L + ' and ask to join my table');
-      const pend = Object.entries(st.pending || {});
       openOv('net', `<h2>Your online table</h2>
-        ${pend.length ? `<div class="grp"><span>Asking to join</span>${pend.map(([id, p]) => `<div class="helprow"><span><b>${esc(String(p.d.name || 'Guest').slice(0, 20))}</b> ${p.d.want === 'opp' ? '(opponent)' : '(partner)'}</span><span><button class="btn gold" data-accept="${esc(id)}">Accept</button> <button class="btn" data-decline="${esc(id)}">Decline</button></span></div>`).join('')}</div>` : ''}
+        ${pendHtml()}
         <div class="grp"><span>App link</span><input class="tok wide" id="nLink" readonly value="${esc(L)}"></div>
         <div class="row2"><a class="btn gold" href="${wa}" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn" id="nCopy">Copy link</button></div>
         <div class="grp"><span>Seats</span>${[0, 1, 2, 3].map(s => `<div class="helprow"><span><b>${SEAT[s]}</b></span><span>${st.seats[s] === 'host' ? esc(st.names[s]) + ' (you)' : st.seats[s] ? esc(st.names[s]) + ` <button class="btn" data-kick="${s}">Remove</button>` : '<i>Robot</i>'}</span></div>`).join('')}</div>
@@ -3706,19 +3748,20 @@ const Net = (() => {
       return;
     }
     openOv('net', `<h2>Play online</h2>
-      <div class="muted">The table owner opens a table with the host code. Friends just open the app (https://servetsvm.github.io/bridge/): while a table is open they are offered it, ask to join, and the owner accepts them. Robots fill the empty seats.</div>
+      ${pendHtml()}
+      <div class="muted">Your table is listed in everyone's lobby while you play${st.slot ? '' : ' (connecting…)'}. When someone asks to join and you accept, your table goes online and you are its host. Or ask to join one of the tables below.</div>
       <div class="grp"><span>Your name</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="Your name"></div>
-      <div class="grp"><span>Host code (table owner only)</span><input class="tok wide" id="nPin" type="password" inputmode="numeric" maxlength="12" value="${esc(myPin())}" placeholder="Host code"></div>
+      <div class="grp"><span>Open tables</span>${tablesHtml()}</div>
+      <div class="grp"><span>Empty waiting room (table owner, host code)</span><input class="tok wide" id="nPin" type="password" inputmode="numeric" maxlength="12" autocomplete="off" value="" placeholder="Host code"></div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(st.msg)}</div>` : ''}
-      <div class="row2"><button class="btn gold" id="nFind">Find a table</button></div>
-      <div class="row2"><button class="btn gold" id="nStart">Start a table</button><button class="btn" id="oClose">Close</button></div>`);
+      <div class="row2"><button class="btn" id="nStart">Open a waiting room</button><button class="btn gold" id="oClose">Close</button></div>`);
   }
   const panelRefresh = () => { if (ui.overlay === 'net') panel(); };
   function showJoin(code) {
     st.joinCode = code;
-    const offer = st.offer && st.offer.code === code ? st.offer : null;
-    openOv('net', `<h2>${offer ? esc(offer.host) + "'s table is open" : 'Join table ' + esc(code)}</h2>
-      ${offer ? `<div class="muted">Table ${esc(code)} · ${[0, 1, 2, 3].map(s => SEAT[s] + ': ' + esc((offer.names || {})[s] || 'empty')).join(' · ')}</div>` : ''}
+    const offer = st.offer && 'room-' + st.offer.k === code ? st.offer : null;
+    openOv('net', `<h2>${offer ? 'Join ' + esc(offer.host) + "'s table" : 'Join table ' + esc(code)}</h2>
+      ${offer ? `<div class="muted">${[0, 1, 2, 3].map(s => SEAT[s] + ': ' + esc((offer.names || {})[s] || 'robot')).join(' · ')}. ${esc(offer.host)} decides whether you can sit.</div>` : ''}
       <div class="grp"><span>Your name</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="Your name"></div>
       <div class="grp"><span>Sit as</span><div class="seg2">${[['partner', "The host's partner"], ['opp', 'An opponent']].map(([v, l]) => `<button data-want="${v}" class="${st.want === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(st.msg)}</div>` : ''}
@@ -3731,6 +3774,7 @@ const Net = (() => {
     if (t.dataset.kick != null) { kick(+t.dataset.kick); return; }
     if (t.dataset.accept) { accept(t.dataset.accept); return; }
     if (t.dataset.decline) { decline(t.dataset.decline); return; }
+    if (t.dataset.jt) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jt); st.offer = tb || null; st.msg = ''; showJoin('room-' + t.dataset.jt); return; }
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {
       case "bNet": panel(); break;
@@ -3739,10 +3783,10 @@ const Net = (() => {
       case 'nStart': {
         const n = document.getElementById('nName'), p = document.getElementById('nPin'), pin = p ? p.value.trim() : '';
         setName((n && n.value.trim()) || 'Host');
-        if (pin !== OWNER_CODE) { st.msg = 'Only the table owner can open a table: enter the host code.'; panel(); break; }
-        setPin(pin); host(); break;
+        if (pin !== OWNER_CODE) { st.msg = 'Only the table owner can open a waiting room: enter the host code.'; panel(); break; }
+        host(); break;
       }
-      case 'nFind': closeOv(); flash('Looking for an open table…', 1500); probe(true); break;
+      case 'nFind': findTables(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
       case 'nStop': stop(); closeOv(); break;
       case 'nLeave': leave(); closeOv(); break;
@@ -3753,15 +3797,17 @@ const Net = (() => {
   document.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target && ev.target.id === "nMsg") { ev.preventDefault(); const i = ev.target; if (i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } } });
   // opened through an invite link
   function boot() {
-    const m = location.hash.match(/^#join-([A-Z0-9]{4,8})$/i);
+    const m = location.hash.match(/^#join-([A-Za-z0-9-]{4,10})$/i);
     // a new invite while sitting at another table: leave that one cleanly first (stops any reconnect attempts)
     if (m && st.guest) leave();
-    if (m) { history.replaceState(null, '', location.pathname); st.savedG = null; setTimeout(() => showJoin(m[1].toUpperCase()), 300); }
-    else setTimeout(probe, 1500);
+    if (m) { history.replaceState(null, '', location.pathname); st.savedG = null; setTimeout(() => showJoin(m[1]), 300); }
   }
   boot();
   window.addEventListener('hashchange', boot);
-  return { st, owner, broadcast, send, panel, sit, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  // take a room so this table shows up in the lobby, and look at the other tables
+  setTimeout(() => { claimSlot().then(() => { if (!st.tables) findTables(); }); }, 800);
+  window.addEventListener('online', () => claimSlot());
+  return { st, owner, broadcast, send, panel, sit, tablesHtml, findTables, pendHtml, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

@@ -378,3 +378,6 @@ tr.rev:hover td,tr.rev:active td{background:#f3efdd}
   #bar .tools .btn{flex:1 0 auto;padding:7px 8px}
   #table{margin-top:0}
 }
+.tables{display:flex;flex-direction:column;gap:6px}
+.tables .lseat b{width:auto;min-width:52px}
+.lobby .helprow{display:flex;justify-content:space-between;align-items:center;gap:8px}
