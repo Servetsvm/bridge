@@ -338,3 +338,16 @@ body.classic #app{padding-left:max(2px,env(safe-area-inset-left,0px));padding-ri
   #bidbox button{padding:5px 0}
   #bidbox button.st{font-size:26px;padding:4px 0}
 }
+
+/* online waiting room: the felt shows the seats instead of cards until the host presses Start */
+#table.lobby #pos1,#table.lobby #pos2,#table.lobby #pos3{display:none}
+#table.lobby #center{grid-column:1/4;cursor:default}
+body.inlobby #pos0{display:none}
+.lobby{background:var(--sheet,#f6f3e8);color:var(--sheet-ink,#222);border-radius:10px;padding:12px;width:min(100%,440px);align-self:center;display:flex;flex-direction:column;gap:8px}
+.lobby h3{margin:0;font-size:18px}
+.lseat{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #dcdccf;border-radius:8px;padding:8px 10px;min-height:44px}
+.lseat b{width:52px;flex:none}
+.lseat span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lseat.me{border-color:var(--brass,#c9a227);box-shadow:inset 0 0 0 1px var(--brass,#c9a227)}
+.lseat .btn{flex:none;padding:6px 10px}
+.lobby .row2 .btn{font-size:16px;padding:10px}

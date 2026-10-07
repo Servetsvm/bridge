@@ -38,6 +38,7 @@ function save() {
 function load(d) {
   d = d || Store.loadLocal();
   if (d) { SET = Object.assign(SET, d.SET || {}); G = d.G || null; HIST = d.HIST || []; BOARD = d.BOARD || 0; }
+  if (G && G.phase === "lobby") G = null; // an online waiting room is not restored after a restart
   SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) };
   loadSeen();
   for (const h of HIST) if (h.deal) SEEN.add(E.dealKey(h.deal));
@@ -386,6 +387,19 @@ function auctionPanel() {
   const ex = e ? explHtml(e, ui.hintBid ? 'Suggestion:' : null) : '';
   return `<div class="auction">${auctionTable(G.auction, G.phase === 'bid')}</div>${e && SET.expl ? `<div class="expl" id="dExpl" role="button" tabindex="0">${ex}</div>` : `<div class="muted tap">Tap a call to see what it means</div>`}`;
 }
+/* online waiting room: who sits where, free seats to take, and the host's Start button */
+const esc = s => String(s || "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
+function lobbyG() {
+  const bn = BOARD + 1;
+  return { id: "lobby-" + Date.now().toString(36), board: bn, dealer: dealerOf(bn), deal: [[], [], [], []], auction: [], phase: "lobby", play: null, result: null, claimed: false, field: null, cards: sideCards() };
+}
+function lobbyHtml() {
+  const nm = Net.st.names || {}, me = U();
+  const order = [2, 3, 0, 1].map(r => (me + r) % 4);   // partner at the top, you near the bottom
+  const row = s => { const who = nm[s]; const free = !who; return `<div class="lseat${s === me ? " me" : ""}"><b>${SEAT[s]}</b><span>${who ? esc(who) + (s === me ? " (you)" : "") : "Empty — a robot plays"}</span>${free && guest() ? `<button class="btn" data-sit="${s}">Sit here</button>` : ""}</div>`; };
+  return `<div class="lobby"><h3>Online table ${esc(Net.st.code || "")}</h3>${order.map(row).join("")}
+    ${guest() ? `<div class="muted">Tap “Sit here” to change seats. The host starts the game.</div>` : `<div class="row2"><button class="btn" id="bNet">Invite</button><button class="btn new" id="bStart">Start</button></div>`}</div>`;
+}
 function renderTable() {
   for (let seat = 0; seat < 4; seat++) {
     const r = rel(seat), el = $('pos' + r);
@@ -397,6 +411,8 @@ function renderTable() {
   }
   $('table').classList.toggle('bidding', G.phase === 'bid');
   const C = $('center');
+  $("table").classList.toggle("lobby", G.phase === "lobby"); document.body.classList.toggle("inlobby", G.phase === "lobby");
+  if (G.phase === "lobby") { C.innerHTML = lobbyHtml(); return; }
   if (G.phase === 'bid') C.innerHTML = auctionPanel();
   else if (G.phase === 'play') {
     // tap the table to look at the last finished trick; tap again (or wait) to come back
@@ -435,6 +451,7 @@ function renderStatus() {
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
   if (G.phase === 'bid') s = bidTurn() === U() ? 'Your call' : `${nameOf(bidTurn())} is thinking…`;
   else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = 'Gathering the trick…'; else if (userControls(g.turn)) s = g.turn === U() ? 'Your turn: play a card' : `Play from ${SEAT[g.turn]}'s hand`; else s = `${nameOf(g.turn)} is playing…`; }
+  else if (G.phase === "lobby") s = guest() ? "Waiting for the host to start" : "Waiting for players — press Start when everyone is seated";
   else s = 'Board finished';
   $("status").innerHTML = s + (ui.signal && G.phase === "play" ? `<div class="sig">${symText(ui.signal)}</div>` : "");
 }
@@ -613,6 +630,8 @@ document.addEventListener('click', ev_ => {
   const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
   if (t.id === 'toast') { ui.toast = null; render(); return; }
+  if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
+  if (t.id === "bStart") { if (online() && !guest() && G.phase === "lobby") { Net.note((Net.st.names[SET.seat] || "Host") + " started the game"); newBoard(); } return; }
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
   if (t.dataset.call != null && G.phase === 'bid' && bidTurn() === U()) { const v = t.dataset.call; const c = (v === 'P' || v === 'X' || v === 'XX') ? v : +v; if (c !== -1) makeCall(U(), c); return; }

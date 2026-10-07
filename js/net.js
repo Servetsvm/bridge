@@ -5,7 +5,7 @@
    they are allowed to see. */
 const Net = (() => {
   'use strict';
-  const PREFIX = 'bridgetable-', LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+  const PREFIX = 'bridgetable-', LOBBY = 'bridgetable-open-table', LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
   const st = { chat: [], unread: 0, on: false, host: false, guest: false, me: 'local', seat: 2, code: null, peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, savedG: null, msg: '', wake: null, want: 'partner' };
   const NAME_KEY = 'bridge-table-name';
   const myName = () => { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } };
@@ -69,13 +69,57 @@ const Net = (() => {
         conn.on('close', () => drop(conn)); conn.on('error', () => drop(conn));
       });
       peer.on('disconnected', () => { try { peer.reconnect(); } catch (e) {} });
-      wakeOn();
+      wakeOn(); ping();
+      // the table starts as an empty waiting room: no cards until everyone is seated and the host presses Start
+      clearTimeout(timer); G = lobbyG(); save();
+      openAlias();
     } catch (e) { st.msg = e.message; }
     panel(); render(); tick();
   }
+  /* The open table also answers on a fixed address, so someone who opens the plain app link
+     (…/bridge/ without a code) is offered this table and can join it. */
+  function openAlias() {
+    const p = new Peer(LOBBY);
+    p.on('open', () => { if (st.host) st.alias = p; else p.destroy(); });
+    p.on('error', () => { try { p.destroy(); } catch (e) {} });   // another table already uses the address
+    p.on('connection', conn => conn.on('data', d => {
+      if (d && d.t === 'info' && st.host) conn.send({ t: 'info', code: st.code, host: st.names[SET.seat] || 'Host', names: st.names });
+      setTimeout(() => { try { conn.close(); } catch (e) {} }, 1500);
+    }));
+  }
+  // on start-up (no invite code in the link): is there an open table to join?
+  async function probe() {
+    if (st.on || st.probed || !navigator.onLine) return; st.probed = true;
+    try { await loadLib(); } catch (e) { return; }
+    const p = new Peer(); let done = false;
+    const end = () => { if (done) return; done = true; try { p.destroy(); } catch (e) {} };
+    setTimeout(end, 10000);
+    p.on('error', end);
+    p.on('open', () => {
+      const c = p.connect(LOBBY, { reliable: true });
+      c.on('open', () => c.send({ t: 'info' }));
+      c.on('data', d => {
+        if (!d || d.t !== 'info' || !d.code || st.on || ui.overlay) { end(); return; }
+        end(); st.msg = ''; st.offer = d; showJoin(d.code);
+      });
+    });
+  }
+  // a seated guest moves to another empty seat while the table waits for Start
+  function sit(s) { if (st.guest) send({ t: 'sit', s }); }
   function onHostData(conn, d) {
     if (!d || !d.t) return;
     const seatOf = id => +Object.keys(st.seats).find(s => st.seats[s] === id);
+    if (d.t === 'sit') {
+      const from = seatOf(conn.peer), to = +d.s;
+      if (G && G.phase === 'lobby' && !Number.isNaN(from) && to >= 0 && to < 4 && !st.seats[to]) {
+        st.seats[to] = st.seats[from]; st.names[to] = st.names[from]; delete st.seats[from]; delete st.names[from];
+        const toks = st.toks || {}; if (toks[from]) { toks[to] = toks[from]; delete toks[from]; }
+        try { conn.send({ t: 'seat', seat: to }); } catch (e) {}
+        addChat(null, st.names[to] + ' moved to ' + SEAT[to]);
+        broadcast(); panelRefresh(); render();
+      }
+      return;
+    }
     if (d.t === 'hello') {
       const hs = SET.seat, away = st.away || (st.away = {});
       const free = [0, 1, 2, 3].filter(s => !st.seats[s]);
@@ -127,10 +171,12 @@ const Net = (() => {
   function stop() {
     for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
     for (const a of Object.values(st.away || {})) clearTimeout(a.t); st.away = {};
+    try { st.alias && st.alias.destroy(); } catch (e) {} st.alias = null;
     const cs = [...st.conns.values()], pr = st.peer;   // close a moment later so the goodbye arrives first
     setTimeout(() => { for (const c of cs) { try { c.close(); } catch (e) {} } try { pr && pr.destroy(); } catch (e) {} }, 500);
     wakeOff();
     Object.assign(st, { on: false, host: false, guest: false, me: 'local', peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, code: null, msg: '' });
+    if (G && G.phase === "lobby") { newBoard(); return; }   // nobody started: back to a normal game
     render(); tick();
   }
 
@@ -159,6 +205,7 @@ const Net = (() => {
         } else if (d.t === 'state') applyState(d.v);
         else if (d.t === "full") fail("That table is full.");
         else if (d.t === "chat") gotChat(d.m);
+        else if (d.t === "seat") { st.seat = d.seat; render(); }
         else if (d.t === "bye") { st.rejoin = null; if (st.guest) leave('The host closed the table.'); }
         else if (d.t === "hint" && G && d.id === G.id && G.phase === "play") { ui.hintCard = d.c; render(); }
       });
@@ -285,7 +332,9 @@ const Net = (() => {
   const panelRefresh = () => { if (ui.overlay === 'net') panel(); };
   function showJoin(code) {
     st.joinCode = code;
-    openOv('net', `<h2>Join table ${esc(code)}</h2>
+    const offer = st.offer && st.offer.code === code ? st.offer : null;
+    openOv('net', `<h2>${offer ? esc(offer.host) + "'s table is open" : 'Join table ' + esc(code)}</h2>
+      ${offer ? `<div class="muted">Table ${esc(code)} · ${[0, 1, 2, 3].map(s => SEAT[s] + ': ' + esc((offer.names || {})[s] || 'empty')).join(' · ')}</div>` : ''}
       <div class="grp"><span>Your name</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="Your name"></div>
       <div class="grp"><span>Sit as</span><div class="seg2">${[['partner', "The host's partner"], ['opp', 'An opponent']].map(([v, l]) => `<button data-want="${v}" class="${st.want === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(st.msg)}</div>` : ''}
@@ -314,8 +363,9 @@ const Net = (() => {
     // a new invite while sitting at another table: leave that one cleanly first (stops any reconnect attempts)
     if (m && st.guest) leave();
     if (m) { history.replaceState(null, '', location.pathname); st.savedG = null; setTimeout(() => showJoin(m[1].toUpperCase()), 300); }
+    else setTimeout(probe, 1500);
   }
   boot();
   window.addEventListener('hashchange', boot);
-  return { st, owner, broadcast, send, panel, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, broadcast, send, panel, sit, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
