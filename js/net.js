@@ -5,12 +5,15 @@
    they are allowed to see. */
 const Net = (() => {
   'use strict';
-  const PREFIX = 'bridgetable-', LOBBY = 'bridgetable-open-table', LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+  const PREFIX = 'bridgetable-', OWNER_CODE = '1726', LOBBY = 'bridgetable-open-table', LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
   const st = { chat: [], unread: 0, on: false, host: false, guest: false, me: 'local', seat: 2, code: null, peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, savedG: null, msg: '', wake: null, want: 'partner' };
   const NAME_KEY = 'bridge-table-name';
   const myName = () => { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } };
   // a random id for this tab (kept across reloads), so a host can recognise a returning player
   const devTok = () => { try { let t = sessionStorage.getItem('bridge-table-tok'); if (!t) { t = Math.random().toString(36).slice(2) + Date.now().toString(36); sessionStorage.setItem('bridge-table-tok', t); } return t; } catch (e) { return st.tok || (st.tok = Math.random().toString(36).slice(2)); } };
+  const PIN_KEY = 'bridge-table-pin';
+  const myPin = () => { try { return localStorage.getItem(PIN_KEY) || ''; } catch (e) { return ''; } };
+  const setPin = p => { try { localStorage.setItem(PIN_KEY, p); } catch (e) {} };
   const setName = n => { try { localStorage.setItem(NAME_KEY, n); } catch (e) {} };
   const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -23,7 +26,8 @@ const Net = (() => {
     });
   }
   const newCode = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 6; i++) s += A[E.rnd(A.length)]; return s; };
-  const link = () => location.origin + location.pathname.replace(/[^/]*$/, '') + '#join-' + st.code;
+  // players join from the plain app address; the host accepts each one
+  const link = () => location.origin + location.pathname.replace(/[^/]*$/, '');
 
   /* who plays a seat: a human's id, or 'robot'. The declaring side's humans also play the dummy. */
   function owner(seat) {
@@ -59,7 +63,7 @@ const Net = (() => {
       await loadLib();
       let peer = null;
       for (let i = 0; i < 3 && !peer; i++) {
-        st.code = newCode();
+        st.code = i === 0 ? OWNER_CODE : newCode();   // the owner's table uses the fixed code; a random one if it is still taken
         peer = await new Promise(res => { const p = new Peer(PREFIX + st.code); p.on('open', () => res(p)); p.on('error', () => { p.destroy(); res(null); }); });
       }
       if (!peer) throw new Error('Could not reach the connection service. Try again in a moment.');
@@ -88,11 +92,11 @@ const Net = (() => {
     }));
   }
   // on start-up (no invite code in the link): is there an open table to join?
-  async function probe() {
-    if (st.on || st.probed || !navigator.onLine) return; st.probed = true;
+  async function probe(manual) {
+    if (st.on || (st.probed && !manual) || !navigator.onLine) { if (manual) flash('You are offline', 1500); return; } st.probed = true;
     try { await loadLib(); } catch (e) { return; }
-    const p = new Peer(); let done = false;
-    const end = () => { if (done) return; done = true; try { p.destroy(); } catch (e) {} };
+    const p = new Peer(); let done = false, found = false;
+    const end = () => { if (done) return; done = true; try { p.destroy(); } catch (e) {} if (manual && !found) flash('No table is open right now', 2000); };
     setTimeout(end, 10000);
     p.on('error', end);
     p.on('open', () => {
@@ -100,12 +104,50 @@ const Net = (() => {
       c.on('open', () => c.send({ t: 'info' }));
       c.on('data', d => {
         if (!d || d.t !== 'info' || !d.code || st.on || ui.overlay) { end(); return; }
-        end(); st.msg = ''; st.offer = d; showJoin(d.code);
+        found = true; end(); st.msg = ''; st.offer = d; showJoin(d.code);
       });
     });
   }
+  // the host removes a player: a robot takes the seat and that player cannot come back to this table
+  function kick(s) {
+    if (!st.host) return; const id = st.seats[s]; if (!id || id === 'host') return;
+    const who = st.names[s] || SEAT[s], c = st.conns.get(id), tok = (st.toks || {})[s];
+    if (tok) (st.banned || (st.banned = [])).push(tok);
+    st.conns.delete(id); delete st.seats[s]; delete st.names[s]; if (st.toks) delete st.toks[s];
+    if (st.away && st.away[s]) { clearTimeout(st.away[s].t); delete st.away[s]; }
+    if (c) { try { c.send({ t: 'kick' }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 500); }
+    addChat(null, who + ' was removed from the table; a robot plays ' + SEAT[s]);
+    broadcast(); panelRefresh(); render(); tick();
+  }
   // a seated guest moves to another empty seat while the table waits for Start
   function sit(s) { if (st.guest) send({ t: 'sit', s }); }
+  /* seat a player: back is the seat a returning player gets back, otherwise a free seat is chosen
+     (the partner's or an opponent's seat as they asked, or any free one) */
+  function seatPlayer(conn, d, back) {
+    const hs = SET.seat, away = st.away || (st.away = {}), toks = st.toks || (st.toks = {});
+    if (back != null) { const old = st.conns.get(st.seats[back]); st.conns.delete(st.seats[back]); if (old && old !== conn) { try { old.close(); } catch (e) {} } }
+    const free = [0, 1, 2, 3].filter(s => !st.seats[s]);
+    const pref = (d.want === 'partner' ? [(hs + 2) % 4] : d.want === 'opp' ? [(hs + 1) % 4, (hs + 3) % 4] : []).filter(s => free.includes(s));
+    const s = back != null ? back : pref.length ? pref[0] : free[0];
+    if (s == null) { conn.send({ t: 'full' }); setTimeout(() => conn.close(), 500); return; }
+    if (back != null && away[s]) { clearTimeout(away[s].t); delete away[s]; }
+    if (d.tok) { for (const k in toks) if (toks[k] === d.tok) delete toks[k]; toks[s] = d.tok; }
+    st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
+    conn.send({ t: 'welcome', seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
+    addChat(null, st.names[s] + (back != null ? ' is back' : ' joined as ' + SEAT[s]));
+    ping();
+    broadcast(); panelRefresh(); render(); tick();
+  }
+  // the host answers a join request
+  function accept(id) {
+    const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
+    if (p.conn.open) seatPlayer(p.conn, p.d, null); else { panelRefresh(); render(); }
+  }
+  function decline(id) {
+    const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
+    try { p.conn.send({ t: 'declined' }); } catch (e) {} setTimeout(() => { try { p.conn.close(); } catch (e) {} }, 500);
+    panelRefresh(); render();
+  }
   function onHostData(conn, d) {
     if (!d || !d.t) return;
     const seatOf = id => +Object.keys(st.seats).find(s => st.seats[s] === id);
@@ -121,24 +163,22 @@ const Net = (() => {
       return;
     }
     if (d.t === 'hello') {
-      const hs = SET.seat, away = st.away || (st.away = {});
-      const free = [0, 1, 2, 3].filter(s => !st.seats[s]);
+      if (d.tok && (st.banned || []).includes(d.tok)) { conn.send({ t: 'kick' }); setTimeout(() => conn.close(), 500); return; }
+      const away = st.away || (st.away = {});
       // a player coming back after a dropped connection gets the seat that was kept for them
       // (recognised by the device token, even before this side has noticed the old connection died)
       const toks = st.toks || (st.toks = {});
       const byTok = d.tok ? Object.keys(toks).find(k => toks[k] === d.tok && st.seats[k] && st.seats[k] !== 'host') : null;
       const back = byTok != null ? +byTok : d.seat != null && away[d.seat] ? +d.seat : null;
-      if (back != null) { const old = st.conns.get(st.seats[back]); st.conns.delete(st.seats[back]); if (old && old !== conn) { try { old.close(); } catch (e) {} } }
-      const pref = (d.want === 'partner' ? [(hs + 2) % 4] : d.want === 'opp' ? [(hs + 1) % 4, (hs + 3) % 4] : []).filter(s => free.includes(s));
-      const s = back != null ? back : d.seat != null && free.includes(+d.seat) ? +d.seat : pref.length ? pref[0] : free[0];
-      if (s == null) { conn.send({ t: 'full' }); setTimeout(() => conn.close(), 500); return; }
-      if (back != null && away[s]) { clearTimeout(away[s].t); delete away[s]; }
-      if (d.tok) { for (const k in toks) if (toks[k] === d.tok) delete toks[k]; toks[s] = d.tok; }
-      st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
-      conn.send({ t: "welcome", seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
-      addChat(null, st.names[s] + (back != null ? " is back" : " joined as " + SEAT[s]));
-      ping();
-      broadcast(); panelRefresh(); render(); tick();
+      // a new player waits until the host accepts them
+      if (back == null) {
+        (st.pending || (st.pending = {}))[conn.peer] = { conn, d };
+        conn.send({ t: 'wait' });
+        conn.on('close', () => { if (st.pending && st.pending[conn.peer]) { delete st.pending[conn.peer]; panelRefresh(); render(); } });
+        flash(String(d.name || 'Guest').slice(0, 20) + ' wants to join the table', 3000); panel();
+        return;
+      }
+      seatPlayer(conn, d, back);
       return;
     }
     const seat = seatOf(conn.peer); if (Number.isNaN(seat)) return;
@@ -176,7 +216,7 @@ const Net = (() => {
     setTimeout(() => { for (const c of cs) { try { c.close(); } catch (e) {} } try { pr && pr.destroy(); } catch (e) {} }, 500);
     wakeOff();
     Object.assign(st, { on: false, host: false, guest: false, me: 'local', peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, code: null, msg: '' });
-    if (G && G.phase === "lobby") { newBoard(); return; }   // nobody started: back to a normal game
+    if (G && G.phase === "lobby") { G = idleG(); render(); return; }   // nobody started: back to the start screen
     render(); tick();
   }
 
@@ -189,9 +229,10 @@ const Net = (() => {
       await loadLib();
       const peer = await new Promise((res, rej) => { const p = new Peer(); p.on('open', () => res(p)); p.on('error', e => rej(new Error('Could not reach the connection service (' + (e.type || 'error') + ').'))); });
       const conn = peer.connect(PREFIX + code, { reliable: true });
-      let welcomed = false, failed = false;
+      st.joinPeer = peer;
+      let welcomed = false, failed = false, waiting = false;
       const fail = msg => { if (welcomed || failed) return; failed = true; try { peer.destroy(); } catch (e) {} if (retry) { retry(false); return; } st.msg = msg; showJoin(code); };
-      setTimeout(() => { if (!welcomed) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
+      setTimeout(() => { if (!welcomed && !waiting) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
       peer.on('error', e => { if (e.type === 'peer-unavailable') fail('No table with code ' + code + ' is open right now.'); });
       peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
       conn.on('open', () => conn.send({ t: 'hello', name, want, tok: devTok(), seat: retry ? st.seat : undefined }));
@@ -199,13 +240,17 @@ const Net = (() => {
         if (!d) return;
         if (d.t === 'welcome') {
           welcomed = true; clearTimeout(timer);
-          Object.assign(st, { peer, conn, on: true, guest: true, host: false, me: peer.id, seat: d.seat, code, msg: "", savedG: st.savedG || G, chat: d.chat || st.chat || [], unread: 0, rejoin: { code, name, want } });
+          st.waiting = false;
+          Object.assign(st, { peer, conn, on: true, guest: true, host: false, me: peer.id, seat: d.seat, code, msg: "", savedG: st.savedG || (G && G.phase === "idle" ? ui.saved : G), chat: d.chat || st.chat || [], unread: 0, rejoin: { code, name, want } });
           if (retry) retry(true); else closeOv();
           wakeOn(); ping();
         } else if (d.t === 'state') applyState(d.v);
         else if (d.t === "full") fail("That table is full.");
         else if (d.t === "chat") gotChat(d.m);
         else if (d.t === "seat") { st.seat = d.seat; render(); }
+        else if (d.t === "wait") { waiting = true; st.waiting = true; st.msg = 'Waiting for the host to accept you…'; showJoin(code); }
+        else if (d.t === "declined") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The host did not accept the request.'; showJoin(code); }
+        else if (d.t === "kick") { st.rejoin = null; if (st.guest) leave('The host removed you from the table.'); else { st.msg = 'The host removed you from this table.'; showJoin(code); } }
         else if (d.t === "bye") { st.rejoin = null; if (st.guest) leave('The host closed the table.'); }
         else if (d.t === "hint" && G && d.id === G.id && G.phase === "play") { ui.hintCard = d.c; render(); }
       });
@@ -267,7 +312,7 @@ const Net = (() => {
     wakeOff();
     const back = st.savedG;
     Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null, rejoin: null, reconnecting: false });
-    G = back; if (!G) newBoard(); else { render(); tick(); }
+    G = back && back.phase !== "lobby" ? back : idleG(); render(); tick();
     if (msg) flash(msg, 3000);
   }
 
@@ -312,21 +357,24 @@ const Net = (() => {
       return;
     }
     if (st.host) {
-      const L = link(), wa = 'https://wa.me/?text=' + encodeURIComponent('Join my bridge table: ' + L);
+      const L = link(), wa = 'https://wa.me/?text=' + encodeURIComponent('Bridge: open ' + L + ' and ask to join my table');
+      const pend = Object.entries(st.pending || {});
       openOv('net', `<h2>Your online table</h2>
-        <div class="grp"><span>Table code</span><div class="bigcode">${esc(st.code)}</div></div>
-        <div class="grp"><span>Invite link</span><input class="tok wide" id="nLink" readonly value="${esc(L)}"></div>
+        ${pend.length ? `<div class="grp"><span>Asking to join</span>${pend.map(([id, p]) => `<div class="helprow"><span><b>${esc(String(p.d.name || 'Guest').slice(0, 20))}</b> ${p.d.want === 'opp' ? '(opponent)' : '(partner)'}</span><span><button class="btn gold" data-accept="${esc(id)}">Accept</button> <button class="btn" data-decline="${esc(id)}">Decline</button></span></div>`).join('')}</div>` : ''}
+        <div class="grp"><span>App link</span><input class="tok wide" id="nLink" readonly value="${esc(L)}"></div>
         <div class="row2"><a class="btn gold" href="${wa}" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn" id="nCopy">Copy link</button></div>
-        <div class="grp"><span>Seats</span>${[0, 1, 2, 3].map(s => `<div class="helprow"><span><b>${SEAT[s]}</b></span><span>${st.seats[s] === 'host' ? esc(st.names[s]) + ' (you)' : st.seats[s] ? esc(st.names[s]) : '<i>Robot</i>'}</span></div>`).join('')}</div>
-        <div class="muted">Friends who open the link choose to sit as your partner or as an opponent. Keep this app open while you play: your device runs the table. Robots play any seat that is empty or whose player leaves.</div>
+        <div class="grp"><span>Seats</span>${[0, 1, 2, 3].map(s => `<div class="helprow"><span><b>${SEAT[s]}</b></span><span>${st.seats[s] === 'host' ? esc(st.names[s]) + ' (you)' : st.seats[s] ? esc(st.names[s]) + ` <button class="btn" data-kick="${s}">Remove</button>` : '<i>Robot</i>'}</span></div>`).join('')}</div>
+        <div class="muted">Anyone who opens the app link while your table is open can ask to join; you accept or decline each request. Keep this app open while you play: your device runs the table. Robots play any seat that is empty or whose player leaves.</div>
         ${st.msg ? `<div class="err">${esc(st.msg)}</div>` : ''}
         <div class="row2"><button class="btn" id="nStop">Close the table</button><button class="btn gold" id="oClose">Done</button></div>`);
       return;
     }
     openOv('net', `<h2>Play online</h2>
-      <div class="muted">Start a table and send the link to your partner or opponents (e.g. on WhatsApp). They open it, choose a seat and play with you; robots fill the empty seats. To join a friend's table, just open the link they sent you.</div>
+      <div class="muted">The table owner opens a table with the host code. Friends just open the app (https://servetsvm.github.io/bridge/): while a table is open they are offered it, ask to join, and the owner accepts them. Robots fill the empty seats.</div>
       <div class="grp"><span>Your name</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="Your name"></div>
+      <div class="grp"><span>Host code (table owner only)</span><input class="tok wide" id="nPin" type="password" inputmode="numeric" maxlength="12" value="${esc(myPin())}" placeholder="Host code"></div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(st.msg)}</div>` : ''}
+      <div class="row2"><button class="btn gold" id="nFind">Find a table</button></div>
       <div class="row2"><button class="btn gold" id="nStart">Start a table</button><button class="btn" id="oClose">Close</button></div>`);
   }
   const panelRefresh = () => { if (ui.overlay === 'net') panel(); };
@@ -338,18 +386,28 @@ const Net = (() => {
       <div class="grp"><span>Your name</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="Your name"></div>
       <div class="grp"><span>Sit as</span><div class="seg2">${[['partner', "The host's partner"], ['opp', 'An opponent']].map(([v, l]) => `<button data-want="${v}" class="${st.want === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(st.msg)}</div>` : ''}
-      <div class="row2"><button class="btn gold" id="nJoin">Join</button><button class="btn" id="oClose">Not now</button></div>`);
+      <div class="row2">${st.waiting ? '' : '<button class="btn gold" id="nJoin">Join</button>'}<button class="btn" id="${st.waiting ? 'nCancel' : 'oClose'}">${st.waiting ? 'Cancel' : 'Not now'}</button></div>`);
   }
 
   document.addEventListener('click', ev => {
     const t = ev.target.closest('button'); if (!t) return;
     if (t.dataset.q) { sendChat(t.dataset.q); return; }
+    if (t.dataset.kick != null) { kick(+t.dataset.kick); return; }
+    if (t.dataset.accept) { accept(t.dataset.accept); return; }
+    if (t.dataset.decline) { decline(t.dataset.decline); return; }
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {
       case "bNet": panel(); break;
       case "bChat": chatPanel(); break;
       case "nSend": { const i = document.getElementById("nMsg"); if (i && i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } break; }
-      case 'nStart': { const n = document.getElementById('nName'); setName((n && n.value.trim()) || 'Host'); host(); break; }
+      case 'nStart': {
+        const n = document.getElementById('nName'), p = document.getElementById('nPin'), pin = p ? p.value.trim() : '';
+        setName((n && n.value.trim()) || 'Host');
+        if (pin !== OWNER_CODE) { st.msg = 'Only the table owner can open a table: enter the host code.'; panel(); break; }
+        setPin(pin); host(); break;
+      }
+      case 'nFind': closeOv(); flash('Looking for an open table…', 1500); probe(true); break;
+      case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
       case 'nStop': stop(); closeOv(); break;
       case 'nLeave': leave(); closeOv(); break;
       case 'nCopy': { const L = link(); (navigator.clipboard ? navigator.clipboard.writeText(L) : Promise.reject()).then(() => flash('Link copied', 1200)).catch(() => { const i = document.getElementById('nLink'); if (i) { i.select(); } }); break; }
@@ -359,7 +417,7 @@ const Net = (() => {
   document.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target && ev.target.id === "nMsg") { ev.preventDefault(); const i = ev.target; if (i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } } });
   // opened through an invite link
   function boot() {
-    const m = location.hash.match(/^#join-([A-Z0-9]{6})$/i);
+    const m = location.hash.match(/^#join-([A-Z0-9]{4,8})$/i);
     // a new invite while sitting at another table: leave that one cleanly first (stops any reconnect attempts)
     if (m && st.guest) leave();
     if (m) { history.replaceState(null, '', location.pathname); st.savedG = null; setTimeout(() => showJoin(m[1].toUpperCase()), 300); }

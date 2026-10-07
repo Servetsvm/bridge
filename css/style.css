@@ -351,3 +351,5 @@ body.inlobby #pos0{display:none}
 .lseat.me{border-color:var(--brass,#c9a227);box-shadow:inset 0 0 0 1px var(--brass,#c9a227)}
 .lseat .btn{flex:none;padding:6px 10px}
 .lobby .row2 .btn{font-size:16px;padding:10px}
+.lseat.req{background:#fff6d6;border-color:var(--brass,#c9a227)}
+.lseat.req .btn{padding:6px 10px}

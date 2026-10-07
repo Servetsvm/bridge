@@ -33,7 +33,7 @@ function saveSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify([...SE
 function save() {
   if (online() && Net.host) Net.broadcast();
   const slim = HIST.map((h, i) => (i < HIST.length - 60 ? { ...h, deal: undefined, fieldList: undefined } : h));
-  Store.saveLocal({ SET, G: guest() ? Net.st.savedG : G, HIST: slim, BOARD });
+  Store.saveLocal({ SET, G: guest() ? Net.st.savedG : (G && G.phase === "idle" ? ui.saved || null : G), HIST: slim, BOARD });
 }
 function load(d) {
   d = d || Store.loadLocal();
@@ -389,6 +389,20 @@ function auctionPanel() {
 }
 /* online waiting room: who sits where, free seats to take, and the host's Start button */
 const esc = s => String(s || "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
+// start screen: shown when the app opens, before anything is dealt
+function idleG() { const g = lobbyG(); g.id = "idle"; g.phase = "idle"; return g; }
+// Start on the start screen: carry on with the saved board, or deal a new one
+function resume() {
+  const s = ui.saved; ui.saved = null;
+  if (!s || s.phase === "done") { newBoard(); return; }
+  G = s; if (!G.field || !G.field.done) Field.start(G); else Field.live[G.id] = { f: G.field, deal: G.deal, board: G.board };
+  render(); tick();
+}
+function idleHtml() {
+  const cont = ui.saved && ui.saved.phase !== "done";
+  return `<div class="lobby"><h3>Bridge Table</h3><div class="muted">Nothing is dealt yet. ${cont ? "Your last board is waiting." : ""}</div>
+    <div class="row2"><button class="btn new" id="bGo">${cont ? "Continue" : "Start"}</button><button class="btn" id="bNet">Online table</button></div></div>`;
+}
 function lobbyG() {
   const bn = BOARD + 1;
   return { id: "lobby-" + Date.now().toString(36), board: bn, dealer: dealerOf(bn), deal: [[], [], [], []], auction: [], phase: "lobby", play: null, result: null, claimed: false, field: null, cards: sideCards() };
@@ -396,9 +410,11 @@ function lobbyG() {
 function lobbyHtml() {
   const nm = Net.st.names || {}, me = U();
   const order = [2, 3, 0, 1].map(r => (me + r) % 4);   // partner at the top, you near the bottom
-  const row = s => { const who = nm[s]; const free = !who; return `<div class="lseat${s === me ? " me" : ""}"><b>${SEAT[s]}</b><span>${who ? esc(who) + (s === me ? " (you)" : "") : "Empty — a robot plays"}</span>${free && guest() ? `<button class="btn" data-sit="${s}">Sit here</button>` : ""}</div>`; };
-  return `<div class="lobby"><h3>Online table ${esc(Net.st.code || "")}</h3>${order.map(row).join("")}
-    ${guest() ? `<div class="muted">Tap “Sit here” to change seats. The host starts the game.</div>` : `<div class="row2"><button class="btn" id="bNet">Invite</button><button class="btn new" id="bStart">Start</button></div>`}</div>`;
+  const row = s => { const who = nm[s]; const free = !who; return `<div class="lseat${s === me ? " me" : ""}"><b>${SEAT[s]}</b><span>${who ? esc(who) + (s === me ? " (you)" : "") : "Empty — a robot plays"}</span>${free && guest() ? `<button class="btn" data-sit="${s}">Sit here</button>` : ""}${!free && !guest() && s !== me ? `<button class="btn" data-kick="${s}">Remove</button>` : ""}</div>`; };
+  const pend = guest() ? [] : Object.entries(Net.st.pending || {});
+  const req = pend.map(([id, p]) => `<div class="lseat req"><b>Join?</b><span>${esc(String(p.d.name || "Guest").slice(0, 20))} ${p.d.want === "opp" ? "(opponent)" : "(partner)"}</span><button class="btn gold" data-accept="${esc(id)}">Accept</button><button class="btn" data-decline="${esc(id)}">Decline</button></div>`).join("");
+  return `<div class="lobby"><h3>Online table</h3>${req}${order.map(row).join("")}
+    ${guest() ? `<div class="muted">Tap “Sit here” to change seats. The host starts the game.</div>` : `<div class="row2"><button class="btn" id="bNet">Share link</button><button class="btn new" id="bStart">Start</button></div>`}</div>`;
 }
 function renderTable() {
   for (let seat = 0; seat < 4; seat++) {
@@ -411,8 +427,8 @@ function renderTable() {
   }
   $('table').classList.toggle('bidding', G.phase === 'bid');
   const C = $('center');
-  $("table").classList.toggle("lobby", G.phase === "lobby"); document.body.classList.toggle("inlobby", G.phase === "lobby");
-  if (G.phase === "lobby") { C.innerHTML = lobbyHtml(); return; }
+  $("table").classList.toggle("lobby", G.phase === "lobby" || G.phase === "idle"); document.body.classList.toggle("inlobby", G.phase === "lobby" || G.phase === "idle");
+  if (G.phase === "lobby" || G.phase === "idle") { C.innerHTML = G.phase === "idle" ? idleHtml() : lobbyHtml(); return; }
   if (G.phase === 'bid') C.innerHTML = auctionPanel();
   else if (G.phase === 'play') {
     // tap the table to look at the last finished trick; tap again (or wait) to come back
@@ -451,6 +467,7 @@ function renderStatus() {
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
   if (G.phase === 'bid') s = bidTurn() === U() ? 'Your call' : `${nameOf(bidTurn())} is thinking…`;
   else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = 'Gathering the trick…'; else if (userControls(g.turn)) s = g.turn === U() ? 'Your turn: play a card' : `Play from ${SEAT[g.turn]}'s hand`; else s = `${nameOf(g.turn)} is playing…`; }
+  else if (G.phase === "idle") s = "Press Start to deal";
   else if (G.phase === "lobby") s = guest() ? "Waiting for the host to start" : "Waiting for players — press Start when everyone is seated";
   else s = 'Board finished';
   $("status").innerHTML = s + (ui.signal && G.phase === "play" ? `<div class="sig">${symText(ui.signal)}</div>` : "");
@@ -631,6 +648,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
   if (t.id === 'toast') { ui.toast = null; render(); return; }
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
+  if (t.id === "bGo") { resume(); return; }
   if (t.id === "bStart") { if (online() && !guest() && G.phase === "lobby") { Net.note((Net.st.names[SET.seat] || "Host") + " started the game"); newBoard(); } return; }
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
@@ -683,11 +701,9 @@ window.addEventListener('resize', layoutFans);
 function start(data) {
   load(data && data.G ? data : null);
   Field.init();
-  if (!G || !G.deal || !G.cards) newBoard();
-  else {
-    if (!G.field || !G.field.done) Field.start(G); else Field.live[G.id] = { f: G.field, deal: G.deal, board: G.board };
-    render(); tick();
-  }
+  // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
+  ui.saved = G && G.deal && G.cards && G.phase !== "lobby" && G.phase !== "idle" ? G : null;
+  G = idleG(); render();
   Store.initCloud(mergeCloud);
   syncNow(true);
   window.addEventListener("online", () => syncNow(true));
