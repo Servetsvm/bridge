@@ -2850,7 +2850,10 @@ function replayDeal() {
 function flash(msg, ms) { ui.toast = msg; render(); setTimeout(() => { if (ui.toast === msg) { ui.toast = null; render(); } }, ms); }
 
 /* ================= rendering ================= */
-const rel = seat => (seat - U() + 4) % 4;
+// the seat drawn at the bottom: normally yours; while your robot partner declares and you play both hands,
+// the declarer's hand (for that board only — it switches back when the board ends)
+const viewSeat = () => { if (G && G.phase === 'play' && G.play) { const d = G.play.contract.decl; if (d === pd(U()) && userControls(d)) return d; } return U(); };
+const rel = seat => (seat - viewSeat() + 4) % 4;
 const ORDER = [3, 2, 0, 1];
 const sortHand = h => h.slice().sort((a, b) => ORDER.indexOf(S(a)) - ORDER.indexOf(S(b)) || R(b) - R(a));
 function cardHtml(c, cls) {
