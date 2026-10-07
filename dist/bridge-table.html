@@ -3354,7 +3354,7 @@ const Net = (() => {
     st.reconnecting = true; st.conn = null;
     const until = Date.now() + 120000, r = st.rejoin;
     const tryOnce = () => {
-      if (!st.guest) { st.reconnecting = false; return; }
+      if (!st.guest || st.rejoin !== r) { st.reconnecting = false; return; }
       if (Date.now() > until) { st.reconnecting = false; leave('Could not get back to the table. Open the invite link again to rejoin.'); return; }
       flash('Connection lost — reconnecting…', 2500);
       try { st.peer && st.peer.destroy(); } catch (e) {}
@@ -3494,6 +3494,8 @@ const Net = (() => {
   // opened through an invite link
   function boot() {
     const m = location.hash.match(/^#join-([A-Z0-9]{6})$/i);
+    // a new invite while sitting at another table: leave that one cleanly first (stops any reconnect attempts)
+    if (m && st.guest) leave();
     if (m) { history.replaceState(null, '', location.pathname); st.savedG = null; setTimeout(() => showJoin(m[1].toUpperCase()), 300); }
   }
   boot();
