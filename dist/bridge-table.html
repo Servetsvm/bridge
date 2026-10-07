@@ -331,6 +331,29 @@ body{overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:none;-webkit-text-s
 body.classic #app{padding-left:max(2px,env(safe-area-inset-left,0px));padding-right:max(2px,env(safe-area-inset-right,0px))}
 @supports not (height:100dvh){#app{height:auto;min-height:100%}}
 
+/* phones: everything needed to bid (auction, bidding box, own hand) fits on one screen without scrolling.
+   The app grows instead of clipping, the felt shrinks to the auction while bidding, and the tool buttons
+   sit in a single sideways-scrolling row. */
+#app{height:auto;min-height:100%;min-height:100dvh}
+#table.bidding{min-height:0;grid-template-rows:auto auto}
+#table.bidding #center{min-height:0}
+@media (max-width:560px){
+  #bar{gap:6px;row-gap:4px}
+  #bar .tools{display:flex;flex-wrap:nowrap;overflow-x:auto;width:100%;gap:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  #bar .tools::-webkit-scrollbar{display:none}
+  #bar .tools .btn{flex:none;padding:6px 9px;font-size:13.5px}
+  #bar .spacer{display:none}
+  .vulbox{width:48px;height:48px;font-size:20px;border-width:5px}
+  .box{padding:3px 8px;min-width:70px}
+  .box b{font-size:18px}
+  .box .tr{font-size:13px}
+  #table{min-height:0}
+  #table.bidding .auction{font-size:17px}
+  #bidbox{gap:4px}
+  #bidbox button{padding:5px 0}
+  #bidbox button.st{font-size:26px;padding:4px 0}
+}
+
 </style>
 
 <div id="app">
