@@ -3432,6 +3432,8 @@ const Net = (() => {
       p.on('connection', conn => { conn.on('data', d => onSlotData(conn, d)); conn.on('close', () => drop(conn)); conn.on('error', () => drop(conn)); });
       p.on('disconnected', () => { try { if (!p.destroyed) p.reconnect(); } catch (e) {} });
       p.on('close', () => { if (st.slot && st.slot.peer === p) st.slot = null; });
+      // the address can be lost (e.g. the phone slept and the service gave it away): drop it, keepSlot takes a new one
+      p.on('error', e => { if (e && ['unavailable-id', 'server-error', 'socket-closed'].includes(e.type) && !st.host) { try { p.destroy(); } catch (x) {} if (st.slot && st.slot.peer === p) st.slot = null; } });
     }
     st.claiming = false;
   }
@@ -3458,9 +3460,15 @@ const Net = (() => {
             if (st.slot && st.slot.k === k) continue;
             const c = p.connect(ROOM(k), { reliable: true });
             c.on('open', () => c.send({ t: 'info' }));
-            c.on('data', d => { if (d && d.t === 'info' && !d.busy && !out.some(o => o.k === d.k)) out.push(d); try { c.close(); } catch (e) {} });
+            c.on('data', d => {
+              if (d && d.t === 'info' && !d.busy && !out.some(o => o.k === d.k)) {
+                out.push(d);   // show each table as soon as it answers
+                st.tables = [...(st.tables || []).filter(t => t.k !== d.k), d].sort((a, b) => a.k - b.k); render(); panelRefresh();
+              }
+              try { c.close(); } catch (e) {}
+            });
           }
-          setTimeout(res, 5000);
+          setTimeout(res, 8000);
         });
         try { p.destroy(); } catch (e) {}
       }
@@ -3857,6 +3865,15 @@ const Net = (() => {
   // take a room so this table shows up in the lobby, and look at the other tables
   setTimeout(() => { claimSlot().then(() => { if (!st.tables) findTables(); }); }, 800);
   window.addEventListener('online', () => claimSlot());
+  // keep this table listed (take an address again if it was lost) and keep the lobby list fresh
+  function keepSlot() {
+    if (!navigator.onLine) return;
+    if (!st.slot) claimSlot();
+    else if (st.slot.peer.disconnected && !st.slot.peer.destroyed) { try { st.slot.peer.reconnect(); } catch (e) {} }
+  }
+  const lobbyOpen = () => document.visibilityState === 'visible' && !st.guest && ((G && G.phase === 'idle') || ui.overlay === 'net');
+  setInterval(() => { keepSlot(); if (lobbyOpen() && !st.finding) findTables(); }, 20000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepSlot(); if (lobbyOpen()) findTables(); } });
   return { st, owner, broadcast, send, panel, sit, tablesHtml, findTables, pendHtml, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
