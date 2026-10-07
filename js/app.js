@@ -491,7 +491,7 @@ function resultLine(e) {
   return `${conKey(c)} · ${e.tricks} tricks (${d >= 0 ? (d ? '+' + d : '=') : d}) · <span class="${e.us >= 0 ? 'pos' : 'neg'}">${fmtSigned(e.us)}</span>`;
 }
 function openOv(name, html) { ui.overlay = name; $('ov').innerHTML = `<div class="sheet">${html}</div>`; $('ov').hidden = false; }
-function closeOv() { if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } ui.overlay = null; $('ov').hidden = true; }
+function closeOv() { if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; }
 function showEnd() {
   const e = G.result; if (!e) return;
   const f = G.field || { tables: [], done: false, dd: {} };
@@ -631,6 +631,42 @@ function showResults() {
   openOv('res', `<h2>Results</h2><div class="seg" data-seg="restab"><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">Statistics</button><button data-v="list" class="${tab === 'list' ? 'on' : ''}">Boards</button></div>${body}<div class="row2"><button class="btn gold" id="oClose">Close</button></div>`);
 }
 
+/* replay of a finished board, one card at a time: ui.revStep cards have been played.
+   The hands sit round the table (you at the bottom) and the current trick lies in the middle. */
+function revPlayHtml(e) {
+  const flat = e.pl.flat(), n = flat.length, k = Math.max(0, Math.min(ui.revStep || 0, n));
+  const trump = e.c.strain < 4 ? e.c.strain : -1, decl = sideOf(e.c.decl);
+  const win = t => E.trickWinner(t.map(([s, c]) => ({ s, c })), trump);
+  const played = new Set(flat.slice(0, k).map(x => x[1]));
+  const ti = k ? Math.floor((k - 1) / 4) : -1, trick = ti < 0 ? [] : e.pl[ti].slice(0, k - ti * 4);
+  let t1 = 0, t2 = 0;
+  for (let i = 0; i < e.pl.length && (i + 1) * 4 <= k; i++) { if (sideOf(win(e.pl[i])) === decl) t1++; else t2++; }
+  const w = trick.length === 4 ? win(trick) : -1, next = k < n ? flat[k][0] : -1;
+  const pos = ['s', 'w', 'n', 'e'], rel_ = s => (s - e.seat + 4) % 4;
+  const hand = s => {
+    const left = e.deal[s].filter(c => !played.has(c));
+    const tag = s === e.c.decl ? ' · Decl' : s === pd(e.c.decl) ? ' · Dummy' : '';
+    return `<div class="h ${pos[rel_(s)]}${s === next ? ' turn' : ''}"><b>${SEAT[s]}${s === e.seat ? ' (you)' : ''}${tag}</b>${ORDER.map(su => { const cs = E.desc(E.inSuit(left, su)); return `${symHtml(su)} ${cs.length ? cs.map(c => RTXT[R(c)]).join(' ') : '—'}`; }).join('<br>')}</div>`;
+  };
+  const mid = `<div class="rtrick" data-rs="next">${trick.map(([s, c]) => `<span class="rc ${pos[rel_(s)]}${s === w ? ' win' : ''}">${RTXT[R(c)]}${symHtml(S(c))}</span>`).join('')}</div>`;
+  const status = k === 0 ? `Opening lead: ${SEAT[next]}` : k >= n ? `End of play · declarer ${t1}, defence ${t2}${n < 52 ? ' · the rest was claimed' : ''}`
+    : `Trick ${ti + 1} of ${e.pl.length} · declarer ${t1}, defence ${t2}${w >= 0 ? ` · won by ${SEAT[w]}` : ''}`;
+  return `<div class="deal replay">${[0, 1, 2, 3].map(hand).join('')}${mid}</div>
+    <div class="rstat">${status}</div>
+    <div class="rctl"><button class="btn" data-rs="first" ${k ? '' : 'disabled'}>⏮</button><button class="btn" data-rs="prev" ${k ? '' : 'disabled'}>◀</button>
+      <button class="btn gold" data-rs="auto">${ui.revTimer ? 'Pause' : 'Play'}</button>
+      <button class="btn" data-rs="next" ${k < n ? '' : 'disabled'}>▶</button><button class="btn" data-rs="last" ${k < n ? '' : 'disabled'}>⏭</button></div>`;
+}
+function revStep(a) {
+  const e = HIST.find(h => h.id === ui.revId); if (!e || !e.pl) return;
+  const n = e.pl.flat().length, k = ui.revStep || 0;
+  if (a === 'auto') { if (ui.revTimer) stopRev(); else { if (k >= n) ui.revStep = 0; ui.revTimer = setInterval(() => { if ((ui.revStep || 0) >= n || ui.overlay !== 'rev') { stopRev(); return; } ui.revStep++; revDraw(); }, 900); } }
+  else { stopRev(); ui.revStep = a === 'first' ? 0 : a === 'last' ? n : a === 'prev' ? Math.max(0, k - 1) : Math.min(n, k + 1); }
+  revDraw();
+}
+function stopRev() { clearInterval(ui.revTimer); ui.revTimer = null; }
+function revDraw() { const e = HIST.find(h => h.id === ui.revId), el = $('revPlay'); if (e && el) el.innerHTML = revPlayHtml(e); }
+
 /* a finished board from Results: the four hands, the auction (tap a call for its meaning) and every trick */
 function showReview(id, sel) {
   const e = HIST.find(h => h.id === id); if (!e) return;
@@ -643,25 +679,13 @@ function showReview(id, sel) {
     ? `<div class="auction">${auctionTable(auc, false, { board: e.board, dealer, seat: e.seat, sel })}</div>` +
       (sel != null && auc[sel] ? `<div class="expl">${explHtml(auc[sel])}</div>` : '<div class="muted tap">Tap a call to see what it means</div>')
     : '<div class="muted">The auction was not saved for this board (played before this feature was added).</div>';
-  let playHtml = '';
-  if (e.pl && e.pl.length && e.c) {
-    const trump = e.c.strain < 4 ? e.c.strain : -1, decl = sideOf(e.c.decl);
-    const cardTxt = c => `${RTXT[R(c)]}${symHtml(S(c))}`;
-    let t1 = 0, t2 = 0;
-    const rows = e.pl.map((t, i) => {
-      const w = E.trickWinner(t.map(([s, c]) => ({ s, c })), trump), lead = t[0][0];
-      if (sideOf(w) === decl) t1++; else t2++;
-      const at = s => { const x = t.find(y => y[0] === s); return x ? `<td class="${s === w ? 'win' : ''}${s === lead ? ' lead' : ''}">${cardTxt(x[1])}</td>` : '<td></td>'; };
-      return `<tr><td>${i + 1}</td>${[0, 1, 2, 3].map(at).join('')}<td class="n">${t1}–${t2}</td></tr>`;
-    }).join('');
-    const rest = e.claimedAt != null || e.pl.length < 13 ? `<div class="muted">The remaining tricks were settled by claim.</div>` : '';
-    playHtml = `<div class="grp"><span>The play (underlined = led, bold = won the trick; tricks declarer–defence)</span>
-      <div class="resscroll"><table class="res play"><thead><tr><th>#</th>${[0, 1, 2, 3].map(s => `<th>${SEAT[s][0]}</th>`).join('')}<th class="n">Tricks</th></tr></thead><tbody>${rows}</tbody></table></div>${rest}</div>`;
-  } else if (!e.passed) playHtml = '<div class="muted">The play was not saved for this board (played before this feature was added).</div>';
+  const canPlay = e.pl && e.pl.length && e.c && e.deal;
+  const playHtml = canPlay ? `<div class="grp"><span>The play — tap ▶ (or the table) to play the next card</span><div id="revPlay">${revPlayHtml(e)}</div></div>`
+    : (e.passed ? '' : '<div class="muted">The play was not saved for this board (played before this feature was added).</div>');
   openOv('rev', `<h2>Board ${e.board}</h2><div class="big">${resultLine(e)}</div>
-    ${e.deal ? dealHtml(e.deal, e.seat) : ''}
-    <div class="grp"><span>Auction</span>${aucHtml}</div>
+    ${canPlay ? '' : e.deal ? dealHtml(e.deal, e.seat) : ''}
     ${playHtml}
+    <div class="grp"><span>Auction</span>${aucHtml}</div>
     <div class="row2"><button class="btn" id="oRevBack">Back to the list</button><button class="btn gold" id="oClose">Close</button></div>`);
 }
 
@@ -684,7 +708,8 @@ document.addEventListener('click', ev_ => {
     return;
   }
   // Results: open a finished board, tap its calls, or go back to the list
-  const rv = ev_.target.closest('[data-rev]'); if (rv) { ui.revSel = null; showReview(rv.dataset.rev); return; }
+  const rv = ev_.target.closest('[data-rev]'); if (rv) { ui.revSel = null; ui.revStep = 0; stopRev(); showReview(rv.dataset.rev); return; }
+  const rs = ev_.target.closest('[data-rs]'); if (rs) { if (!rs.disabled) revStep(rs.dataset.rs); return; }
   const ri = ev_.target.closest('[data-ri]'); if (ri) { const i = +ri.dataset.ri; showReview(ui.revId, ui.revSel === i ? null : i); ui.revSel = ui.revSel === i ? null : i; return; }
   if (ev_.target.closest('#oRevBack')) { ui.resTab = 'list'; showResults(); return; }
   const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;

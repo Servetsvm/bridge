@@ -361,3 +361,13 @@ tr.rev:hover td,tr.rev:active td{background:#f3efdd}
 .res.play td.win{font-weight:800;background:#fff3c4}
 .res.play td.lead{text-decoration:underline;text-underline-offset:3px}
 .res.play .sym{font-size:1.15em}
+/* replay of a finished board: hands round the table, the trick in the middle */
+.deal.replay{align-items:stretch}
+.deal.replay .h.turn{box-shadow:0 0 0 2px var(--brass,#c9a227)}
+.rtrick{grid-column:2;grid-row:2;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;place-items:center;background:#1f7a2e;border-radius:8px;min-height:120px;cursor:pointer;padding:4px}
+.rtrick .rc{background:#fff;color:#111;border:1px solid #9a9a9a;border-radius:4px;padding:3px 6px;font-weight:800;font-size:17px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.rtrick .rc.n{grid-column:2;grid-row:1}.rtrick .rc.w{grid-column:1;grid-row:2}.rtrick .rc.e{grid-column:3;grid-row:2}.rtrick .rc.s{grid-column:2;grid-row:3}
+.rtrick .rc.win{background:#fff3c4;box-shadow:0 0 0 2px var(--brass,#c9a227)}
+.rstat{text-align:center;font-weight:700;margin:6px 0 4px}
+.rctl{display:flex;gap:6px;justify-content:center}
+.rctl .btn{min-width:46px;font-size:17px}
