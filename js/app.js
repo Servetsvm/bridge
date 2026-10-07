@@ -70,32 +70,48 @@ function syncNow(quiet) {
 function scheduleSync() { clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(true), 2500); }
 
 /* ================= virtual field (background worker) ================= */
+/* the virtual field: 10 expert robot tables play the same deal in two background workers;
+   double-dummy checks run in a third worker that is restarted for every new board, so nothing waits behind an old job */
+const FIELD_N = 10, FIELD_PARTS = 2;
 const Field = {
-  worker: null, live: {},
-  init() {
+  live: {}, fw: [], dw: null, ddBoard: null, src: null,
+  mk() {
     try {
-      const src = 'const E={};\n' + window.BRIDGE.map(f => '(' + f.toString() + ')(E);').join('\n') + '\n(' + E.workerMain.toString() + ')(E);';
-      this.worker = new Worker(URL.createObjectURL(new Blob([src], { type: 'text/javascript' })));
-      this.worker.onmessage = e => this.onmsg(e.data);
-      this.worker.onerror = () => { this.worker = null; };
-    } catch (e) { this.worker = null; }
+      if (!this.src) this.src = URL.createObjectURL(new Blob(['const E={};\n' + window.BRIDGE.map(f => '(' + f.toString() + ')(E);').join('\n') + '\n(' + E.workerMain.toString() + ')(E);'], { type: 'text/javascript' }));
+      const w = new Worker(this.src);
+      w.onmessage = e => this.onmsg(e.data);
+      return w;
+    } catch (e) { return null; }
   },
+  init() {},
   start(g) {
-    const f = { tables: [], done: false, dd: {}, normC: null };
+    const f = { tables: [], n: FIELD_N, done: false, dd: {}, normC: null, parts: 0, t0: Date.now() };
     g.field = f; this.live[g.id] = { f, deal: g.deal, board: g.board };
-    const msg = { type: 'field', id: g.id, deal: g.deal, board: g.board, cards: g.cards, n: 8 };
-    if (this.worker) this.worker.postMessage(msg); else this.fallback(msg);
+    this.fw.forEach(w => w && w.terminate()); this.fw = [];
+    const per = Math.ceil(FIELD_N / FIELD_PARTS);
+    for (let p = 0; p < FIELD_PARTS; p++) {
+      const w = this.mk(), msg = { type: 'field', id: g.id, deal: g.deal, board: g.board, cards: g.cards, from: p * per, to: Math.min(FIELD_N, (p + 1) * per) };
+      if (!w) { this.fallback(msg); continue; }
+      w.onerror = () => this.partDone(g.id);
+      this.fw.push(w); w.postMessage(msg);
+    }
+    // safety net: if a worker is stopped by the phone, finish with the tables we have
+    clearTimeout(this.watch); this.watch = setTimeout(() => { const L = this.live[g.id]; if (L && !L.f.done) { L.f.parts = FIELD_PARTS - 1; this.partDone(g.id); } }, 6 * 60000);
+  },
+  partDone(id) {
+    const L = this.live[id]; if (!L || L.f.done) return;
+    if (++L.f.parts >= FIELD_PARTS) this.onmsg({ type: 'fieldDone', id });
   },
   dd(id, key, deal, c) {
-    const msg = { type: 'dd', id, key, deal, c };
-    if (this.worker) this.worker.postMessage(msg);
+    if (this.ddBoard !== id || !this.dw) { if (this.dw) this.dw.terminate(); this.dw = this.mk(); this.ddBoard = id; if (this.dw) this.dw.onerror = () => this.onmsg({ type: 'dd', id, key, t: null }); }
+    if (this.dw) this.dw.postMessage({ type: 'dd', id, key, deal, c, limit: 4e7 });
     else setTimeout(() => this.onmsg({ type: 'dd', id, key, t: E.ddContract(deal, c, 1.5e6) }), 50);
   },
   fallback(msg) {
-    let i = 0;
+    let i = msg.from;
     const step = () => {
-      if (i >= msg.n) { this.onmsg({ type: 'fieldDone', id: msg.id }); return; }
-      const r = E.simulateTable(msg.deal, msg.board, msg.cards, E.FIELD_AGG[i]);
+      if (i >= msg.to) { this.partDone(msg.id); return; }
+      const r = E.simulateTable(msg.deal, msg.board, msg.cards, E.FIELD_AGG[i % E.FIELD_AGG.length]);
       this.onmsg({ type: 'table', id: msg.id, i, r }); i++; setTimeout(step, 30);
     };
     setTimeout(step, 500);
@@ -103,7 +119,8 @@ const Field = {
   onmsg(m) {
     const L = this.live[m.id]; if (!L) return; const f = L.f;
     if (m.type === 'table') f.tables.push(m.r);
-    if (m.type === 'fieldDone') {
+    if (m.type === 'part') { this.partDone(m.id); return; }
+    if (m.type === 'fieldDone' && !f.done) {
       f.done = true;
       const cnt = {}; let best = null;
       for (const t of f.tables) { if (t.passed) continue; const k = conId(t.c); cnt[k] = (cnt[k] || 0) + 1; if (!best || cnt[k] > cnt[conId(best)]) best = t.c; }
@@ -113,7 +130,7 @@ const Field = {
       if (e) { applyField(e, f); Store.saveRec(e); scheduleSync(); }
     }
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; }
-    if (m.type === 'error') f.done = true;
+    if (m.type === 'error') this.partDone(m.id);
     if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
 };
@@ -387,7 +404,7 @@ function renderTable() {
   } else {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
-    C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${SET.mode === 'IMP' ? fmtSigned(e.imp) + ' IMP' : e.mp + '% MP'}</small>` : ''}<small>Tap for details</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">Next deal</button>` : '';
+    C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>Tap for details</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">Next deal</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans();
@@ -439,7 +456,7 @@ function showEnd() {
   const f = G.field || { tables: [], done: false, dd: {} };
   const ddTxt = (k, c) => { const v = f.dd[k]; if (v === undefined) return 'calculating…'; if (v === null) return 'not available'; const d = v - (c.level + 6); return `${v} tricks (${d >= 0 ? 'makes' : 'down ' + -d})`; };
   let fieldHtml;
-  if (!f.done) fieldHtml = `<div class="muted">The robot tables are playing this deal… (${f.tables.length}/8)</div>`;
+  if (!f.done) fieldHtml = `<div class="muted">The robot tables are playing this deal… (${f.tables.length}/${f.n || 10})</div>`;
   else {
     const fus = t => sideOf(e.seat) === 0 ? t.ns : -t.ns;
     fieldHtml = `<table class="res"><thead><tr><th>Table</th><th>Contract</th><th>Tricks</th><th class="n">Score</th><th class="n">IMP</th></tr></thead><tbody>${f.tables.map((t, i) => `<tr><td>${i + 1}</td><td>${t.passed ? 'Pass' : conKey(t.c)}</td><td>${t.tricks ?? ''}</td><td class="n">${fmtSigned(fus(t))}</td><td class="n">${fmtSigned(E.imps(e.us - fus(t)))}</td></tr>`).join('')}</tbody></table>`;
@@ -564,11 +581,11 @@ function showResults() {
   const per = Store.periods(HIST), isImp = SET.mode === 'IMP', tab = ui.resTab;
   let body;
   if (tab === 'stats') {
-    body = `<table class="res"><thead><tr><th>Period</th><th class="n">Boards</th><th class="n">${isImp ? 'IMPs' : 'MP %'}</th><th class="n">${isImp ? 'IMP/board' : 'IMPs'}</th><th class="n">Points</th></tr></thead><tbody>${per.map(p => `<tr><td>${p.name}</td><td class="n">${p.n}</td><td class="n">${isImp ? (p.scored ? fmtSigned(p.impSum) : '—') : (p.mpAvg != null ? p.mpAvg : '—')}</td><td class="n">${isImp ? (p.impAvg != null ? fmtSigned(p.impAvg) : '—') : (p.scored ? fmtSigned(p.impSum) : '—')}</td><td class="n">${fmtSigned(p.pts)}</td></tr>`).join('')}</tbody></table>
-     <div class="muted">IMP: each of your results is compared with 8 robot tables (average cross-IMPs). MP: your percentage against the same field.</div>`;
+    body = `<div class="resscroll"><table class="res"><thead><tr><th>Period</th><th class="n">Boards</th><th class="n">IMPs</th><th class="n">IMP/bd</th><th class="n">MP %</th><th class="n">Points</th></tr></thead><tbody>${per.map(p => `<tr><td>${p.name}</td><td class="n">${p.n}</td><td class="n">${p.scored ? fmtSigned(p.impSum) : "—"}</td><td class="n">${p.impAvg != null ? fmtSigned(p.impAvg) : "—"}</td><td class="n">${p.mpAvg != null ? p.mpAvg : "—"}</td><td class="n">${fmtSigned(p.pts)}</td></tr>`).join("")}</tbody></table></div>
+     <div class="muted">Every board is also played at 10 expert robot tables. IMP: your result against each table, averaged (cross-IMPs). MP: the percentage of the field you beat.</div>`;
   } else {
-    const rows = HIST.slice(-100).reverse().map(e => `<tr><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.passed ? 'Pass' : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? '—' : isImp ? fmtSigned(e.imp) : e.mp + '%'}</td></tr>`).join('');
-    body = `<table class="res"><thead><tr><th>Date</th><th>Board</th><th>Contract</th><th>Tricks</th><th class="n">Score</th><th class="n">${isImp ? 'IMP' : 'MP'}</th></tr></thead><tbody>${rows || '<tr><td colspan="6">No boards played yet.</td></tr>'}</tbody></table>`;
+    const rows = HIST.slice(-100).reverse().map(e => `<tr><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.passed ? 'Pass' : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
+    body = `<div class="resscroll"><table class="res"><thead><tr><th>Date</th><th>Bd</th><th>Contract</th><th>Tr</th><th class="n">Score</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || "<tr><td colspan=\"7\">No boards played yet.</td></tr>"}</tbody></table></div>`;
   }
   openOv('res', `<h2>Results</h2><div class="seg" data-seg="restab"><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">Statistics</button><button data-v="list" class="${tab === 'list' ? 'on' : ''}">Boards</button></div>${body}<div class="row2"><button class="btn gold" id="oClose">Close</button></div>`);
 }

@@ -3,8 +3,10 @@
 'use strict';
 const { dealerOf, auctionOver, contractOf, sideOf, vulOf, scoreOf } = E;
 
-const FIELD_AGG = [0, 1, -1, 0, 1, 0, -1, 0];
+const FIELD_AGG = [0, 1, -1, 0, 1, 0, -1, 0, 1, -1];
+// quick settings for the fallback without workers; the workers play at expert strength
 const FIELD_OPT = { budget: 90, maxSamples: 10, ddTricks: 6 };
+const EXPERT_OPT = { budget: 350, maxSamples: 16, ddTricks: 9 };
 
 function simulateTable(deal, board, cards, agg, opt) {
   const dealer = dealerOf(board), auc = [];
@@ -31,12 +33,12 @@ function workerMain(E) {
   self.onmessage = ev => {
     const m = ev.data;
     try {
-      if (m.type === 'field') {
-        for (let i = 0; i < m.n; i++) {
-          const r = E.simulateTable(m.deal, m.board, m.cards, E.FIELD_AGG[i % E.FIELD_AGG.length]);
-          self.postMessage({ type: 'table', id: m.id, i, r });
+      if (m.type === "field") {
+        for (let i = m.from; i < m.to; i++) {
+          const r = E.simulateTable(m.deal, m.board, m.cards, E.FIELD_AGG[i % E.FIELD_AGG.length], E.EXPERT_OPT);
+          self.postMessage({ type: "table", id: m.id, i, r });
         }
-        self.postMessage({ type: 'fieldDone', id: m.id });
+        self.postMessage({ type: "part", id: m.id });
       } else if (m.type === 'dd') {
         self.postMessage({ type: 'dd', id: m.id, key: m.key, t: E.ddContract(m.deal, m.c, m.limit || 1.5e8) });
       }
@@ -44,5 +46,5 @@ function workerMain(E) {
   };
 }
 
-Object.assign(E, { simulateTable, workerMain, FIELD_AGG, FIELD_OPT });
+Object.assign(E, { simulateTable, workerMain, FIELD_AGG, FIELD_OPT, EXPERT_OPT });
 });
