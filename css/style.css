@@ -544,3 +544,22 @@ b.inv{color:#b3261e}
 #dock .dbtns{display:flex;gap:4px}
 .tbtns .tdel{padding:4px 9px;min-width:0;opacity:.8}
 .pname[data-who]{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px}
+/* whose turn it is: that player's name label lights up yellow (as on BBO) */
+.lbl.turn,body.classic .lbl.turn{background:#f2c94c;color:#1d1a0f;box-shadow:0 0 0 2px #f2c94c,0 0 14px rgba(242,201,76,.75);animation:turnglow 1.6s ease-in-out infinite}
+.lbl.turn .vn{color:#b3261e}
+.lbl.turn .pname{color:#1d1a0f}
+@keyframes turnglow{50%{box-shadow:0 0 0 2px #f2c94c,0 0 4px rgba(242,201,76,.3)}}
+@media (prefers-reduced-motion:reduce){.lbl.turn{animation:none}}
+/* the tricks taken, large in the contract box */
+.box .tr .tk{font-size:17px;font-weight:800;color:inherit}
+/* the cards of the trick a little larger */
+.card.tc{--cw:clamp(50px,13.5vw,74px)}
+.tbds{flex-wrap:wrap}.tbds button{flex:0 0 auto;min-width:34px}.tbds button.dim{opacity:.45}
+/* alerts: the alert row in the bidding box, alerted calls in the auction, the alert in the explanation */
+#bidbox .alrow{display:flex;gap:6px;align-items:center}
+#bidbox .alrow button{flex:none;padding:6px 10px;border-radius:8px;border:1px solid #c9a227;background:#fff7dc;color:#5a4300;font-weight:700}
+#bidbox .alrow button.on{background:#c9a227;color:#1d1a0f}
+#bidbox .alrow .tok{flex:1;min-width:0}
+#bidbox .alrow small{color:#e8e2c8;font-size:12px}
+.auction .c.alrt{background:#fff1b8;color:#5a4300;border-radius:4px;padding:0 3px}
+.expl .al{background:#c9a227;color:#1d1a0f;border-radius:4px;padding:0 5px;font-size:12px;font-weight:800}
