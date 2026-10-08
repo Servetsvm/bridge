@@ -93,7 +93,7 @@ const Net = (() => {
   // what the lobby sees of this table
   function tableInfo() {
     return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0,
-      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv) };
+      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null };
   }
   /* a player's profile, shown next to their name: boards played today and the average IMPs (or MP %) */
   function prof() {
@@ -119,11 +119,15 @@ const Net = (() => {
       n: Math.min(32, Math.max(1, +t.n || 8)), seed: (+t.seed >>> 0) || 1, ts: +t.ts || Date.now(),
       state: ['setup', 'live', 'off'].includes(t.state) ? t.state : 'live',
       inv: (Array.isArray(t.inv) ? t.inv : []).slice(0, 40).map(x => String(x).slice(0, 20)),
-      joined: obj20(t.joined), declined: obj20(t.declined), v: +t.v || 0 };
+      joined: obj20(t.joined), declined: obj20(t.declined), v: +t.v || 0,
+      // options: format "ind" (everyone alone with robots) or "tables" (players sit together; seats N E S W named
+      // in advance, empty = robot), ranking by matchpoints or IMPs, and how many hours the tournament is kept
+      format: t.format === "tables" ? "tables" : "ind", scoring: t.scoring === "imp" ? "imp" : "mp", hours: [3, 24, 72].includes(+t.hours) ? +t.hours : 72,
+      tables: (Array.isArray(t.tables) ? t.tables : []).slice(0, 8).map(r => [0, 1, 2, 3].map(s => String((r || [])[s] || "").slice(0, 20))) };
   }
   function mergeTour(t) {
     if (!t || !t.id) return false;
-    if (Date.now() - (+t.ts || 0) > 3 * 864e5) return false;   // tournaments are kept for three days
+    if (Date.now() - (+t.ts || 0) > ([3, 24, 72].includes(+t.hours) ? +t.hours : 72) * 3600e3) return false;   // kept for the chosen time
     const cur = st.tours[t.id];
     if (cur && ((+t.v || 0) <= cur.v || (cur.byKey && t.byKey !== cur.byKey))) return false;
     st.tours[t.id] = cleanTour(t);
@@ -135,7 +139,7 @@ const Net = (() => {
     for (const b in (r.ns || {})) if (+b >= 1 && +b <= st.tours[id].n) ns[b] = +r.ns[b] || 0;
     const cur = R[key];
     if (cur && Object.keys(cur.ns).length >= Object.keys(ns).length) return false;   // results only grow
-    R[key] = { name: String(r.name || 'Player').slice(0, 20), ns };
+    R[key] = { name: String(r.name || 'Player').slice(0, 40), ns, dir: r.dir === 'NS' || r.dir === 'EW' ? r.dir : undefined };
     return true;
   }
   try { const d = JSON.parse(localStorage.getItem('bridge-tours') || '{}'); for (const id in (d.tours || {})) mergeTour(d.tours[id]); for (const id in (d.res || {})) for (const k in d.res[id]) mergeRes(id, k, d.res[id][k]); } catch (e) {}
@@ -165,6 +169,77 @@ const Net = (() => {
   }
   // is this player invited to a tournament that is still being set up (and has not answered yet)?
   const invitedTo = t => !!t && t.state === 'setup' && !isMine(t) && !t.joined[devId()] && !t.declined[devId()] && t.inv.some(x => nameKey(x) === nameKey(myName() || ''));
+  // a board finished at a tournament table: the result counts for that table's N-S pair and its E-W pair
+  function tourTableResult(id, ti, b, ns) {
+    const t = st.tours[id]; if (!t) return;
+    const R = st.tres[id] || (st.tres[id] = {}), row = t.tables[ti] || [];
+    const nm = (a, c) => [row[a], row[c]].map(x => x || 'Robot').join(' & ');
+    for (const [dir, val, a, c] of [['NS', ns, 0, 2], ['EW', -ns, 1, 3]]) {
+      const key = 'T' + ti + dir, cur = R[key] || (R[key] = { name: (ti + 1) + ' · ' + nm(a, c), dir, ns: {} });
+      cur.ns[b] = val;
+      meshSend({ t: 'tres', id, key, r: cur });
+    }
+    saveTours(); renderL();
+  }
+  // where a player sits in a tournament played at tables (the first named player of a table opens it)
+  function myTourSeat(t, name) {
+    const k = nameKey(name || myName() || '');
+    for (let ti = 0; ti < t.tables.length; ti++) for (let s = 0; s < 4; s++) if (t.tables[ti][s] && nameKey(t.tables[ti][s]) === k) {
+      const hs = [0, 1, 2, 3].find(x => t.tables[ti][x]);
+      return { ti, seat: s, hostSeat: hs, host: t.tables[ti][hs] };
+    }
+    return null;
+  }
+  // open your tournament table: a private online table, the other players are invited straight to their seats
+  async function openTourTable(id) {
+    const t = st.tours[id], me = t && myTourSeat(t); if (!me || st.on) return;
+    st.seatBak = SET.seat; SET.seat = me.seat;
+    await host(true);
+    if (!st.host) { SET.seat = st.seatBak; st.seatBak = null; return; }
+    st.tour = { id, ti: me.ti }; st.invSeat = {};
+    t.tables[me.ti].forEach((n, s) => {
+      if (!n || s === me.seat) return;
+      const k = nameKey(n); st.invited.push(k); st.invSeat[k] = s;
+      meshSend({ t: 'tblinv', k: st.slot.k, host: myName() || 'Host', to: n, priv: true, tour: t.name, seat: s });
+    });
+    closeOv(); render();
+  }
+  // a player of a tournament table joins it (the table's own address is in the lobby information)
+  function joinTourTable(id) {
+    const t = st.tours[id], me = t && myTourSeat(t); if (!me) return;
+    const tb = (st.tables || []).find(x => x.tour && x.tour.id === id && x.tour.ti === me.ti);
+    if (!tb) { flash(T('Waiting for {0} to open the table', me.host), 2500); if (!st.finding) findTables(); return; }
+    st.offer = tb; st.want = 'any'; st.msg = '';
+    join('room-' + tb.k, myName() || 'Guest', 'any');
+  }
+  /* ---- private messages to one player in the lobby (sent along that player's own lobby line) ---- */
+  st.dms = {}; try { st.dms = JSON.parse(localStorage.getItem('bridge-dms') || '{}') || {}; } catch (e) {}
+  st.dmUnread = {}; st.dmSeen = new Set();
+  function saveDms() { try { localStorage.setItem('bridge-dms', JSON.stringify(st.dms)); } catch (e) {} }
+  function addDm(other, m) {
+    const k = nameKey(other), L = st.dms[k] || (st.dms[k] = { name: other, list: [] });
+    L.name = other; L.list.push(m); if (L.list.length > 100) L.list.shift(); saveDms();
+  }
+  function dmConn(name) {
+    const k = nameKey(name), t = (st.tables || []).find(x => nameKey(x.host) === k || Object.values(x.names || {}).some(n => nameKey(n) === k));
+    const c = t && (st.mesh || new Map()).get(ROOM(t.k));
+    return c && c.open ? c : null;
+  }
+  function dmSend(name, text) {
+    text = String(text || '').trim().slice(0, 300); if (!text) return;
+    const m = { t: 'dm', id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), from: myName() || 'Player', to: name, text, ts: Date.now() };
+    const c = dmConn(name);
+    if (c) { try { c.send(m); } catch (e) {} } else meshSend(m);   // if the line is not known, everyone gets it but only that player keeps it
+    addDm(name, { from: m.from, text, ts: m.ts, me: true });
+  }
+  function gotDm(d) {
+    if (!d || !d.text || nameKey(d.to) !== nameKey(myName() || '') || st.dmSeen.has(d.id)) return;
+    st.dmSeen.add(d.id);
+    const from = String(d.from || 'Player').slice(0, 20), text = String(d.text).slice(0, 300);
+    addDm(from, { from, text, ts: +d.ts || Date.now(), me: false });
+    if (ui.overlay === 'dm' && nameKey(ui.dmWith || '') === nameKey(from)) showDm(from);
+    else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); beep(); renderL(); }
+  }
   function tourResult(id, b, ns) {
     const t = st.tours[id]; if (!t) return;
     const R = st.tres[id] || (st.tres[id] = {}), key = devId();
@@ -209,6 +284,7 @@ const Net = (() => {
     if (d.t === 'lchat') { addL(d.m); return true; }
     if (d.t === 'lhist') { (d.list || []).forEach(m => addL(m, true)); renderL(); return true; }
     if (d.t === 'tblinv') { gotTableInvite(d); return true; }
+    if (d.t === 'dm') { gotDm(d); return true; }
     if (onTourData(d)) return true;
     return false;
   }
@@ -371,7 +447,8 @@ const Net = (() => {
     if (back != null) { const old = st.conns.get(st.seats[back]); st.conns.delete(st.seats[back]); if (old && old !== conn) { try { old.close(); } catch (e) {} } }
     const free = [0, 1, 2, 3].filter(s => !st.seats[s]);
     const pref = (d.want === 'partner' ? [(hs + 2) % 4] : d.want === 'opp' ? [(hs + 1) % 4, (hs + 3) % 4] : []).filter(s => free.includes(s));
-    const s = back != null ? back : pref.length ? pref[0] : free[0];
+    const assigned = st.invSeat && st.invSeat[nameKey(d.name)];   // a tournament table seats each player where the organiser put them
+    const s = back != null ? back : assigned != null && free.includes(assigned) ? assigned : pref.length ? pref[0] : free[0];
     if (s == null) { conn.send({ t: 'full' }); setTimeout(() => conn.close(), 500); return; }
     if (back != null && away[s]) { clearTimeout(away[s].t); delete away[s]; }
     if (d.tok) { for (const k in toks) if (toks[k] === d.tok) delete toks[k]; toks[s] = d.tok; }
@@ -445,7 +522,8 @@ const Net = (() => {
     const names = knownNames();
     if (!names.length) return `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`;
     const sent = st.invited || [];
-    return `<div class="people">${names.map(n => `<div class="person"><b>${esc(n)}</b>${st.host ? (sent.includes(nameKey(n)) ? `<span class="muted">${T('invited')}</span>` : `<button class="btn gold" data-tblinv="${esc(n)}">${T('Invite to my table')}</button>`) : ''}</div>`).join('')}</div>
+    const un = n => st.dmUnread[nameKey(n)] ? ` <span class="badge">${st.dmUnread[nameKey(n)]}</span>` : "";
+    return `<div class="people">${names.map(n => `<div class="person"><b>${esc(n)}</b><span class="pbtns"><button class="btn" data-dm="${esc(n)}" title="${T("Message")}">💬${un(n)}</button>${st.host ? (sent.includes(nameKey(n)) ? `<span class="muted">${T('invited')}</span>` : `<button class="btn gold" data-tblinv="${esc(n)}">${T('Invite to my table')}</button>`) : ''}</span></div>`).join('')}</div>
       ${st.host ? '' : `<div class="muted">${T('Open an online table to invite players to it.')}</div>`}`;
   }
   function onHostData(conn, d) {
@@ -501,7 +579,7 @@ const Net = (() => {
     if (d.t === "hint") { if (G.phase === "play" && owner(G.play.turn) === conn.peer && G.play.trick.length < 4) conn.send({ t: "hint", c: E.aiPlay(G.play, G.play.turn), id: G.id }); return; }
     if (d.t === "call" && G.phase === "bid" && owner(bidTurn()) === conn.peer) makeCall(bidTurn(), d.call);
     else if (d.t === 'card' && G.phase === 'play' && owner(G.play.turn) === conn.peer) playCard(G.play.turn, d.c);
-    else if (d.t === 'next' && G.phase === 'done') newBoard();
+    else if (d.t === 'next' && G.phase === 'done') nextDeal();
   }
   // a guest's connection dropped: a robot plays the seat at once, and the seat is kept for them for 10 minutes
   // (they get it back without asking when they return)
@@ -537,6 +615,7 @@ const Net = (() => {
     broadcast(); panelRefresh(); render(); tick();
   }
   function stop() {
+    if (st.seatBak != null) { SET.seat = st.seatBak; st.seatBak = null; } st.tour = null; st.invSeat = {};
     for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
     for (const w of (st.watch || new Map()).values()) { try { w.conn.send({ t: 'bye' }); } catch (e) {} setTimeout(() => { try { w.conn.close(); } catch (e) {} }, 500); }
     st.watch = new Map(); st.watchToks = []; st.priv = false; st.invited = [];
@@ -800,7 +879,7 @@ const Net = (() => {
       case 'nStart': {
         const n = document.getElementById('nName');
         setName((n && n.value.trim()) || myName() || 'Host');
-        host(); break;
+        showOpenChoice(); break;   // public or private first
       }
       case 'nFind': findTables(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
@@ -837,5 +916,5 @@ const Net = (() => {
   // the lobby lines also carry tournaments and chat, so they are rebuilt during play too when none is open
   setInterval(() => { keepSlot(); if (!st.finding && (lobbyOpen() || (document.visibilityState === 'visible' && lobbyCount() <= 1 && st.slot))) findTables(); }, 20000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepSlot(); if (lobbyOpen()) findTables(); } });
-  return { st, owner, broadcast, send, panel, sit, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, broadcast, send, panel, sit, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
