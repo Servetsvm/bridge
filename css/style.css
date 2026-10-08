@@ -438,3 +438,12 @@ body.athome #app{max-width:1180px}
   .lmsgs{max-height:46vh;min-height:160px}
   .brand{font-size:21px}
 }
+/* player profile badge, tournaments */
+.pb{display:inline-block;font-size:11px;font-weight:600;background:rgba(201,162,39,.18);color:#6b5a14;border-radius:999px;padding:1px 7px;margin-left:5px;white-space:nowrap}
+.tbl .pb{background:rgba(255,215,106,.18);color:#ffd76a;margin:0}
+.tourrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #e3dfcd}
+.tourrow small{display:block;color:#6d6c62;font-size:12.5px;margin-top:2px}
+.tourrow .tbtns{display:flex;gap:6px;flex:none}
+.tnew{margin-top:10px}
+.tnew .sel{flex:0 0 auto;width:auto}
+tr.meRow td{background:#fff3c4;font-weight:700}

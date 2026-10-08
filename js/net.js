@@ -45,25 +45,30 @@ const Net = (() => {
   function viewFor(id) {
     const v = JSON.parse(JSON.stringify(G));
     for (let s = 0; s < 4; s++) {
-      const show = G.phase === 'done' || owner(s) === id || (G.play && G.play.dummyShown && s === G.play.dummy);
+      const show = G.phase === 'done' || id === '*watch' || owner(s) === id || (G.play && G.play.dummyShown && s === G.play.dummy);
       if (show) continue;
       v.deal[s] = v.deal[s].map(() => -1);
       if (v.play) v.play.hands[s] = v.play.hands[s].map(() => -1);
     }
-    v.ctl = [0, 1, 2, 3].map(owner); v.names = st.names; v.score = st.score;
+    v.ctl = [0, 1, 2, 3].map(owner); v.names = st.names; v.score = st.score; v.profs = st.profs || {};
+    v.watchers = [...(st.watch || new Map()).values()].map(w => w.name);
     return v;
   }
   function broadcast() {
     if (!st.host || !G) return;
     for (const [id, c] of st.conns) if (c.open) { try { c.send({ t: 'state', v: viewFor(id) }); } catch (e) {} }
+    // spectators see all four hands
+    if (st.watch && st.watch.size) { const w = viewFor('*watch'); for (const x of st.watch.values()) if (x.conn.open) { try { x.conn.send({ t: 'state', v: w }); } catch (e) {} } }
   }
   function send(m) { if (st.conn && st.conn.open) st.conn.send(m); }
   async function wakeOn() { try { st.wake = await navigator.wakeLock.request('screen'); } catch (e) {} }
   function wakeOff() { try { st.wake && st.wake.release(); } catch (e) {} st.wake = null; }
 
   /* ---- your table's address (room) and the lobby ---- */
-  async function claimSlot() {
-    if (st.slot || st.claiming || !navigator.onLine) return; st.claiming = true;
+  // the same promise for everyone who asks while a claim is running (so the lobby waits for our own address)
+  function claimSlot() { if (st.slot || !navigator.onLine) return Promise.resolve(); return st.claimP || (st.claimP = claimSlot0().finally(() => { st.claimP = null; })); }
+  async function claimSlot0() {
+    st.claiming = true;
     try { await loadLib(); } catch (e) { st.claiming = false; return; }
     for (let k = 1; k <= ROOMS && !st.slot; k++) {
       const p = await new Promise(res => {
@@ -86,7 +91,63 @@ const Net = (() => {
   }
   // what the lobby sees of this table
   function tableInfo() {
-    return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0 };
+    return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0,
+      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0 };
+  }
+  /* a player's profile, shown next to their name: boards played today and the average IMPs (or MP %) */
+  function prof() {
+    const p = Store.periods(HIST)[0];
+    return { n: p.n, imp: p.impAvg, mp: p.mpAvg };
+  }
+  function profTxt(p) {
+    if (!p || !p.n) return '';
+    return `${p.n} ${T('boards')}${p.imp != null ? ' · ' + (p.imp > 0 ? '+' : '') + p.imp + ' IMP' : p.mp != null ? ' · ' + p.mp + '%' : ''}`;
+  }
+
+  /* ---- tournaments: the same deals for everyone (from a shared number), played alone with robots from
+     South; results travel along the lobby lines and every app works out the same ranking ---- */
+  const devId = () => { try { let t = localStorage.getItem('bridge-dev-id'); if (!t) { t = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('bridge-dev-id', t); } return t; } catch (e) { return st.devId || (st.devId = Math.random().toString(36).slice(2)); } };
+  st.tours = {}; st.tres = {};
+  function saveTours() { try { localStorage.setItem('bridge-tours', JSON.stringify({ tours: st.tours, res: st.tres })); } catch (e) {} }
+  function mergeTour(t) {
+    if (!t || !t.id || st.tours[t.id]) return false;
+    if (Date.now() - (+t.ts || 0) > 3 * 864e5) return false;   // tournaments are kept for three days
+    st.tours[t.id] = { id: String(t.id).slice(0, 30), name: String(t.name || '').slice(0, 40), by: String(t.by || '').slice(0, 20), n: Math.min(32, Math.max(1, +t.n || 8)), seed: (+t.seed >>> 0) || 1, ts: +t.ts || Date.now() };
+    return true;
+  }
+  function mergeRes(id, key, r) {
+    if (!st.tours[id] || !r || !key) return false;
+    const R = st.tres[id] || (st.tres[id] = {}), ns = {};
+    for (const b in (r.ns || {})) if (+b >= 1 && +b <= st.tours[id].n) ns[b] = +r.ns[b] || 0;
+    const cur = R[key];
+    if (cur && Object.keys(cur.ns).length >= Object.keys(ns).length) return false;   // results only grow
+    R[key] = { name: String(r.name || 'Player').slice(0, 20), ns };
+    return true;
+  }
+  try { const d = JSON.parse(localStorage.getItem('bridge-tours') || '{}'); for (const id in (d.tours || {})) mergeTour(d.tours[id]); for (const id in (d.res || {})) for (const k in d.res[id]) mergeRes(id, k, d.res[id][k]); } catch (e) {}
+  function meshSend(m) { for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send(m); } catch (e) {} } }
+  function newTour(n) {
+    const t = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: (myName() || 'Player') + ' · ' + new Date().toLocaleDateString(), by: myName() || 'Player', n, seed: (Math.random() * 4294967295) >>> 0, ts: Date.now() };
+    mergeTour(t); saveTours(); meshSend({ t: 'tour', tour: t }); renderL(); return t;
+  }
+  function tourResult(id, b, ns) {
+    if (!st.tours[id]) return;
+    const R = st.tres[id] || (st.tres[id] = {}), key = devId();
+    const me = R[key] || (R[key] = { name: myName() || 'Player', ns: {} });
+    me.name = myName() || me.name; me.ns[b] = ns;
+    saveTours(); meshSend({ t: 'tres', id, key, r: me });
+  }
+  function onTourData(d) {
+    if (d.t === 'tour') { if (mergeTour(d.tour)) { saveTours(); renderL(); } return true; }
+    if (d.t === 'tres') { if (mergeRes(d.id, d.key, d.r)) { saveTours(); renderL(); } return true; }
+    if (d.t === 'tsync') {
+      let ch = false;
+      for (const id in (d.tours || {})) ch = mergeTour(d.tours[id]) || ch;
+      for (const id in (d.res || {})) for (const k in d.res[id]) ch = mergeRes(id, k, d.res[id][k]) || ch;
+      if (ch) { saveTours(); renderL(); }
+      return true;
+    }
+    return false;
   }
   /* The lobby is a small mesh: every open app keeps a line to every other room it has found. The lines carry
      table information (who sits where) and the lobby chat. A request is 'inforeq' ('info' without a room
@@ -96,6 +157,7 @@ const Net = (() => {
     if (d.t === 'info') { gotInfo(d); return true; }
     if (d.t === 'lchat') { addL(d.m); return true; }
     if (d.t === 'lhist') { (d.list || []).forEach(m => addL(m, true)); renderL(); return true; }
+    if (onTourData(d)) return true;
     return false;
   }
   function onSlotData(conn, d) {
@@ -110,10 +172,11 @@ const Net = (() => {
     if (old === conn) return;
     m.set(conn.peer, conn);
     conn.on('close', () => { if (m.get(conn.peer) === conn) { m.delete(conn.peer); renderL(); } });
-    try { conn.send({ t: 'lhist', list: (st.lchat || []).slice(-30) }); } catch (e) {}
+    try { conn.send({ t: 'lhist', list: (st.lchat || []).slice(-30) }); conn.send({ t: 'tsync', tours: st.tours, res: st.tres }); } catch (e) {}
     renderL();
   }
   function gotInfo(d) {
+    if (st.slot && d.k === st.slot.k) return;   // our own table
     if (st.collect && !st.collect.some(o => o.k === d.k)) st.collect.push(d);
     if (d.busy) { st.tables = (st.tables || []).filter(t => t.k !== d.k); }
     else st.tables = [...(st.tables || []).filter(t => t.k !== d.k), d].sort((a, b) => a.k - b.k);   // show each table as soon as it answers
@@ -125,6 +188,7 @@ const Net = (() => {
     const out = st.collect = [];
     try {
       await loadLib();
+      await claimSlot();   // use our own address, so the lines stay open for chat and tournaments
       // our own room's address keeps the lines open for the chat; without one, a short-lived address is used
       const own = st.slot && !st.slot.peer.destroyed ? st.slot.peer : null;
       const p = own || await new Promise(res => { const p = new Peer(); p.on('open', () => res(p)); p.on('error', () => res(null)); setTimeout(() => res(null), 8000); });
@@ -151,8 +215,9 @@ const Net = (() => {
     // each table is drawn as a table: the player's name or "Robot" at every side
     const rows = !L ? '' : L.length ? `<div class="tbls">${L.map(t => {
       const nm = t.names || {}, away = t.away || [];
-      const cells = [0, 1, 2, 3].map(s => nm[s] ? `<b>${esc(nm[s])}</b>${away.includes(s) ? `<em>${T('away · robot plays')}</em>` : ''}` : `<i>${T('Robot')}</i>`);
-      const mid = `<div class="tname">${T("{0}'s table", esc(t.host))}</div><div class="tstate">${t.online ? T('online') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' ? ' · ' + T('board {0}', t.board) : ''}</div><button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`;
+      const pf = t.profs || {};
+      const cells = [0, 1, 2, 3].map(s => nm[s] ? `<b>${esc(nm[s])}</b>${(pf[s] || (!t.online && t.prof)) && profTxt(pf[s] || t.prof) ? `<span class="pb">${esc(profTxt(pf[s] || t.prof))}</span>` : ''}${away.includes(s) ? `<em>${T('away · robot plays')}</em>` : ''}` : `<i>${T('Robot')}</i>`);
+      const mid = `<div class="tname">${T("{0}'s table", esc(t.host))}</div><div class="tstate">${t.online ? T('online') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div><button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>${t.online ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
       return seatTable(cells, mid, 2);
     }).join('')}</div>` : `<div class="muted">${T('No other tables are open right now.')}</div>`;
     return `<div class="tables">${rows}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
@@ -162,7 +227,7 @@ const Net = (() => {
     if (!m || !m.id || !m.text) return;
     const L = st.lchat || (st.lchat = []);
     if (L.some(x => x.id === m.id)) return;
-    L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now() });
+    L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: m.p && typeof m.p === 'object' ? { n: +m.p.n || 0, imp: m.p.imp == null ? null : +m.p.imp, mp: m.p.mp == null ? null : +m.p.mp } : null });
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
     try { localStorage.setItem('bridge-lobby-chat', JSON.stringify(L.slice(-50))); } catch (e) {}
     if (!quiet) renderL();
@@ -170,14 +235,14 @@ const Net = (() => {
   function lsend(text) {
     text = String(text || '').trim(); if (!text) return;
     if (!navigator.onLine) { flash(T('You are offline'), 1500); return; }
-    const m = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), from: myName() || 'Player', text: text.slice(0, 200), ts: Date.now() };
+    const m = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), from: myName() || 'Player', text: text.slice(0, 200), ts: Date.now(), p: prof() };
     addL(m);
     for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send({ t: 'lchat', m }); } catch (e) {} }
   }
   function lchatHtml() {
     const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myName() || 'Player';
     const L = st.lchat || [];
-    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b>${esc(m.from)}</b> ${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
+    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b>${esc(m.from)}</b>${m.p && m.p.n ? `<span class="pb">${esc(profTxt(m.p))}</span>` : ''} ${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
   }
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   const renderL = () => { if (G && G.phase === 'idle') render(); };
@@ -198,7 +263,7 @@ const Net = (() => {
   function becomeHost() {
     if (st.host || !st.slot) return !!st.host;
     Object.assign(st, { peer: st.slot.peer, on: true, host: true, guest: false, me: 'host', code: 'room-' + st.slot.k, seats: { [SET.seat]: 'host' }, names: { [SET.seat]: myName() || 'Host' }, msg: '' });
-    wakeOn(); ping(); st.score = { ns: 0, ew: 0, n: 0 }; st.asks = {};
+    wakeOn(); ping(); st.score = { ns: 0, ew: 0, n: 0 }; st.asks = {}; st.profs = { [SET.seat]: prof() }; st.watch = new Map();
     if (!G || G.phase === 'idle') { clearTimeout(timer); G = lobbyG(); }
     save(); return true;
   }
@@ -236,7 +301,8 @@ const Net = (() => {
   function nameTaken(n, except) {
     const k = nameKey(n || 'Guest');
     const names = st.host ? st.names : { [SET.seat]: myName() || 'Player' };   // before going online, only the player is at the table
-    const used = Object.keys(names).filter(s => +s !== except).map(s => names[s]).concat(Object.values(st.pending || {}).map(p => p.d.name));
+    const watching = [...(st.watch || new Map()).values()].map(w => w.name);
+    const used = Object.keys(names).filter(s => +s !== except).map(s => names[s]).concat(Object.values(st.pending || {}).map(p => p.d.name), watching);
     return used.some(u => nameKey(u) === k);
   }
   function seatPlayer(conn, d, back) {
@@ -249,6 +315,7 @@ const Net = (() => {
     if (back != null && away[s]) { clearTimeout(away[s].t); delete away[s]; }
     if (d.tok) { for (const k in toks) if (toks[k] === d.tok) delete toks[k]; toks[s] = d.tok; }
     st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
+    (st.profs || (st.profs = {}))[s] = d.prof && typeof d.prof === 'object' ? { n: +d.prof.n || 0, imp: d.prof.imp == null ? null : +d.prof.imp, mp: d.prof.mp == null ? null : +d.prof.mp } : null;
     conn.send({ t: 'welcome', seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
     addChat(null, st.names[s] + (back != null ? ' is back' : ' joined as ' + SEAT[s]));
     ping();
@@ -259,8 +326,18 @@ const Net = (() => {
     const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
     if (nameTaken(p.d.name)) { try { p.conn.send({ t: 'nametaken' }); } catch (e) {} setTimeout(() => { try { p.conn.close(); } catch (e) {} }, 500); panelRefresh(); render(); return; }
     if (!p.conn.open) { panelRefresh(); render(); return; }
+    if (p.d.want === 'watch') { if (st.host) addWatcher(p.conn, p.d); return; }
     becomeHost();   // the first accepted player turns this table into an online table
     seatPlayer(p.conn, p.d, null);
+  }
+  // a spectator: sees all four hands, cannot bid or play, can chat
+  function addWatcher(conn, d) {
+    const name = String(d.name || 'Guest').slice(0, 20);
+    (st.watch || (st.watch = new Map())).set(conn.peer, { conn, name });
+    if (d.tok) { const w = st.watchToks || (st.watchToks = []); if (!w.includes(d.tok)) w.push(d.tok); }
+    try { conn.send({ t: 'welcome', seat: SET.seat, watch: true, id: conn.peer, code: st.code, chat: st.chat.slice(-50) }); } catch (e) {}
+    addChat(null, name + ' is watching 👁');
+    ping(); broadcast(); panelRefresh(); render();
   }
   function decline(id) {
     const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
@@ -280,6 +357,9 @@ const Net = (() => {
     }
     if (d.t === 'hello') {
       if (d.tok && (st.banned || []).includes(d.tok)) { conn.send({ t: 'kick' }); setTimeout(() => conn.close(), 500); return; }
+      // spectators: a solo table cannot be watched; a spectator who comes back is let in again at once
+      if (d.want === 'watch' && !st.host) { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
+      if (d.want === 'watch' && d.tok && (st.watchToks || []).includes(d.tok)) { addWatcher(conn, d); return; }
       const away = st.away || (st.away = {});
       // a player coming back after a dropped connection gets the seat that was kept for them
       // (recognised by the device token, even before this side has noticed the old connection died)
@@ -292,12 +372,15 @@ const Net = (() => {
         (st.pending || (st.pending = {}))[conn.peer] = { conn, d };
         conn.send({ t: 'wait' });
         conn.on('close', () => { if (st.pending && st.pending[conn.peer]) { delete st.pending[conn.peer]; panelRefresh(); render(); } });
-        flash(String(d.name || 'Guest').slice(0, 20) + ' wants to join the table', 3000); panel();
+        flash(String(d.name || 'Guest').slice(0, 20) + (d.want === 'watch' ? ' wants to watch' : ' wants to join the table'), 3000); panel();
         return;
       }
       seatPlayer(conn, d, back);
       return;
     }
+    // a spectator may only chat
+    const wt = st.watch && st.watch.get(conn.peer);
+    if (wt) { if (d.t === 'chat') addChat(wt.name + ' 👁', d.text); return; }
     const seat = seatOf(conn.peer); if (Number.isNaN(seat)) return;
     // a guest asks for a new deal during play, or for the table score to be reset: the host decides
     if (d.t === 'ndreq' || d.t === 'rsreq') { (st.asks || (st.asks = {}))[conn.peer] = { kind: d.t === 'ndreq' ? 'nd' : 'rs', seat }; flash((st.names[seat] || SEAT[seat]) + ' ' + T(d.t === 'ndreq' ? 'asks for a new deal' : 'asks to reset the table score'), 3000); panel(); render(); return; }
@@ -314,6 +397,8 @@ const Net = (() => {
   // a guest's connection dropped: a robot plays the seat at once, and the seat is kept for them for 10 minutes
   // (they get it back without asking when they return)
   function drop(conn) {
+    const wt = st.watch && st.watch.get(conn.peer);
+    if (wt && wt.conn === conn) { st.watch.delete(conn.peer); addChat(null, wt.name + ' stopped watching'); broadcast(); panelRefresh(); render(); return; }
     if (st.conns.get(conn.peer) !== conn) return;
     const s = Object.keys(st.seats).find(k => st.seats[k] === conn.peer);
     st.conns.delete(conn.peer);
@@ -344,6 +429,8 @@ const Net = (() => {
   }
   function stop() {
     for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
+    for (const w of (st.watch || new Map()).values()) { try { w.conn.send({ t: 'bye' }); } catch (e) {} setTimeout(() => { try { w.conn.close(); } catch (e) {} }, 500); }
+    st.watch = new Map(); st.watchToks = [];
     for (const a of Object.values(st.away || {})) clearTimeout(a.t); st.away = {};
     const cs = [...st.conns.values()];   // close a moment later so the goodbye arrives first (the room address is kept)
     setTimeout(() => { for (const c of cs) { try { c.close(); } catch (e) {} } }, 500);
@@ -368,12 +455,12 @@ const Net = (() => {
       setTimeout(() => { if (!welcomed && !waiting) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
       peer.on('error', e => { if (e.type === 'peer-unavailable') fail('That table is not open any more.'); });
       peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
-      conn.on('open', () => conn.send({ t: 'hello', name, want, tok: devTok(), seat: retry ? st.seat : undefined }));
+      conn.on('open', () => conn.send({ t: 'hello', name, want, tok: devTok(), prof: prof(), seat: retry ? st.seat : undefined }));
       conn.on('data', d => {
         if (!d) return;
         if (d.t === 'welcome') {
           welcomed = true; clearTimeout(timer);
-          st.waiting = false;
+          st.waiting = false; st.watching = !!d.watch;
           Object.assign(st, { peer, conn, on: true, guest: true, host: false, me: peer.id, seat: d.seat, code, msg: "", savedG: st.savedG || (G && G.phase === "idle" ? ui.saved : G), chat: d.chat || st.chat || [], unread: 0, rejoin: { code, name, want } });
           if (retry) retry(true); else closeOv();
           wakeOn(); ping();
@@ -447,7 +534,7 @@ const Net = (() => {
     try { st.peer && st.peer.destroy(); } catch (e) {}
     wakeOff();
     const back = st.savedG;
-    Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null, rejoin: null, reconnecting: false });
+    Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null, rejoin: null, reconnecting: false, watching: false });
     G = back && back.phase !== "lobby" ? back : idleG(); render(); tick();
     if (msg) flash(msg, 3000);
   }
@@ -496,7 +583,7 @@ const Net = (() => {
     const s = st.score; if (!st.on) return '';
     const line = s ? `NS <b>${s.ns}</b> – EW <b>${s.ew}</b> · ${s.n} ${T('boards')}` : '—';
     const btns = st.host ? `<button class="btn" id="nRst">${T('Reset the score')}</button>`
-      : `<button class="btn" id="nRstQ">${T('Ask to reset the score')}</button>${G && (G.phase === 'bid' || G.phase === 'play') ? `<button class="btn" id="nNdQ">${T('Ask for a new deal')}</button>` : ''}`;
+      : st.watching ? '' : `<button class="btn" id="nRstQ">${T('Ask to reset the score')}</button>${G && (G.phase === 'bid' || G.phase === 'play') ? `<button class="btn" id="nNdQ">${T('Ask for a new deal')}</button>` : ''}`;
     return `<div class="grp"><span>${T('Table score')}</span><div>${line}</div><div class="row2">${btns}</div></div>`;
   }
   // the host answers a guest's request (a new deal during play, or a fresh score)
@@ -516,14 +603,14 @@ const Net = (() => {
   function pendHtml() {
     const pend = Object.entries(st.pending || {}), mv = Object.entries(st.moves || {});
     const moves = mv.length ? `<div class="grp"><span>${T('Asking to change seats')}</span>${mv.map(([id, m]) => `<div class="helprow"><span><b>${esc(st.names[m.from] || SEAT[m.from])}</b> ${SEAT[m.from]} → ${SEAT[m.to]}</span><span><button class="btn gold" data-mva="${esc(id)}">${T('Accept')}</button> <button class="btn" data-mvd="${esc(id)}">${T('Decline')}</button></span></div>`).join('')}</div>` : '';
-    const join = pend.length ? `<div class="grp"><span>${T('Asking to join')}</span>${pend.map(([id, p]) => `<div class="helprow"><span><b>${esc(String(p.d.name || 'Guest').slice(0, 20))}</b> ${p.d.want === 'opp' ? T('(opponent)') : p.d.want === 'any' ? '' : T('(partner)')}</span><span><button class="btn gold" data-accept="${esc(id)}">${T('Accept')}</button> <button class="btn" data-decline="${esc(id)}">${T('Decline')}</button></span></div>`).join('')}</div>` : '';
+    const join = pend.length ? `<div class="grp"><span>${T('Asking to join')}</span>${pend.map(([id, p]) => `<div class="helprow"><span><b>${esc(String(p.d.name || 'Guest').slice(0, 20))}</b> ${p.d.want === 'opp' ? T('(opponent)') : p.d.want === 'watch' ? '👁 ' + T('Watch') : p.d.want === 'any' ? '' : T('(partner)')}</span><span><button class="btn gold" data-accept="${esc(id)}">${T('Accept')}</button> <button class="btn" data-decline="${esc(id)}">${T('Decline')}</button></span></div>`).join('')}</div>` : '';
     const asks = Object.entries(st.asks || {}).map(([id, a]) => `<div class="helprow"><span><b>${esc(st.names[a.seat] || SEAT[a.seat])}</b> ${T(a.kind === 'nd' ? 'asks for a new deal' : 'asks to reset the table score')}</span><span><button class="btn gold" data-aska="${esc(id)}">${T('Accept')}</button> <button class="btn" data-askd="${esc(id)}">${T('Decline')}</button></span></div>`).join('');
     return (asks ? `<div class="grp">${asks}</div>` : '') + moves + join;
   }
   function panel() {
     if (st.guest) {
-      openOv('net', `<h2>Online table ${esc(st.code)}</h2><div>You sit <b>${SEAT[st.seat]}</b>. The host's device runs the table; robots fill the empty seats.</div>
-        ${G && (G.phase === 'lobby' || G.phase === 'done') ? `<div class="grp"><span>Move to another seat (the host decides)</span><div class="row2">${[0, 1, 2, 3].filter(s => s !== st.seat && !(st.names || {})[s]).map(s => `<button class="btn" data-sit="${s}">${SEAT[s]}</button>`).join('') || '<span class="muted">No free seat</span>'}</div></div>` : ''}
+      openOv('net', `<h2>${T('Online table')}</h2><div>${st.watching ? '👁 ' + T('You are watching this table.') : `You sit <b>${SEAT[st.seat]}</b>. The host's device runs the table; robots fill the empty seats.`}</div>
+        ${!st.watching && G && (G.phase === 'lobby' || G.phase === 'done') ? `<div class="grp"><span>Move to another seat (the host decides)</span><div class="row2">${[0, 1, 2, 3].filter(s => s !== st.seat && !(st.names || {})[s]).map(s => `<button class="btn" data-sit="${s}">${SEAT[s]}</button>`).join('') || '<span class="muted">No free seat</span>'}</div></div>` : ''}
         ${scoreHtml()}
         <div class="row2"><button class="btn" id="nLeave">Leave the table</button><button class="btn gold" id="oClose">Close</button></div>`);
       return;
@@ -557,7 +644,7 @@ const Net = (() => {
     openOv('net', `<h2>${offer ? T("Join {0}'s table", esc(offer.host)) : 'Join table ' + esc(code)}</h2>
       ${offer ? `<div class="muted">${[0, 1, 2, 3].map(s => SEAT[s] + ': ' + esc((offer.names || {})[s] || T('Robot'))).join(' · ')}. ${T('{0} decides whether you can sit.', esc(offer.host))}</div>` : ''}
       <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="${T('Your name')}"></div>
-      <div class="grp"><span>${T('Sit as')}</span><div class="seg2">${[['partner', T("The host's partner")], ['opp', T('An opponent')], ['any', T('Any free seat')]].map(([v, l]) => `<button data-want="${v}" class="${st.want === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
+      <div class="grp"><span>${T('Sit as')}</span><div class="seg2">${[['partner', T("The host's partner")], ['opp', T('An opponent')], ['any', T('Any free seat')], ['watch', '👁 ' + T('Watch')]].map(([v, l]) => `<button data-want="${v}" class="${st.want === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
       <div class="row2">${st.waiting ? '' : `<button class="btn gold" id="nJoin">${T('Join')}</button>`}<button class="btn" id="${st.waiting ? 'nCancel' : 'oClose'}">${st.waiting ? T('Cancel') : T('Not now')}</button></div>`);
   }
@@ -573,6 +660,7 @@ const Net = (() => {
     if (t.dataset.mva) { moveAnswer(t.dataset.mva, true); return; }
     if (t.dataset.mvd) { moveAnswer(t.dataset.mvd, false); return; }
     if (t.dataset.jt) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jt); st.offer = tb || null; st.msg = ''; showJoin('room-' + t.dataset.jt); return; }
+    if (t.dataset.jw) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jw); st.offer = tb || null; st.msg = ''; st.want = 'watch'; showJoin('room-' + t.dataset.jw); return; }
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {
       case "bNet": panel(); break;
@@ -615,7 +703,8 @@ const Net = (() => {
     else if (st.slot.peer.disconnected && !st.slot.peer.destroyed) { try { st.slot.peer.reconnect(); } catch (e) {} }
   }
   const lobbyOpen = () => document.visibilityState === 'visible' && !st.guest && ((G && G.phase === 'idle') || ui.overlay === 'net');
-  setInterval(() => { keepSlot(); if (lobbyOpen() && !st.finding) findTables(); }, 20000);
+  // the lobby lines also carry tournaments and chat, so they are rebuilt during play too when none is open
+  setInterval(() => { keepSlot(); if (!st.finding && (lobbyOpen() || (document.visibilityState === 'visible' && lobbyCount() <= 1 && st.slot))) findTables(); }, 20000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepSlot(); if (lobbyOpen()) findTables(); } });
-  return { st, owner, broadcast, send, panel, sit, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, broadcast, send, panel, sit, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
