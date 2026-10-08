@@ -27,7 +27,7 @@ const I18N = {
     "Watch": "İzle", "You are watching this table.": "Bu masayı izliyorsun.", "Tournaments": "Turnuvalar", "New tournament": "Yeni turnuva", "Play": "Oyna", "Standings": "Sıralama", "Close": "Kapat", "Player": "Oyuncu", "{0} boards": "{0} el", "{0} players": "{0} oyuncu", "you: {0}/{1}": "sen: {0}/{1}",
     "Nobody has played yet.": "Henüz kimse oynamadı.", "{0} boards · started by {1} · results arrive as the others play": "{0} el · başlatan {1} · diğerleri oynadıkça sonuçlar gelir", "No tournaments yet. Start one — everyone in the lobby gets the same deals.": "Henüz turnuva yok. Bir tane başlat — lobideki herkes aynı elleri oynar.",
     "Tournament board {0} of {1} — you sit South": "Turnuva eli {0}/{1} — South'ta oturuyorsun", "Close the online table first": "Önce online masayı kapat", "Finish this tournament board first": "Önce bu turnuva elini bitir",
-    "Going back to your table…": "Masana geri dönülüyor…",     "Clear the chat": "Sohbeti temizle", "Open an online table": "Online masa aç", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Kendi online masanı aç (oyuncular katılmak ister, sen kabul edersin) ya da aşağıdaki masalardan birine katılmak iste.",
+    "Going back to your table…": "Masana geri dönülüyor…", "Players in the lobby": "Lobideki oyuncular", "Invite players": "Oyuncu davet et", "wants to join your table": "masana katılmak istiyor", "wants to watch your table": "masanı izlemek istiyor", "more waiting": "kişi daha bekliyor", "Open an online table first": "Önce online masa aç", "Invitation sent to {0}": "{0} davet edildi", "invites you to their table": "seni masasına davet ediyor", "Nobody else is in the lobby right now.": "Şu an lobide başka kimse yok.", "Invite to my table": "Masama davet et", "Open an online table to invite players to it.": "Oyuncu davet etmek için online masa aç.", "Public table": "Herkese açık masa", "Private table": "Kapalı masa", "Listed in the lobby: anyone can ask to join, you accept.": "Lobide listelenir: herkes katılmak isteyebilir, sen kabul edersin.", "Not listed: only the players you invite can come (👥 Players in the lobby).": "Listelenmez: sadece davet ettiğin oyuncular gelebilir (👥 Lobideki oyuncular).",     "Clear the chat": "Sohbeti temizle", "Open an online table": "Online masa aç", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Kendi online masanı aç (oyuncular katılmak ister, sen kabul edersin) ya da aşağıdaki masalardan birine katılmak iste.",
     "setting up": "hazırlanıyor", "{0} accepted": "{0} kabul etti", "Players and start": "Oyuncular ve başlat", "Waiting for {0} to start": "{0} başlatacak", "{0} invites you": "{0} seni davet ediyor", "{0} invites you to a tournament": "{0} seni turnuvaya davet ediyor",
     "No tournaments yet. Create one and invite the players you want.": "Henüz turnuva yok. Bir tane oluştur ve istediğin oyuncuları davet et.", "accepted": "kabul etti", "declined": "reddetti", "invited": "davet edildi", "organiser": "düzenleyen",
     "Everyone plays the same deals at their own table, sitting South. The tournament opens when you press Start.": "Herkes aynı elleri kendi masasında, South'ta oturarak oynar. Turnuva sen Başlat deyince açılır.", "Players to invite": "Davet edilecek oyuncular",
@@ -54,7 +54,7 @@ const I18N = {
     "Watch": "Se på", "You are watching this table.": "Du ser på dette bordet.", "Tournaments": "Turneringer", "New tournament": "Ny turnering", "Play": "Spill", "Standings": "Resultatliste", "Close": "Lukk", "Player": "Spiller", "{0} boards": "{0} spill", "{0} players": "{0} spillere", "you: {0}/{1}": "du: {0}/{1}",
     "Nobody has played yet.": "Ingen har spilt ennå.", "{0} boards · started by {1} · results arrive as the others play": "{0} spill · startet av {1} · resultatene kommer etter hvert som de andre spiller", "No tournaments yet. Start one — everyone in the lobby gets the same deals.": "Ingen turneringer ennå. Start en — alle i lobbyen får de samme spillene.",
     "Tournament board {0} of {1} — you sit South": "Turneringsspill {0} av {1} — du sitter Syd", "Close the online table first": "Lukk online-bordet først", "Finish this tournament board first": "Fullfør dette turneringsspillet først",
-    "Going back to your table…": "Går tilbake til bordet ditt…",     "Clear the chat": "Tøm chatten", "Open an online table": "Åpne et online-bord", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Åpne ditt eget online-bord (spillere ber om å bli med og du godtar dem), eller be om å bli med ved et av bordene under.",
+    "Going back to your table…": "Går tilbake til bordet ditt…", "Players in the lobby": "Spillere i lobbyen", "Invite players": "Inviter spillere", "wants to join your table": "vil bli med ved bordet ditt", "wants to watch your table": "vil se på bordet ditt", "more waiting": "venter til", "Open an online table first": "Åpne et online-bord først", "Invitation sent to {0}": "Invitasjon sendt til {0}", "invites you to their table": "inviterer deg til bordet sitt", "Nobody else is in the lobby right now.": "Ingen andre er i lobbyen nå.", "Invite to my table": "Inviter til mitt bord", "Open an online table to invite players to it.": "Åpne et online-bord for å invitere spillere.", "Public table": "Åpent bord", "Private table": "Lukket bord", "Listed in the lobby: anyone can ask to join, you accept.": "Vises i lobbyen: alle kan be om å bli med, du godtar.", "Not listed: only the players you invite can come (👥 Players in the lobby).": "Vises ikke: bare spillere du inviterer kan komme (👥 Spillere i lobbyen).",     "Clear the chat": "Tøm chatten", "Open an online table": "Åpne et online-bord", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Åpne ditt eget online-bord (spillere ber om å bli med og du godtar dem), eller be om å bli med ved et av bordene under.",
     "setting up": "settes opp", "{0} accepted": "{0} har takket ja", "Players and start": "Spillere og start", "Waiting for {0} to start": "Venter på at {0} starter", "{0} invites you": "{0} inviterer deg", "{0} invites you to a tournament": "{0} inviterer deg til en turnering",
     "No tournaments yet. Create one and invite the players you want.": "Ingen turneringer ennå. Lag en og inviter spillerne du vil.", "accepted": "takket ja", "declined": "takket nei", "invited": "invitert", "organiser": "arrangør",
     "Everyone plays the same deals at their own table, sitting South. The tournament opens when you press Start.": "Alle spiller de samme spillene ved sitt eget bord, som Syd. Turneringen åpner når du trykker Start.", "Players to invite": "Spillere som skal inviteres",
@@ -496,7 +496,8 @@ function lobbyHtml() {
   };
   const mid = guest() ? `<div class="muted">${T("Waiting for the host to start.")}<br>${T("“Sit here” asks the host to move you.")}</div>`
     : `<button class="btn new" id="bStart">${T("Start")}</button><button class="btn" id="bNet">${T("Online")}</button>`;
-  return `<div class="lobby"><h3>${T("Online table")}</h3>${guest() ? "" : Net.pendHtml()}${seatTable([0, 1, 2, 3].map(cell), mid, me)}${Net.scoreHtml()}</div>`;
+  const inv = guest() ? "" : `<div class="grp"><span>👥 ${T("Invite players")}${Net.st.priv ? " · 🔒 " + T("Private table") : ""}</span>${Net.peopleHtml()}</div>`;
+  return `<div class="lobby"><h3>${T("Online table")}</h3>${guest() ? "" : Net.pendHtml()}${seatTable([0, 1, 2, 3].map(cell), mid, me)}${inv}${Net.scoreHtml()}</div>`;
 }
 function renderTable() {
   for (let seat = 0; seat < 4; seat++) {
@@ -589,6 +590,7 @@ function turnAlert() {
 const myNm = () => { try { return localStorage.getItem('bridge-table-name') || ''; } catch (e) { return ''; } };
 function homeShell() {
   const langs = [['en', 'English'], ['tr', 'Türkçe'], ['no', 'Norsk']];
+  const sec = (k, label) => `<button class="hsec" data-hsec="${k}">${label}</button>`;
   return `<div class="home">
   <header class="hhead"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
     <div class="seg" data-seg="lang">${langs.map(([v, l]) => `<button data-v="${v}" class="${SET.lang === v ? 'on' : ''}">${l}</button>`).join('')}</div></header>
@@ -598,18 +600,26 @@ function homeShell() {
         <label class="hname"><span>${T('Your name')}</span><input id="hName" class="tok" maxlength="20" autocomplete="nickname" value="${esc(myNm())}" placeholder="${T('Your name')}"></label>
         <div class="muted">${T('Play alone with robots, or join a table where a robot is playing.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn gold" id="hQuick">${T('Seat me at a table')}</button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button></div>
+        <div class="hsecs">${sec('tours', '🏆 ' + T('Tournaments'))}${sec('conv', '📋 ' + T('Our convention card (with partner)'))}${sec('people', '👥 ' + T('Players in the lobby'))}<button class="hsec phoneonly" data-hsec="chat">💬 ${T('Lobby chat')} <span id="hChatN"></span></button></div>
         <div class="hlinks"><button class="btn" id="bNet">${T('Online')}</button><button class="btn" id="bRes">${T('Results')}</button><button class="btn" id="bSet">${T('Settings')}</button><button class="btn" id="bHelp">${T('Help')}</button></div>
         <div class="hstats" id="hStats"></div>
       </div>
+      <div id="hSec"></div>
       <div id="hPend"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
-      <div class="hcard"><h3>🏆 ${T('Tournaments')}</h3><div id="hTours"></div></div>
-      <div class="hcard"><details id="hConvBox"><summary>${T('Our convention card (with partner)')}</summary><div id="hConv"></div></details></div>
     </section>
     <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lmsgs" id="hChat"></div>
       <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></aside>
-  </div>
-  <button class="lchatfab" id="lFab">💬 <span id="lFabN"></span></button></div>`;
+  </div></div>`;
+}
+// the section opened with the buttons at the top of the home page (tournaments, our card, players, chat on a phone)
+function homeSection(k) {
+  if (k === 'tours') return `<div class="hcard"><h3>🏆 ${T('Tournaments')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hTours"></div></div>`;
+  if (k === 'conv') return `<div class="hcard"><h3>📋 ${T('Our convention card (with partner)')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hConv"></div></div>`;
+  if (k === 'people') return `<div class="hcard"><h3>👥 ${T('Players in the lobby')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hPeople"></div></div>`;
+  if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lmsgs" id="pChat"></div>
+    <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div>`;
+  return '';
 }
 // our card: every convention with a switch; tap a name for its description
 function convCardHtml() {
@@ -623,14 +633,20 @@ function renderHome() {
   set('hGo', cont ? T('Continue') : T('Start'));
   const per = Store.periods(HIST)[0];
   set('hStats', `${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
+  // the open section is rebuilt only when it changes (so typing in it is not lost); its contents are refreshed
+  const hs = $('hSec'), want = ui.hsec || '';
+  if (hs && hs.dataset.sec !== want) { hs.dataset.sec = want; hs.innerHTML = homeSection(want); }
+  document.querySelectorAll('[data-hsec]').forEach(b => b.classList.toggle('on', !!want && b.dataset.hsec === want));
   if (N) {
     set('hPend', N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : '');
     set('hTables', N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
-    set('hCount', T('{0} in the lobby', N.lobbyCount()));
-    set('lFabN', T('Lobby chat') + (N.st.lunread ? ' (' + N.st.lunread + ')' : ''));
+    if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
+    set('hCount', T('{0} in the lobby', N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
+    set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
+    if (want === 'chat') N.st.lunread = 0;
+    set('hTours', toursHtml()); set('hPeople', N.peopleHtml());
   }
-  if (N) set('hTours', toursHtml());
   set('hConv', convCardHtml());
 }
 /* ---- tournaments: the deals come from the tournament's number, so every player gets the same boards ---- */
@@ -978,6 +994,8 @@ document.addEventListener('click', ev_ => {
     return;
   }
   // Results: open a finished board, tap its calls, or go back to the list
+  const hsb = ev_.target.closest('[data-hsec]'); if (hsb) { const v = hsb.dataset.hsec; ui.hsec = !v || ui.hsec === v ? null : v; render(); if (ui.hsec === 'chat') { const i = $('lMsg2'); if (i) i.focus(); } return; }
+  const opb = ev_.target.closest('[data-open]'); if (opb) { closeOv(); ui.saved = null; Net.openTable(opb.dataset.open === 'priv'); return; }
   const tp = ev_.target.closest('[data-tplay]'); if (tp) { playTour(tp.dataset.tplay); return; }
   const tq = ev_.target.closest('[data-tset],[data-tyes],[data-tno]'); if (tq) { if (tq.dataset.tset) { ui.tsel = null; showTourSetup(tq.dataset.tset); } else Net.tourAnswer(tq.dataset.tyes || tq.dataset.tno, !!tq.dataset.tyes); return; }
   const ts = ev_.target.closest('[data-tstand]'); if (ts) { showStandings(ts.dataset.tstand); return; }
@@ -1031,9 +1049,12 @@ document.addEventListener('click', ev_ => {
     case 'bRes': showResults(); break;
     case 'bHome': goHome(); break;
     case 'hQuick': Net.quickJoin(); break;
-    case 'hOpen': ui.saved = null; Net.openTable(); break;
+    case 'hOpen': if (online()) { Net.panel(); break; } openOv('open', `<h2>🌐 ${T('Open an online table')}</h2>
+      <button class="btn new choice" data-open="pub"><b>🌍 ${T('Public table')}</b><small>${T('Listed in the lobby: anyone can ask to join, you accept.')}</small></button>
+      <button class="btn choice" data-open="priv"><b>🔒 ${T('Private table')}</b><small>${T('Not listed: only the players you invite can come (👥 Players in the lobby).')}</small></button>
+      <div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`); break;
     case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } break; }
-    case 'lSend2': { const i = $('lMsg2'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; i.focus(); } break; }
+    case 'lSend2': { const i = $('lMsg2'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } if (ui.hsec === 'chat') { ui.hsec = null; render(); } break; }
     case 'lClear': Net.lclear(); break;
     case 'lFab': showLChat(); break;
     case 'oClose': closeOv(); break;
@@ -1051,7 +1072,7 @@ document.addEventListener('click', ev_ => {
   }
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
-document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); Net.lsend(e.target.value); e.target.value = ''; } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); Net.lsend(e.target.value); e.target.value = ''; if (e.target.id === 'lMsg2' && ui.hsec === 'chat') { ui.hsec = null; render(); } } });
 window.addEventListener('resize', layoutFans);
 
 /* ================= boot ================= */
