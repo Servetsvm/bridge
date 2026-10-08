@@ -5,6 +5,46 @@ const { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealer
 
 let SET = { style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', conv: { ...E.ALL_ON } };
 let G = null, HIST = [], BOARD = 0, timer = null;
+/* ---- language: the screens are written in English; T() gives the Turkish or Norwegian text ({0} = a value) ---- */
+const I18N = {
+  tr: {
+    "Contract": "Kontrat", "Today": "Bugün", "last:": "son:", "New Deal": "Yeni El", "Sure?": "Emin misin?", "Undo": "Geri al", "Chat": "Sohbet", "Hint": "İpucu", "Claim": "Claim", "Online": "Online", "Help": "Yardım", "Settings": "Ayarlar", "Results": "Sonuçlar", "Home": "Ana sayfa",
+    "Us": "Biz", "Them": "Onlar", "Pass": "Pas", "Double": "Kontr", "Redouble": "Sürkontr",
+    "Your call": "Teklif sırası sende", "{0} is thinking…": "{0} düşünüyor…", "Gathering the trick…": "Löve toplanıyor…", "Your turn: play a card": "Sıra sende: kart oyna", "Play from {0}'s hand": "{0} elinden oyna", "{0} is playing…": "{0} oynuyor…",
+    "Press Start to deal": "Dağıtmak için Başla'ya bas", "Waiting for the host to start": "Host'un başlatması bekleniyor", "Waiting for players — press Start when everyone is seated": "Oyuncular bekleniyor — herkes oturunca Başla'ya bas", "Board finished": "El bitti",
+    "Tap a call to see what it means": "Anlamını görmek için bir teklife dokun", "Next deal": "Sonraki el", "Tap for details": "Ayrıntılar için dokun", "Tap here to see the last trick": "Son löveyi görmek için dokun",
+    "Bridge Table": "Briç Masası", "Your name": "Adın", "Start": "Başla", "Continue": "Devam et", "Seat me at a table": "Beni uygun masaya al", "Open tables": "Açık masalar", "Lobby chat": "Lobi sohbeti", "Write a message…": "Mesaj yaz…", "Send": "Gönder",
+    "Our convention card (with partner)": "Konvansiyon kartımız (partnerle)", "No messages yet — say hello!": "Henüz mesaj yok — merhaba de!", "{0} in the lobby": "Lobide {0} kişi", "Your last board is waiting.": "Son elin seni bekliyor.",
+    "Play alone with robots, or join a table where a robot is playing.": "Robotlarla tek başına oyna ya da robotun oynadığı bir masaya katıl.", "Language": "Dil", "boards": "el", "Open a waiting room": "Bekleme salonu aç",
+    "{0}'s table": "{0} masası", "playing with robots": "robotlarla oynuyor", "online": "online", "waiting to start": "başlamayı bekliyor", "board {0}": "{0}. el", "Ask to join": "Katılmak iste", "Robot": "Robot", "away · robot plays": "uzakta · robot oynuyor",
+    "No other tables are open right now.": "Şu an başka açık masa yok.", "Looking for tables…": "Masalar aranıyor…", "Refresh the list": "Listeyi yenile", "Show open tables": "Açık masaları göster",
+    "Online table": "Online masa", "Sit here": "Buraya otur", "Remove": "Kaldır", "(you)": "(sen)", "Waiting for the host to start.": "Host'un başlatması bekleniyor.", "“Sit here” asks the host to move you.": "“Buraya otur” host'tan yer değiştirme izni ister.",
+    "Asking to join": "Katılmak istiyor", "Accept": "Kabul", "Decline": "Reddet", "(opponent)": "(rakip)", "(partner)": "(partner)", "Asking to change seats": "Yer değiştirmek istiyor", "asks for a new deal": "yeni el istiyor", "asks to reset the table score": "masa skorunun sıfırlanmasını istiyor",
+    "Table score": "Masa skoru", "Reset the score": "Skoru sıfırla", "Ask to reset the score": "Skor sıfırlamayı iste", "Ask for a new deal": "Yeni el iste",
+    "Join {0}'s table": "{0} masasına katıl", "Sit as": "Otur", "The host's partner": "Host'un partneri", "An opponent": "Rakip", "Any free seat": "Herhangi boş yer", "Join": "Katıl", "Not now": "Şimdi değil", "Cancel": "İptal",
+    "Waiting for the host to accept you…": "Host'un kabul etmesi bekleniyor…", "{0} decides whether you can sit.": "Oturup oturamayacağına {0} karar verir.",
+    "No table has a free seat right now.": "Şu an boş yeri olan masa yok.", "Asked {0} for a seat…": "{0} masasından yer istendi…", "Asked the host for a new deal": "Host'tan yeni el istendi", "The host said no": "Host kabul etmedi", "You are offline": "İnternet bağlantısı yok",
+  },
+  no: {
+    "Contract": "Kontrakt", "Today": "I dag", "last:": "siste:", "New Deal": "Nytt spill", "Sure?": "Sikker?", "Undo": "Angre", "Chat": "Chat", "Hint": "Tips", "Claim": "Claim", "Online": "Online", "Help": "Hjelp", "Settings": "Innstillinger", "Results": "Resultater", "Home": "Hjem",
+    "Us": "Vi", "Them": "De", "Pass": "Pass", "Double": "Dobl", "Redouble": "Redobl",
+    "Your call": "Din melding", "{0} is thinking…": "{0} tenker…", "Gathering the trick…": "Stikket samles…", "Your turn: play a card": "Din tur: spill et kort", "Play from {0}'s hand": "Spill fra {0}", "{0} is playing…": "{0} spiller…",
+    "Press Start to deal": "Trykk Start for å dele ut", "Waiting for the host to start": "Venter på at verten starter", "Waiting for players — press Start when everyone is seated": "Venter på spillere — trykk Start når alle sitter", "Board finished": "Spillet er ferdig",
+    "Tap a call to see what it means": "Trykk på en melding for å se hva den betyr", "Next deal": "Neste spill", "Tap for details": "Trykk for detaljer", "Tap here to see the last trick": "Trykk her for å se siste stikk",
+    "Bridge Table": "Bridgebord", "Your name": "Navnet ditt", "Start": "Start", "Continue": "Fortsett", "Seat me at a table": "Finn et bord til meg", "Open tables": "Åpne bord", "Lobby chat": "Lobbychat", "Write a message…": "Skriv en melding…", "Send": "Send",
+    "Our convention card (with partner)": "Vårt konvensjonskort (med makker)", "No messages yet — say hello!": "Ingen meldinger ennå — si hei!", "{0} in the lobby": "{0} i lobbyen", "Your last board is waiting.": "Det siste spillet ditt venter.",
+    "Play alone with robots, or join a table where a robot is playing.": "Spill alene med roboter, eller bli med ved et bord der en robot spiller.", "Language": "Språk", "boards": "spill", "Open a waiting room": "Åpne et venterom",
+    "{0}'s table": "{0} sitt bord", "playing with robots": "spiller med roboter", "online": "online", "waiting to start": "venter på start", "board {0}": "spill {0}", "Ask to join": "Be om å bli med", "Robot": "Robot", "away · robot plays": "borte · robot spiller",
+    "No other tables are open right now.": "Ingen andre bord er åpne nå.", "Looking for tables…": "Leter etter bord…", "Refresh the list": "Oppdater listen", "Show open tables": "Vis åpne bord",
+    "Online table": "Online-bord", "Sit here": "Sitt her", "Remove": "Fjern", "(you)": "(deg)", "Waiting for the host to start.": "Venter på at verten starter.", "“Sit here” asks the host to move you.": "«Sitt her» ber verten om å flytte deg.",
+    "Asking to join": "Vil bli med", "Accept": "Godta", "Decline": "Avslå", "(opponent)": "(motstander)", "(partner)": "(makker)", "Asking to change seats": "Vil bytte plass", "asks for a new deal": "ber om nytt spill", "asks to reset the table score": "ber om å nullstille bordets poeng",
+    "Table score": "Bordets poeng", "Reset the score": "Nullstill poengene", "Ask to reset the score": "Be om nullstilling", "Ask for a new deal": "Be om nytt spill",
+    "Join {0}'s table": "Bli med ved {0} sitt bord", "Sit as": "Sitt som", "The host's partner": "Vertens makker", "An opponent": "Motstander", "Any free seat": "Hvilken som helst ledig plass", "Join": "Bli med", "Not now": "Ikke nå", "Cancel": "Avbryt",
+    "Waiting for the host to accept you…": "Venter på at verten godtar deg…", "{0} decides whether you can sit.": "{0} bestemmer om du kan sitte.",
+    "No table has a free seat right now.": "Ingen bord har ledig plass nå.", "Asked {0} for a seat…": "Spurte {0} om en plass…", "Asked the host for a new deal": "Ba verten om nytt spill", "The host said no": "Verten sa nei", "You are offline": "Du er frakoblet",
+  },
+};
+function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, confirmNew: 0, overlay: null, resTab: 'stats' };
 const online = () => typeof Net !== "undefined" && Net.on;
 const guest = () => typeof Net !== "undefined" && Net.guest;
@@ -40,6 +80,7 @@ function load(d) {
   if (d) { SET = Object.assign(SET, d.SET || {}); G = d.G || null; HIST = d.HIST || []; BOARD = d.BOARD || 0; }
   if (G && G.phase === "lobby") G = null; // an online waiting room is not restored after a restart
   SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) };
+  if (!SET.lang) { const l = (navigator.language || 'en').toLowerCase(); SET.lang = l.startsWith('tr') ? 'tr' : /^(nb|nn|no)/.test(l) ? 'no' : 'en'; }
   loadSeen();
   for (const h of HIST) if (h.deal) SEEN.add(E.dealKey(h.deal));
 }
@@ -258,6 +299,7 @@ function finishBoard() {
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
   G.result = e; G.phase = 'done';
+  if (online() && !guest()) Net.boardDone(e);
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
   Store.saveRec(e);
   save(); render();
@@ -352,7 +394,7 @@ function renderBar() {
   const topbot = uNS ? vulOf(b, 0) : vulOf(b, 1), lr = uNS ? vulOf(b, 1) : vulOf(b, 0);
   const dst = ['bottom:-1px;left:50%;transform:translateX(-50%)', 'left:1px;top:50%;transform:translateY(-50%)', 'top:-1px;left:50%;transform:translateX(-50%)', 'right:1px;top:50%;transform:translateY(-50%)'][rel(G.dealer)];
   let con = '—', tr = '';
-  if (G.play) { const c = G.play.contract; con = `${callHtml(B(c.level, c.strain))}${c.dbl === 1 ? ' X' : c.dbl === 2 ? ' XX' : ''} <span class="sm">${SEAT[c.decl]}</span>`; const us = sideOf(u); tr = `Us ${G.play.tricks[us]} · Them ${G.play.tricks[1 - us]}`; }
+  if (G.play) { const c = G.play.contract; con = `${callHtml(B(c.level, c.strain))}${c.dbl === 1 ? ' X' : c.dbl === 2 ? ' XX' : ''} <span class="sm">${SEAT[c.decl]}</span>`; const us = sideOf(u); tr = `${T('Us')} ${G.play.tricks[us]} · ${T('Them')} ${G.play.tricks[1 - us]}`; }
   const g = G.play;
   const canClaim = G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
   const last = HIST.length ? HIST[HIST.length - 1] : null;
@@ -361,18 +403,19 @@ function renderBar() {
   const dayTxt = SET.mode === 'IMP' ? (per.scored ? fmtSigned(per.impSum) + ' IMP' : '—') : (per.mpAvg != null ? per.mpAvg + '%' : '—');
   $('bar').innerHTML = `
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
-   <button class="box" id="bAuc" title="Show the auction"><small>Contract</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
-   <div class="box"><small>Today</small><b>${dayTxt}</b><span class="tr">last: ${lastTxt}</span></div>
+   <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
+   <div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>
    <div class="spacer"></div>
    <div class="tools">
-     <button class="btn new${ui.confirmNew > Date.now() ? ' warn' : ''}" id="bNew">${ui.confirmNew > Date.now() ? 'Sure?' : 'New Deal'}</button>
-     <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>Undo</button>${online() ? `<button class="btn${Net.st.unread ? " gold" : ""}" id="bChat">Chat${Net.st.unread ? " (" + Net.st.unread + ")" : ""}</button>` : ""}
-     <button class="btn gold" id="bHint">Hint</button>
-     <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>Claim</button>
-     <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? "Online ●" : "Online"}</button>
-     <button class="btn" id="bHelp">Help</button>
-     <button class="btn" id="bSet">Settings</button>
-     <button class="btn" id="bRes">Results</button>
+     <button class="btn" id="bHome" title="${T('Home')}">⌂</button>
+     <button class="btn new${ui.confirmNew > Date.now() ? ' warn' : ''}" id="bNew">${ui.confirmNew > Date.now() ? T('Sure?') : T('New Deal')}</button>
+     <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>${T('Undo')}</button>${online() ? `<button class="btn${Net.st.unread ? " gold" : ""}" id="bChat">${T('Chat')}${Net.st.unread ? " (" + Net.st.unread + ")" : ""}</button>` : ""}
+     <button class="btn gold" id="bHint">${T('Hint')}</button>
+     <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
+     <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
+     <button class="btn" id="bHelp">${T('Help')}</button>
+     <button class="btn" id="bSet">${T('Settings')}</button>
+     <button class="btn" id="bRes">${T('Results')}</button>
    </div>`;
 }
 function explHtml(e, prefix) {
@@ -393,7 +436,7 @@ function auctionPanel() {
   // the explanation appears only when you tap a call (or ask for a hint); tap again to close it
   const e = ui.hintBid ? { call: ui.hintBid.call, m: ui.hintBid.m } : (ui.lastExpl != null ? G.auction[ui.lastExpl] : null);
   const ex = e ? explHtml(e, ui.hintBid ? 'Suggestion:' : null) : '';
-  return `<div class="auction">${auctionTable(G.auction, G.phase === 'bid')}</div>${e && SET.expl ? `<div class="expl" id="dExpl" role="button" tabindex="0">${ex}</div>` : `<div class="muted tap">Tap a call to see what it means</div>`}`;
+  return `<div class="auction">${auctionTable(G.auction, G.phase === 'bid')}</div>${e && SET.expl ? `<div class="expl" id="dExpl" role="button" tabindex="0">${ex}</div>` : `<div class="muted tap">${T("Tap a call to see what it means")}</div>`}`;
 }
 /* online waiting room: who sits where, free seats to take, and the host's Start button */
 const esc = s => String(s || "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
@@ -427,12 +470,12 @@ function lobbyHtml() {
   const nm = Net.st.names || {}, me = U(), away = Net.st.away || {};
   const cell = s => {
     const who = nm[s];
-    if (!who) return `<i>Robot</i>${guest() ? `<button class="btn" data-sit="${s}">Sit here</button>` : ""}`;
-    return `<b>${esc(who)}${s === me ? " (you)" : ""}</b>${away[s] ? "<em>away · robot plays</em>" : ""}${!guest() && s !== me ? `<button class="btn" data-kick="${s}">Remove</button>` : ""}`;
+    if (!who) return `<i>${T("Robot")}</i>${guest() ? `<button class="btn" data-sit="${s}">${T("Sit here")}</button>` : ""}`;
+    return `<b>${esc(who)}${s === me ? " " + T("(you)") : ""}</b>${away[s] ? `<em>${T("away · robot plays")}</em>` : ""}${!guest() && s !== me ? `<button class="btn" data-kick="${s}">${T("Remove")}</button>` : ""}`;
   };
-  const mid = guest() ? `<div class="muted">Waiting for the host to start.<br>“Sit here” asks the host to move you.</div>`
-    : `<button class="btn new" id="bStart">Start</button><button class="btn" id="bNet">Online</button>`;
-  return `<div class="lobby"><h3>Online table</h3>${guest() ? "" : Net.pendHtml()}${seatTable([0, 1, 2, 3].map(cell), mid, me)}</div>`;
+  const mid = guest() ? `<div class="muted">${T("Waiting for the host to start.")}<br>${T("“Sit here” asks the host to move you.")}</div>`
+    : `<button class="btn new" id="bStart">${T("Start")}</button><button class="btn" id="bNet">${T("Online")}</button>`;
+  return `<div class="lobby"><h3>${T("Online table")}</h3>${guest() ? "" : Net.pendHtml()}${seatTable([0, 1, 2, 3].map(cell), mid, me)}${Net.scoreHtml()}</div>`;
 }
 function renderTable() {
   for (let seat = 0; seat < 4; seat++) {
@@ -452,11 +495,11 @@ function renderTable() {
     // tap the table to look at the last finished trick; tap again (or wait) to come back
     const H = G.play.history, last = ui.showLast && H.length ? H[H.length - 1] : null;
     const tr = last ? last.cards : G.play.trick, w = last ? last.w : (tr.length === 4 ? E.trickWinner(tr, G.play.trump) : -1);
-    C.innerHTML = `<div class="trick${last ? " lasttrick" : ""}" id="trickArea">` + tr.map(x => cardHtml(x.c, "tc p" + rel(x.s) + (x.s === w ? " win" : ""))).join("") + (last ? `<div class="lastlbl">Last trick (${H.length}) — won by ${SEAT[last.w]}</div>` : (H.length && !tr.length ? `<div class="lasthint">Tap here to see the last trick</div>` : "")) + "</div>";
+    C.innerHTML = `<div class="trick${last ? " lasttrick" : ""}" id="trickArea">` + tr.map(x => cardHtml(x.c, "tc p" + rel(x.s) + (x.s === w ? " win" : ""))).join("") + (last ? `<div class="lastlbl">Last trick (${H.length}) — won by ${SEAT[last.w]}</div>` : (H.length && !tr.length ? `<div class="lasthint">${T("Tap here to see the last trick")}</div>` : "")) + "</div>";
   } else {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
-    C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>Tap for details</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">Next deal</button>` : '';
+    C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans();
@@ -477,20 +520,77 @@ function renderBidbox() {
   bb.hidden = false; const L = legalCalls(G.auction, U());
   const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st${red(s) ? ' r' : ''}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
-  bb.innerHTML = `<div class="row"><button data-call="P" class="pass">Pass</button><button data-call="X" class="dbl" ${L.includes('X') ? '' : 'disabled'}>Double</button><button data-call="XX" class="rdbl" ${L.includes('XX') ? '' : 'disabled'}>Redouble</button></div><div class="row">${lv}</div><div class="row">${sts}</div>`;
+  bb.innerHTML = `<div class="row"><button data-call="P" class="pass">${T('Pass')}</button><button data-call="X" class="dbl" ${L.includes('X') ? '' : 'disabled'}>${T('Double')}</button><button data-call="XX" class="rdbl" ${L.includes('XX') ? '' : 'disabled'}>${T('Redouble')}</button></div><div class="row">${lv}</div><div class="row">${sts}</div>`;
 }
 function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
-  if (G.phase === 'bid') s = bidTurn() === U() ? 'Your call' : `${nameOf(bidTurn())} is thinking…`;
-  else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = 'Gathering the trick…'; else if (userControls(g.turn)) s = g.turn === U() ? 'Your turn: play a card' : `Play from ${SEAT[g.turn]}'s hand`; else s = `${nameOf(g.turn)} is playing…`; }
-  else if (G.phase === "idle") s = "Press Start to deal";
-  else if (G.phase === "lobby") s = guest() ? "Waiting for the host to start" : "Waiting for players — press Start when everyone is seated";
-  else s = 'Board finished';
+  if (G.phase === 'bid') s = bidTurn() === U() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
+  else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = T('Gathering the trick…'); else if (userControls(g.turn)) s = g.turn === U() ? T('Your turn: play a card') : T("Play from {0}'s hand", SEAT[g.turn]); else s = T('{0} is playing…', nameOf(g.turn)); }
+  else if (G.phase === "idle") s = T("Press Start to deal");
+  else if (G.phase === "lobby") s = guest() ? T("Waiting for the host to start") : T("Waiting for players — press Start when everyone is seated");
+  else s = T('Board finished');
   $("status").innerHTML = s + (ui.signal && G.phase === "play" ? `<div class="sig">${symText(ui.signal)}</div>` : "");
 }
-function render() { if (!G) return; document.body.classList.toggle("classic", SET.style !== "modern"); renderBar(); renderTable(); renderBidbox(); renderStatus(); }
+function render() {
+  if (!G) return; document.body.classList.toggle("classic", SET.style !== "modern");
+  const home = G.phase === 'idle';
+  document.body.classList.toggle('athome', home); $('home').hidden = !home;
+  if (home) { renderHome(); return; }
+  renderBar(); renderTable(); renderBidbox(); renderStatus();
+}
+
+/* ================= home page: start, open tables, our convention card and the lobby chat ================= */
+const myNm = () => { try { return localStorage.getItem('bridge-table-name') || ''; } catch (e) { return ''; } };
+function homeShell() {
+  const langs = [['en', 'English'], ['tr', 'Türkçe'], ['no', 'Norsk']];
+  return `<div class="home">
+  <header class="hhead"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
+    <div class="seg" data-seg="lang">${langs.map(([v, l]) => `<button data-v="${v}" class="${SET.lang === v ? 'on' : ''}">${l}</button>`).join('')}</div></header>
+  <div class="hgrid">
+    <section class="hmain">
+      <div class="hcard hero">
+        <label class="hname"><span>${T('Your name')}</span><input id="hName" class="tok" maxlength="20" autocomplete="nickname" value="${esc(myNm())}" placeholder="${T('Your name')}"></label>
+        <div class="muted">${T('Play alone with robots, or join a table where a robot is playing.')}</div>
+        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn gold" id="hQuick">${T('Seat me at a table')}</button></div>
+        <div class="hlinks"><button class="btn" id="bNet">${T('Online')}</button><button class="btn" id="bRes">${T('Results')}</button><button class="btn" id="bSet">${T('Settings')}</button><button class="btn" id="bHelp">${T('Help')}</button></div>
+        <div class="hstats" id="hStats"></div>
+      </div>
+      <div id="hPend"></div>
+      <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
+      <div class="hcard"><details id="hConvBox"><summary>${T('Our convention card (with partner)')}</summary><div id="hConv"></div></details></div>
+    </section>
+    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small></h3><div class="lmsgs" id="hChat"></div>
+      <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></aside>
+  </div></div>`;
+}
+// our card: every convention with a switch; tap a name for its description
+function convCardHtml() {
+  return `<div class="muted">5-card majors · 15-17 1NT · weak twos · strong 2♣ · Jacoby transfers · negative and takeout doubles</div><div class="convs">${E.CONVS.map(c => `<label class="cvchip${SET.conv[c.k] ? ' on' : ''}" title="${esc(c.d)}"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}>${esc(c.n)}</label>`).join('')}</div>`;
+}
+function renderHome() {
+  const h = $('home'), N = typeof Net !== 'undefined' ? Net : null;
+  if (h.dataset.lang !== SET.lang) { h.dataset.lang = SET.lang; h.innerHTML = homeShell(); }
+  const set = (id, html) => { const el = $(id); if (el && el.innerHTML !== html) { el.innerHTML = html; return true; } return false; };
+  const cont = ui.saved && ui.saved.phase !== 'done';
+  set('hGo', cont ? T('Continue') : T('Start'));
+  const per = Store.periods(HIST)[0];
+  set('hStats', `${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
+  if (N) {
+    set('hPend', N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : '');
+    set('hTables', N.tablesHtml());
+    if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
+    set('hCount', T('{0} in the lobby', N.lobbyCount()));
+  }
+  set('hConv', convCardHtml());
+}
+// back to the home page from a board played alone (the board is kept for Continue)
+function goHome() {
+  if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
+  clearTimeout(timer); if (G && G.phase !== 'idle') ui.saved = G.phase === 'done' ? null : G;
+  G = idleG(); closeOv(); save(); render();
+}
 
 /* ================= overlays ================= */
 function suitLine(cards, s) { const cs = E.desc(E.inSuit(cards, s)); return `${symHtml(s)} ${cs.length ? cs.map(c => RTXT[R(c)]).join(' ') : '—'}`; }
@@ -710,8 +810,9 @@ document.addEventListener('change', e => {
     SET.conv[k] = t.checked;
     if (t.checked && c && c.x) SET.conv[c.x] = false;
     if (!t.checked && SET.practice === k) SET.practice = "";
-    Store.saveSettings(SET); save(); showSettings();
+    Store.saveSettings(SET); save(); if (ui.overlay === "set") showSettings(); else render();
   }
+  if (t.id === 'hName') { try { localStorage.setItem('bridge-table-name', t.value.trim().slice(0, 20)); } catch (e) {} return; }
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
@@ -737,6 +838,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.c != null && t.classList.contains('play')) { const c = +t.dataset.c; const seat = G.play.turn; if (G.play.hands[seat].includes(c)) playCard(seat, c); return; }
   if (t.closest('.seg')) {
     const seg = t.closest('.seg').dataset.seg, v = t.dataset.v;
+    if (seg === 'lang') { SET.lang = v; Store.saveSettings(SET); save(); render(); return; }
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
@@ -747,7 +849,7 @@ document.addEventListener('click', ev_ => {
   }
   switch (t.id) {
     case "bNew": case "oNext2":
-      if (guest()) { if (G.phase === "done") Net.send({ t: "next" }); else flash("Only the host can deal a new board during play", 1800); break; }
+      if (guest()) { if (G.phase === "done") Net.send({ t: "next" }); else Net.askNewDeal(); break; }
       if (t.id === "oNext2" || G.phase === "done" || ui.confirmNew > Date.now()) { ui.confirmNew = 0; newBoard(); }
       else { ui.confirmNew = Date.now() + 3000; renderBar(); setTimeout(renderBar, 3100); }
       break;
@@ -766,6 +868,9 @@ document.addEventListener('click', ev_ => {
     case "bHelp": case "bHelp2": showHelp(); break;
     case "bSet": showSettings(); break;
     case 'bRes': showResults(); break;
+    case 'bHome': goHome(); break;
+    case 'hQuick': Net.quickJoin(); break;
+    case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } break; }
     case 'oClose': closeOv(); break;
     case 'sReset': HIST = []; save(); showSettings(); render(); break;
     case "sSave": { const v = ($("syncToken") || {}).value; if (v) { GitSync.setToken(v); syncState.msg = ""; syncNow(); showSettings(); } break; }
@@ -776,6 +881,7 @@ document.addEventListener('click', ev_ => {
   }
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'lMsg' && e.target.value.trim()) { e.preventDefault(); Net.lsend(e.target.value); e.target.value = ''; } });
 window.addEventListener('resize', layoutFans);
 
 /* ================= boot ================= */
