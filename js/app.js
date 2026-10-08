@@ -27,7 +27,7 @@ const I18N = {
     "Watch": "İzle", "You are watching this table.": "Bu masayı izliyorsun.", "Tournaments": "Turnuvalar", "New tournament": "Yeni turnuva", "Play": "Oyna", "Standings": "Sıralama", "Close": "Kapat", "Player": "Oyuncu", "{0} boards": "{0} el", "{0} players": "{0} oyuncu", "you: {0}/{1}": "sen: {0}/{1}",
     "Nobody has played yet.": "Henüz kimse oynamadı.", "{0} boards · started by {1} · results arrive as the others play": "{0} el · başlatan {1} · diğerleri oynadıkça sonuçlar gelir", "No tournaments yet. Start one — everyone in the lobby gets the same deals.": "Henüz turnuva yok. Bir tane başlat — lobideki herkes aynı elleri oynar.",
     "Tournament board {0} of {1} — you sit South": "Turnuva eli {0}/{1} — South'ta oturuyorsun", "Close the online table first": "Önce online masayı kapat", "Finish this tournament board first": "Önce bu turnuva elini bitir",
-    "Going back to your table…": "Masana geri dönülüyor…", "Table": "Masa", "Lobby": "Lobi", "Alone with robots": "Robotlarla yalnız", "Not shown in the lobby.": "Lobide görünmez.", "Open to others": "Herkese açık", "Shown in the lobby: players can ask to join, you accept.": "Lobide görünür: oyuncular katılmak isteyebilir, sen kabul edersin.", "Message": "Mesaj", "Write a private message to {0}.": "{0} kişisine özel mesaj yaz.", "Waiting for {0} to open the table": "{0} masayı açacak, bekleniyor", "Tournament board {0} of {1}": "Turnuva eli {0}/{1}", "Pair": "Çift", "Points": "Puan", "{0} tables": "{0} masa", "individual": "bireysel", "at tables": "masalarda", "ranked by {0}": "{0} ile sıralama", "started by {0}": "başlatan {0}", "table {0}, you sit {1}": "masa {0}, sen {1}", "Open table {0}": "{0}. masayı aç", "Join table {0}": "{0}. masaya katıl", "Table {0}": "Masa {0}", "Name": "Ad", "Boards": "El sayısı", "Format": "Biçim", "Tables": "Masalar", "Ranking": "Sıralama", "Keep the tournament for": "Turnuva saklama süresi", "{0} hours": "{0} saat", "1 day": "1 gün", "3 days": "3 gün", "Players sit together at tables; every table plays the same boards; robots fill empty seats. The first player named at a table opens it.": "Oyuncular masalarda birlikte oturur; her masa aynı elleri oynar; boş koltuğu robot oynar. Masaya ilk yazılan oyuncu masayı açar.", "Players in the lobby": "Lobideki oyuncular", "Invite players": "Oyuncu davet et", "wants to join your table": "masana katılmak istiyor", "wants to watch your table": "masanı izlemek istiyor", "more waiting": "kişi daha bekliyor", "Open an online table first": "Önce online masa aç", "Invitation sent to {0}": "{0} davet edildi", "invites you to their table": "seni masasına davet ediyor", "Nobody else is in the lobby right now.": "Şu an lobide başka kimse yok.", "Invite to my table": "Masama davet et", "Open an online table to invite players to it.": "Oyuncu davet etmek için online masa aç.", "Public table": "Herkese açık masa", "Private table": "Kapalı masa", "Listed in the lobby: anyone can ask to join, you accept.": "Lobide listelenir: herkes katılmak isteyebilir, sen kabul edersin.", "Not listed: only the players you invite can come (👥 Players in the lobby).": "Listelenmez: sadece davet ettiğin oyuncular gelebilir (👥 Lobideki oyuncular).",     "Clear the chat": "Sohbeti temizle", "Open an online table": "Online masa aç", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Kendi online masanı aç (oyuncular katılmak ister, sen kabul edersin) ya da aşağıdaki masalardan birine katılmak iste.",
+    "Going back to your table…": "Masana geri dönülüyor…", "In the lobby": "Lobide", "Claim": "Claim", "How many of the remaining {0} tricks do you take?": "Kalan {0} lövenin kaçını alıyorsun?", "All {0}": "Hepsi ({0})", "Claim sent — waiting for the other side": "Claim gönderildi — karşı taraf bekleniyor", "You": "Sen", "Could not work it out yet — play a little longer": "Henüz hesaplanamadı — biraz daha oyna", "The robots do not accept: {0} tricks at most": "Robotlar kabul etmiyor: en fazla {0} löve", "{0} claimed {1} of the last {2} tricks — accepted": "{0} son {2} lövenin {1} tanesini claim etti — kabul edildi", "{0} claimed {1} of the last {2} tricks — not accepted": "{0} son {2} lövenin {1} tanesini claim etti — kabul edilmedi", "Robots": "Robotlar", "The robots claimed the last {0} tricks — accepted": "Robotlar son {0} löveyi claim etti — kabul edildi", "The robots claimed the last {0} tricks — play goes on": "Robotlar son {0} löveyi claim etti — oyun devam ediyor", "{0} claims {1} of the last {2} tricks": "{0} son {2} lövenin {1} tanesini claim ediyor", "The robots claim all of the last {0} tricks": "Robotlar son {0} lövenin hepsini claim ediyor", "{0} wants to take back their last {1}": "{0} son {1} geri almak istiyor", "move": "hamlesini", "call": "teklifini", "Do you agree?": "Kabul ediyor musun?", "{0} wanted to take back their last {1} — not accepted": "{0} son {1} geri almak istedi — kabul edilmedi", "Nothing to take back, or the other side said no": "Geri alınacak bir şey yok ya da karşı taraf kabul etmedi", "Table": "Masa", "Lobby": "Lobi", "Alone with robots": "Robotlarla yalnız", "Not shown in the lobby.": "Lobide görünmez.", "Open to others": "Herkese açık", "Shown in the lobby: players can ask to join, you accept.": "Lobide görünür: oyuncular katılmak isteyebilir, sen kabul edersin.", "Message": "Mesaj", "Write a private message to {0}.": "{0} kişisine özel mesaj yaz.", "Waiting for {0} to open the table": "{0} masayı açacak, bekleniyor", "Tournament board {0} of {1}": "Turnuva eli {0}/{1}", "Pair": "Çift", "Points": "Puan", "{0} tables": "{0} masa", "individual": "bireysel", "at tables": "masalarda", "ranked by {0}": "{0} ile sıralama", "started by {0}": "başlatan {0}", "table {0}, you sit {1}": "masa {0}, sen {1}", "Open table {0}": "{0}. masayı aç", "Join table {0}": "{0}. masaya katıl", "Table {0}": "Masa {0}", "Name": "Ad", "Boards": "El sayısı", "Format": "Biçim", "Tables": "Masalar", "Ranking": "Sıralama", "Keep the tournament for": "Turnuva saklama süresi", "{0} hours": "{0} saat", "1 day": "1 gün", "3 days": "3 gün", "Players sit together at tables; every table plays the same boards; robots fill empty seats. The first player named at a table opens it.": "Oyuncular masalarda birlikte oturur; her masa aynı elleri oynar; boş koltuğu robot oynar. Masaya ilk yazılan oyuncu masayı açar.", "Players in the lobby": "Lobideki oyuncular", "Invite players": "Oyuncu davet et", "wants to join your table": "masana katılmak istiyor", "wants to watch your table": "masanı izlemek istiyor", "more waiting": "kişi daha bekliyor", "Open an online table first": "Önce online masa aç", "Invitation sent to {0}": "{0} davet edildi", "invites you to their table": "seni masasına davet ediyor", "Nobody else is in the lobby right now.": "Şu an lobide başka kimse yok.", "Invite to my table": "Masama davet et", "Open an online table to invite players to it.": "Oyuncu davet etmek için online masa aç.", "Public table": "Herkese açık masa", "Private table": "Kapalı masa", "Listed in the lobby: anyone can ask to join, you accept.": "Lobide listelenir: herkes katılmak isteyebilir, sen kabul edersin.", "Not listed: only the players you invite can come (👥 Players in the lobby).": "Listelenmez: sadece davet ettiğin oyuncular gelebilir (👥 Lobideki oyuncular).",     "Clear the chat": "Sohbeti temizle", "Open an online table": "Online masa aç", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Kendi online masanı aç (oyuncular katılmak ister, sen kabul edersin) ya da aşağıdaki masalardan birine katılmak iste.",
     "setting up": "hazırlanıyor", "{0} accepted": "{0} kabul etti", "Players and start": "Oyuncular ve başlat", "Waiting for {0} to start": "{0} başlatacak", "{0} invites you": "{0} seni davet ediyor", "{0} invites you to a tournament": "{0} seni turnuvaya davet ediyor",
     "No tournaments yet. Create one and invite the players you want.": "Henüz turnuva yok. Bir tane oluştur ve istediğin oyuncuları davet et.", "accepted": "kabul etti", "declined": "reddetti", "invited": "davet edildi", "organiser": "düzenleyen",
     "Everyone plays the same deals at their own table, sitting South. The tournament opens when you press Start.": "Herkes aynı elleri kendi masasında, South'ta oturarak oynar. Turnuva sen Başlat deyince açılır.", "Players to invite": "Davet edilecek oyuncular",
@@ -54,7 +54,7 @@ const I18N = {
     "Watch": "Se på", "You are watching this table.": "Du ser på dette bordet.", "Tournaments": "Turneringer", "New tournament": "Ny turnering", "Play": "Spill", "Standings": "Resultatliste", "Close": "Lukk", "Player": "Spiller", "{0} boards": "{0} spill", "{0} players": "{0} spillere", "you: {0}/{1}": "du: {0}/{1}",
     "Nobody has played yet.": "Ingen har spilt ennå.", "{0} boards · started by {1} · results arrive as the others play": "{0} spill · startet av {1} · resultatene kommer etter hvert som de andre spiller", "No tournaments yet. Start one — everyone in the lobby gets the same deals.": "Ingen turneringer ennå. Start en — alle i lobbyen får de samme spillene.",
     "Tournament board {0} of {1} — you sit South": "Turneringsspill {0} av {1} — du sitter Syd", "Close the online table first": "Lukk online-bordet først", "Finish this tournament board first": "Fullfør dette turneringsspillet først",
-    "Going back to your table…": "Går tilbake til bordet ditt…", "Table": "Bord", "Lobby": "Lobby", "Alone with robots": "Alene med roboter", "Not shown in the lobby.": "Vises ikke i lobbyen.", "Open to others": "Åpent for andre", "Shown in the lobby: players can ask to join, you accept.": "Vises i lobbyen: spillere kan be om å bli med, du godtar.", "Message": "Melding", "Write a private message to {0}.": "Skriv en privat melding til {0}.", "Waiting for {0} to open the table": "Venter på at {0} åpner bordet", "Tournament board {0} of {1}": "Turneringsspill {0} av {1}", "Pair": "Par", "Points": "Poeng", "{0} tables": "{0} bord", "individual": "individuell", "at tables": "ved bord", "ranked by {0}": "rangert etter {0}", "started by {0}": "startet av {0}", "table {0}, you sit {1}": "bord {0}, du sitter {1}", "Open table {0}": "Åpne bord {0}", "Join table {0}": "Gå til bord {0}", "Table {0}": "Bord {0}", "Name": "Navn", "Boards": "Antall spill", "Format": "Form", "Tables": "Bord", "Ranking": "Rangering", "Keep the tournament for": "Behold turneringen i", "{0} hours": "{0} timer", "1 day": "1 dag", "3 days": "3 dager", "Players sit together at tables; every table plays the same boards; robots fill empty seats. The first player named at a table opens it.": "Spillerne sitter sammen ved bord; alle bord spiller de samme spillene; roboter fyller tomme plasser. Den første spilleren ved et bord åpner det.", "Players in the lobby": "Spillere i lobbyen", "Invite players": "Inviter spillere", "wants to join your table": "vil bli med ved bordet ditt", "wants to watch your table": "vil se på bordet ditt", "more waiting": "venter til", "Open an online table first": "Åpne et online-bord først", "Invitation sent to {0}": "Invitasjon sendt til {0}", "invites you to their table": "inviterer deg til bordet sitt", "Nobody else is in the lobby right now.": "Ingen andre er i lobbyen nå.", "Invite to my table": "Inviter til mitt bord", "Open an online table to invite players to it.": "Åpne et online-bord for å invitere spillere.", "Public table": "Åpent bord", "Private table": "Lukket bord", "Listed in the lobby: anyone can ask to join, you accept.": "Vises i lobbyen: alle kan be om å bli med, du godtar.", "Not listed: only the players you invite can come (👥 Players in the lobby).": "Vises ikke: bare spillere du inviterer kan komme (👥 Spillere i lobbyen).",     "Clear the chat": "Tøm chatten", "Open an online table": "Åpne et online-bord", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Åpne ditt eget online-bord (spillere ber om å bli med og du godtar dem), eller be om å bli med ved et av bordene under.",
+    "Going back to your table…": "Går tilbake til bordet ditt…", "In the lobby": "I lobbyen", "Claim": "Claim", "How many of the remaining {0} tricks do you take?": "Hvor mange av de {0} siste stikkene tar du?", "All {0}": "Alle ({0})", "Claim sent — waiting for the other side": "Claim sendt — venter på den andre siden", "You": "Du", "Could not work it out yet — play a little longer": "Kan ikke regnes ut ennå — spill litt til", "The robots do not accept: {0} tricks at most": "Robotene godtar ikke: høyst {0} stikk", "{0} claimed {1} of the last {2} tricks — accepted": "{0} claimet {1} av de siste {2} stikkene — godtatt", "{0} claimed {1} of the last {2} tricks — not accepted": "{0} claimet {1} av de siste {2} stikkene — ikke godtatt", "Robots": "Roboter", "The robots claimed the last {0} tricks — accepted": "Robotene claimet de siste {0} stikkene — godtatt", "The robots claimed the last {0} tricks — play goes on": "Robotene claimet de siste {0} stikkene — spillet fortsetter", "{0} claims {1} of the last {2} tricks": "{0} claimer {1} av de siste {2} stikkene", "The robots claim all of the last {0} tricks": "Robotene claimer alle de siste {0} stikkene", "{0} wants to take back their last {1}": "{0} vil ta tilbake sitt siste {1}", "move": "trekk", "call": "melding", "Do you agree?": "Er du enig?", "{0} wanted to take back their last {1} — not accepted": "{0} ville ta tilbake sitt siste {1} — ikke godtatt", "Nothing to take back, or the other side said no": "Ingenting å ta tilbake, eller den andre siden sa nei", "Table": "Bord", "Lobby": "Lobby", "Alone with robots": "Alene med roboter", "Not shown in the lobby.": "Vises ikke i lobbyen.", "Open to others": "Åpent for andre", "Shown in the lobby: players can ask to join, you accept.": "Vises i lobbyen: spillere kan be om å bli med, du godtar.", "Message": "Melding", "Write a private message to {0}.": "Skriv en privat melding til {0}.", "Waiting for {0} to open the table": "Venter på at {0} åpner bordet", "Tournament board {0} of {1}": "Turneringsspill {0} av {1}", "Pair": "Par", "Points": "Poeng", "{0} tables": "{0} bord", "individual": "individuell", "at tables": "ved bord", "ranked by {0}": "rangert etter {0}", "started by {0}": "startet av {0}", "table {0}, you sit {1}": "bord {0}, du sitter {1}", "Open table {0}": "Åpne bord {0}", "Join table {0}": "Gå til bord {0}", "Table {0}": "Bord {0}", "Name": "Navn", "Boards": "Antall spill", "Format": "Form", "Tables": "Bord", "Ranking": "Rangering", "Keep the tournament for": "Behold turneringen i", "{0} hours": "{0} timer", "1 day": "1 dag", "3 days": "3 dager", "Players sit together at tables; every table plays the same boards; robots fill empty seats. The first player named at a table opens it.": "Spillerne sitter sammen ved bord; alle bord spiller de samme spillene; roboter fyller tomme plasser. Den første spilleren ved et bord åpner det.", "Players in the lobby": "Spillere i lobbyen", "Invite players": "Inviter spillere", "wants to join your table": "vil bli med ved bordet ditt", "wants to watch your table": "vil se på bordet ditt", "more waiting": "venter til", "Open an online table first": "Åpne et online-bord først", "Invitation sent to {0}": "Invitasjon sendt til {0}", "invites you to their table": "inviterer deg til bordet sitt", "Nobody else is in the lobby right now.": "Ingen andre er i lobbyen nå.", "Invite to my table": "Inviter til mitt bord", "Open an online table to invite players to it.": "Åpne et online-bord for å invitere spillere.", "Public table": "Åpent bord", "Private table": "Lukket bord", "Listed in the lobby: anyone can ask to join, you accept.": "Vises i lobbyen: alle kan be om å bli med, du godtar.", "Not listed: only the players you invite can come (👥 Players in the lobby).": "Vises ikke: bare spillere du inviterer kan komme (👥 Spillere i lobbyen).",     "Clear the chat": "Tøm chatten", "Open an online table": "Åpne et online-bord", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Åpne ditt eget online-bord (spillere ber om å bli med og du godtar dem), eller be om å bli med ved et av bordene under.",
     "setting up": "settes opp", "{0} accepted": "{0} har takket ja", "Players and start": "Spillere og start", "Waiting for {0} to start": "Venter på at {0} starter", "{0} invites you": "{0} inviterer deg", "{0} invites you to a tournament": "{0} inviterer deg til en turnering",
     "No tournaments yet. Create one and invite the players you want.": "Ingen turneringer ennå. Lag en og inviter spillerne du vil.", "accepted": "takket ja", "declined": "takket nei", "invited": "invitert", "organiser": "arrangør",
     "Everyone plays the same deals at their own table, sitting South. The tournament opens when you press Start.": "Alle spiller de samme spillene ved sitt eget bord, som Syd. Turneringen åpner når du trykker Start.", "Players to invite": "Spillere som skal inviteres",
@@ -336,20 +336,92 @@ function tick() {
   } else if (G.phase === 'play') {
     const g = G.play;
     if (g.trick.length === 4) timer = setTimeout(collectTrick, Math.max(700, delay() + 300));
-    else if (robot(g.turn)) { const t = g.turn; timer = setTimeout(() => playCard(t, E.aiPlay(g, t)), delay()); }
+    else if (robot(g.turn)) {
+      const t = g.turn, left = g.hands[t].length;
+      // a robot side about to lead may claim the rest (asked once per trick, near the end of the board)
+      const mayClaim = !g.trick.length && g.rcl !== g.history.length && robot(pd(t)) && left >= 2 && left <= 8;
+      timer = setTimeout(async () => { if (mayClaim && await robotClaim(g, t)) return; if (G && G.play === g && g.turn === t) playCard(t, E.aiPlay(g, t)); }, delay());
+    }
     else if (!userControls(g.turn)) { /* a friend is to play */ }
     else { const leg = E.legalFor(g, g.turn); if (leg.length === 1 && g.trick.length > 0 && SET.auto) timer = setTimeout(() => playCard(g.turn, leg[0]), 450); }
   }
 }
+/* ---- claims: the claimer says how many of the remaining tricks they take; the other side accepts or not.
+   Robots on the other side check the claim double dummy (they accept only what can really be made). ---- */
+const tricksLeft = () => G.play.hands[G.play.leader].length;
+// the claimer picks the number of tricks (all of them first)
 function claim(seat) {
-  if (guest()) { Net.send({ t: "claim" }); return; }
   const g = G.play; if (!g || G.phase !== "play" || g.trick.length) return;
-  const side = sideOf(seat == null ? U() : seat);
-  const v = E.ddFull(g.hands, g.leader, side, g.trump, 3e6);
-  if (v == null) { flash('Could not work it out yet — play a little longer', 1500); return; }
-  const left = g.hands[g.leader].length;
-  g.tricks[side] += v; g.tricks[1 - side] += left - v; g.hands = g.hands.map(() => []); G.claimed = true;
+  const left = tricksLeft();
+  openOv('claim', `<h2>${T('Claim')}</h2><div class="muted">${T('How many of the remaining {0} tricks do you take?', left)}</div>
+    <div class="claimn">${Array.from({ length: left + 1 }, (_, i) => left - i).map(n => `<button class="btn ${n === left ? 'new' : ''}" data-claimn="${n}">${n === left ? T('All {0}', n) : n}</button>`).join('')}</div>
+    <div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
+}
+function claimChosen(n) {
+  closeOv();
+  if (guest()) { Net.send({ t: "claim", n }); flash(T('Claim sent — waiting for the other side'), 2000); return; }
+  requestClaim(G.play.turn, n);
+}
+// humans on the side that has to agree (online: their ids; "host" is this device)
+function agreeOwners(side) {
+  if (!online()) return [];
+  return [...new Set([0, 1, 2, 3].filter(s => sideOf(s) !== side).map(s => Net.owner(s)).filter(o => o !== 'robot'))];
+}
+async function requestClaim(seat, n, who) {
+  const g = G.play; if (!g || G.phase !== 'play' || g.trick.length) return;
+  const side = sideOf(seat), left = tricksLeft(), id = G.id, name = who || (online() ? Net.st.names[seat] || SEAT[seat] : T('You'));
+  const humans = agreeOwners(side);
+  let ok;
+  if (humans.length) ok = await Net.askOwners(humans, { kind: 'claim', who: name, n, left });
+  else {
+    const v = E.ddFull(g.hands, g.leader, side, g.trump, 3e6);
+    ok = v != null && n <= v;
+    if (!ok) flash(v == null ? T('Could not work it out yet — play a little longer') : T('The robots do not accept: {0} tricks at most', v), 2600);
+  }
+  if (!G || G.id !== id || G.phase !== 'play' || G.play !== g) return;
+  if (online()) Net.note(ok ? T('{0} claimed {1} of the last {2} tricks — accepted', name, n, left) : T('{0} claimed {1} of the last {2} tricks — not accepted', name, n, left));
+  if (ok) applyClaim(side, n);
+}
+function applyClaim(side, n) {
+  const g = G.play, left = tricksLeft();
+  g.tricks[side] += n; g.tricks[1 - side] += left - n; g.hands = g.hands.map(() => []); G.claimed = true;
   finishBoard();
+}
+/* a robot side that will surely take every remaining trick claims them and asks the humans on the other side */
+async function robotClaim(g, seat) {
+  g.rcl = g.history.length;
+  const side = sideOf(seat), left = tricksLeft();
+  const v = E.ddFull(g.hands, g.leader, side, g.trump, 1e6);
+  if (v !== left) return false;
+  const owners = online() ? agreeOwners(side) : ['host'];
+  if (!owners.length) return false;
+  const ok = await Net.askOwners(owners, { kind: 'rclaim', who: T('Robots'), n: left, left });
+  if (!G || G.play !== g || G.phase !== 'play') return true;
+  if (online()) Net.note(ok ? T('The robots claimed the last {0} tricks — accepted', left) : T('The robots claimed the last {0} tricks — play goes on', left));
+  if (ok) applyClaim(side, left); else tick();
+  return true;
+}
+/* an undo at an online table: the humans on the other side agree first (with robots there it happens at once) */
+async function requestUndo(owner, name, seat) {
+  const what = G.phase === 'bid' ? 'call' : 'move';
+  const humans = seat == null ? [] : agreeOwners(sideOf(seat)).filter(o => o !== owner);
+  if (humans.length && !(await Net.askOwners(humans, { kind: 'undo', who: name, what }))) { Net.note(T('{0} wanted to take back their last {1} — not accepted', name, T(what))); return false; }
+  const ok = undo(owner);
+  if (ok) Net.note(name + ' took back their last ' + what);
+  return ok;
+}
+// the text of a question to the other side (claim, robot claim, undo)
+function askText(a) {
+  if (a.kind === 'claim') return T('{0} claims {1} of the last {2} tricks', a.who, a.n, a.left);
+  if (a.kind === 'rclaim') return T('The robots claim all of the last {0} tricks', a.left);
+  return T('{0} wants to take back their last {1}', a.who, T(a.what || 'move'));
+}
+// a question shown on this device: Accept / Decline
+function askLocal(a, fin) {
+  ui.askFin = fin;
+  openOv('ask', `<h2>❓ ${T('Do you agree?')}</h2><div class="big">${esc(askText(a))}</div>
+    <div class="row2"><button class="btn new" data-askr="1">${T('Accept')}</button><button class="btn" data-askr="0">${T('Decline')}</button></div>`);
+  beep();
 }
 /* play the same deal again (at an online table: for everyone) */
 function replayDeal() {
@@ -565,6 +637,11 @@ function render() {
 }
 /* ---- chat while playing: a column on the right on a wide screen; on a phone (or a narrow window) a panel that
    opens from the bottom with 💬 and closes after Send. At an online table there are two tabs: table and lobby. ---- */
+// who is in the lobby: tap a name to write to that player privately
+function whoHtml() {
+  const names = Net.knownNames(), un = n => { const c = Object.entries(Net.st.dmUnread).find(([k, v]) => v && Net.st.dms[k] && Net.st.dms[k].name.toLowerCase() === n.toLowerCase()); return c ? ` <span class="badge">${c[1]}</span>` : ''; };
+  return names.length ? `<small>${T('In the lobby')}:</small> ${names.map(n => `<button class="whob" data-dm="${esc(n)}" title="${T('Message')}">● ${esc(n)} 💬${un(n)}</button>`).join('')}` : `<small>${T('Nobody else is in the lobby right now.')}</small>`;
+}
 const dockWide = () => window.matchMedia('(min-width:1100px)').matches;
 function toggleDock() {
   if (dockWide()) { const i = $('dMsg'); if (i) i.focus(); return; }
@@ -582,12 +659,13 @@ function renderDock() {
   if (d.dataset.key !== key) {
     d.dataset.key = key;
     const tabs = tbl ? `<div class="dtabs"><button data-dtab="table" class="${tab === 'table' ? 'on' : ''}">${T('Table')} <span id="dTn"></span></button><button data-dtab="lobby" class="${tab === 'lobby' ? 'on' : ''}">${T('Lobby')} <span id="dLn"></span></button></div>` : `<b>💬 ${T('Lobby chat')}</b>`;
-    d.innerHTML = `<div class="dhead">${tabs}<button class="btn mini-btn dclose" id="dClose">✕</button></div><div class="lmsgs" id="dList"></div>
+    d.innerHTML = `<div class="dhead">${tabs}<button class="btn mini-btn dclose" id="dClose">✕</button></div>${tab === "lobby" ? `<div class="who" id="dWho"></div>` : ""}<div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}
       <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
   if (L && L.innerHTML !== html) { L.innerHTML = html; L.scrollTop = L.scrollHeight; }
+  { const w = $('dWho'), h = whoHtml(); if (w && w.innerHTML !== h) w.innerHTML = h; }
   if (tab === 'table') Net.st.unread = 0; else Net.st.lunread = 0;
   const tn = $('dTn'), ln = $('dLn');
   if (tn) tn.textContent = Net.st.unread ? '(' + Net.st.unread + ')' : '';
@@ -596,7 +674,7 @@ function renderDock() {
 function dockSend(text) {
   text = String(text || '').trim(); if (!text) return;
   if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else Net.lsend(text);
-  if (!dockWide()) ui.dockOpen = false;   // on a phone the panel closes after sending
+  // the panel stays open after sending; it is closed with ✕
   renderDock();
 }
 window.addEventListener('resize', () => renderDock());
@@ -653,7 +731,7 @@ function homeShell() {
       <div id="hPend"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
-    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lmsgs" id="hChat"></div>
+    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="who" id="hWho"></div><div class="lmsgs" id="hChat"></div>
       <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></aside>
   </div><div id="hSheet"></div></div>`;
 }
@@ -694,6 +772,7 @@ function renderHome() {
     set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
     if (want === 'chat') N.st.lunread = 0;
     set('hTours', toursHtml()); set('hPeople', N.peopleHtml());
+    set('hWho', whoHtml());
   }
   set('hConv', convCardHtml());
 }
@@ -1108,8 +1187,11 @@ document.addEventListener('click', ev_ => {
     return;
   }
   // Results: open a finished board, tap its calls, or go back to the list
-  const hsb = ev_.target.closest('[data-hsec]'); if (hsb) { const v = hsb.dataset.hsec; ui.hsec = !v || ui.hsec === v ? null : v; render(); if (ui.hsec === 'chat') { const i = $('lMsg2'); if (i) i.focus(); } return; }
+  const hsb = ev_.target.closest('[data-hsec]'); if (hsb && hsb.dataset.hsec === 'chat') { const c = document.querySelector('.hchat'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'end' }); const i = $('lMsg'); if (i) setTimeout(() => i.focus(), 300); return; }
+  if (hsb) { const v = hsb.dataset.hsec; ui.hsec = !v || ui.hsec === v ? null : v; render(); if (ui.hsec === 'chat') { const i = $('lMsg2'); if (i) i.focus(); } return; }
   const opb = ev_.target.closest('[data-open]'); if (opb) { closeOv(); ui.saved = null; Net.openTable(opb.dataset.open === 'priv'); return; }
+  const ar = ev_.target.closest('[data-askr]'); if (ar) { const f = ui.askFin; ui.askFin = null; closeOv(); if (f) f(ar.dataset.askr === '1'); return; }
+  const cn = ev_.target.closest('[data-claimn]'); if (cn) { claimChosen(+cn.dataset.claimn); return; }
   const tp = ev_.target.closest('[data-tplay]'); if (tp) { playTour(tp.dataset.tplay); return; }
   const tt = ev_.target.closest('[data-ttab],[data-tjtab]'); if (tt) { if (tt.dataset.ttab) Net.openTourTable(tt.dataset.ttab); else Net.joinTourTable(tt.dataset.tjtab); return; }
   const dmb = ev_.target.closest('[data-dm]'); if (dmb) { showDm(dmb.dataset.dm); return; }
@@ -1167,8 +1249,11 @@ document.addEventListener('click', ev_ => {
       if (G.phase === 'bid' && bidTurn() === U()) { ui.hintBid = E.aiBid(G.auction, U(), G.deal[U()], G.cards); SET.expl = true; render(); }
       else if (G.phase === 'play' && userControls(G.play.turn) && G.play.trick.length < 4) { ui.hintCard = E.aiPlay(G.play, G.play.turn); render(); }
       break;
-    case "bClaim": if (online() && !guest()) Net.note((Net.st.names[SET.seat] || "Host") + " claimed the rest"); claim(); break;
-    case "bUndo": { const ok = undo(); if (ok === false) flash("Nothing of yours to take back", 1500); else if (ok && online() && !guest()) Net.note((Net.st.names[SET.seat] || "Host") + " took back their last move"); break; }
+    case "bClaim": claim(); break;
+    case "bUndo": {
+      if (online() && !guest()) { requestUndo("host", Net.st.names[SET.seat] || "Host", SET.seat).then(ok => { if (ok === false) flash(T("Nothing to take back, or the other side said no"), 1800); }); break; }
+      const ok = undo(); if (ok === false) flash("Nothing of yours to take back", 1500); break;
+    }
     case "sDeal": showDealEntry(); break;
     case "dPlay": startEnteredDeal(); break;
     case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;

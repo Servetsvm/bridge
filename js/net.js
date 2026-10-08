@@ -150,7 +150,8 @@ const Net = (() => {
   function newTour(n) {
     const me = myName() || 'Player';
     const t = cleanTour({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: me + ' · ' + new Date().toLocaleDateString(), by: me, byKey: devId(), n,
-      seed: (Math.random() * 4294967295) >>> 0, ts: Date.now(), state: 'setup', inv: [], joined: { [devId()]: me }, declined: {}, v: 1 });
+      seed: (Math.random() * 4294967295) >>> 0, ts: Date.now(), state: 'setup', inv: [], joined: { [devId()]: me }, declined: {}, v: 1,
+      format: 'tables', tables: [[me, '', '', ''], ['', '', '', '']] });   // two tables to start with; every seat can be typed in
     st.tours[t.id] = t; saveTours(); renderL(); return t;
   }
   function tourInvite(id, names) {
@@ -575,8 +576,9 @@ const Net = (() => {
     const who = st.names[seat] || SEAT[seat];
     if (d.t === 'leave') { delete st.seats[seat]; delete st.names[seat]; if (st.toks) delete st.toks[seat]; if (st.away && st.away[seat]) { clearTimeout(st.away[seat].t); delete st.away[seat]; } st.conns.delete(conn.peer); addChat(null, who + ' left the table — a robot plays ' + SEAT[seat]); broadcast(); panelRefresh(); render(); tick(); return; }
     if (d.t === "chat") { addChat(who, d.text); return; }
-    if (d.t === "undo") { if (undo(conn.peer)) addChat(null, who + " took back their last " + (G.phase === "bid" ? "call" : "move")); return; }
-    if (d.t === "claim") { if (G.phase === "play" && !G.play.trick.length && owner(G.play.turn) === conn.peer) { addChat(null, who + " claimed the rest"); claim(seat); } return; }
+    if (d.t === "undo") { requestUndo(conn.peer, who, seat); return; }   // the other side may say no
+    if (d.t === "claim") { if (G.phase === "play" && !G.play.trick.length && owner(G.play.turn) === conn.peer) { const left = G.play.hands[G.play.turn].length, n = Number.isFinite(+d.n) ? Math.max(0, Math.min(+d.n, left)) : left; requestClaim(G.play.turn, n, who); } return; }
+    if (d.t === "askreply") { const f = askP[d.id]; if (f && f.who.includes(conn.peer)) f.fin(!!d.ok); return; }
     if (d.t === "replay") { if (G.phase === "done") { addChat(null, who + " asked to replay this deal"); replayDeal(); } return; }
     if (d.t === "hint") { if (G.phase === "play" && owner(G.play.turn) === conn.peer && G.play.trick.length < 4) conn.send({ t: "hint", c: E.aiPlay(G.play, G.play.turn), id: G.id }); return; }
     if (d.t === "call" && G.phase === "bid" && owner(bidTurn()) === conn.peer) makeCall(bidTurn(), d.call);
@@ -660,6 +662,8 @@ const Net = (() => {
         else if (d.t === "chat") gotChat(d.m);
         else if (d.t === "seat") { st.seat = d.seat; render(); }
         else if (d.t === "askno") flash(T('The host said no'), 2500);
+        else if (d.t === "ask") { st.askId = d.id; askLocal(d.a || {}, ok => { send({ t: 'askreply', id: d.id, ok }); closeOv(); }); }
+        else if (d.t === "askdone") { if (st.askId === d.id && ui.overlay === 'ask') closeOv(); }
         else if (d.t === "movedeclined") flash('The host did not agree to the move', 2500);
         else if (d.t === "wait") { waiting = true; st.waiting = true; st.msg = 'Waiting for the host to accept you…'; showJoin(code); }
         else if (d.t === "nametaken") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The name ' + name + ' is already used at this table. Choose another name.'; showJoin(code); }
@@ -786,6 +790,23 @@ const Net = (() => {
       <div class="row2"><button class="btn" id="oClose">Close</button></div>`);
     const L = document.getElementById('nList'); if (L) L.scrollTop = L.scrollHeight;
     renderBar();
+  }
+
+  /* ---- questions to players (a claim, a robot claim, an undo): the first answer decides; no answer in 90 s = no.
+     "host" is this device (asked on screen), other owners are asked over their line. ---- */
+  const askP = {};
+  function askOwners(owners, a) {
+    return new Promise(res => {
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      let done = false;
+      const fin = ok => { if (done) return; done = true; delete askP[id]; if (ui.overlay === 'ask') closeOv(); for (const o of owners) { const c = st.conns.get(o); if (c && c.open) { try { c.send({ t: 'askdone', id }); } catch (e) {} } } res(ok); };
+      askP[id] = { fin, who: owners };
+      for (const o of owners) {
+        if (o === 'host' || o === 'local') askLocal(a, fin);
+        else { const c = st.conns.get(o); if (c && c.open) { try { c.send({ t: 'ask', id, a }); } catch (e) {} } }
+      }
+      setTimeout(() => fin(false), 90000);
+    });
   }
 
   /* ---- table score (NS against EW, points of every board played at this online table) ---- */
@@ -924,5 +945,5 @@ const Net = (() => {
   // the lobby lines also carry tournaments and chat, so they are rebuilt during play too when none is open
   setInterval(() => { keepSlot(); if (!st.finding && (lobbyOpen() || (document.visibilityState === 'visible' && lobbyCount() <= 1 && st.slot))) findTables(); }, 20000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepSlot(); if (lobbyOpen()) findTables(); } });
-  return { st, owner, broadcast, send, panel, sit, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, broadcast, send, panel, sit, askOwners, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
