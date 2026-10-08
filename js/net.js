@@ -98,11 +98,20 @@ const Net = (() => {
   /* a player's profile, shown next to their name: boards played today and the average IMPs (or MP %) */
   function prof() {
     const p = Store.periods(HIST)[0];
-    return { n: p.n, imp: p.impAvg, mp: p.mpAvg };
+    return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv } };   // with the system this player bids
   }
+  // the profile of a player seen in the lobby (from the table information)
+  function profOf(name) {
+    const k = nameKey(name);
+    for (const t of (st.tables || [])) { if (nameKey(t.host) === k && t.prof) return t.prof; for (const s in (t.names || {})) if (nameKey(t.names[s]) === k && t.profs && t.profs[s]) return t.profs[s]; }
+    return null;
+  }
+  const sysShort = p => p && p.sys ? ({ twoone: '2/1', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' })[p.sys] || '' : '';
   function profTxt(p) {
-    if (!p || !p.n) return '';
-    return `${p.n} ${T('boards')}${p.imp != null ? ' · ' + (p.imp > 0 ? '+' : '') + p.imp + ' IMP' : p.mp != null ? ' · ' + p.mp + '%' : ''}`;
+    if (!p) return "";
+    const s = p.sys ? ({ twoone: "2/1", sayc: "SAYC", acol: "Acol", sef: "SEF", precision: "Precision", polish: "Polish" })[p.sys] || "" : "";
+    const st = p.n ? `${p.n} ${T("boards")}${p.imp != null ? " · " + (p.imp > 0 ? "+" : "") + p.imp + " IMP" : p.mp != null ? " · " + p.mp + "%" : ""}` : "";
+    return [s, st].filter(Boolean).join(" · ");
   }
 
   /* ---- tournaments: the same deals for everyone (from a shared number), played alone with robots from
@@ -363,7 +372,7 @@ const Net = (() => {
     const L = st.lchat || (st.lchat = []);
     if ((+m.ts || 0) <= lclearTs()) return;   // cleared on this device: older messages do not come back from the others
     if (L.some(x => x.id === m.id)) return;
-    L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: m.p && typeof m.p === 'object' ? { n: +m.p.n || 0, imp: m.p.imp == null ? null : +m.p.imp, mp: m.p.mp == null ? null : +m.p.mp } : null });
+    L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: m.p && typeof m.p === 'object' ? { n: +m.p.n || 0, imp: m.p.imp == null ? null : +m.p.imp, mp: m.p.mp == null ? null : +m.p.mp, sys: typeof m.p.sys === 'string' ? m.p.sys.slice(0, 12) : undefined } : null });
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
     try { localStorage.setItem('bridge-lobby-chat', JSON.stringify(L.slice(-50))); } catch (e) {}
     if (!quiet) { if (m.from !== (myName() || 'Player') && ui.overlay !== 'lchat') st.lunread = (st.lunread || 0) + 1; renderL(); }
@@ -378,7 +387,7 @@ const Net = (() => {
   function lchatHtml() {
     const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myName() || 'Player';
     const L = st.lchat || [];
-    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b>${esc(m.from)}</b>${m.p && m.p.n ? `<span class="pb">${esc(profTxt(m.p))}</span>` : ''} ${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
+    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b>${esc(m.from)}</b>${m.p && profTxt(m.p) ? `<span class="pb">${esc(profTxt(m.p))}</span>` : ''} ${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
   }
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
@@ -456,7 +465,7 @@ const Net = (() => {
     if (back != null && away[s]) { clearTimeout(away[s].t); delete away[s]; }
     if (d.tok) { for (const k in toks) if (toks[k] === d.tok) delete toks[k]; toks[s] = d.tok; }
     st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
-    (st.profs || (st.profs = {}))[s] = d.prof && typeof d.prof === 'object' ? { n: +d.prof.n || 0, imp: d.prof.imp == null ? null : +d.prof.imp, mp: d.prof.mp == null ? null : +d.prof.mp } : null;
+    (st.profs || (st.profs = {}))[s] = d.prof && typeof d.prof === 'object' ? { n: +d.prof.n || 0, imp: d.prof.imp == null ? null : +d.prof.imp, mp: d.prof.mp == null ? null : +d.prof.mp, sys: typeof d.prof.sys === 'string' ? d.prof.sys.slice(0, 12) : undefined, conv: d.prof.conv && typeof d.prof.conv === 'object' ? Object.fromEntries(E.CONVS.map(c => [c.k, !!d.prof.conv[c.k]])) : undefined } : null;
     conn.send({ t: 'welcome', seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
     addChat(null, st.names[s] + (back != null ? ' is back' : ' joined as ' + SEAT[s]));
     ping();
@@ -945,5 +954,5 @@ const Net = (() => {
   // the lobby lines also carry tournaments and chat, so they are rebuilt during play too when none is open
   setInterval(() => { keepSlot(); if (!st.finding && (lobbyOpen() || (document.visibilityState === 'visible' && lobbyCount() <= 1 && st.slot))) findTables(); }, 20000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepSlot(); if (lobbyOpen()) findTables(); } });
-  return { st, owner, broadcast, send, panel, sit, askOwners, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

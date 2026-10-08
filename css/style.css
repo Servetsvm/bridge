@@ -529,3 +529,4 @@ b.inv{color:#b3261e}
   #dock .lmsgs{max-height:none;min-height:70px}
   #dock .who{max-height:30px;overflow:hidden}
 }
+.hname .sel{flex:1;max-width:260px}
