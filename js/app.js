@@ -728,8 +728,8 @@ function homeShell() {
   <div class="hgrid">
     <section class="hmain">
       <div class="hcard hero">
-        <label class="hname"><span>${T('Your name')}</span><input id="hName" class="tok" maxlength="20" autocomplete="nickname" value="${esc(myNm())}" placeholder="${T('Your name')}"></label>
-        <label class="hname"><span>${T('Your system')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(s.n)}</option>`).join('')}</select></label>
+        <div class="hname hrow"><label><span>${T('Your name')}</span><input id="hName" class="tok" maxlength="20" autocomplete="nickname" value="${esc(myNm())}" placeholder="${T('Your name')}"></label>
+        <label><span>${T('Your system')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
         <div class="muted">${T('Play alone with robots, or join a table where a robot is playing.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn gold" id="hQuick">${T('Seat me at a table')}</button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button></div>
         <div class="hsecs">${sec('tours', '🏆 ' + T('Tournaments'))}${sec('conv', '📋 ' + T('Our convention card (with partner)'))}${sec('people', '👥 ' + T('Players in the lobby'))}<button class="hsec phoneonly" data-hsec="chat">💬 ${T('Lobby chat')} <span id="hChatN"></span></button></div>

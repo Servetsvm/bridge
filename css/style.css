@@ -530,3 +530,6 @@ b.inv{color:#b3261e}
   #dock .who{max-height:30px;overflow:hidden}
 }
 .hname .sel{flex:1;max-width:260px}
+.hrow{flex-wrap:wrap;gap:6px 14px}
+.hrow label{display:flex;align-items:center;gap:8px;flex:1 1 150px;min-width:0}
+.hrow .tok,.hrow .sel{flex:1;min-width:0;max-width:200px}
