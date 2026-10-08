@@ -93,7 +93,12 @@ const Net = (() => {
   // what the lobby sees of this table
   function tableInfo() {
     return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0,
-      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub };
+      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub, tplay: tplay() };
+  }
+  // an individual tournament board played here: shown on this table in the lobby, and others can join the tournament
+  function tplay() {
+    const g = !st.host && !st.guest && G && G.tour && G.tour.table == null ? G.tour : null, t = g && st.tours[g.id];
+    return t && t.format !== 'tables' && t.state === 'live' ? { id: t.id, name: t.name, b: g.b, n: t.n } : null;
   }
   /* a player's profile, shown next to their name: boards played today and the average IMPs (or MP %) */
   function prof() {
@@ -154,6 +159,8 @@ const Net = (() => {
   try { const d = JSON.parse(localStorage.getItem('bridge-tours') || '{}'); for (const id in (d.tours || {})) mergeTour(d.tours[id]); for (const id in (d.res || {})) for (const k in d.res[id]) mergeRes(id, k, d.res[id][k]); } catch (e) {}
   function meshSend(m) { for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send(m); } catch (e) {} } }
   const isMine = t => !!t && t.byKey === devId();
+  // an individual tournament is open to everyone in the lobby: anyone can join and play its boards while it is kept
+  const openTour = t => !!t && t.format !== 'tables' && t.state !== 'off';
   // the organiser publishes a new version of the tournament
   function pubTour(t) { t.v = (t.v || 0) + 1; saveTours(); meshSend({ t: 'tour', tour: t }); renderL(); }
   function newTour(n) {
@@ -259,7 +266,8 @@ const Net = (() => {
   }
   function onTourData(d) {
     if (d.t === 'tour') {
-      if (mergeTour(d.tour)) { saveTours(); const t = st.tours[d.tour.id]; if (invitedTo(t)) flash(T('{0} invites you to a tournament', t.by), 3500); renderL(); }
+      const fresh = d.tour && !st.tours[d.tour.id];
+      if (mergeTour(d.tour)) { saveTours(); const t = st.tours[d.tour.id]; if (invitedTo(t)) flash(T('{0} invites you to a tournament', t.by), 3500); else if (fresh && openTour(t) && t.state === 'live') flash('🏆 ' + T('{0} started a tournament — everyone can play it', t.by), 3500); renderL(); }
       return true;
     }
     if (d.t === 'tjoin') {
@@ -351,7 +359,7 @@ const Net = (() => {
   // a private table is never listed (only invited players come)
   // listed: public online tables, and players at a board with robots who chose "open to others" (never someone on
   // the home page, a private table, or a player who chose to play alone)
-  const listed = t => !t.priv && (t.online || (t.pub && t.phase && t.phase !== 'idle'));
+  const listed = t => !t.priv && (t.online || ((t.pub || t.tplay) && t.phase && t.phase !== 'idle'));
   function tablesHtml() {
     // tables in play are listed: online tables, and players at a board with robots (not someone on the home page)
     const L = st.tables && st.tables.filter(listed);
@@ -360,7 +368,11 @@ const Net = (() => {
       const nm = t.names || {}, away = t.away || [];
       const pf = t.profs || {};
       const cells = [0, 1, 2, 3].map(s => nm[s] ? `<b>${esc(nm[s])}</b>${(pf[s] || (!t.online && t.prof)) && profTxt(pf[s] || t.prof) ? `<span class="pb">${esc(profTxt(pf[s] || t.prof))}</span>` : ''}${away.includes(s) ? `<em>${T('away · robot plays')}</em>` : ''}` : `<i>${T('Robot')}</i>`);
-      const mid = `<div class="tname">${T("{0}'s table", esc(t.host))}</div><div class="tstate">${t.online ? T('online') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div><button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>${t.online ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
+      // a tournament is named on its table: an individual one can be joined (you play the same boards at your own table)
+      const tp = t.tplay && typeof t.tplay === 'object' ? t.tplay : null, tt = t.tour && st.tours[t.tour.id];
+      const tinfo = tp ? `<div class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</div>`
+        : tt ? `<div class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</div>` : '';
+      const mid = `<div class="tname">${T("{0}'s table", esc(t.host))}</div>${tinfo}<div class="tstate">${t.online ? T('online') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div>${tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`}${t.online ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
       return seatTable(cells, mid, 2);
     }).join('')}</div>` : `<div class="muted">${T('No other tables are open right now.')}</div>`;
     return `<div class="tables">${rows}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
@@ -907,6 +919,7 @@ const Net = (() => {
     if (t.id === 'tinvYes') { joinInvite(); return; }
     if (t.dataset.mva) { moveAnswer(t.dataset.mva, true); return; }
     if (t.dataset.mvd) { moveAnswer(t.dataset.mvd, false); return; }
+    if (t.dataset.tjoin) { const id = t.dataset.tjoin; if (!st.tours[id]) { flash(T('This tournament has not reached you yet — try again in a moment'), 2500); findTables(); return; } closeOv(); playTour(id); return; }
     if (t.dataset.jt) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jt); st.offer = tb || null; st.msg = ''; showJoin('room-' + t.dataset.jt); return; }
     if (t.dataset.jw) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jw); st.offer = tb || null; st.msg = ''; st.want = 'watch'; showJoin('room-' + t.dataset.jw); return; }
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
@@ -954,5 +967,7 @@ const Net = (() => {
   // the lobby lines also carry tournaments and chat, so they are rebuilt during play too when none is open
   setInterval(() => { keepSlot(); if (!st.finding && (lobbyOpen() || (document.visibilityState === 'visible' && lobbyCount() <= 1 && st.slot))) findTables(); }, 20000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepSlot(); if (lobbyOpen()) findTables(); } });
-  return { st, owner, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  // tell the lobby at once what is played here (e.g. a tournament board started)
+  const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
+  return { st, owner, shareInfo, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
