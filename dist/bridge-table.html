@@ -578,6 +578,42 @@ b.inv{color:#b3261e}
 #bidbox .alrow small{color:#e8e2c8;font-size:12px}
 .auction .c.alrt{background:#fff1b8;color:#5a4300;border-radius:4px;padding:0 3px}
 .expl .al{background:#c9a227;color:#1d1a0f;border-radius:4px;padding:0 5px;font-size:12px;font-weight:800}
+/* ===== table look, after BBO: a calmer bar, a richer felt, name plates and card backs ===== */
+/* the ☰ menu holds the less used buttons */
+.menuwrap{position:relative;display:inline-flex}
+.menuwrap .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;display:flex;flex-direction:column;gap:4px;min-width:200px;padding:8px;background:#f6f3e8;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.menuwrap .menu .btn{width:100%;text-align:left;justify-content:flex-start}
+#bar .tools .menuwrap .menu .btn{flex:none}
+@media (max-width:1099px){ .menuwrap .menu{position:fixed;right:8px;top:auto;margin-top:6px} }
+/* the felt: a lighter centre, a darker rail round the edge */
+#table,body.classic #table{border-radius:10px;background:radial-gradient(ellipse at 50% 45%,#2f8a52 0%,#1f6b3d 55%,#164f2d 100%);box-shadow:inset 0 0 0 4px #0e3d22,inset 0 0 0 6px rgba(255,255,255,.08),inset 0 0 50px rgba(0,0,0,.35)}
+/* name plates: dark blue with the seat letter in a white tab (red when vulnerable) */
+.lbl,body.classic .lbl{background:#1b2a4e;color:#fff;border-radius:6px;padding:3px 9px 3px 3px;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15)}
+.lbl>span:first-child{background:#fff;color:#1b2a4e;border-radius:4px;padding:1px 6px;font-weight:800}
+.lbl>span.vn:first-child,.lbl>span:first-child.vn{background:#c62828;color:#fff}
+.lbl .tag{background:#f2c94c;color:#1d1a0f}
+.lbl.turn>span:first-child{background:#1b2a4e;color:#f2c94c}
+/* card backs: blue, a little larger, fanned */
+.backs i{width:17px;height:25px;border-radius:3px;background:repeating-linear-gradient(45deg,#1f4fa0 0 3px,#2b63c2 3px 6px);border:1.5px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.35);margin-left:-11px}
+.backs i:first-child{margin-left:0}
+/* the cards of the trick: a soft shadow and a clear winner */
+.card.tc{box-shadow:0 4px 12px rgba(0,0,0,.45)}
+.tc.win{box-shadow:0 0 0 3px #f2c94c,0 4px 12px rgba(0,0,0,.45)}
+/* the auction: a white sheet like a bidding pad */
+#center .auction table{background:#fff;color:#1d1d1d;border-radius:8px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+#center .auction th{background:#e9edf5;color:#1b2a4e}
+#center .auction th.v{background:#c62828;color:#fff}
+/* the bidding box: white keys on a light tray (disabled keys fade into the tray instead of going dark) */
+#bidbox{background:#dfe5ef;padding:6px;border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,.35)}
+#bidbox button{background:#fff;color:#1b2a4e;border:1px solid #c3cbd9;box-shadow:0 2px 0 #b7c0d0}
+#bidbox button:disabled{opacity:.35;box-shadow:none}
+#bidbox button.sel{background:#f2c94c;border-color:#c9a227}
+#bidbox button.pass{background:#2e8b57;color:#fff;border-color:#256f46}
+#bidbox button.dbl{background:#c62828;color:#fff;border-color:#9e1f1f}
+#bidbox button.rdbl{background:#1f4fa0;color:#fff;border-color:#183e7d}
+#bidbox button.st{color:#1d1d1d}
+#bidbox button.st.r{color:#c62828}
+#bidbox button.st.nt{color:#1b2a4e}
 
 </style>
 
@@ -3375,7 +3411,7 @@ function seatLabel(seat) {
   // the host can tap a player's name to remove them from the table (a robot takes the seat)
   if (online() && !guest() && nm && seat !== meSeat()) who = `<b class="pname" data-kickask="${seat}" title="${T('Remove')}">${esc(who)}</b>`;
   const turn = (G.phase === 'bid' && bidTurn() === seat) || (G.phase === 'play' && g.turn === seat);
-  return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> · ${who} ${tags.join('')}</span>`;
+  return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> ${who} ${tags.join('')}</span>`;
 }
 const backs = n => `<span class="backs">${'<i></i>'.repeat(Math.min(n, 13))}</span>`;
 function renderBar() {
@@ -3402,11 +3438,15 @@ function renderBar() {
      <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>${T('Undo')}</button>${typeof Net !== "undefined" ? (n => `<button class="btn${n ? " gold" : ""}" id="bChat">💬 ${T('Chat')}${n ? " (" + n + ")" : ""}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ""}
      <button class="btn gold" id="bHint">${T('Hint')}</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
-     <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>${guest() ? `<button class="btn" id="nLeave">🚪 ${T("Leave")}</button>` : online() ? `<button class="btn" id="nStop">🚪 ${T("Close table")}</button>` : ""}<button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕" : "🔔"}</button>
-     <button class="btn" id="bHelp">${T('Help')}</button>
-     <button class="btn" id="bSet">${T('Settings')}</button>
-     <button class="btn" id="bHist" title="${T('History')}">📜 ${T('History')}</button>
-     <button class="btn" id="bRes">${T('Results')}</button>
+     ${guest() ? `<button class="btn" id="nLeave">🚪 ${T("Leave")}</button>` : online() ? `<button class="btn" id="nStop">🚪 ${T("Close table")}</button>` : ""}
+     <span class="menuwrap"><button class="btn" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰</button>${ui.menu ? `<div class="menu" role="menu">
+       <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
+       <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
+       <button class="btn" id="bHist">📜 ${T('History')}</button>
+       <button class="btn" id="bRes">📊 ${T('Results')}</button>
+       <button class="btn" id="bSet">⚙ ${T('Settings')}</button>
+       <button class="btn" id="bHelp">❔ ${T('Help')}</button>
+     </div>` : ''}</span>
    </div>`;
 }
 function explHtml(e, prefix) {
@@ -3514,7 +3554,7 @@ function renderBidbox() {
   bb.hidden = false; const L = legalCalls(G.auction, U());
   const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st${red(s) ? ' r' : ''}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
-  const html = `<div class="row"><button data-call="P" class="pass">${T('Pass')}</button><button data-call="X" class="dbl" ${L.includes('X') ? '' : 'disabled'}>${T('Double')}</button><button data-call="XX" class="rdbl" ${L.includes('XX') ? '' : 'disabled'}>${T('Redouble')}</button></div><div class="row">${lv}</div><div class="row">${sts}</div>${online() ? `<div class="row alrow"><button id="bAlert" class="${ui.alertOn ? 'on' : ''}">⚠ ${T('Alert')}</button>${ui.alertOn ? `<input id="alTxt" class="tok" maxlength="120" placeholder="${T('What does your next call mean?')}">` : `<small>${T('Alert your next call and say what it means')}</small>`}</div>` : ''}`;
+  const html = `<div class="row"><button data-call="P" class="pass">${T('Pass')}</button><button data-call="X" class="dbl" ${L.includes('X') ? '' : 'disabled'}>${T('Double')}</button><button data-call="XX" class="rdbl" ${L.includes('XX') ? '' : 'disabled'}>${T('Redouble')}</button></div><div class="row">${lv}</div><div class="row">${sts}</div>`;
   // redraw only when something changed, so the alert text being typed keeps its focus
   if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; const i = $('alTxt'); if (i) i.value = ui.alertTxt || ''; }
 }
@@ -4209,6 +4249,8 @@ document.addEventListener('change', e => {
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {
+  // the ☰ menu closes after any tap outside its button (a menu item still does its job)
+  if (ui.menu && !ev_.target.closest('#bMenu')) { ui.menu = false; setTimeout(() => { if (G && G.phase !== 'idle') renderBar(); }, 0); }
   if (G && G.phase === "play" && ev_.target.closest("#center") && !ev_.target.closest("[data-c].play,button")) {
     if (G.play.history.length) { ui.showLast = !ui.showLast; clearTimeout(ui.lastTimer); if (ui.showLast) ui.lastTimer = setTimeout(() => { ui.showLast = false; render(); }, 4000); render(); }
     return;
@@ -4301,6 +4343,7 @@ document.addEventListener('click', ev_ => {
     case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;
     case "bHelp": case "bHelp2": showHelp(); break;
     case "bHist": showHist(); break;
+    case "bMenu": ui.menu = !ui.menu; renderBar(); break;
     case "bAlert": ui.alertOn = !ui.alertOn; renderBidbox(); if (ui.alertOn) setTimeout(() => { const i = $('alTxt'); if (i) i.focus(); }, 30); break;
     // the turn sound on and off from the top bar
     case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; } else { SET.alert = SET.alertOn || "online"; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }

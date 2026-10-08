@@ -505,7 +505,7 @@ function seatLabel(seat) {
   // the host can tap a player's name to remove them from the table (a robot takes the seat)
   if (online() && !guest() && nm && seat !== meSeat()) who = `<b class="pname" data-kickask="${seat}" title="${T('Remove')}">${esc(who)}</b>`;
   const turn = (G.phase === 'bid' && bidTurn() === seat) || (G.phase === 'play' && g.turn === seat);
-  return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> · ${who} ${tags.join('')}</span>`;
+  return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> ${who} ${tags.join('')}</span>`;
 }
 const backs = n => `<span class="backs">${'<i></i>'.repeat(Math.min(n, 13))}</span>`;
 function renderBar() {
@@ -532,11 +532,15 @@ function renderBar() {
      <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>${T('Undo')}</button>${typeof Net !== "undefined" ? (n => `<button class="btn${n ? " gold" : ""}" id="bChat">💬 ${T('Chat')}${n ? " (" + n + ")" : ""}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ""}
      <button class="btn gold" id="bHint">${T('Hint')}</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
-     <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>${guest() ? `<button class="btn" id="nLeave">🚪 ${T("Leave")}</button>` : online() ? `<button class="btn" id="nStop">🚪 ${T("Close table")}</button>` : ""}<button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕" : "🔔"}</button>
-     <button class="btn" id="bHelp">${T('Help')}</button>
-     <button class="btn" id="bSet">${T('Settings')}</button>
-     <button class="btn" id="bHist" title="${T('History')}">📜 ${T('History')}</button>
-     <button class="btn" id="bRes">${T('Results')}</button>
+     ${guest() ? `<button class="btn" id="nLeave">🚪 ${T("Leave")}</button>` : online() ? `<button class="btn" id="nStop">🚪 ${T("Close table")}</button>` : ""}
+     <span class="menuwrap"><button class="btn" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰</button>${ui.menu ? `<div class="menu" role="menu">
+       <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
+       <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
+       <button class="btn" id="bHist">📜 ${T('History')}</button>
+       <button class="btn" id="bRes">📊 ${T('Results')}</button>
+       <button class="btn" id="bSet">⚙ ${T('Settings')}</button>
+       <button class="btn" id="bHelp">❔ ${T('Help')}</button>
+     </div>` : ''}</span>
    </div>`;
 }
 function explHtml(e, prefix) {
@@ -644,7 +648,7 @@ function renderBidbox() {
   bb.hidden = false; const L = legalCalls(G.auction, U());
   const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st${red(s) ? ' r' : ''}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
-  const html = `<div class="row"><button data-call="P" class="pass">${T('Pass')}</button><button data-call="X" class="dbl" ${L.includes('X') ? '' : 'disabled'}>${T('Double')}</button><button data-call="XX" class="rdbl" ${L.includes('XX') ? '' : 'disabled'}>${T('Redouble')}</button></div><div class="row">${lv}</div><div class="row">${sts}</div>${online() ? `<div class="row alrow"><button id="bAlert" class="${ui.alertOn ? 'on' : ''}">⚠ ${T('Alert')}</button>${ui.alertOn ? `<input id="alTxt" class="tok" maxlength="120" placeholder="${T('What does your next call mean?')}">` : `<small>${T('Alert your next call and say what it means')}</small>`}</div>` : ''}`;
+  const html = `<div class="row"><button data-call="P" class="pass">${T('Pass')}</button><button data-call="X" class="dbl" ${L.includes('X') ? '' : 'disabled'}>${T('Double')}</button><button data-call="XX" class="rdbl" ${L.includes('XX') ? '' : 'disabled'}>${T('Redouble')}</button></div><div class="row">${lv}</div><div class="row">${sts}</div>`;
   // redraw only when something changed, so the alert text being typed keeps its focus
   if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; const i = $('alTxt'); if (i) i.value = ui.alertTxt || ''; }
 }
@@ -1339,6 +1343,8 @@ document.addEventListener('change', e => {
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {
+  // the ☰ menu closes after any tap outside its button (a menu item still does its job)
+  if (ui.menu && !ev_.target.closest('#bMenu')) { ui.menu = false; setTimeout(() => { if (G && G.phase !== 'idle') renderBar(); }, 0); }
   if (G && G.phase === "play" && ev_.target.closest("#center") && !ev_.target.closest("[data-c].play,button")) {
     if (G.play.history.length) { ui.showLast = !ui.showLast; clearTimeout(ui.lastTimer); if (ui.showLast) ui.lastTimer = setTimeout(() => { ui.showLast = false; render(); }, 4000); render(); }
     return;
@@ -1431,6 +1437,7 @@ document.addEventListener('click', ev_ => {
     case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;
     case "bHelp": case "bHelp2": showHelp(); break;
     case "bHist": showHist(); break;
+    case "bMenu": ui.menu = !ui.menu; renderBar(); break;
     case "bAlert": ui.alertOn = !ui.alertOn; renderBidbox(); if (ui.alertOn) setTimeout(() => { const i = $('alTxt'); if (i) i.focus(); }, 30); break;
     // the turn sound on and off from the top bar
     case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; } else { SET.alert = SET.alertOn || "online"; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }

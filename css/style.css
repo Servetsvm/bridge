@@ -563,3 +563,39 @@ b.inv{color:#b3261e}
 #bidbox .alrow small{color:#e8e2c8;font-size:12px}
 .auction .c.alrt{background:#fff1b8;color:#5a4300;border-radius:4px;padding:0 3px}
 .expl .al{background:#c9a227;color:#1d1a0f;border-radius:4px;padding:0 5px;font-size:12px;font-weight:800}
+/* ===== table look, after BBO: a calmer bar, a richer felt, name plates and card backs ===== */
+/* the ☰ menu holds the less used buttons */
+.menuwrap{position:relative;display:inline-flex}
+.menuwrap .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;display:flex;flex-direction:column;gap:4px;min-width:200px;padding:8px;background:#f6f3e8;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.menuwrap .menu .btn{width:100%;text-align:left;justify-content:flex-start}
+#bar .tools .menuwrap .menu .btn{flex:none}
+@media (max-width:1099px){ .menuwrap .menu{position:fixed;right:8px;top:auto;margin-top:6px} }
+/* the felt: a lighter centre, a darker rail round the edge */
+#table,body.classic #table{border-radius:10px;background:radial-gradient(ellipse at 50% 45%,#2f8a52 0%,#1f6b3d 55%,#164f2d 100%);box-shadow:inset 0 0 0 4px #0e3d22,inset 0 0 0 6px rgba(255,255,255,.08),inset 0 0 50px rgba(0,0,0,.35)}
+/* name plates: dark blue with the seat letter in a white tab (red when vulnerable) */
+.lbl,body.classic .lbl{background:#1b2a4e;color:#fff;border-radius:6px;padding:3px 9px 3px 3px;font-size:13px;box-shadow:0 2px 6px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15)}
+.lbl>span:first-child{background:#fff;color:#1b2a4e;border-radius:4px;padding:1px 6px;font-weight:800}
+.lbl>span.vn:first-child,.lbl>span:first-child.vn{background:#c62828;color:#fff}
+.lbl .tag{background:#f2c94c;color:#1d1a0f}
+.lbl.turn>span:first-child{background:#1b2a4e;color:#f2c94c}
+/* card backs: blue, a little larger, fanned */
+.backs i{width:17px;height:25px;border-radius:3px;background:repeating-linear-gradient(45deg,#1f4fa0 0 3px,#2b63c2 3px 6px);border:1.5px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.35);margin-left:-11px}
+.backs i:first-child{margin-left:0}
+/* the cards of the trick: a soft shadow and a clear winner */
+.card.tc{box-shadow:0 4px 12px rgba(0,0,0,.45)}
+.tc.win{box-shadow:0 0 0 3px #f2c94c,0 4px 12px rgba(0,0,0,.45)}
+/* the auction: a white sheet like a bidding pad */
+#center .auction table{background:#fff;color:#1d1d1d;border-radius:8px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+#center .auction th{background:#e9edf5;color:#1b2a4e}
+#center .auction th.v{background:#c62828;color:#fff}
+/* the bidding box: white keys on a light tray (disabled keys fade into the tray instead of going dark) */
+#bidbox{background:#dfe5ef;padding:6px;border-radius:12px;box-shadow:0 3px 12px rgba(0,0,0,.35)}
+#bidbox button{background:#fff;color:#1b2a4e;border:1px solid #c3cbd9;box-shadow:0 2px 0 #b7c0d0}
+#bidbox button:disabled{opacity:.35;box-shadow:none}
+#bidbox button.sel{background:#f2c94c;border-color:#c9a227}
+#bidbox button.pass{background:#2e8b57;color:#fff;border-color:#256f46}
+#bidbox button.dbl{background:#c62828;color:#fff;border-color:#9e1f1f}
+#bidbox button.rdbl{background:#1f4fa0;color:#fff;border-color:#183e7d}
+#bidbox button.st{color:#1d1d1d}
+#bidbox button.st.r{color:#c62828}
+#bidbox button.st.nt{color:#1b2a4e}
