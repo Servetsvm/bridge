@@ -359,7 +359,7 @@ const Net = (() => {
   // a private table is never listed (only invited players come)
   // listed: public online tables, and players at a board with robots who chose "open to others" (never someone on
   // the home page, a private table, or a player who chose to play alone)
-  const listed = t => !t.priv && (t.online || ((t.pub || t.tplay) && t.phase && t.phase !== 'idle'));
+  const listed = t => (t.online || ((t.pub || t.tplay) && t.phase && t.phase !== 'idle'));
   function tablesHtml() {
     // tables in play are listed: online tables, and players at a board with robots (not someone on the home page)
     const L = st.tables && st.tables.filter(listed);
@@ -372,7 +372,7 @@ const Net = (() => {
       const tp = t.tplay && typeof t.tplay === 'object' ? t.tplay : null, tt = t.tour && st.tours[t.tour.id];
       const tinfo = tp ? `<div class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</div>`
         : tt ? `<div class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</div>` : '';
-      const mid = `<div class="tname">${T("{0}'s table", esc(t.host))}</div>${tinfo}<div class="tstate">${t.online ? T('online') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div>${tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`}${t.online ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
+      const mid = `<div class="tname">${t.priv ? '🔒 ' : ''}${T("{0}'s table", esc(t.host))}</div>${tinfo}<div class="tstate">${t.online ? (t.priv ? T('Private table') : T('online')) : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div>${tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`}${t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
       return seatTable(cells, mid, 2);
     }).join('')}</div>` : `<div class="muted">${T('No other tables are open right now.')}</div>`;
     return `<div class="tables">${rows}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
@@ -410,7 +410,7 @@ const Net = (() => {
   /* ---- "seat me at a table": ask the best table that still has a robot for a seat ---- */
   function quickJoin() {
     if (!navigator.onLine) { flash(T('You are offline'), 1500); return; }
-    const L = (st.tables || []).filter(t => listed(t) && Object.keys(t.names || {}).length < 4);
+    const L = (st.tables || []).filter(t => listed(t) && !t.priv && !t.tplay && Object.keys(t.names || {}).length < 4);
     if (!L.length) { flash(T('No table has a free seat right now.'), 2500); if (!st.finding) findTables(); return; }
     // tables already online with friends first (more people to play with), then players alone
     L.sort((a, b) => (b.online - a.online) || (Object.keys(b.names || {}).length - Object.keys(a.names || {}).length) || a.k - b.k);
@@ -575,10 +575,10 @@ const Net = (() => {
       // a new player waits until the host accepts them
       if (back == null) {
         if (nameTaken(d.name)) { conn.send({ t: 'nametaken' }); setTimeout(() => conn.close(), 500); return; }
-        // someone you invited sits down at once; a private table turns away anyone else
+        // someone you invited sits down at once; a private table (🔒 in the lobby) takes no spectators, others ask the host
         const inv = (st.invited || []).includes(nameKey(d.name));
         if (inv && st.host && d.want !== 'watch') { st.invited = st.invited.filter(x => x !== nameKey(d.name)); seatPlayer(conn, d, null); return; }
-        if (st.priv && st.host && !inv) { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
+        if (st.priv && st.host && !inv && d.want === 'watch') { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
         (st.pending || (st.pending = {}))[conn.peer] = { conn, d };
         conn.send({ t: 'wait' });
         conn.on('close', () => { if (st.pending && st.pending[conn.peer]) { delete st.pending[conn.peer]; reqRefresh(); render(); } });
