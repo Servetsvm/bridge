@@ -556,6 +556,7 @@ b.inv{color:#b3261e}
 .askbox{background:rgba(246,243,232,.96);color:#222;border-radius:10px;padding:6px 8px;font-size:13px;font-weight:700;text-align:center;max-width:220px;margin:auto;box-shadow:0 2px 10px rgba(0,0,0,.35)}
 .askbox .row2{gap:6px;margin-top:6px}
 .askbox .btn{padding:5px 10px;font-size:13px;min-height:0}
+#dock .dbtns{display:flex;gap:4px}
 
 </style>
 
@@ -3526,7 +3527,7 @@ function renderDock() {
   if (d.dataset.key !== key) {
     d.dataset.key = key;
     const tabs = tbl ? `<div class="dtabs"><button data-dtab="table" class="${tab === 'table' ? 'on' : ''}">${T('Table')} <span id="dTn"></span></button><button data-dtab="lobby" class="${tab === 'lobby' ? 'on' : ''}">${T('Lobby')} <span id="dLn"></span></button></div>` : `<b>💬 ${T('Lobby chat')}</b>`;
-    d.innerHTML = `<div class="dhead">${tabs}<button class="btn mini-btn dclose" id="dClose">✕</button></div>${tab === "lobby" ? `<div class="who" id="dWho"></div>` : ""}<div class="lmsgs" id="dList"></div>
+    d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div>${tab === "lobby" ? `<div class="who" id="dWho"></div>` : ""}<div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}
       <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div>`;
   }
@@ -4088,6 +4089,8 @@ document.addEventListener('click', ev_ => {
   const dq = ev_.target.closest("[data-dq]"); if (dq) { dockSend(dq.dataset.dq); return; }
   if (t.id === "dSend") { const i = $("dMsg"); if (i) { dockSend(i.value); i.value = ""; } return; }
   if (t.id === "dClose") { ui.dockOpen = false; renderDock(); return; }
+  // clear the chat shown in the panel on this device (the lobby chat stays cleared; the table chat until new messages)
+  if (t.id === "dClear") { if (online() && (ui.dockTab || "table") === "table") { Net.st.chat.length = 0; Net.st.unread = 0; renderDock(); } else Net.lclear(); return; }
   if (t.id === "chatBtn") { toggleDock(); return; }
   if (t.id === "bStart") { if (online() && !guest() && G.phase === "lobby") { Net.note((Net.st.names[SET.seat] || "Host") + " started the game"); if (Net.st.tour) tableBoard(); else newBoard(); } return; }
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
