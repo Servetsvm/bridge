@@ -426,12 +426,17 @@ function askText(a) {
 // a question shown on this device: Accept / Decline
 function askLocal(a, fin) {
   ui.askFin = fin;
-  // a claim shows every card still in play, so it can be checked before agreeing
+  // a claim: every remaining card is shown open on the table itself, with a small Accept / Decline in the middle
   const hs = Array.isArray(a.hands) && a.hands.length === 4 ? a.hands.map(h => (Array.isArray(h) ? h : []).map(Number).filter(c => c >= 0 && c < 52)) : null;
-  openOv('ask', (hs ? `<div class="askc"><div class="askt">❓ ${esc(askText(a))}</div>${dealHtml(hs, U())}</div>`
-    : `<h2>❓ ${T('Do you agree?')}</h2><div class="big">${esc(askText(a))}</div>`) + `
+  if (hs && G && G.phase === 'play') { ui.ask = { a, hands: hs }; render(); beep(); return; }
+  openOv('ask', `<h2>❓ ${T('Do you agree?')}</h2><div class="big">${esc(askText(a))}</div>
     <div class="row2"><button class="btn new" data-askr="1">${T('Accept')}</button><button class="btn" data-askr="0">${T('Decline')}</button></div>`);
   beep();
+}
+// the question is over (answered here, answered by someone else, or timed out)
+function askClose() {
+  if (ui.ask) { ui.ask = null; render(); }
+  if (ui.overlay === 'ask') closeOv();
 }
 /* play the same deal again (at an online table: for everyone) */
 function replayDeal() {
@@ -451,8 +456,9 @@ function cardHtml(c, cls) {
   const s = S(c), r = R(c), face = r >= 9 && r <= 11;
   return `<div class="card${red(s) ? ' rd' : ''}${face ? ' face' : ''}${cls ? ' ' + cls : ''}" data-c="${c}"><span class="ix"><b>${RTXT[r]}</b><i>${SUIT[s]}</i></span><span class="pip">${face ? `<em>${RTXT[r]}</em>` : ''}${SUIT[s]}</span></div>`;
 }
-const handsNow = () => G.phase === "play" ? G.play.hands : G.deal;
+const handsNow = () => G.phase === "play" ? (ui.ask && ui.ask.hands) || G.play.hands : G.deal;   // a claim being asked shows every remaining card
 function isVisible(seat) {
+  if (ui.ask && ui.ask.hands && G.phase === "play") return true;
   if (guest()) return handsNow()[seat].every(c => c >= 0); // the host only sends the cards you may see
   if (seat === U() || G.phase === "done") return true;
   if (G.phase !== 'play') return false;
@@ -461,7 +467,7 @@ function isVisible(seat) {
   return sideOf(g.contract.decl) === sideOf(U()) && seat === pd(U()) && g.dummyShown;
 }
 function ctlInfo(seat) {
-  const g = G.play; const ctl = G.phase === 'play' && g.turn === seat && userControls(seat) && g.trick.length < 4;
+  const g = G.play; const ctl = !ui.ask && G.phase === 'play' && g.turn === seat && userControls(seat) && g.trick.length < 4;
   return { ctl, leg: ctl ? E.legalFor(g, seat) : [] };
 }
 function fanHtml(seat, max) {
@@ -596,6 +602,7 @@ function renderTable() {
   $("table").classList.toggle("lobby", G.phase === "lobby" || G.phase === "idle"); document.body.classList.toggle("inlobby", G.phase === "lobby" || G.phase === "idle");
   if (G.phase === "lobby" || G.phase === "idle") { C.innerHTML = G.phase === "idle" ? idleHtml() : lobbyHtml(); return; }
   if (G.phase === 'bid') C.innerHTML = auctionPanel();
+  else if (G.phase === 'play' && ui.ask) C.innerHTML = `<div class="askbox"><div>❓ ${esc(askText(ui.ask.a))}</div><div class="row2"><button class="btn new" data-askr="1">${T('Accept')}</button><button class="btn" data-askr="0">${T('Decline')}</button></div></div>`;   // a claim: the hands are open, the question sits in the middle
   else if (G.phase === 'play') {
     // tap the table to look at the last finished trick; tap again (or wait) to come back
     const H = G.play.history, last = ui.showLast && H.length ? H[H.length - 1] : null;
@@ -632,6 +639,7 @@ function renderStatus() {
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
   if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
+  else if (G.phase === "play" && ui.ask) s = T("Do you agree?");
   else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = T('Gathering the trick…'); else if (userControls(g.turn)) s = g.turn === U() ? T('Your turn: play a card') : T("Play from {0}'s hand", SEAT[g.turn]); else s = T('{0} is playing…', nameOf(g.turn)); }
   else if (G.phase === "idle") s = T("Press Start to deal");
   else if (G.phase === "lobby") s = guest() ? T("Waiting for the host to start") : T("Waiting for players — press Start when everyone is seated");
@@ -1211,7 +1219,7 @@ document.addEventListener('click', ev_ => {
   const hsb = ev_.target.closest('[data-hsec]'); if (hsb && hsb.dataset.hsec === 'chat') { const c = document.querySelector('.hchat'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'end' }); const i = $('lMsg'); if (i) setTimeout(() => i.focus(), 300); return; }
   if (hsb) { const v = hsb.dataset.hsec; ui.hsec = !v || ui.hsec === v ? null : v; render(); if (ui.hsec === 'chat') { const i = $('lMsg2'); if (i) i.focus(); } return; }
   const opb = ev_.target.closest('[data-open]'); if (opb) { closeOv(); ui.saved = null; Net.openTable(opb.dataset.open === 'priv'); return; }
-  const ar = ev_.target.closest('[data-askr]'); if (ar) { const f = ui.askFin; ui.askFin = null; closeOv(); if (f) f(ar.dataset.askr === '1'); return; }
+  const ar = ev_.target.closest('[data-askr]'); if (ar) { const f = ui.askFin; ui.askFin = null; askClose(); if (f) f(ar.dataset.askr === '1'); return; }
   const cn = ev_.target.closest('[data-claimn]'); if (cn) { claimChosen(+cn.dataset.claimn); return; }
   const tp = ev_.target.closest('[data-tplay]'); if (tp) { playTour(tp.dataset.tplay); return; }
   const tt = ev_.target.closest('[data-ttab],[data-tjtab]'); if (tt) { if (tt.dataset.ttab) Net.openTourTable(tt.dataset.ttab); else Net.joinTourTable(tt.dataset.tjtab); return; }

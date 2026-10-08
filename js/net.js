@@ -683,8 +683,8 @@ const Net = (() => {
         else if (d.t === "chat") gotChat(d.m);
         else if (d.t === "seat") { st.seat = d.seat; render(); }
         else if (d.t === "askno") flash(T('The host said no'), 2500);
-        else if (d.t === "ask") { st.askId = d.id; askLocal(d.a || {}, ok => { send({ t: 'askreply', id: d.id, ok }); closeOv(); }); }
-        else if (d.t === "askdone") { if (st.askId === d.id && ui.overlay === 'ask') closeOv(); }
+        else if (d.t === "ask") { st.askId = d.id; askLocal(d.a || {}, ok => { send({ t: 'askreply', id: d.id, ok }); askClose(); }); }
+        else if (d.t === "askdone") { if (st.askId === d.id) askClose(); }
         else if (d.t === "movedeclined") flash('The host did not agree to the move', 2500);
         else if (d.t === "wait") { waiting = true; st.waiting = true; st.msg = 'Waiting for the host to accept you…'; showJoin(code); }
         else if (d.t === "nametaken") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The name ' + name + ' is already used at this table. Choose another name.'; showJoin(code); }
@@ -820,7 +820,7 @@ const Net = (() => {
     return new Promise(res => {
       const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       let done = false;
-      const fin = ok => { if (done) return; done = true; delete askP[id]; if (ui.overlay === 'ask') closeOv(); for (const o of owners) { const c = st.conns.get(o); if (c && c.open) { try { c.send({ t: 'askdone', id }); } catch (e) {} } } res(ok); };
+      const fin = ok => { if (done) return; done = true; delete askP[id]; askClose(); for (const o of owners) { const c = st.conns.get(o); if (c && c.open) { try { c.send({ t: 'askdone', id }); } catch (e) {} } } res(ok); };
       askP[id] = { fin, who: owners };
       for (const o of owners) {
         if (o === 'host' || o === 'local') askLocal(a, fin);
