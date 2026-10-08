@@ -93,7 +93,7 @@ const Net = (() => {
   // what the lobby sees of this table
   function tableInfo() {
     return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0,
-      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null };
+      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub };
   }
   /* a player's profile, shown next to their name: boards played today and the average IMPs (or MP %) */
   function prof() {
@@ -339,7 +339,9 @@ const Net = (() => {
   }
   // the lobby list, used on the home page and in the Online panel
   // a private table is never listed (only invited players come)
-  const listed = t => !t.priv && (t.online || (t.phase && t.phase !== 'idle'));
+  // listed: public online tables, and players at a board with robots who chose "open to others" (never someone on
+  // the home page, a private table, or a player who chose to play alone)
+  const listed = t => !t.priv && (t.online || (t.pub && t.phase && t.phase !== 'idle'));
   function tablesHtml() {
     // tables in play are listed: online tables, and players at a board with robots (not someone on the home page)
     const L = st.tables && st.tables.filter(listed);
@@ -379,7 +381,7 @@ const Net = (() => {
   }
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
-  const renderL = () => { if (G && G.phase === 'idle') render(); if (ui.overlay === 'lchat') showLChat(); if (ui.overlay === 'tsetup') showTourSetup(ui.tsetId); };
+  const renderL = () => { if (typeof renderDock === 'function') renderDock(); if (G && G.phase === 'idle') render(); if (ui.overlay === 'lchat') showLChat(); if (ui.overlay === 'tsetup') showTourSetup(ui.tsetId); };
   // clear the lobby chat on this device
   function lclear() { st.lchat = []; st.lunread = 0; try { localStorage.removeItem('bridge-lobby-chat'); localStorage.setItem('bridge-lobby-cleared', String(Date.now())); } catch (e) {} renderL(); }
   try { (JSON.parse(localStorage.getItem('bridge-lobby-chat') || '[]') || []).forEach(m => addL(m, true)); } catch (e) {}
@@ -758,8 +760,9 @@ const Net = (() => {
   }
   function gotChat(m, mine) {
     if (!mine) { st.chat.push(m); if (st.chat.length > 200) st.chat.shift(); }
+    if (typeof renderDock === 'function') renderDock();
     if (ui.overlay === 'chat') { chatPanel(); return; }
-    if (m.from !== myTableName()) { st.unread++; flash((m.from ? m.from + ': ' : '') + m.text, 2600); }
+    if (m.from !== myTableName() && !(ui.dockOpen || dockWide())) { st.unread++; flash((m.from ? m.from + ': ' : '') + m.text, 2600); }
     renderBar();
   }
   function sendChat(text) {
@@ -767,6 +770,11 @@ const Net = (() => {
     if (st.host) addChat(myTableName(), text); else send({ t: 'chat', text });
   }
   const QUICK = ['Hi!', 'Well played', 'Thanks partner', 'Sorry partner', 'Good luck', 'Ready?', 'One more?', '👍', '😂', '🙈'];
+  // the table chat as a list (for the chat column)
+  function tchatHtml() {
+    const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return st.chat.slice(-80).map(m => m.from ? `<div class="cm${m.from === myTableName() ? ' me' : ''}"><b>${esc(m.from)}</b> ${esc(m.text)}<small>${t(m.ts)}</small></div>` : `<div class="cm sys">${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') || `<div class="muted">${T('No messages yet — say hello!')}</div>`;
+  }
   function chatPanel() {
     const draft = document.getElementById('nMsg'); if (draft) st.draft = draft.value;
     st.unread = 0;
@@ -874,7 +882,7 @@ const Net = (() => {
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {
       case "bNet": panel(); break;
-      case "bChat": chatPanel(); break;
+      case "bChat": toggleDock(); break;
       case "nSend": { const i = document.getElementById("nMsg"); if (i && i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } break; }
       case 'nStart': {
         const n = document.getElementById('nName');
@@ -916,5 +924,5 @@ const Net = (() => {
   // the lobby lines also carry tournaments and chat, so they are rebuilt during play too when none is open
   setInterval(() => { keepSlot(); if (!st.finding && (lobbyOpen() || (document.visibilityState === 'visible' && lobbyCount() <= 1 && st.slot))) findTables(); }, 20000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepSlot(); if (lobbyOpen()) findTables(); } });
-  return { st, owner, broadcast, send, panel, sit, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, broadcast, send, panel, sit, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

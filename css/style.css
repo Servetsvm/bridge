@@ -486,3 +486,22 @@ b.inv{color:#b3261e}
 .tsetrow label small{font-size:11px;color:#6d6c62}
 .tsetrow .tok{width:100%;min-width:0;padding:6px}
 @media (max-width:560px){ .tsetrow{grid-template-columns:repeat(2,minmax(0,1fr))} .tsetrow b{grid-column:1/-1} }
+/* chat while playing: right column on a wide screen, bottom panel on a phone or narrow window */
+#dock[hidden]{display:none!important}
+#dock{display:flex;flex-direction:column;gap:6px;background:var(--sheet,#f6f3e8);color:var(--sheet-ink,#222);border-radius:12px;padding:10px;box-shadow:0 6px 24px rgba(0,0,0,.45);z-index:40}
+#dock .dhead{display:flex;align-items:center;justify-content:space-between;gap:6px}
+#dock .dtabs{display:flex;gap:4px}
+#dock .dtabs button{border:1px solid #c9c4ad;background:#fff;border-radius:8px;padding:5px 10px;font-weight:700;cursor:pointer}
+#dock .dtabs button.on{background:#2f6f4a;color:#fff;border-color:#2f6f4a}
+#dock .lmsgs{flex:1;min-height:0;overflow:auto;margin:0}
+#dock .quick{display:flex;flex-wrap:wrap;gap:4px}
+#dock .quick button{border:1px solid #dcdccf;background:#fff;border-radius:999px;padding:3px 9px;font-size:12.5px;cursor:pointer}
+@media (min-width:1100px){
+  #dock{position:fixed;right:10px;top:10px;bottom:10px;width:310px}
+  #dock .dclose{display:none}
+  body.withdock #app{margin:0 340px 0 auto}
+}
+@media (max-width:1099px){
+  #dock{position:fixed;left:max(8px,env(safe-area-inset-left,0px));right:max(8px,env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:58vh}
+  #dock .lmsgs{max-height:34vh;min-height:110px}
+}
