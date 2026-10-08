@@ -1253,7 +1253,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
   if (t.id === 'toast') { ui.toast = null; render(); return; }
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
-  if (t.id === "bGo") { if (ui.saved) resume(); else showStartChoice(); return; }
+  // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
+  if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
   const sol = ev_.target.closest("[data-solo]"); if (sol) { Net.st.soloPub = sol.dataset.solo === "pub"; closeOv(); resume(); return; }
   const dtb = ev_.target.closest("[data-dtab]"); if (dtb) { ui.dockTab = dtb.dataset.dtab; renderDock(); return; }
   const dq = ev_.target.closest("[data-dq]"); if (dq) { dockSend(dq.dataset.dq); return; }

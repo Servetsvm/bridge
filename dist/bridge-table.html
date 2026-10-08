@@ -4104,7 +4104,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
   if (t.id === 'toast') { ui.toast = null; render(); return; }
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
-  if (t.id === "bGo") { if (ui.saved) resume(); else showStartChoice(); return; }
+  // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
+  if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
   const sol = ev_.target.closest("[data-solo]"); if (sol) { Net.st.soloPub = sol.dataset.solo === "pub"; closeOv(); resume(); return; }
   const dtb = ev_.target.closest("[data-dtab]"); if (dtb) { ui.dockTab = dtb.dataset.dtab; renderDock(); return; }
   const dq = ev_.target.closest("[data-dq]"); if (dq) { dockSend(dq.dataset.dq); return; }
@@ -4601,7 +4602,7 @@ const Net = (() => {
       const tp = t.tplay && typeof t.tplay === 'object' ? t.tplay : null, tt = t.tour && st.tours[t.tour.id];
       const tinfo = tp ? `<div class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</div>`
         : tt ? `<div class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</div>` : '';
-      const mid = `<div class="tname">${t.priv ? '🔒 ' : ''}${T("{0}'s table", esc(t.host))}</div>${tinfo}<div class="tstate">${t.online ? (t.priv ? T('Private table') : T('online')) : t.pub || tp ? T('playing with robots') : '🤖 ' + T('Alone with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div>${tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : !t.online && !t.pub ? '' : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`}${t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
+      const mid = `<div class="tname">${t.priv ? '🔒 ' : ''}${T("{0}'s table", esc(t.host))}</div>${tinfo}<div class="tstate">${t.online ? (t.priv ? T('Private table') : T('online')) : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div>${tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`}${t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
       return seatTable(cells, mid, 2);
     }).join('')}</div>` : `<div class="muted">${T('No other tables are open right now.')}</div>`;
     return `<div class="tables">${rows}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
@@ -4639,7 +4640,7 @@ const Net = (() => {
   /* ---- "seat me at a table": ask the best table that still has a robot for a seat ---- */
   function quickJoin() {
     if (!navigator.onLine) { flash(T('You are offline'), 1500); return; }
-    const L = (st.tables || []).filter(t => listed(t) && (t.online || t.pub) && !t.priv && !t.tplay && Object.keys(t.names || {}).length < 4);
+    const L = (st.tables || []).filter(t => listed(t) && !t.priv && !t.tplay && Object.keys(t.names || {}).length < 4);
     if (!L.length) { flash(T('No table has a free seat right now.'), 2500); if (!st.finding) findTables(); return; }
     // tables already online with friends first (more people to play with), then players alone
     L.sort((a, b) => (b.online - a.online) || (Object.keys(b.names || {}).length - Object.keys(a.names || {}).length) || a.k - b.k);
@@ -4741,13 +4742,13 @@ const Net = (() => {
   }
   // close the request window without answering: the request waits in the Online panel and does not pop up again
   function reqLater(id) {
-    const p = st.pending && st.pending[id]; if (p) { p.quiet = true; reqMute(p.d.name, 'later'); }
+    const p = st.pending && st.pending[id]; if (p) { p.quiet = true; reqMute(p.d.rq ? "rq:" + p.d.rq : p.d.name, 'later'); }
     if (ui.overlay === 'req') closeOv(); showReq(); panelRefresh();
   }
   function decline(id) {
     setTimeout(reqRefresh, 50);
     const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
-    reqMute(p.d.name, 'no');
+    reqMute(p.d.rq ? "rq:" + p.d.rq : p.d.name, 'no');
     try { p.conn.send({ t: 'declined' }); } catch (e) {} setTimeout(() => { try { p.conn.close(); } catch (e) {} }, 500);
     panelRefresh(); render();
   }
@@ -4825,7 +4826,7 @@ const Net = (() => {
         if (st.priv && st.host && !inv && d.want === 'watch') { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
         // a request answered recently (also before a page refresh) is not asked again: declined stays declined,
         // "later" waits quietly in the Online panel
-        const mu = reqMute(d.name);
+        const mu = reqMute(d.rq ? "rq:" + d.rq : d.name);
         if (mu === 'no') { try { conn.send({ t: 'declined' }); } catch (e) {} setTimeout(() => { try { conn.close(); } catch (e) {} }, 500); return; }
         (st.pending || (st.pending = {}))[conn.peer] = { conn, d, quiet: mu === 'later' };
         conn.send({ t: 'wait' });
@@ -4904,8 +4905,12 @@ const Net = (() => {
 
   /* ---- guest ---- */
   // retry: reconnecting after a dropped connection (screen locked, app switched, network blip) — same seat, no join screen
-  async function join(code, name, want, retry) {
+  async function join(code, name, want, retry, auto) {
     setName(name);
+    // each request you make has its own number; automatic tries (reconnecting, coming back after a refresh) reuse it,
+    // so the host is not asked again for a request already answered, but a new request of yours is always asked
+    let rq = null; try { rq = localStorage.getItem("bridge-req-id"); } catch (e) {}
+    if (!(retry || auto) || !rq) { rq = Date.now().toString(36) + Math.random().toString(36).slice(2, 7); try { localStorage.setItem("bridge-req-id", rq); } catch (e) {} }
     if (!retry) { st.msg = 'Connecting to table ' + code + '…'; showJoin(code); }
     try {
       await loadLib();
@@ -4917,7 +4922,7 @@ const Net = (() => {
       setTimeout(() => { if (!welcomed && !waiting) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
       peer.on('error', e => { if (e.type === 'peer-unavailable') fail('That table is not open any more.'); });
       peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
-      conn.on('open', () => conn.send({ t: 'hello', name, want, tok: devTok(), prof: prof(), seat: retry ? st.seat : undefined }));
+      conn.on('open', () => conn.send({ t: 'hello', name, want, rq, tok: devTok(), prof: prof(), seat: retry ? st.seat : undefined }));
       conn.on('data', d => {
         if (!d) return;
         if (d.t === 'welcome') {
@@ -4958,7 +4963,7 @@ const Net = (() => {
     if (Date.now() - t.ts > 10 * 60000) { forgetTable(); return; }   // the host keeps a seat for 10 minutes
     st.want = t.watch ? 'watch' : t.want || 'partner'; st.offer = null;
     flash(T('Going back to your table…'), 2500);
-    join(t.code, t.name, st.want);
+    join(t.code, t.name, st.want, undefined, true);
   }
   // the connection dropped: keep the table on screen and try to get back in for two minutes
   function lost() {
