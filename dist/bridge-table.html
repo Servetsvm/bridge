@@ -476,6 +476,7 @@ tr.meRow td{background:#fff3c4;font-weight:700}
 .invrow b{flex:1}
 .ok{color:#2f6f4a;font-weight:700}.no{color:#b3261e;font-weight:700}.wait{color:#8a6d22;font-weight:600}
 b.inv{color:#b3261e}
+.hbtns .hopen{grid-column:1/-1;background:#1f5f8b;color:#fff;font-size:17px}
 
 </style>
 
@@ -3217,7 +3218,7 @@ function homeShell() {
       <div class="hcard hero">
         <label class="hname"><span>${T('Your name')}</span><input id="hName" class="tok" maxlength="20" autocomplete="nickname" value="${esc(myNm())}" placeholder="${T('Your name')}"></label>
         <div class="muted">${T('Play alone with robots, or join a table where a robot is playing.')}</div>
-        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn gold" id="hQuick">${T('Seat me at a table')}</button></div>
+        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn gold" id="hQuick">${T('Seat me at a table')}</button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button></div>
         <div class="hlinks"><button class="btn" id="bNet">${T('Online')}</button><button class="btn" id="bRes">${T('Results')}</button><button class="btn" id="bSet">${T('Settings')}</button><button class="btn" id="bHelp">${T('Help')}</button></div>
         <div class="hstats" id="hStats"></div>
       </div>
@@ -3651,6 +3652,7 @@ document.addEventListener('click', ev_ => {
     case 'bRes': showResults(); break;
     case 'bHome': goHome(); break;
     case 'hQuick': Net.quickJoin(); break;
+    case 'hOpen': ui.saved = null; Net.openTable(); break;
     case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } break; }
     case 'lSend2': { const i = $('lMsg2'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; i.focus(); } break; }
     case 'lClear': Net.lclear(); break;
@@ -4480,7 +4482,7 @@ const Net = (() => {
   // the lobby lines also carry tournaments and chat, so they are rebuilt during play too when none is open
   setInterval(() => { keepSlot(); if (!st.finding && (lobbyOpen() || (document.visibilityState === 'visible' && lobbyCount() <= 1 && st.slot))) findTables(); }, 20000);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepSlot(); if (lobbyOpen()) findTables(); } });
-  return { st, owner, broadcast, send, panel, sit, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, broadcast, send, panel, sit, openTable: () => { if (!st.on) host(); else panel(); }, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

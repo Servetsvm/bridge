@@ -461,3 +461,4 @@ tr.meRow td{background:#fff3c4;font-weight:700}
 .invrow b{flex:1}
 .ok{color:#2f6f4a;font-weight:700}.no{color:#b3261e;font-weight:700}.wait{color:#8a6d22;font-weight:600}
 b.inv{color:#b3261e}
+.hbtns .hopen{grid-column:1/-1;background:#1f5f8b;color:#fff;font-size:17px}

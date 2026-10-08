@@ -597,7 +597,7 @@ function homeShell() {
       <div class="hcard hero">
         <label class="hname"><span>${T('Your name')}</span><input id="hName" class="tok" maxlength="20" autocomplete="nickname" value="${esc(myNm())}" placeholder="${T('Your name')}"></label>
         <div class="muted">${T('Play alone with robots, or join a table where a robot is playing.')}</div>
-        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn gold" id="hQuick">${T('Seat me at a table')}</button></div>
+        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn gold" id="hQuick">${T('Seat me at a table')}</button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button></div>
         <div class="hlinks"><button class="btn" id="bNet">${T('Online')}</button><button class="btn" id="bRes">${T('Results')}</button><button class="btn" id="bSet">${T('Settings')}</button><button class="btn" id="bHelp">${T('Help')}</button></div>
         <div class="hstats" id="hStats"></div>
       </div>
@@ -1031,6 +1031,7 @@ document.addEventListener('click', ev_ => {
     case 'bRes': showResults(); break;
     case 'bHome': goHome(); break;
     case 'hQuick': Net.quickJoin(); break;
+    case 'hOpen': ui.saved = null; Net.openTable(); break;
     case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } break; }
     case 'lSend2': { const i = $('lMsg2'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; i.focus(); } break; }
     case 'lClear': Net.lclear(); break;
