@@ -103,12 +103,23 @@ const Net = (() => {
   /* a player's profile, shown next to their name: boards played today and the average IMPs (or MP %) */
   function prof() {
     const p = Store.periods(HIST)[0];
-    return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv } };   // with the system this player bids
+    // with the system this player bids, and the rating over each period (today, week, month, year, all time)
+    return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]) };
+  }
+  // a profile received from another app, kept to the fields we know
+  const num = v => v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
+  function cleanProf(q, conv) {
+    if (!q || typeof q !== 'object') return null;
+    return { n: +q.n || 0, imp: num(q.imp), mp: num(q.mp), sys: typeof q.sys === 'string' ? q.sys.slice(0, 12) : undefined,
+      conv: conv && q.conv && typeof q.conv === 'object' ? Object.fromEntries(E.CONVS.map(c => [c.k, !!q.conv[c.k]])) : undefined,
+      per: Array.isArray(q.per) ? q.per.slice(0, 5).map(r => Array.isArray(r) ? [+r[0] || 0, num(r[1]), num(r[2])] : [0, null, null]) : undefined };
   }
   // the profile of a player seen in the lobby (from the table information)
   function profOf(name) {
     const k = nameKey(name);
-    for (const t of (st.tables || [])) { if (nameKey(t.host) === k && t.prof) return t.prof; for (const s in (t.names || {})) if (nameKey(t.names[s]) === k && t.profs && t.profs[s]) return t.profs[s]; }
+    for (const t of (st.tables || [])) { if (nameKey(t.host) === k && t.prof) return cleanProf(t.prof); for (const s in (t.names || {})) if (nameKey(t.names[s]) === k && t.profs && t.profs[s]) return cleanProf(t.profs[s]); }
+    for (const m of (st.lchat || []).slice().reverse()) if (nameKey(m.from) === k && m.p) return m.p;   // from the lobby chat
+    if (k === nameKey(myName() || '')) return prof();
     return null;
   }
   const sysShort = p => p && p.sys ? ({ twoone: '2/1', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' })[p.sys] || '' : '';
@@ -367,7 +378,7 @@ const Net = (() => {
     const rows = !L ? '' : L.length ? `<div class="tbls">${L.map(t => {
       const nm = t.names || {}, away = t.away || [];
       const pf = t.profs || {};
-      const cells = [0, 1, 2, 3].map(s => nm[s] ? `<b>${esc(nm[s])}</b>${(pf[s] || (!t.online && t.prof)) && profTxt(pf[s] || t.prof) ? `<span class="pb">${esc(profTxt(pf[s] || t.prof))}</span>` : ''}${away.includes(s) ? `<em>${T('away · robot plays')}</em>` : ''}` : `<i>${T('Robot')}</i>`);
+      const cells = [0, 1, 2, 3].map(s => nm[s] ? `<b class="pname" data-who="${esc(nm[s])}">${esc(nm[s])}</b>${(pf[s] || (!t.online && t.prof)) && profTxt(pf[s] || t.prof) ? `<span class="pb">${esc(profTxt(pf[s] || t.prof))}</span>` : ''}${away.includes(s) ? `<em>${T('away · robot plays')}</em>` : ''}` : `<i>${T('Robot')}</i>`);
       // a tournament is named on its table: an individual one can be joined (you play the same boards at your own table)
       const tp = t.tplay && typeof t.tplay === 'object' ? t.tplay : null, tt = t.tour && st.tours[t.tour.id];
       const tinfo = tp ? `<div class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</div>`
@@ -384,7 +395,7 @@ const Net = (() => {
     const L = st.lchat || (st.lchat = []);
     if ((+m.ts || 0) <= lclearTs()) return;   // cleared on this device: older messages do not come back from the others
     if (L.some(x => x.id === m.id)) return;
-    L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: m.p && typeof m.p === 'object' ? { n: +m.p.n || 0, imp: m.p.imp == null ? null : +m.p.imp, mp: m.p.mp == null ? null : +m.p.mp, sys: typeof m.p.sys === 'string' ? m.p.sys.slice(0, 12) : undefined } : null });
+    L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: cleanProf(m.p) });
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
     try { localStorage.setItem('bridge-lobby-chat', JSON.stringify(L.slice(-50))); } catch (e) {}
     if (!quiet) { if (m.from !== (myName() || 'Player') && ui.overlay !== 'lchat') st.lunread = (st.lunread || 0) + 1; renderL(); }
@@ -399,7 +410,7 @@ const Net = (() => {
   function lchatHtml() {
     const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myName() || 'Player';
     const L = st.lchat || [];
-    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b>${esc(m.from)}</b>${m.p && profTxt(m.p) ? `<span class="pb">${esc(profTxt(m.p))}</span>` : ''} ${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
+    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b class="pname" data-who="${esc(m.from)}">${esc(m.from)}</b>${m.p && profTxt(m.p) ? `<span class="pb">${esc(profTxt(m.p))}</span>` : ''} ${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
   }
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
@@ -477,7 +488,7 @@ const Net = (() => {
     if (back != null && away[s]) { clearTimeout(away[s].t); delete away[s]; }
     if (d.tok) { for (const k in toks) if (toks[k] === d.tok) delete toks[k]; toks[s] = d.tok; }
     st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
-    (st.profs || (st.profs = {}))[s] = d.prof && typeof d.prof === 'object' ? { n: +d.prof.n || 0, imp: d.prof.imp == null ? null : +d.prof.imp, mp: d.prof.mp == null ? null : +d.prof.mp, sys: typeof d.prof.sys === 'string' ? d.prof.sys.slice(0, 12) : undefined, conv: d.prof.conv && typeof d.prof.conv === 'object' ? Object.fromEntries(E.CONVS.map(c => [c.k, !!d.prof.conv[c.k]])) : undefined } : null;
+    (st.profs || (st.profs = {}))[s] = cleanProf(d.prof, true);
     conn.send({ t: 'welcome', seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
     addChat(null, st.names[s] + (back != null ? ' is back' : ' joined as ' + SEAT[s]));
     ping();
@@ -502,16 +513,30 @@ const Net = (() => {
     addChat(null, name + ' is watching 👁');
     ping(); broadcast(); panelRefresh(); render();
   }
+  // requests answered on this device, remembered for 30 minutes by name: 'no' (declined) or 'later' (window closed)
+  function reqMute(name, kind) {
+    let m = {}; try { m = JSON.parse(localStorage.getItem('bridge-req-mute') || '{}') || {}; } catch (e) {}
+    const now = Date.now(); for (const k in m) if (now - m[k].ts > 30 * 60e3) delete m[k];
+    const k = nameKey(name || 'Guest');
+    if (kind) { m[k] = { kind, ts: now }; try { localStorage.setItem('bridge-req-mute', JSON.stringify(m)); } catch (e) {} }
+    return m[k] ? m[k].kind : null;
+  }
+  // close the request window without answering: the request waits in the Online panel and does not pop up again
+  function reqLater(id) {
+    const p = st.pending && st.pending[id]; if (p) { p.quiet = true; reqMute(p.d.name, 'later'); }
+    if (ui.overlay === 'req') closeOv(); showReq(); panelRefresh();
+  }
   function decline(id) {
     setTimeout(reqRefresh, 50);
     const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
+    reqMute(p.d.name, 'no');
     try { p.conn.send({ t: 'declined' }); } catch (e) {} setTimeout(() => { try { p.conn.close(); } catch (e) {} }, 500);
     panelRefresh(); render();
   }
   /* a join request opens its own window (with a sound), so it is not missed during play; when it is answered
      the next one, if any, is shown */
   function showReq() {
-    const pend = Object.entries(st.pending || {});
+    const pend = Object.entries(st.pending || {}).filter(([, p]) => !p.quiet);
     if (!pend.length) { if (ui.overlay === 'req') closeOv(); return; }
     if (ui.overlay && ui.overlay !== 'req' && ui.overlay !== 'net' && ui.overlay !== 'lchat') { flash(String(pend[0][1].d.name || 'Guest').slice(0, 20) + ' — ' + T('Asking to join'), 3000); return; }
     const [id, p] = pend[0], name = esc(String(p.d.name || 'Guest').slice(0, 20));
@@ -519,7 +544,8 @@ const Net = (() => {
     openOv('req', `<h2>🔔 ${name}</h2><div class="big">${what}${p.d.want === 'opp' ? ' ' + T('(opponent)') : p.d.want === 'partner' ? ' ' + T('(partner)') : ''}</div>
       ${p.d.prof && profTxt(p.d.prof) ? `<div class="muted">${esc(profTxt(p.d.prof))}</div>` : ''}
       ${pend.length > 1 ? `<div class="muted">+${pend.length - 1} ${T('more waiting')}</div>` : ''}
-      <div class="row2"><button class="btn new" data-accept="${esc(id)}">${T('Accept')}</button><button class="btn" data-decline="${esc(id)}">${T('Decline')}</button></div>`);
+      <div class="row2"><button class="btn new" data-accept="${esc(id)}">${T('Accept')}</button><button class="btn" data-decline="${esc(id)}">${T('Decline')}</button></div>
+      <div class="row2"><button class="btn" data-reqlater="${esc(id)}">âœ• ${T('Close â€” answer later')}</button></div>`);
   }
   const reqRefresh = () => { if (ui.overlay === 'req') showReq(); else panelRefresh(); };
   /* invitations to your table: sent along the lobby lines to a player by name; they join with one tap and sit
@@ -579,9 +605,14 @@ const Net = (() => {
         const inv = (st.invited || []).includes(nameKey(d.name));
         if (inv && st.host && d.want !== 'watch') { st.invited = st.invited.filter(x => x !== nameKey(d.name)); seatPlayer(conn, d, null); return; }
         if (st.priv && st.host && !inv && d.want === 'watch') { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
-        (st.pending || (st.pending = {}))[conn.peer] = { conn, d };
+        // a request answered recently (also before a page refresh) is not asked again: declined stays declined,
+        // "later" waits quietly in the Online panel
+        const mu = reqMute(d.name);
+        if (mu === 'no') { try { conn.send({ t: 'declined' }); } catch (e) {} setTimeout(() => { try { conn.close(); } catch (e) {} }, 500); return; }
+        (st.pending || (st.pending = {}))[conn.peer] = { conn, d, quiet: mu === 'later' };
         conn.send({ t: 'wait' });
         conn.on('close', () => { if (st.pending && st.pending[conn.peer]) { delete st.pending[conn.peer]; reqRefresh(); render(); } });
+        if (mu === 'later') { panelRefresh(); return; }
         showReq(); beep();
         return;
       }
@@ -919,6 +950,7 @@ const Net = (() => {
     if (t.id === 'tinvYes') { joinInvite(); return; }
     if (t.dataset.mva) { moveAnswer(t.dataset.mva, true); return; }
     if (t.dataset.mvd) { moveAnswer(t.dataset.mvd, false); return; }
+    if (t.dataset.reqlater) { reqLater(t.dataset.reqlater); return; }
     if (t.dataset.tjoin) { const id = t.dataset.tjoin; if (!st.tours[id]) { flash(T('This tournament has not reached you yet — try again in a moment'), 2500); findTables(); return; } closeOv(); playTour(id); return; }
     if (t.dataset.jt) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jt); st.offer = tb || null; st.msg = ''; showJoin('room-' + t.dataset.jt); return; }
     if (t.dataset.jw) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jw); st.offer = tb || null; st.msg = ''; st.want = 'watch'; showJoin('room-' + t.dataset.jw); return; }

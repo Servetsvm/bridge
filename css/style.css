@@ -542,3 +542,5 @@ b.inv{color:#b3261e}
 .askbox .row2{gap:6px;margin-top:6px}
 .askbox .btn{padding:5px 10px;font-size:13px;min-height:0}
 #dock .dbtns{display:flex;gap:4px}
+.tbtns .tdel{padding:4px 9px;min-width:0;opacity:.8}
+.pname[data-who]{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px}
