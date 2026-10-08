@@ -517,3 +517,15 @@ b.inv{color:#b3261e}
 .whob:hover{background:#eef3ec}
 .claimn{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
 .claimn .btn{min-width:48px;font-size:17px}
+/* phones: a small chat button of fixed size under your cards (the one in the top bar is hidden) */
+.chatbtn[hidden]{display:none!important}
+.chatbtn{align-self:flex-end;flex:none;width:auto;border:0;border-radius:999px;padding:6px 14px;font-weight:800;font-size:14px;background:#c9a227;color:#1d1a0f;box-shadow:0 2px 8px rgba(0,0,0,.35);margin-top:4px}
+@media (max-width:1099px){ #bar #bChat{display:none} }
+.sysseg{flex-wrap:wrap}
+.sysseg button{flex:1 1 auto}
+/* phones: the chat panel stays in the free space under the cards instead of covering the table */
+@media (max-width:1099px){
+  #dock{max-height:33vh;padding:8px}
+  #dock .lmsgs{max-height:none;min-height:70px}
+  #dock .who{max-height:30px;overflow:hidden}
+}

@@ -15,6 +15,8 @@ function ctxOf(auc, seat, cards) {
   const oppBids = bids.filter(e => sideOf(e.seat) !== sideOf(seat));
   return {
     auc, seat, p, bids, st: aState(auc), my: act(seat), pa: act(p), oppBids, C: cfg.conv || E.ALL_ON, agg: cfg.agg || 0,
+    // the side's bidding system; ntShift moves the notrump ranges (e.g. 3 for a 12-14 notrump)
+    sys: E.sysOf(cfg.sys), ntShift: 15 - E.sysOf(cfg.sys).nt[0],
     opening: bids[0] || null, oppSuits: [...new Set(oppBids.map(e => ST(e.call)).filter(s => s < 4))],
     rhoCall: auc.length ? auc[auc.length - 1].call : null,
     passed: auc.some(e => e.seat === seat && e.call === 'P'),
@@ -37,8 +39,10 @@ const otherMajor = s => s === 2 ? 3 : 2;
 const BAL = { 0: 2, 1: 2, 2: 2, 3: 2 };
 
 /* 2♣–2♦–2NT is treated like a 2NT opening (systems on): drop the 2♣ and 2♦ round and bid as over 2NT */
+// a strong artificial 2♣ (not the natural 2♣ of Precision or Polish Club)
+const strong2 = o => !!(o && o.m && (o.m.tag === '2c' || o.m.cv === 'strong2c'));
 function virt2N(x) {
-  const o = x.opening, a = x.auc; if (!o || o.call !== B(2, 0) || sideOf(o.seat) !== sideOf(x.seat)) return null;
+  const o = x.opening, a = x.auc; if (!o || o.call !== B(2, 0) || sideOf(o.seat) !== sideOf(x.seat) || !strong2(o)) return null;
   const i = a.indexOf(o);
   if (a.length <= i + 4 || a[i + 1].call !== 'P' || a[i + 2].call !== B(2, 1) || a[i + 3].call !== 'P' || a[i + 4].call !== B(2, 4)) return null;
   if (!ourOnly(x)) return null;
@@ -112,6 +116,12 @@ function cands(x) {
     add('P', h => h.longest === 0, { t: 'To play in clubs' });
     for (const s of [1, 2, 3]) if (s !== os) add(B(3, s), h => h.longest === s, { len: { [s]: 5 }, t: 'To play in ' + SUIT[s] + ' (sign-off)' });
     add('P', () => true, { t: 'Pass' });
+    return L;
+  }
+  // Multi 2♦: the opener shows the major
+  if (pJust && rhoPass && myLast && mm.tag === 'multi' && (pm.tag === 'mpoc' || pm.tag === 'mask')) {
+    if (pm.tag === 'mpoc') { add('P', h => h.len[2] >= 6, { len: { 2: 6 }, cv: 'sys', t: 'Multi: my suit is hearts' }); add(B(2, 3), () => true, { len: { 3: 6 }, cv: 'sys', t: 'Multi: my suit is spades' }); }
+    else { add(B(3, 2), h => h.len[2] >= 6, { len: { 2: 6 }, cv: 'sys', t: 'Multi: hearts' }); add(B(3, 3), () => true, { len: { 3: 6 }, cv: 'sys', t: 'Multi: spades' }); }
     return L;
   }
   if (pJust && rhoPass && pm.tag === 'lebcue') {
@@ -220,22 +230,74 @@ function cands(x) {
     return L;
   }
 
-  /* ===== opening ===== */
+  /* ===== opening (by the side's system) ===== */
   if (!opening) {
-    const pos = auc.length, ag = x.agg > 0 ? 1 : 0;
-    add(B(2, 0), h => h.hcp >= 22 || (h.hcp >= 19 && h.lp >= 4), { min: 22, cv: 'strong2c', t: 'Strong and artificial: 22+ HCP, game forcing', f: 1, gf: 1, tag: '2c' });
-    add(B(2, 4), h => h.bal && h.hcp >= 20 && h.hcp <= 21, { min: 20, max: 21, len: BAL, t: 'Balanced, 20-21 HCP', tag: 'nt2' });
-    add(B(1, 4), h => h.bal && h.hcp >= 15 && h.hcp <= 17, { min: 15, max: 17, len: BAL, cv: 'nt1', t: 'Balanced, 15-17 HCP', tag: 'nt1' });
+    const pos = auc.length, ag = x.agg > 0 ? 1 : 0, Y = x.sys, sk = Y.k;
+    const [n1, n2] = Y.nt, [t1, t2] = Y.nt2, Z = Y.n;
     const can = h => { const ls = [...h.len].sort((a, b) => b - a); if (pos === 3) return h.hcp >= 13 - ag || (h.hcp >= 10 && h.hcp + h.len[3] >= 15); return h.hcp >= 12 - ag || (h.hcp >= 10 && h.hcp + ls[0] + ls[1] >= 20); };
-    add(B(1, 3), h => can(h) && h.len[3] >= 5 && h.len[3] >= h.len[2], { min: 11, max: 21, len: { 3: 5 }, t: '5+ ♠, 12-21 HCP' });
-    add(B(1, 2), h => can(h) && h.len[2] >= 5, { min: 11, max: 21, len: { 2: 5 }, t: '5+ ♥, 12-21 HCP' });
-    add(B(1, 1), h => can(h) && (h.len[1] > h.len[0] || (h.len[1] === h.len[0] && h.len[1] >= 4)), { min: 11, max: 21, len: { 1: 3 }, t: '3+ ♦, 12-21 HCP' });
-    add(B(1, 0), h => can(h), { min: 11, max: 21, len: { 0: 2 }, t: '3+ ♣, 12-21 HCP' });
-    if (pos < 3) {
+    const ntBal = (lo, hi) => h => h.bal && h.hcp >= lo && h.hcp <= hi;
+    const weakTwo = s => h => h.len[s] === 6 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2;
+    const preempts = () => {
+      if (pos >= 3) return;
       if (C.gamb) add(B(3, 4), h => [0, 1].some(s => h.len[s] >= 7 && h.has(s, 12) && h.has(s, 11) && h.has(s, 10)) && [0, 1, 2, 3].every(s => h.len[s] >= 7 || (!h.has(s, 12) && !h.has(s, 11))), { min: 9, max: 13, tag: 'gamb', cv: 'gamb', t: 'Gambling 3NT: solid 7+ card minor, nothing outside' });
       for (const s of [3, 2]) add(B(4, s), h => h.len[s] >= 8 && h.hcp >= 5 && h.hcp <= 11, { min: 5, max: 11, len: { [s]: 8 }, cv: 'pre', t: 'Preempt: 8+ ' + SUIT[s] + ', 5-11 HCP', tag: 'pre' });
-      for (const s of [3, 2, 1]) add(B(2, s), h => h.len[s] === 6 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2, { min: 5, max: 10, len: { [s]: 6 }, cv: 'weak2', t: 'Weak two: six ' + SUIT[s] + ', 5-10 HCP', tag: 'weak' });
-      for (const s of [3, 2, 1, 0]) add(B(3, s), h => h.len[s] >= 7 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2, { min: 5, max: 10, len: { [s]: 7 }, cv: 'pre', t: 'Preempt: 7+ ' + SUIT[s] + ', 5-10 HCP', tag: 'pre' });
+    };
+    const threes = () => { if (pos < 3) for (const s of [3, 2, 1, 0]) add(B(3, s), h => h.len[s] >= 7 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2, { min: 5, max: 10, len: { [s]: 7 }, cv: 'pre', t: 'Preempt: 7+ ' + SUIT[s] + ', 5-10 HCP', tag: 'pre' }); };
+    const weakTwos = suits => { if (pos < 3) for (const s of suits) add(B(2, s), weakTwo(s), { min: 5, max: 10, len: { [s]: 6 }, cv: 'weak2', t: 'Weak two: six ' + SUIT[s] + ', 5-10 HCP', tag: 'weak' }); };
+    const nts = () => {
+      add(B(2, 4), ntBal(t1, t2), { min: t1, max: t2, len: BAL, t: 'Balanced, ' + t1 + '-' + t2 + ' HCP', tag: 'nt2' });
+      add(B(1, 4), ntBal(n1, n2), { min: n1, max: n2, len: BAL, cv: 'nt1', t: 'Balanced, ' + n1 + '-' + n2 + ' HCP (' + Z + ')', tag: 'nt1' });
+    };
+    if (sk === 'precision') {
+      // strong club: every 16+ hand opens 1♣ (except the 2NT range); the other openings show 11-15
+      nts();
+      add(B(1, 0), h => h.hcp >= 16, { min: 16, tag: 'sclub', cv: 'sys', f: 1, t: 'Precision 1♣: 16+ HCP, any shape (artificial, forcing)' });
+      preempts();
+      const lim = h => can(h) && h.hcp <= 15;
+      add(B(1, 3), h => lim(h) && h.len[3] >= 5 && h.len[3] >= h.len[2], { min: 11, max: 15, len: { 3: 5 }, t: '5+ ♠, 11-15 HCP (Precision)' });
+      add(B(1, 2), h => lim(h) && h.len[2] >= 5, { min: 11, max: 15, len: { 2: 5 }, t: '5+ ♥, 11-15 HCP (Precision)' });
+      add(B(2, 0), h => lim(h) && (h.len[0] >= 6 || (h.len[0] >= 5 && Math.max(h.len[2], h.len[3]) === 4)), { min: 11, max: 15, len: { 0: 6 }, cv: 'sys', t: 'Precision 2♣: 6+ ♣ (or 5♣ and a 4-card major), 11-15 HCP' });
+      add(B(2, 1), h => lim(h) && h.len[2] >= 4 && h.len[3] >= 4 && h.len[1] <= 1 && h.len[0] >= 4, { min: 11, max: 15, len: { 0: 4, 2: 4, 3: 4 }, cv: 'sys', t: 'Precision 2♦: three-suited, short in ♦ (4-4-1-4 or 4-4-0-5), 11-15 HCP' });
+      weakTwos([3, 2]); threes();
+      add(B(1, 1), h => lim(h), { min: 11, max: 15, len: { 1: 2 }, cv: 'sys', t: 'Precision 1♦: 11-15 HCP, 2+ ♦ (no 5-card major, not 1NT, not 2♣)' });
+    } else if (sk === 'polish') {
+      // Polish Club: 1♣ covers 12-14 balanced, 15+ with long clubs and every strong hand (18+)
+      add(B(2, 4), ntBal(t1, t2), { min: t1, max: t2, len: BAL, t: 'Balanced, ' + t1 + '-' + t2 + ' HCP', tag: 'nt2' });
+      add(B(1, 4), ntBal(n1, n2), { min: n1, max: n2, len: BAL, cv: 'nt1', t: 'Balanced, ' + n1 + '-' + n2 + ' HCP (' + Z + ')', tag: 'nt1' });
+      add(B(1, 0), h => h.hcp >= 18 || (h.bal && h.hcp >= 12 && h.hcp <= 14), { min: 12, tag: 'pclub', cv: 'sys', f: 1, t: 'Polish 1♣: 12-14 balanced, or 15+ with long clubs, or 18+ any shape' });
+      preempts();
+      const lim = h => can(h) && h.hcp <= 17;
+      add(B(1, 3), h => lim(h) && h.len[3] >= 5 && h.len[3] >= h.len[2], { min: 12, max: 17, len: { 3: 5 }, t: '5+ ♠, 12-17 HCP (Polish Club)' });
+      add(B(1, 2), h => lim(h) && h.len[2] >= 5, { min: 12, max: 17, len: { 2: 5 }, t: '5+ ♥, 12-17 HCP (Polish Club)' });
+      add(B(2, 0), h => lim(h) && h.hcp <= 15 && h.len[0] >= 6 && !h.bal, { min: 11, max: 15, len: { 0: 6 }, cv: 'sys', t: 'Polish 2♣: 6+ ♣, 11-15 HCP' });
+      if (pos < 3) add(B(2, 1), h => weakTwo(2)(h) || weakTwo(3)(h), { min: 5, max: 10, tag: 'multi', cv: 'sys', t: 'Multi 2♦: a weak two (six cards) in ♥ or ♠, 5-10 HCP' });
+      threes();
+      add(B(1, 1), h => lim(h) && h.len[1] >= 4 && !h.bal, { min: 12, max: 17, len: { 1: 4 }, t: '4+ ♦, 12-17 HCP, unbalanced (Polish Club)' });
+      add(B(1, 0), h => can(h), { min: 12, tag: 'pclub', cv: 'sys', f: 1, t: 'Polish 1♣: 12-14 balanced, or 15+ with long clubs, or 18+ any shape' });
+    } else {
+      // natural systems: SAYC, 2/1, Acol, French Standard
+      if (sk === 'sef') {
+        add(B(2, 1), h => h.hcp >= 23 || (h.hcp >= 20 && h.lp >= 4), { min: 23, tag: '2c', cv: 'sys', f: 1, gf: 1, t: 'SEF 2♦: artificial game force (23+ HCP or about nine tricks)' });
+        add(B(2, 0), h => h.hcp >= 20 && !h.bal, { min: 20, max: 22, cv: 'strong2c', f: 1, t: 'SEF 2♣: strong (20-22, unbalanced), forcing for one round' });
+      } else add(B(2, 0), h => h.hcp >= (sk === 'acol' ? 23 : 22) || (h.hcp >= 19 && h.lp >= 4), { min: sk === 'acol' ? 23 : 22, cv: 'strong2c', t: 'Strong and artificial: ' + (sk === 'acol' ? 23 : 22) + '+ HCP, game forcing', f: 1, gf: 1, tag: '2c' });
+      nts();
+      if (Y.maj5) {
+        add(B(1, 3), h => can(h) && h.len[3] >= 5 && h.len[3] >= h.len[2], { min: 11, max: 21, len: { 3: 5 }, t: '5+ ♠, 12-21 HCP' });
+        add(B(1, 2), h => can(h) && h.len[2] >= 5, { min: 11, max: 21, len: { 2: 5 }, t: '5+ ♥, 12-21 HCP' });
+        add(B(1, 1), h => can(h) && (h.len[1] > h.len[0] || (h.len[1] === h.len[0] && h.len[1] >= 4)), { min: 11, max: 21, len: { 1: 3 }, t: '3+ ♦, 12-21 HCP' });
+        add(B(1, 0), h => can(h), { min: 11, max: 21, len: { 0: 2 }, t: '3+ ♣, 12-21 HCP' });
+      } else {
+        // Acol: 4-card majors; open the longest suit (with 4-4 in the majors, 1♥; a 4-card major before a 4-card minor)
+        const top = h => Math.max(...h.len);
+        add(B(1, 3), h => can(h) && h.len[3] >= 4 && h.len[3] === top(h) && h.len[2] < h.len[3], { min: 11, max: 22, len: { 3: 4 }, t: '4+ ♠, 12-22 HCP (Acol: a 4-card major)' });
+        add(B(1, 2), h => can(h) && h.len[2] >= 4 && h.len[2] === top(h), { min: 11, max: 22, len: { 2: 4 }, t: '4+ ♥, 12-22 HCP (Acol: a 4-card major)' });
+        add(B(1, 3), h => can(h) && h.len[3] >= 4 && h.len[3] === top(h), { min: 11, max: 22, len: { 3: 4 }, t: '4+ ♠, 12-22 HCP (Acol: a 4-card major)' });
+        add(B(1, 1), h => can(h) && h.len[1] >= h.len[0] && h.len[1] >= 4, { min: 11, max: 22, len: { 1: 4 }, t: '4+ ♦, 12-22 HCP (Acol)' });
+        add(B(1, 0), h => can(h), { min: 11, max: 22, len: { 0: 3 }, t: '3+ ♣, 12-22 HCP (Acol)' });
+      }
+      preempts();
+      weakTwos(sk === 'sef' ? [3, 2] : [3, 2, 1]);
+      threes();
     }
     add('P', () => true, { max: 12, t: 'No opening values' });
     return L;
@@ -301,7 +363,30 @@ function cands(x) {
   if (!oppOpened && opening.seat === p && my.length === 0) {
     const o = opening.call, os = ST(o), ol = LV(o);
     const fresh = opening === pLast && cleanAfter(auc, auc.indexOf(opening));
-    if ((o === B(1, 4) || o === B(2, 4)) && rhoPass && fresh) { ntResponses(x, add, ol); return L; }
+    const otag = opening.m && opening.m.tag;
+    // strong club (Precision / Polish Club): 1♦ is negative (Polish: or waiting), other bids are natural positives
+    if (o === B(1, 0) && (otag === 'sclub' || otag === 'pclub') && rhoPass && fresh) {
+      const pol = otag === 'pclub', lo = pol ? 7 : 8, mj = pol ? 4 : 5;
+      for (const s of [3, 2]) add(B(1, s), h => h.hcp >= lo && h.len[s] >= mj && h.len[s] >= h.len[otherMajor(s)], { min: lo, len: { [s]: mj }, cv: 'sys', f: 1, gf: pol ? 0 : 1, t: 'Positive: ' + mj + '+ ' + SUIT[s] + ', ' + lo + '+ HCP' + (pol ? '' : ', game forcing') });
+      add(B(1, 4), h => h.bal && h.hcp >= 8 && h.hcp <= 13, { min: 8, max: 13, cv: 'sys', f: 1, t: 'Positive: balanced, 8-13 HCP' });
+      for (const s of [0, 1]) add(B(2, s), h => h.hcp >= 8 && h.len[s] >= 5, { min: 8, len: { [s]: 5 }, cv: 'sys', f: 1, gf: pol ? 0 : 1, t: 'Positive: 5+ ' + SUIT[s] + ', 8+ HCP' });
+      add(B(2, 4), h => h.bal && h.hcp >= 14, { min: 14, cv: 'sys', f: 1, gf: 1, t: 'Positive: balanced, 14+ HCP' });
+      add(B(1, 1), () => true, { max: pol ? 11 : 7, tag: 'neg', cv: 'sys', f: 1, t: pol ? 'Polish 1♦: negative (0-7) or a waiting bid' : 'Precision 1♦: negative, 0-7 HCP (artificial)' });
+      return L;
+    }
+    // Multi 2♦ (Polish Club): 2♥ = pass or correct, 2NT asks which major
+    if (o === B(2, 1) && otag === 'multi' && rhoPass && fresh) {
+      add(B(2, 4), h => h.hcp >= 15, { min: 15, tag: 'mask', cv: 'sys', f: 1, t: 'Asking: which major is it?' });
+      add(B(2, 2), () => true, { tag: 'mpoc', cv: 'sys', t: 'Pass or correct: pass with hearts, bid 2♠ with spades' });
+      return L;
+    }
+    // SEF 2♦ (artificial game force): 2♥ is the waiting reply
+    if (o === B(2, 1) && otag === '2c' && x.sys.k === 'sef' && rhoPass && fresh) {
+      for (const s of [3, 0, 1]) add(B(s === 3 ? 2 : 3, s), h => h.hcp >= 7 && h.len[s] >= 5 && h.top5(s) >= 2, { min: 7, len: { [s]: 5 }, cv: 'sys', t: 'Positive: 5+ ' + SUIT[s] + ', 7+ HCP' });
+      add(B(2, 2), () => true, { cv: 'sys', tag: 'relay', t: 'Waiting reply (artificial)' });
+      return L;
+    }
+    if ((o === B(1, 4) || o === B(2, 4)) && rhoPass && fresh) { ntResponses(x, add, ol, true); return L; }
     // Texas after interference: 4♦/4♥ stay transfers over a double or a 2-3 level overcall (not in their own suit)
     if (o === B(1, 4) && opening === pLast && pJust && C.texas && C.texasInt && (x.rhoCall === 'X' || (isNum(x.rhoCall) && LV(x.rhoCall) <= 3 && ST(x.rhoCall) < 4))) {
       const obs = isNum(x.rhoCall) ? ST(x.rhoCall) : -1;
@@ -333,7 +418,7 @@ function cands(x) {
       add('P', () => true, { t: 'Pass' });
       return L;
     }
-    if (o === B(2, 0) && rhoPass) {
+    if (o === B(2, 0) && rhoPass && strong2(opening)) {
       for (const s of [3, 2]) add(B(2, s), h => h.hcp >= 8 && h.len[s] >= 5 && h.top5(s) >= 2, { min: 8, len: { [s]: 5 }, t: 'Positive: 5+ ' + SUIT[s] + ', 8+ HCP', gf: 1 });
       for (const s of [0, 1]) add(B(3, s), h => h.hcp >= 8 && h.len[s] >= 5 && h.top5(s) >= 2, { min: 8, len: { [s]: 5 }, t: 'Positive: 5+ ' + SUIT[s] + ', 8+ HCP', gf: 1 });
       add(B(2, 4), h => h.hcp >= 8 && h.bal, { min: 8, t: 'Positive: balanced, 8+ HCP', gf: 1 });
@@ -403,7 +488,7 @@ function cands(x) {
   }
 
   /* ===== 2♣–2♦–(suit): responder's second call; 3♣ over a major is the second negative ===== */
-  if (!oppOpened && opening.call === B(2, 0) && opening.seat === p && my.length === 1 && my[0].call === B(2, 1) && pa.length === 2 && pJust && rhoPass && ourOnly(x) && ST(pa[1].call) < 4) {
+  if (!oppOpened && opening.call === B(2, 0) && strong2(opening) && opening.seat === p && my.length === 1 && my[0].call === B(2, 1) && pa.length === 2 && pJust && rhoPass && ourOnly(x) && ST(pa[1].call) < 4) {
     const r = pa[1].call, s = ST(r);
     if (s >= 2) {
       add(B(4, s), h => h.len[s] >= 3 && h.hcp <= 4 && h.lp + h.hcp <= 5 && h.aces === 0, { max: 4, len: { [s]: 3 }, t: 'Support, but nothing else (fast arrival)' });
@@ -491,43 +576,44 @@ function cands(x) {
   /* ===== notrump follow-ups (Stayman, transfers, Smolen) ===== */
   if (!oppOpened && (opening.call === B(1, 4) || opening.call === B(2, 4)) && ourOnly(x)) {
     const lv = LV(opening.call);
+    const A = shiftAdd(add, lv === 1 ? x.ntShift : 0, opening.seat === p);   // the system's notrump range
     if (opening.seat === p && my.length === 1 && pa.length === 2 && (mm.tag === 'stay' || mm.tag === 'tr')) {
       const ans = pa[1].call;
       if (mm.tag === 'stay') {
         const aS = ST(ans);
         if (aS === 2 || aS === 3) {
-          add(B(4, aS), h => h.len[aS] >= 4 && (lv === 2 || h.hcp >= 10) && h.hcp <= 15, { min: lv === 1 ? 10 : 4, len: { [aS]: 4 }, t: 'Major fit: game' });
-          if (lv === 1) add(B(3, aS), h => h.len[aS] >= 4 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { [aS]: 4 }, t: 'Major fit: invitational' });
+          A(B(4, aS), h => h.len[aS] >= 4 && (lv === 2 || h.hcp >= 10) && h.hcp <= 15, { min: lv === 1 ? 10 : 4, len: { [aS]: 4 }, t: 'Major fit: game' });
+          if (lv === 1) A(B(3, aS), h => h.len[aS] >= 4 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { [aS]: 4 }, t: 'Major fit: invitational' });
         }
         if (aS === 1 && C.smolen) {
           const g = lv === 1 ? 10 : 4;
-          add(B(3, 2), h => h.len[2] === 4 && h.len[3] >= 5 && h.hcp >= g, { min: g, len: { 2: 4, 3: 5 }, tag: 'smolen', five: 3, cv: 'smolen', t: 'Smolen: 4♥ + 5♠, game forcing', f: 1, gf: 1 });
-          add(B(3, 3), h => h.len[3] === 4 && h.len[2] >= 5 && h.hcp >= g, { min: g, len: { 3: 4, 2: 5 }, tag: 'smolen', five: 2, cv: 'smolen', t: 'Smolen: 4♠ + 5♥, game forcing', f: 1, gf: 1 });
+          A(B(3, 2), h => h.len[2] === 4 && h.len[3] >= 5 && h.hcp >= g, { min: g, len: { 2: 4, 3: 5 }, tag: 'smolen', five: 3, cv: 'smolen', t: 'Smolen: 4♥ + 5♠, game forcing', f: 1, gf: 1 });
+          A(B(3, 3), h => h.len[3] === 4 && h.len[2] >= 5 && h.hcp >= g, { min: g, len: { 3: 4, 2: 5 }, tag: 'smolen', five: 2, cv: 'smolen', t: 'Smolen: 4♠ + 5♥, game forcing', f: 1, gf: 1 });
         }
         // 5-4 in the majors, invitational: bid the five-card major at the two level
-        if (aS === 1 && lv === 1) for (const M of [3, 2]) add(B(2, M), h => h.len[M] >= 5 && h.len[otherMajor(M)] >= 4 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { [M]: 5, [otherMajor(M)]: 4 }, cv: 'stayman', t: 'Five ' + SUIT[M] + ' and four ' + SUIT[otherMajor(M)] + ', invitational' });
-        if (aS === 2 && lv === 1) add(B(2, 3), h => h.len[3] >= 4 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { 3: 4 }, t: 'Four spades, invitational' });
-        if (lv === 1) add(B(2, 4), h => h.hcp <= 9, { min: 8, max: 9, t: 'Invitational: 8-9 HCP' });
-        add(B(3, 4), h => h.hcp <= 15, { min: lv === 1 ? 10 : 4, max: 15, t: 'Game' });
+        if (aS === 1 && lv === 1) for (const M of [3, 2]) A(B(2, M), h => h.len[M] >= 5 && h.len[otherMajor(M)] >= 4 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { [M]: 5, [otherMajor(M)]: 4 }, cv: 'stayman', t: 'Five ' + SUIT[M] + ' and four ' + SUIT[otherMajor(M)] + ', invitational' });
+        if (aS === 2 && lv === 1) A(B(2, 3), h => h.len[3] >= 4 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { 3: 4 }, t: 'Four spades, invitational' });
+        if (lv === 1) A(B(2, 4), h => h.hcp <= 9, { min: 8, max: 9, t: 'Invitational: 8-9 HCP' });
+        A(B(3, 4), h => h.hcp <= 15, { min: lv === 1 ? 10 : 4, max: 15, t: 'Game' });
       } else {
         const M = ST(ans);
         if (lv === 1 && ans === B(3, M)) {
-          add(B(4, M), h => h.hcp >= 6, { t: 'Partner super-accepted: game' });
-          add('P', () => true, { t: 'Weak: stop in three' });
+          A(B(4, M), h => h.hcp >= 6, { t: 'Partner super-accepted: game' });
+          A('P', () => true, { t: 'Weak: stop in three' });
         } else if (lv === 1) {
-          add('P', h => h.hcp <= 7, { max: 7, t: 'Weak: play the transfer suit' });
+          A('P', h => h.hcp <= 7, { max: 7, t: 'Weak: play the transfer suit' });
           // 5-5 majors (after ♥ transfer, 2♠ is invitational; after ♠, 3♥ is game forcing)
-          if (M === 2) add(B(2, 3), h => h.len[3] >= 5 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { 2: 5, 3: 5 }, t: '5-5 in the majors, invitational' });
+          if (M === 2) A(B(2, 3), h => h.len[3] >= 5 && h.hcp >= 8 && h.hcp <= 9, { min: 8, max: 9, len: { 2: 5, 3: 5 }, t: '5-5 in the majors, invitational' });
           // a second suit at the three level: natural, game forcing
-          for (const s of [0, 1, 2]) if (s !== M && B(3, s) > ans) add(B(3, s), h => h.len[s] >= (s === 2 ? 5 : 4) && h.hcp >= 10 && h.hcp <= 15 && !(h.bal && h.len[M] === 5), { min: 10, len: { [M]: 5, [s]: s === 2 ? 5 : 4 }, t: 'Second suit: 4+ ' + SUIT[s] + ', game forcing', f: 1, gf: 1 });
-          add(B(3, M), h => h.len[M] >= 6 && h.hcp <= 9, { min: 8, max: 9, len: { [M]: 6 }, t: 'Six-card suit, invitational' });
-          add(B(4, M), h => h.len[M] >= 6 && h.hcp <= 15, { min: 10, max: 15, len: { [M]: 6 }, t: 'Six-card suit, game' });
-          add(B(2, 4), h => h.hcp <= 9, { min: 8, max: 9, len: { [M]: 5 }, t: 'Five-card major, invitational' });
-          add(B(3, 4), h => h.hcp <= 15, { min: 10, max: 15, len: { [M]: 5 }, t: 'Five-card major, game: opener chooses' });
+          for (const s of [0, 1, 2]) if (s !== M && B(3, s) > ans) A(B(3, s), h => h.len[s] >= (s === 2 ? 5 : 4) && h.hcp >= 10 && h.hcp <= 15 && !(h.bal && h.len[M] === 5), { min: 10, len: { [M]: 5, [s]: s === 2 ? 5 : 4 }, t: 'Second suit: 4+ ' + SUIT[s] + ', game forcing', f: 1, gf: 1 });
+          A(B(3, M), h => h.len[M] >= 6 && h.hcp <= 9, { min: 8, max: 9, len: { [M]: 6 }, t: 'Six-card suit, invitational' });
+          A(B(4, M), h => h.len[M] >= 6 && h.hcp <= 15, { min: 10, max: 15, len: { [M]: 6 }, t: 'Six-card suit, game' });
+          A(B(2, 4), h => h.hcp <= 9, { min: 8, max: 9, len: { [M]: 5 }, t: 'Five-card major, invitational' });
+          A(B(3, 4), h => h.hcp <= 15, { min: 10, max: 15, len: { [M]: 5 }, t: 'Five-card major, game: opener chooses' });
         } else {
-          add('P', h => h.hcp <= 3, { max: 3, t: 'Weak' });
-          add(B(4, M), h => h.len[M] >= 6 && h.hcp <= 12, { len: { [M]: 6 }, t: 'Six-card suit, game' });
-          add(B(3, 4), h => h.hcp <= 12, { len: { [M]: 5 }, t: 'Five-card major, game: opener chooses' });
+          A('P', h => h.hcp <= 3, { max: 3, t: 'Weak' });
+          A(B(4, M), h => h.len[M] >= 6 && h.hcp <= 12, { len: { [M]: 6 }, t: 'Six-card suit, game' });
+          A(B(3, 4), h => h.hcp <= 12, { len: { [M]: 5 }, t: 'Five-card major, game: opener chooses' });
         }
       }
       if (L.length) return L;
@@ -535,46 +621,61 @@ function cands(x) {
     // opener after Stayman: responder's 2NT/3NT/2♠ may hide the other major (responder promised one)
     if (opening.seat === x.seat && my.length === 2 && pa.length === 2 && pa[0].m && pa[0].m.tag === 'stay' && ST(my[1].call) === 2) {
       const r2 = pa[1].call, top = lv === 1 ? 16 : 21;
-      if (r2 === B(3, 4)) { add(B(4, 3), h => h.len[3] >= 4, { len: { 3: 4 }, t: 'Four spades too: partner has them' }); add('P', () => true, { t: 'Pass' }); return L; }
+      if (r2 === B(3, 4)) { A(B(4, 3), h => h.len[3] >= 4, { len: { 3: 4 }, t: 'Four spades too: partner has them' }); A('P', () => true, { t: 'Pass' }); return L; }
       if (r2 === B(2, 4)) {
-        add(B(4, 3), h => h.len[3] >= 4 && h.hcp >= top, { min: top, len: { 3: 4 }, t: 'Four spades too, maximum' });
-        add(B(3, 3), h => h.len[3] >= 4, { len: { 3: 4 }, t: 'Four spades too, minimum' });
-        add(B(3, 4), h => h.hcp >= top, { min: top, t: 'Maximum: accepting' }); add('P', () => true, { t: 'Minimum' }); return L;
+        A(B(4, 3), h => h.len[3] >= 4 && h.hcp >= top, { min: top, len: { 3: 4 }, t: 'Four spades too, maximum' });
+        A(B(3, 3), h => h.len[3] >= 4, { len: { 3: 4 }, t: 'Four spades too, minimum' });
+        A(B(3, 4), h => h.hcp >= top, { min: top, t: 'Maximum: accepting' }); A('P', () => true, { t: 'Minimum' }); return L;
       }
       if (r2 === B(2, 3)) {
-        add(B(4, 3), h => h.len[3] >= 4 && h.hcp >= top, { min: top, t: 'Spade fit, maximum: game' });
-        add(B(3, 3), h => h.len[3] >= 4, { t: 'Spade fit, minimum' });
-        add(B(3, 4), h => h.hcp >= top, { min: top, t: 'No spade fit, maximum' }); add(B(2, 4), () => true, { t: 'No spade fit, minimum' }); return L;
+        A(B(4, 3), h => h.len[3] >= 4 && h.hcp >= top, { min: top, t: 'Spade fit, maximum: game' });
+        A(B(3, 3), h => h.len[3] >= 4, { t: 'Spade fit, minimum' });
+        A(B(3, 4), h => h.hcp >= top, { min: top, t: 'No spade fit, maximum' }); A(B(2, 4), () => true, { t: 'No spade fit, minimum' }); return L;
       }
     }
     if (opening.seat === x.seat && lv === 1 && my.length === 2 && pa.length === 2 && pa[0].m && pa[0].m.tag === 'stay' && my[1].call === B(2, 1) && (pa[1].call === B(2, 2) || pa[1].call === B(2, 3))) {
       const M = ST(pa[1].call);
-      add(B(4, M), h => h.len[M] >= 3 && h.hcp >= 16, { t: 'Fit and maximum: game' });
-      add('P', h => h.len[M] >= 3, { t: 'Fit, minimum: pass' });
-      add(B(3, 4), h => h.hcp >= 16, { t: 'No fit, maximum' });
-      add(B(2, 4), () => true, { t: 'No fit, minimum' });
+      A(B(4, M), h => h.len[M] >= 3 && h.hcp >= 16, { t: 'Fit and maximum: game' });
+      A('P', h => h.len[M] >= 3, { t: 'Fit, minimum: pass' });
+      A(B(3, 4), h => h.hcp >= 16, { t: 'No fit, maximum' });
+      A(B(2, 4), () => true, { t: 'No fit, minimum' });
       return L;
     }
     if (opening.seat === x.seat && pLast && pm.tag === 'smolen' && pJust) {
       const F = pm.five;
-      add(B(4, F), h => h.len[F] >= 3, { t: 'Smolen reply: three-card ' + SUIT[F] + ' fit, game' });
-      add(B(3, 4), () => true, { t: 'Smolen reply: no fit, 3NT' });
+      A(B(4, F), h => h.len[F] >= 3, { t: 'Smolen reply: three-card ' + SUIT[F] + ' fit, game' });
+      A(B(3, 4), () => true, { t: 'Smolen reply: no fit, 3NT' });
       return L;
     }
     if (opening.seat === x.seat && my.length === 2 && my[1].m && my[1].m.tag === 'trc' && pa.length === 2 && ST(my[1].call) >= 2) {
       const M = ST(my[1].call), r2 = pa[1].call;
-      if (r2 === B(2, 4)) { add(B(4, M), h => h.len[M] >= 3 && h.hcp >= 16, { t: 'Fit and maximum: game' }); add(B(3, M), h => h.len[M] >= 3, { t: 'Fit, minimum' }); add(B(3, 4), h => h.hcp >= 16, { t: 'Maximum, no fit' }); add('P', () => true, { t: 'Minimum' }); return L; }
-      if (r2 === B(3, 4)) { add(B(4, M), h => h.len[M] >= 3, { t: 'Three-card fit: major game' }); add('P', () => true, { t: 'No fit' }); return L; }
-      if (r2 === B(3, M)) { add(B(4, M), h => lv === 2 || h.hcp >= 16 || h.len[M] >= 4, { t: 'Accepting the invitation' }); add('P', () => true, { t: 'Minimum' }); return L; }
-      if (r2 >= B(4, 0)) { add('P', () => true, { t: 'Pass' }); return L; }
+      if (r2 === B(2, 4)) { A(B(4, M), h => h.len[M] >= 3 && h.hcp >= 16, { t: 'Fit and maximum: game' }); A(B(3, M), h => h.len[M] >= 3, { t: 'Fit, minimum' }); A(B(3, 4), h => h.hcp >= 16, { t: 'Maximum, no fit' }); A('P', () => true, { t: 'Minimum' }); return L; }
+      if (r2 === B(3, 4)) { A(B(4, M), h => h.len[M] >= 3, { t: 'Three-card fit: major game' }); A('P', () => true, { t: 'No fit' }); return L; }
+      if (r2 === B(3, M)) { A(B(4, M), h => lv === 2 || h.hcp >= 16 || h.len[M] >= 4, { t: 'Accepting the invitation' }); A('P', () => true, { t: 'Minimum' }); return L; }
+      if (r2 >= B(4, 0)) { A('P', () => true, { t: 'Pass' }); return L; }
     }
-    if (opening.seat === p && my.length === 1 && pa.length === 2 && mm.tag === 'trm') { add('P', () => true, { t: 'Pass to play the minor' }); return L; }
+    if (opening.seat === p && my.length === 1 && pa.length === 2 && mm.tag === 'trm') { A('P', () => true, { t: 'Pass to play the minor' }); return L; }
   }
   return L;
 }
 
-/* ---- responses to 1NT / 2NT (also after our 1NT overcall) ---- */
-function ntResponses(x, add, lv) {
+/* Notrump ranges other than 15-17 (Acol 12-14, Precision 13-15): the 15-17 rules are used with every hand moved
+   by the difference d — the responder counts d points less, the opener d points more — and the ranges in the
+   meanings (and their texts) are moved back. */
+function shiftAdd(add, d, resp) {
+  if (!d) return add;
+  const sh = h => Object.assign(Object.create(h), { hcp: h.hcp + (resp ? -d : d) });
+  const fix = m => {
+    if (!m || !resp) return m;
+    const n = { ...m }; if (n.min != null) n.min += d; if (n.max != null) n.max += d;
+    if (n.t) n.t = n.t.replace(/(\d+)-(\d+) HCP/g, (_, a, b) => (+a ? +a + d : 0) + '-' + (+b + d) + ' HCP').replace(/(\d+)\+ HCP/g, (_, a) => (+a + d) + '+ HCP');
+    return n;
+  };
+  return (c, t, m) => add(c, h => t(sh(h)), fix(m));
+}
+/* ---- responses to 1NT / 2NT (also after our 1NT overcall; own: our own opening, whose range the system sets) ---- */
+function ntResponses(x, add, lv, own) {
+  if (own && lv === 1) add = shiftAdd(add, x.ntShift, true);
   const C = x.C, off = lv - 1;
   if (C.texas) {
     add(B(4, 1), h => h.len[2] >= 6 && h.hcp >= (lv === 1 ? 10 : 4) && h.hcp <= (lv === 1 ? 15 : 11), { min: lv === 1 ? 10 : 4, len: { 2: 6 }, tag: 'texas', to: B(4, 2), cv: 'texas', t: 'Texas transfer: 6+ ♥, game (partner bids 4♥)' });
@@ -627,8 +728,8 @@ function suitResponses(x, add, o, os) {
       add(B(2, os), h => h.len[os] >= 4 && h.sup(os) >= 6 && h.sup(os) <= 9, { min: 6, max: 9, len: { [os]: 4 }, t: 'Single raise: support, 6-9 points' });
     }
     if (os === 2) add(B(1, 3), h => h.len[3] >= 4 && h.hcp >= 6, { min: 6, len: { 3: 4 }, t: '4+ ♠, 6+ HCP', f: 1 });
-    add(B(2, os), h => h.len[os] >= 3 && h.sup(os) >= 6 && h.sup(os) <= 9, { min: 6, max: 9, len: { [os]: 3 }, t: 'Single raise: 3-card support, 6-9 points' });
-    if (!C.bergen) add(B(3, os), h => h.len[os] === 3 && h.sup(os) >= 10 && h.sup(os) <= 12, { min: 10, max: 12, len: { [os]: 3 }, t: 'Limit raise: 3-card support, 10-12 points' });
+    if (x.sys.maj5) add(B(2, os), h => h.len[os] >= 3 && h.sup(os) >= 6 && h.sup(os) <= 9, { min: 6, max: 9, len: { [os]: 3 }, t: 'Single raise: 3-card support, 6-9 points' });   // a 4-card major (Acol) needs four
+    if (!C.bergen && x.sys.maj5) add(B(3, os), h => h.len[os] === 3 && h.sup(os) >= 10 && h.sup(os) <= 12, { min: 10, max: 12, len: { [os]: 3 }, t: 'Limit raise: 3-card support, 10-12 points' });
   } else {
     if (C.invMin && un && !rhoX) {
       add(B(2, os), h => h.len[os] >= (os === 0 ? 5 : 4) && h.hcp >= 10 && h.len[2] < 4 && h.len[3] < 4, { min: 10, len: { [os]: 4 }, tag: "inv", cv: "invMin", t: "Inverted minor: 10+ points, 4+ support, no 4-card major, forcing", f: 1 });
@@ -691,6 +792,8 @@ function competitiveResponses(x, add, os) {
 function openerRebid(x, add, o, resp) {
   const os = ST(o), ol = LV(o), r = resp.call, rs = ST(r), rl = LV(r), rm = resp.m || {};
   if (os === 4 && (ol === 1 || ol === 2)) {
+    // our own 1NT opening: its range comes from the system (see shiftAdd)
+    if (ol === 1 && x.opening && x.opening.call === B(1, 4) && sideOf(x.opening.seat) === sideOf(x.seat)) add = shiftAdd(add, x.ntShift, false);
     const off = ol - 1;
     if (rm.tag === 'stay') {
       add(B(2 + off, 2), h => h.len[2] >= 4, { len: { 2: 4 }, cv: 'stayman', t: 'Stayman reply: four hearts' });
@@ -710,7 +813,7 @@ function openerRebid(x, add, o, resp) {
     if (r === B(3, 4) || (r >= B(4, 3) && !rm.tag)) { add('P', () => true, { t: 'Pass' }); return true; }
     return false;
   }
-  if (o === B(2, 0) && r === B(2, 1)) {
+  if (o === B(2, 0) && r === B(2, 1) && strong2(x.opening)) {
     add(B(2, 4), h => h.bal && h.hcp <= 24, { min: 22, max: 24, t: 'Balanced 22-24 HCP' });
     add(B(3, 4), h => h.bal && h.hcp >= 25, { min: 25, max: 27, t: 'Balanced 25-27 HCP' });
     for (const s of [3, 2]) add(B(2, s), h => h.longest === s || (h.len[s] >= 5 && h.len[s] >= h.len[h.longest]), { min: 22, len: { [s]: 5 }, t: '5+ ' + SUIT[s] + ', forcing (3♣ by partner = second negative)', f: 1 });
@@ -718,6 +821,25 @@ function openerRebid(x, add, o, resp) {
     return true;
   }
   if (ol !== 1 || os === 4) return false;
+  // strong club after the 1♦ reply: the opener describes the hand (Polish: first the 12-14 balanced type)
+  const ctag = x.opening && x.opening.m && x.opening.m.tag;
+  if (o === B(1, 0) && rm.tag === 'neg' && (ctag === 'sclub' || ctag === 'pclub')) {
+    const pol = ctag === 'pclub', st = pol ? 18 : 16;
+    if (pol) {
+      add(B(1, 4), h => h.bal && h.hcp <= 14, { min: 12, max: 14, cv: 'sys', t: 'Polish 1♣: the 12-14 balanced type' });
+      add(B(2, 0), h => h.hcp <= 17 && h.len[0] >= 5, { min: 15, max: 17, len: { 0: 5 }, cv: 'sys', t: 'Polish 1♣: 15-17 with long clubs' });
+      for (const s of [3, 2]) add(B(1, s), h => h.hcp <= 17 && h.len[s] >= 4, { min: 12, max: 17, len: { [s]: 4 }, t: '4+ ' + SUIT[s] + ', not strong' });
+      add(B(2, 4), h => h.bal && h.hcp >= 18, { min: 18, max: 20, cv: 'sys', t: 'Strong: 18-20 balanced' });
+    } else {
+      add(B(1, 4), h => h.bal && h.hcp <= 18, { min: 16, max: 18, cv: 'sys', t: 'Precision: 16-18 balanced' });
+      add(B(2, 4), h => h.bal && h.hcp >= 19, { min: 19, max: 21, cv: 'sys', t: 'Precision: 19-21 balanced' });
+    }
+    for (const s of [3, 2]) add(B(1, s), h => h.len[s] >= 5 || (h.len[s] >= 4 && !h.bal), { min: st, len: { [s]: 5 }, f: 1, t: '5+ ' + SUIT[s] + ', strong' });
+    add(B(2, 1), h => h.len[1] >= 5, { min: st, len: { 1: 5 }, f: 1, t: '5+ ♦, strong' });
+    add(B(2, 0), h => h.len[0] >= 5, { min: st, len: { 0: 5 }, f: 1, t: '5+ ♣, strong' });
+    add(B(1, 4), () => true, { min: st, t: 'Strong hand' });
+    return true;
+  }
   if (rm.tag === 'wjs') { add('P', () => true, { t: 'Passing partner\'s weak suit' }); return true; }
   if (rm.tag === 'inv') {
     add(B(3, 4), h => h.bal && h.hcp >= 18, { min: 18, max: 19, cv: 'invMin', t: 'After the inverted raise: balanced 18-19' });

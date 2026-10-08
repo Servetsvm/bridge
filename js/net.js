@@ -195,7 +195,7 @@ const Net = (() => {
   async function openTourTable(id) {
     const t = st.tours[id], me = t && myTourSeat(t); if (!me || st.on) return;
     st.seatBak = SET.seat; SET.seat = me.seat;
-    await host(true);
+    await host(false);   // listed in the lobby: a newcomer can ask for a robot's seat (you accept)
     if (!st.host) { SET.seat = st.seatBak; st.seatBak = null; return; }
     st.tour = { id, ti: me.ti }; st.invSeat = {};
     t.tables[me.ti].forEach((n, s) => {

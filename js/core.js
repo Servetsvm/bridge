@@ -133,11 +133,35 @@ const XINFO = {
   pre: { n: 'Preempt', d: 'An opening at the three or four level: a long suit (7+) and a weak hand, taking bidding space from the opponents.' },
   runout: { n: 'Escape after 1NT doubled', d: 'When our 1NT is doubled, a weak responder runs to a 5+ card suit; redouble shows values (9+).' },
 };
+/* ---- bidding systems: the base of a convention card. Each has its opening structure and notrump ranges, and
+   switches on the conventions that belong to it (the player can still change any of them afterwards). ---- */
+const on = (...ks) => Object.fromEntries(CONVS.map(c => [c.k, ks.includes(c.k)]));
+const SYSTEMS = [
+  { k: 'twoone', n: '2/1 Game Force', nt: [15, 17], nt2: [20, 21], maj5: true,
+    d: '5-card majors, 15-17 1NT, weak twos, strong 2♣. An unpassed responder\'s new suit at the two level is game forcing; 1NT over a major is forcing.',
+    conv: Object.fromEntries(CONVS.map(c => [c.k, !c.off])) },
+  { k: 'sayc', n: 'SAYC (Standard American Yellow Card)', nt: [15, 17], nt2: [20, 21], maj5: true,
+    d: '5-card majors, 15-17 1NT, weak twos, strong 2♣, Jacoby transfers and Stayman, Blackwood. A two-level new suit is forcing for one round (10+); 1NT over a major is 6-10 and not forcing; jump shifts are strong.',
+    conv: on('stayman', 'gerber', 'j2nt', 'texas', 'michaels', 'sjs', 'leb', 'lav') },
+  { k: 'acol', n: 'Acol (British)', nt: [12, 14], nt2: [20, 22], maj5: false,
+    d: '4-card majors, weak 1NT (12-14), strong 2♣ (23+ or game force), weak twos in ♦ ♥ ♠, limit raises (a raise promises four cards), 2NT 20-22, Stayman and transfers, RKCB.',
+    conv: on('rkc', 'stayman', 'splinter', 'michaels', 'texas', 'leb', 'lav', 'sjs') },
+  { k: 'sef', n: 'French Standard (SEF)', nt: [15, 17], nt2: [20, 21], maj5: true,
+    d: 'Système d\'Enseignement Français: 5-card majors, "best minor" 1♣/1♦, 15-17 1NT, 2♣ strong and forcing, 2♦ artificial game force, weak 2♥/2♠. A two-level new suit is forcing for one round; RKCB.',
+    conv: on('rkc', 'stayman', 'j2nt', 'texas', 'michaels', 'splinter', 'leb', 'lav') },
+  { k: 'precision', n: 'Precision Club', nt: [13, 15], nt2: [22, 23], maj5: true,
+    d: 'Strong club: 1♣ = 16+ any shape (artificial, forcing; 1♦ = negative 0-7). Other openings 11-15: 1♦ 2+ ♦ (catch-all), 1♥/1♠ 5+, 1NT 13-15, 2♣ 6+ ♣ (or 5♣ + a 4-card major), 2♦ three-suited short in ♦ (4-4-1-4 / 4-4-0-5), weak 2♥/2♠.',
+    conv: on('rkc', 'stayman', 'j2nt', 'texas', 'michaels', 'splinter', 'leb', 'lav') },
+  { k: 'polish', n: 'Polish Club', nt: [15, 17], nt2: [20, 21], maj5: true,
+    d: 'Wspólny Język: 1♣ = (a) 12-14 balanced, (b) 15+ with long clubs, or (c) 18+ any (1♦ = negative 0-7 or a waiting reply). 1♦ 4+ ♦ unbalanced, 1♥/1♠ 5+, 1NT 15-17, 2♣ 6+ ♣ 11-15, 2♦ Multi (a weak two in ♥ or ♠), 2♥/2♠ weak.',
+    conv: on('rkc', 'stayman', 'j2nt', 'texas', 'michaels', 'splinter', 'leb', 'lav') },
+];
+const sysOf = k => SYSTEMS.find(s => s.k === k) || SYSTEMS[0];
 /* default card = the player's own card; conventions marked off start disabled */
 const ALL_ON = Object.fromEntries(CONVS.map(c => [c.k, !c.off]));
 const SAYC = Object.fromEntries(CONVS.map(c => [c.k, ['gerber', 'j2nt', 'stayman'].includes(c.k)]));
 const convInfo = k => CONVS.find(c => c.k === k) || XINFO[k] || null;
 
 Object.assign(E, { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealerOf, callTxt, popc, rnd, seed, shuffle, dealKey,
-  aState, legalCalls, isLegal, auctionOver, contractOf, ev, scoreOf, imps, compare, CONVS, XINFO, ALL_ON, SAYC, convInfo });
+  aState, legalCalls, isLegal, auctionOver, contractOf, ev, scoreOf, imps, compare, CONVS, XINFO, ALL_ON, SAYC, convInfo, SYSTEMS, sysOf });
 });
