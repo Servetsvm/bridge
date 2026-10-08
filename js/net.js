@@ -51,7 +51,7 @@ const Net = (() => {
       v.deal[s] = v.deal[s].map(() => -1);
       if (v.play) v.play.hands[s] = v.play.hands[s].map(() => -1);
     }
-    v.ctl = [0, 1, 2, 3].map(owner); v.names = st.names; v.score = st.score; v.profs = st.profs || {};
+    v.ctl = [0, 1, 2, 3].map(owner); v.names = st.names; v.away = Object.keys(st.away || {}).map(Number); v.score = st.score; v.profs = st.profs || {};
     v.watchers = [...(st.watch || new Map()).values()].map(w => w.name);
     return v;
   }
@@ -93,7 +93,7 @@ const Net = (() => {
   // what the lobby sees of this table
   function tableInfo() {
     return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0,
-      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub, tplay: tplay() };
+      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub, solo: !st.host && !st.guest, tplay: tplay() };
   }
   // an individual tournament board played here: shown on this table in the lobby, and others can join the tournament
   function tplay() {
@@ -370,7 +370,7 @@ const Net = (() => {
   // a private table is never listed (only invited players come)
   // listed: public online tables, and players at a board with robots who chose "open to others" (never someone on
   // the home page, a private table, or a player who chose to play alone)
-  const listed = t => (t.online || ((t.pub || t.tplay) && t.phase && t.phase !== 'idle'));
+  const listed = t => (t.online || ((t.pub || t.tplay || t.solo) && t.phase && t.phase !== 'idle'));   // every table in play shows (alone with robots: no joining)
   function tablesHtml() {
     // tables in play are listed: online tables, and players at a board with robots (not someone on the home page)
     const L = st.tables && st.tables.filter(listed);
@@ -383,7 +383,7 @@ const Net = (() => {
       const tp = t.tplay && typeof t.tplay === 'object' ? t.tplay : null, tt = t.tour && st.tours[t.tour.id];
       const tinfo = tp ? `<div class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</div>`
         : tt ? `<div class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</div>` : '';
-      const mid = `<div class="tname">${t.priv ? '🔒 ' : ''}${T("{0}'s table", esc(t.host))}</div>${tinfo}<div class="tstate">${t.online ? (t.priv ? T('Private table') : T('online')) : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div>${tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`}${t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
+      const mid = `<div class="tname">${t.priv ? '🔒 ' : ''}${T("{0}'s table", esc(t.host))}</div>${tinfo}<div class="tstate">${t.online ? (t.priv ? T('Private table') : T('online')) : t.pub || tp ? T('playing with robots') : '🤖 ' + T('Alone with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div>${tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : !t.online && !t.pub ? '' : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`}${t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
       return seatTable(cells, mid, 2);
     }).join('')}</div>` : `<div class="muted">${T('No other tables are open right now.')}</div>`;
     return `<div class="tables">${rows}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
@@ -421,7 +421,7 @@ const Net = (() => {
   /* ---- "seat me at a table": ask the best table that still has a robot for a seat ---- */
   function quickJoin() {
     if (!navigator.onLine) { flash(T('You are offline'), 1500); return; }
-    const L = (st.tables || []).filter(t => listed(t) && !t.priv && !t.tplay && Object.keys(t.names || {}).length < 4);
+    const L = (st.tables || []).filter(t => listed(t) && (t.online || t.pub) && !t.priv && !t.tplay && Object.keys(t.names || {}).length < 4);
     if (!L.length) { flash(T('No table has a free seat right now.'), 2500); if (!st.finding) findTables(); return; }
     // tables already online with friends first (more people to play with), then players alone
     L.sort((a, b) => (b.online - a.online) || (Object.keys(b.names || {}).length - Object.keys(a.names || {}).length) || a.k - b.k);
@@ -545,7 +545,7 @@ const Net = (() => {
       ${p.d.prof && profTxt(p.d.prof) ? `<div class="muted">${esc(profTxt(p.d.prof))}</div>` : ''}
       ${pend.length > 1 ? `<div class="muted">+${pend.length - 1} ${T('more waiting')}</div>` : ''}
       <div class="row2"><button class="btn new" data-accept="${esc(id)}">${T('Accept')}</button><button class="btn" data-decline="${esc(id)}">${T('Decline')}</button></div>
-      <div class="row2"><button class="btn" data-reqlater="${esc(id)}">âœ• ${T('Close â€” answer later')}</button></div>`);
+      <div class="row2"><button class="btn" data-reqlater="${esc(id)}">✕ ${T('Close — answer later')}</button></div>`);
   }
   const reqRefresh = () => { if (ui.overlay === 'req') showReq(); else panelRefresh(); };
   /* invitations to your table: sent along the lobby lines to a player by name; they join with one tap and sit
@@ -776,7 +776,7 @@ const Net = (() => {
   function applyState(v) {
     clearTimeout(timer);
     if (v.phase !== "done") HIST = HIST.filter(h => !(h.id === v.id && h.online)); // a finished board was taken back
-    st.ctl = v.ctl; st.names = v.names || {}; st.score = v.score || null;
+    st.ctl = v.ctl; st.names = v.names || {}; st.away = Object.fromEntries((Array.isArray(v.away) ? v.away : []).map(s => [+s, {}])); st.score = v.score || null;
     touchTable();
     G = v;
     if (G.phase === 'done' && G.result) {
@@ -901,7 +901,7 @@ const Net = (() => {
       openOv('net', `<h2>${T('Online table')}</h2><div>${st.watching ? '👁 ' + T('You are watching this table.') : `You sit <b>${SEAT[st.seat]}</b>. The host's device runs the table; robots fill the empty seats.`}</div>
         ${!st.watching && G && (G.phase === 'lobby' || G.phase === 'done') ? `<div class="grp"><span>Move to another seat (the host decides)</span><div class="row2">${[0, 1, 2, 3].filter(s => s !== st.seat && !(st.names || {})[s]).map(s => `<button class="btn" data-sit="${s}">${SEAT[s]}</button>`).join('') || '<span class="muted">No free seat</span>'}</div></div>` : ''}
         ${scoreHtml()}
-        <div class="row2"><button class="btn" id="nLeave">Leave the table</button><button class="btn gold" id="oClose">Close</button></div>`);
+        <div class="row2"><button class="btn" id="nLeave">🚪 ${T('Leave the table')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
       return;
     }
     if (st.host) {
@@ -967,7 +967,7 @@ const Net = (() => {
       case 'nFind': findTables(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
       case 'nStop': stop(); closeOv(); break;
-      case 'nLeave': leave(); closeOv(); break;
+      case 'nLeave': if (ui.overlay === 'net' || confirm(T('Leave the table?'))) { leave(); closeOv(); } break;
       case 'nRst': resetScore(); break;
       case 'nRstQ': send({ t: 'rsreq' }); flash(T('Ask to reset the score') + ' ✓', 1500); break;
       case 'nNdQ': askNewDeal(); closeOv(); break;
