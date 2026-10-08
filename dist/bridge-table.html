@@ -3962,9 +3962,10 @@ const Net = (() => {
     render(); panelRefresh();
   }
   // the lobby list, used on the home page and in the Online panel
+  const listed = t => t.online || (t.phase && t.phase !== 'idle');
   function tablesHtml() {
-    // only tables that were opened online are listed (a player alone with robots is not a table to join)
-    const L = st.tables && st.tables.filter(t => t.online);
+    // tables in play are listed: online tables, and players at a board with robots (not someone on the home page)
+    const L = st.tables && st.tables.filter(listed);
     // each table is drawn as a table: the player's name or "Robot" at every side
     const rows = !L ? '' : L.length ? `<div class="tbls">${L.map(t => {
       const nm = t.names || {}, away = t.away || [];
@@ -3976,9 +3977,11 @@ const Net = (() => {
     return `<div class="tables">${rows}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
   }
   /* ---- lobby chat: everyone with the app open can talk; each message goes along every lobby line ---- */
+  const lclearTs = () => { try { return +localStorage.getItem('bridge-lobby-cleared') || 0; } catch (e) { return 0; } };
   function addL(m, quiet) {
     if (!m || !m.id || !m.text) return;
     const L = st.lchat || (st.lchat = []);
+    if ((+m.ts || 0) <= lclearTs()) return;   // cleared on this device: older messages do not come back from the others
     if (L.some(x => x.id === m.id)) return;
     L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: m.p && typeof m.p === 'object' ? { n: +m.p.n || 0, imp: m.p.imp == null ? null : +m.p.imp, mp: m.p.mp == null ? null : +m.p.mp } : null });
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
@@ -4001,12 +4004,12 @@ const Net = (() => {
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
   const renderL = () => { if (G && G.phase === 'idle') render(); if (ui.overlay === 'lchat') showLChat(); if (ui.overlay === 'tsetup') showTourSetup(ui.tsetId); };
   // clear the lobby chat on this device
-  function lclear() { st.lchat = []; st.lunread = 0; try { localStorage.removeItem('bridge-lobby-chat'); } catch (e) {} renderL(); }
+  function lclear() { st.lchat = []; st.lunread = 0; try { localStorage.removeItem('bridge-lobby-chat'); localStorage.setItem('bridge-lobby-cleared', String(Date.now())); } catch (e) {} renderL(); }
   try { (JSON.parse(localStorage.getItem('bridge-lobby-chat') || '[]') || []).forEach(m => addL(m, true)); } catch (e) {}
   /* ---- "seat me at a table": ask the best table that still has a robot for a seat ---- */
   function quickJoin() {
     if (!navigator.onLine) { flash(T('You are offline'), 1500); return; }
-    const L = (st.tables || []).filter(t => t.online && Object.keys(t.names || {}).length < 4);
+    const L = (st.tables || []).filter(t => listed(t) && Object.keys(t.names || {}).length < 4);
     if (!L.length) { flash(T('No table has a free seat right now.'), 2500); if (!st.finding) findTables(); return; }
     // tables already online with friends first (more people to play with), then players alone
     L.sort((a, b) => (b.online - a.online) || (Object.keys(b.names || {}).length - Object.keys(a.names || {}).length) || a.k - b.k);
