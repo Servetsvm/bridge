@@ -420,7 +420,7 @@ body.athome #app{max-width:1180px}
 .hbtns .btn{font-size:18px;padding:13px 10px;border-radius:10px}
 .hlinks{display:flex;gap:6px;flex-wrap:wrap}
 .hlinks .btn{flex:1 0 auto}
-.hstats{margin-top:8px;font-size:13.5px;color:#5b5a50}
+.hstats{margin-top:8px;font-size:13.5px;color:#5b5a50;background:none;border:0;padding:0;text-align:left;cursor:pointer;font:inherit;font-size:13.5px;text-decoration:underline dotted;text-underline-offset:2px}
 .hchat{position:sticky;top:8px;display:flex;flex-direction:column;height:calc(100dvh - 120px);min-height:360px}
 .hchat h3 small{font-weight:500;color:#6d6c62;font-size:12.5px}
 .lmsgs{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:6px;background:#fff;border:1px solid #dcdccf;border-radius:10px;padding:8px;margin-bottom:8px}
