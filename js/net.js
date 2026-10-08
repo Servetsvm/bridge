@@ -162,9 +162,12 @@ const Net = (() => {
     if (!st.tours[id] || !r || !key) return false;
     const R = st.tres[id] || (st.tres[id] = {}), ns = {};
     for (const b in (r.ns || {})) if (+b >= 1 && +b <= st.tours[id].n) ns[b] = +r.ns[b] || 0;
-    const cur = R[key];
-    if (cur && Object.keys(cur.ns).length >= Object.keys(ns).length) return false;   // results only grow
-    R[key] = { name: String(r.name || 'Player').slice(0, 40), ns, dir: r.dir === 'NS' || r.dir === 'EW' ? r.dir : undefined };
+    // f: the score of each board against the robot field (10 robot tables): [IMP, MP %]
+    const f = {};
+    for (const b in (r.f || {})) if (+b >= 1 && +b <= st.tours[id].n && Array.isArray(r.f[b])) f[b] = [num(r.f[b][0]) || 0, num(r.f[b][1]) || 0];
+    const cur = R[key], size = x => Object.keys(x.ns || {}).length + Object.keys(x.f || {}).length;
+    if (cur && size(cur) >= size({ ns, f })) return false;   // results only grow
+    R[key] = { name: String(r.name || 'Player').slice(0, 40), ns, f, dir: r.dir === 'NS' || r.dir === 'EW' ? r.dir : undefined };
     return true;
   }
   try { const d = JSON.parse(localStorage.getItem('bridge-tours') || '{}'); for (const id in (d.tours || {})) mergeTour(d.tours[id]); for (const id in (d.res || {})) for (const k in d.res[id]) mergeRes(id, k, d.res[id][k]); } catch (e) {}
@@ -268,11 +271,14 @@ const Net = (() => {
     if (ui.overlay === 'dm' && nameKey(ui.dmWith || '') === nameKey(from)) showDm(from);
     else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); beep(); renderL(); }
   }
-  function tourResult(id, b, ns) {
+  // an individual board played: the score for your side (dir 'EW' when you sit East or West) and, once the
+  // robot tables have played it, your IMPs and MP % against them
+  function tourResult(id, b, ns, dir, f) {
     const t = st.tours[id]; if (!t) return;
     const R = st.tres[id] || (st.tres[id] = {}), key = devId();
     const me = R[key] || (R[key] = { name: myName() || 'Player', ns: {} });
-    me.name = myName() || me.name; me.ns[b] = ns;
+    me.name = myName() || me.name; me.ns[b] = ns; if (dir === 'EW') me.dir = 'EW';
+    if (f) (me.f || (me.f = {}))[b] = f;
     saveTours(); meshSend({ t: 'tres', id, key, r: me });
   }
   function onTourData(d) {
@@ -970,7 +976,7 @@ const Net = (() => {
       }
       case 'nFind': findTables(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
-      case 'nStop': stop(); closeOv(); break;
+      case 'nStop': if (ui.overlay === 'net') { stop(); closeOv(); } else if (confirm(T('Close the table for everyone?'))) { stop(); closeOv(); goHome(); } break;
       case 'nLeave': if (ui.overlay === 'net' || confirm(T('Leave the table?'))) { leave(); closeOv(); } break;
       case 'nRst': resetScore(); break;
       case 'nRstQ': send({ t: 'rsreq' }); flash(T('Ask to reset the score') + ' ✓', 1500); break;
@@ -1005,5 +1011,5 @@ const Net = (() => {
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { keepSlot(); if (lobbyOpen()) findTables(); } });
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, shareInfo, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, shareInfo, kick, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
