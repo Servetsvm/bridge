@@ -145,11 +145,11 @@
 
 <h2 id="online">Arkadaşlarla online oyun</h2>
 <ol>
-<li>Herkes uygulamayı aynı linkten açar: https://servetsvm.github.io/bridge/. Açılınca kart dağıtılmaz; <span class="k">Start</span> ile robotlarla tek başına oynanır (internet yoksa da).</li>
-<li>İnternet varken her oyuncunun masası herkesin lobisinde görünür: başlangıç ekranında ve <span class="k">Online</span> panelinde <b>Open tables</b> listesi: her masa küçük bir masa olarak çizilir, her kenarda oturan oyuncunun adı ya da “Robot” yazar. <span class="k">Refresh the list</span> listeyi yeniler.</li>
-<li>Bir masaya katılmak için <span class="k">Ask to join</span>: adını yaz, ortak ya da rakip seç, <span class="k">Join</span>. İstek o masadaki oyuncuya gider.</li>
-<li>Sana istek gelince <span class="k">Accept</span> ya da <span class="k">Decline</span>. İlk kabul ettiğinde masan otomatik online olur ve sen host olursun; oynadığın el kaldığı yerden devam eder, katılan robotun yerine oturur.</li>
-<li>Host istediği oyuncuyu <span class="k">Remove</span> ile kaldırabilir. Masa sahibi istersen <b>host kodu</b> ile (her seferinde yazılır, saklanmaz) boş bir bekleme salonu açıp herkes oturunca <span class="k">Start</span> diyebilir.</li>
+<li>Herkes uygulamayı aynı linkten açar: https://servetsvm.github.io/bridge/. Uygulama her açılışta temiz ana sayfayla başlar; kart dağıtılmaz, masa kurulmaz. <span class="k">Başla</span> ile robotlarla tek başına oynanır (internet yoksa da).</li>
+<li>Online masa açmak için (şifre yok, herkes açabilir): <span class="k">Online</span> → <span class="k">Online masa aç</span>. Masa boş bir bekleme salonu olarak açılır ve herkesin lobisinde <b>Açık masalar</b> listesinde görünür (her kenarda oyuncunun adı ya da Robot).</li>
+<li>Bir masaya katılmak için <span class="k">Katılmak iste</span> (ya da <span class="k">Beni uygun masaya al</span>): adını yaz, ortak, rakip ya da herhangi boş yer seç, <span class="k">Katıl</span>. İstek masayı açana gider.</li>
+<li>Masayı açan istekleri <span class="k">Kabul</span> ya da <span class="k">Reddet</span> ile cevaplar; herkes oturunca <span class="k">Başla</span>'ya basar.</li>
+<li>Host istediği oyuncuyu <span class="k">Kaldır</span> ile masadan çıkarabilir. Masadan düşen ya da uygulamayı kapatan oyuncu 10 dakika içinde linki yeniden açarsa kendiliğinden aynı masaya, aynı koltuğa döner; bilerek <span class="k">Leave the table</span> diyen ise masadan çıkar ve koltuğu hemen boşalır.</li>
 </ol>
 <h3>Ana sayfa</h3>
 <ul>
@@ -157,12 +157,12 @@
 <li><span class="k">Başla / Devam et</span>: robotlarla tek başına oyna. <span class="k">⌂</span> düğmesi oyundan ana sayfaya döner; el kaybolmaz, Devam et ile sürer.</li>
 <li><span class="k">Beni uygun masaya al</span>: içinde robot oynayan açık bir masa bulur ve oraya katılma isteği gönderir; masanın host'u kabul edince robotun yerine oturursun.</li>
 <li><b>Konvansiyon kartımız (partnerle)</b>: konvansiyonları ana sayfadan aç/kapat; adının üstünde durunca açıklaması çıkar.</li>
-<li><b>Lobi sohbeti</b> (bilgisayarda sağda, telefonda altta): uygulamayı o an açık tutan herkes birbiriyle yazışabilir.</li>
+<li><b>Lobi sohbeti</b>: bilgisayarda sağda bir sütun; telefonda köşedeki 💬 düğmesiyle açılan pencere (yer kaplamaz, okunmamış mesaj sayısını gösterir). Uygulamayı o an açık tutan herkes yazışabilir. 🗑 sohbeti bu cihazda temizler.</li>
 <li>Online masada misafir oyun sırasında <span class="k">Yeni El</span>'e basınca host'a <b>yeni el isteği</b> gider. Online panelinde <b>masa skoru</b> (NS–EW) görünür; misafir skorun sıfırlanmasını isteyebilir. Her iki isteğe de host karar verir.</li>
 </ul>
 <h3>Turnuva, seyirci, profil ve sıra uyarısı</h3>
 <ul>
-<li><b>Turnuva</b>: ana sayfada 🏆 Turnuvalar → el sayısını seç (4/8/12/16) → <span class="k">Yeni turnuva</span>. Lobideki herkes turnuvayı görür ve <span class="k">Oyna</span> ile aynı elleri kendi masasında robotlarla, South'ta oturarak oynar. Sonuçlar lobi üzerinden paylaşılır; <span class="k">Sıralama</span> her elde oyuncular arası MP % ve IMP'ye göre sıralar. İnternet yokken oynanan eller bağlantı gelince gönderilir. Turnuvalar 3 gün saklanır.</li>
+<li><b>Turnuva</b>: ana sayfada 🏆 Turnuvalar → el sayısını seç (4/8/12/16) → <span class="k">Yeni turnuva</span>. Açılan ekranda oynamasını istediğin oyuncuları seç (lobide görünenler listelenir, istersen ismini yazarak ekle) ve <span class="k">Davetleri gönder</span>. Davet edilenlerin ana sayfasına davet düşer; <span class="k">Kabul</span> ya da <span class="k">Reddet</span> der, cevaplar sana ✓ / ✗ olarak gelir. En az bir kişi kabul edince <span class="k">Turnuvayı başlat</span>; başlamadan kimse oynayamaz. Sonra herkes aynı elleri kendi masasında robotlarla, South'ta oturarak oynar; <span class="k">Sıralama</span> MP % ve IMP'ye göre sıralar. Turnuvalar 3 gün saklanır.</li>
 <li><b>Seyirci</b>: açık masalar listesinde online bir masada <span class="k">👁 İzle</span>. Host kabul edince dört eli de görürsün; teklif veremez, kart oynayamazsın ama masa sohbetine yazabilirsin.</li>
 <li><b>Profil</b>: lobi sohbetinde ve masa kartlarında oyuncunun adının yanında bugünkü el sayısı ve IMP ortalaması görünür.</li>
 <li><b>Sıra uyarısı</b>: teklif ya da kart sırası sana gelince kısa bir ses ve titreşim. Ayarlar → “Sound and buzz when it is your turn”: online masalarda (varsayılan), her zaman ya da kapalı.</li>

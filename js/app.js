@@ -27,6 +27,12 @@ const I18N = {
     "Watch": "İzle", "You are watching this table.": "Bu masayı izliyorsun.", "Tournaments": "Turnuvalar", "New tournament": "Yeni turnuva", "Play": "Oyna", "Standings": "Sıralama", "Close": "Kapat", "Player": "Oyuncu", "{0} boards": "{0} el", "{0} players": "{0} oyuncu", "you: {0}/{1}": "sen: {0}/{1}",
     "Nobody has played yet.": "Henüz kimse oynamadı.", "{0} boards · started by {1} · results arrive as the others play": "{0} el · başlatan {1} · diğerleri oynadıkça sonuçlar gelir", "No tournaments yet. Start one — everyone in the lobby gets the same deals.": "Henüz turnuva yok. Bir tane başlat — lobideki herkes aynı elleri oynar.",
     "Tournament board {0} of {1} — you sit South": "Turnuva eli {0}/{1} — South'ta oturuyorsun", "Close the online table first": "Önce online masayı kapat", "Finish this tournament board first": "Önce bu turnuva elini bitir",
+    "Going back to your table…": "Masana geri dönülüyor…",     "Clear the chat": "Sohbeti temizle", "Open an online table": "Online masa aç", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Kendi online masanı aç (oyuncular katılmak ister, sen kabul edersin) ya da aşağıdaki masalardan birine katılmak iste.",
+    "setting up": "hazırlanıyor", "{0} accepted": "{0} kabul etti", "Players and start": "Oyuncular ve başlat", "Waiting for {0} to start": "{0} başlatacak", "{0} invites you": "{0} seni davet ediyor", "{0} invites you to a tournament": "{0} seni turnuvaya davet ediyor",
+    "No tournaments yet. Create one and invite the players you want.": "Henüz turnuva yok. Bir tane oluştur ve istediğin oyuncuları davet et.", "accepted": "kabul etti", "declined": "reddetti", "invited": "davet edildi", "organiser": "düzenleyen",
+    "Everyone plays the same deals at their own table, sitting South. The tournament opens when you press Start.": "Herkes aynı elleri kendi masasında, South'ta oturarak oynar. Turnuva sen Başlat deyince açılır.", "Players to invite": "Davet edilecek oyuncular",
+    "Nobody else is in the lobby right now — type a name below.": "Şu an lobide başka kimse yok — aşağıya bir isim yaz.", "Add a player by name": "İsimle oyuncu ekle", "Add": "Ekle", "Answers": "Cevaplar", "Send the invitations": "Davetleri gönder", "Start the tournament": "Turnuvayı başlat", "Cancel the tournament": "Turnuvayı iptal et",
+    "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
     "Contract": "Kontrakt", "Today": "I dag", "last:": "siste:", "New Deal": "Nytt spill", "Sure?": "Sikker?", "Undo": "Angre", "Chat": "Chat", "Hint": "Tips", "Claim": "Claim", "Online": "Online", "Help": "Hjelp", "Settings": "Innstillinger", "Results": "Resultater", "Home": "Hjem",
@@ -48,6 +54,12 @@ const I18N = {
     "Watch": "Se på", "You are watching this table.": "Du ser på dette bordet.", "Tournaments": "Turneringer", "New tournament": "Ny turnering", "Play": "Spill", "Standings": "Resultatliste", "Close": "Lukk", "Player": "Spiller", "{0} boards": "{0} spill", "{0} players": "{0} spillere", "you: {0}/{1}": "du: {0}/{1}",
     "Nobody has played yet.": "Ingen har spilt ennå.", "{0} boards · started by {1} · results arrive as the others play": "{0} spill · startet av {1} · resultatene kommer etter hvert som de andre spiller", "No tournaments yet. Start one — everyone in the lobby gets the same deals.": "Ingen turneringer ennå. Start en — alle i lobbyen får de samme spillene.",
     "Tournament board {0} of {1} — you sit South": "Turneringsspill {0} av {1} — du sitter Syd", "Close the online table first": "Lukk online-bordet først", "Finish this tournament board first": "Fullfør dette turneringsspillet først",
+    "Going back to your table…": "Går tilbake til bordet ditt…",     "Clear the chat": "Tøm chatten", "Open an online table": "Åpne et online-bord", "Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.": "Åpne ditt eget online-bord (spillere ber om å bli med og du godtar dem), eller be om å bli med ved et av bordene under.",
+    "setting up": "settes opp", "{0} accepted": "{0} har takket ja", "Players and start": "Spillere og start", "Waiting for {0} to start": "Venter på at {0} starter", "{0} invites you": "{0} inviterer deg", "{0} invites you to a tournament": "{0} inviterer deg til en turnering",
+    "No tournaments yet. Create one and invite the players you want.": "Ingen turneringer ennå. Lag en og inviter spillerne du vil.", "accepted": "takket ja", "declined": "takket nei", "invited": "invitert", "organiser": "arrangør",
+    "Everyone plays the same deals at their own table, sitting South. The tournament opens when you press Start.": "Alle spiller de samme spillene ved sitt eget bord, som Syd. Turneringen åpner når du trykker Start.", "Players to invite": "Spillere som skal inviteres",
+    "Nobody else is in the lobby right now — type a name below.": "Ingen andre er i lobbyen nå — skriv et navn under.", "Add a player by name": "Legg til en spiller med navn", "Add": "Legg til", "Answers": "Svar", "Send the invitations": "Send invitasjonene", "Start the tournament": "Start turneringen", "Cancel the tournament": "Avlys turneringen",
+    "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
 };
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
@@ -594,9 +606,10 @@ function homeShell() {
       <div class="hcard"><h3>🏆 ${T('Tournaments')}</h3><div id="hTours"></div></div>
       <div class="hcard"><details id="hConvBox"><summary>${T('Our convention card (with partner)')}</summary><div id="hConv"></div></details></div>
     </section>
-    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small></h3><div class="lmsgs" id="hChat"></div>
+    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lmsgs" id="hChat"></div>
       <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></aside>
-  </div></div>`;
+  </div>
+  <button class="lchatfab" id="lFab">💬 <span id="lFabN"></span></button></div>`;
 }
 // our card: every convention with a switch; tap a name for its description
 function convCardHtml() {
@@ -615,6 +628,7 @@ function renderHome() {
     set('hTables', N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     set('hCount', T('{0} in the lobby', N.lobbyCount()));
+    set('lFabN', T('Lobby chat') + (N.st.lunread ? ' (' + N.st.lunread + ')' : ''));
   }
   if (N) set('hTours', toursHtml());
   set('hConv', convCardHtml());
@@ -630,6 +644,7 @@ const myTour = id => ((Net.st.tres[id] || {})[Net.devId()] || { ns: {} }).ns;
 // play the next board of a tournament that you have not played yet (or show the ranking when all are done)
 function playTour(id) {
   const t = Net.st.tours[id]; if (!t) return;
+  if (t.state !== 'live' || !t.joined[Net.devId()]) { flash(T('This tournament has not started yet'), 2000); return; }
   if (online()) { flash(T('Close the online table first'), 2000); return; }
   const done = myTour(id); let b = 1; while (b <= t.n && done[b] != null) b++;
   if (b > t.n) { showStandings(id); return; }
@@ -667,14 +682,56 @@ function showStandings(id) {
     ${standingsHtml(id)}
     <div class="row2">${done < t.n ? `<button class="btn new" data-tplay="${t.id}">${done ? T('Continue') : T('Play')}</button>` : ''}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+// the tournaments you organise, have joined, or are invited to
 function toursHtml() {
-  const L = Object.values(Net.st.tours).sort((a, b) => b.ts - a.ts);
+  const me = Net.devId();
+  const L = Object.values(Net.st.tours).filter(t => t.state !== 'off' && (Net.isMine(t) || t.joined[me] || Net.invitedTo(t))).sort((a, b) => b.ts - a.ts);
   const list = L.length ? L.map(t => {
-    const players = Object.keys(Net.st.tres[t.id] || {}).length, done = Object.keys(myTour(t.id)).length;
-    return `<div class="tourrow"><div><b>🏆 ${esc(t.name)}</b><small>${T('{0} boards', t.n)} · ${T('{0} players', players)} · ${T('you: {0}/{1}', done, t.n)}</small></div>
-      <div class="tbtns">${done < t.n ? `<button class="btn new" data-tplay="${t.id}">${done ? T('Continue') : T('Play')}</button>` : ''}<button class="btn" data-tstand="${t.id}">${T('Standings')}</button></div></div>`;
-  }).join('') : `<div class="muted">${T('No tournaments yet. Start one — everyone in the lobby gets the same deals.')}</div>`;
+    const done = Object.keys(myTour(t.id)).length, players = Object.keys(t.joined).length;
+    let info, btns;
+    if (t.state === 'setup') {
+      info = `${T('{0} boards', t.n)} · ${T('setting up')} · ${T('{0} accepted', players)}`;
+      btns = Net.isMine(t) ? `<button class="btn gold" data-tset="${t.id}">${T('Players and start')}</button>`
+        : Net.invitedTo(t) ? `<button class="btn new" data-tyes="${t.id}">${T('Accept')}</button><button class="btn" data-tno="${t.id}">${T('Decline')}</button>`
+        : `<span class="muted">${T('Waiting for {0} to start', esc(t.by))}</span>`;
+      if (Net.invitedTo(t)) info = `<b class="inv">${T('{0} invites you', esc(t.by))}</b> · ` + info;
+    } else {
+      info = `${T('{0} boards', t.n)} · ${T('{0} players', players)} · ${T('you: {0}/{1}', done, t.n)}`;
+      btns = `${t.joined[me] && done < t.n ? `<button class="btn new" data-tplay="${t.id}">${done ? T('Continue') : T('Play')}</button>` : ''}<button class="btn" data-tstand="${t.id}">${T('Standings')}</button>`;
+    }
+    return `<div class="tourrow"><div><b>🏆 ${esc(t.name)}</b><small>${info}</small></div><div class="tbtns">${btns}</div></div>`;
+  }).join('') : `<div class="muted">${T('No tournaments yet. Create one and invite the players you want.')}</div>`;
   return `${list}<div class="row2 tnew"><select id="tN" class="sel">${[4, 8, 12, 16].map(n => `<option value="${n}" ${n === 8 ? 'selected' : ''}>${T('{0} boards', n)}</option>`).join('')}</select><button class="btn gold" id="tNew">${T('New tournament')}</button></div>`;
+}
+/* the organiser's set-up: pick the players (people seen in the lobby, or any name typed in), send the
+   invitations, follow the answers, and start when ready */
+function showTourSetup(id) {
+  const t = Net.st.tours[id]; if (!t || !Net.isMine(t)) return;
+  ui.tsetId = id;
+  const sel = ui.tsel && ui.tsel.id === id ? ui.tsel : (ui.tsel = { id, names: new Set(t.inv) });
+  const known = [...new Set([...Net.knownNames(), ...sel.names])];
+  const status = n => {
+    const k = Object.entries(t.joined).find(([, v]) => v.toLowerCase() === n.toLowerCase()), d = Object.entries(t.declined).find(([, v]) => v.toLowerCase() === n.toLowerCase());
+    return k ? '<span class="ok">✓ ' + T('accepted') + '</span>' : d ? '<span class="no">✗ ' + T('declined') + '</span>' : t.inv.some(x => x.toLowerCase() === n.toLowerCase()) ? '<span class="wait">… ' + T('invited') + '</span>' : '';
+  };
+  const accepted = Object.keys(t.joined).length - 1;
+  openOv('tsetup', `<h2>🏆 ${esc(t.name)}</h2><div class="muted">${T('{0} boards', t.n)} · ${T('Everyone plays the same deals at their own table, sitting South. The tournament opens when you press Start.')}</div>
+    <div class="grp"><span>${T('Players to invite')}</span>
+      <div class="invlist">${known.length ? known.map(n => `<label class="invrow"><input type="checkbox" data-tinv="${esc(n)}" ${sel.names.has(n) ? 'checked' : ''}><b>${esc(n)}</b>${status(n)}</label>`).join('') : `<div class="muted">${T('Nobody else is in the lobby right now — type a name below.')}</div>`}</div>
+      <div class="row2"><input class="tok" id="tAdd" maxlength="20" placeholder="${T('Add a player by name')}"><button class="btn" id="tAddBtn">${T('Add')}</button></div></div>
+    <div class="grp"><span>${T('Answers')}</span><div>${esc(t.by)} <span class="ok">✓ ${T('organiser')}</span>${Object.values(t.joined).filter(n => n !== t.by).map(n => ` · ${esc(n)} <span class="ok">✓</span>`).join('')}${Object.values(t.declined).map(n => ` · ${esc(n)} <span class="no">✗</span>`).join('')}</div></div>
+    <div class="row2"><button class="btn gold" id="tSend">${T('Send the invitations')}</button><button class="btn new" id="tGo" ${accepted > 0 ? '' : 'disabled'}>${T('Start the tournament')}</button></div>
+    <div class="row2"><button class="btn" id="tCancel">${T('Cancel the tournament')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+// lobby chat as a pop-up window (on phones the chat column is hidden)
+function showLChat() {
+  Net.st.lunread = 0;
+  const draft = $('lMsg2') ? $('lMsg2').value : '';
+  openOv('lchat', `<h2>💬 ${T('Lobby chat')} <small class="muted">${T('{0} in the lobby', Net.lobbyCount())}</small></h2><div class="lmsgs pop" id="ovLChat">${Net.lchatHtml()}</div>
+    <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}" value="${esc(draft)}"><button class="btn gold" id="lSend2">${T('Send')}</button></div>
+    <div class="row2"><button class="btn" id="lClear">🗑 ${T('Clear the chat')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  const c = $('ovLChat'); if (c) c.scrollTop = c.scrollHeight;
+  if (document.activeElement !== $('lMsg2') && draft) $('lMsg2').focus();
 }
 // after a tournament board: the next one, or the ranking when you have played them all
 function nextTourBoard() {
@@ -910,6 +967,7 @@ document.addEventListener('change', e => {
     if (!t.checked && SET.practice === k) SET.practice = "";
     Store.saveSettings(SET); save(); if (ui.overlay === "set") showSettings(); else render();
   }
+  if (t.dataset.tinv != null && ui.tsel) { if (t.checked) ui.tsel.names.add(t.dataset.tinv); else ui.tsel.names.delete(t.dataset.tinv); return; }
   if (t.id === 'hName') { try { localStorage.setItem('bridge-table-name', t.value.trim().slice(0, 20)); } catch (e) {} return; }
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
@@ -921,6 +979,7 @@ document.addEventListener('click', ev_ => {
   }
   // Results: open a finished board, tap its calls, or go back to the list
   const tp = ev_.target.closest('[data-tplay]'); if (tp) { playTour(tp.dataset.tplay); return; }
+  const tq = ev_.target.closest('[data-tset],[data-tyes],[data-tno]'); if (tq) { if (tq.dataset.tset) { ui.tsel = null; showTourSetup(tq.dataset.tset); } else Net.tourAnswer(tq.dataset.tyes || tq.dataset.tno, !!tq.dataset.tyes); return; }
   const ts = ev_.target.closest('[data-tstand]'); if (ts) { showStandings(ts.dataset.tstand); return; }
   const rv = ev_.target.closest('[data-rev]'); if (rv) { ui.revSel = null; ui.revStep = 0; stopRev(); showReview(rv.dataset.rev); return; }
   const rs = ev_.target.closest('[data-rs]'); if (rs) { if (!rs.disabled) revStep(rs.dataset.rs); return; }
@@ -973,18 +1032,25 @@ document.addEventListener('click', ev_ => {
     case 'bHome': goHome(); break;
     case 'hQuick': Net.quickJoin(); break;
     case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } break; }
+    case 'lSend2': { const i = $('lMsg2'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; i.focus(); } break; }
+    case 'lClear': Net.lclear(); break;
+    case 'lFab': showLChat(); break;
     case 'oClose': closeOv(); break;
     case 'sReset': HIST = []; save(); showSettings(); render(); break;
     case "sSave": { const v = ($("syncToken") || {}).value; if (v) { GitSync.setToken(v); syncState.msg = ""; syncNow(); showSettings(); } break; }
     case "sNow": syncNow(); break;
     case "sOff": GitSync.setToken(null); syncState.msg = ""; showSettings(); break;
     case "oNext": if (guest()) { Net.send({ t: "next" }); closeOv(); } else if (G && G.tour) { closeOv(); nextTourBoard(); } else newBoard(); break;
-    case 'tNew': { const n = +($('tN') || {}).value || 8; const t = Net.newTour(n); render(); playTour(t.id); break; }
+    case 'tNew': { const n = +($('tN') || {}).value || 8; const t = Net.newTour(n); ui.tsel = null; render(); showTourSetup(t.id); break; }
+    case 'tAddBtn': { const i = $('tAdd'), v = i && i.value.trim().slice(0, 20); if (v && ui.tsel) { ui.tsel.names.add(v); showTourSetup(ui.tsetId); } break; }
+    case 'tSend': { if (!ui.tsel || !ui.tsel.names.size) { flash(T('Pick at least one player'), 1800); break; } Net.tourInvite(ui.tsetId, [...ui.tsel.names]); flash(T('Invitations sent'), 1800); break; }
+    case 'tGo': Net.tourStart(ui.tsetId); closeOv(); flash(T('The tournament has started'), 2000); render(); break;
+    case 'tCancel': Net.tourCancel(ui.tsetId); closeOv(); render(); break;
     case "oReplay": replayDeal(); break;
   }
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
-document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'lMsg' && e.target.value.trim()) { e.preventDefault(); Net.lsend(e.target.value); e.target.value = ''; } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); Net.lsend(e.target.value); e.target.value = ''; } });
 window.addEventListener('resize', layoutFans);
 
 /* ================= boot ================= */
@@ -992,7 +1058,8 @@ function start(data) {
   load(data && data.G ? data : null);
   Field.init();
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
-  ui.saved = G && G.deal && G.cards && G.phase !== "lobby" && G.phase !== "idle" ? G : null;
+  // every opening starts fresh on the home page (an unfinished board is not kept)
+  ui.saved = null;
   G = idleG(); render();
   Store.initCloud(mergeCloud);
   syncNow(true);

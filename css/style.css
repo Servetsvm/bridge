@@ -447,3 +447,17 @@ body.athome #app{max-width:1180px}
 .tnew{margin-top:10px}
 .tnew .sel{flex:0 0 auto;width:auto}
 tr.meRow td{background:#fff3c4;font-weight:700}
+/* lobby chat: a column on a computer, a pop-up behind a button on a phone; tournament set-up */
+.mini-btn{float:right;padding:2px 8px;font-size:13px;margin-left:6px}
+.lchatfab{display:none}
+.lmsgs.pop{max-height:55vh;min-height:220px;flex:none}
+@media (max-width:820px){
+  .hchat{display:none}
+  .lchatfab{display:flex;align-items:center;gap:6px;position:fixed;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:20;border:0;border-radius:999px;padding:12px 18px;background:#c9a227;color:#1d1a0f;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.45)}
+}
+.invlist{display:flex;flex-direction:column;gap:4px;max-height:40vh;overflow:auto;margin-bottom:8px}
+.invrow{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #dcdccf;border-radius:8px;padding:7px 10px;cursor:pointer}
+.invrow input{width:18px;height:18px;accent-color:#2f6f4a}
+.invrow b{flex:1}
+.ok{color:#2f6f4a;font-weight:700}.no{color:#b3261e;font-weight:700}.wait{color:#8a6d22;font-weight:600}
+b.inv{color:#b3261e}
