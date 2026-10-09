@@ -509,10 +509,13 @@ const Net = (() => {
   function quickWatch() {
     if (!navigator.onLine) { flash(T('You are offline'), 1500); return; }
     if (st.on) { flash(T('Leave the table you are at first'), 2000); return; }
-    const L = (st.tables || []).filter(t => t.online && !t.priv && !t.busy);
+    // online tables and players at a board (a tournament board first: the organiser's own table before the others)
+    const playing = t => t.phase === 'play' || t.phase === 'bid';
+    const L = (st.tables || []).filter(t => !t.priv && !t.busy && (t.online || (playing(t) && (t.pub || t.tplay || t.solo))));
     if (!L.length) { flash(T('No table to watch right now.'), 2500); if (!st.finding) findTables(); return; }
     const people = t => Object.keys(t.names || {}).length - (t.away || []).length;
-    L.sort((a, b) => people(b) - people(a) || ((b.phase === 'play' || b.phase === 'bid') - (a.phase === 'play' || a.phase === 'bid')) || (b.watchers || 0) - (a.watchers || 0));
+    const tourRank = t => { const id = (t.tplay && t.tplay.id) || (t.tour && t.tour.id), tr = id && st.tours[id]; return !tr ? 0 : nameKey(tr.by) === nameKey(t.host) ? 2 : 1; };
+    L.sort((a, b) => tourRank(b) - tourRank(a) || people(b) - people(a) || (playing(b) - playing(a)) || (b.watchers || 0) - (a.watchers || 0));
     const t = L[0];
     st.offer = t; st.want = 'watch'; st.msg = '';
     flash('👁 ' + T("{0}'s table", t.host), 2000);
@@ -521,8 +524,9 @@ const Net = (() => {
   // this player's own table goes online: they become its host (requests are accepted one by one)
   function becomeHost() {
     if (st.host || !st.slot) return !!st.host;
-    Object.assign(st, { peer: st.slot.peer, on: true, host: true, guest: false, me: 'host', code: 'room-' + st.slot.k, seats: { [SET.seat]: 'host' }, names: { [SET.seat]: myName() || 'Host' }, msg: '' });
-    wakeOn(); ping(); st.score = { ns: 0, ew: 0, n: 0 }; st.asks = {}; st.profs = { [SET.seat]: prof() }; st.watch = new Map();
+    const ms = typeof U === 'function' ? U() : SET.seat;   // the seat you play now (in a tournament, the seat you chose there)
+    Object.assign(st, { peer: st.slot.peer, on: true, host: true, guest: false, me: 'host', code: 'room-' + st.slot.k, seats: { [ms]: 'host' }, names: { [ms]: myName() || 'Host' }, msg: '' });
+    wakeOn(); ping(); st.score = { ns: 0, ew: 0, n: 0 }; st.asks = {}; st.profs = { [ms]: prof() }; st.watch = new Map();
     if (!G || G.phase === 'idle') { clearTimeout(timer); G = lobbyG(); }
     save(); return true;
   }
@@ -588,7 +592,7 @@ const Net = (() => {
     const p = st.pending && st.pending[id]; if (!p) return; delete st.pending[id];
     if (nameTaken(p.d.name)) { try { p.conn.send({ t: 'nametaken' }); } catch (e) {} setTimeout(() => { try { p.conn.close(); } catch (e) {} }, 500); panelRefresh(); render(); return; }
     if (!p.conn.open) { panelRefresh(); render(); return; }
-    if (p.d.want === 'watch') { if (st.host) addWatcher(p.conn, p.d); return; }
+    if (p.d.want === 'watch') { if (!st.host) becomeHost(); if (st.host) addWatcher(p.conn, p.d); return; }   // a player alone with robots can be watched too
     becomeHost();   // the first accepted player turns this table into an online table
     seatPlayer(p.conn, p.d, null);
   }
@@ -679,8 +683,8 @@ const Net = (() => {
     }
     if (d.t === 'hello') {
       if (d.tok && (st.banned || []).includes(d.tok)) { conn.send({ t: 'kick' }); setTimeout(() => conn.close(), 500); return; }
-      // spectators: a solo table cannot be watched; a spectator who comes back is let in again at once
-      if (d.want === 'watch' && !st.host) { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
+      // spectators: a player alone with robots can be watched while at a board (they accept); a spectator who comes back is let in again at once
+      if (d.want === 'watch' && !st.host && !(G && (G.phase === 'bid' || G.phase === 'play' || G.phase === 'done'))) { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
       if (d.want === 'watch' && d.tok && (st.watchToks || []).includes(d.tok)) { addWatcher(conn, d); return; }
       const away = st.away || (st.away = {});
       // a player coming back after a dropped connection gets the seat that was kept for them
@@ -695,8 +699,7 @@ const Net = (() => {
         // a tournament table always takes its own players back, at the seat the organiser gave them
         const inv = (st.invited || []).includes(nameKey(d.name)) || !!(st.tour && st.invSeat && st.invSeat[nameKey(d.name)] != null);
         if (inv && st.host && d.want !== 'watch') { st.invited = st.invited.filter(x => x !== nameKey(d.name)); seatPlayer(conn, d, null); return; }
-        // a public online table takes spectators at once; the players see who is watching
-        if (d.want === 'watch' && st.host && !st.priv) { addWatcher(conn, d); return; }
+        // a spectator asks too: the host (or the player at a tournament board) accepts or declines
         if (st.priv && st.host && !inv && d.want === 'watch') { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
         // a request answered recently (also before a page refresh) is not asked again: declined stays declined,
         // "later" waits quietly in the Online panel

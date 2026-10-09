@@ -1155,7 +1155,7 @@ function finishBoard() {
   G.result = e; G.phase = 'done';
   if (online() && !guest()) Net.boardDone(e);
   if (G.tprac) { const c = tourCompare(G.tprac.id, G.tprac.b, e); if (c) { e.tprac = c; flash('🏆 ' + T('Against the tournament ({0} players): {1} IMP · {2}%', c.n, fmtSigned(c.imp), c.mp), 4500); } }
-  if (G.tour && !online()) { e.tour = G.tour; tourSend(e); }
+  if (G.tour && G.tour.table == null && !guest()) { e.tour = G.tour; tourSend(e); }   // an individual board (also while someone watches)
   else if (G.tour && G.tour.table != null && online() && !guest()) { e.tour = G.tour; Net.tourTableResult(G.tour.id, G.tour.table, G.tour.b, e.ns, conTxt(e)); }
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
   Store.saveRec(e);
@@ -1703,7 +1703,8 @@ function playTour(id) {
   if (t.state !== 'live') { flash(T('This tournament has not started yet'), 2000); return; }
   if (t.format === 'tables') { if (t.joined[Net.devId()]) tableBoard(); return; }
   if (!t.joined[Net.devId()]) Net.tourAnswer(id, true);   // an individual tournament: anyone in the lobby can join it
-  if (online()) { flash(T('Close the online table first'), 2000); return; }
+  // spectators may watch your tournament boards; another player at your table means it is a different game
+  if (online() && (guest() || Object.keys(Net.st.seats || {}).length > 1)) { flash(T('Close the online table first'), 2000); return; }
   const done = myTour(id); let b = 1; while (b <= t.n && done[b] != null) b++;
   if (b > t.n) { showStandings(id); return; }
   // the first time you play a tournament you choose your seat; you keep it for all its boards
