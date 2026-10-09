@@ -3373,9 +3373,9 @@ async function robotClaim(g, seat) {
 async function requestUndo(owner, name, seat) {
   const what = G.phase === 'bid' ? 'call' : 'move';
   const humans = seat == null ? [] : agreeOwners(sideOf(seat)).filter(o => o !== owner);
-  if (humans.length && !(await Net.askOwners(humans, { kind: 'undo', who: name, what }))) { Net.note(T('{0} wanted to take back their last {1} — not accepted', name, T(what))); return false; }
+  if (humans.length && !(await Net.askOwners(humans, { kind: 'undo', who: name, what }))) return false;
   const ok = undo(owner);
-  if (ok) Net.note(name + ' took back their last ' + what);
+  // no note in the table chat: the cards simply go back
   return ok;
 }
 // the text of a question to the other side (claim, robot claim, undo)
