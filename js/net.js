@@ -511,10 +511,11 @@ const Net = (() => {
     if (st.on) { flash(T('Leave the table you are at first'), 2000); return; }
     // online tables and players at a board (a tournament board first: the organiser's own table before the others)
     const playing = t => t.phase === 'play' || t.phase === 'bid';
-    const L = (st.tables || []).filter(t => !t.priv && !t.busy && (t.online || (playing(t) && (t.pub || t.tplay || t.solo))));
+    const L = (st.tables || []).filter(t => !t.priv && !t.busy && (t.online || (playing(t) && (t.pub || t.solo || t.tplay))));
     if (!L.length) { flash(T('No table to watch right now.'), 2500); if (!st.finding) findTables(); return; }
     const people = t => Object.keys(t.names || {}).length - (t.away || []).length;
-    const tourRank = t => { const id = (t.tplay && t.tplay.id) || (t.tour && t.tour.id), tr = id && st.tours[id]; return !tr ? 0 : nameKey(tr.by) === nameKey(t.host) ? 2 : 1; };
+    // a tournament you have finished first (you may watch it), one you have not played last (its player would turn you away)
+    const tourRank = t => { const id = (t.tplay && t.tplay.id) || (t.tour && t.tour.id), tr = id && st.tours[id]; if (!tr) return 0; const mine = (st.tres[id] || {})[devId()]; return mine && Object.keys(mine.ns || {}).length >= tr.n ? 1 : -1; };
     L.sort((a, b) => tourRank(b) - tourRank(a) || people(b) - people(a) || (playing(b) - playing(a)) || (b.watchers || 0) - (a.watchers || 0));
     const t = L[0];
     st.offer = t; st.want = 'watch'; st.msg = '';
@@ -570,6 +571,7 @@ const Net = (() => {
     return used.some(u => nameKey(u) === k);
   }
   function seatPlayer(conn, d, back) {
+    everAdd(d.tok);
     const hs = SET.seat, away = st.away || (st.away = {}), toks = st.toks || (st.toks = {});
     if (back != null) { const old = st.conns.get(st.seats[back]); st.conns.delete(st.seats[back]); if (old && old !== conn) { try { old.close(); } catch (e) {} } }
     const free = [0, 1, 2, 3].filter(s => !st.seats[s]);
@@ -597,7 +599,14 @@ const Net = (() => {
     seatPlayer(p.conn, p.d, null);
   }
   // a spectator: sees all four hands, cannot bid or play, can chat
+  // the devices that have been at this player's table (sat or watched): only they may watch a board played alone
+  function everAdd(tok) {
+    if (!tok) return; let L = []; try { L = JSON.parse(localStorage.getItem('bridge-ever-toks') || '[]') || []; } catch (e) {}
+    if (!L.includes(tok)) { L.push(tok); try { localStorage.setItem('bridge-ever-toks', JSON.stringify(L.slice(-200))); } catch (e) {} }
+  }
+  const everHas = tok => { try { return !!tok && (JSON.parse(localStorage.getItem('bridge-ever-toks') || '[]') || []).includes(tok); } catch (e) { return false; } };
   function addWatcher(conn, d) {
+    everAdd(d.tok);
     const name = String(d.name || 'Guest').slice(0, 20);
     (st.watch || (st.watch = new Map())).set(conn.peer, { conn, name });
     if (d.tok) { const w = st.watchToks || (st.watchToks = []); if (!w.includes(d.tok)) w.push(d.tok); }
@@ -684,7 +693,12 @@ const Net = (() => {
     if (d.t === 'hello') {
       if (d.tok && (st.banned || []).includes(d.tok)) { conn.send({ t: 'kick' }); setTimeout(() => conn.close(), 500); return; }
       // spectators: a player alone with robots can be watched while at a board (they accept); a spectator who comes back is let in again at once
-      if (d.want === 'watch' && !st.host && !(G && (G.phase === 'bid' || G.phase === 'play' || G.phase === 'done'))) { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
+      // a board played with robots may be watched by anyone who asks (the player accepts or declines); a tournament
+      // board only by someone who has been at this table before or has already played all the tournament's boards,
+      // so nobody sees the deals before playing them
+      const atBoard = G && (G.phase === 'bid' || G.phase === 'play' || G.phase === 'done'), tourId = G && G.tour && G.tour.table == null && G.tour.id;
+      const playedAll = id => { const r = (st.tres[id] || {})[d.tok], t = st.tours[id]; return !!(r && t && Object.keys(r.ns || {}).length >= t.n); };
+      if (d.want === 'watch' && !st.host && (!atBoard || (tourId && !everHas(d.tok) && !playedAll(tourId)))) { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
       if (d.want === 'watch' && d.tok && (st.watchToks || []).includes(d.tok)) { addWatcher(conn, d); return; }
       const away = st.away || (st.away = {});
       // a player coming back after a dropped connection gets the seat that was kept for them
