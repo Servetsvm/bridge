@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Day / night": "Gündüz / gece", "Day": "Gündüz", "Night": "Gece",
     "Checking…": "Kontrol ediliyor…", "Choose another name.": "Başka bir ad seç.", "Friends": "Arkadaşlar", "Leaderboard": "Liderlik tablosu", "Logins today": "Bugün giriş", "Nobody has a rating yet.": "Henüz kimsenin puanı yok.", "Offline": "Çevrimdışı", "Playing": "Oyunda", "Online": "Çevrimiçi",
     "PIN (4 digits)": "PIN (4 rakam)", "PIN again": "PIN tekrar", "Private message": "Özel mesaj", "Private message to {0}": "{0} kişisine özel mesaj", "Reply privately": "Özel cevap ver", "The PIN is 4 digits.": "PIN 4 rakamdan oluşur.", "The two PINs are not the same.": "İki PIN aynı değil.",
     "This name is registered with another PIN. If it is yours, enter your PIN.": "Bu ad başka bir PIN ile kayıtlı. Senin adınsa PIN’ini gir.", "Welcome, {0}!": "Hoş geldin, {0}!", "Write a name of at least 2 letters.": "En az 2 harfli bir ad yaz.",
@@ -90,6 +91,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Day / night": "Dag / natt", "Day": "Dag", "Night": "Natt",
     "Checking…": "Sjekker…", "Choose another name.": "Velg et annet navn.", "Friends": "Venner", "Leaderboard": "Toppliste", "Logins today": "Innlogginger i dag", "Nobody has a rating yet.": "Ingen har rating ennå.", "Offline": "Frakoblet", "Playing": "Spiller", "Online": "Pålogget",
     "PIN (4 digits)": "PIN (4 sifre)", "PIN again": "PIN igjen", "Private message": "Privat melding", "Private message to {0}": "Privat melding til {0}", "Reply privately": "Svar privat", "The PIN is 4 digits.": "PIN-koden har 4 sifre.", "The two PINs are not the same.": "De to PIN-kodene er ikke like.",
     "This name is registered with another PIN. If it is yours, enter your PIN.": "Navnet er registrert med en annen PIN. Er det ditt, skriv din PIN.", "Welcome, {0}!": "Velkommen, {0}!", "Write a name of at least 2 letters.": "Skriv et navn på minst 2 bokstaver.",
@@ -177,6 +179,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Day / night": "Día / noche", "Day": "Día", "Night": "Noche",
     "Checking…": "Comprobando…", "Choose another name.": "Elige otro nombre.", "Friends": "Amigos", "Leaderboard": "Clasificación", "Logins today": "Entradas hoy", "Nobody has a rating yet.": "Nadie tiene rating todavía.", "Offline": "Desconectados", "Playing": "Jugando", "Online": "Conectados",
     "PIN (4 digits)": "PIN (4 cifras)", "PIN again": "Repite el PIN", "Private message": "Mensaje privado", "Private message to {0}": "Mensaje privado a {0}", "Reply privately": "Responder en privado", "The PIN is 4 digits.": "El PIN tiene 4 cifras.", "The two PINs are not the same.": "Los dos PIN no coinciden.",
     "This name is registered with another PIN. If it is yours, enter your PIN.": "Este nombre está registrado con otro PIN. Si es tuyo, escribe tu PIN.", "Welcome, {0}!": "¡Bienvenido, {0}!", "Write a name of at least 2 letters.": "Escribe un nombre de al menos 2 letras.",
@@ -292,6 +295,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Day / night": "Jour / nuit", "Day": "Jour", "Night": "Nuit",
     "Checking…": "Vérification…", "Choose another name.": "Choisissez un autre nom.", "Friends": "Amis", "Leaderboard": "Classement", "Logins today": "Connexions aujourd’hui", "Nobody has a rating yet.": "Personne n’a encore de classement.", "Offline": "Hors ligne", "Playing": "En jeu", "Online": "En ligne",
     "PIN (4 digits)": "PIN (4 chiffres)", "PIN again": "PIN à nouveau", "Private message": "Message privé", "Private message to {0}": "Message privé à {0}", "Reply privately": "Répondre en privé", "The PIN is 4 digits.": "Le PIN a 4 chiffres.", "The two PINs are not the same.": "Les deux PIN ne sont pas identiques.",
     "This name is registered with another PIN. If it is yours, enter your PIN.": "Ce nom est enregistré avec un autre PIN. Si c’est le vôtre, entrez votre PIN.", "Welcome, {0}!": "Bienvenue, {0} !", "Write a name of at least 2 letters.": "Écrivez un nom d’au moins 2 lettres.",
@@ -407,6 +411,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Day / night": "Giorno / notte", "Day": "Giorno", "Night": "Notte",
     "Checking…": "Verifica…", "Choose another name.": "Scegli un altro nome.", "Friends": "Amici", "Leaderboard": "Classifica", "Logins today": "Accessi oggi", "Nobody has a rating yet.": "Nessuno ha ancora un rating.", "Offline": "Offline", "Playing": "In gioco", "Online": "Online",
     "PIN (4 digits)": "PIN (4 cifre)", "PIN again": "Ripeti il PIN", "Private message": "Messaggio privato", "Private message to {0}": "Messaggio privato a {0}", "Reply privately": "Rispondi in privato", "The PIN is 4 digits.": "Il PIN ha 4 cifre.", "The two PINs are not the same.": "I due PIN non coincidono.",
     "This name is registered with another PIN. If it is yours, enter your PIN.": "Questo nome è registrato con un altro PIN. Se è tuo, inserisci il tuo PIN.", "Welcome, {0}!": "Benvenuto, {0}!", "Write a name of at least 2 letters.": "Scrivi un nome di almeno 2 lettere.",
@@ -522,6 +527,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Day / night": "Tag / Nacht", "Day": "Tag", "Night": "Nacht",
     "Checking…": "Wird geprüft…", "Choose another name.": "Wähle einen anderen Namen.", "Friends": "Freunde", "Leaderboard": "Bestenliste", "Logins today": "Anmeldungen heute", "Nobody has a rating yet.": "Noch niemand hat ein Rating.", "Offline": "Offline", "Playing": "Am Spielen", "Online": "Online",
     "PIN (4 digits)": "PIN (4 Ziffern)", "PIN again": "PIN wiederholen", "Private message": "Private Nachricht", "Private message to {0}": "Private Nachricht an {0}", "Reply privately": "Privat antworten", "The PIN is 4 digits.": "Die PIN hat 4 Ziffern.", "The two PINs are not the same.": "Die beiden PINs stimmen nicht überein.",
     "This name is registered with another PIN. If it is yours, enter your PIN.": "Dieser Name ist mit einer anderen PIN registriert. Wenn es deiner ist, gib deine PIN ein.", "Welcome, {0}!": "Willkommen, {0}!", "Write a name of at least 2 letters.": "Schreibe einen Namen mit mindestens 2 Buchstaben.",
@@ -637,6 +643,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Day / night": "День / ночь", "Day": "День", "Night": "Ночь",
     "Checking…": "Проверяем…", "Choose another name.": "Выберите другое имя.", "Friends": "Друзья", "Leaderboard": "Лучшие", "Logins today": "Входов сегодня", "Nobody has a rating yet.": "Пока ни у кого нет рейтинга.", "Offline": "Не в сети", "Playing": "Играют", "Online": "В сети",
     "PIN (4 digits)": "PIN (4 цифры)", "PIN again": "PIN ещё раз", "Private message": "Личное сообщение", "Private message to {0}": "Личное сообщение: {0}", "Reply privately": "Ответить лично", "The PIN is 4 digits.": "PIN — это 4 цифры.", "The two PINs are not the same.": "PIN-коды не совпадают.",
     "This name is registered with another PIN. If it is yours, enter your PIN.": "Это имя зарегистрировано с другим PIN. Если оно ваше, введите свой PIN.", "Welcome, {0}!": "Добро пожаловать, {0}!", "Write a name of at least 2 letters.": "Имя — не короче 2 букв.",
@@ -752,6 +759,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Day / night": "Dzień / noc", "Day": "Dzień", "Night": "Noc",
     "Checking…": "Sprawdzanie…", "Choose another name.": "Wybierz inne imię.", "Friends": "Znajomi", "Leaderboard": "Ranking", "Logins today": "Logowania dziś", "Nobody has a rating yet.": "Nikt nie ma jeszcze rankingu.", "Offline": "Offline", "Playing": "Grają", "Online": "Online",
     "PIN (4 digits)": "PIN (4 cyfry)", "PIN again": "Powtórz PIN", "Private message": "Prywatna wiadomość", "Private message to {0}": "Prywatna wiadomość do {0}", "Reply privately": "Odpowiedz prywatnie", "The PIN is 4 digits.": "PIN ma 4 cyfry.", "The two PINs are not the same.": "Kody PIN się różnią.",
     "This name is registered with another PIN. If it is yours, enter your PIN.": "To imię jest zarejestrowane z innym PIN-em. Jeśli jest twoje, wpisz swój PIN.", "Welcome, {0}!": "Witaj, {0}!", "Write a name of at least 2 letters.": "Wpisz imię z co najmniej 2 liter.",
@@ -867,6 +875,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Day / night": "日间 / 夜间", "Day": "日间", "Night": "夜间",
     "Checking…": "正在检查…", "Choose another name.": "请换一个名字。", "Friends": "好友", "Leaderboard": "排行榜", "Logins today": "今日登录", "Nobody has a rating yet.": "还没有人有等级分。", "Offline": "离线", "Playing": "在打牌", "Online": "在线",
     "PIN (4 digits)": "PIN(4 位数字)", "PIN again": "再输一次 PIN", "Private message": "私信", "Private message to {0}": "私信给 {0}", "Reply privately": "私下回复", "The PIN is 4 digits.": "PIN 是 4 位数字。", "The two PINs are not the same.": "两次 PIN 不一致。",
     "This name is registered with another PIN. If it is yours, enter your PIN.": "这个名字已用另一个 PIN 注册。如果是你的,请输入你的 PIN。", "Welcome, {0}!": "欢迎,{0}!", "Write a name of at least 2 letters.": "名字至少 2 个字。",

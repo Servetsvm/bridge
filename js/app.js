@@ -556,6 +556,7 @@ function renderBar() {
        ${typeof Net !== "undefined" ? `<button class="btn" id="bChat">💬 ${T('Chat')}${(n => n ? ` (${n})` : '')((Net.st.unread || 0) + (Net.st.lunread || 0))}</button>` : ""}
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
        <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
+       <button class="btn" id="bTheme2">${document.documentElement.dataset.theme === "dark" ? "☀️ " + T("Day") : "🌙 " + T("Night")}</button>
        <button class="btn" id="bHist">📜 ${T('History')}</button>
        <button class="btn" id="bRes">📊 ${T('Results')}</button>
        <button class="btn" id="bSet">⚙ ${T('Settings')}</button>
@@ -836,7 +837,7 @@ function homeShell() {
   return `<div class="home">
   <header class="hhead"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
     <div class="hhr"><label class="hlang" title="${T('Language')}">🌐 <select id="hLang" class="sel" aria-label="${T('Language')}">${langs.map(([v, l]) => `<option value="${v}" ${SET.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-      <button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button></div></header>
+      <button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button></div></header>
   <div class="hgrid">
     <section class="hmain">
       <div class="hcard hero">
@@ -891,6 +892,7 @@ function renderHome() {
     }
   }
   const per = Store.periods(HIST)[0];
+  set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
   set('hStats', `${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
   // the open section is rebuilt only when it changes (so typing in it is not lost); its contents are refreshed
   // the chat opens as a panel at the bottom of the screen (phones and narrow windows); the others under the buttons
@@ -1716,6 +1718,7 @@ document.addEventListener('click', ev_ => {
       break; }
     case 'tCancel': Net.tourCancel(ui.tsetId); closeOv(); render(); break;
     case "oReplay": replayDeal(); break;
+    case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
     case "pRename": showGate(true); break;
     case "oShared": { const d = ui.sharedDeal; ui.sharedDeal = null; closeOv(); if (d) { ui.saved = null; newBoard(d.hands, d.b); } break; }
