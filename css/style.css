@@ -750,3 +750,4 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .pedit .sel,.pedit .tok{padding:4px 6px;font-size:13px;height:30px;border-radius:6px}
 .pedit .pconvb{padding:5px 8px;font-size:13px;min-height:0}
 @media (max-width:420px){ .pedit label span{width:48px;font-size:11px} }
+.pnm .pctry{font-size:14px;font-weight:600;opacity:.9;white-space:nowrap}

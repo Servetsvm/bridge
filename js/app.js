@@ -1917,7 +1917,6 @@ function showPlayer(name) {
   const tot = p && p.per ? p.per[4] : p ? [p.n, p.imp, p.mp] : null;
   const boards = tot ? tot[0] || 0 : 0;
   const fields = [
-    [T('Country/Region'), ctry ? `${flagOf(ctry)} ${esc(ctryName(ctry))}` : '—'],
     [T('Skill level'), lvl ? `<span class="plvl l-${lvl}">${T(LEVEL_N[lvl])}</span>` : '—'],
     [T('Joined'), p && p.joined ? esc(p.joined) : '—'],
     [T('Logins'), p && p.logins ? loginsTxt(p.logins) : '—'],
@@ -1933,7 +1932,7 @@ function showPlayer(name) {
       <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
   openOv('player', `<div class="pcard">
     <div class="phead"><div class="pav">${esc((shown.trim()[0] || '?').toUpperCase())}</div>
-      <div class="pmain"><div class="pnm">${esc(shown)}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
+      <div class="pmain"><div class="pnm">${esc(shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
         <div class="psub">${where ? `<span class="pwhere">● ${esc(where)}</span>` : ''}</div></div></div>
     <table class="pfields">${fields.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>
     ${conv ? `<div class="pconv">${conv}</div>` : ''}
