@@ -467,6 +467,19 @@ const Net = (() => {
     flash(T('Asked {0} for a seat…', t.host), 2000);
     join('room-' + t.k, name, 'any');
   }
+  // watch the most interesting table: an online table with the most people at it, already playing
+  function quickWatch() {
+    if (!navigator.onLine) { flash(T('You are offline'), 1500); return; }
+    if (st.on) { flash(T('Leave the table you are at first'), 2000); return; }
+    const L = (st.tables || []).filter(t => t.online && !t.priv && !t.busy);
+    if (!L.length) { flash(T('No table to watch right now.'), 2500); if (!st.finding) findTables(); return; }
+    const people = t => Object.keys(t.names || {}).length - (t.away || []).length;
+    L.sort((a, b) => people(b) - people(a) || ((b.phase === 'play' || b.phase === 'bid') - (a.phase === 'play' || a.phase === 'bid')) || (b.watchers || 0) - (a.watchers || 0));
+    const t = L[0];
+    st.offer = t; st.want = 'watch'; st.msg = '';
+    flash('👁 ' + T("{0}'s table", t.host), 2000);
+    join('room-' + t.k, myName() || 'Guest', 'watch');
+  }
   // this player's own table goes online: they become its host (requests are accepted one by one)
   function becomeHost() {
     if (st.host || !st.slot) return !!st.host;
@@ -587,16 +600,18 @@ const Net = (() => {
   const reqRefresh = () => { if (ui.overlay === 'req') showReq(); else panelRefresh(); };
   /* invitations to your table: sent along the lobby lines to a player by name; they join with one tap and sit
      down without waiting (this is the way into a private table) */
-  function inviteToTable(name) {
+  // seat: where the invited player sits (your partner's seat when you play together)
+  function inviteToTable(name, seat) {
     if (!st.host || !st.slot) { flash(T('Open an online table first'), 2000); return; }
     const inv = st.invited || (st.invited = []); if (!inv.includes(nameKey(name))) inv.push(nameKey(name));
-    meshSend({ t: 'tblinv', k: st.slot.k, host: myName() || 'Host', to: name, priv: !!st.priv });
+    if (seat != null) (st.invSeat || (st.invSeat = {}))[nameKey(name)] = seat;
+    meshSend({ t: 'tblinv', k: st.slot.k, host: myName() || 'Host', to: name, priv: !!st.priv, partner: seat != null && seat === (SET.seat + 2) % 4 });
     flash(T('Invitation sent to {0}', name), 2000); render();
   }
   function gotTableInvite(d) {
     if (!d || nameKey(d.to) !== nameKey(myName() || '') || st.on) return;
     st.tinv = d; beep();
-    openOv('tinv', `<h2>🔔 ${esc(d.host)}</h2><div class="big">${T('invites you to their table')}</div>
+    openOv('tinv', `<h2>🔔 ${esc(d.host)}</h2><div class="big">${d.partner ? '🤝 ' + T('wants to play with you as partners') : T('invites you to their table')}</div>
       <div class="row2"><button class="btn new" id="tinvYes">${T('Join')}</button><button class="btn" id="oClose">${T('Not now')}</button></div>`);
   }
   function joinInvite() {
@@ -641,6 +656,8 @@ const Net = (() => {
         // someone you invited sits down at once; a private table (🔒 in the lobby) takes no spectators, others ask the host
         const inv = (st.invited || []).includes(nameKey(d.name));
         if (inv && st.host && d.want !== 'watch') { st.invited = st.invited.filter(x => x !== nameKey(d.name)); seatPlayer(conn, d, null); return; }
+        // a public online table takes spectators at once (as on BBO); the players see who is watching
+        if (d.want === 'watch' && st.host && !st.priv) { addWatcher(conn, d); return; }
         if (st.priv && st.host && !inv && d.want === 'watch') { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
         // a request answered recently (also before a page refresh) is not asked again: declined stays declined,
         // "later" waits quietly in the Online panel
@@ -1046,7 +1063,14 @@ const Net = (() => {
     if (id === st.me || id === 'host') { nudged(secs); return; }
     const c = st.conns.get(id); if (c && c.open) { try { c.send({ t: 'nudge', s: secs }); } catch (e) {} }
   }
+  /* play together: open a table that is listed in the lobby (if yours is not open yet) and invite the other
+     player to the seat opposite you; the two free seats are left for opponents (robots play them meanwhile) */
+  async function playWith(name) {
+    if (st.guest) { flash(T('Leave the table you are at first'), 2000); return; }
+    if (!st.host) { await host(false); if (!st.host) return; }
+    inviteToTable(name, (SET.seat + 2) % 4);
+  }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, shareInfo, kick, nudge, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
