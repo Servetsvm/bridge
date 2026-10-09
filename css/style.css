@@ -733,3 +733,5 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
   .ttab td[data-l]:not([data-l=""])::before{content:attr(data-l);display:block;color:#6d6c62;font-size:11px;font-weight:600}
   .ttab .tact .btn{margin:4px 6px 0 0}
 }
+.hnamebtn{text-align:left;cursor:pointer;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hnamebtn i{color:#9a988a;font-weight:400}

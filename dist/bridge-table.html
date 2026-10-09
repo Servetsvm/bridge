@@ -748,6 +748,8 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
   .ttab td[data-l]:not([data-l=""])::before{content:attr(data-l);display:block;color:#6d6c62;font-size:11px;font-weight:600}
   .ttab .tact .btn{margin:4px 6px 0 0}
 }
+.hnamebtn{text-align:left;cursor:pointer;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hnamebtn i{color:#9a988a;font-weight:400}
 
 </style>
 
@@ -4637,7 +4639,7 @@ function homeShell() {
   <div class="hgrid">
     <section class="hmain">
       <div class="hcard hero">
-        <div class="hname hrow"><label><span>${T('Name')}</span><input id="hName" class="tok" maxlength="20" autocomplete="nickname" value="${esc(myNm())}" placeholder="${T('Name')}"></label>
+        <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label>
         <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label><button class="btn hpeople" data-hsec="people" title="${T('Players in the lobby')}">👥<span class="hpl"> ${T('Players in the lobby')}</span> <b id="hPeopleN"></b></button></div>
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
@@ -4676,6 +4678,7 @@ function renderHome() {
   const set = (id, html) => { const el = $(id); if (el && el.innerHTML !== html) { el.innerHTML = html; return true; } return false; };
   const cont = ui.saved && ui.saved.phase !== 'done';
   set('hGo', cont ? T('Continue') : '🤖 ' + T('Play with robots'));
+  { const b = $('hNameBtn'), h = (myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`) + ' ✏️'; if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name, after a change on your card
   { const hs = $('hSys'), v = SET.sys || 'twoone'; if (hs && hs.value !== v) hs.value = v; }   // also when it was changed on the convention card
   const per = Store.periods(HIST)[0];
   set('hStats', `${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
@@ -5307,6 +5310,7 @@ document.addEventListener('click', ev_ => {
   const pwx = ev_.target.closest('[data-pairwith]'); if (pwx) { closeOv(); Net.playWith(pwx.dataset.pairwith); return; }
   const fr = ev_.target.closest('[data-friend]'); if (fr) { toggleFriend(fr.dataset.friend); showPlayer(fr.dataset.friend); render(); return; }
   const ka = ev_.target.closest('[data-kickask]'); if (ka) { const s = +ka.dataset.kickask, n = Net.st.names[s] || SEAT[s]; askYes(T('Remove {0} from the table? A robot plays the seat.', n), () => Net.kick(s)); return; }
+  if (ev_.target.closest('#hNameBtn')) { showPlayer(myNm() || T('You')); return; }   // your name on the home page opens your card, where you change it
   if (ev_.target.closest('#hStats')) { showPlayer(myNm() || T('You')); return; }   // your own rating (the Results of this device)
   const dmb = ev_.target.closest('[data-dm]'); if (dmb) { showDm(dmb.dataset.dm); return; }
   const tq = ev_.target.closest('[data-tset],[data-tyes],[data-tno]'); if (tq) { if (tq.dataset.tset) { ui.tsel = null; showTourSetup(tq.dataset.tset); } else Net.tourAnswer(tq.dataset.tyes || tq.dataset.tno, !!tq.dataset.tyes); return; }
