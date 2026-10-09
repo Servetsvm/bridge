@@ -8,6 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "At {0}'s table": "{0} masasında", "Country": "Ülke", "Level": "Seviye", "Not set": "Seçilmedi", "About me": "Hakkımda", "A few words about you (system, what you like…)": "Kendinden birkaç kelime (sistemin, sevdiklerin…)", "Beginner": "Başlangıç", "Intermediate": "Orta", "Advanced": "İleri", "Expert": "Uzman", "World class": "Dünya klasmanı",
     "Contract": "Kontrat", "Today": "Bugün", "last:": "son:", "New Deal": "Yeni El", "Sure?": "Emin misin?", "Undo": "Geri al", "Chat": "Sohbet", "Hint": "İpucu", "Claim": "Claim", "Online": "Online", "Help": "Yardım", "Settings": "Ayarlar", "Results": "Sonuçlar", "Home": "Ana sayfa",
     "Us": "Biz", "Them": "Onlar", "Pass": "Pas", "Double": "Kontr", "Redouble": "Sürkontr",
     "Your call": "Teklif sırası sende", "{0} is thinking…": "{0} düşünüyor…", "Gathering the trick…": "Löve toplanıyor…", "Your turn: play a card": "Sıra sende: kart oyna", "Play from {0}'s hand": "{0} elinden oyna", "{0} is playing…": "{0} oynuyor…",
@@ -35,6 +36,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "At {0}'s table": "Ved bordet til {0}", "Country": "Land", "Level": "Nivå", "Not set": "Ikke valgt", "About me": "Om meg", "A few words about you (system, what you like…)": "Noen ord om deg (system, hva du liker …)", "Beginner": "Nybegynner", "Intermediate": "Middels", "Advanced": "Viderekommen", "Expert": "Ekspert", "World class": "Verdensklasse",
     "Contract": "Kontrakt", "Today": "I dag", "last:": "siste:", "New Deal": "Nytt spill", "Sure?": "Sikker?", "Undo": "Angre", "Chat": "Chat", "Hint": "Tips", "Claim": "Claim", "Online": "Online", "Help": "Hjelp", "Settings": "Innstillinger", "Results": "Resultater", "Home": "Hjem",
     "Us": "Vi", "Them": "De", "Pass": "Pass", "Double": "Dobl", "Redouble": "Redobl",
     "Your call": "Din melding", "{0} is thinking…": "{0} tenker…", "Gathering the trick…": "Stikket samles…", "Your turn: play a card": "Din tur: spill et kort", "Play from {0}'s hand": "Spill fra {0}", "{0} is playing…": "{0} spiller…",
@@ -62,6 +64,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "At {0}'s table": "En la mesa de {0}", "Country": "País", "Level": "Nivel", "Not set": "Sin elegir", "About me": "Sobre mí", "A few words about you (system, what you like…)": "Unas palabras sobre ti (sistema, lo que te gusta…)", "Beginner": "Principiante", "Intermediate": "Intermedio", "Advanced": "Avanzado", "Expert": "Experto", "World class": "Clase mundial",
     "Contract": "Contrato", "Today": "Hoy", "last:": "última:", "New Deal": "Repartir", "Sure?": "¿Seguro?", "Undo": "Atrás", "Chat": "Chat", "Hint": "Pista", "Claim": "Reclamar", "Online": "En línea", "Help": "Ayuda", "Settings": "Ajustes", "Results": "Resultados", "Home": "Inicio",
     "Us": "Nos.", "Them": "Ellos", "Pass": "Paso", "Double": "Doblo", "Redouble": "Redoblo",
     "Your call": "Te toca declarar", "{0} is thinking…": "{0} está pensando…", "Gathering the trick…": "Recogiendo la baza…", "Your turn: play a card": "Tu turno: juega una carta", "Play from {0}'s hand": "Juega desde la mano de {0}", "{0} is playing…": "{0} está jugando…",
@@ -117,6 +120,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "At {0}'s table": "À la table de {0}", "Country": "Pays", "Level": "Niveau", "Not set": "Non choisi", "About me": "À propos de moi", "A few words about you (system, what you like…)": "Quelques mots sur vous (système, ce que vous aimez…)", "Beginner": "Débutant", "Intermediate": "Intermédiaire", "Advanced": "Avancé", "Expert": "Expert", "World class": "Classe mondiale",
     "Contract": "Contrat", "Today": "Aujourd’hui", "last:": "dernière :", "New Deal": "Donner", "Sure?": "Sûr ?", "Undo": "Retour", "Chat": "Chat", "Hint": "Indice", "Claim": "Réclamer", "Online": "En ligne", "Help": "Aide", "Settings": "Réglages", "Results": "Résultats", "Home": "Accueil",
     "Us": "Nous", "Them": "Eux", "Pass": "Passe", "Double": "Contre", "Redouble": "Surcontre",
     "Your call": "À vous d’annoncer", "{0} is thinking…": "{0} réfléchit…", "Gathering the trick…": "On ramasse la levée…", "Your turn: play a card": "À vous : jouez une carte", "Play from {0}'s hand": "Jouez de la main de {0}", "{0} is playing…": "{0} joue…",
@@ -172,6 +176,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "At {0}'s table": "Al tavolo di {0}", "Country": "Paese", "Level": "Livello", "Not set": "Non scelto", "About me": "Su di me", "A few words about you (system, what you like…)": "Qualche parola su di te (sistema, cosa ti piace…)", "Beginner": "Principiante", "Intermediate": "Intermedio", "Advanced": "Avanzato", "Expert": "Esperto", "World class": "Classe mondiale",
     "Contract": "Contratto", "Today": "Oggi", "last:": "ultima:", "New Deal": "Nuova", "Sure?": "Sicuro?", "Undo": "Indietro", "Chat": "Chat", "Hint": "Aiuto", "Claim": "Claim", "Online": "Online", "Help": "Guida", "Settings": "Impostazioni", "Results": "Risultati", "Home": "Home",
     "Us": "Noi", "Them": "Loro", "Pass": "Passo", "Double": "Contro", "Redouble": "Surcontro",
     "Your call": "Tocca a te dichiarare", "{0} is thinking…": "{0} sta pensando…", "Gathering the trick…": "Si raccoglie la presa…", "Your turn: play a card": "Tocca a te: gioca una carta", "Play from {0}'s hand": "Gioca dalla mano di {0}", "{0} is playing…": "{0} sta giocando…",
@@ -227,6 +232,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "At {0}'s table": "Am Tisch von {0}", "Country": "Land", "Level": "Niveau", "Not set": "Nicht gewählt", "About me": "Über mich", "A few words about you (system, what you like…)": "Ein paar Worte über dich (System, was du magst …)", "Beginner": "Anfänger", "Intermediate": "Mittel", "Advanced": "Fortgeschritten", "Expert": "Experte", "World class": "Weltklasse",
     "Contract": "Kontrakt", "Today": "Heute", "last:": "letztes:", "New Deal": "Neu", "Sure?": "Sicher?", "Undo": "Zurück", "Chat": "Chat", "Hint": "Tipp", "Claim": "Claim", "Online": "Online", "Help": "Hilfe", "Settings": "Einstellungen", "Results": "Ergebnisse", "Home": "Start",
     "Us": "Wir", "Them": "Sie", "Pass": "Passe", "Double": "Kontra", "Redouble": "Rekontra",
     "Your call": "Du bist mit Reizen dran", "{0} is thinking…": "{0} überlegt…", "Gathering the trick…": "Stich wird eingesammelt…", "Your turn: play a card": "Du bist dran: spiele eine Karte", "Play from {0}'s hand": "Spiele aus der Hand von {0}", "{0} is playing…": "{0} spielt…",
@@ -282,6 +288,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "At {0}'s table": "За столом {0}", "Country": "Страна", "Level": "Уровень", "Not set": "Не выбрано", "About me": "Обо мне", "A few words about you (system, what you like…)": "Пара слов о себе (система, что вам нравится…)", "Beginner": "Новичок", "Intermediate": "Средний", "Advanced": "Продвинутый", "Expert": "Эксперт", "World class": "Мировой класс",
     "Contract": "Контракт", "Today": "Сегодня", "last:": "последняя:", "New Deal": "Сдать", "Sure?": "Точно?", "Undo": "Отмена", "Chat": "Чат", "Hint": "Подсказка", "Claim": "Клейм", "Online": "Онлайн", "Help": "Справка", "Settings": "Настройки", "Results": "Результаты", "Home": "Главная",
     "Us": "Мы", "Them": "Они", "Pass": "Пас", "Double": "Контра", "Redouble": "Реконтра",
     "Your call": "Ваша заявка", "{0} is thinking…": "{0} думает…", "Gathering the trick…": "Взятка собирается…", "Your turn: play a card": "Ваш ход: сыграйте карту", "Play from {0}'s hand": "Играйте из руки {0}", "{0} is playing…": "{0} играет…",
@@ -337,6 +344,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "At {0}'s table": "Przy stole {0}", "Country": "Kraj", "Level": "Poziom", "Not set": "Nie wybrano", "About me": "O mnie", "A few words about you (system, what you like…)": "Kilka słów o sobie (system, co lubisz…)", "Beginner": "Początkujący", "Intermediate": "Średniozaawansowany", "Advanced": "Zaawansowany", "Expert": "Ekspert", "World class": "Klasa światowa",
     "Contract": "Kontrakt", "Today": "Dziś", "last:": "ostatnie:", "New Deal": "Rozdaj", "Sure?": "Na pewno?", "Undo": "Cofnij", "Chat": "Czat", "Hint": "Podpowiedź", "Claim": "Claim", "Online": "Online", "Help": "Pomoc", "Settings": "Ustawienia", "Results": "Wyniki", "Home": "Start",
     "Us": "My", "Them": "Oni", "Pass": "Pas", "Double": "Kontra", "Redouble": "Rekontra",
     "Your call": "Twoja odzywka", "{0} is thinking…": "{0} myśli…", "Gathering the trick…": "Zbieranie lewy…", "Your turn: play a card": "Twój ruch: zagraj kartę", "Play from {0}'s hand": "Zagraj z ręki {0}", "{0} is playing…": "{0} gra…",
@@ -392,6 +400,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "At {0}'s table": "在{0}的牌桌", "Country": "国家/地区", "Level": "水平", "Not set": "未选择", "About me": "关于我", "A few words about you (system, what you like…)": "介绍一下自己(体系、喜好…)", "Beginner": "初学", "Intermediate": "中级", "Advanced": "高级", "Expert": "专家", "World class": "世界级",
     "Contract": "定约", "Today": "今天", "last:": "上一副:", "New Deal": "新牌", "Sure?": "确定?", "Undo": "撤回", "Chat": "聊天", "Hint": "提示", "Claim": "摊牌", "Online": "在线", "Help": "帮助", "Settings": "设置", "Results": "成绩", "Home": "首页",
     "Us": "我方", "Them": "对方", "Pass": "不叫", "Double": "加倍", "Redouble": "再加倍",
     "Your call": "轮到你叫牌", "{0} is thinking…": "{0} 正在思考…", "Gathering the trick…": "正在收墩…", "Your turn: play a card": "轮到你:出一张牌", "Play from {0}'s hand": "从{0}的手中出牌", "{0} is playing…": "{0} 正在出牌…",
@@ -451,6 +460,8 @@ function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) =
 
 /* ---- the seats, the conventions and the systems in the chosen language (the English text stays in the engine;
    applyLang() swaps the names and descriptions shown on the screen) ---- */
+// the languages of the app (code, name in that language)
+const LANGS = [['en', 'English'], ['tr', 'Türkçe'], ['no', 'Norsk'], ['es', 'Español'], ['fr', 'Français'], ['it', 'Italiano'], ['de', 'Deutsch'], ['ru', 'Русский'], ['pl', 'Polski'], ['zh', '中文']];
 const SEAT_T = { en: ['North', 'East', 'South', 'West'], tr: ['Kuzey', 'Doğu', 'Güney', 'Batı'], no: ['Nord', 'Øst', 'Syd', 'Vest'], es: ['Norte', 'Este', 'Sur', 'Oeste'], fr: ['Nord', 'Est', 'Sud', 'Ouest'], it: ['Nord', 'Est', 'Sud', 'Ovest'], de: ['Nord', 'Ost', 'Süd', 'West'], ru: ['Север', 'Восток', 'Юг', 'Запад'], pl: ['Północ', 'Wschód', 'Południe', 'Zachód'], zh: ['北', '东', '南', '西'] };
 // one letter for each seat (in contracts such as "4♠ S"); Polish uses N E S W, as Polish players do
 const SEAT_AB_T = { en: 'NESW', tr: 'KDGB', no: 'NØSV', es: 'NESO', fr: 'NESO', it: 'NESO', de: 'NOSW', ru: 'СВЮЗ', pl: 'NESW', zh: '北东南西' };
@@ -1555,7 +1566,7 @@ function turnAlert() {
 /* ================= home page: start, open tables, our convention card and the lobby chat ================= */
 const myNm = () => { try { return localStorage.getItem('bridge-table-name') || ''; } catch (e) { return ''; } };
 function homeShell() {
-  const langs = [['en', 'English'], ['tr', 'Türkçe'], ['no', 'Norsk'], ['es', 'Español'], ['fr', 'Français'], ['it', 'Italiano'], ['de', 'Deutsch'], ['ru', 'Русский'], ['pl', 'Polski'], ['zh', '中文']];
+  const langs = LANGS;
   const sec = (k, label) => `<button class="hsec" data-hsec="${k}">${label}</button>`;
   return `<div class="home">
   <header class="hhead"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
@@ -1827,12 +1838,34 @@ function showPlayer(name) {
   const PN = ['Today', 'This week', 'This month', 'This year', 'All time'];
   const per = p && p.per ? p.per : p ? [[p.n, p.imp, p.mp]] : [];
   const rows = per.map((r, i) => `<tr><td>${T(PN[i])}</td><td class="n">${r[0] || 0}</td><td class="n">${r[1] == null ? '—' : fmtSigned(r[1])}</td><td class="n">${r[2] == null ? '—' : r[2] + '%'}</td></tr>`).join('');
-
-  openOv('player', `<h2>👤 ${esc(name)}</h2>${sys ? `<div class="muted">${T('System')}: <b>${esc(sys)}</b></div>` : ''}
+  // the card's head, as on the big bridge sites: initial, name, flag, level, where the player is
+  const shown = me ? (myNm() || T('You')) : name, lvl = p && p.lvl, ctry = p && p.ctry;
+  const w = me ? null : Net.whereIs(name);
+  const where = me ? '' : !w ? '' : w.lobby ? T('In the lobby') : w.online ? T("At {0}'s table", w.host) : T('playing with robots');
+  const lang = p && p.lang && (LANGS.find(l => l[0] === p.lang) || [])[1];
+  const info = [sys && `${T('System')}: <b>${esc(sys)}</b>`, lang && `${T('Language')}: ${esc(lang)}`, ctry && `${T('Country')}: ${flagOf(ctry)} ${esc(ctryName(ctry))}`].filter(Boolean).join(' · ');
+  const edit = me ? `<div class="pedit">
+      <label><span>${T('Level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
+      <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
+      <label class="pab"><span>${T('About me')}</span><input id="pAbout" class="tok" maxlength="80" value="${esc(SET.about || '')}" placeholder="${T('A few words about you (system, what you like…)')}"></label></div>` : '';
+  openOv('player', `<div class="pcard">
+    <div class="phead"><div class="pav">${esc((shown.trim()[0] || '?').toUpperCase())}</div>
+      <div class="pmain"><div class="pnm">${esc(shown)} ${ctry ? `<span class="pflag" title="${esc(ctryName(ctry))}">${flagOf(ctry)}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
+        <div class="psub">${lvl ? `<span class="plvl l-${lvl}">${T(LEVEL_N[lvl])}</span>` : ''}${where ? `<span class="pwhere">● ${esc(where)}</span>` : ''}</div></div></div>
+    ${p && p.about ? `<div class="pabout">“${esc(p.about)}”</div>` : ''}
+    ${info ? `<div class="pinfo">${info}</div>` : ''}
+    ${edit}
     ${rows ? `<div class="resscroll"><table class="res"><thead><tr><th></th><th class="n">${T('boards')}</th><th class="n">${T('IMP / board')}</th><th class="n">MP %</th></tr></thead><tbody>${rows}</tbody></table></div>`
       : `<div class="muted">${T('No rating yet — it shows once this player has played (with the new version).')}</div>`}
+    </div>
     <div class="row2">${me ? '' : `<button class="btn gold" data-dm="${esc(name)}">💬 ${T('Message')}</button><button class="btn new" data-pairwith="${esc(name)}">🤝 ${T('Play as partners')}</button><button class="btn" data-friend="${esc(name)}">${isFriend(name) ? '★ ' + T('Friend') : '☆ ' + T('Add as friend')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
+// the player card's level and country lists
+const LEVELS = ['beg', 'int', 'adv', 'exp', 'wc'];
+const LEVEL_N = { beg: 'Beginner', int: 'Intermediate', adv: 'Advanced', exp: 'Expert', wc: 'World class' };
+const COUNTRIES = ['TR', 'NO', 'SE', 'DK', 'FI', 'IS', 'GB', 'IE', 'FR', 'DE', 'NL', 'BE', 'LU', 'CH', 'AT', 'IT', 'ES', 'PT', 'PL', 'CZ', 'SK', 'HU', 'RO', 'BG', 'GR', 'CY', 'HR', 'SI', 'RS', 'BA', 'UA', 'RU', 'EE', 'LV', 'LT', 'US', 'CA', 'MX', 'BR', 'AR', 'CL', 'CN', 'TW', 'HK', 'JP', 'KR', 'IN', 'ID', 'PK', 'AU', 'NZ', 'ZA', 'EG', 'IL', 'MA', 'AZ', 'GE', 'KZ'];
+const flagOf = c => /^[A-Z]{2}$/.test(c || '') ? String.fromCodePoint(...[...c].map(x => 127397 + x.charCodeAt(0))) : '';
+function ctryName(c) { try { return new Intl.DisplayNames([SET.lang || 'en'], { type: 'region' }).of(c) || c; } catch (e) { return c; } }
 /* friends: ★ on a player's card; friends come first in the lobby list and you hear when one arrives */
 const friends = () => { try { return JSON.parse(localStorage.getItem('bridge-friends') || '[]') || []; } catch (e) { return []; } };
 const isFriend = n => friends().some(f => f.toLowerCase() === String(n).trim().toLowerCase());
@@ -2142,6 +2175,8 @@ document.addEventListener('change', e => {
     Store.saveSettings(SET); save(); if (ui.overlay === "set") showSettings(); else render();
   }
   if (t.dataset.tinv != null && ui.tsel) { if (t.checked) ui.tsel.names.add(t.dataset.tinv); else ui.tsel.names.delete(t.dataset.tinv); return; }
+  // your own player card: level, country and a few words, sent with your profile
+  if (t.id === 'pLvl' || t.id === 'pCtry' || t.id === 'pAbout') { SET[{ pLvl: 'lvl', pCtry: 'ctry', pAbout: 'about' }[t.id]] = t.id === 'pAbout' ? t.value.trim().slice(0, 80) : t.value; Store.saveSettings(SET); save(); Net.shareInfo(); if (t.id !== 'pAbout') showPlayer(myNm() || T('You')); return; }
   if (t.id === 'hLang') { SET.lang = t.value; applyLang(); Store.saveSettings(SET); save(); render(); return; }
   if (t.id === 'hSys') { SET.sys = t.value; SET.conv = { ...E.sysOf(t.value).conv }; SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(E.sysOf(t.value).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
   if (t.id === 'hName') { try { localStorage.setItem('bridge-table-name', t.value.trim().slice(0, 20)); } catch (e) {} return; }

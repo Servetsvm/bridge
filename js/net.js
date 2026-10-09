@@ -105,7 +105,8 @@ const Net = (() => {
   function prof() {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
-    return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]) };
+    return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en' };   // the player card: level, country, a few words
   }
   // a profile received from another app, kept to the fields we know
   const num = v => v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
@@ -113,7 +114,15 @@ const Net = (() => {
     if (!q || typeof q !== 'object') return null;
     return { n: +q.n || 0, imp: num(q.imp), mp: num(q.mp), sys: typeof q.sys === 'string' ? q.sys.slice(0, 12) : undefined,
       conv: conv && q.conv && typeof q.conv === 'object' ? Object.fromEntries(E.CONVS.map(c => [c.k, !!q.conv[c.k]])) : undefined,
-      per: Array.isArray(q.per) ? q.per.slice(0, 5).map(r => Array.isArray(r) ? [+r[0] || 0, num(r[1]), num(r[2])] : [0, null, null]) : undefined };
+      per: Array.isArray(q.per) ? q.per.slice(0, 5).map(r => Array.isArray(r) ? [+r[0] || 0, num(r[1]), num(r[2])] : [0, null, null]) : undefined,
+      lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
+      about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '' };
+  }
+  // where a player is: at a table (whose, online or with robots) or just in the lobby
+  function whereIs(name) {
+    const k = nameKey(name);
+    for (const t of (st.tables || [])) if ((t.online || (t.phase && t.phase !== 'idle')) && (nameKey(t.host) === k || Object.values(t.names || {}).some(n => nameKey(n) === k))) return { host: t.host, online: t.online, phase: t.phase, own: nameKey(t.host) === k };   // someone on the home page is just in the lobby
+    return (st.roomOf || {})[k] != null ? { lobby: true } : null;
   }
   // the profile of a player seen in the lobby (from the table information)
   function profOf(name) {
@@ -1075,5 +1084,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

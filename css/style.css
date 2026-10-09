@@ -676,3 +676,21 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .hrow .hpeople{flex:0 1 auto;white-space:nowrap;font-size:14px;padding:8px 10px;border-radius:10px;background:#fff;border:1px solid #c9c4ad;color:#2a2a24;font-weight:700}
 .hrow .hpeople.on{background:#2f6f4a;color:#fff;border-color:#2f6f4a}
 @media (max-width:600px){ .hrow .hpeople .hpl{display:none} .hrow .hpeople{padding:8px 8px} .hrow label{flex:1 1 120px} }
+/* the player card (tap a name in the lobby) */
+.pcard{display:flex;flex-direction:column;gap:8px}
+.phead{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#1b2a4e,#2b4a86);color:#fff;border-radius:12px;padding:12px}
+.pav{flex:none;width:52px;height:52px;border-radius:50%;background:#f2c94c;color:#1b2a4e;font-size:26px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.pmain{min-width:0}
+.pnm{font-size:20px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pflag{font-size:20px}
+.pstar{color:#f2c94c}
+.psub{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;font-size:13px}
+.plvl{border-radius:999px;padding:1px 9px;font-weight:700;background:#fff;color:#1b2a4e}
+.plvl.l-beg{background:#d8f0d2;color:#24572a}.plvl.l-int{background:#d6e7fb;color:#1d4c8a}.plvl.l-adv{background:#fde9c2;color:#7a4a00}.plvl.l-exp{background:#f8d0d4;color:#8a1d2b}.plvl.l-wc{background:#f2c94c;color:#3a2a00}
+.pwhere{color:#bfe8c6}
+.pabout{font-style:italic;background:#f6f3e8;border-left:4px solid #c9a227;border-radius:6px;padding:6px 10px}
+.pinfo{font-size:14px;color:#3a3a32}
+.pedit{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;background:#f6f3e8;border-radius:10px;padding:8px}
+.pedit label{display:flex;flex-direction:column;gap:2px;font-size:12.5px;font-weight:700;color:#5b5a50;min-width:0}
+.pedit .pab{grid-column:1/-1}
+.pedit .sel,.pedit .tok{width:100%;min-width:0}
