@@ -106,7 +106,7 @@ const Net = (() => {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
     return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
-      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en' };   // the player card: level, country, a few words
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0 };   // the player card: level, country, a few words
   }
   // a profile received from another app, kept to the fields we know
   const num = v => v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
@@ -116,7 +116,8 @@ const Net = (() => {
       conv: conv && q.conv && typeof q.conv === 'object' ? Object.fromEntries(E.CONVS.map(c => [c.k, !!q.conv[c.k]])) : undefined,
       per: Array.isArray(q.per) ? q.per.slice(0, 5).map(r => Array.isArray(r) ? [+r[0] || 0, num(r[1]), num(r[2])] : [0, null, null]) : undefined,
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
-      about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '' };
+      about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
+      joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   function whereIs(name) {
@@ -127,7 +128,7 @@ const Net = (() => {
   // the profile of a player seen in the lobby (from the table information)
   function profOf(name) {
     const k = nameKey(name);
-    for (const t of (st.tables || [])) { if (nameKey(t.host) === k && t.prof) return cleanProf(t.prof); for (const s in (t.names || {})) if (nameKey(t.names[s]) === k && t.profs && t.profs[s]) return cleanProf(t.profs[s]); }
+    for (const t of (st.tables || [])) { if (nameKey(t.host) === k && t.prof) return cleanProf(t.prof, true); for (const s in (t.names || {})) if (nameKey(t.names[s]) === k && t.profs && t.profs[s]) return cleanProf(t.profs[s], true); }
     for (const m of (st.lchat || []).slice().reverse()) if (nameKey(m.from) === k && m.p) return m.p;   // from the lobby chat
     if (k === nameKey(myName() || '')) return prof();
     return null;
