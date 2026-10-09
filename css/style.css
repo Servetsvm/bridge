@@ -651,4 +651,5 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .hbtns .hrow3 .hwatch{flex:1.5 1 0}
 /* the home page: Play with robots and Open an online table side by side, Seat me under them */
 .hbtns .hopen{grid-column:auto}
-.hbtns .hquick{grid-column:1/-1}
+.hbtns .htour{font-size:17px}
+.hbtns .htour.on{background:#2f6f4a;color:#fff}
