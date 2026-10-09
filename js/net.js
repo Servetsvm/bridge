@@ -1025,8 +1025,8 @@ const Net = (() => {
       }
       case 'nFind': findTables(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
-      case 'nStop': if (ui.overlay === 'net') { stop(); closeOv(); } else if (confirm(T('Close the table for everyone?'))) { stop(); closeOv(); goHome(); } break;
-      case 'nLeave': if (ui.overlay === 'net' || confirm(T('Leave the table?'))) { leave(); closeOv(); } break;
+      case 'nStop': if (ui.overlay === 'net') { stop(); closeOv(); } else askYes(T('Close the table for everyone?'), () => { stop(); closeOv(); goHome(); }); break;
+      case 'nLeave': if (ui.overlay === 'net') { leave(); closeOv(); } else askYes(T('Leave the table?'), () => { leave(); closeOv(); }); break;
       case 'nRst': resetScore(); break;
       case 'nRstQ': send({ t: 'rsreq' }); flash(T('Ask to reset the score') + ' ✓', 1500); break;
       case 'nNdQ': askNewDeal(); closeOv(); break;
