@@ -701,3 +701,35 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .pfields tr+tr th,.pfields tr+tr td{border-top:1px solid #e6e2d2}
 .pconv{background:#f6f3e8;border-left:4px solid #1b2a4e;border-radius:6px;padding:7px 10px;font-size:13.5px;line-height:1.45}
 .ptot{margin-top:2px}
+/* Players in the lobby: side by side when the list is long */
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.person{min-width:0}
+.person .pname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.pedit .pedh{grid-column:1/-1;font-weight:800;color:#1b2a4e;font-size:14px}
+.pedit .pconvb{grid-column:1/-1;background:#b5651d;color:#fff;border-color:#8f4f16}
+/* the tournament list: tabs and a table (on phones each tournament becomes a small card) */
+.ttabs{flex-wrap:wrap;margin-bottom:6px}
+.ttabs button small{opacity:.7;font-weight:600}
+.ttwrap{overflow-x:auto}
+.ttab{width:100%;border-collapse:collapse;font-size:14px}
+.ttab th{background:#1b2a4e;color:#fff;text-align:left;padding:6px 8px;font-weight:700;white-space:nowrap}
+.ttab th:first-child{border-radius:8px 0 0 0}.ttab th:last-child{border-radius:0 8px 0 0}
+.ttab td{padding:7px 8px;border-bottom:1px solid #e3dfcd;vertical-align:middle}
+.ttab tbody tr:nth-child(even){background:#faf8f0}
+.ttab td small{display:block;color:#6d6c62;font-size:12px}
+.ttab .n{text-align:right}
+.ttab .tact{white-space:nowrap}
+.ttab .tact .btn{padding:6px 10px;margin:2px 0 2px 4px}
+.tst{border-radius:999px;padding:2px 9px;font-weight:700;font-size:12.5px;white-space:nowrap}
+.tst.reg{background:#fde9c2;color:#7a4a00}.tst.run{background:#d8f0d2;color:#24572a}
+.tnote{color:#1b2a4e!important;font-weight:600}
+@media (max-width:700px){
+  .ttab thead{display:none}
+  .ttab,.ttab tbody,.ttab tr{display:block}
+  .ttab tr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px 8px;border:1px solid #e3dfcd;border-radius:10px;padding:8px;margin-bottom:8px;background:#fff!important}
+  .ttab td{border:0;padding:2px 0;font-size:13px}
+  .ttab td:first-child,.ttab td.tact{grid-column:1/-1}
+  .ttab td.n{text-align:left}
+  .ttab td[data-l]:not([data-l=""])::before{content:attr(data-l);display:block;color:#6d6c62;font-size:11px;font-weight:600}
+  .ttab .tact .btn{margin:4px 6px 0 0}
+}
