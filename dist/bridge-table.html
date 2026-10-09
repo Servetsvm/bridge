@@ -5586,7 +5586,6 @@ function homeShell() {
         <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
-        <div class="hsecs"><button class="hsec phoneonly" data-hsec="chat">💬 ${T('Lobby chat')} <span id="hChatN"></span></button></div>
         
         <button class="hdaily" id="hDaily"></button>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
@@ -6547,7 +6546,7 @@ function pmTo(name) {
   ui.pmTo = name; Net.st.dmUnread[Net.nameKey ? Net.nameKey(name) : name.toLowerCase()] = 0;
   for (const k in Net.st.dms) if (Net.st.dms[k].name.toLowerCase() === name.toLowerCase()) Net.st.dmUnread[k] = 0;
   if (G && G.phase !== 'idle') { ui.dockOpen = true; ui.dockTab = 'lobby'; renderDock(); }
-  else if (!document.querySelector('.hchat') || getComputedStyle(document.querySelector('.hchat')).display === 'none') ui.hsec = 'chat';
+  else { const c = document.querySelector('.hchat'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'end' }); }
   render();
   setTimeout(() => { const i = ['dMsg', 'lMsg2', 'lMsg'].map($).find(x => x && x.offsetParent); if (i) i.focus(); }, 50);
 }
