@@ -649,3 +649,6 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .hbtns .hrow3{grid-column:1/-1;display:flex;gap:8px}
 .hbtns .hrow3 .btn{flex:1 1 0;min-width:0;white-space:nowrap;font-size:15px;padding-left:4px;padding-right:4px;overflow:hidden;text-overflow:ellipsis}
 .hbtns .hrow3 .hwatch{flex:1.5 1 0}
+/* the home page: Play with robots and Open an online table side by side, Seat me under them */
+.hbtns .hopen{grid-column:auto}
+.hbtns .hquick{grid-column:1/-1}
