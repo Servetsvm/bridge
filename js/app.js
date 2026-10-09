@@ -808,7 +808,7 @@ function homeShell() {
         <div class="muted">${T('Play alone with robots, or join a table where a robot is playing.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn gold" id="hQuick">${T('Seat me at a table')}</button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button></div>
         <div class="hsecs">${sec('tours', '🏆 ' + T('Tournaments'))}${sec('conv', '📋 ' + T('Our convention card (with partner)'))}${sec('people', '👥 ' + T('Players in the lobby'))}<button class="hsec phoneonly" data-hsec="chat">💬 ${T('Lobby chat')} <span id="hChatN"></span></button></div>
-        <div class="hlinks"><button class="btn" id="bNet">${T('Online')}</button><button class="btn" id="bSet">${T('Settings')}</button><button class="btn" id="bHelp">${T('Help')}</button></div>
+        <div class="hlinks"><button class="btn" id="bSet">${T('Settings')}</button><button class="btn" id="bHelp">${T('Help')}</button></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div id="hSec"></div>
