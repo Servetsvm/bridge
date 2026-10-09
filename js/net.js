@@ -158,6 +158,7 @@ const Net = (() => {
       joined: obj20(t.joined), declined: obj20(t.declined), v: +t.v || 0,
       // options: format "ind" (everyone alone with robots) or "tables" (players sit together; seats N E S W named
       // in advance, empty = robot), ranking by matchpoints or IMPs, and how many hours the tournament is kept
+      kind: ['speed', 'robot', 'daylong', 'pairs', 'imppairs', 'teams', 'custom'].includes(t.kind) ? t.kind : 'custom',
       format: t.format === "tables" ? "tables" : "ind", scoring: t.scoring === "imp" ? "imp" : "mp", hours: [3, 24, 72].includes(+t.hours) ? +t.hours : 72,
       tables: (Array.isArray(t.tables) ? t.tables : []).slice(0, 8).map(r => [0, 1, 2, 3].map(s => String((r || [])[s] || "").slice(0, 20))) };
   }
@@ -196,7 +197,7 @@ const Net = (() => {
     const me = myName() || 'Player';
     const t = cleanTour({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: me + ' · ' + new Date().toLocaleDateString(), by: me, byKey: devId(), n,
       seed: (Math.random() * 4294967295) >>> 0, ts: Date.now(), state: 'setup', inv: [], joined: { [devId()]: me }, declined: {}, v: 1,
-      format: 'tables', tables: [[me, '', '', ''], ['', '', '', '']] });   // two tables to start with; every seat can be typed in
+      format: 'tables', kind: 'pairs', tables: [[me, '', '', ''], ['', '', '', '']] });   // two tables to start with; every seat can be typed in
     st.tours[t.id] = t; saveTours(); renderL(); return t;
   }
   function tourInvite(id, names) {

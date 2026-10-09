@@ -735,3 +735,10 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 }
 .hnamebtn{text-align:left;cursor:pointer;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hnamebtn i{color:#9a988a;font-weight:400}
+/* tournament types and the team match score */
+.tkinds{flex-wrap:wrap}
+.tkinds button{flex:1 1 30%;min-width:0}
+.teams .tscore{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1b2a4e;color:#fff;border-radius:10px;padding:10px 12px;margin:6px 0}
+.teams .tscore>div:not(.tsn){flex:1;font-size:13px}
+.teams .tscore>div:last-child{text-align:right}
+.teams .tsn{font-size:24px;font-weight:800;color:#f2c94c;white-space:nowrap}
