@@ -5736,7 +5736,8 @@ const Net = (() => {
   // tournaments made by test devices while the app was being built (they reached the real lobby by mistake)
   const TEST_KEYS = ['hdr4fnhkte9muzjte04', '8bx5flpiljomv046g5q', 'yzx7gpx2u5emuzjw34j'];
   function mergeTour(t) {
-    if (!t || !t.id || TEST_KEYS.includes(t.byKey)) return false;
+    // test devices' tournaments, and old ones without an organiser key (nobody could ever close them), are dropped
+    if (!t || !t.id || !t.byKey || TEST_KEYS.includes(t.byKey)) return false;
     if (Date.now() - (+t.ts || 0) > ([3, 24, 72].includes(+t.hours) ? +t.hours : 72) * 3600e3) return false;   // kept for the chosen time
     const cur = st.tours[t.id];
     if (cur && ((+t.v || 0) <= cur.v || (cur.byKey && t.byKey !== cur.byKey))) return false;
@@ -6022,7 +6023,7 @@ const Net = (() => {
     // the tournaments that are open: an individual one is played at each player's own table, so it is listed here
     // even while nobody is at a board (join it from here)
     const me = devId(), live = Object.values(st.tours).filter(t => t.state !== 'off' && Date.now() < t.ts + t.hours * 3600e3 && (openTour(t) || t.joined[me] || isMine(t))).sort((a, b) => (a.state === 'live' ? 0 : 1) - (b.state === 'live' ? 0 : 1) || b.ts - a.ts);   // running ones first, newest first
-    const tours = live.map(t => {
+    const tours = live.filter(t => isMine(t) || t.joined[me] || Math.max(Object.keys(t.joined).length, Object.keys(st.tres[t.id] || {}).length) > 0).map(t => {   // an empty tournament is shown to its organiser only
       const k = typeof TOUR_KINDS !== 'undefined' && TOUR_KINDS[t.kind] && t.kind !== 'custom' ? `${TOUR_KINDS[t.kind].icon} ${T(TOUR_KINDS[t.kind].n)}` : t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual');
       const players = Math.max(Object.keys(t.joined).length, Object.keys(st.tres[t.id] || {}).length);
       const btn = t.state === 'setup' ? (isMine(t) ? `<button class="btn gold" data-tset="${t.id}">${T('Players and start')}</button>` : t.joined[me] ? `<span class="muted">${T('Waiting for {0} to start', esc(t.by))}</span>` : `<button class="btn new" data-tyes="${t.id}">${T('Register')}</button>`)
