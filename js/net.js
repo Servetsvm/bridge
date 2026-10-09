@@ -6,7 +6,8 @@
 const Net = (() => {
   'use strict';
   // ?ns=name in the address gives a separate lobby (for testing without disturbing real players)
-  const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1];
+  // on this computer's own test server (localhost) the app always uses a test lobby, so tests never reach real players
+  const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1] || (/^(localhost|127.0.0.1)$/.test(location.hostname) ? 'dev' : undefined);
   const PREFIX = 'bridgetable-' + (NS ? NS.toLowerCase() + '-' : ''), LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
   /* Every open app holds one of ROOMS fixed addresses ("rooms"): its table, played alone with robots, is then
      listed in everyone's lobby. When someone asks to join and the player accepts, that table goes online
@@ -150,8 +151,10 @@ const Net = (() => {
       format: t.format === "tables" ? "tables" : "ind", scoring: t.scoring === "imp" ? "imp" : "mp", hours: [3, 24, 72].includes(+t.hours) ? +t.hours : 72,
       tables: (Array.isArray(t.tables) ? t.tables : []).slice(0, 8).map(r => [0, 1, 2, 3].map(s => String((r || [])[s] || "").slice(0, 20))) };
   }
+  // tournaments made by test devices while the app was being built (they reached the real lobby by mistake)
+  const TEST_KEYS = ['hdr4fnhkte9muzjte04', '8bx5flpiljomv046g5q', 'yzx7gpx2u5emuzjw34j'];
   function mergeTour(t) {
-    if (!t || !t.id) return false;
+    if (!t || !t.id || TEST_KEYS.includes(t.byKey)) return false;
     if (Date.now() - (+t.ts || 0) > ([3, 24, 72].includes(+t.hours) ? +t.hours : 72) * 3600e3) return false;   // kept for the chosen time
     const cur = st.tours[t.id];
     if (cur && ((+t.v || 0) <= cur.v || (cur.byKey && t.byKey !== cur.byKey))) return false;
