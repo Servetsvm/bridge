@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>桥牌桌 — 使用指南</title>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--red:#c4122f;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:16px/1.7 "Segoe UI","PingFang SC","Microsoft YaHei",Roboto,Arial,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:28px;margin:0 0 4px}
+  h2{font-size:21px;margin:34px 0 8px;padding-top:12px;border-top:2px solid var(--felt)}
+  p{margin:6px 0}
+  .lead{color:var(--muted)}
+  code,.k{font-family:Consolas,ui-monospace,monospace;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:14px}
+  .k{font-family:inherit;font-weight:600}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  .note{background:#fff8dc;border-left:4px solid var(--gold);padding:8px 12px;border-radius:4px;margin:10px 0}
+  ol li,ul li{margin:3px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>桥牌桌 — 使用指南</h1>
+<p class="lead">每个按钮和每项设置的作用。应用地址:<code>https://servetsvm.github.io/bridge/</code> &nbsp;·&nbsp; <a href="guide-en.html">English</a></p>
+
+<h2>1. 首页</h2>
+<p>应用总是从首页打开:不会发牌,也不会开桌。</p>
+<ul>
+<li>顶部:<b>🌐 语言</b>、<span class="k">⚙</span> 设置和 <span class="k">?</span> 本指南。</li>
+<li><b>你的名字</b>和<b>你的体系</b>(2/1、SAYC、Acol、SEF、Precision、Polish Club):体系显示在大厅里你的名字旁边,你的机器人同伴也用这个体系叫牌。</li>
+<li><span class="k">🤖 与机器人打牌</span>(绿色):与机器人打牌(离线也可以)。你的牌桌会出现在大厅里;有人申请加入时由你决定。</li>
+<li><span class="k">🌐 开在线牌桌</span>(蓝色):开一张自己的牌桌,公开或私人。</li>
+<li><span class="k">帮我找座位</span>(黄色):寻找有机器人打牌的牌桌并申请加入;桌主接受后你接替机器人的座位。</li>
+<li><span class="k">🏆 比赛</span>(紫色)、<span class="k">👁 观战</span>(青色)、<span class="k">📋 约定卡</span>(棕色)。</li>
+<li><span class="k">👥 大厅里的玩家</span>和<span class="k">💬 大厅聊天</span>。点击玩家的名字可查看其体系和成绩;点击“今天:…”这一行查看你自己的。</li>
+</ul>
+
+<h2>2. 顶部栏</h2>
+<table>
+<tr><th>部分</th><th>作用</th></tr>
+<tr><td><span class="k">牌号</span></td><td>红边表示有局方,<b>D</b> 表示发牌人。</td></tr>
+<tr><td><span class="k">定约</span></td><td>定约、庄家以及双方赢墩(“我方 / 对方”)。点击可查看完整叫牌及解释。</td></tr>
+<tr><td><span class="k">⌂</span> / <span class="k">🚪</span></td><td>回到首页 / 离开牌桌(在页面内确认)。</td></tr>
+<tr><td><span class="k">新牌</span> / <span class="k">撤回</span> / <span class="k">提示</span></td><td>新的一副(打到一半会问“确定?”)/ 撤回上一个叫品或出牌 / 机器人在你位置会怎么做。</td></tr>
+<tr><td><span class="k">摊牌</span></td><td>剩 8 墩或更少时:选择剩下的墩你能拿几墩。</td></tr>
+<tr><td><span class="k">💬</span> / <span class="k">☰</span></td><td>聊天(红色数字表示新消息)/ 菜单:在线、提示音 🔔 / 🔕、📜 记录、成绩、设置和帮助。</td></tr>
+</table>
+<p>点击叫品可查看含义。打牌时点击牌桌中间可查看上一墩。轮到谁,谁的名牌就亮黄色;对面的明手按花色分列摆放;出的牌从出牌人方向滑入,完成的一墩滑向赢墩的一方。一副结束时,黄色横条显示结果和 IMP;点击查看详情(10 张机器人牌桌、常规定约、双明手结果)。</p>
+
+<h2>3. 设置</h2>
+<ul>
+<li><b>牌面样式</b>:经典或扇形。<b>你的座位</b>:北、东、南或西(你的牌总在下方)。</li>
+<li><b>计分</b>:每副牌也会在 10 张专家级机器人牌桌上打。<b>IMP</b>(队式)或 <b>比赛分 %</b>(双人)。</li>
+<li><b>对手体系</b>:与我们相同或标准(SAYC)。还有<b>机器人速度</b>、<b>叫品解释</b>、<b>自动出唯一合法牌</b>、<b>轮到你时提示音</b>。</li>
+<li><b>练习某个约定</b>:每副新牌都会挑选成你(或同伴)能用上该约定。<b>输入牌局</b>:手动输入(<code>AKQ2.K73.J5.T942</code>、PBN)或从照片读取(照片只在你的设备上读取,读完立即忘记)。</li>
+</ul>
+
+<h2>4. 我们的约定卡</h2>
+<p>选择<b>基本体系</b>(2/1、SAYC、Acol、SEF、Precision Club、Polish Club):会打开该体系的约定,之后每一项都可以修改。你的机器人同伴使用同一体系。点击约定名称可阅读完整的中文说明。</p>
+
+<h2>5. 与朋友在线打牌</h2>
+<ol>
+<li>大家打开同一个地址:https://servetsvm.github.io/bridge/。</li>
+<li><span class="k">🌐 开在线牌桌</span>:<b>公开牌桌</b>在大厅列出,任何人都可申请加入;<b>私人牌桌</b>带 🔒:受邀者直接入座,其他人需申请,不允许观战。邀请:点击名字旁的<span class="k">邀请到我的牌桌</span>。</li>
+<li>加入:<span class="k">申请加入</span>,选择同伴、对手或任意空位。申请会带提示音发给桌主;<span class="k">✕ 关闭 — 稍后回复</span>让申请先等待。</li>
+<li>桌主接受或拒绝,并按<span class="k">开始</span>。打牌时桌主可以点击玩家名字将其移出(由机器人代打),也可以用 <span class="k">🚪</span> 关闭牌桌。</li>
+<li>掉线的玩家显示为“离开 · 机器人代打”,10 分钟内回来可重新入座。</li>
+</ol>
+<ul>
+<li>玩家名片上的 <span class="k">🤝 结为同伴</span>:开一张牌桌并邀请他坐你对面。<span class="k">👁 观战</span>:公开牌桌无需批准即可观战。</li>
+<li><b>私信</b>:名字旁的 💬;对方不在大厅时,消息会在其到来时送达(⏳ / ✓)。<b>好友</b>:玩家名片上的 ☆。</li>
+<li>在线牌桌上的<b>撤回</b>和<b>摊牌</b>:由对方同意或拒绝;摊牌时剩余的牌会在桌上亮出。45 秒未出牌的玩家会收到提醒。</li>
+<li>设备之间直接连接;部分移动网络无法连接,通常 Wi-Fi 可以。</li>
+</ul>
+
+<h2>6. 比赛</h2>
+<ul>
+<li>🏆 比赛 → <span class="k">➕ 新比赛</span>:名称、副数(4–24)、赛制、排名方式(比赛分 % 或 IMP)、保留时间(3 小时、1 天、3 天)。</li>
+<li><b>个人赛</b>:每人在自己的牌桌与机器人打同样的牌;向整个大厅开放;第一副之前选择座位(北、东、南、西)并一直保持。</li>
+<li><b>分桌赛</b>:事先填写每桌的玩家;空位由机器人代打。</li>
+<li>🤖 IMP 和 🤖 比赛分 % 两列是你与 10 张机器人牌桌相比的成绩。<b>其他牌桌</b>显示每副牌所有人的定约。比赛结束后可用 <span class="k">🔁 练习这些牌</span>。只有组织者可以用 ✕ 关闭比赛。</li>
+</ul>
+
+<h2>7. 同步与安装</h2>
+<p>成绩和统计可通过 GitHub 上的私人文件在手机和电脑之间同步:设置 → Sync,使用 <code>gist</code> 令牌。<span class="note">令牌相当于密码:不要告诉任何人。</span></p>
+<ul>
+<li><b>手机:</b>在 Chrome 中打开地址 → 菜单 ⋮ → <i>添加到主屏幕</i>。离线也能用。</li>
+<li><b>电脑:</b>Chrome 或 Edge 地址栏里的“安装”图标。</li>
+<li>新版本会在下次打开时自动安装。</li>
+</ul>
+</main>
+</body>
+</html>

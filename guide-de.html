@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bridgetisch — Anleitung</title>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--red:#c4122f;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:16px/1.55 "Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:28px;margin:0 0 4px}
+  h2{font-size:21px;margin:34px 0 8px;padding-top:12px;border-top:2px solid var(--felt)}
+  p{margin:6px 0}
+  .lead{color:var(--muted)}
+  code,.k{font-family:Consolas,ui-monospace,monospace;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:14px}
+  .k{font-family:inherit;font-weight:600}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  .note{background:#fff8dc;border-left:4px solid var(--gold);padding:8px 12px;border-radius:4px;margin:10px 0}
+  ol li,ul li{margin:3px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Bridgetisch — Anleitung</h1>
+<p class="lead">Was jede Taste und jede Option bewirkt. Die App findest du unter <code>https://servetsvm.github.io/bridge/</code> &nbsp;·&nbsp; <a href="guide-en.html">English</a> · <a href="guide-pl.html">Polski</a> · <a href="guide-it.html">Italiano</a> · <a href="guide-fr.html">Français</a></p>
+
+<h2>1. Startseite</h2>
+<p>Die App öffnet immer auf der Startseite: es wird nichts gegeben und kein Tisch geöffnet.</p>
+<ul>
+<li>Oben: <b>🌐 Sprache</b>, <span class="k">⚙</span> Einstellungen und <span class="k">?</span> diese Anleitung.</li>
+<li><b>Dein Name</b> und <b>Dein System</b> (2/1, SAYC, Acol, SEF, Precision, Polish Club): das System steht in der Lobby neben deinem Namen, und dein Roboterpartner reizt es auch.</li>
+<li><span class="k">🤖 Mit Robotern spielen</span> (grün): du spielst mit Robotern (auch offline). Dein Tisch erscheint in der Lobby; fragt jemand an, entscheidest du.</li>
+<li><span class="k">🌐 Online-Tisch eröffnen</span> (blau): dein eigener Tisch, öffentlich oder privat.</li>
+<li><span class="k">Such mir einen Tisch</span> (gelb): findet einen Tisch, an dem ein Roboter spielt, und fragt an; nimmt der Gastgeber an, übernimmst du den Platz des Roboters.</li>
+<li><span class="k">🏆 Turniere</span> (lila), <span class="k">👁 Tisch zuschauen</span> (türkis), <span class="k">📋 Konventionen</span> (braun).</li>
+<li><span class="k">👥 Spieler in der Lobby</span> und <span class="k">💬 Lobby-Chat</span>. Tippe auf den Namen eines Spielers für sein System und seine Bilanz; tippe auf die Zeile „Heute: …“ für deine eigene.</li>
+</ul>
+
+<h2>2. Obere Leiste</h2>
+<table>
+<tr><th>Teil</th><th>Funktion</th></tr>
+<tr><td><span class="k">Boardnummer</span></td><td>Rote Ränder zeigen die gefährdete Seite, <b>D</b> den Geber.</td></tr>
+<tr><td><span class="k">Kontrakt</span></td><td>Kontrakt, Alleinspieler und Stiche beider Seiten („Wir / Sie“). Antippen zeigt die ganze Reizung mit Erklärungen.</td></tr>
+<tr><td><span class="k">⌂</span> / <span class="k">🚪</span></td><td>Zur Startseite / Tisch verlassen (die Frage erscheint auf der Seite).</td></tr>
+<tr><td><span class="k">Neu</span> / <span class="k">Zurück</span> / <span class="k">Tipp</span></td><td>Neues Board (mitten im Spiel fragt es „Sicher?“) / letztes Gebot oder letzte Karte zurücknehmen / was der Roboter an deiner Stelle täte.</td></tr>
+<tr><td><span class="k">Claim</span></td><td>Bei höchstens 8 restlichen Stichen: du wählst, wie viele du machst.</td></tr>
+<tr><td><span class="k">💬</span> / <span class="k">☰</span></td><td>Chat (eine rote Zahl zeigt neue Nachrichten) / Menü: Online, Ton 🔔 / 🔕, 📜 Verlauf, Ergebnisse, Einstellungen und Hilfe.</td></tr>
+</table>
+<p>Tippe auf ein Gebot für seine Bedeutung. Beim Spielen zeigt ein Tipp auf die Tischmitte den letzten Stich. Das Namensschild dessen, der dran ist, leuchtet gelb; der Dummy gegenüber liegt Farbe für Farbe in Spalten; die gespielte Karte gleitet vom Spieler herein und der fertige Stich zur Seite, die ihn gewonnen hat. Am Ende zeigt das gelbe Banner Ergebnis und IMP; antippen für Details (10 Robotertische, Normalkontrakt, Double-Dummy-Ergebnis).</p>
+
+<h2>3. Einstellungen</h2>
+<ul>
+<li><b>Kartenstil</b>: klassisch oder Fächer. <b>Dein Platz</b>: Nord, Ost, Süd oder West (deine Hand ist immer unten).</li>
+<li><b>Wertung</b>: jedes Board wird auch an 10 Experten-Robotertischen gespielt. <b>IMP</b> (Teams) oder <b>Matchpoints %</b> (Paare).</li>
+<li><b>System der Gegner</b>: wie unseres oder Standard (SAYC). <b>Robotertempo</b>, <b>Erklärungen</b>, <b>erzwungene Karte automatisch</b>, <b>Ton bei deinem Zug</b>.</li>
+<li><b>Konvention üben</b>: jedes neue Board wird so gewählt, dass du (oder Partner) sie anwenden kannst. <b>Board eingeben</b>: eintippen (<code>AKQ2.K73.J5.T942</code>, PBN) oder aus einem Foto lesen (das Foto bleibt auf deinem Gerät und wird sofort vergessen).</li>
+</ul>
+
+<h2>4. Unsere Konventionskarte</h2>
+<p>Wähle das <b>Grundsystem</b> (2/1, SAYC, Acol, SEF, Precision Club, Polish Club): seine Konventionen werden eingeschaltet, danach kannst du jede ändern. Dein Roboterpartner reizt dasselbe System. Tippe auf den Namen einer Konvention für die vollständige Beschreibung auf Deutsch.</p>
+
+<h2>5. Online mit Freunden spielen</h2>
+<ol>
+<li>Alle öffnen dieselbe Adresse: https://servetsvm.github.io/bridge/.</li>
+<li><span class="k">🌐 Online-Tisch eröffnen</span>: ein <b>öffentlicher Tisch</b> steht in der Lobby und jeder kann anfragen; ein <b>privater Tisch</b> erscheint mit 🔒: Eingeladene setzen sich sofort, andere müssen fragen, keine Zuschauer. Einladen: <span class="k">An meinen Tisch einladen</span> neben einem Namen.</li>
+<li>Mitspielen: <span class="k">Platz anfragen</span>, Partner, Gegner oder beliebigen Platz wählen. Die Anfrage erreicht den Gastgeber mit einem Ton; <span class="k">✕ Schließen — später antworten</span> lässt sie warten.</li>
+<li>Der Gastgeber nimmt an oder lehnt ab und drückt <span class="k">Start</span>. Beim Spielen kann er auf den Namen eines Spielers tippen, um ihn zu entfernen (ein Roboter übernimmt), und den Tisch mit <span class="k">🚪</span> schließen.</li>
+<li>Wer die Verbindung verliert, erscheint als „weg · Roboter spielt“ und bekommt seinen Platz zurück, wenn er binnen 10 Minuten wiederkommt.</li>
+</ol>
+<ul>
+<li><span class="k">🤝 Als Partner spielen</span> auf der Karte eines Spielers: öffnet einen Tisch und lädt ihn auf den Platz gegenüber ein. <span class="k">👁 Zuschauen</span>: öffentliche Tische nehmen Zuschauer ohne Rückfrage.</li>
+<li><b>Private Nachrichten</b>: 💬 neben einem Namen; ist die Person nicht in der Lobby, kommt die Nachricht an, sobald sie da ist (⏳ / ✓). <b>Freunde</b>: ☆ auf der Karte eines Spielers.</li>
+<li><b>Zurück</b> und <b>Claim</b> an einem Online-Tisch: die Gegenseite stimmt zu oder lehnt ab; beim Claim liegen die restlichen Karten offen auf dem Tisch. Wer 45 Sekunden nicht spielt, bekommt eine Erinnerung.</li>
+<li>Die Verbindung läuft direkt zwischen den Geräten; in manchen Mobilnetzen klappt das nicht, im WLAN meist schon.</li>
+</ul>
+
+<h2>6. Turniere</h2>
+<ul>
+<li>🏆 Turniere → <span class="k">➕ Neues Turnier</span>: Name, Boards (4–24), Form, Wertung (MP % oder IMP), Dauer (3 Stunden, 1 Tag, 3 Tage).</li>
+<li><b>Einzel</b>: jeder spielt dieselben Boards an seinem eigenen Tisch mit Robotern; offen für die ganze Lobby; vor dem ersten Board wählst du deinen Platz (N, O, S, W) und behältst ihn.</li>
+<li><b>An Tischen</b>: die Spieler jedes Tisches werden vorab eingetragen; Roboter besetzen leere Plätze.</li>
+<li>Die Spalten 🤖 IMP und 🤖 MP % sind dein Ergebnis gegen 10 Robotertische. <b>Andere Tische</b> zeigt den Kontrakt aller auf jedem Board. <span class="k">🔁 Diese Boards üben</span> nach dem Ende. Nur der Veranstalter kann ein Turnier mit ✕ schließen.</li>
+</ul>
+
+<h2>7. Synchronisieren und Installieren</h2>
+<p>Ergebnisse und Statistiken lassen sich über eine private Datei auf GitHub zwischen Handy und PC abgleichen: Einstellungen → Sync, mit einem <code>gist</code>-Token. <span class="note">Der Token ist wie ein Passwort: niemals weitergeben.</span></p>
+<ul>
+<li><b>Handy:</b> Adresse in Chrome öffnen → Menü ⋮ → <i>Zum Startbildschirm hinzufügen</i>. Funktioniert auch offline.</li>
+<li><b>PC:</b> das Symbol „Installieren“ in der Adressleiste von Chrome oder Edge.</li>
+<li>Neue Versionen installieren sich beim nächsten Öffnen von selbst.</li>
+</ul>
+</main>
+</body>
+</html>

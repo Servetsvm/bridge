@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tavolo di Bridge — Guida</title>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--red:#c4122f;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:16px/1.55 "Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:28px;margin:0 0 4px}
+  h2{font-size:21px;margin:34px 0 8px;padding-top:12px;border-top:2px solid var(--felt)}
+  p{margin:6px 0}
+  .lead{color:var(--muted)}
+  code,.k{font-family:Consolas,ui-monospace,monospace;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:14px}
+  .k{font-family:inherit;font-weight:600}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  .note{background:#fff8dc;border-left:4px solid var(--gold);padding:8px 12px;border-radius:4px;margin:10px 0}
+  ol li,ul li{margin:3px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Tavolo di Bridge — Guida</h1>
+<p class="lead">Cosa fa ogni pulsante e ogni opzione. L’app si trova su <code>https://servetsvm.github.io/bridge/</code> &nbsp;·&nbsp; <a href="guide-en.html">English</a> · <a href="guide-de.html">Deutsch</a> · <a href="guide-fr.html">Français</a> · <a href="guide-es.html">Español</a></p>
+
+<h2>1. Pagina iniziale</h2>
+<p>L’app si apre sempre sulla pagina iniziale: nessuna carta viene distribuita e nessun tavolo viene aperto.</p>
+<ul>
+<li>In alto: <b>🌐 Lingua</b>, <span class="k">⚙</span> Impostazioni e <span class="k">?</span> questa guida.</li>
+<li><b>Il tuo nome</b> e <b>Il tuo sistema</b> (2/1, SAYC, Acol, SEF, Precision, Polish Club): il sistema compare accanto al tuo nome nella sala e anche il tuo compagno robot lo gioca.</li>
+<li><span class="k">🤖 Gioca con i robot</span> (verde): giochi con i robot (anche offline). Il tuo tavolo appare nella sala; se qualcuno chiede di unirsi, decidi tu.</li>
+<li><span class="k">🌐 Apri un tavolo online</span> (blu): apri il tuo tavolo, pubblico o privato.</li>
+<li><span class="k">Trovami un tavolo</span> (giallo): cerca un tavolo dove gioca un robot e chiede di unirsi; se l’host accetta, prendi il posto del robot.</li>
+<li><span class="k">🏆 Tornei</span> (viola), <span class="k">👁 Guarda un tavolo</span> (turchese), <span class="k">📋 Convenzioni</span> (marrone).</li>
+<li><span class="k">👥 Giocatori nella sala</span> e <span class="k">💬 Chat della sala</span>. Tocca il nome di un giocatore per vederne sistema e rendimento; tocca la riga «Oggi: …» per vedere il tuo.</li>
+</ul>
+
+<h2>2. Barra in alto</h2>
+<table>
+<tr><th>Elemento</th><th>Cosa fa</th></tr>
+<tr><td><span class="k">Numero di smazzata</span></td><td>I bordi rossi indicano la linea in zona, <b>D</b> il mazziere.</td></tr>
+<tr><td><span class="k">Contratto</span></td><td>Contratto, dichiarante e prese di ogni linea («Noi / Loro»). Toccalo per vedere tutta la licita spiegata.</td></tr>
+<tr><td><span class="k">⌂</span> / <span class="k">🚪</span></td><td>Torna alla pagina iniziale / lascia il tavolo (la domanda compare nella pagina).</td></tr>
+<tr><td><span class="k">Nuova</span> / <span class="k">Indietro</span> / <span class="k">Aiuto</span></td><td>Nuova smazzata (a metà chiede «Sicuro?») / riprendi l’ultima dichiarazione o carta / cosa farebbe il robot al tuo posto.</td></tr>
+<tr><td><span class="k">Claim</span></td><td>Con 8 prese o meno rimaste: scegli quante prese fai.</td></tr>
+<tr><td><span class="k">💬</span> / <span class="k">☰</span></td><td>La chat (un numero rosso indica i nuovi messaggi) / menu: Online, suono di turno 🔔 / 🔕, 📜 Cronologia, Risultati, Impostazioni e Guida.</td></tr>
+</table>
+<p>Tocca una dichiarazione per vederne il significato. Durante il gioco tocca il centro del tavolo per vedere l’ultima presa. L’etichetta di chi deve giocare si illumina di giallo; il morto di fronte è disposto un colore per colonna; la carta giocata scivola dal giocatore e la presa finita scivola verso chi l’ha vinta. A fine smazzata il riquadro giallo mostra risultato e IMP; toccalo per i dettagli (10 tavoli di robot, contratto normale, risultato a carte viste).</p>
+
+<h2>3. Impostazioni</h2>
+<ul>
+<li><b>Stile delle carte</b>: classico o ventaglio. <b>Il tuo posto</b>: Nord, Est, Sud o Ovest (la tua mano è sempre in basso).</li>
+<li><b>Punteggio</b>: ogni smazzata è giocata anche a 10 tavoli di robot esperti. <b>IMP</b> (squadre) o <b>Matchpoint %</b> (coppie).</li>
+<li><b>Sistema degli avversari</b>: come il nostro o standard (SAYC). <b>Velocità dei robot</b>, <b>spiegazioni</b>, <b>carta obbligata automatica</b>, <b>suono di turno</b>.</li>
+<li><b>Allenati su una convenzione</b>: ogni nuova smazzata viene scelta perché tu (o il compagno) possa usarla. <b>Inserisci una smazzata</b>: scrivila (<code>AKQ2.K73.J5.T942</code>, PBN) o leggila da una foto (la foto resta sul tuo dispositivo e viene dimenticata subito).</li>
+</ul>
+
+<h2>4. La nostra carta delle convenzioni</h2>
+<p>Scegli il <b>sistema di base</b> (2/1, SAYC, Acol, SEF, Precision Club, Polish Club): si attivano le sue convenzioni, poi puoi cambiare ognuna. Il tuo compagno robot gioca lo stesso sistema. Tocca il nome di una convenzione per leggerne la descrizione completa, in italiano.</p>
+
+<h2>5. Giocare online con gli amici</h2>
+<ol>
+<li>Tutti aprono lo stesso indirizzo: https://servetsvm.github.io/bridge/.</li>
+<li><span class="k">🌐 Apri un tavolo online</span>: un <b>tavolo pubblico</b> compare nella sala e chiunque può chiedere di unirsi; un <b>tavolo privato</b> compare con 🔒: gli invitati si siedono subito, gli altri devono chiedere, niente spettatori. Per invitare: <span class="k">Invita al mio tavolo</span> accanto a un nome.</li>
+<li>Per unirti: <span class="k">Chiedi di unirti</span>, scegli compagno, avversario o qualsiasi posto. La richiesta arriva all’host con un suono; <span class="k">✕ Chiudi — rispondi dopo</span> la lascia in attesa.</li>
+<li>L’host accetta o rifiuta e preme <span class="k">Inizia</span>. Durante il gioco può toccare il nome di un giocatore per rimuoverlo (un robot prende il posto) e chiudere il tavolo con <span class="k">🚪</span>.</li>
+<li>Chi perde la connessione appare come «assente · gioca un robot» e ritrova il suo posto se torna entro 10 minuti.</li>
+</ol>
+<ul>
+<li><span class="k">🤝 Gioca in coppia</span> sulla scheda di un giocatore: apre un tavolo e lo invita di fronte a te. <span class="k">👁 Guarda</span>: i tavoli pubblici accettano spettatori senza chiedere.</li>
+<li><b>Messaggi privati</b>: 💬 accanto a un nome; se la persona non è nella sala il messaggio arriva quando entra (⏳ / ✓). <b>Amici</b>: ☆ sulla scheda di un giocatore.</li>
+<li><b>Indietro</b> e <b>Claim</b> a un tavolo online: l’altra linea accetta o rifiuta; durante un claim le carte rimaste sono scoperte sul tavolo. Un giocatore che non gioca da 45 secondi riceve un promemoria sonoro.</li>
+<li>La connessione è diretta tra i dispositivi; su alcune reti mobili non funziona, il Wi-Fi di solito sì.</li>
+</ul>
+
+<h2>6. Tornei</h2>
+<ul>
+<li>🏆 Tornei → <span class="k">➕ Nuovo torneo</span>: nome, smazzate (4–24), formula, classifica (MP % o IMP), durata (3 ore, 1 giorno, 3 giorni).</li>
+<li><b>Individuale</b>: ognuno gioca le stesse smazzate al proprio tavolo con i robot; è aperto a tutta la sala; prima della prima smazzata scegli il posto (N, E, S, O) e lo mantieni.</li>
+<li><b>A tavoli</b>: scrivi in anticipo i giocatori di ogni tavolo; i robot occupano i posti vuoti.</li>
+<li>Le colonne 🤖 IMP e 🤖 MP % sono il tuo risultato contro 10 tavoli di robot. <b>Altri tavoli</b> mostra il contratto di tutti su ogni smazzata. <span class="k">🔁 Rigioca queste smazzate</span> dopo la fine. Solo l’organizzatore può chiudere un torneo con ✕.</li>
+</ul>
+
+<h2>7. Sincronizzazione e installazione</h2>
+<p>Risultati e statistiche possono essere sincronizzati tra telefono e PC tramite un file privato su GitHub: Impostazioni → Sync, con un token <code>gist</code>. <span class="note">Il token è come una password: non condividerlo.</span></p>
+<ul>
+<li><b>Telefono:</b> apri l’indirizzo in Chrome → menu ⋮ → <i>Aggiungi a schermata Home</i>. Funziona anche offline.</li>
+<li><b>PC:</b> l’icona «Installa» nella barra degli indirizzi di Chrome o Edge.</li>
+<li>Le nuove versioni si installano da sole alla prossima apertura.</li>
+</ul>
+</main>
+</body>
+</html>

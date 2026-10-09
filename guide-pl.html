@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stół brydżowy — Instrukcja</title>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--red:#c4122f;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:16px/1.55 "Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:28px;margin:0 0 4px}
+  h2{font-size:21px;margin:34px 0 8px;padding-top:12px;border-top:2px solid var(--felt)}
+  p{margin:6px 0}
+  .lead{color:var(--muted)}
+  code,.k{font-family:Consolas,ui-monospace,monospace;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:14px}
+  .k{font-family:inherit;font-weight:600}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  .note{background:#fff8dc;border-left:4px solid var(--gold);padding:8px 12px;border-radius:4px;margin:10px 0}
+  ol li,ul li{margin:3px 0}
+</style>
+</head>
+<body>
+<main>
+<h1>Stół brydżowy — Instrukcja</h1>
+<p class="lead">Co robi każdy przycisk i każda opcja. Aplikacja jest pod adresem <code>https://servetsvm.github.io/bridge/</code> &nbsp;·&nbsp; <a href="guide-en.html">English</a> · <a href="guide-de.html">Deutsch</a> · <a href="guide-ru.html">Русский</a></p>
+
+<h2>1. Strona startowa</h2>
+<p>Aplikacja zawsze otwiera się na stronie startowej: nic nie jest rozdawane i żaden stół się nie otwiera.</p>
+<ul>
+<li>Na górze: <b>🌐 Język</b>, <span class="k">⚙</span> Ustawienia i <span class="k">?</span> ta instrukcja.</li>
+<li><b>Twoje imię</b> i <b>Twój system</b> (2/1, SAYC, Acol, SEF, Precision, Polish Club): system widać przy twoim imieniu na sali, a twój partner robot też nim gra.</li>
+<li><span class="k">🤖 Graj z robotami</span> (zielony): grasz z robotami (także offline). Twój stół widać na sali; jeśli ktoś poprosi o miejsce, ty decydujesz.</li>
+<li><span class="k">🌐 Otwórz stół online</span> (niebieski): własny stół, publiczny lub prywatny.</li>
+<li><span class="k">Znajdź mi stół</span> (żółty): szuka stołu, przy którym gra robot, i prosi o miejsce; gdy gospodarz się zgodzi, zajmujesz miejsce robota.</li>
+<li><span class="k">🏆 Turnieje</span> (fioletowy), <span class="k">👁 Kibicuj przy stole</span> (turkusowy), <span class="k">📋 Konwencje</span> (brązowy).</li>
+<li><span class="k">👥 Gracze na sali</span> i <span class="k">💬 Czat sali</span>. Dotknij imienia gracza, aby zobaczyć jego system i bilans; dotknij wiersza „Dziś: …”, aby zobaczyć swój.</li>
+</ul>
+
+<h2>2. Górny pasek</h2>
+<table>
+<tr><th>Element</th><th>Działanie</th></tr>
+<tr><td><span class="k">Numer rozdania</span></td><td>Czerwone krawędzie oznaczają strefę, <b>D</b> rozdającego.</td></tr>
+<tr><td><span class="k">Kontrakt</span></td><td>Kontrakt, rozgrywający i lewy obu stron („My / Oni”). Dotknij, aby zobaczyć całą licytację z objaśnieniami.</td></tr>
+<tr><td><span class="k">⌂</span> / <span class="k">🚪</span></td><td>Na stronę startową / opuść stół (pytanie pojawia się na stronie).</td></tr>
+<tr><td><span class="k">Rozdaj</span> / <span class="k">Cofnij</span> / <span class="k">Podpowiedź</span></td><td>Nowe rozdanie (w trakcie pyta „Na pewno?”) / cofnij ostatnią odzywkę lub kartę / co zrobiłby robot na twoim miejscu.</td></tr>
+<tr><td><span class="k">Claim</span></td><td>Gdy zostało 8 lew lub mniej: wybierasz, ile z nich bierzesz.</td></tr>
+<tr><td><span class="k">💬</span> / <span class="k">☰</span></td><td>Czat (czerwona liczba to nowe wiadomości) / menu: Online, dźwięk 🔔 / 🔕, 📜 Historia, Wyniki, Ustawienia i Pomoc.</td></tr>
+</table>
+<p>Dotknij odzywki, aby zobaczyć jej znaczenie. Podczas rozgrywki dotknij środka stołu, aby zobaczyć ostatnią lewę. Plakietka gracza, który ma ruch, świeci na żółto; dziadek naprzeciwko leży kolorami w kolumnach; zagrana karta wjeżdża od gracza, a skończona lewa odjeżdża do strony, która ją wzięła. Na końcu żółty pasek pokazuje wynik i IMP; dotknij go, aby zobaczyć szczegóły (10 stołów robotów, kontrakt typowy, wynik w widne karty).</p>
+
+<h2>3. Ustawienia</h2>
+<ul>
+<li><b>Wygląd kart</b>: klasyczny lub wachlarz. <b>Twoje miejsce</b>: N, E, S lub W (twoja ręka zawsze na dole).</li>
+<li><b>Zapis</b>: każde rozdanie gra się też przy 10 stołach robotów-ekspertów. <b>IMP</b> (teamy) lub <b>Matchpoints %</b> (pary).</li>
+<li><b>System przeciwników</b>: jak nasz lub standard (SAYC). <b>Tempo robotów</b>, <b>objaśnienia</b>, <b>automatyczna karta wymuszona</b>, <b>dźwięk ruchu</b>.</li>
+<li><b>Trening konwencji</b>: każde nowe rozdanie jest dobierane tak, abyś ty (lub partner) mógł jej użyć. <b>Wpisz rozdanie</b>: wpisz (<code>AKQ2.K73.J5.T942</code>, PBN) lub odczytaj ze zdjęcia (zdjęcie zostaje na twoim urządzeniu i jest od razu zapominane).</li>
+</ul>
+
+<h2>4. Nasza karta konwencyjna</h2>
+<p>Wybierz <b>system bazowy</b> (2/1, SAYC, Acol, SEF, Precision Club, Polish Club): włączą się jego konwencje, potem każdą możesz zmienić. Twój partner robot gra tym samym systemem. Dotknij nazwy konwencji, aby przeczytać pełny opis po polsku.</p>
+
+<h2>5. Gra online ze znajomymi</h2>
+<ol>
+<li>Wszyscy otwierają ten sam adres: https://servetsvm.github.io/bridge/.</li>
+<li><span class="k">🌐 Otwórz stół online</span>: <b>stół publiczny</b> widać na sali i każdy może poprosić o miejsce; <b>stół prywatny</b> ma 🔒: zaproszeni siadają od razu, inni muszą prosić, bez kibiców. Zaproszenie: <span class="k">Zaproś do mojego stołu</span> obok imienia.</li>
+<li>Aby usiąść: <span class="k">Poproś o miejsce</span>, wybierz partnera, przeciwnika lub dowolne miejsce. Prośba trafia do gospodarza z dźwiękiem; <span class="k">✕ Zamknij — odpowiedz później</span> zostawia ją w oczekiwaniu.</li>
+<li>Gospodarz przyjmuje lub odrzuca i naciska <span class="k">Start</span>. W trakcie gry może dotknąć imienia gracza, aby go usunąć (miejsce zajmie robot), i zamknąć stół przyciskiem <span class="k">🚪</span>.</li>
+<li>Gracz, który stracił połączenie, jest oznaczony „nieobecny · gra robot” i odzyskuje miejsce, jeśli wróci w ciągu 10 minut.</li>
+</ol>
+<ul>
+<li><span class="k">🤝 Graj w parze</span> na karcie gracza: otwiera stół i zaprasza go na miejsce naprzeciwko. <span class="k">👁 Kibicuj</span>: stoły publiczne przyjmują kibiców bez pytania.</li>
+<li><b>Prywatne wiadomości</b>: 💬 obok imienia; jeśli tej osoby nie ma na sali, wiadomość dotrze, gdy się pojawi (⏳ / ✓). <b>Znajomi</b>: ☆ na karcie gracza.</li>
+<li><b>Cofnij</b> i <b>claim</b> przy stole online: druga strona zgadza się lub nie; przy claimie pozostałe karty leżą odkryte. Gracz, który nie gra przez 45 sekund, dostaje przypomnienie.</li>
+<li>Połączenie jest bezpośrednie między urządzeniami; w niektórych sieciach komórkowych nie działa, przez Wi-Fi zwykle tak.</li>
+</ul>
+
+<h2>6. Turnieje</h2>
+<ul>
+<li>🏆 Turnieje → <span class="k">➕ Nowy turniej</span>: nazwa, rozdania (4–24), format, punktacja (MP % lub IMP), czas (3 godziny, 1 dzień, 3 dni).</li>
+<li><b>Indywidualny</b>: każdy gra te same rozdania przy własnym stole z robotami; otwarty dla całej sali; przed pierwszym rozdaniem wybierasz miejsce (N, E, S, W) i je zachowujesz.</li>
+<li><b>Przy stołach</b>: graczy każdego stołu wpisuje się z góry; puste miejsca zajmują roboty.</li>
+<li>Kolumny 🤖 IMP i 🤖 MP % to twój wynik przeciw 10 stołom robotów. <b>Inne stoły</b> pokazują kontrakt każdego w każdym rozdaniu. <span class="k">🔁 Przećwicz te rozdania</span> po zakończeniu. Tylko organizator może zamknąć turniej przyciskiem ✕.</li>
+</ul>
+
+<h2>7. Synchronizacja i instalacja</h2>
+<p>Wyniki i statystyki można synchronizować między telefonem a komputerem przez prywatny plik na GitHubie: Ustawienia → Sync, z tokenem <code>gist</code>. <span class="note">Token jest jak hasło: nikomu go nie podawaj.</span></p>
+<ul>
+<li><b>Telefon:</b> otwórz adres w Chrome → menu ⋮ → <i>Dodaj do ekranu głównego</i>. Działa też offline.</li>
+<li><b>Komputer:</b> ikona „Zainstaluj” w pasku adresu Chrome lub Edge.</li>
+<li>Nowe wersje instalują się same przy następnym otwarciu.</li>
+</ul>
+</main>
+</body>
+</html>

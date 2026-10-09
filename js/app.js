@@ -1565,10 +1565,10 @@ function homeShell() {
     <section class="hmain">
       <div class="hcard hero">
         <div class="hname hrow"><label><span>${T('Your name')}</span><input id="hName" class="tok" maxlength="20" autocomplete="nickname" value="${esc(myNm())}" placeholder="${T('Your name')}"></label>
-        <label><span>${T('Your system')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
+        <label><span>${T('Your system')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label><button class="btn hpeople" data-hsec="people" title="${T('Players in the lobby')}">👥<span class="hpl"> ${T('Players in the lobby')}</span> <b id="hPeopleN"></b></button></div>
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
-        <div class="hsecs">${sec('people', '👥 ' + T('Players in the lobby'))}<button class="hsec phoneonly" data-hsec="chat">💬 ${T('Lobby chat')} <span id="hChatN"></span></button></div>
+        <div class="hsecs"><button class="hsec phoneonly" data-hsec="chat">💬 ${T('Lobby chat')} <span id="hChatN"></span></button></div>
         
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
@@ -1623,6 +1623,7 @@ function renderHome() {
     if (want === 'chat') N.st.lunread = 0;
     set('hTours', toursHtml()); set('hPeople', N.peopleHtml());
     set('hWho', whoHtml());
+    set('hPeopleN', String(N.lobbyCount()));   // how many are in the lobby, on the Players button
   }
   set('hConv', convCardHtml());
 }
@@ -1965,7 +1966,7 @@ function showHelp() {
   const row = (file, name, flag) => `<div class="helprow"><span>${flag} <b>${name}</b></span><a class="btn" href="${base}${file}" target="_blank" rel="noopener">Open</a><a class="btn gold" href="${base}${file}" download="${file.replace(".html", "")}-bridge-table.html">Download</a></div>`;
   openOv("help", `<h2>User guide</h2>
    <div class="muted">Explains every button and every option in Settings, the convention card, reading a deal from a photo, and syncing your phone and PC. Download it to keep it on your device and read it offline.</div>
-   ${[["en", "guide-en.html", "English", "🇬🇧"], ["tr", "guide.html", "Türkçe", "🇹🇷"], ["no", "guide-no.html", "Norsk", "🇳🇴"], ["es", "guide-es.html", "Español", "🇪🇸"], ["fr", "guide-fr.html", "Français", "🇫🇷"]].sort((a, b) => (b[0] === SET.lang) - (a[0] === SET.lang)).map(([, f, n, fl]) => row(f, n, fl)).join("")}
+   ${[["en", "guide-en.html", "English", "🇬🇧"], ["tr", "guide.html", "Türkçe", "🇹🇷"], ["no", "guide-no.html", "Norsk", "🇳🇴"], ["es", "guide-es.html", "Español", "🇪🇸"], ["fr", "guide-fr.html", "Français", "🇫🇷"], ["it", "guide-it.html", "Italiano", "🇮🇹"], ["de", "guide-de.html", "Deutsch", "🇩🇪"], ["ru", "guide-ru.html", "Русский", "🇷🇺"], ["pl", "guide-pl.html", "Polski", "🇵🇱"], ["zh", "guide-zh.html", "中文", "🇨🇳"]].sort((a, b) => (b[0] === SET.lang) - (a[0] === SET.lang)).map(([, f, n, fl]) => row(f, n, fl)).join("")}
    <div class="row2"><button class="btn gold" id="oClose">Close</button></div>`);
 }
 /* ---- entering a deal (hand record, PBN, or the code Claude reads from a photo) ---- */
