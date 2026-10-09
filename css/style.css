@@ -664,3 +664,7 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .hico{width:38px;height:38px;border-radius:50%;border:1px solid #c9c4ad;background:#fff;font-size:18px;line-height:1;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
 .hico:hover{background:#eef3ec}
 .hico{color:#1b2a4e;font-weight:800;font-size:20px;background:#f6f3e8;border-color:#b9b39a}
+.hlang{display:inline-flex;align-items:center;gap:6px;color:#f6f3e8;font-size:18px}
+.hlang .sel{font-size:15px;padding:6px 8px;border-radius:8px}
+@media (max-width:600px){ #bar .lbt{display:none} }
+@media (max-width:600px){ #bar .tools{flex-wrap:nowrap;gap:4px} #bar .tools>.btn{flex:1 1 auto;min-width:0;font-size:13px;padding:7px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} #bar .tools>#bHome,#bar .tools>#bChat,#bar .tools>#bLeave,#bar .tools>#nLeave,#bar .tools>#nStop{flex:none} #bar .menuwrap{flex:none} }
