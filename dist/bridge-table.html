@@ -3066,6 +3066,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "{0} has started — open Tournaments to play": "{0} başladı — oynamak için Turnuvalar’ı aç", "{0} has started — you are seated": "{0} başladı — yerine oturdun", "Back to your seat in {0}": "{0}: yerine dönüyorsun",
     "Type": "Tür", "Speedball": "Speedball", "Robot individual": "Robotlu bireysel", "Daylong (IMP)": "Günlük (IMP)", "Pairs (MP)": "Çiftler (MP)", "IMP pairs": "IMP çiftleri", "Team match": "Takım maçı", "Custom": "Özel", "Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.": "Robotlarla bireysel, 4 el, MP, 3 saat: hızlı bir turnuva.", "Everyone plays the same 8 boards with robots, matchpoints, kept for a day.": "Herkes aynı 8 eli robotlarla oynar, MP, bir gün açık kalır.", "12 boards with robots, scored in IMPs, play them any time during the day.": "Robotlarla 12 el, IMP ile; gün içinde istediğin zaman oyna.", "Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.": "Masalarda çiftler: her masa aynı 8 eli oynar; K–G ve D–B çiftleri MP ile sıralanır.", "Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).": "Masalarda çiftler, aynı 8 el, IMP ile sıralanır (cross-IMP).", "Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.": "Dörder kişilik iki takım: A takımı 1. masada K–G, 2. masada D–B oturur; aynı eller masa masa IMP ile karşılaştırılır.", "Choose every option yourself.": "Bütün seçenekleri kendin belirle.",
     "All": "Tümü", "Registering": "Kayıt açık", "Running": "Oynanıyor", "Mine": "Benimkiler", "Tournament": "Turnuva", "Players": "Oyuncu", "Status": "Durum", "Ends in": "Kalan süre", "{0} d {1} h": "{0} g {1} sa", "{0} h {1} min": "{0} sa {1} dk", "Register": "Kaydol", "No tournaments here.": "Burada turnuva yok.", "Edit my card": "Kartımı düzenle",
     "Country/Region": "Ülke/Bölge", "Skill level": "Beceri düzeyi", "Joined": "Oluşturma tarihi", "Logins": "Girişler", "Title": "Ünvan", "Newcomer": "Yeni gelen", "Strategist": "Stratejist", "Master": "Usta", "Grandmaster": "Büyük usta",
@@ -3097,6 +3098,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "{0} has started — open Tournaments to play": "{0} har startet — åpne Turneringer for å spille", "{0} has started — you are seated": "{0} har startet — du er plassert", "Back to your seat in {0}": "Tilbake til plassen din i {0}",
     "Type": "Type", "Speedball": "Speedball", "Robot individual": "Robot-individuell", "Daylong (IMP)": "Dagslang (IMP)", "Pairs (MP)": "Par (MP)", "IMP pairs": "IMP-par", "Team match": "Lagkamp", "Custom": "Egendefinert", "Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.": "Individuell med roboter, 4 spill, MP, 3 timer: en rask turnering.", "Everyone plays the same 8 boards with robots, matchpoints, kept for a day.": "Alle spiller de samme 8 spillene med roboter, MP, åpen i ett døgn.", "12 boards with robots, scored in IMPs, play them any time during the day.": "12 spill med roboter, IMP, spill dem når du vil i løpet av dagen.", "Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.": "Par ved bord: alle bord spiller de samme 8 spillene; N–S- og Ø–V-par rangeres på MP.", "Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).": "Par ved bord, de samme 8 spillene, rangert på IMP (cross-IMP).", "Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.": "To lag på fire: lag A sitter N–S ved bord 1 og Ø–V ved bord 2; spillene sammenlignes bord mot bord i IMP.", "Choose every option yourself.": "Velg alle valgene selv.",
     "All": "Alle", "Registering": "Påmelding", "Running": "Pågår", "Mine": "Mine", "Tournament": "Turnering", "Players": "Spillere", "Status": "Status", "Ends in": "Slutter om", "{0} d {1} h": "{0} d {1} t", "{0} h {1} min": "{0} t {1} min", "Register": "Meld på", "No tournaments here.": "Ingen turneringer her.", "Edit my card": "Rediger kortet mitt",
     "Country/Region": "Land/region", "Skill level": "Ferdighetsnivå", "Joined": "Registrert", "Logins": "Innlogginger", "Title": "Tittel", "Newcomer": "Nykommer", "Strategist": "Strateg", "Master": "Mester", "Grandmaster": "Stormester",
@@ -3128,6 +3130,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "{0} has started — open Tournaments to play": "{0} ha empezado — abre Torneos para jugar", "{0} has started — you are seated": "{0} ha empezado — ya estás sentado", "Back to your seat in {0}": "Vuelves a tu sitio en {0}",
     "Type": "Tipo", "Speedball": "Speedball", "Robot individual": "Individual con robots", "Daylong (IMP)": "Diario (IMP)", "Pairs (MP)": "Parejas (MP)", "IMP pairs": "Parejas IMP", "Team match": "Partido de equipos", "Custom": "Personalizado", "Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.": "Individual con robots, 4 manos, matchpoints, 3 horas: un torneo rápido.", "Everyone plays the same 8 boards with robots, matchpoints, kept for a day.": "Todos juegan las mismas 8 manos con robots, matchpoints, durante un día.", "12 boards with robots, scored in IMPs, play them any time during the day.": "12 manos con robots, en IMP; juégalas cuando quieras durante el día.", "Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.": "Parejas en mesas: todas las mesas juegan las mismas 8 manos; parejas N–S y E–O por matchpoints.", "Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).": "Parejas en mesas, las mismas 8 manos, clasificadas por IMP (cross-IMP).", "Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.": "Dos equipos de cuatro: el equipo A se sienta N–S en la mesa 1 y E–O en la mesa 2; las mismas manos se comparan mesa contra mesa en IMP.", "Choose every option yourself.": "Elige tú todas las opciones.",
     "All": "Todos", "Registering": "Inscripción", "Running": "En juego", "Mine": "Míos", "Tournament": "Torneo", "Players": "Jugadores", "Status": "Estado", "Ends in": "Termina en", "{0} d {1} h": "{0} d {1} h", "{0} h {1} min": "{0} h {1} min", "Register": "Inscribirse", "No tournaments here.": "No hay torneos aquí.", "Edit my card": "Editar mi tarjeta",
     "Country/Region": "País/región", "Skill level": "Nivel", "Joined": "Fecha de alta", "Logins": "Accesos", "Title": "Título", "Newcomer": "Recién llegado", "Strategist": "Estratega", "Master": "Maestro", "Grandmaster": "Gran maestro",
@@ -3187,6 +3190,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "{0} has started — open Tournaments to play": "{0} a commencé — ouvrez Tournois pour jouer", "{0} has started — you are seated": "{0} a commencé — vous êtes placé", "Back to your seat in {0}": "Retour à votre place dans {0}",
     "Type": "Type", "Speedball": "Speedball", "Robot individual": "Individuel avec robots", "Daylong (IMP)": "Journalier (IMP)", "Pairs (MP)": "Paires (MP)", "IMP pairs": "Paires IMP", "Team match": "Match par quatre", "Custom": "Personnalisé", "Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.": "Individuel avec robots, 4 donnes, matchpoints, 3 heures : un tournoi rapide.", "Everyone plays the same 8 boards with robots, matchpoints, kept for a day.": "Tout le monde joue les mêmes 8 donnes avec des robots, matchpoints, pendant une journée.", "12 boards with robots, scored in IMPs, play them any time during the day.": "12 donnes avec des robots, en IMP ; jouez-les quand vous voulez dans la journée.", "Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.": "Paires aux tables : toutes les tables jouent les mêmes 8 donnes ; paires N–S et E–O classées en matchpoints.", "Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).": "Paires aux tables, les mêmes 8 donnes, classées en IMP (cross-IMP).", "Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.": "Deux équipes de quatre : l’équipe A est N–S à la table 1 et E–O à la table 2 ; les mêmes donnes sont comparées table contre table en IMP.", "Choose every option yourself.": "Choisissez toutes les options vous-même.",
     "All": "Tous", "Registering": "Inscriptions", "Running": "En cours", "Mine": "Les miens", "Tournament": "Tournoi", "Players": "Joueurs", "Status": "État", "Ends in": "Fin dans", "{0} d {1} h": "{0} j {1} h", "{0} h {1} min": "{0} h {1} min", "Register": "S’inscrire", "No tournaments here.": "Aucun tournoi ici.", "Edit my card": "Modifier ma fiche",
     "Country/Region": "Pays/région", "Skill level": "Niveau", "Joined": "Inscrit le", "Logins": "Connexions", "Title": "Titre", "Newcomer": "Nouveau venu", "Strategist": "Stratège", "Master": "Maître", "Grandmaster": "Grand maître",
@@ -3246,6 +3250,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "{0} has started — open Tournaments to play": "{0} è iniziato — apri Tornei per giocare", "{0} has started — you are seated": "{0} è iniziato — sei al tuo posto", "Back to your seat in {0}": "Torni al tuo posto in {0}",
     "Type": "Tipo", "Speedball": "Speedball", "Robot individual": "Individuale con robot", "Daylong (IMP)": "Giornaliero (IMP)", "Pairs (MP)": "Coppie (MP)", "IMP pairs": "Coppie IMP", "Team match": "Incontro a squadre", "Custom": "Personalizzato", "Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.": "Individuale con i robot, 4 smazzate, matchpoint, 3 ore: un torneo veloce.", "Everyone plays the same 8 boards with robots, matchpoints, kept for a day.": "Tutti giocano le stesse 8 smazzate con i robot, matchpoint, per un giorno.", "12 boards with robots, scored in IMPs, play them any time during the day.": "12 smazzate con i robot, a IMP; giocale quando vuoi durante il giorno.", "Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.": "Coppie ai tavoli: ogni tavolo gioca le stesse 8 smazzate; coppie N–S ed E–O classificate a matchpoint.", "Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).": "Coppie ai tavoli, le stesse 8 smazzate, classifica a IMP (cross-IMP).", "Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.": "Due squadre da quattro: la squadra A siede N–S al tavolo 1 ed E–O al tavolo 2; le stesse smazzate si confrontano tavolo contro tavolo a IMP.", "Choose every option yourself.": "Scegli tu tutte le opzioni.",
     "All": "Tutti", "Registering": "Iscrizioni", "Running": "In corso", "Mine": "Miei", "Tournament": "Torneo", "Players": "Giocatori", "Status": "Stato", "Ends in": "Termina tra", "{0} d {1} h": "{0} g {1} h", "{0} h {1} min": "{0} h {1} min", "Register": "Iscriviti", "No tournaments here.": "Nessun torneo qui.", "Edit my card": "Modifica la mia scheda",
     "Country/Region": "Paese/regione", "Skill level": "Livello", "Joined": "Iscritto il", "Logins": "Accessi", "Title": "Titolo", "Newcomer": "Nuovo arrivato", "Strategist": "Stratega", "Master": "Maestro", "Grandmaster": "Gran maestro",
@@ -3305,6 +3310,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "{0} has started — open Tournaments to play": "{0} hat begonnen — öffne Turniere zum Spielen", "{0} has started — you are seated": "{0} hat begonnen — du sitzt am Tisch", "Back to your seat in {0}": "Zurück an deinen Platz in {0}",
     "Type": "Art", "Speedball": "Speedball", "Robot individual": "Roboter-Einzel", "Daylong (IMP)": "Tagesturnier (IMP)", "Pairs (MP)": "Paare (MP)", "IMP pairs": "IMP-Paare", "Team match": "Teamkampf", "Custom": "Eigene", "Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.": "Einzel mit Robotern, 4 Boards, Matchpoints, 3 Stunden: ein schnelles Turnier.", "Everyone plays the same 8 boards with robots, matchpoints, kept for a day.": "Alle spielen dieselben 8 Boards mit Robotern, Matchpoints, einen Tag lang.", "12 boards with robots, scored in IMPs, play them any time during the day.": "12 Boards mit Robotern, IMP-Wertung; spiele sie, wann du willst.", "Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.": "Paare an Tischen: alle Tische spielen dieselben 8 Boards; N–S- und O–W-Paare nach Matchpoints.", "Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).": "Paare an Tischen, dieselben 8 Boards, Wertung nach IMP (Cross-IMP).", "Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.": "Zwei Vierer-Teams: Team A sitzt an Tisch 1 N–S und an Tisch 2 O–W; dieselben Boards werden Tisch gegen Tisch in IMP verglichen.", "Choose every option yourself.": "Wähle alle Optionen selbst.",
     "All": "Alle", "Registering": "Anmeldung", "Running": "Läuft", "Mine": "Meine", "Tournament": "Turnier", "Players": "Spieler", "Status": "Status", "Ends in": "Endet in", "{0} d {1} h": "{0} T {1} Std", "{0} h {1} min": "{0} Std {1} Min", "Register": "Anmelden", "No tournaments here.": "Keine Turniere hier.", "Edit my card": "Meine Karte bearbeiten",
     "Country/Region": "Land/Region", "Skill level": "Spielstärke", "Joined": "Dabei seit", "Logins": "Anmeldungen", "Title": "Titel", "Newcomer": "Neuling", "Strategist": "Stratege", "Master": "Meister", "Grandmaster": "Großmeister",
@@ -3364,6 +3370,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "{0} has started — open Tournaments to play": "{0} начался — откройте «Турниры», чтобы играть", "{0} has started — you are seated": "{0} начался — вы за столом", "Back to your seat in {0}": "Возвращаемся на ваше место в {0}",
     "Type": "Тип", "Speedball": "Спидбол", "Robot individual": "Личный с роботами", "Daylong (IMP)": "Дневной (IMP)", "Pairs (MP)": "Пары (MP)", "IMP pairs": "Пары IMP", "Team match": "Командный матч", "Custom": "Свой", "Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.": "Личный с роботами, 4 сдачи, MP, 3 часа: быстрый турнир.", "Everyone plays the same 8 boards with robots, matchpoints, kept for a day.": "Все играют одни и те же 8 сдач с роботами, MP, сутки.", "12 boards with robots, scored in IMPs, play them any time during the day.": "12 сдач с роботами, по IMP; играйте когда угодно в течение дня.", "Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.": "Пары за столами: все столы играют одни и те же 8 сдач; пары С–Ю и В–З по MP.", "Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).": "Пары за столами, те же 8 сдач, зачёт по IMP (кросс-IMP).", "Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.": "Две команды по четыре: команда A сидит С–Ю за 1-м столом и В–З за 2-м; одни и те же сдачи сравниваются стол против стола в IMP.", "Choose every option yourself.": "Выберите все параметры сами.",
     "All": "Все", "Registering": "Регистрация", "Running": "Идут", "Mine": "Мои", "Tournament": "Турнир", "Players": "Игроки", "Status": "Статус", "Ends in": "Окончание через", "{0} d {1} h": "{0} д {1} ч", "{0} h {1} min": "{0} ч {1} мин", "Register": "Записаться", "No tournaments here.": "Здесь турниров нет.", "Edit my card": "Изменить мою карточку",
     "Country/Region": "Страна/регион", "Skill level": "Уровень игры", "Joined": "Дата регистрации", "Logins": "Входы", "Title": "Звание", "Newcomer": "Новичок", "Strategist": "Стратег", "Master": "Мастер", "Grandmaster": "Гроссмейстер",
@@ -3423,6 +3430,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "{0} has started — open Tournaments to play": "{0} się rozpoczął — otwórz Turnieje, aby grać", "{0} has started — you are seated": "{0} się rozpoczął — siedzisz przy stole", "Back to your seat in {0}": "Wracasz na swoje miejsce w {0}",
     "Type": "Rodzaj", "Speedball": "Speedball", "Robot individual": "Indywidualny z robotami", "Daylong (IMP)": "Całodzienny (IMP)", "Pairs (MP)": "Pary (MP)", "IMP pairs": "Pary na IMP", "Team match": "Mecz drużynowy", "Custom": "Własny", "Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.": "Indywidualny z robotami, 4 rozdania, MP, 3 godziny: szybki turniej.", "Everyone plays the same 8 boards with robots, matchpoints, kept for a day.": "Wszyscy grają te same 8 rozdań z robotami, MP, przez jeden dzień.", "12 boards with robots, scored in IMPs, play them any time during the day.": "12 rozdań z robotami, na IMP; graj kiedy chcesz w ciągu dnia.", "Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.": "Pary przy stołach: każdy stół gra te same 8 rozdań; pary NS i EW na MP.", "Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).": "Pary przy stołach, te same 8 rozdań, punktacja IMP (cross-IMP).", "Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.": "Dwie czwórki: drużyna A siedzi NS przy stole 1 i EW przy stole 2; te same rozdania porównuje się stół przeciw stołowi na IMP.", "Choose every option yourself.": "Wybierz wszystkie opcje sam.",
     "All": "Wszystkie", "Registering": "Zapisy", "Running": "Trwają", "Mine": "Moje", "Tournament": "Turniej", "Players": "Gracze", "Status": "Status", "Ends in": "Koniec za", "{0} d {1} h": "{0} d {1} godz.", "{0} h {1} min": "{0} godz. {1} min", "Register": "Zapisz się", "No tournaments here.": "Brak turniejów.", "Edit my card": "Edytuj moją kartę",
     "Country/Region": "Kraj/region", "Skill level": "Poziom gry", "Joined": "Data dołączenia", "Logins": "Logowania", "Title": "Tytuł", "Newcomer": "Nowicjusz", "Strategist": "Strateg", "Master": "Mistrz", "Grandmaster": "Arcymistrz",
@@ -3482,6 +3490,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "{0} has started — open Tournaments to play": "{0} 已开始 — 打开“比赛”去打牌", "{0} has started — you are seated": "{0} 已开始 — 你已入座", "Back to your seat in {0}": "回到{0}中你的座位",
     "Type": "类型", "Speedball": "快速赛", "Robot individual": "机器人个人赛", "Daylong (IMP)": "全天赛(IMP)", "Pairs (MP)": "双人赛(MP)", "IMP pairs": "IMP 双人赛", "Team match": "队式赛", "Custom": "自定义", "Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.": "与机器人的个人赛,4 副牌,比赛分,3 小时:快速比赛。", "Everyone plays the same 8 boards with robots, matchpoints, kept for a day.": "所有人与机器人打同样的 8 副牌,比赛分,保留一天。", "12 boards with robots, scored in IMPs, play them any time during the day.": "与机器人打 12 副牌,按 IMP 计分;当天任何时间都可以打。", "Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.": "分桌双人赛:每桌打同样的 8 副牌;南北和东西按比赛分排名。", "Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).": "分桌双人赛,同样的 8 副牌,按 IMP(交叉 IMP)排名。", "Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.": "两支四人队:A 队在 1 号桌坐南北,在 2 号桌坐东西;同样的牌逐桌按 IMP 比较。", "Choose every option yourself.": "所有选项由你自己选择。",
     "All": "全部", "Registering": "报名中", "Running": "进行中", "Mine": "我的", "Tournament": "比赛", "Players": "玩家", "Status": "状态", "Ends in": "剩余时间", "{0} d {1} h": "{0}天{1}小时", "{0} h {1} min": "{0}小时{1}分", "Register": "报名", "No tournaments here.": "这里没有比赛。", "Edit my card": "编辑我的名片",
     "Country/Region": "国家/地区", "Skill level": "技术水平", "Joined": "注册日期", "Logins": "登录次数", "Title": "称号", "Newcomer": "新手", "Strategist": "策略家", "Master": "大师", "Grandmaster": "特级大师",
@@ -4855,6 +4864,43 @@ function otherTablesHtml(id) {
     ${L.length ? `<div class="resscroll"><table class="res"><thead><tr><th>${T('Player')}</th><th>${T('Contract')}</th><th class="n">${T('Score')}</th><th class="n">🤖 IMP</th></tr></thead><tbody>${rows}</tbody></table></div>${myE ? `<div class="muted">${T('Tap your own row to replay the board.')}</div>` : ''}`
       : `<div class="muted">${T('Nobody has played this board yet.')}</div>`}</div>`;
 }
+/* the organiser started a tournament you registered for: you are seated at once (as on the big bridge sites).
+   Individual: your first board is dealt. At tables: the first player named at your table opens it, the others
+   join it as soon as it shows in the lobby. Someone in the middle of a board only gets a notice. */
+function tourAutoStart(t) {
+  if (!t || t.state !== 'live' || !t.joined[Net.devId()] || Net.isMine(t)) return;
+  const busy = online() || (G && (G.phase === 'bid' || G.phase === 'play'));
+  if (busy) { flash('🏆 ' + T('{0} has started — open Tournaments to play', t.name), 5000); beep(); return; }
+  beep(); flash('🏆 ' + T('{0} has started — you are seated', t.name), 3500);
+  if (t.format !== 'tables') { closeOv(); playTour(t.id); return; }
+  const s = Net.myTourSeat(t); if (!s) return;
+  tourSit(t, s);
+}
+// sit at your tournament table: open it if you are its first named player, otherwise join it once it is in the
+// lobby (tried for about a minute); until then a robot plays your seat
+function tourSit(t, s) {
+  if (s.seat === s.hostSeat) { Net.openTourTable(t.id); return; }
+  let tries = 0;
+  const tryJoin = () => {
+    if (Net.on) return;
+    const tb = (Net.st.tables || []).find(x => x.tour && x.tour.id === t.id && x.tour.ti === s.ti);
+    if (tb) { Net.joinTourTable(t.id); return; }
+    if (tries++ < 12) { Net.findTables(); setTimeout(tryJoin, 5000); }
+  };
+  setTimeout(tryJoin, 1500);
+}
+/* back online (the app opened again): if a tournament you play at tables is still running and your table has
+   boards left, you go straight back to your seat (a robot played it while you were away) */
+function tourResume() {
+  if (online() || (G && (G.phase === 'bid' || G.phase === 'play'))) return;
+  for (const t of Object.values(Net.st.tours)) {
+    if (t.state !== 'live' || t.format !== 'tables' || !t.joined[Net.devId()]) continue;
+    const s = Net.myTourSeat(t); if (!s) continue;
+    if (Object.keys(tableDone(t.id, s.ti)).length >= t.n) continue;
+    flash('🏆 ' + T('Back to your seat in {0}', t.name), 3000);
+    tourSit(t, s); return;
+  }
+}
 /* tournament types, as on the big bridge sites: each fills in the options (custom keeps them as they are) */
 const TOUR_KINDS = {
   speed: { icon: '⚡', n: 'Speedball', d: 'Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.', set: { format: 'ind', n: 4, scoring: 'mp', hours: 3 } },
@@ -5499,6 +5545,8 @@ function start(data) {
 }
 window.claude?.hot?.snapshot?.(() => ({ SET, G, HIST, BOARD }));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+// with nobody else in the lobby there is no tournament sync to wait for: check the running tournaments a little after opening
+setTimeout(() => { if (typeof Net !== 'undefined' && !Net.st.tourResumed) { Net.st.tourResumed = true; tourResume(); } }, 9000);
 
 </script>
 <script>
@@ -5830,8 +5878,11 @@ const Net = (() => {
   }
   function onTourData(d) {
     if (d.t === 'tour') {
-      const fresh = d.tour && !st.tours[d.tour.id];
-      if (mergeTour(d.tour)) { saveTours(); const t = st.tours[d.tour.id]; if (invitedTo(t)) flash(T('{0} invites you to a tournament', t.by), 3500); else if (fresh && openTour(t) && t.state === 'live') flash('🏆 ' + T('{0} started a tournament — everyone can play it', t.by), 3500); renderL(); }
+      const fresh = d.tour && !st.tours[d.tour.id], was = d.tour && st.tours[d.tour.id] && st.tours[d.tour.id].state;
+      if (mergeTour(d.tour)) { saveTours(); const t = st.tours[d.tour.id];
+        // the organiser pressed Start: registered players sit down
+        if (t.state === 'live' && was === 'setup') setTimeout(() => tourAutoStart(t), 300);
+        if (invitedTo(t)) flash(T('{0} invites you to a tournament', t.by), 3500); else if (fresh && openTour(t) && t.state === 'live') flash('🏆 ' + T('{0} started a tournament — everyone can play it', t.by), 3500); renderL(); }
       return true;
     }
     if (d.t === 'tjoin') {
@@ -5841,6 +5892,7 @@ const Net = (() => {
     }
     if (d.t === 'tres') { if (mergeRes(d.id, d.key, d.r)) { saveTours(); renderL(); } return true; }
     if (d.t === 'tsync') {
+      if (!st.tourResumed) { st.tourResumed = true; setTimeout(() => tourResume(), 2500); }   // back online: return to a running tournament table
       let ch = false;
       for (const id in (d.tours || {})) ch = mergeTour(d.tours[id]) || ch;
       for (const id in (d.res || {})) for (const k in d.res[id]) ch = mergeRes(id, k, d.res[id][k]) || ch;
@@ -5854,6 +5906,9 @@ const Net = (() => {
     const me = nameKey(myName() || ''), out = new Map();
     for (const t of (st.tables || [])) for (const n of [t.host, ...Object.values(t.names || {})]) if (n) out.set(nameKey(n), n);
     for (const m of (st.lchat || [])) if (Date.now() - m.ts < 6 * 3600e3) out.set(nameKey(m.from), m.from);
+    // players whose app answered lately and still has an open lobby line
+    const lines = st.mesh || new Map();
+    for (const k in (st.present || {})) { const p = st.present[k], c = lines.get(ROOM(p.k)); if (Date.now() - p.ts < 15 * 60e3 && (!c || c.open)) out.set(k, p.name); }
     out.delete(me); out.delete(nameKey('Player'));
     return [...out.values()].sort((a, b) => a.localeCompare(b));
   }
@@ -5883,6 +5938,8 @@ const Net = (() => {
     if (old === conn) return;
     m.set(conn.peer, conn);
     conn.on('close', () => { if (m.get(conn.peer) === conn) { m.delete(conn.peer); renderL(); } });
+    // ask the newcomer who they are, so they show in the lobby at once (not only after the next scan)
+    try { conn.send({ t: 'inforeq' }); } catch (e) {}
     try { conn.send({ t: 'lhist', list: (st.lchat || []).slice(-30) }); conn.send({ t: 'tsync', tours: st.tours, res: st.tres }); } catch (e) {}
     renderL(); deliverOut();
   }
@@ -5890,6 +5947,8 @@ const Net = (() => {
     if (st.slot && d.k === st.slot.k) return;   // our own table
     if (st.collect && !st.collect.some(o => o.k === d.k)) st.collect.push(d);
     if (d.host) (st.roomOf || (st.roomOf = {}))[nameKey(d.host)] = d.k;   // each player's own lobby line (also when sitting elsewhere)
+    // everyone who answered is in the lobby, also a player sitting at someone else's table (who has no table of their own)
+    if (d.host) (st.present || (st.present = {}))[nameKey(d.host)] = { name: String(d.host).slice(0, 20), ts: Date.now(), k: d.k };
     if (d.busy) { st.tables = (st.tables || []).filter(t => t.k !== d.k); }
     else st.tables = [...(st.tables || []).filter(t => t.k !== d.k), d].sort((a, b) => a.k - b.k);   // show each table as soon as it answers
     render(); panelRefresh(); deliverOut();
@@ -6172,7 +6231,8 @@ const Net = (() => {
       if (back == null) {
         if (nameTaken(d.name)) { conn.send({ t: 'nametaken' }); setTimeout(() => conn.close(), 500); return; }
         // someone you invited sits down at once; a private table (🔒 in the lobby) takes no spectators, others ask the host
-        const inv = (st.invited || []).includes(nameKey(d.name));
+        // a tournament table always takes its own players back, at the seat the organiser gave them
+        const inv = (st.invited || []).includes(nameKey(d.name)) || !!(st.tour && st.invSeat && st.invSeat[nameKey(d.name)] != null);
         if (inv && st.host && d.want !== 'watch') { st.invited = st.invited.filter(x => x !== nameKey(d.name)); seatPlayer(conn, d, null); return; }
         // a public online table takes spectators at once; the players see who is watching
         if (d.want === 'watch' && st.host && !st.priv) { addWatcher(conn, d); return; }

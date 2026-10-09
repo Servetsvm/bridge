@@ -326,8 +326,11 @@ const Net = (() => {
   }
   function onTourData(d) {
     if (d.t === 'tour') {
-      const fresh = d.tour && !st.tours[d.tour.id];
-      if (mergeTour(d.tour)) { saveTours(); const t = st.tours[d.tour.id]; if (invitedTo(t)) flash(T('{0} invites you to a tournament', t.by), 3500); else if (fresh && openTour(t) && t.state === 'live') flash('🏆 ' + T('{0} started a tournament — everyone can play it', t.by), 3500); renderL(); }
+      const fresh = d.tour && !st.tours[d.tour.id], was = d.tour && st.tours[d.tour.id] && st.tours[d.tour.id].state;
+      if (mergeTour(d.tour)) { saveTours(); const t = st.tours[d.tour.id];
+        // the organiser pressed Start: registered players sit down
+        if (t.state === 'live' && was === 'setup') setTimeout(() => tourAutoStart(t), 300);
+        if (invitedTo(t)) flash(T('{0} invites you to a tournament', t.by), 3500); else if (fresh && openTour(t) && t.state === 'live') flash('🏆 ' + T('{0} started a tournament — everyone can play it', t.by), 3500); renderL(); }
       return true;
     }
     if (d.t === 'tjoin') {
@@ -337,6 +340,7 @@ const Net = (() => {
     }
     if (d.t === 'tres') { if (mergeRes(d.id, d.key, d.r)) { saveTours(); renderL(); } return true; }
     if (d.t === 'tsync') {
+      if (!st.tourResumed) { st.tourResumed = true; setTimeout(() => tourResume(), 2500); }   // back online: return to a running tournament table
       let ch = false;
       for (const id in (d.tours || {})) ch = mergeTour(d.tours[id]) || ch;
       for (const id in (d.res || {})) for (const k in d.res[id]) ch = mergeRes(id, k, d.res[id][k]) || ch;
@@ -350,6 +354,9 @@ const Net = (() => {
     const me = nameKey(myName() || ''), out = new Map();
     for (const t of (st.tables || [])) for (const n of [t.host, ...Object.values(t.names || {})]) if (n) out.set(nameKey(n), n);
     for (const m of (st.lchat || [])) if (Date.now() - m.ts < 6 * 3600e3) out.set(nameKey(m.from), m.from);
+    // players whose app answered lately and still has an open lobby line
+    const lines = st.mesh || new Map();
+    for (const k in (st.present || {})) { const p = st.present[k], c = lines.get(ROOM(p.k)); if (Date.now() - p.ts < 15 * 60e3 && (!c || c.open)) out.set(k, p.name); }
     out.delete(me); out.delete(nameKey('Player'));
     return [...out.values()].sort((a, b) => a.localeCompare(b));
   }
@@ -379,6 +386,8 @@ const Net = (() => {
     if (old === conn) return;
     m.set(conn.peer, conn);
     conn.on('close', () => { if (m.get(conn.peer) === conn) { m.delete(conn.peer); renderL(); } });
+    // ask the newcomer who they are, so they show in the lobby at once (not only after the next scan)
+    try { conn.send({ t: 'inforeq' }); } catch (e) {}
     try { conn.send({ t: 'lhist', list: (st.lchat || []).slice(-30) }); conn.send({ t: 'tsync', tours: st.tours, res: st.tres }); } catch (e) {}
     renderL(); deliverOut();
   }
@@ -386,6 +395,8 @@ const Net = (() => {
     if (st.slot && d.k === st.slot.k) return;   // our own table
     if (st.collect && !st.collect.some(o => o.k === d.k)) st.collect.push(d);
     if (d.host) (st.roomOf || (st.roomOf = {}))[nameKey(d.host)] = d.k;   // each player's own lobby line (also when sitting elsewhere)
+    // everyone who answered is in the lobby, also a player sitting at someone else's table (who has no table of their own)
+    if (d.host) (st.present || (st.present = {}))[nameKey(d.host)] = { name: String(d.host).slice(0, 20), ts: Date.now(), k: d.k };
     if (d.busy) { st.tables = (st.tables || []).filter(t => t.k !== d.k); }
     else st.tables = [...(st.tables || []).filter(t => t.k !== d.k), d].sort((a, b) => a.k - b.k);   // show each table as soon as it answers
     render(); panelRefresh(); deliverOut();
@@ -668,7 +679,8 @@ const Net = (() => {
       if (back == null) {
         if (nameTaken(d.name)) { conn.send({ t: 'nametaken' }); setTimeout(() => conn.close(), 500); return; }
         // someone you invited sits down at once; a private table (🔒 in the lobby) takes no spectators, others ask the host
-        const inv = (st.invited || []).includes(nameKey(d.name));
+        // a tournament table always takes its own players back, at the seat the organiser gave them
+        const inv = (st.invited || []).includes(nameKey(d.name)) || !!(st.tour && st.invSeat && st.invSeat[nameKey(d.name)] != null);
         if (inv && st.host && d.want !== 'watch') { st.invited = st.invited.filter(x => x !== nameKey(d.name)); seatPlayer(conn, d, null); return; }
         // a public online table takes spectators at once; the players see who is watching
         if (d.want === 'watch' && st.host && !st.priv) { addWatcher(conn, d); return; }
