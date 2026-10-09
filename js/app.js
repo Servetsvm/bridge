@@ -534,10 +534,11 @@ function renderBar() {
    <div class="tools">
      <button class="btn" id="bHome" title="${T('Home')}">⌂</button>
      <button class="btn new${ui.confirmNew > Date.now() ? ' warn' : ''}" id="bNew">${ui.confirmNew > Date.now() ? T('Sure?') : T('New Deal')}</button>
-     <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>${T('Undo')}</button>${typeof Net !== "undefined" ? (n => `<button class="btn${n ? " gold" : ""}" id="bChat">💬 ${T('Chat')}${n ? " (" + n + ")" : ""}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ""}
+     <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>${T('Undo')}</button>
      <button class="btn gold" id="bHint">${T('Hint')}</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
      ${guest() ? `<button class="btn" id="nLeave">🚪 ${T("Leave")}</button>` : online() ? `<button class="btn" id="nStop">🚪 ${T("Close table")}</button>` : ""}
+     ${typeof Net !== "undefined" ? (n => `<button class="btn${n ? " gold" : ""}" id="bChat" title="${T('Chat')}">💬<span class="cbl"> ${T('Chat')}</span>${n ? `<span class="cbn">${n}</span>` : ""}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ""}
      <span class="menuwrap"><button class="btn" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰</button>${ui.menu ? `<div class="menu" role="menu">
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
        <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
@@ -694,9 +695,17 @@ function toggleDock() {
   ui.dockOpen = !ui.dockOpen; renderDock();
   if (ui.dockOpen) setTimeout(() => { const i = $('dMsg'); if (i) i.focus(); }, 50);
 }
+// the new-message count on 💬 in the top bar
+function chatBadge() {
+  const bc = $('bChat'), n = (Net.st.unread || 0) + (Net.st.lunread || 0); if (!bc) return;
+  let s = bc.querySelector('.cbn');
+  if (n) { if (!s) { s = document.createElement('span'); s.className = 'cbn'; bc.appendChild(s); } s.textContent = n; } else if (s) s.remove();
+  bc.classList.toggle('gold', !!n);
+}
 function renderDock() {
   const d = $('dock'); if (!d || typeof Net === 'undefined' || !G) return;
   const athome = G.phase === 'idle', wide = dockWide();
+  chatBadge();
   const cb = $('chatBtn'); if (cb) { cb.hidden = athome || wide; const n = (Net.st.unread || 0) + (Net.st.lunread || 0); const s = $('chatBtnN'); if (s) s.textContent = n ? '(' + n + ')' : ''; }
   const show = !athome && (wide || ui.dockOpen);
   document.body.classList.toggle('withdock', !athome && wide);
@@ -717,6 +726,7 @@ function renderDock() {
   const tn = $('dTn'), ln = $('dLn');
   if (tn) tn.textContent = Net.st.unread ? '(' + Net.st.unread + ')' : '';
   if (ln) ln.textContent = Net.st.lunread ? '(' + Net.st.lunread + ')' : '';
+  chatBadge();
 }
 function dockSend(text) {
   text = String(text || '').trim(); if (!text) return;

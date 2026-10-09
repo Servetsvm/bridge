@@ -521,7 +521,10 @@ b.inv{color:#b3261e}
 /* phones: a small chat button of fixed size under your cards (the one in the top bar is hidden) */
 .chatbtn[hidden]{display:none!important}
 .chatbtn{align-self:flex-end;flex:none;width:auto;border:0;border-radius:999px;padding:6px 14px;font-weight:800;font-size:14px;background:#c9a227;color:#1d1a0f;box-shadow:0 2px 8px rgba(0,0,0,.35);margin-top:4px}
-@media (max-width:1099px){ #bar #bChat{display:none} }
+/* phones: the chat button sits in the top bar next to ☰ (a small icon with the number of new messages) */
+@media (max-width:1099px){ #chatBtn{display:none!important} #bar #bChat .cbl{display:none} }
+#bChat{position:relative}
+#bChat .cbn{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#c62828;color:#fff;font-size:11px;font-weight:800;line-height:18px;text-align:center}
 .sysseg{flex-wrap:wrap}
 .sysseg button{flex:1 1 auto}
 /* phones: the chat panel stays in the free space under the cards instead of covering the table */
