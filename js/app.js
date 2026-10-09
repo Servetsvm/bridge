@@ -1135,7 +1135,8 @@ function showOpenChoice() {
 // back to the home page from a board played alone (the board is kept for Continue)
 function goHome() {
   if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
-  clearTimeout(timer); if (G && G.phase !== 'idle') ui.saved = G.phase === 'done' ? null : G;
+  // leaving the table ends the board: the home page is fresh (no "Continue"), as when the app is opened
+  clearTimeout(timer); ui.saved = null;
   G = idleG(); closeOv(); save(); render();
 }
 
