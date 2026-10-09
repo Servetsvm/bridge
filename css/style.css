@@ -559,11 +559,6 @@ b.inv{color:#b3261e}
 .card.tc{--cw:clamp(50px,13.5vw,74px)}
 .tbds{flex-wrap:wrap}.tbds button{flex:0 0 auto;min-width:34px}.tbds button.dim{opacity:.45}
 /* alerts: the alert row in the bidding box, alerted calls in the auction, the alert in the explanation */
-#bidbox .alrow{display:flex;gap:6px;align-items:center}
-#bidbox .alrow button{flex:none;padding:6px 10px;border-radius:8px;border:1px solid #c9a227;background:#fff7dc;color:#5a4300;font-weight:700}
-#bidbox .alrow button.on{background:#c9a227;color:#1d1a0f}
-#bidbox .alrow .tok{flex:1;min-width:0}
-#bidbox .alrow small{color:#e8e2c8;font-size:12px}
 .auction .c.alrt{background:#fff1b8;color:#5a4300;border-radius:4px;padding:0 3px}
 .expl .al{background:#c9a227;color:#1d1a0f;border-radius:4px;padding:0 5px;font-size:12px;font-weight:800}
 /* ===== table look: a calmer bar, a richer felt, name plates and card backs ===== */
@@ -757,3 +752,39 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .otour small{display:block;color:#6d6c62;font-size:12.5px;margin-top:2px}
 .otour .otb{flex:none}
 .pclin{width:100%;font:inherit;font-size:13.5px;line-height:1.45;resize:vertical;min-height:62px;background:#fff;border:1px solid #c9c4ad;border-left:4px solid #1b2a4e}
+/* the daily tournament line on the home page */
+.hdaily{display:block;width:100%;margin-top:10px;padding:9px 12px;border-radius:10px;border:1px solid #c9b6e8;background:linear-gradient(90deg,#f3ecff,#fbf8ff);color:#3d2a66;font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.hdaily:empty{display:none}
+.hdaily b{color:#5b3aa0}
+.hdaily:hover{background:#ece2ff}
+.prt{color:#1f6f3a;font-size:16px}
+.anarow{padding:4px 0;border-bottom:1px dashed #e2e0d4}.anarow b.pos{color:#1f7a2e}
+/* ---- dark screens (Settings → Screen): the pages, sheets and lists; the green table stays as it is ---- */
+:root[data-theme="dark"]{--sheet:#1e2421;--sheet-ink:#e8ece4;--sheet-muted:#9db0a2;color-scheme:dark}
+:root[data-theme="dark"] [class="btn"],:root[data-theme="dark"] .btn.mini-btn,:root[data-theme="dark"] .seg button,:root[data-theme="dark"] .seg2 button,:root[data-theme="dark"] .quick button,:root[data-theme="dark"] .dtabs button{background:#323b36;color:#e8ece4;box-shadow:inset 0 -2px 0 rgba(0,0,0,.35)}
+:root[data-theme="dark"] .seg button.on,:root[data-theme="dark"] .seg2 button.on{background:#d9b25c;color:#1b1b1b}
+:root[data-theme="dark"] .tok,:root[data-theme="dark"] .sel,:root[data-theme="dark"] .pclin,:root[data-theme="dark"] .pconv{background:#2a312d;color:#e8ece4;border-color:#4a564f}
+:root[data-theme="dark"] .res th,:root[data-theme="dark"] .res td{border-bottom-color:#3a443e}
+:root[data-theme="dark"] .auction th,:root[data-theme="dark"] .ttab tbody tr:nth-child(even) td{background:#29302c}
+:root[data-theme="dark"] tr.meRow td{background:#3b3a22}
+:root[data-theme="dark"] tr.rev:hover td{background:#2f3833}
+:root[data-theme="dark"] .deal .h,:root[data-theme="dark"] .helprow,:root[data-theme="dark"] .person,:root[data-theme="dark"] .cvrow,:root[data-theme="dark"] .cvchip,:root[data-theme="dark"] .pedit,:root[data-theme="dark"] .hsec,:root[data-theme="dark"] .invrow,:root[data-theme="dark"] .otour,:root[data-theme="dark"] .score2 div,:root[data-theme="dark"] .rtrick .rc,:root[data-theme="dark"] .pabout,:root[data-theme="dark"] .menu{background:#262d29;color:#e8ece4;border-color:#3e4a43}
+:root[data-theme="dark"] .cvchip.on{background:#2f4a36}
+:root[data-theme="dark"] .lmsgs,:root[data-theme="dark"] .chatlist{background:#1a1f1c}
+:root[data-theme="dark"] .lmsgs .cm,:root[data-theme="dark"] .chatlist .cm{background:#2a312d;color:#e8ece4}
+:root[data-theme="dark"] .lmsgs .cm.me{background:#2f4a36}
+:root[data-theme="dark"] .okmsg{background:#1f3a27;color:#bfe8c9}
+:root[data-theme="dark"] .err{background:#4a1f22;color:#ffd0d0}
+:root[data-theme="dark"] .hdaily{background:linear-gradient(90deg,#2d2440,#241f30);border-color:#4c3d6e;color:#e4dafa}
+:root[data-theme="dark"] .hdaily b{color:#c9b2ff}
+:root[data-theme="dark"] .hstats{color:#b9c6bd}
+:root[data-theme="dark"] .hico{background:#2a312d;color:#e8ece4}
+:root[data-theme="dark"] .anarow{border-bottom-color:#3a443e}
+:root[data-theme="dark"] .sheet .sym.red,:root[data-theme="dark"] .hcard .sym.red{color:#ff6b7f}
+/* larger cards (Settings → Card size): the cards on the table too */
+body.bigcards .card.tc{--cw:clamp(58px,16vw,90px)}
+body.bigcards .mini{transform:scale(1.15);transform-origin:bottom}
+:root[data-theme="dark"] .hero{background:linear-gradient(160deg,#252c28,#1d2320)}
+:root[data-theme="dark"] .hname label>span,:root[data-theme="dark"] .hero .muted{color:#b9c6bd}
+:root[data-theme="dark"] .hsec{background:#2a312d;color:#e8ece4}
+:root[data-theme="dark"] .hrow .hpeople:not(.on){background:#2a312d;color:#e8ece4;border-color:#4a564f}

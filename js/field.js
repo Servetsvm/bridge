@@ -39,6 +39,8 @@ function workerMain(E) {
           self.postMessage({ type: "table", id: m.id, i, r });
         }
         self.postMessage({ type: "part", id: m.id });
+      } else if (m.type === 'ana') {
+        self.postMessage({ type: 'ana', id: m.id, list: E.analysePlay(m.deal, m.c, m.pl, m.seats, m.limit) });
       } else if (m.type === 'dd') {
         self.postMessage({ type: 'dd', id: m.id, key: m.key, t: E.ddContract(m.deal, m.c, m.limit || 1.5e8) });
       }

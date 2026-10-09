@@ -9,6 +9,10 @@ const Net = (() => {
   // on this computer's own test server (localhost) the app always uses a test lobby, so tests never reach real players
   const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1] || (/^(localhost|127.0.0.1)$/.test(location.hostname) ? 'dev' : undefined);
   const PREFIX = 'bridgetable-' + (NS ? NS.toLowerCase() + '-' : ''), LIB = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
+  // connection helpers: several public STUN servers, and the PeerJS relay (TURN) also over TCP, for mobile networks
+  // that block direct (UDP) connections
+  const PEER_OPT = { config: { iceServers: [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302", "stun:stun.cloudflare.com:3478"] },
+    { urls: ["turn:eu-0.turn.peerjs.com:3478", "turn:us-0.turn.peerjs.com:3478", "turn:eu-0.turn.peerjs.com:3478?transport=tcp", "turn:us-0.turn.peerjs.com:3478?transport=tcp"], username: "peerjs", credential: "peerjsp" }] } };
   /* Every open app holds one of ROOMS fixed addresses ("rooms"): its table, played alone with robots, is then
      listed in everyone's lobby. When someone asks to join and the player accepts, that table goes online
      and the player is its host. */
@@ -74,7 +78,7 @@ const Net = (() => {
     try { await loadLib(); } catch (e) { st.claiming = false; return; }
     for (let k = 1; k <= ROOMS && !st.slot; k++) {
       const p = await new Promise(res => {
-        const p = new Peer(ROOM(k)); let opened = false;
+        const p = new Peer(ROOM(k), PEER_OPT); let opened = false;
         const t = setTimeout(() => { try { p.destroy(); } catch (e) {} res(null); }, 8000);
         p.on('open', () => { opened = true; clearTimeout(t); res(p); });
         // taken by another player: try the next room (only while claiming — later errors, such as asking an
@@ -106,8 +110,34 @@ const Net = (() => {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
     return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
-      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300) };   // the player card: level, country, a few words
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), ...ratingOf(HIST) };   // the player card: level, country, a few words
   }
+  /* the rating: 1500 plus 150 × the IMPs won against the robot field over the last 200 scored boards, shrunk for a
+     player with few boards (so ten lucky boards do not make a champion). Every app sends its own; the lobby keeps the
+     ratings it has seen for a week, for the leaderboard */
+  function ratingOf(H) {
+    const L = (H || []).filter(e => e.imp != null).slice(-200), s = L.reduce((a, e) => a + e.imp, 0);
+    return { rt: Math.round(1500 + 150 * s / (L.length + 20)), rtn: L.length };
+  }
+  st.rated = (() => { try { return JSON.parse(localStorage.getItem('bridge-rated') || '{}') || {}; } catch (e) { return {}; } })();
+  function noteRating(name, p) {
+    if (!name || !p || !p.rt || !p.rtn) return;
+    st.rated[nameKey(name)] = { name: String(name).slice(0, 20), rt: p.rt, rtn: p.rtn, ctry: p.ctry || '', ts: Date.now() };
+    for (const k in st.rated) if (Date.now() - st.rated[k].ts > 7 * 864e5) delete st.rated[k];
+    try { localStorage.setItem('bridge-rated', JSON.stringify(st.rated)); } catch (e) {}
+  }
+  // the ten best ratings among the players seen this week (you included)
+  function leaderHtml() {
+    const me = prof(), L = Object.entries(st.rated).filter(([k]) => k !== nameKey(myName() || '')).map(([, r]) => r);
+    if (me.rtn) L.push({ name: myName() || T('You'), rt: me.rt, rtn: me.rtn, ctry: me.ctry, me: true });
+    if (!L.length) return '';
+    L.sort((a, b) => b.rt - a.rt);
+    const top = L.slice(0, 10), mine = L.findIndex(r => r.me);
+    const row = (r, i) => `<tr class="${r.me ? 'meRow' : ''}"><td>${i + 1}</td><td><b class="pname" data-who="${esc(r.name)}">${esc(r.name)}</b></td><td class="n"><b>${r.rt}</b></td><td class="n">${r.rtn}</td></tr>`;
+    return `<div class="grp leader"><span>🏅 ${T('Leaderboard — this week')}</span><div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Rating')}</th><th class="n">${T('boards')}</th></tr></thead><tbody>${top.map(row).join('')}${mine >= 10 ? row(L[mine], mine) : ''}</tbody></table></div>
+      <div class="muted">${T('Rating: 1500 + your IMPs against the robot tables over your last 200 boards.')}</div></div>`;
+  }
+
   // a profile received from another app, kept to the fields we know
   const num = v => v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
   function cleanProf(q, conv) {
@@ -118,7 +148,7 @@ const Net = (() => {
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
       joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
-      cline: typeof q.cline === 'string' ? q.cline.slice(0, 300) : '' };
+      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   function whereIs(name) {
@@ -167,7 +197,7 @@ const Net = (() => {
   const TEST_KEYS = ['hdr4fnhkte9muzjte04', '8bx5flpiljomv046g5q', 'yzx7gpx2u5emuzjw34j'];
   function mergeTour(t) {
     // test devices' tournaments, and old ones without an organiser key (nobody could ever close them), are dropped
-    if (!t || !t.id || !t.byKey || TEST_KEYS.includes(t.byKey)) return false;
+    if (!t || !t.id || !t.byKey || TEST_KEYS.includes(t.byKey) || t.byKey === "daily") return false;   // each app makes the daily one itself
     if (Date.now() - (+t.ts || 0) > ([3, 24, 72].includes(+t.hours) ? +t.hours : 72) * 3600e3) return false;   // kept for the chosen time
     const cur = st.tours[t.id];
     if (cur && ((+t.v || 0) <= cur.v || (cur.byKey && t.byKey !== cur.byKey))) return false;
@@ -188,7 +218,25 @@ const Net = (() => {
     R[key] = { name: String(r.name || 'Player').slice(0, 40), ns, f, c, dir: r.dir === 'NS' || r.dir === 'EW' ? r.dir : undefined };
     return true;
   }
-  try { const d = JSON.parse(localStorage.getItem('bridge-tours') || '{}'); for (const id in (d.tours || {})) mergeTour(d.tours[id]); for (const id in (d.res || {})) for (const k in d.res[id]) mergeRes(id, k, d.res[id][k]); } catch (e) {}
+  try { const d = JSON.parse(localStorage.getItem('bridge-tours') || '{}'); for (const id in (d.tours || {})) if (/^daily-/.test(id)) st.tours[id] = cleanTour(d.tours[id]); else mergeTour(d.tours[id]); for (const id in (d.res || {})) for (const k in d.res[id]) mergeRes(id, k, d.res[id][k]); } catch (e) {}
+  /* the daily tournament: every app makes the same one by itself from the date (UTC), with the same 8 boards for
+     everyone; it is played alone with robots, results travel like any tournament's and it is kept three days */
+  const ymd = d => d.toISOString().slice(0, 10);
+  const dailyId = (d = new Date()) => 'daily-' + ymd(d);
+  function ensureDaily() {
+    for (let back = 0; back < 3; back++) {   // today, and the two days before (their rankings are still shown)
+      const d = new Date(Date.now() - back * 864e5), id = dailyId(d), ts = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+      const name = T("Daily tournament") + " · " + new Date(ts).toLocaleDateString(undefined, { timeZone: "UTC" });   // in the chosen language
+      if (st.tours[id]) { st.tours[id].name = name; st.tours[id].by = T("Daily"); continue; }
+      let seed = 2166136261; for (const ch of id) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
+      st.tours[id] = cleanTour({ id, name, by: T("Daily"), byKey: 'daily', n: 8, seed: seed >>> 0,
+        ts, state: "live", inv: [], joined: {}, declined: {}, v: 1, format: "ind", kind: "robot", scoring: "mp", hours: 72 });
+    }
+    for (const k of Object.keys(st.tours)) if (/^daily-/.test(k) && Date.now() - st.tours[k].ts > 72 * 3600e3) delete st.tours[k];
+    saveTours();
+  }
+  ensureDaily(); setInterval(() => { ensureDaily(); }, 10 * 60e3);
+
   function meshSend(m) { for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send(m); } catch (e) {} } }
   const isMine = t => !!t && t.byKey === devId();
   // an individual tournament is open to everyone in the lobby: anyone can join and play its boards while it is kept
@@ -399,6 +447,7 @@ const Net = (() => {
     if (d.host) (st.roomOf || (st.roomOf = {}))[nameKey(d.host)] = d.k;   // each player's own lobby line (also when sitting elsewhere)
     // everyone who answered is in the lobby, also a player sitting at someone else's table (who has no table of their own)
     if (d.host) (st.present || (st.present = {}))[nameKey(d.host)] = { name: String(d.host).slice(0, 20), ts: Date.now(), k: d.k };
+    if (d.host && d.prof) noteRating(d.host, cleanProf(d.prof));
     if (d.busy) { st.tables = (st.tables || []).filter(t => t.k !== d.k); }
     else st.tables = [...(st.tables || []).filter(t => t.k !== d.k), d].sort((a, b) => a.k - b.k);   // show each table as soon as it answers
     render(); panelRefresh(); deliverOut();
@@ -412,7 +461,7 @@ const Net = (() => {
       await claimSlot();   // use our own address, so the lines stay open for chat and tournaments
       // our own room's address keeps the lines open for the chat; without one, a short-lived address is used
       const own = st.slot && !st.slot.peer.destroyed ? st.slot.peer : null;
-      const p = own || await new Promise(res => { const p = new Peer(); p.on('open', () => res(p)); p.on('error', () => res(null)); setTimeout(() => res(null), 8000); });
+      const p = own || await new Promise(res => { const p = new Peer(PEER_OPT); p.on('open', () => res(p)); p.on('error', () => res(null)); setTimeout(() => res(null), 8000); });
       if (p) {
         const mesh = st.mesh || (st.mesh = new Map());
         for (let k = 1; k <= ROOMS; k++) {
@@ -472,6 +521,7 @@ const Net = (() => {
     if ((+m.ts || 0) <= lclearTs()) return;   // cleared on this device: older messages do not come back from the others
     if (L.some(x => x.id === m.id)) return;
     L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: cleanProf(m.p) });
+    noteRating(m.from, L[L.length - 1].p);
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
     try { localStorage.setItem('bridge-lobby-chat', JSON.stringify(L.slice(-50))); } catch (e) {}
     if (!quiet) { if (m.from !== (myName() || 'Player') && ui.overlay !== 'lchat') st.lunread = (st.lunread || 0) + 1; renderL(); }
@@ -559,7 +609,7 @@ const Net = (() => {
     broadcast(); panelRefresh(); render(); tick();
   }
   // a seated guest moves to another empty seat while the table waits for Start
-  function sit(s) { if (st.guest) { send({ t: 'sit', s }); flash('Asked the host to move you to ' + SEAT[s], 2000); } }
+  function sit(s) { if (st.guest) { send({ t: 'sit', s }); flash(T("Asked the host to move you to {0}", SEAT[s]), 2000); } }
   /* seat a player: back is the seat a returning player gets back, otherwise a free seat is chosen
      (the partner's or an opponent's seat as they asked, or any free one) */
   // names are unique at a table: "Servet", "SERVET" and "Sérvet" count as the same name
@@ -674,11 +724,11 @@ const Net = (() => {
   // the players seen in the lobby; with your table open, each can be invited with one tap
   function peopleHtml() {
     const names = knownNames();
-    if (!names.length) return `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`;
+    if (!names.length) return `<div class="muted">${T("Nobody else is in the lobby right now.")}</div>${leaderHtml()}`;
     const sent = st.invited || [];
     const un = n => st.dmUnread[nameKey(n)] ? ` <span class="badge">${st.dmUnread[nameKey(n)]}</span>` : "";
     return `<div class="people">${names.map(n => `<div class="person"><b class="pname" data-who="${esc(n)}" title="${T('Player card')}">${esc(n)}</b><span class="pbtns"><button class="btn" data-dm="${esc(n)}" title="${T("Message")}">💬${un(n)}</button>${st.host ? (sent.includes(nameKey(n)) ? `<span class="muted">${T('invited')}</span>` : `<button class="btn gold" data-tblinv="${esc(n)}">${T('Invite to my table')}</button>`) : ''}</span></div>`).join('')}</div>
-      ${st.host ? '' : `<div class="muted">${T('Open an online table to invite players to it.')}</div>`}`;
+      ${st.host ? '' : `<div class="muted">${T('Open an online table to invite players to it.')}</div>`}${leaderHtml()}`;
   }
   function onHostData(conn, d) {
     if (!d || !d.t) return;
@@ -688,7 +738,7 @@ const Net = (() => {
       const from = seatOf(conn.peer), to = +d.s;
       if (Number.isNaN(from) || !(to >= 0 && to < 4) || st.seats[to] || !G || !(G.phase === 'lobby' || G.phase === 'done')) { try { conn.send({ t: 'movedeclined' }); } catch (e) {} return; }
       (st.moves || (st.moves = {}))[conn.peer] = { from, to };
-      flash((st.names[from] || SEAT[from]) + ' wants to move to ' + SEAT[to], 3000); panel(); render();
+      flash(T("{0} wants to move to {1}", st.names[from] || SEAT[from], SEAT[to]), 3000); panel(); render();
       return;
     }
     if (d.t === 'hello') {
@@ -803,10 +853,10 @@ const Net = (() => {
     // so the host is not asked again for a request already answered, but a new request of yours is always asked
     let rq = null; try { rq = localStorage.getItem("bridge-req-id"); } catch (e) {}
     if (!(retry || auto) || !rq) { rq = Date.now().toString(36) + Math.random().toString(36).slice(2, 7); try { localStorage.setItem("bridge-req-id", rq); } catch (e) {} }
-    if (!retry) { st.msg = 'Connecting to table ' + code + '…'; showJoin(code); }
+    if (!retry) { st.msg = T("Connecting to table {0}…", code); showJoin(code); }
     try {
       await loadLib();
-      const peer = await new Promise((res, rej) => { const p = new Peer(); p.on('open', () => res(p)); p.on('error', e => rej(new Error('Could not reach the connection service (' + (e.type || 'error') + ').'))); });
+      const peer = await new Promise((res, rej) => { const p = new Peer(PEER_OPT); p.on('open', () => res(p)); p.on('error', e => rej(new Error('Could not reach the connection service (' + (e.type || 'error') + ').'))); });
       const conn = peer.connect(PREFIX + code, { reliable: true });
       st.joinPeer = peer;
       let welcomed = false, failed = false, waiting = false;
@@ -834,7 +884,7 @@ const Net = (() => {
         else if (d.t === "nudge") nudged(+d.s || 0);
         else if (d.t === "movedeclined") flash('The host did not agree to the move', 2500);
         else if (d.t === "wait") { waiting = true; st.waiting = true; st.msg = 'Waiting for the host to accept you…'; showJoin(code); }
-        else if (d.t === "nametaken") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The name ' + name + ' is already used at this table. Choose another name.'; showJoin(code); }
+        else if (d.t === "nametaken") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = T("The name {0} is already used at this table. Choose another name.", name); showJoin(code); }
         else if (d.t === "declined") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The host did not accept the request.'; showJoin(code); }
         else if (d.t === "kick") { st.rejoin = null; if (st.guest) leave('The host removed you from the table.'); else { st.msg = 'The host removed you from this table.'; showJoin(code); } }
         else if (d.t === "bye") { st.rejoin = null; if (st.guest) leave('The host closed the table.'); }
@@ -953,7 +1003,7 @@ const Net = (() => {
     const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const list = st.chat.slice(-60).map(m => m.from ? `<div class="cm${m.from === myTableName() ? ' me' : ''}"><b>${esc(m.from)}</b> ${esc(m.text)}<small>${t(m.ts)}</small></div>` : `<div class="cm sys">${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') || '<div class="muted">No messages yet — say hello!</div>';
     openOv('chat', `<h2>Table chat</h2><div class="chatlist" id="nList">${list}</div>
-      <div class="quick">${QUICK.map(q => `<button data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+      <div class="quick">${QUICK.map(q => `<button data-q="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>
       <div class="row2"><input class="tok" id="nMsg" maxlength="200" placeholder="Write a message…" value="${esc(st.draft || '')}"><button class="btn gold" id="nSend">Send</button></div>
       <div class="row2"><button class="btn" id="oClose">Close</button></div>`);
     const L = document.getElementById('nList'); if (L) L.scrollTop = L.scrollHeight;
@@ -1014,39 +1064,39 @@ const Net = (() => {
   }
   function panel() {
     if (st.guest) {
-      openOv('net', `<h2>${T('Online table')}</h2><div>${st.watching ? '👁 ' + T('You are watching this table.') : `You sit <b>${SEAT[st.seat]}</b>. The host's device runs the table; robots fill the empty seats.`}</div>
-        ${!st.watching && G && (G.phase === 'lobby' || G.phase === 'done') ? `<div class="grp"><span>Move to another seat (the host decides)</span><div class="row2">${[0, 1, 2, 3].filter(s => s !== st.seat && !(st.names || {})[s]).map(s => `<button class="btn" data-sit="${s}">${SEAT[s]}</button>`).join('') || '<span class="muted">No free seat</span>'}</div></div>` : ''}
+      openOv('net', `<h2>${T('Online table')}</h2><div>${st.watching ? '👁 ' + T('You are watching this table.') : T("You sit <b>{0}</b>. The host's device runs the table; robots fill the empty seats.", SEAT[st.seat])}</div>
+        ${!st.watching && G && (G.phase === 'lobby' || G.phase === 'done') ? `<div class="grp"><span>${T('Move to another seat (the host decides)')}</span><div class="row2">${[0, 1, 2, 3].filter(s => s !== st.seat && !(st.names || {})[s]).map(s => `<button class="btn" data-sit="${s}">${SEAT[s]}</button>`).join('') || `<span class="muted">${T('No free seat')}</span>`}</div></div>` : ''}
         ${scoreHtml()}
         <div class="row2"><button class="btn" id="nLeave">🚪 ${T('Leave the table')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
       return;
     }
     if (st.host) {
-      const L = link(), wa = 'https://wa.me/?text=' + encodeURIComponent('Bridge: open ' + L + ' and ask to join my table');
-      openOv('net', `<h2>Your online table</h2>
+      const L = link(), wa = 'https://wa.me/?text=' + encodeURIComponent(T('Bridge: open {0} and ask to join my table', L));
+      openOv('net', `<h2>${T('Your online table')}</h2>
         ${pendHtml()}
         <div class="grp"><span>👥 ${T('Invite players')}${st.priv ? ' · 🔒 ' + T('Private table') : ''}</span>${peopleHtml()}</div>
-        <div class="grp"><span>App link</span><input class="tok wide" id="nLink" readonly value="${esc(L)}"></div>
-        <div class="row2"><a class="btn gold" href="${wa}" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn" id="nCopy">Copy link</button></div>
-        <div class="grp"><span>Seats</span>${[0, 1, 2, 3].map(s => `<div class="helprow"><span><b>${SEAT[s]}</b></span><span>${st.seats[s] === 'host' ? esc(st.names[s]) + ' (you)' : st.seats[s] ? esc(st.names[s]) + ` <button class="btn" data-kick="${s}">Remove</button>` : '<i>Robot</i>'}</span></div>`).join('')}</div>
-        <div class="muted">Anyone who opens the app link while your table is open can ask to join; you accept or decline each request. Keep this app open while you play: your device runs the table. Robots play any seat that is empty or whose player leaves.</div>
-        ${st.msg ? `<div class="err">${esc(st.msg)}</div>` : ''}
+        <div class="grp"><span>${T('App link')}</span><input class="tok wide" id="nLink" readonly value="${esc(L)}"></div>
+        <div class="row2"><a class="btn gold" href="${wa}" target="_blank" rel="noopener">${T('Send on WhatsApp')}</a><button class="btn" id="nCopy">${T('Copy link')}</button></div>
+        <div class="grp"><span>${T('Seats')}</span>${[0, 1, 2, 3].map(s => `<div class="helprow"><span><b>${SEAT[s]}</b></span><span>${st.seats[s] === 'host' ? esc(st.names[s]) + ' (' + T('you') + ')' : st.seats[s] ? esc(st.names[s]) + ` <button class="btn" data-kick="${s}">${T('Remove')}</button>` : `<i>${T('Robot')}</i>`}</span></div>`).join('')}</div>
+        <div class="muted">${T('Anyone who opens the app link while your table is open can ask to join; you accept or decline each request. Keep this app open while you play: your device runs the table. Robots play any seat that is empty or whose player leaves.')}</div>
+        ${st.msg ? `<div class="err">${esc(T(st.msg))}</div>` : ''}
         ${scoreHtml()}
-        <div class="row2"><button class="btn" id="nStop">Close the table</button><button class="btn gold" id="oClose">Done</button></div>`);
+        <div class="row2"><button class="btn" id="nStop">${T('Close the table')}</button><button class="btn gold" id="oClose">${T('Done')}</button></div>`);
       return;
     }
-    openOv('net', `<h2>Play online</h2>
+    openOv('net', `<h2>${T('Play online')}</h2>
       ${pendHtml()}
-      <div class="muted">${T('Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.')}${st.slot ? '' : ' (connecting…)'}</div>
-      <div class="grp"><span>Your name</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="Your name"></div>
-      <div class="grp"><span>Open tables</span>${tablesHtml()}</div>
-      ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(st.msg)}</div>` : ''}
+      <div class="muted">${T('Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.')}${st.slot ? '' : ' (' + T('connecting…') + ')'}</div>
+      <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="${T('Your name')}"></div>
+      <div class="grp"><span>${T('Open tables')}</span>${tablesHtml()}</div>
+      ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
       <div class="row2"><button class="btn new" id="nStart">${T('Open an online table')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
   }
   const panelRefresh = () => { if (ui.overlay === 'net') panel(); };
   function showJoin(code) {
     st.joinCode = code;
     const offer = st.offer && 'room-' + st.offer.k === code ? st.offer : null;
-    openOv('net', `<h2>${offer ? T("Join {0}'s table", esc(offer.host)) : 'Join table ' + esc(code)}</h2>
+    openOv('net', `<h2>${offer ? T("Join {0}'s table", esc(offer.host)) : T('Join table {0}', esc(code))}</h2>
       ${offer ? `<div class="muted">${[0, 1, 2, 3].map(s => SEAT[s] + ': ' + esc((offer.names || {})[s] || T('Robot'))).join(' · ')}. ${T('{0} decides whether you can sit.', esc(offer.host))}</div>` : ''}
       <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Sit as')}</span><div class="seg2">${[['partner', T("The host's partner")], ['opp', T('An opponent')], ['any', T('Any free seat')], ['watch', '👁 ' + T('Watch')]].map(([v, l]) => `<button data-want="${v}" class="${st.want === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
@@ -1129,5 +1179,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

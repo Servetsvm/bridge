@@ -543,5 +543,38 @@ function aiPlay(g, seat, opt) {
   return heurPlay(g, seat);
 }
 
-Object.assign(E, { DD, DDF, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
+/* after the board: every card our side played is checked double dummy against the other legal cards. A card that
+   gave away tricks is reported with the best card instead (trick number, seat, played, better, tricks lost). */
+function analysePlay(deal, c, pl, seats, limit) {
+  const hands = deal.map(h => h.slice()), trump = c.strain < 4 ? c.strain : -1, TTs = [new Map(), new Map()], out = [];
+  DD.trump = trump;
+  let trick = [];
+  for (let ti = 0; ti < pl.length; ti++) {
+    for (const [s, card] of pl[ti]) {
+      if (seats.includes(s) && hands[s].length > 1) {
+        const led = trick.length ? S(trick[0].c) : -1, has = led >= 0 && hands[s].some(x => S(x) === led);
+        const legal = hands[s].filter(x => !has || S(x) === led);
+        if (legal.length > 1) {
+          // one card from each run of touching cards is enough (they give the same tricks)
+          const cand = legal.filter(x => !legal.some(y => S(y) === S(x) && R(y) === R(x) + 1 && !hands.some(h => h.some(z => S(z) === S(x) && R(z) > R(x) && R(z) < R(y)))));
+          if (!cand.includes(card)) cand.push(card);
+          const v = {};
+          try {
+            DD.TT = TTs[s & 1];
+            for (const x of cand) v[x] = ddEval(hands, trick, s, x, limit || 3e6);
+          } catch (e) { if (e !== DDX) throw e; }
+          if (v[card] != null) {
+            let best = card; for (const x of cand) if (v[x] != null && v[x] > v[best]) best = x;
+            if (v[best] > v[card]) out.push({ t: ti + 1, s, c: card, b: best, lost: v[best] - v[card] });
+          }
+        }
+      }
+      hands[s] = hands[s].filter(x => x !== card); trick.push({ s, c: card });
+      if (trick.length === 4) trick = [];
+    }
+  }
+  return out;
+}
+
+Object.assign(E, { DD, DDF, analysePlay, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
 });
