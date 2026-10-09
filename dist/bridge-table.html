@@ -4471,7 +4471,7 @@ function showHelp() {
   const row = (file, name, flag) => `<div class="helprow"><span>${flag} <b>${name}</b></span><a class="btn" href="${base}${file}" target="_blank" rel="noopener">Open</a><a class="btn gold" href="${base}${file}" download="${file.replace(".html", "")}-bridge-table.html">Download</a></div>`;
   openOv("help", `<h2>User guide</h2>
    <div class="muted">Explains every button and every option in Settings, the convention card, reading a deal from a photo, and syncing your phone and PC. Download it to keep it on your device and read it offline.</div>
-   ${row("guide-en.html", "English", "🇬🇧")}${row("guide-no.html", "Norsk", "🇳🇴")}${row("guide.html", "Türkçe", "🇹🇷")}
+   ${[["en", "guide-en.html", "English", "🇬🇧"], ["tr", "guide.html", "Türkçe", "🇹🇷"], ["no", "guide-no.html", "Norsk", "🇳🇴"], ["es", "guide-es.html", "Español", "🇪🇸"], ["fr", "guide-fr.html", "Français", "🇫🇷"]].sort((a, b) => (b[0] === SET.lang) - (a[0] === SET.lang)).map(([, f, n, fl]) => row(f, n, fl)).join("")}
    <div class="row2"><button class="btn gold" id="oClose">Close</button></div>`);
 }
 /* ---- entering a deal (hand record, PBN, or the code Claude reads from a photo) ---- */

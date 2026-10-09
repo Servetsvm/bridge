@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Table de Bridge — Guide d’utilisation</title>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--red:#c4122f;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:16px/1.55 "Segoe UI",Roboto,Arial,sans-serif}
+  main{max-width:760px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:28px;margin:0 0 4px}
+  h2{font-size:21px;margin:34px 0 8px;padding-top:12px;border-top:2px solid var(--felt)}
+  h3{font-size:17px;margin:20px 0 4px}
+  p{margin:6px 0}
+  .lead{color:var(--muted)}
+  code,.k{font-family:Consolas,ui-monospace,monospace;background:var(--soft);border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:14px}
+  .k{font-family:inherit;font-weight:600}
+  .r{color:var(--red)}
+  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:15px}
+  th,td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+  th{background:var(--soft)}
+  .note{background:#fff8dc;border-left:4px solid var(--gold);padding:8px 12px;border-radius:4px;margin:10px 0}
+  nav{background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin:16px 0}
+  nav a{color:var(--felt);text-decoration:none}
+  nav ol{margin:4px 0;padding-left:20px}
+  ol li,ul li{margin:3px 0}
+  @media print{nav{display:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>Table de Bridge — Guide d’utilisation</h1>
+<p class="lead">Ce que fait chaque bouton et chaque option des Réglages. L’application se trouve à <code>https://servetsvm.github.io/bridge/</code> &nbsp;·&nbsp; <a href="guide-en.html">English</a> · <a href="guide-es.html">Español</a> · <a href="guide-no.html">Norsk</a> · <a href="guide.html">Türkçe</a></p>
+
+<nav><b>Sommaire</b>
+<ol>
+<li><a href="#home">Page d’accueil</a></li>
+<li><a href="#bar">Barre du haut et boutons</a></li>
+<li><a href="#practice">S’entraîner sur une convention</a></li>
+<li><a href="#deal">Jouer une donne précise — la saisir ou lire une photo</a></li>
+<li><a href="#basic">Style des cartes, place, marque, adversaires, vitesse…</a></li>
+<li><a href="#card">Notre feuille de conventions</a></li>
+<li><a href="#sync">Synchroniser entre appareils</a></li>
+<li><a href="#results">Résultats et statistiques</a></li>
+<li><a href="#online">Jouer en ligne avec des amis</a></li>
+<li><a href="#tour">Tournois</a></li>
+<li><a href="#install">Installer sur téléphone et PC</a></li>
+</ol></nav>
+
+<h2 id="home">1. Page d’accueil</h2>
+<p>L’application s’ouvre toujours sur la page d’accueil : aucune carte n’est distribuée et aucune table n’est ouverte.</p>
+<ul>
+<li>En haut : <b>🌐 Langue</b> (English, Türkçe, Norsk, Español, Français), <span class="k">⚙</span> Réglages et <span class="k">?</span> ce guide.</li>
+<li><b>Votre nom</b> et <b>Votre système</b> (2/1, SAYC, Acol, SEF, Precision, Polish Club) : le système s’affiche à côté de votre nom dans le salon et votre partenaire robot le joue aussi.</li>
+<li><span class="k">🤖 Jouer avec des robots</span> (vert) : vous jouez avec des robots (aussi hors ligne). Votre table apparaît dans le salon comme « joue avec des robots » ; si quelqu’un demande à rejoindre, c’est vous qui décidez.</li>
+<li><span class="k">🌐 Ouvrir une table en ligne</span> (bleu) : ouvre votre propre table en ligne, publique ou privée (voir plus bas).</li>
+<li><span class="k">Placez-moi à une table</span> (jaune) : trouve une table ouverte où joue un robot et demande à la rejoindre ; si l’hôte accepte, vous prenez la place du robot.</li>
+<li><span class="k">🏆 Tournois</span> (violet) : la liste des tournois.</li>
+<li><span class="k">👁 Regarder une table</span> : vous emmène en spectateur à la table en ligne la plus fréquentée. <span class="k">📋 Conventions</span> : notre feuille de conventions.</li>
+<li><span class="k">👥 Joueurs dans le salon</span> et <span class="k">💬 Chat du salon</span>. Touchez le nom d’un joueur pour voir son système et son classement (aujourd’hui, cette semaine, ce mois-ci, cette année, depuis le début) ; touchez la ligne « Aujourd’hui : … » pour voir le vôtre.</li>
+</ul>
+
+<h2 id="bar">2. Barre du haut et boutons</h2>
+<table>
+<tr><th>Élément</th><th>Rôle</th></tr>
+<tr><td><span class="k">Numéro de donne</span></td><td>Les bords rouges marquent le camp vulnérable, <b>D</b> marque le donneur.</td></tr>
+<tr><td><span class="k">Contrat</span></td><td>Le contrat et le déclarant, avec les levées de chaque camp en grand (« Nous / Eux »). Touchez-le pour voir toutes les enchères expliquées.</td></tr>
+<tr><td><span class="k">Aujourd’hui</span></td><td>Le total d’IMP du jour (ou la moyenne en MP) et le résultat de la dernière donne.</td></tr>
+<tr><td><span class="k">⌂</span></td><td>Retour à la page d’accueil (une donne commencée n’est pas gardée).</td></tr>
+<tr><td><span class="k">Donner</span></td><td>Distribue une nouvelle donne. En cours de donne, il redemande (« Sûr ? ») pour ne pas perdre une donne par erreur.</td></tr>
+<tr><td><span class="k">Retour</span></td><td>Reprend votre dernière enchère ou carte, avec les coups des robots qui ont suivi. Touchez encore pour remonter plus loin.</td></tr>
+<tr><td><span class="k">Indice</span></td><td>Montre ce que ferait le robot à votre place : l’enchère proposée avec sa signification, ou la carte proposée (elle se soulève dans votre main).</td></tr>
+<tr><td><span class="k">Réclamer</span></td><td>Avec 8 levées ou moins à jouer : vous choisissez combien des levées restantes vous faites.</td></tr>
+<tr><td><span class="k">🚪</span></td><td>Quitter la table (la question s’affiche dans la page).</td></tr>
+<tr><td><span class="k">💬</span></td><td>Le chat ; un chiffre rouge indique les nouveaux messages.</td></tr>
+<tr><td><span class="k">☰</span></td><td>Menu : En ligne, son de tour 🔔 / 🔕, 📜 Historique, Résultats, Réglages et Aide.</td></tr>
+</table>
+<p><b>Explication des enchères :</b> touchez n’importe quelle enchère dans le tableau pour voir sa signification et la convention à laquelle elle appartient ; touchez encore pour fermer. Les enchères soulignées en pointillé sont conventionnelles.</p>
+<p><b>Dernière levée :</b> pendant le jeu de la carte, touchez le centre vert de la table pour voir la dernière levée (la carte gagnante est entourée). Touchez encore, ou attendez 4 secondes, pour revenir.</p>
+<p><b>Pendant le jeu :</b> l’étiquette du joueur dont c’est le tour s’allume en jaune. Le mort en face de vous est étalé avec une couleur par colonne, comme à une vraie table. La carte jouée glisse depuis son joueur et la levée terminée glisse vers le camp qui l’a gagnée.</p>
+<p><b>Fin de la donne :</b> les quatre mains restent visibles et le bandeau jaune affiche le résultat et les IMP. Touchez le bandeau pour les détails (tables de robots, contrat normal, résultat à quatre jeux) ; <span class="k">Donne suivante</span> en commence une autre.</p>
+<p><b>Signaux du partenaire en défense :</b> quand votre partenaire robot signale dans les premières levées (défausse Lavinthal, ou carte haute/basse sur votre entame), une ligne jaune sous la table vous dit ce qu’il demande.</p>
+
+<h2 id="practice">3. S’entraîner sur une convention</h2>
+<p>Choisissez une convention dans le menu (p. ex. <b>Cappelletti</b>). Dès lors chaque nouvelle donne est choisie pour que vous (ou votre partenaire) puissiez l’utiliser. Si elle est désactivée sur votre feuille, elle est activée automatiquement.</p>
+<ul>
+<li>Les conventions courantes arrivent tout de suite ; les rares (Smolen, Gerber…) peuvent prendre 2-3 secondes.</li>
+<li>Si aucune donne adaptée n’est trouvée rapidement, vous recevez une donne normale et un court message.</li>
+<li>Choisissez <span class="k">Off — normal random deals</span> pour revenir au jeu normal.</li>
+</ul>
+
+<h2 id="deal">4. Jouer une donne précise</h2>
+<h3>À partir d’une photo ou d’une capture d’écran</h3>
+<ol>
+<li><span class="k">Enter a deal</span> → <span class="k">📷 Read from a photo or screenshot</span> → choisissez l’image.</li>
+<li>Les quatre mains lues s’affichent. Si une carte est fausse, corrigez-la dans le code en dessous.</li>
+<li><span class="k">Play this deal</span>.</li>
+</ol>
+<p>Elle lit l’<b>écran de fin de donne</b> de votre application de bridge (quatre mains ouvertes dessinées en cartes) et les <b>diagrammes</b> qui listent ♠ <span class="r">♥ ♦</span> ♣ pour chaque main (le dix écrit « T » ou « 10 »).</p>
+<div class="note"><b>Confidentialité et mémoire :</b> l’image est lue uniquement sur votre appareil. L’application ne la garde ni ne l’envoie jamais, et elle est effacée de la mémoire dès que les cartes sont lues. Les cartes lues sont oubliées quand vous commencez la donne ou fermez la fenêtre. (La capture dans votre galerie n’est pas touchée : supprimez-la vous-même si vous voulez.)</div>
+<h3>Saisir les mains</h3>
+<p>Chaque main sous la forme <code>piques.cœurs.carreaux.trèfles</code>, p. ex. <code>AKQ2.K73.J5.T942</code> (T = 10). Trois mains suffisent : laissez la quatrième vide, elle est complétée avec les cartes restantes. Ou collez un code PBN : <code>N:AKQ2.K73.J5.T942 …</code> (quatre mains dans le sens horaire depuis Nord). Choisissez le <span class="k">donneur</span> et la <span class="k">vulnérabilité</span>.</p>
+
+<h2 id="basic">5. Réglages de base</h2>
+<table>
+<tr><th>Réglage</th><th>Explication</th></tr>
+<tr><td><span class="k">Style des cartes</span></td><td><b>Classique</b> : cartes blanches plates côte à côte, comme dans les applications de club. <b>Éventail moderne</b> : cartes superposées en éventail.</td></tr>
+<tr><td><span class="k">Votre place</span></td><td>Où vous êtes assis (Nord, Est, Sud, Ouest). Votre main est toujours en bas. Quand votre camp joue le contrat, vous jouez aussi la main du partenaire.</td></tr>
+<tr><td><span class="k">Marque</span></td><td>Chaque donne est aussi jouée à 10 tables de robots experts. <b>IMP</b> : votre score est comparé à chaque table, converti en IMP puis moyenné (par quatre). <b>Matchpoints (%)</b> : le pourcentage de tables que vous battez (par paires).</td></tr>
+<tr><td><span class="k">Système des adversaires</span></td><td><b>Comme le nôtre</b> : les adversaires utilisent votre feuille. <b>Standard (SAYC)</b> : un système standard simple. Leurs enchères sont expliquées selon leur propre système.</td></tr>
+<tr><td><span class="k">Vitesse des robots</span></td><td>La rapidité avec laquelle les robots enchérissent et jouent.</td></tr>
+<tr><td><span class="k">Explications</span></td><td>Si toucher une enchère affiche son explication.</td></tr>
+<tr><td><span class="k">Jouer automatiquement une carte forcée</span></td><td>Joue pour vous votre seule carte légale.</td></tr>
+<tr><td><span class="k">Son de tour</span></td><td>Un son court et une vibration quand c’est votre tour : aux tables en ligne (par défaut), toujours ou jamais. Aussi avec 🔔 / 🔕 dans le menu ☰.</td></tr>
+<tr><td><span class="k">Effacer l’historique</span></td><td>Efface l’historique des scores sur cet appareil (irréversible).</td></tr>
+</table>
+<p>Les changements s’appliquent dès la donne suivante. Une donne ne vous est <b>jamais distribuée deux fois</b> (sauf si vous choisissez « Rejouer cette donne »).</p>
+
+<h2 id="card">6. Notre feuille de conventions</h2>
+<p><b>Système de base</b> (« Votre système » à côté de votre nom sur la page d’accueil, 📋 Conventions ou Réglages ; il s’affiche à côté de votre nom dans le salon) : 2/1 forcing de manche, SAYC, Acol (majeures quatrièmes, 1SA faible 12-14), Standard Français SEF (2♦ forcing de manche), Precision Club (1♣ 16+, 1SA 13-15, 2♣ et 2♦ spéciaux) et Polish Club (1♣ 12-14 régulier / trèfles longs / 18+, Multi 2♦). Choisir un système active ses conventions ; vous pouvez ensuite modifier chacune. Votre partenaire robot joue le même système (et les adversaires aussi avec « Comme le nôtre »). Par défaut : 2/1. Chaque convention peut être activée ou désactivée ; les paires marquées « ↔ » se remplacent l’une l’autre. Les descriptions complètes s’affichent dans l’application, dans votre langue.</p>
+<table>
+<tr><th>Convention</th><th>Description courte</th></tr>
+<tr><td>✓ 2/1 forcing de manche</td><td>Sur une ouverture en majeure, une couleur nouvelle au palier de deux d’un répondant non passé est forcing de manche (12+). 1SA est forcing un tour (6-12).</td></tr>
+<tr><td>✓ RKCB 1430</td><td>4SA demande cinq clés : 5♣ = 1/4, 5♦ = 3/0, 5♥ = 2 sans la dame d’atout, 5♠ = 2 avec.</td></tr>
+<tr><td>✓ Gerber</td><td>Directement sur 1SA/2SA, 4♣ demande les as : 4♦ 0/4, 4♥ 1, 4♠ 2, 4SA 3.</td></tr>
+<tr><td>✓ Soutiens Bergen</td><td>Sur 1M : 3♣ = soutien de quatre 7-9, 3♦ = quatre 10-12, 3M = quatre 0-6 (barrage).</td></tr>
+<tr><td>✓ Cappelletti ↔ DONT</td><td>Sur leur 1SA : X punitif 15+, 2♣ unicolore, 2♦ les deux majeures, 2♥ = ♥ + une mineure, 2♠ = ♠ + une mineure, 2SA les deux mineures.</td></tr>
+<tr><td>✓ Jacoby 2SA</td><td>Sur une ouverture en majeure : soutien de 4+, 13+, forcing de manche.</td></tr>
+<tr><td>✓ Sauts faibles ↔ Sauts forts</td><td>Saut simple du répondant dans une couleur nouvelle : 6+ cartes, 0-5 H, pour jouer.</td></tr>
+<tr><td>✓ Stayman</td><td>2♣ sur 1SA (3♣ sur 2SA) demande une majeure quatrième.</td></tr>
+<tr><td>✓ Transferts à quatre couleurs</td><td>Sur 1SA : 2♦→♥, 2♥→♠, 2♠→♣, 2SA→♦.</td></tr>
+<tr><td>✓ Smolen</td><td>Après 1SA–2♣–2♦, 5-4 en majeures avec valeurs de manche : la majeure quatrième au palier de trois, pour que la main forte joue.</td></tr>
+<tr><td>✓ Michaels / 2SA unusual</td><td>Cue-bid de leur couleur = bicolore 5-5 ; saut à 2SA = les deux couleurs non nommées les plus basses.</td></tr>
+<tr><td>✓ Splinters</td><td>Double saut sur une ouverture en majeure = soutien de 4+, singleton ou chicane dans cette couleur.</td></tr>
+<tr><td>✓ Texas</td><td>Sur 1SA/2SA : 4♦→4♥, 4♥→4♠ (majeure de 6+, manche).</td></tr>
+<tr><td>✓ Texas après intervention</td><td>Les Texas restent en vigueur quand ils contrent notre 1SA ou interviennent au palier de 2-3.</td></tr>
+<tr><td>✓ Lebensohl</td><td>Après une intervention au palier de deux sur notre 1SA, 2SA oblige l’ouvreur à dire 3♣ ; 3SA rapide nie l’arrêt.</td></tr>
+<tr><td>✓ Défausses Lavinthal</td><td>Signaux en défense : la couleur défaussée n’est pas voulue ; une carte haute demande la plus haute des deux autres couleurs, une basse la plus basse.</td></tr>
+<tr><td>Mineures inversées</td><td>Sur une ouverture en mineure : 2m = soutien fort 10+ (forcing) ; 3m = barrage.</td></tr>
+<tr><td>Drury</td><td>Une main passée répond à 1M en troisième/quatrième par 2♣ = soutien de 3+, 10-12.</td></tr>
+<tr><td>Nouvelle mineure forcing</td><td>Après 1m–1M–1SA, l’autre mineure est artificielle et forcing.</td></tr>
+<tr><td>Quatrième couleur forcing</td><td>Trois couleurs nommées : la quatrième est artificielle et forcing de manche.</td></tr>
+<tr><td>Ogust</td><td>Sur le deux faible du partenaire, 2SA demande la qualité de la main et de la couleur.</td></tr>
+<tr><td>Contre de soutien</td><td>Après 1m–(P)–1M–(intervention), le contre de l’ouvreur = exactement trois cartes de soutien.</td></tr>
+<tr><td>Contre spoutnik de réponse</td><td>Après le contre d’appel du partenaire et leur soutien, contre = 8+ avec les deux couleurs non nommées.</td></tr>
+<tr><td>DONT ↔ Cappelletti</td><td>Sur leur 1SA : X unicolore, 2♣ ♣ + une couleur plus haute, 2♦ ♦ + une majeure, 2♥ les deux majeures, 2♠ piques.</td></tr>
+<tr><td>3SA Gambling</td><td>Ouverture de 3SA = mineure solide de 7+ sans as ni roi à côté.</td></tr>
+</table>
+
+<h2 id="sync">7. Synchroniser entre appareils</h2>
+<p>Les scores, les statistiques et la liste des donnes vues sont gardés dans un fichier <b>privé</b> de votre compte GitHub, pour que le téléphone et le PC se rejoignent tout seuls. Hors ligne, tout est gardé sur l’appareil et fusionné au retour en ligne.</p>
+<ol>
+<li>Ouvrez <code>github.com/settings/tokens/new?scopes=gist</code>. <b>Expiration</b> : <i>No expiration</i>. Cochez seulement <b>gist</b>. <span class="k">Generate token</span>.</li>
+<li>Copiez le code qui commence par <code>ghp_…</code> (GitHub ne le montre qu’une fois).</li>
+<li>Dans l’application : Réglages → Sync → coller → <span class="k">Connect</span>. Faites de même sur votre autre appareil.</li>
+</ol>
+<div class="note">Le code fonctionne comme un mot de passe : ne le partagez jamais. <span class="k">Disconnect</span> le retire de l’appareil.</div>
+
+<h2 id="results">8. Résultats et statistiques</h2>
+<p>Menu ☰ → <b>Résultats</b> : onglet <b>Statistiques</b> avec les donnes jouées, les IMP au total et par donne (ou MP %) et le total des points pour aujourd’hui, cette semaine, ce mois-ci, cette année et depuis le début ; onglet <b>Donnes</b> avec date, contrat, levées, score et IMP/MP des 100 dernières donnes. Touchez une donne pour voir les quatre mains, les enchères (touchez une enchère pour sa signification) et rejouer la carte pas à pas : ▶ joue la carte suivante (◀ retour, ⏮ ⏭ début/fin, Play la déroule toute seule).</p>
+<p><span class="k">📜 Historique</span> (menu ☰, en cours de partie) : les donnes du jour avec contrat, résultat, score, IMP, MP et les totaux ; ◀ ▶ passent à la donne précédente ou suivante.</p>
+<p>Dans les détails de fin de donne : le <b>contrat normal</b> (le plus fréquent aux tables de robots), le résultat <b>à quatre jeux</b> de votre contrat et du contrat normal, et le résultat de chaque table de robots.</p>
+
+<h2 id="online">9. Jouer en ligne avec des amis</h2>
+<ol>
+<li>Tout le monde ouvre l’application depuis le même lien : https://servetsvm.github.io/bridge/.</li>
+<li>Pour ouvrir une table (sans mot de passe, tout le monde peut) : <span class="k">🌐 Ouvrir une table en ligne</span> et choisissez : une <b>table publique</b> apparaît dans le salon et chacun peut demander à la rejoindre ; une <b>table privée</b> apparaît avec 🔒 : les invités s’assoient tout de suite, les autres doivent vous demander, et personne ne peut regarder. Pour inviter, touchez <span class="k">Inviter à ma table</span> à côté d’un nom dans 👥 <b>Joueurs dans le salon</b> ; le joueur reçoit une fenêtre et s’assoit tout de suite avec <span class="k">Rejoindre</span>.</li>
+<li>Pour rejoindre une table, touchez <span class="k">Demander à rejoindre</span> (ou <span class="k">Placez-moi à une table</span>), tapez votre nom, choisissez partenaire, adversaire ou n’importe quelle place libre et touchez <span class="k">Rejoindre</span>. La demande arrive chez celui qui a ouvert la table, dans sa propre fenêtre avec un son. <span class="k">✕ Fermer — répondre plus tard</span> la laisse en attente dans le panneau En ligne.</li>
+<li>Le propriétaire de la table répond à chaque demande par <span class="k">Accepter</span> ou <span class="k">Refuser</span> et appuie sur <span class="k">Commencer</span> quand tout le monde est assis. Pendant le jeu, il peut toucher le nom d’un joueur pour le retirer (un robot prend sa place) et fermer la table avec <span class="k">🚪</span>.</li>
+<li>Pour quitter la table de quelqu’un d’autre : <span class="k">🚪</span> dans la barre du haut. Un joueur qui perd la connexion s’affiche « absent · un robot joue » ; s’il revient dans les 10 minutes, il retrouve sa place.</li>
+</ol>
+<ul>
+<li><span class="k">🤝 Jouer en partenaires</span> sur la fiche d’un joueur : ouvre une table et l’invite à la place en face de vous.</li>
+<li><span class="k">👁 Regarder</span> : les tables publiques acceptent les spectateurs sans demander ; vous voyez les quatre mains et pouvez écrire dans le chat de la table.</li>
+<li><b>Messages privés</b> : touchez 💬 à côté d’un nom. Si la personne n’est pas dans le salon, le message lui est remis à son arrivée (⏳ en attente, ✓ remis).</li>
+<li><b>Amis</b> : <span class="k">☆ Ajouter comme ami</span> sur la fiche d’un joueur ; les amis apparaissent en premier avec ★ et vous êtes prévenu de leur arrivée.</li>
+<li><b>Retour</b> et <b>Réclamer</b> à une table en ligne : l’autre camp accepte ou refuse ; les robots vérifient la réclamation à quatre jeux. Pendant une réclamation, les cartes restantes sont visibles sur la table avec un petit Accepter / Refuser au centre.</li>
+<li>L’hôte rappelle par un son un joueur qui ne joue pas depuis 45 secondes (puis à 90).</li>
+<li>La connexion est directe entre les appareils. Sur certains réseaux mobiles elle ne peut pas s’établir : le Wi-Fi fonctionne en général.</li>
+</ul>
+
+<h2 id="tour">10. Tournois</h2>
+<ul>
+<li>🏆 Tournois → <span class="k">➕ Nouveau tournoi</span> : nom, nombre de donnes (4–24), <b>format</b>, classement (MP % ou IMP) et durée de conservation (3 heures, 1 jour, 3 jours).</li>
+<li><b>Individuel</b> : chacun joue les mêmes donnes à sa propre table avec des robots. Il est ouvert à tout le salon ; avant la première donne vous choisissez votre place (N, E, S ou O) et la gardez. Les N–S sont classés avec les N–S, les E–O avec les E–O.</li>
+<li><b>Aux tables</b> : choisissez le nombre de tables et saisissez à l’avance les joueurs de chaque table (les robots occupent les places vides). <span class="k">Envoyer les invitations</span> → <span class="k">Lancer le tournoi</span>.</li>
+<li>Chaque donne est aussi jouée à 10 tables de robots : les colonnes 🤖 IMP et 🤖 MP % sont votre résultat contre elles et classent les joueurs tant que personne d’autre n’a joué. <b>Autres tables</b> montre le contrat et le résultat de chacun sur chaque donne.</li>
+<li><span class="k">🔁 Rejouer ces donnes</span> (tournoi terminé) : vous rejouez les mêmes donnes à l’entraînement et votre résultat est comparé à celui du tournoi.</li>
+<li>Seul l’organisateur peut fermer un tournoi avec ✕ ; sinon il disparaît tout seul à la fin de la durée choisie.</li>
+</ul>
+
+<h2 id="install">11. Installer sur téléphone et PC</h2>
+<ul>
+<li><b>Téléphone :</b> ouvrez l’adresse dans Chrome → menu ⋮ → <i>Ajouter à l’écran d’accueil</i>. Elle s’ouvre depuis son icône et fonctionne hors ligne.</li>
+<li><b>PC :</b> l’icône « Installer » dans la barre d’adresse de Chrome ou Edge.</li>
+<li><b>Mises à jour :</b> les nouvelles versions s’installent toutes seules à la prochaine ouverture.</li>
+</ul>
+</main>
+</body>
+</html>
