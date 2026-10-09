@@ -559,7 +559,7 @@ b.inv{color:#b3261e}
 #dock .dbtns{display:flex;gap:4px}
 .tbtns .tdel{padding:4px 9px;min-width:0;opacity:.8}
 .pname[data-who]{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px}
-/* whose turn it is: that player's name label lights up yellow (as on BBO) */
+/* whose turn it is: that player's name label lights up yellow */
 .lbl.turn,body.classic .lbl.turn{background:#f2c94c;color:#1d1a0f;box-shadow:0 0 0 2px #f2c94c,0 0 14px rgba(242,201,76,.75);animation:turnglow 1.6s ease-in-out infinite}
 .lbl.turn .vn{color:#b3261e}
 .lbl.turn .pname{color:#1d1a0f}
@@ -578,7 +578,7 @@ b.inv{color:#b3261e}
 #bidbox .alrow small{color:#e8e2c8;font-size:12px}
 .auction .c.alrt{background:#fff1b8;color:#5a4300;border-radius:4px;padding:0 3px}
 .expl .al{background:#c9a227;color:#1d1a0f;border-radius:4px;padding:0 5px;font-size:12px;font-weight:800}
-/* ===== table look, after BBO: a calmer bar, a richer felt, name plates and card backs ===== */
+/* ===== table look: a calmer bar, a richer felt, name plates and card backs ===== */
 /* the ☰ menu holds the less used buttons */
 .menuwrap{position:relative;display:inline-flex}
 .menuwrap .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;display:flex;flex-direction:column;gap:4px;min-width:200px;padding:8px;background:#f6f3e8;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
@@ -3563,7 +3563,7 @@ function renderTable() {
     const r = rel(seat), el = $('pos' + r);
     if (r === 0) { el.innerHTML = fanHtml(seat, 78) + seatLabel(seat); continue; }
     let inner = '';
-    // dummy opposite you is laid out as on a real table (and on BBO): one column per suit
+    // dummy opposite you is laid out as on a real table: one column per suit
     if (isVisible(seat)) inner = r === 2 ? (G.phase === 'play' && seat === G.play.dummy ? dummyCols(seat) : fanHtml(seat, 78)) : vHand(seat);
     else if (G.phase === 'play') inner = backs(G.play.hands[seat].length);
     el.innerHTML = seatLabel(seat) + inner;
@@ -4284,7 +4284,7 @@ function showReview(id, sel) {
     <div class="row2"><button class="btn" data-revgo="-1" ${hi > 0 ? '' : 'disabled'}>◀ ${T('Previous deal')}</button><button class="btn" data-revgo="1" ${hi >= 0 && hi < HIST.length - 1 ? '' : 'disabled'}>${T('Next deal')} ▶</button></div>
     <div class="row2"><button class="btn" id="oRevBack">${T('Back to the list')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
-/* the boards played today, from the table (as BBO's History): contract, result, score, IMPs and MP against the
+/* the boards played today, from the table: contract, result, score, IMPs and MP against the
    robot field, with the totals; tap a board to replay it */
 function showHist() {
   const sod = new Date(); sod.setHours(0, 0, 0, 0);
@@ -5133,7 +5133,7 @@ const Net = (() => {
         // someone you invited sits down at once; a private table (🔒 in the lobby) takes no spectators, others ask the host
         const inv = (st.invited || []).includes(nameKey(d.name));
         if (inv && st.host && d.want !== 'watch') { st.invited = st.invited.filter(x => x !== nameKey(d.name)); seatPlayer(conn, d, null); return; }
-        // a public online table takes spectators at once (as on BBO); the players see who is watching
+        // a public online table takes spectators at once; the players see who is watching
         if (d.want === 'watch' && st.host && !st.priv) { addWatcher(conn, d); return; }
         if (st.priv && st.host && !inv && d.want === 'watch') { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
         // a request answered recently (also before a page refresh) is not asked again: declined stays declined,

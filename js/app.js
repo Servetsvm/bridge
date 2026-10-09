@@ -614,7 +614,7 @@ function renderTable() {
     const r = rel(seat), el = $('pos' + r);
     if (r === 0) { el.innerHTML = fanHtml(seat, 78) + seatLabel(seat); continue; }
     let inner = '';
-    // dummy opposite you is laid out as on a real table (and on BBO): one column per suit
+    // dummy opposite you is laid out as on a real table: one column per suit
     if (isVisible(seat)) inner = r === 2 ? (G.phase === 'play' && seat === G.play.dummy ? dummyCols(seat) : fanHtml(seat, 78)) : vHand(seat);
     else if (G.phase === 'play') inner = backs(G.play.hands[seat].length);
     el.innerHTML = seatLabel(seat) + inner;
@@ -1335,7 +1335,7 @@ function showReview(id, sel) {
     <div class="row2"><button class="btn" data-revgo="-1" ${hi > 0 ? '' : 'disabled'}>◀ ${T('Previous deal')}</button><button class="btn" data-revgo="1" ${hi >= 0 && hi < HIST.length - 1 ? '' : 'disabled'}>${T('Next deal')} ▶</button></div>
     <div class="row2"><button class="btn" id="oRevBack">${T('Back to the list')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
-/* the boards played today, from the table (as BBO's History): contract, result, score, IMPs and MP against the
+/* the boards played today, from the table: contract, result, score, IMPs and MP against the
    robot field, with the totals; tap a board to replay it */
 function showHist() {
   const sod = new Date(); sod.setHours(0, 0, 0, 0);

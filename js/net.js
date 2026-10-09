@@ -656,7 +656,7 @@ const Net = (() => {
         // someone you invited sits down at once; a private table (🔒 in the lobby) takes no spectators, others ask the host
         const inv = (st.invited || []).includes(nameKey(d.name));
         if (inv && st.host && d.want !== 'watch') { st.invited = st.invited.filter(x => x !== nameKey(d.name)); seatPlayer(conn, d, null); return; }
-        // a public online table takes spectators at once (as on BBO); the players see who is watching
+        // a public online table takes spectators at once; the players see who is watching
         if (d.want === 'watch' && st.host && !st.priv) { addWatcher(conn, d); return; }
         if (st.priv && st.host && !inv && d.want === 'watch') { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
         // a request answered recently (also before a page refresh) is not asked again: declined stays declined,

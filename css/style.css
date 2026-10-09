@@ -544,7 +544,7 @@ b.inv{color:#b3261e}
 #dock .dbtns{display:flex;gap:4px}
 .tbtns .tdel{padding:4px 9px;min-width:0;opacity:.8}
 .pname[data-who]{cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px}
-/* whose turn it is: that player's name label lights up yellow (as on BBO) */
+/* whose turn it is: that player's name label lights up yellow */
 .lbl.turn,body.classic .lbl.turn{background:#f2c94c;color:#1d1a0f;box-shadow:0 0 0 2px #f2c94c,0 0 14px rgba(242,201,76,.75);animation:turnglow 1.6s ease-in-out infinite}
 .lbl.turn .vn{color:#b3261e}
 .lbl.turn .pname{color:#1d1a0f}
@@ -563,7 +563,7 @@ b.inv{color:#b3261e}
 #bidbox .alrow small{color:#e8e2c8;font-size:12px}
 .auction .c.alrt{background:#fff1b8;color:#5a4300;border-radius:4px;padding:0 3px}
 .expl .al{background:#c9a227;color:#1d1a0f;border-radius:4px;padding:0 5px;font-size:12px;font-weight:800}
-/* ===== table look, after BBO: a calmer bar, a richer felt, name plates and card backs ===== */
+/* ===== table look: a calmer bar, a richer felt, name plates and card backs ===== */
 /* the ☰ menu holds the less used buttons */
 .menuwrap{position:relative;display:inline-flex}
 .menuwrap .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:60;display:flex;flex-direction:column;gap:4px;min-width:200px;padding:8px;background:#f6f3e8;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
