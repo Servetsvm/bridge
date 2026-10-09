@@ -492,7 +492,7 @@ const Net = (() => {
     const rows = !L ? '' : L.length ? `<div class="tbls">${L.map(t => {
       const nm = t.names || {}, away = t.away || [];
       const pf = t.profs || {};
-      const cells = [0, 1, 2, 3].map(s => nm[s] ? `<b class="pname" data-who="${esc(nm[s])}">${esc(nm[s])}</b>${(pf[s] || (!t.online && t.prof)) && profTxt(pf[s] || t.prof) ? `<span class="pb">${esc(profTxt(pf[s] || t.prof))}</span>` : ''}${away.includes(s) ? `<em>${T('away · robot plays')}</em>` : ''}` : `<i>${T('Robot')}</i>`);
+      const cells = [0, 1, 2, 3].map(s => nm[s] ? (nameKey(nm[s]) === nameKey(myName()) ? `<b class="pname" data-who="${esc(nm[s])}">${esc(nm[s])}</b>` : `<b class="pname" data-pm="${esc(nm[s])}" title="${T("Private message")}">${esc(nm[s])}</b><button class="tinfo" data-who="${esc(nm[s])}" title="${T("Player card")}">ⓘ</button>`) + `${(pf[s] || (!t.online && t.prof)) && profTxt(pf[s] || t.prof) ? `<span class="pb">${esc(profTxt(pf[s] || t.prof))}</span>` : ''}${away.includes(s) ? `<em>${T('away · robot plays')}</em>` : ''}` : `<i>${T('Robot')}</i>`);
       // a tournament is named on its table: an individual one can be joined (you play the same boards at your own table)
       const tp = t.tplay && typeof t.tplay === 'object' ? t.tplay : null, tt = t.tour && st.tours[t.tour.id];
       const tinfo = tp ? `<div class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</div>`

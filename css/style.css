@@ -820,3 +820,4 @@ body.bigcards .mini{transform:scale(1.15);transform-origin:bottom}
 :root[data-theme="dark"] .lmsgs .cm.pm.me{background:#463a68}
 :root[data-theme="dark"] .ladmin{background:#3b3a22;border-color:#6b6230;color:#f3e7b0}
 :root[data-theme="dark"] .lcount{border-bottom-color:#3a443e}
+.tinfo{background:none;border:0;color:#7c7b70;font-size:12.5px;padding:0 3px;margin-left:2px;cursor:pointer;border-radius:4px}.tinfo:hover{background:#eef3ec;color:#222}:root[data-theme="dark"] .tinfo:hover{background:#2a312d;color:#e8ece4}
