@@ -106,7 +106,7 @@ const Net = (() => {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
     return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
-      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0 };   // the player card: level, country, a few words
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300) };   // the player card: level, country, a few words
   }
   // a profile received from another app, kept to the fields we know
   const num = v => v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
@@ -117,7 +117,8 @@ const Net = (() => {
       per: Array.isArray(q.per) ? q.per.slice(0, 5).map(r => Array.isArray(r) ? [+r[0] || 0, num(r[1]), num(r[2])] : [0, null, null]) : undefined,
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
-      joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)) };
+      joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
+      cline: typeof q.cline === 'string' ? q.cline.slice(0, 300) : '' };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   function whereIs(name) {
@@ -447,8 +448,20 @@ const Net = (() => {
         : tt ? `<div class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</div>` : '';
       const mid = `<div class="tname">${t.priv ? '🔒 ' : ''}${T("{0}'s table", esc(t.host))}</div>${tinfo}<div class="tstate">${t.online ? (t.priv ? T('Private table') : T('online')) : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div>${tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`}${t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
       return seatTable(cells, mid, 2);
-    }).join('')}</div>` : `<div class="muted">${T('No other tables are open right now.')}</div>`;
-    return `<div class="tables">${rows}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
+    }).join('')}</div>` : '';
+    // the tournaments that are open: an individual one is played at each player's own table, so it is listed here
+    // even while nobody is at a board (join it from here)
+    const me = devId(), live = Object.values(st.tours).filter(t => t.state !== 'off' && Date.now() < t.ts + t.hours * 3600e3 && (openTour(t) || t.joined[me] || isMine(t))).sort((a, b) => (a.state === 'live' ? 0 : 1) - (b.state === 'live' ? 0 : 1) || b.ts - a.ts);   // running ones first, newest first
+    const tours = live.map(t => {
+      const k = typeof TOUR_KINDS !== 'undefined' && TOUR_KINDS[t.kind] && t.kind !== 'custom' ? `${TOUR_KINDS[t.kind].icon} ${T(TOUR_KINDS[t.kind].n)}` : t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual');
+      const players = Math.max(Object.keys(t.joined).length, Object.keys(st.tres[t.id] || {}).length);
+      const btn = t.state === 'setup' ? (isMine(t) ? `<button class="btn gold" data-tset="${t.id}">${T('Players and start')}</button>` : t.joined[me] ? `<span class="muted">${T('Waiting for {0} to start', esc(t.by))}</span>` : `<button class="btn new" data-tyes="${t.id}">${T('Register')}</button>`)
+        : t.format === 'tables' ? `<button class="btn" data-tstand="${t.id}">${T('Standings')}</button>`
+        : `<button class="btn new" data-tplay="${t.id}">${t.joined[me] ? T('Play') : T('Join and play')}</button>`;
+      return `<div class="otour"><div><b>🏆 ${esc(t.name)}</b><small>${k} · ${T('{0} boards', t.n)} · ${T('{0} players', players)} · ${t.state === 'setup' ? T('Registering') : T('Running')}</small></div><div class="otb">${btn}</div></div>`;
+    }).join('');
+    const empty = !rows && !tours ? `<div class="muted">${T('No other tables are open right now.')}</div>` : '';
+    return `<div class="tables">${tours ? `<div class="otours">${tours}</div>` : ''}${rows}${empty}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
   }
   /* ---- lobby chat: everyone with the app open can talk; each message goes along every lobby line ---- */
   const lclearTs = () => { try { return +localStorage.getItem('bridge-lobby-cleared') || 0; } catch (e) { return 0; } };

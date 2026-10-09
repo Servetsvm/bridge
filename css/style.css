@@ -751,3 +751,9 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .pedit .pconvb{padding:5px 8px;font-size:13px;min-height:0}
 @media (max-width:420px){ .pedit label span{width:48px;font-size:11px} }
 .pnm .pctry{font-size:14px;font-weight:600;opacity:.9;white-space:nowrap}
+/* open tournaments at the top of Open tables */
+.otours{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.otour{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#f3eefc;border:1px solid #d4c6ef;border-left:4px solid #6a3fa0;border-radius:10px;padding:8px 10px}
+.otour small{display:block;color:#6d6c62;font-size:12.5px;margin-top:2px}
+.otour .otb{flex:none}
+.pclin{width:100%;font:inherit;font-size:13.5px;line-height:1.45;resize:vertical;min-height:62px;background:#fff;border:1px solid #c9c4ad;border-left:4px solid #1b2a4e}
