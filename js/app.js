@@ -552,8 +552,8 @@ function renderBar() {
      <button class="btn gold" id="bHint">${T('Hint')}</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
      ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
-     ${typeof Net !== "undefined" ? (n => `<button class="btn${n ? " gold" : ""}" id="bChat" title="${T('Chat')}">💬<span class="cbl"> ${T('Chat')}</span>${n ? `<span class="cbn">${n}</span>` : ""}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ""}
-     <span class="menuwrap"><button class="btn" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰</button>${ui.menu ? `<div class="menu" role="menu">
+     <span class="menuwrap">${(n => `<button class="btn${n ? " gold" : ""}" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰${n ? `<span class="cbn">${n}</span>` : ""}</button>`)(typeof Net !== "undefined" ? (Net.st.unread || 0) + (Net.st.lunread || 0) : 0)}${ui.menu ? `<div class="menu" role="menu">
+       ${typeof Net !== "undefined" ? `<button class="btn" id="bChat">💬 ${T('Chat')}${(n => n ? ` (${n})` : '')((Net.st.unread || 0) + (Net.st.lunread || 0))}</button>` : ""}
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
        <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
        <button class="btn" id="bHist">📜 ${T('History')}</button>
@@ -712,7 +712,7 @@ function toggleDock() {
 }
 // the new-message count on 💬 in the top bar
 function chatBadge() {
-  const bc = $('bChat'), n = (Net.st.unread || 0) + (Net.st.lunread || 0); if (!bc) return;
+  const bc = $('bMenu'), n = (Net.st.unread || 0) + (Net.st.lunread || 0); if (!bc) return;
   let s = bc.querySelector('.cbn');
   if (n) { if (!s) { s = document.createElement('span'); s.className = 'cbn'; bc.appendChild(s); } s.textContent = n; } else if (s) s.remove();
   bc.classList.toggle('gold', !!n);
@@ -721,7 +721,7 @@ function renderDock() {
   const d = $('dock'); if (!d || typeof Net === 'undefined' || !G) return;
   const athome = G.phase === 'idle', wide = dockWide();
   chatBadge();
-  const cb = $('chatBtn'); if (cb) { cb.hidden = athome || wide; const n = (Net.st.unread || 0) + (Net.st.lunread || 0); const s = $('chatBtnN'); if (s) s.textContent = n ? '(' + n + ')' : ''; }
+  const cb = $('chatBtn'); if (cb) { cb.hidden = true; const n = (Net.st.unread || 0) + (Net.st.lunread || 0); const s = $('chatBtnN'); if (s) s.textContent = n ? '(' + n + ')' : ''; }
   const show = !athome && (wide || ui.dockOpen);
   document.body.classList.toggle('withdock', !athome && wide);
   d.hidden = !show; if (!show) return;
@@ -732,9 +732,11 @@ function renderDock() {
     const tabs = tbl ? `<div class="dtabs"><button data-dtab="table" class="${tab === 'table' ? 'on' : ''}">${T('Table')} <span id="dTn"></span></button><button data-dtab="lobby" class="${tab === 'lobby' ? 'on' : ''}">${T('Lobby')} <span id="dLn"></span></button></div>` : `<b>💬 ${T('Lobby chat')}</b>`;
     d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>` : ''}
+      <div class="pmto" id="dPmTo"></div>
       <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
+  { const p = $("dPmTo"), h = tab !== "table" && ui.pmTo ? `🔒 ${T("Private message to {0}", esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : ""; if (p && p.innerHTML !== h) p.innerHTML = h; }
   if (L && L.innerHTML !== html) { L.innerHTML = html; L.scrollTop = L.scrollHeight; }
   friendsCheck();   // the players are listed under 👥, not above the chat; a friend's arrival is still announced
   if (tab === 'table') Net.st.unread = 0; else Net.st.lunread = 0;
@@ -745,7 +747,7 @@ function renderDock() {
 }
 function dockSend(text) {
   text = String(text || '').trim(); if (!text) return;
-  if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else Net.lsend(text);
+  if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else lobbySend(text);
   // the panel stays open after sending; it is closed with ✕
   renderDock();
 }
@@ -839,7 +841,7 @@ function homeShell() {
     <section class="hmain">
       <div class="hcard hero">
         <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label>
-        <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label><button class="btn hpeople" data-hsec="people" title="${T('Players in the lobby')}">👥<span class="hpl"> ${T('Players in the lobby')}</span> <b id="hPeopleN"></b></button></div>
+        <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         <div class="hsecs"><button class="hsec phoneonly" data-hsec="chat">💬 ${T('Lobby chat')} <span id="hChatN"></span></button></div>
@@ -851,17 +853,16 @@ function homeShell() {
       <div id="hPend"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
-    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lmsgs" id="hChat"></div>
-      <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></aside>
+    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers" id="hPlayers"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
+      <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></div></div></aside>
   </div><div id="hSheet"></div></div>`;
 }
 // the section opened with the buttons at the top of the home page (tournaments, our card, players, chat on a phone)
 function homeSection(k) {
   if (k === 'tours') return `<div class="hcard"><h3>🏆 ${T('Tournaments')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hTours"></div></div>`;
   if (k === 'conv') return `<div class="hcard"><h3>📋 ${T('Our convention card (with partner)')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hConv"></div></div>`;
-  if (k === 'people') return `<div class="hcard"><h3>👥 ${T('Players in the lobby')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hPeople"></div></div>`;
-  if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lmsgs" id="pChat"></div>
-    <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div>`;
+  if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lsplit"><div class="lplayers" id="pPlayers"></div><div class="lcol"><div class="lmsgs" id="pChat"></div><div class="pmto" id="pPmTo"></div>
+    <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div></div></div>`;
   return '';
 }
 // our card: every convention with a switch; tap a name for its description
@@ -906,9 +907,11 @@ function renderHome() {
     set('hCount', T('{0} in the lobby', N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
     set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
     if (want === 'chat') N.st.lunread = 0;
-    set('hTours', toursHtml()); set('hPeople', N.peopleHtml());
+    set('hTours', toursHtml());
+    const pl = N.playersHtml(); set('hPlayers', pl); set('pPlayers', pl);
+    const pm = ui.pmTo ? `🔒 ${T('Private message to {0}', esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : '';
+    set('hPmTo', pm); set('pPmTo', pm);
     friendsCheck();
-    set('hPeopleN', String(N.lobbyCount()));   // how many are in the lobby, on the Players button
   }
   set('hConv', convCardHtml());
 }
@@ -1206,7 +1209,7 @@ function showPlayer(name) {
   const conv = p ? convLine(p) : '';
   // your own card: change what the others see (name, system, level, country; the conventions on the card itself)
   const edit = me ? `<div class="pedit"><div class="pedh">✏️ ${T('Edit my card')}</div>
-      <label><span>${T('Name')}</span><input id="pName" class="tok" maxlength="20" value="${esc(myNm())}" placeholder="${T('Name')}"></label>
+      <label><span>${T('Name')}</span><button id="pRename" class="tok prename">${esc(myNm())} ✏️</button></label>
       <label><span>${T('System')}</span><select id="pSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label>
       <label><span>${T('Level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
       <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
@@ -1322,8 +1325,9 @@ function resultLine(e) {
   const c = e.c, d = e.tricks - (c.level + 6);
   return `${conKey(c)} · ${T('{0} tricks', e.tricks)} (${d >= 0 ? (d ? '+' + d : '=') : d}) · <span class="${e.us >= 0 ? 'pos' : 'neg'}">${fmtSigned(e.us)}</span>`;
 }
-function openOv(name, html) { ui.overlay = name; $('ov').innerHTML = `<div class="sheet">${html}</div>`; $('ov').hidden = false; }
-function closeOv() { if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; }
+function openOv(name, html) { if (ui.overlay === "gate" && name !== "gate" && needGate()) return; ui.overlay = name; $('ov').innerHTML = `<div class="sheet">${html}</div>`; $('ov').hidden = false; }
+function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no way past the name and PIN
+  if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; }
 function showEnd() {
   const e = G.result; if (!e) return;
   const f = G.field || { tables: [], done: false, dd: {} };
@@ -1560,7 +1564,6 @@ document.addEventListener('change', e => {
   }
   if (t.dataset.tinv != null && ui.tsel) { if (t.checked) ui.tsel.names.add(t.dataset.tinv); else ui.tsel.names.delete(t.dataset.tinv); return; }
   // your own player card: level, country and a few words, sent with your profile
-  if (t.id === 'pName') { const v = t.value.trim().slice(0, 20); if (v) { try { localStorage.setItem('bridge-table-name', v); } catch (e) {} Net.shareInfo(); render(); showPlayer(v); } return; }
   if (t.id === 'pSys') { SET.sys = t.value; SET.conv = { ...E.sysOf(t.value).conv }; SET.practice = ''; Store.saveSettings(SET); save(); Net.shareInfo(); render(); showPlayer(myNm() || T('You')); return; }
   if (t.id === 'pCline') { SET.cline = t.value.trim().slice(0, 300); Store.saveSettings(SET); save(); Net.shareInfo(); flash('✓', 800); return; }   // your convention line, written by hand
   if (t.id === 'pLvl' || t.id === 'pCtry') { SET[{ pLvl: 'lvl', pCtry: 'ctry' }[t.id]] = t.value; Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T('You')); return; }
@@ -1591,6 +1594,10 @@ document.addEventListener('click', ev_ => {
   const tsit = ev_.target.closest('[data-tsit]'); if (tsit) { const S = tourSeats(); S[tsit.dataset.tid] = +tsit.dataset.tsit; try { localStorage.setItem('bridge-tour-seats', JSON.stringify(S)); } catch (e) {} closeOv(); playTour(tsit.dataset.tid); return; }
   const tl = ev_.target.closest('[data-tlist]'); if (tl) { ui.ttab = tl.dataset.tlist; render(); return; }   // the tournament list's tabs
   const tt = ev_.target.closest('[data-ttab],[data-tjtab]'); if (tt) { if (tt.dataset.ttab) Net.openTourTable(tt.dataset.ttab); else Net.joinTourTable(tt.dataset.tjtab); return; }
+  // a name in the players list (or a private message): write to that player privately
+  const pmb = ev_.target.closest("[data-pm]"); if (pmb) { pmTo(pmb.dataset.pm); return; }
+  if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
+  if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
   const pw = ev_.target.closest('[data-who]'); if (pw) { showPlayer(pw.dataset.who); return; }
   const pwx = ev_.target.closest('[data-pairwith]'); if (pwx) { closeOv(); Net.playWith(pwx.dataset.pairwith); return; }
   const fr = ev_.target.closest('[data-friend]'); if (fr) { toggleFriend(fr.dataset.friend); showPlayer(fr.dataset.friend); render(); return; }
@@ -1623,7 +1630,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === "dClose") { ui.dockOpen = false; renderDock(); return; }
   // clear the chat shown in the panel on this device (the lobby chat stays cleared; the table chat until new messages)
   if (t.id === "dClear") { if (online() && (ui.dockTab || "table") === "table") { Net.st.chat.length = 0; Net.st.unread = 0; renderDock(); } else Net.lclear(); return; }
-  if (t.id === "chatBtn") { toggleDock(); return; }
+  if (t.id === "chatBtn" || t.id === "bChat") { ui.menu = false; toggleDock(); renderBar(); return; }
   if (t.id === "bStart") { if (online() && !guest() && G.phase === "lobby") { Net.note((Net.st.names[SET.seat] || "Host") + " started the game"); if (Net.st.tour) tableBoard(); else newBoard(); } return; }
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
@@ -1689,8 +1696,8 @@ document.addEventListener('click', ev_ => {
     case 'hQuick': Net.quickJoin(); break;
     case 'hWatch': Net.quickWatch(); break;
     case 'hOpen': showOpenChoice(); break;
-    case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } break; }
-    case 'lSend2': { const i = $('lMsg2'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } if (ui.hsec === 'chat') { ui.hsec = null; render(); } break; }
+    case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { lobbySend(i.value); i.value = ""; } break; }
+    case 'lSend2': { const i = $('lMsg2'); if (i && i.value.trim()) { lobbySend(i.value); i.value = ""; } break; }
     case 'lClear': Net.lclear(); break;
     case 'dmSend': { const i = $('dmMsg'); if (i && i.value.trim() && ui.dmWith) { Net.dmSend(ui.dmWith, i.value); i.value = ''; showDm(ui.dmWith); } break; }
     case 'lFab': showLChat(); break;
@@ -1709,13 +1716,15 @@ document.addEventListener('click', ev_ => {
       break; }
     case 'tCancel': Net.tourCancel(ui.tsetId); closeOv(); render(); break;
     case "oReplay": replayDeal(); break;
+    case "gGo": gateGo(); break;
+    case "pRename": showGate(true); break;
     case "oShared": { const d = ui.sharedDeal; ui.sharedDeal = null; closeOv(); if (d) { ui.saved = null; newBoard(d.hands, d.b); } break; }
     case "oShare": if (G && G.deal) shareDeal(G.deal, G.board); break;
     case "oRevShare": { const e = HIST.find(h => h.id === ui.revId); if (e && e.deal) shareDeal(e.deal, e.board); break; }
   }
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
-document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'dMsg') { e.preventDefault(); const v = e.target.value; e.target.value = ''; dockSend(v); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dmMsg') { e.preventDefault(); $('dmSend').click(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); Net.lsend(e.target.value); e.target.value = ''; if (e.target.id === 'lMsg2' && ui.hsec === 'chat') { ui.hsec = null; render(); } } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && /^g(Name|Pin|Pin2)$/.test(e.target.id)) { e.preventDefault(); gateGo(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dMsg') { e.preventDefault(); const v = e.target.value; e.target.value = ''; dockSend(v); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dmMsg') { e.preventDefault(); $('dmSend').click(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); lobbySend(e.target.value); e.target.value = ""; } });
 window.addEventListener('resize', layoutFans);
 
 /* ---- a deal as a link: 2 bits a card (who holds it) make 13 bytes, 18 letters in the address after #d= ---- */
@@ -1754,7 +1763,8 @@ function start(data) {
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
   // every opening starts fresh on the home page (an unfinished board is not kept)
   ui.saved = null;
-  G = idleG(); render(); checkSharedDeal();
+  G = idleG(); render();
+  { const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (needGate()) showGate(); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
   Store.initCloud(mergeCloud);
   syncNow(true);
   window.addEventListener("online", () => syncNow(true));
@@ -1787,4 +1797,58 @@ function setNotify(on) {
     SET.notify = p === 'granted'; Store.saveSettings(SET); save(); showSettings();
     if (p !== 'granted') flash(T('Notifications are blocked — allow them in the browser settings'), 3500);
   }).catch(() => {});
+}
+/* private messages in the lobby chat: tap a player's name, the next message goes only to them (✕ ends it) */
+function pmTo(name) {
+  ui.pmTo = name; Net.st.dmUnread[Net.nameKey ? Net.nameKey(name) : name.toLowerCase()] = 0;
+  for (const k in Net.st.dms) if (Net.st.dms[k].name.toLowerCase() === name.toLowerCase()) Net.st.dmUnread[k] = 0;
+  if (G && G.phase !== 'idle') { ui.dockOpen = true; ui.dockTab = 'lobby'; renderDock(); }
+  else if (!document.querySelector('.hchat') || getComputedStyle(document.querySelector('.hchat')).display === 'none') ui.hsec = 'chat';
+  render();
+  setTimeout(() => { const i = ['dMsg', 'lMsg2', 'lMsg'].map($).find(x => x && x.offsetParent); if (i) i.focus(); }, 50);
+}
+function lobbySend(text) {
+  text = String(text || '').trim(); if (!text) return;
+  if (ui.pmTo) Net.dmSend(ui.pmTo, text); else Net.lsend(text);
+  render(); renderDock();
+}
+/* ---- your name and PIN: nothing can be done before a name is chosen, and every name gets a 4-digit PIN (old
+   players too). A name in use by someone else is refused. With the online database the PIN also lets you take
+   your name to another phone or PC. ---- */
+async function pinHash(name, pin) {
+  const b = new TextEncoder().encode('bridge-table:' + Net.nameKey(name) + ':' + pin);
+  const h = await crypto.subtle.digest('SHA-256', b);
+  return [...new Uint8Array(h)].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+const needGate = () => typeof Net !== 'undefined' && (!myNm() || !SET.pinH || SET.pinFor !== Net.nameKey(myNm()));
+function showGate(rename) {
+  ui.gateRename = !!rename;
+  const keep = id => $(id) ? $(id).value : '';
+  const nm = $('gName') ? keep('gName') : rename ? '' : myNm();
+  openOv('gate', `<h2>👋 ${T(rename ? 'Change your name' : myNm() ? 'Choose a PIN' : 'Welcome!')}</h2>
+    <div class="muted">${T('Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.')}</div>
+    <div class="grp"><span>${T('Name')}</span><input id="gName" class="tok" maxlength="20" value="${esc(nm)}" autocomplete="nickname"></div>
+    <div class="grp"><span>${T('PIN (4 digits)')}</span><input id="gPin" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin'))}"></div>
+    <div class="grp"><span>${T('PIN again')}</span><input id="gPin2" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin2'))}"></div>
+    ${ui.gateErr ? `<div class="err">${esc(ui.gateErr)}</div>` : ''}
+    <div class="row2"><button class="btn new" id="gGo">${T('Continue')}</button>${rename ? `<button class="btn" id="oClose">${T('Cancel')}</button>` : ''}</div>`);
+  setTimeout(() => { const i = $(nm ? 'gPin' : 'gName'); if (i) i.focus(); }, 50);
+}
+async function gateGo() {
+  const name = ($('gName') ? $('gName').value : '').trim().replace(/\s+/g, ' ').slice(0, 20), pin = $('gPin') ? $('gPin').value : '', pin2 = $('gPin2') ? $('gPin2').value : '';
+  const err = m => { ui.gateErr = m; showGate(ui.gateRename); };
+  if (name.length < 2) return err(T('Write a name of at least 2 letters.'));
+  if (['player', 'guest', 'robot', 'you', 'host'].includes(Net.nameKey(name))) return err(T('Choose another name.'));
+  if (!/^\d{4}$/.test(pin)) return err(T('The PIN is 4 digits.'));
+  if (pin !== pin2) return err(T('The two PINs are not the same.'));
+  ui.gateErr = T('Checking…'); showGate(ui.gateRename);
+  const h = await pinHash(name, pin), r = await Net.checkName(name, h);
+  if (r === 'taken') return err(T('{0} is already used by another player. Choose another name.', name));
+  if (r === 'pin') return err(T('This name is registered with another PIN. If it is yours, enter your PIN.'));
+  try { localStorage.setItem('bridge-table-name', name); } catch (e) {}
+  SET.pinH = h; SET.pinFor = Net.nameKey(name); Store.saveSettings(SET); save();
+  ui.gateErr = null; ui.overlay = null; $('ov').hidden = true;
+  Net.st.claimed = true; Net.shareInfo(); Net.Cloud.beat(); render();
+  flash(T('Welcome, {0}!', name), 2000);
+  checkSharedDeal();
 }

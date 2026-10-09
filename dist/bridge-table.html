@@ -803,6 +803,38 @@ body.bigcards .mini{transform:scale(1.15);transform-origin:bottom}
 :root[data-theme="dark"] .hname label>span,:root[data-theme="dark"] .hero .muted{color:#b9c6bd}
 :root[data-theme="dark"] .hsec{background:#2a312d;color:#e8ece4}
 :root[data-theme="dark"] .hrow .hpeople:not(.on){background:#2a312d;color:#e8ece4;border-color:#4a564f}
+/* ---- the lobby chat with the players beside it (a third of the width) ---- */
+@media (min-width:901px){ .hgrid{grid-template-columns:minmax(0,1fr) 470px} }
+.lsplit{display:grid;grid-template-columns:minmax(110px,1fr) 2fr;gap:8px;flex:1;min-height:0}
+.lcol{display:flex;flex-direction:column;min-height:0;min-width:0}
+.lplayers{overflow:auto;min-height:0;background:#fff;border:1px solid #dcdccf;border-radius:10px;padding:6px;font-size:13.5px;margin-bottom:8px}
+.pchat .lsplit{max-height:46vh}
+#hSheet .pchat .lsplit{max-height:none;height:52vh}
+.lcount{display:flex;gap:8px;justify-content:space-between;font-weight:700;font-size:12.5px;padding:2px 2px 6px;border-bottom:1px solid #e3e1d4;margin-bottom:4px}
+.ladmin{font-size:12.5px;background:#fff6d6;border:1px solid #e6cf7a;border-radius:6px;padding:3px 6px;margin-bottom:4px}
+.lph{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#7c7b70;margin:6px 2px 2px}
+.lp{display:flex;align-items:center;gap:2px}
+.lp .lpn{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:0 6px;text-align:left;background:none;border:0;padding:4px 3px;border-radius:6px;font:inherit;color:inherit;cursor:pointer}
+.lp .lpn:hover{background:#eef3ec}
+.lp .lpn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;font-weight:600}
+.lp .lpn small{flex-basis:100%;padding-left:14px;color:#7c7b70;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp .lpi{flex:none;background:none;border:0;color:#7c7b70;font-size:13px;padding:2px 4px;cursor:pointer;border-radius:5px}
+.lp .lpi:hover{background:#eef3ec;color:#222}
+.lp .dot{width:8px;height:8px;border-radius:50%;flex:none;background:#2fa84f}
+.lp.st-play .dot{background:#e0a400}
+.lp.st-off .dot{background:#bdbdb4}
+.lp.st-off .lpn span{color:#8a897f;font-weight:500}
+.lplead{margin-top:8px;width:100%}
+.pmto:empty{display:none}
+.pmto{display:flex;align-items:center;gap:6px;font-size:13px;background:#ece4ff;color:#3d2a66;border-radius:8px;padding:4px 8px;margin-bottom:6px}
+.lmsgs .cm.pm{background:#ece4ff;color:#3d2a66;cursor:pointer}
+.lmsgs .cm.pm.me{background:#dcd0fb}
+:root[data-theme="dark"] .lplayers{background:#1a1f1c;border-color:#3a443e}
+:root[data-theme="dark"] .lp .lpn:hover,:root[data-theme="dark"] .lp .lpi:hover{background:#2a312d;color:#e8ece4}
+:root[data-theme="dark"] .lmsgs .cm.pm,:root[data-theme="dark"] .pmto{background:#3a2f57;color:#e8defd}
+:root[data-theme="dark"] .lmsgs .cm.pm.me{background:#463a68}
+:root[data-theme="dark"] .ladmin{background:#3b3a22;border-color:#6b6230;color:#f3e7b0}
+:root[data-theme="dark"] .lcount{border-bottom-color:#3a443e}
 
 </style>
 
@@ -3133,6 +3165,11 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Checking…": "Kontrol ediliyor…", "Choose another name.": "Başka bir ad seç.", "Friends": "Arkadaşlar", "Leaderboard": "Liderlik tablosu", "Logins today": "Bugün giriş", "Nobody has a rating yet.": "Henüz kimsenin puanı yok.", "Offline": "Çevrimdışı", "Playing": "Oyunda", "Online": "Çevrimiçi",
+    "PIN (4 digits)": "PIN (4 rakam)", "PIN again": "PIN tekrar", "Private message": "Özel mesaj", "Private message to {0}": "{0} kişisine özel mesaj", "Reply privately": "Özel cevap ver", "The PIN is 4 digits.": "PIN 4 rakamdan oluşur.", "The two PINs are not the same.": "İki PIN aynı değil.",
+    "This name is registered with another PIN. If it is yours, enter your PIN.": "Bu ad başka bir PIN ile kayıtlı. Senin adınsa PIN’ini gir.", "Welcome, {0}!": "Hoş geldin, {0}!", "Write a name of at least 2 letters.": "En az 2 harfli bir ad yaz.",
+    "Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.": "Diğer oyuncular seni adınla tanır. 4 rakamlı PIN adını korur: başkası alamaz, başka telefon ya da PC’de de bu PIN ile girersin.",
+    "at a table": "bir masada", "to {0}": "→ {0}", "{0} is already used by another player. Choose another name.": "{0} adını başka bir oyuncu kullanıyor. Başka bir ad seç.", "Change your name": "Adını değiştir", "Choose a PIN": "PIN belirle", "Welcome!": "Hoş geldin!",
     "You play": "Sen oynuyorsun", "you play": "sen oynuyorsun",
     "A shared deal": "Paylaşılan el", "Automatic": "Otomatik", "Card play check": "Kart oyunu kontrolü", "Card size": "Kart boyutu", "Check my card play": "Kart oyunumu kontrol et", "Checking the play…": "Oyun kontrol ediliyor…",
     "Daily": "Günlük", "Daily tournament": "Günlük turnuva", "Dark": "Koyu", "Light": "Açık", "Large": "Büyük", "Screen": "Ekran", "Rating": "Puan", "Share": "Paylaş", "Share this deal": "Bu eli paylaş", "Table sounds": "Masa sesleri", "Your turn": "Sıra sende", "Trick {0}": "Löve {0}",
@@ -3215,6 +3252,11 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Checking…": "Sjekker…", "Choose another name.": "Velg et annet navn.", "Friends": "Venner", "Leaderboard": "Toppliste", "Logins today": "Innlogginger i dag", "Nobody has a rating yet.": "Ingen har rating ennå.", "Offline": "Frakoblet", "Playing": "Spiller", "Online": "Pålogget",
+    "PIN (4 digits)": "PIN (4 sifre)", "PIN again": "PIN igjen", "Private message": "Privat melding", "Private message to {0}": "Privat melding til {0}", "Reply privately": "Svar privat", "The PIN is 4 digits.": "PIN-koden har 4 sifre.", "The two PINs are not the same.": "De to PIN-kodene er ikke like.",
+    "This name is registered with another PIN. If it is yours, enter your PIN.": "Navnet er registrert med en annen PIN. Er det ditt, skriv din PIN.", "Welcome, {0}!": "Velkommen, {0}!", "Write a name of at least 2 letters.": "Skriv et navn på minst 2 bokstaver.",
+    "Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.": "Navnet ditt er hvordan de andre kjenner deg. En firesifret PIN holder det ditt: ingen andre kan ta det, og du bruker den for å logge inn på en annen telefon eller PC.",
+    "at a table": "ved et bord", "to {0}": "til {0}", "{0} is already used by another player. Choose another name.": "{0} brukes allerede av en annen spiller. Velg et annet navn.", "Change your name": "Bytt navn", "Choose a PIN": "Velg en PIN", "Welcome!": "Velkommen!",
     "You play": "Du spiller", "you play": "du spiller",
     "A shared deal": "Et delt spill", "Automatic": "Automatisk", "Card play check": "Sjekk av spilleføringen", "Card size": "Kortstørrelse", "Check my card play": "Sjekk kortspillet mitt", "Checking the play…": "Sjekker spillet…",
     "Daily": "Daglig", "Daily tournament": "Dagens turnering", "Dark": "Mørk", "Light": "Lys", "Large": "Store", "Screen": "Skjerm", "Rating": "Rating", "Share": "Del", "Share this deal": "Del dette spillet", "Table sounds": "Bordlyder", "Your turn": "Din tur", "Trick {0}": "Stikk {0}",
@@ -3297,6 +3339,11 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Checking…": "Comprobando…", "Choose another name.": "Elige otro nombre.", "Friends": "Amigos", "Leaderboard": "Clasificación", "Logins today": "Entradas hoy", "Nobody has a rating yet.": "Nadie tiene rating todavía.", "Offline": "Desconectados", "Playing": "Jugando", "Online": "Conectados",
+    "PIN (4 digits)": "PIN (4 cifras)", "PIN again": "Repite el PIN", "Private message": "Mensaje privado", "Private message to {0}": "Mensaje privado a {0}", "Reply privately": "Responder en privado", "The PIN is 4 digits.": "El PIN tiene 4 cifras.", "The two PINs are not the same.": "Los dos PIN no coinciden.",
+    "This name is registered with another PIN. If it is yours, enter your PIN.": "Este nombre está registrado con otro PIN. Si es tuyo, escribe tu PIN.", "Welcome, {0}!": "¡Bienvenido, {0}!", "Write a name of at least 2 letters.": "Escribe un nombre de al menos 2 letras.",
+    "Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.": "Tu nombre es como te conocen los demás. Un PIN de 4 cifras lo protege: nadie más puede usarlo y con él entras desde otro móvil o PC.",
+    "at a table": "en una mesa", "to {0}": "a {0}", "{0} is already used by another player. Choose another name.": "{0} ya lo usa otro jugador. Elige otro nombre.", "Change your name": "Cambiar tu nombre", "Choose a PIN": "Elige un PIN", "Welcome!": "¡Bienvenido!",
     "You play": "Juegas tú", "you play": "juegas tú",
     "A shared deal": "Una mano compartida", "Automatic": "Automático", "Card play check": "Revisión del carteo", "Card size": "Tamaño de cartas", "Check my card play": "Revisar mi carteo", "Checking the play…": "Revisando el carteo…",
     "Daily": "Diario", "Daily tournament": "Torneo diario", "Dark": "Oscuro", "Light": "Claro", "Large": "Grandes", "Screen": "Pantalla", "Rating": "Rating", "Share": "Compartir", "Share this deal": "Compartir esta mano", "Table sounds": "Sonidos de mesa", "Your turn": "Te toca", "Trick {0}": "Baza {0}",
@@ -3407,6 +3454,11 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Checking…": "Vérification…", "Choose another name.": "Choisissez un autre nom.", "Friends": "Amis", "Leaderboard": "Classement", "Logins today": "Connexions aujourd’hui", "Nobody has a rating yet.": "Personne n’a encore de classement.", "Offline": "Hors ligne", "Playing": "En jeu", "Online": "En ligne",
+    "PIN (4 digits)": "PIN (4 chiffres)", "PIN again": "PIN à nouveau", "Private message": "Message privé", "Private message to {0}": "Message privé à {0}", "Reply privately": "Répondre en privé", "The PIN is 4 digits.": "Le PIN a 4 chiffres.", "The two PINs are not the same.": "Les deux PIN ne sont pas identiques.",
+    "This name is registered with another PIN. If it is yours, enter your PIN.": "Ce nom est enregistré avec un autre PIN. Si c’est le vôtre, entrez votre PIN.", "Welcome, {0}!": "Bienvenue, {0} !", "Write a name of at least 2 letters.": "Écrivez un nom d’au moins 2 lettres.",
+    "Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.": "Votre nom est ce que voient les autres joueurs. Un PIN à 4 chiffres le protège : personne d’autre ne peut le prendre, et il sert à vous connecter sur un autre téléphone ou PC.",
+    "at a table": "à une table", "to {0}": "à {0}", "{0} is already used by another player. Choose another name.": "{0} est déjà utilisé par un autre joueur. Choisissez un autre nom.", "Change your name": "Changer de nom", "Choose a PIN": "Choisir un PIN", "Welcome!": "Bienvenue !",
     "You play": "Vous jouez", "you play": "vous jouez",
     "A shared deal": "Une donne partagée", "Automatic": "Automatique", "Card play check": "Vérification du jeu de la carte", "Card size": "Taille des cartes", "Check my card play": "Vérifier mon jeu de la carte", "Checking the play…": "Vérification…",
     "Daily": "Quotidien", "Daily tournament": "Tournoi du jour", "Dark": "Sombre", "Light": "Clair", "Large": "Grandes", "Screen": "Écran", "Rating": "Classement", "Share": "Partager", "Share this deal": "Partager cette donne", "Table sounds": "Sons de la table", "Your turn": "À vous", "Trick {0}": "Levée {0}",
@@ -3517,6 +3569,11 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Checking…": "Verifica…", "Choose another name.": "Scegli un altro nome.", "Friends": "Amici", "Leaderboard": "Classifica", "Logins today": "Accessi oggi", "Nobody has a rating yet.": "Nessuno ha ancora un rating.", "Offline": "Offline", "Playing": "In gioco", "Online": "Online",
+    "PIN (4 digits)": "PIN (4 cifre)", "PIN again": "Ripeti il PIN", "Private message": "Messaggio privato", "Private message to {0}": "Messaggio privato a {0}", "Reply privately": "Rispondi in privato", "The PIN is 4 digits.": "Il PIN ha 4 cifre.", "The two PINs are not the same.": "I due PIN non coincidono.",
+    "This name is registered with another PIN. If it is yours, enter your PIN.": "Questo nome è registrato con un altro PIN. Se è tuo, inserisci il tuo PIN.", "Welcome, {0}!": "Benvenuto, {0}!", "Write a name of at least 2 letters.": "Scrivi un nome di almeno 2 lettere.",
+    "Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.": "Il tuo nome è come ti conoscono gli altri. Un PIN di 4 cifre lo protegge: nessun altro può prenderlo e lo usi per entrare da un altro telefono o PC.",
+    "at a table": "a un tavolo", "to {0}": "a {0}", "{0} is already used by another player. Choose another name.": "{0} è già usato da un altro giocatore. Scegli un altro nome.", "Change your name": "Cambia nome", "Choose a PIN": "Scegli un PIN", "Welcome!": "Benvenuto!",
     "You play": "Giochi tu", "you play": "giochi tu",
     "A shared deal": "Una smazzata condivisa", "Automatic": "Automatico", "Card play check": "Controllo del gioco", "Card size": "Dimensione carte", "Check my card play": "Controlla il mio gioco", "Checking the play…": "Controllo in corso…",
     "Daily": "Giornaliero", "Daily tournament": "Torneo del giorno", "Dark": "Scuro", "Light": "Chiaro", "Large": "Grandi", "Screen": "Schermo", "Rating": "Rating", "Share": "Condividi", "Share this deal": "Condividi questa smazzata", "Table sounds": "Suoni del tavolo", "Your turn": "Tocca a te", "Trick {0}": "Presa {0}",
@@ -3627,6 +3684,11 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Checking…": "Wird geprüft…", "Choose another name.": "Wähle einen anderen Namen.", "Friends": "Freunde", "Leaderboard": "Bestenliste", "Logins today": "Anmeldungen heute", "Nobody has a rating yet.": "Noch niemand hat ein Rating.", "Offline": "Offline", "Playing": "Am Spielen", "Online": "Online",
+    "PIN (4 digits)": "PIN (4 Ziffern)", "PIN again": "PIN wiederholen", "Private message": "Private Nachricht", "Private message to {0}": "Private Nachricht an {0}", "Reply privately": "Privat antworten", "The PIN is 4 digits.": "Die PIN hat 4 Ziffern.", "The two PINs are not the same.": "Die beiden PINs stimmen nicht überein.",
+    "This name is registered with another PIN. If it is yours, enter your PIN.": "Dieser Name ist mit einer anderen PIN registriert. Wenn es deiner ist, gib deine PIN ein.", "Welcome, {0}!": "Willkommen, {0}!", "Write a name of at least 2 letters.": "Schreibe einen Namen mit mindestens 2 Buchstaben.",
+    "Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.": "Unter deinem Namen kennen dich die anderen. Eine 4-stellige PIN schützt ihn: niemand sonst kann ihn nehmen, und mit ihr meldest du dich auf einem anderen Handy oder PC an.",
+    "at a table": "an einem Tisch", "to {0}": "an {0}", "{0} is already used by another player. Choose another name.": "{0} wird schon von einem anderen Spieler benutzt. Wähle einen anderen Namen.", "Change your name": "Namen ändern", "Choose a PIN": "PIN wählen", "Welcome!": "Willkommen!",
     "You play": "Du spielst", "you play": "du spielst",
     "A shared deal": "Ein geteiltes Board", "Automatic": "Automatisch", "Card play check": "Prüfung des Kartenspiels", "Card size": "Kartengröße", "Check my card play": "Mein Kartenspiel prüfen", "Checking the play…": "Spiel wird geprüft…",
     "Daily": "Täglich", "Daily tournament": "Tagesturnier", "Dark": "Dunkel", "Light": "Hell", "Large": "Groß", "Screen": "Bildschirm", "Rating": "Rating", "Share": "Teilen", "Share this deal": "Dieses Board teilen", "Table sounds": "Tischgeräusche", "Your turn": "Du bist dran", "Trick {0}": "Stich {0}",
@@ -3737,6 +3799,11 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Checking…": "Проверяем…", "Choose another name.": "Выберите другое имя.", "Friends": "Друзья", "Leaderboard": "Лучшие", "Logins today": "Входов сегодня", "Nobody has a rating yet.": "Пока ни у кого нет рейтинга.", "Offline": "Не в сети", "Playing": "Играют", "Online": "В сети",
+    "PIN (4 digits)": "PIN (4 цифры)", "PIN again": "PIN ещё раз", "Private message": "Личное сообщение", "Private message to {0}": "Личное сообщение: {0}", "Reply privately": "Ответить лично", "The PIN is 4 digits.": "PIN — это 4 цифры.", "The two PINs are not the same.": "PIN-коды не совпадают.",
+    "This name is registered with another PIN. If it is yours, enter your PIN.": "Это имя зарегистрировано с другим PIN. Если оно ваше, введите свой PIN.", "Welcome, {0}!": "Добро пожаловать, {0}!", "Write a name of at least 2 letters.": "Имя — не короче 2 букв.",
+    "Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.": "По имени вас узнают другие игроки. PIN из 4 цифр закрепляет его за вами: никто не сможет его занять, а с ним вы войдёте с другого телефона или ПК.",
+    "at a table": "за столом", "to {0}": "для {0}", "{0} is already used by another player. Choose another name.": "Имя {0} уже занято другим игроком. Выберите другое.", "Change your name": "Сменить имя", "Choose a PIN": "Задайте PIN", "Welcome!": "Добро пожаловать!",
     "You play": "Играете вы", "you play": "играете вы",
     "A shared deal": "Присланная сдача", "Automatic": "Авто", "Card play check": "Проверка розыгрыша", "Card size": "Размер карт", "Check my card play": "Проверить мой розыгрыш", "Checking the play…": "Проверяем розыгрыш…",
     "Daily": "Ежедневный", "Daily tournament": "Турнир дня", "Dark": "Тёмный", "Light": "Светлый", "Large": "Крупные", "Screen": "Экран", "Rating": "Рейтинг", "Share": "Поделиться", "Share this deal": "Поделиться сдачей", "Table sounds": "Звуки стола", "Your turn": "Ваш ход", "Trick {0}": "Взятка {0}",
@@ -3847,6 +3914,11 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Checking…": "Sprawdzanie…", "Choose another name.": "Wybierz inne imię.", "Friends": "Znajomi", "Leaderboard": "Ranking", "Logins today": "Logowania dziś", "Nobody has a rating yet.": "Nikt nie ma jeszcze rankingu.", "Offline": "Offline", "Playing": "Grają", "Online": "Online",
+    "PIN (4 digits)": "PIN (4 cyfry)", "PIN again": "Powtórz PIN", "Private message": "Prywatna wiadomość", "Private message to {0}": "Prywatna wiadomość do {0}", "Reply privately": "Odpowiedz prywatnie", "The PIN is 4 digits.": "PIN ma 4 cyfry.", "The two PINs are not the same.": "Kody PIN się różnią.",
+    "This name is registered with another PIN. If it is yours, enter your PIN.": "To imię jest zarejestrowane z innym PIN-em. Jeśli jest twoje, wpisz swój PIN.", "Welcome, {0}!": "Witaj, {0}!", "Write a name of at least 2 letters.": "Wpisz imię z co najmniej 2 liter.",
+    "Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.": "Po imieniu rozpoznają cię inni gracze. 4-cyfrowy PIN je chroni: nikt inny go nie zajmie, a dzięki niemu zalogujesz się na innym telefonie lub komputerze.",
+    "at a table": "przy stole", "to {0}": "do {0}", "{0} is already used by another player. Choose another name.": "Imię {0} jest już używane przez innego gracza. Wybierz inne.", "Change your name": "Zmień imię", "Choose a PIN": "Ustaw PIN", "Welcome!": "Witaj!",
     "You play": "Grasz ty", "you play": "grasz ty",
     "A shared deal": "Udostępnione rozdanie", "Automatic": "Automatycznie", "Card play check": "Sprawdzenie rozgrywki", "Card size": "Rozmiar kart", "Check my card play": "Sprawdź moją rozgrywkę", "Checking the play…": "Sprawdzanie…",
     "Daily": "Dzienny", "Daily tournament": "Turniej dnia", "Dark": "Ciemny", "Light": "Jasny", "Large": "Duże", "Screen": "Ekran", "Rating": "Ranking", "Share": "Udostępnij", "Share this deal": "Udostępnij rozdanie", "Table sounds": "Dźwięki stołu", "Your turn": "Twój ruch", "Trick {0}": "Lewa {0}",
@@ -3957,6 +4029,11 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Checking…": "正在检查…", "Choose another name.": "请换一个名字。", "Friends": "好友", "Leaderboard": "排行榜", "Logins today": "今日登录", "Nobody has a rating yet.": "还没有人有等级分。", "Offline": "离线", "Playing": "在打牌", "Online": "在线",
+    "PIN (4 digits)": "PIN(4 位数字)", "PIN again": "再输一次 PIN", "Private message": "私信", "Private message to {0}": "私信给 {0}", "Reply privately": "私下回复", "The PIN is 4 digits.": "PIN 是 4 位数字。", "The two PINs are not the same.": "两次 PIN 不一致。",
+    "This name is registered with another PIN. If it is yours, enter your PIN.": "这个名字已用另一个 PIN 注册。如果是你的,请输入你的 PIN。", "Welcome, {0}!": "欢迎,{0}!", "Write a name of at least 2 letters.": "名字至少 2 个字。",
+    "Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.": "其他玩家通过名字认识你。4 位 PIN 保护你的名字:别人无法占用,你也可以用它在其他手机或电脑上登录。",
+    "at a table": "在牌桌", "to {0}": "给 {0}", "{0} is already used by another player. Choose another name.": "{0} 已被其他玩家使用。请换一个名字。", "Change your name": "修改名字", "Choose a PIN": "设置 PIN", "Welcome!": "欢迎!",
     "You play": "由你打", "you play": "由你打",
     "A shared deal": "分享的牌", "Automatic": "自动", "Card play check": "打牌检查", "Card size": "牌的大小", "Check my card play": "检查我的打牌", "Checking the play…": "正在检查…",
     "Daily": "每日", "Daily tournament": "每日赛", "Dark": "深色", "Light": "浅色", "Large": "大", "Screen": "屏幕", "Rating": "等级分", "Share": "分享", "Share this deal": "分享这副牌", "Table sounds": "牌桌音效", "Your turn": "轮到你了", "Trick {0}": "第 {0} 墩",
@@ -5207,8 +5284,8 @@ function renderBar() {
      <button class="btn gold" id="bHint">${T('Hint')}</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
      ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
-     ${typeof Net !== "undefined" ? (n => `<button class="btn${n ? " gold" : ""}" id="bChat" title="${T('Chat')}">💬<span class="cbl"> ${T('Chat')}</span>${n ? `<span class="cbn">${n}</span>` : ""}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ""}
-     <span class="menuwrap"><button class="btn" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰</button>${ui.menu ? `<div class="menu" role="menu">
+     <span class="menuwrap">${(n => `<button class="btn${n ? " gold" : ""}" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰${n ? `<span class="cbn">${n}</span>` : ""}</button>`)(typeof Net !== "undefined" ? (Net.st.unread || 0) + (Net.st.lunread || 0) : 0)}${ui.menu ? `<div class="menu" role="menu">
+       ${typeof Net !== "undefined" ? `<button class="btn" id="bChat">💬 ${T('Chat')}${(n => n ? ` (${n})` : '')((Net.st.unread || 0) + (Net.st.lunread || 0))}</button>` : ""}
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
        <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
        <button class="btn" id="bHist">📜 ${T('History')}</button>
@@ -5367,7 +5444,7 @@ function toggleDock() {
 }
 // the new-message count on 💬 in the top bar
 function chatBadge() {
-  const bc = $('bChat'), n = (Net.st.unread || 0) + (Net.st.lunread || 0); if (!bc) return;
+  const bc = $('bMenu'), n = (Net.st.unread || 0) + (Net.st.lunread || 0); if (!bc) return;
   let s = bc.querySelector('.cbn');
   if (n) { if (!s) { s = document.createElement('span'); s.className = 'cbn'; bc.appendChild(s); } s.textContent = n; } else if (s) s.remove();
   bc.classList.toggle('gold', !!n);
@@ -5376,7 +5453,7 @@ function renderDock() {
   const d = $('dock'); if (!d || typeof Net === 'undefined' || !G) return;
   const athome = G.phase === 'idle', wide = dockWide();
   chatBadge();
-  const cb = $('chatBtn'); if (cb) { cb.hidden = athome || wide; const n = (Net.st.unread || 0) + (Net.st.lunread || 0); const s = $('chatBtnN'); if (s) s.textContent = n ? '(' + n + ')' : ''; }
+  const cb = $('chatBtn'); if (cb) { cb.hidden = true; const n = (Net.st.unread || 0) + (Net.st.lunread || 0); const s = $('chatBtnN'); if (s) s.textContent = n ? '(' + n + ')' : ''; }
   const show = !athome && (wide || ui.dockOpen);
   document.body.classList.toggle('withdock', !athome && wide);
   d.hidden = !show; if (!show) return;
@@ -5387,9 +5464,11 @@ function renderDock() {
     const tabs = tbl ? `<div class="dtabs"><button data-dtab="table" class="${tab === 'table' ? 'on' : ''}">${T('Table')} <span id="dTn"></span></button><button data-dtab="lobby" class="${tab === 'lobby' ? 'on' : ''}">${T('Lobby')} <span id="dLn"></span></button></div>` : `<b>💬 ${T('Lobby chat')}</b>`;
     d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>` : ''}
+      <div class="pmto" id="dPmTo"></div>
       <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
+  { const p = $("dPmTo"), h = tab !== "table" && ui.pmTo ? `🔒 ${T("Private message to {0}", esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : ""; if (p && p.innerHTML !== h) p.innerHTML = h; }
   if (L && L.innerHTML !== html) { L.innerHTML = html; L.scrollTop = L.scrollHeight; }
   friendsCheck();   // the players are listed under 👥, not above the chat; a friend's arrival is still announced
   if (tab === 'table') Net.st.unread = 0; else Net.st.lunread = 0;
@@ -5400,7 +5479,7 @@ function renderDock() {
 }
 function dockSend(text) {
   text = String(text || '').trim(); if (!text) return;
-  if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else Net.lsend(text);
+  if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else lobbySend(text);
   // the panel stays open after sending; it is closed with ✕
   renderDock();
 }
@@ -5494,7 +5573,7 @@ function homeShell() {
     <section class="hmain">
       <div class="hcard hero">
         <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label>
-        <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label><button class="btn hpeople" data-hsec="people" title="${T('Players in the lobby')}">👥<span class="hpl"> ${T('Players in the lobby')}</span> <b id="hPeopleN"></b></button></div>
+        <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         <div class="hsecs"><button class="hsec phoneonly" data-hsec="chat">💬 ${T('Lobby chat')} <span id="hChatN"></span></button></div>
@@ -5506,17 +5585,16 @@ function homeShell() {
       <div id="hPend"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
-    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lmsgs" id="hChat"></div>
-      <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></aside>
+    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers" id="hPlayers"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
+      <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></div></div></aside>
   </div><div id="hSheet"></div></div>`;
 }
 // the section opened with the buttons at the top of the home page (tournaments, our card, players, chat on a phone)
 function homeSection(k) {
   if (k === 'tours') return `<div class="hcard"><h3>🏆 ${T('Tournaments')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hTours"></div></div>`;
   if (k === 'conv') return `<div class="hcard"><h3>📋 ${T('Our convention card (with partner)')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hConv"></div></div>`;
-  if (k === 'people') return `<div class="hcard"><h3>👥 ${T('Players in the lobby')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hPeople"></div></div>`;
-  if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lmsgs" id="pChat"></div>
-    <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div>`;
+  if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lsplit"><div class="lplayers" id="pPlayers"></div><div class="lcol"><div class="lmsgs" id="pChat"></div><div class="pmto" id="pPmTo"></div>
+    <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div></div></div>`;
   return '';
 }
 // our card: every convention with a switch; tap a name for its description
@@ -5561,9 +5639,11 @@ function renderHome() {
     set('hCount', T('{0} in the lobby', N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
     set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
     if (want === 'chat') N.st.lunread = 0;
-    set('hTours', toursHtml()); set('hPeople', N.peopleHtml());
+    set('hTours', toursHtml());
+    const pl = N.playersHtml(); set('hPlayers', pl); set('pPlayers', pl);
+    const pm = ui.pmTo ? `🔒 ${T('Private message to {0}', esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : '';
+    set('hPmTo', pm); set('pPmTo', pm);
     friendsCheck();
-    set('hPeopleN', String(N.lobbyCount()));   // how many are in the lobby, on the Players button
   }
   set('hConv', convCardHtml());
 }
@@ -5861,7 +5941,7 @@ function showPlayer(name) {
   const conv = p ? convLine(p) : '';
   // your own card: change what the others see (name, system, level, country; the conventions on the card itself)
   const edit = me ? `<div class="pedit"><div class="pedh">✏️ ${T('Edit my card')}</div>
-      <label><span>${T('Name')}</span><input id="pName" class="tok" maxlength="20" value="${esc(myNm())}" placeholder="${T('Name')}"></label>
+      <label><span>${T('Name')}</span><button id="pRename" class="tok prename">${esc(myNm())} ✏️</button></label>
       <label><span>${T('System')}</span><select id="pSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label>
       <label><span>${T('Level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
       <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
@@ -5977,8 +6057,9 @@ function resultLine(e) {
   const c = e.c, d = e.tricks - (c.level + 6);
   return `${conKey(c)} · ${T('{0} tricks', e.tricks)} (${d >= 0 ? (d ? '+' + d : '=') : d}) · <span class="${e.us >= 0 ? 'pos' : 'neg'}">${fmtSigned(e.us)}</span>`;
 }
-function openOv(name, html) { ui.overlay = name; $('ov').innerHTML = `<div class="sheet">${html}</div>`; $('ov').hidden = false; }
-function closeOv() { if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; }
+function openOv(name, html) { if (ui.overlay === "gate" && name !== "gate" && needGate()) return; ui.overlay = name; $('ov').innerHTML = `<div class="sheet">${html}</div>`; $('ov').hidden = false; }
+function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no way past the name and PIN
+  if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; }
 function showEnd() {
   const e = G.result; if (!e) return;
   const f = G.field || { tables: [], done: false, dd: {} };
@@ -6215,7 +6296,6 @@ document.addEventListener('change', e => {
   }
   if (t.dataset.tinv != null && ui.tsel) { if (t.checked) ui.tsel.names.add(t.dataset.tinv); else ui.tsel.names.delete(t.dataset.tinv); return; }
   // your own player card: level, country and a few words, sent with your profile
-  if (t.id === 'pName') { const v = t.value.trim().slice(0, 20); if (v) { try { localStorage.setItem('bridge-table-name', v); } catch (e) {} Net.shareInfo(); render(); showPlayer(v); } return; }
   if (t.id === 'pSys') { SET.sys = t.value; SET.conv = { ...E.sysOf(t.value).conv }; SET.practice = ''; Store.saveSettings(SET); save(); Net.shareInfo(); render(); showPlayer(myNm() || T('You')); return; }
   if (t.id === 'pCline') { SET.cline = t.value.trim().slice(0, 300); Store.saveSettings(SET); save(); Net.shareInfo(); flash('✓', 800); return; }   // your convention line, written by hand
   if (t.id === 'pLvl' || t.id === 'pCtry') { SET[{ pLvl: 'lvl', pCtry: 'ctry' }[t.id]] = t.value; Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T('You')); return; }
@@ -6246,6 +6326,10 @@ document.addEventListener('click', ev_ => {
   const tsit = ev_.target.closest('[data-tsit]'); if (tsit) { const S = tourSeats(); S[tsit.dataset.tid] = +tsit.dataset.tsit; try { localStorage.setItem('bridge-tour-seats', JSON.stringify(S)); } catch (e) {} closeOv(); playTour(tsit.dataset.tid); return; }
   const tl = ev_.target.closest('[data-tlist]'); if (tl) { ui.ttab = tl.dataset.tlist; render(); return; }   // the tournament list's tabs
   const tt = ev_.target.closest('[data-ttab],[data-tjtab]'); if (tt) { if (tt.dataset.ttab) Net.openTourTable(tt.dataset.ttab); else Net.joinTourTable(tt.dataset.tjtab); return; }
+  // a name in the players list (or a private message): write to that player privately
+  const pmb = ev_.target.closest("[data-pm]"); if (pmb) { pmTo(pmb.dataset.pm); return; }
+  if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
+  if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
   const pw = ev_.target.closest('[data-who]'); if (pw) { showPlayer(pw.dataset.who); return; }
   const pwx = ev_.target.closest('[data-pairwith]'); if (pwx) { closeOv(); Net.playWith(pwx.dataset.pairwith); return; }
   const fr = ev_.target.closest('[data-friend]'); if (fr) { toggleFriend(fr.dataset.friend); showPlayer(fr.dataset.friend); render(); return; }
@@ -6278,7 +6362,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === "dClose") { ui.dockOpen = false; renderDock(); return; }
   // clear the chat shown in the panel on this device (the lobby chat stays cleared; the table chat until new messages)
   if (t.id === "dClear") { if (online() && (ui.dockTab || "table") === "table") { Net.st.chat.length = 0; Net.st.unread = 0; renderDock(); } else Net.lclear(); return; }
-  if (t.id === "chatBtn") { toggleDock(); return; }
+  if (t.id === "chatBtn" || t.id === "bChat") { ui.menu = false; toggleDock(); renderBar(); return; }
   if (t.id === "bStart") { if (online() && !guest() && G.phase === "lobby") { Net.note((Net.st.names[SET.seat] || "Host") + " started the game"); if (Net.st.tour) tableBoard(); else newBoard(); } return; }
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
@@ -6344,8 +6428,8 @@ document.addEventListener('click', ev_ => {
     case 'hQuick': Net.quickJoin(); break;
     case 'hWatch': Net.quickWatch(); break;
     case 'hOpen': showOpenChoice(); break;
-    case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } break; }
-    case 'lSend2': { const i = $('lMsg2'); if (i && i.value.trim()) { Net.lsend(i.value); i.value = ''; } if (ui.hsec === 'chat') { ui.hsec = null; render(); } break; }
+    case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { lobbySend(i.value); i.value = ""; } break; }
+    case 'lSend2': { const i = $('lMsg2'); if (i && i.value.trim()) { lobbySend(i.value); i.value = ""; } break; }
     case 'lClear': Net.lclear(); break;
     case 'dmSend': { const i = $('dmMsg'); if (i && i.value.trim() && ui.dmWith) { Net.dmSend(ui.dmWith, i.value); i.value = ''; showDm(ui.dmWith); } break; }
     case 'lFab': showLChat(); break;
@@ -6364,13 +6448,15 @@ document.addEventListener('click', ev_ => {
       break; }
     case 'tCancel': Net.tourCancel(ui.tsetId); closeOv(); render(); break;
     case "oReplay": replayDeal(); break;
+    case "gGo": gateGo(); break;
+    case "pRename": showGate(true); break;
     case "oShared": { const d = ui.sharedDeal; ui.sharedDeal = null; closeOv(); if (d) { ui.saved = null; newBoard(d.hands, d.b); } break; }
     case "oShare": if (G && G.deal) shareDeal(G.deal, G.board); break;
     case "oRevShare": { const e = HIST.find(h => h.id === ui.revId); if (e && e.deal) shareDeal(e.deal, e.board); break; }
   }
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
-document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'dMsg') { e.preventDefault(); const v = e.target.value; e.target.value = ''; dockSend(v); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dmMsg') { e.preventDefault(); $('dmSend').click(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); Net.lsend(e.target.value); e.target.value = ''; if (e.target.id === 'lMsg2' && ui.hsec === 'chat') { ui.hsec = null; render(); } } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && /^g(Name|Pin|Pin2)$/.test(e.target.id)) { e.preventDefault(); gateGo(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dMsg') { e.preventDefault(); const v = e.target.value; e.target.value = ''; dockSend(v); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dmMsg') { e.preventDefault(); $('dmSend').click(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); lobbySend(e.target.value); e.target.value = ""; } });
 window.addEventListener('resize', layoutFans);
 
 /* ---- a deal as a link: 2 bits a card (who holds it) make 13 bytes, 18 letters in the address after #d= ---- */
@@ -6409,7 +6495,8 @@ function start(data) {
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
   // every opening starts fresh on the home page (an unfinished board is not kept)
   ui.saved = null;
-  G = idleG(); render(); checkSharedDeal();
+  G = idleG(); render();
+  { const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (needGate()) showGate(); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
   Store.initCloud(mergeCloud);
   syncNow(true);
   window.addEventListener("online", () => syncNow(true));
@@ -6442,6 +6529,60 @@ function setNotify(on) {
     SET.notify = p === 'granted'; Store.saveSettings(SET); save(); showSettings();
     if (p !== 'granted') flash(T('Notifications are blocked — allow them in the browser settings'), 3500);
   }).catch(() => {});
+}
+/* private messages in the lobby chat: tap a player's name, the next message goes only to them (✕ ends it) */
+function pmTo(name) {
+  ui.pmTo = name; Net.st.dmUnread[Net.nameKey ? Net.nameKey(name) : name.toLowerCase()] = 0;
+  for (const k in Net.st.dms) if (Net.st.dms[k].name.toLowerCase() === name.toLowerCase()) Net.st.dmUnread[k] = 0;
+  if (G && G.phase !== 'idle') { ui.dockOpen = true; ui.dockTab = 'lobby'; renderDock(); }
+  else if (!document.querySelector('.hchat') || getComputedStyle(document.querySelector('.hchat')).display === 'none') ui.hsec = 'chat';
+  render();
+  setTimeout(() => { const i = ['dMsg', 'lMsg2', 'lMsg'].map($).find(x => x && x.offsetParent); if (i) i.focus(); }, 50);
+}
+function lobbySend(text) {
+  text = String(text || '').trim(); if (!text) return;
+  if (ui.pmTo) Net.dmSend(ui.pmTo, text); else Net.lsend(text);
+  render(); renderDock();
+}
+/* ---- your name and PIN: nothing can be done before a name is chosen, and every name gets a 4-digit PIN (old
+   players too). A name in use by someone else is refused. With the online database the PIN also lets you take
+   your name to another phone or PC. ---- */
+async function pinHash(name, pin) {
+  const b = new TextEncoder().encode('bridge-table:' + Net.nameKey(name) + ':' + pin);
+  const h = await crypto.subtle.digest('SHA-256', b);
+  return [...new Uint8Array(h)].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+const needGate = () => typeof Net !== 'undefined' && (!myNm() || !SET.pinH || SET.pinFor !== Net.nameKey(myNm()));
+function showGate(rename) {
+  ui.gateRename = !!rename;
+  const keep = id => $(id) ? $(id).value : '';
+  const nm = $('gName') ? keep('gName') : rename ? '' : myNm();
+  openOv('gate', `<h2>👋 ${T(rename ? 'Change your name' : myNm() ? 'Choose a PIN' : 'Welcome!')}</h2>
+    <div class="muted">${T('Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.')}</div>
+    <div class="grp"><span>${T('Name')}</span><input id="gName" class="tok" maxlength="20" value="${esc(nm)}" autocomplete="nickname"></div>
+    <div class="grp"><span>${T('PIN (4 digits)')}</span><input id="gPin" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin'))}"></div>
+    <div class="grp"><span>${T('PIN again')}</span><input id="gPin2" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin2'))}"></div>
+    ${ui.gateErr ? `<div class="err">${esc(ui.gateErr)}</div>` : ''}
+    <div class="row2"><button class="btn new" id="gGo">${T('Continue')}</button>${rename ? `<button class="btn" id="oClose">${T('Cancel')}</button>` : ''}</div>`);
+  setTimeout(() => { const i = $(nm ? 'gPin' : 'gName'); if (i) i.focus(); }, 50);
+}
+async function gateGo() {
+  const name = ($('gName') ? $('gName').value : '').trim().replace(/\s+/g, ' ').slice(0, 20), pin = $('gPin') ? $('gPin').value : '', pin2 = $('gPin2') ? $('gPin2').value : '';
+  const err = m => { ui.gateErr = m; showGate(ui.gateRename); };
+  if (name.length < 2) return err(T('Write a name of at least 2 letters.'));
+  if (['player', 'guest', 'robot', 'you', 'host'].includes(Net.nameKey(name))) return err(T('Choose another name.'));
+  if (!/^\d{4}$/.test(pin)) return err(T('The PIN is 4 digits.'));
+  if (pin !== pin2) return err(T('The two PINs are not the same.'));
+  ui.gateErr = T('Checking…'); showGate(ui.gateRename);
+  const h = await pinHash(name, pin), r = await Net.checkName(name, h);
+  if (r === 'taken') return err(T('{0} is already used by another player. Choose another name.', name));
+  if (r === 'pin') return err(T('This name is registered with another PIN. If it is yours, enter your PIN.'));
+  try { localStorage.setItem('bridge-table-name', name); } catch (e) {}
+  SET.pinH = h; SET.pinFor = Net.nameKey(name); Store.saveSettings(SET); save();
+  ui.gateErr = null; ui.overlay = null; $('ov').hidden = true;
+  Net.st.claimed = true; Net.shareInfo(); Net.Cloud.beat(); render();
+  flash(T('Welcome, {0}!', name), 2000);
+  checkSharedDeal();
 }
 
 </script>
@@ -6809,7 +6950,7 @@ const Net = (() => {
     const from = String(d.from || 'Player').slice(0, 20), text = String(d.text).slice(0, 300);
     addDm(from, { from, text, ts: +d.ts || Date.now(), me: false });
     if (ui.overlay === 'dm' && nameKey(ui.dmWith || '') === nameKey(from)) showDm(from);
-    else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); beep(); renderL(); }
+    else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; st.lunread = (st.lunread || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); beep(); renderL(); }
   }
   // an individual board played: the score for your side (dir 'EW' when you sit East or West) and, once the
   // robot tables have played it, your IMPs and MP % against them
@@ -6896,6 +7037,7 @@ const Net = (() => {
     // everyone who answered is in the lobby, also a player sitting at someone else's table (who has no table of their own)
     if (d.host) (st.present || (st.present = {}))[nameKey(d.host)] = { name: String(d.host).slice(0, 20), ts: Date.now(), k: d.k };
     if (d.host && d.prof) noteRating(d.host, cleanProf(d.prof));
+    if (d.host) noteSeen(d.host);
     if (d.busy) { st.tables = (st.tables || []).filter(t => t.k !== d.k); }
     else st.tables = [...(st.tables || []).filter(t => t.k !== d.k), d].sort((a, b) => a.k - b.k);   // show each table as soon as it answers
     render(); panelRefresh(); deliverOut();
@@ -6969,7 +7111,7 @@ const Net = (() => {
     if ((+m.ts || 0) <= lclearTs()) return;   // cleared on this device: older messages do not come back from the others
     if (L.some(x => x.id === m.id)) return;
     L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: cleanProf(m.p) });
-    noteRating(m.from, L[L.length - 1].p);
+    noteRating(m.from, L[L.length - 1].p); noteSeen(m.from);
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
     try { localStorage.setItem('bridge-lobby-chat', JSON.stringify(L.slice(-50))); } catch (e) {}
     if (!quiet) { if (m.from !== (myName() || 'Player') && ui.overlay !== 'lchat') st.lunread = (st.lunread || 0) + 1; renderL(); }
@@ -6981,16 +7123,115 @@ const Net = (() => {
     addL(m);
     for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send({ t: 'lchat', m }); } catch (e) {} }
   }
+  // the lobby chat with your private messages in it (another colour, only you and the other player see them)
   function lchatHtml() {
-    const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myName() || 'Player';
-    const L = st.lchat || [];
-    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b class="pname" data-who="${esc(m.from)}">${esc(m.from)}</b> ${esc(m.text)}</div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
+    const me = myName() || "Player", L = (st.lchat || []).map(m => ({ ...m, pub: true }));
+    for (const c of Object.values(st.dms || {})) for (const m of c.list) L.push({ from: m.from, to: m.me ? c.name : me, text: m.text, ts: m.ts, me: m.me, ok: m.ok, id: m.id });
+    L.sort((a, b) => a.ts - b.ts);
+    return L.length ? L.slice(-80).map(m => m.pub
+      ? `<div class="cm${m.from === me ? " me" : ""}"><b class="pname" data-who="${esc(m.from)}">${esc(m.from)}</b> ${esc(m.text)}</div>`
+      : `<div class="cm pm${m.me ? " me" : ""}" data-pm="${esc(m.me ? m.to : m.from)}" title="${T("Reply privately")}">🔒 <b>${esc(m.me ? T("to {0}", m.to) : m.from)}</b> ${esc(m.text)}${m.me && m.id ? (m.ok ? " ✓" : " ⏳") : ""}</div>`).join("")
+      : `<div class="muted">${T("No messages yet — say hello!")}</div>`;
   }
+  /* ---- the small online database (Firebase Realtime Database, used through its web address only): names with
+     their PIN, who logged in each day and who is online. Without it (DB_URL empty) the lobby works as before and
+     names are only checked against the players in the lobby. ---- */
+  // test lobbies (?ns=…, and this computer's test server) keep their data apart under test/<name>/
+  const DB_URL = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');
+  const fbKey = n => encodeURIComponent(encodeURIComponent(nameKey(n)).replace(/\./g, '%2E'));
+  const today = () => new Date().toISOString().slice(0, 10);
+  const Cloud = {
+    get on() { return !!DB_URL && navigator.onLine; },
+    async get(path) { const [p, q] = path.split('?'); const r = await fetch(DB_URL + '/' + p + '.json' + (q ? '?' + q : '')); if (!r.ok) throw new Error('db ' + r.status); return r.json(); },
+    async put(path, v) { const r = await fetch(DB_URL + '/' + path + '.json', { method: 'PUT', body: JSON.stringify(v) }); if (!r.ok) throw new Error('db ' + r.status); return r.json(); },
+    user: name => Cloud.get('users/' + fbKey(name)),
+    claim: (name, pin) => Cloud.put('users/' + fbKey(name), { name: String(name).slice(0, 20), pin, ts: Date.now() }),
+    // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
+    async beat() {
+      const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
+      const w = G && G.phase !== 'idle' ? (st.on ? 'table' : 'robots') : 'lobby';
+      try {
+        // a name chosen before the database existed is registered now; if someone else holds it with another PIN,
+        // this player chooses again
+        if (!st.claimed) {
+          const u = await Cloud.user(name);
+          if (!u) await Cloud.claim(name, SET.pinH);
+          else if (u.pin !== SET.pinH) { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
+          st.claimed = true;
+        }
+        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w });
+        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now() }); st.loggedDay = today(); }
+        const [on, users, logins] = await Promise.all([Cloud.get('online'), Cloud.get('users?shallow=true'), isAdmin() ? Cloud.get('logins/' + today() + '?shallow=true') : null]);
+        st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: Object.keys(users || {}).length, logins: logins ? Object.keys(logins).length : null };
+        renderL();
+      } catch (e) {}
+    },
+  };
+  setInterval(() => Cloud.beat(), 60e3); setTimeout(() => Cloud.beat(), 3000);
+  // the real administrator: Servet, with the PIN checked
+  const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
+  /* everyone seen in the lobby lately (kept a week, for the offline list) and today (for the administrator's count) */
+  st.known = (() => { try { return JSON.parse(localStorage.getItem('bridge-known') || '{}') || {}; } catch (e) { return {}; } })();
+  function noteSeen(name) {
+    if (!name || ['player', 'guest', 'robot'].includes(nameKey(name))) return;
+    const k = nameKey(name), cur = st.known[k];
+    if (cur && Date.now() - cur.ts < 60e3) return;
+    st.known[k] = { name: String(name).slice(0, 20), ts: Date.now(), day: today() };
+    for (const x in st.known) if (Date.now() - st.known[x].ts > 7 * 864e5) delete st.known[x];
+    try { localStorage.setItem('bridge-known', JSON.stringify(st.known)); } catch (e) {}
+  }
+  /* the players beside the lobby chat: friends first, then those playing, those waiting in the lobby, and last the
+     ones seen this week who are offline. Tap a name to write to that player privately in the chat. */
+  function lobbyGroups() {
+    const me = nameKey(myName()), here = new Map(knownNames().map(n => [nameKey(n), n]));
+    const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
+    if (cloudOn) for (const x of cloudOn) if (nameKey(x.name) !== me && !here.has(nameKey(x.name))) here.set(nameKey(x.name), x.name);
+    const status = n => {
+      const w = whereIs(n), c = cloudOn && cloudOn.find(x => nameKey(x.name) === nameKey(n));
+      if (w && !w.lobby) return { s: 'play', at: w.online ? T("At {0}'s table", w.host) : T('playing with robots') };
+      if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : T('playing with robots') };
+      return { s: 'lobby' };
+    };
+    const fr = (typeof friends === 'function' ? friends() : []);
+    const off = new Map();
+    for (const k in st.known) if (k !== me && !here.has(k)) off.set(k, st.known[k].name);
+    for (const f of fr) if (nameKey(f) !== me && !here.has(nameKey(f))) off.set(nameKey(f), f);
+    const G_ = { friends: [], play: [], lobby: [], off: [] };
+    for (const [k, n] of here) { const s = status(n); (fr.some(f => nameKey(f) === k) ? G_.friends : s.s === 'play' ? G_.play : G_.lobby).push({ n, ...s }); }
+    for (const [k, n] of off) (fr.some(f => nameKey(f) === k) ? G_.friends : G_.off).push({ n, s: 'off' });
+    for (const g in G_) G_[g].sort((a, b) => a.n.localeCompare(b.n));
+    return G_;
+  }
+  function playersHtml() {
+    const g = lobbyGroups(), all = [...g.friends, ...g.play, ...g.lobby, ...g.off];
+    const nOn = 1 + all.filter(x => x.s !== 'off').length, nPlay = all.filter(x => x.s === 'play').length + (G && G.phase !== 'idle' ? 1 : 0);
+    const nOff = st.cloud && Cloud.on && st.cloud.users ? Math.max(0, st.cloud.users - nOn) : all.filter(x => x.s === 'off').length;
+    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
+      + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
+    const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
+    const admin = isAdmin() ? `<div class="ladmin">👑 ${T('Logins today')}: <b>${st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1}</b></div>` : '';
+    return `<div class="lcount"><span title="${T('Online')}">🟢 ${nOn}</span><span title="${T('Playing')}">🎮 ${nPlay}</span><span title="${T('Offline')}">⚪ ${nOff}</span></div>${admin}
+      ${sec('★ ' + T('Friends'), g.friends)}${sec('🎮 ' + T('Playing'), g.play)}${sec('🟢 ' + T('In the lobby'), g.lobby)}${sec('⚪ ' + T('Offline'), g.off)}
+      ${all.length ? '' : `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`}<button class="btn mini-btn lplead" id="lLead">🏅 ${T('Leaderboard')}</button>`;
+  }
+  /* is this name free? Taken when someone else in the lobby uses it now, or (with the database) when it belongs to
+     someone with another PIN. Returns 'ok', 'new' (free, not yet registered), 'taken' or 'pin' (yours, wrong PIN) */
+  async function checkName(name, pinH) {
+    const k = nameKey(name);
+    // with the database the PIN decides (the same player may sign in on a second device); without it, a name in use is refused
+    if (!Cloud.on) return k !== nameKey(myName()) && knownNames().some(n => nameKey(n) === k) ? 'taken' : 'ok';
+    try {
+      const u = await Cloud.user(name);
+      if (!u) { await Cloud.claim(name, pinH); return 'new'; }
+      return u.pin === pinH ? 'ok' : 'pin';
+    } catch (e) { return 'ok'; }
+  }
+
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
   const renderL = () => { if (typeof renderDock === 'function') renderDock(); if (G && G.phase === 'idle') render(); if (ui.overlay === 'lchat') showLChat(); if (ui.overlay === 'tsetup') showTourSetup(ui.tsetId); };
   // clear the lobby chat on this device
-  function lclear() { st.lchat = []; st.lunread = 0; try { localStorage.removeItem('bridge-lobby-chat'); localStorage.setItem('bridge-lobby-cleared', String(Date.now())); } catch (e) {} renderL(); }
+  function lclear() { st.lchat = []; st.lunread = 0; st.dms = {}; saveDms(); try { localStorage.removeItem('bridge-lobby-chat'); localStorage.setItem('bridge-lobby-cleared', String(Date.now())); } catch (e) {} renderL(); }
   try { (JSON.parse(localStorage.getItem('bridge-lobby-chat') || '[]') || []).forEach(m => addL(m, true)); } catch (e) {}
   /* ---- "seat me at a table": ask the best table that still has a robot for a seat ---- */
   function quickJoin() {
@@ -7535,7 +7776,7 @@ const Net = (() => {
     openOv('net', `<h2>${T('Play online')}</h2>
       ${pendHtml()}
       <div class="muted">${T('Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.')}${st.slot ? '' : ' (' + T('connecting…') + ')'}</div>
-      <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="${T('Your name')}"></div>
+      <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" readonly value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Open tables')}</span>${tablesHtml()}</div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
       <div class="row2"><button class="btn new" id="nStart">${T('Open an online table')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
@@ -7546,7 +7787,7 @@ const Net = (() => {
     const offer = st.offer && 'room-' + st.offer.k === code ? st.offer : null;
     openOv('net', `<h2>${offer ? T("Join {0}'s table", esc(offer.host)) : T('Join table {0}', esc(code))}</h2>
       ${offer ? `<div class="muted">${[0, 1, 2, 3].map(s => SEAT[s] + ': ' + esc((offer.names || {})[s] || T('Robot'))).join(' · ')}. ${T('{0} decides whether you can sit.', esc(offer.host))}</div>` : ''}
-      <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="${T('Your name')}"></div>
+      <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" readonly value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Sit as')}</span><div class="seg2">${[['partner', T("The host's partner")], ['opp', T('An opponent')], ['any', T('Any free seat')], ['watch', '👁 ' + T('Watch')]].map(([v, l]) => `<button data-want="${v}" class="${st.want === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
       <div class="row2">${st.waiting ? '' : `<button class="btn gold" id="nJoin">${T('Join')}</button>`}<button class="btn" id="${st.waiting ? 'nCancel' : 'oClose'}">${st.waiting ? T('Cancel') : T('Not now')}</button></div>`);
@@ -7571,7 +7812,6 @@ const Net = (() => {
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {
       case "bNet": panel(); break;
-      case "bChat": toggleDock(); break;
       case "nSend": { const i = document.getElementById("nMsg"); if (i && i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } break; }
       case 'nStart': {
         const n = document.getElementById('nName');
@@ -7627,7 +7867,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, leaderHtml, Cloud, nameKey, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

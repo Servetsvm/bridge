@@ -788,3 +788,35 @@ body.bigcards .mini{transform:scale(1.15);transform-origin:bottom}
 :root[data-theme="dark"] .hname label>span,:root[data-theme="dark"] .hero .muted{color:#b9c6bd}
 :root[data-theme="dark"] .hsec{background:#2a312d;color:#e8ece4}
 :root[data-theme="dark"] .hrow .hpeople:not(.on){background:#2a312d;color:#e8ece4;border-color:#4a564f}
+/* ---- the lobby chat with the players beside it (a third of the width) ---- */
+@media (min-width:901px){ .hgrid{grid-template-columns:minmax(0,1fr) 470px} }
+.lsplit{display:grid;grid-template-columns:minmax(110px,1fr) 2fr;gap:8px;flex:1;min-height:0}
+.lcol{display:flex;flex-direction:column;min-height:0;min-width:0}
+.lplayers{overflow:auto;min-height:0;background:#fff;border:1px solid #dcdccf;border-radius:10px;padding:6px;font-size:13.5px;margin-bottom:8px}
+.pchat .lsplit{max-height:46vh}
+#hSheet .pchat .lsplit{max-height:none;height:52vh}
+.lcount{display:flex;gap:8px;justify-content:space-between;font-weight:700;font-size:12.5px;padding:2px 2px 6px;border-bottom:1px solid #e3e1d4;margin-bottom:4px}
+.ladmin{font-size:12.5px;background:#fff6d6;border:1px solid #e6cf7a;border-radius:6px;padding:3px 6px;margin-bottom:4px}
+.lph{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#7c7b70;margin:6px 2px 2px}
+.lp{display:flex;align-items:center;gap:2px}
+.lp .lpn{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:0 6px;text-align:left;background:none;border:0;padding:4px 3px;border-radius:6px;font:inherit;color:inherit;cursor:pointer}
+.lp .lpn:hover{background:#eef3ec}
+.lp .lpn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;font-weight:600}
+.lp .lpn small{flex-basis:100%;padding-left:14px;color:#7c7b70;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lp .lpi{flex:none;background:none;border:0;color:#7c7b70;font-size:13px;padding:2px 4px;cursor:pointer;border-radius:5px}
+.lp .lpi:hover{background:#eef3ec;color:#222}
+.lp .dot{width:8px;height:8px;border-radius:50%;flex:none;background:#2fa84f}
+.lp.st-play .dot{background:#e0a400}
+.lp.st-off .dot{background:#bdbdb4}
+.lp.st-off .lpn span{color:#8a897f;font-weight:500}
+.lplead{margin-top:8px;width:100%}
+.pmto:empty{display:none}
+.pmto{display:flex;align-items:center;gap:6px;font-size:13px;background:#ece4ff;color:#3d2a66;border-radius:8px;padding:4px 8px;margin-bottom:6px}
+.lmsgs .cm.pm{background:#ece4ff;color:#3d2a66;cursor:pointer}
+.lmsgs .cm.pm.me{background:#dcd0fb}
+:root[data-theme="dark"] .lplayers{background:#1a1f1c;border-color:#3a443e}
+:root[data-theme="dark"] .lp .lpn:hover,:root[data-theme="dark"] .lp .lpi:hover{background:#2a312d;color:#e8ece4}
+:root[data-theme="dark"] .lmsgs .cm.pm,:root[data-theme="dark"] .pmto{background:#3a2f57;color:#e8defd}
+:root[data-theme="dark"] .lmsgs .cm.pm.me{background:#463a68}
+:root[data-theme="dark"] .ladmin{background:#3b3a22;border-color:#6b6230;color:#f3e7b0}
+:root[data-theme="dark"] .lcount{border-bottom-color:#3a443e}

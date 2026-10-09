@@ -361,7 +361,7 @@ const Net = (() => {
     const from = String(d.from || 'Player').slice(0, 20), text = String(d.text).slice(0, 300);
     addDm(from, { from, text, ts: +d.ts || Date.now(), me: false });
     if (ui.overlay === 'dm' && nameKey(ui.dmWith || '') === nameKey(from)) showDm(from);
-    else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); beep(); renderL(); }
+    else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; st.lunread = (st.lunread || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); beep(); renderL(); }
   }
   // an individual board played: the score for your side (dir 'EW' when you sit East or West) and, once the
   // robot tables have played it, your IMPs and MP % against them
@@ -448,6 +448,7 @@ const Net = (() => {
     // everyone who answered is in the lobby, also a player sitting at someone else's table (who has no table of their own)
     if (d.host) (st.present || (st.present = {}))[nameKey(d.host)] = { name: String(d.host).slice(0, 20), ts: Date.now(), k: d.k };
     if (d.host && d.prof) noteRating(d.host, cleanProf(d.prof));
+    if (d.host) noteSeen(d.host);
     if (d.busy) { st.tables = (st.tables || []).filter(t => t.k !== d.k); }
     else st.tables = [...(st.tables || []).filter(t => t.k !== d.k), d].sort((a, b) => a.k - b.k);   // show each table as soon as it answers
     render(); panelRefresh(); deliverOut();
@@ -521,7 +522,7 @@ const Net = (() => {
     if ((+m.ts || 0) <= lclearTs()) return;   // cleared on this device: older messages do not come back from the others
     if (L.some(x => x.id === m.id)) return;
     L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: cleanProf(m.p) });
-    noteRating(m.from, L[L.length - 1].p);
+    noteRating(m.from, L[L.length - 1].p); noteSeen(m.from);
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
     try { localStorage.setItem('bridge-lobby-chat', JSON.stringify(L.slice(-50))); } catch (e) {}
     if (!quiet) { if (m.from !== (myName() || 'Player') && ui.overlay !== 'lchat') st.lunread = (st.lunread || 0) + 1; renderL(); }
@@ -533,16 +534,115 @@ const Net = (() => {
     addL(m);
     for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send({ t: 'lchat', m }); } catch (e) {} }
   }
+  // the lobby chat with your private messages in it (another colour, only you and the other player see them)
   function lchatHtml() {
-    const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myName() || 'Player';
-    const L = st.lchat || [];
-    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b class="pname" data-who="${esc(m.from)}">${esc(m.from)}</b> ${esc(m.text)}</div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
+    const me = myName() || "Player", L = (st.lchat || []).map(m => ({ ...m, pub: true }));
+    for (const c of Object.values(st.dms || {})) for (const m of c.list) L.push({ from: m.from, to: m.me ? c.name : me, text: m.text, ts: m.ts, me: m.me, ok: m.ok, id: m.id });
+    L.sort((a, b) => a.ts - b.ts);
+    return L.length ? L.slice(-80).map(m => m.pub
+      ? `<div class="cm${m.from === me ? " me" : ""}"><b class="pname" data-who="${esc(m.from)}">${esc(m.from)}</b> ${esc(m.text)}</div>`
+      : `<div class="cm pm${m.me ? " me" : ""}" data-pm="${esc(m.me ? m.to : m.from)}" title="${T("Reply privately")}">🔒 <b>${esc(m.me ? T("to {0}", m.to) : m.from)}</b> ${esc(m.text)}${m.me && m.id ? (m.ok ? " ✓" : " ⏳") : ""}</div>`).join("")
+      : `<div class="muted">${T("No messages yet — say hello!")}</div>`;
   }
+  /* ---- the small online database (Firebase Realtime Database, used through its web address only): names with
+     their PIN, who logged in each day and who is online. Without it (DB_URL empty) the lobby works as before and
+     names are only checked against the players in the lobby. ---- */
+  // test lobbies (?ns=…, and this computer's test server) keep their data apart under test/<name>/
+  const DB_URL = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');
+  const fbKey = n => encodeURIComponent(encodeURIComponent(nameKey(n)).replace(/\./g, '%2E'));
+  const today = () => new Date().toISOString().slice(0, 10);
+  const Cloud = {
+    get on() { return !!DB_URL && navigator.onLine; },
+    async get(path) { const [p, q] = path.split('?'); const r = await fetch(DB_URL + '/' + p + '.json' + (q ? '?' + q : '')); if (!r.ok) throw new Error('db ' + r.status); return r.json(); },
+    async put(path, v) { const r = await fetch(DB_URL + '/' + path + '.json', { method: 'PUT', body: JSON.stringify(v) }); if (!r.ok) throw new Error('db ' + r.status); return r.json(); },
+    user: name => Cloud.get('users/' + fbKey(name)),
+    claim: (name, pin) => Cloud.put('users/' + fbKey(name), { name: String(name).slice(0, 20), pin, ts: Date.now() }),
+    // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
+    async beat() {
+      const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
+      const w = G && G.phase !== 'idle' ? (st.on ? 'table' : 'robots') : 'lobby';
+      try {
+        // a name chosen before the database existed is registered now; if someone else holds it with another PIN,
+        // this player chooses again
+        if (!st.claimed) {
+          const u = await Cloud.user(name);
+          if (!u) await Cloud.claim(name, SET.pinH);
+          else if (u.pin !== SET.pinH) { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
+          st.claimed = true;
+        }
+        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w });
+        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now() }); st.loggedDay = today(); }
+        const [on, users, logins] = await Promise.all([Cloud.get('online'), Cloud.get('users?shallow=true'), isAdmin() ? Cloud.get('logins/' + today() + '?shallow=true') : null]);
+        st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: Object.keys(users || {}).length, logins: logins ? Object.keys(logins).length : null };
+        renderL();
+      } catch (e) {}
+    },
+  };
+  setInterval(() => Cloud.beat(), 60e3); setTimeout(() => Cloud.beat(), 3000);
+  // the real administrator: Servet, with the PIN checked
+  const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
+  /* everyone seen in the lobby lately (kept a week, for the offline list) and today (for the administrator's count) */
+  st.known = (() => { try { return JSON.parse(localStorage.getItem('bridge-known') || '{}') || {}; } catch (e) { return {}; } })();
+  function noteSeen(name) {
+    if (!name || ['player', 'guest', 'robot'].includes(nameKey(name))) return;
+    const k = nameKey(name), cur = st.known[k];
+    if (cur && Date.now() - cur.ts < 60e3) return;
+    st.known[k] = { name: String(name).slice(0, 20), ts: Date.now(), day: today() };
+    for (const x in st.known) if (Date.now() - st.known[x].ts > 7 * 864e5) delete st.known[x];
+    try { localStorage.setItem('bridge-known', JSON.stringify(st.known)); } catch (e) {}
+  }
+  /* the players beside the lobby chat: friends first, then those playing, those waiting in the lobby, and last the
+     ones seen this week who are offline. Tap a name to write to that player privately in the chat. */
+  function lobbyGroups() {
+    const me = nameKey(myName()), here = new Map(knownNames().map(n => [nameKey(n), n]));
+    const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
+    if (cloudOn) for (const x of cloudOn) if (nameKey(x.name) !== me && !here.has(nameKey(x.name))) here.set(nameKey(x.name), x.name);
+    const status = n => {
+      const w = whereIs(n), c = cloudOn && cloudOn.find(x => nameKey(x.name) === nameKey(n));
+      if (w && !w.lobby) return { s: 'play', at: w.online ? T("At {0}'s table", w.host) : T('playing with robots') };
+      if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : T('playing with robots') };
+      return { s: 'lobby' };
+    };
+    const fr = (typeof friends === 'function' ? friends() : []);
+    const off = new Map();
+    for (const k in st.known) if (k !== me && !here.has(k)) off.set(k, st.known[k].name);
+    for (const f of fr) if (nameKey(f) !== me && !here.has(nameKey(f))) off.set(nameKey(f), f);
+    const G_ = { friends: [], play: [], lobby: [], off: [] };
+    for (const [k, n] of here) { const s = status(n); (fr.some(f => nameKey(f) === k) ? G_.friends : s.s === 'play' ? G_.play : G_.lobby).push({ n, ...s }); }
+    for (const [k, n] of off) (fr.some(f => nameKey(f) === k) ? G_.friends : G_.off).push({ n, s: 'off' });
+    for (const g in G_) G_[g].sort((a, b) => a.n.localeCompare(b.n));
+    return G_;
+  }
+  function playersHtml() {
+    const g = lobbyGroups(), all = [...g.friends, ...g.play, ...g.lobby, ...g.off];
+    const nOn = 1 + all.filter(x => x.s !== 'off').length, nPlay = all.filter(x => x.s === 'play').length + (G && G.phase !== 'idle' ? 1 : 0);
+    const nOff = st.cloud && Cloud.on && st.cloud.users ? Math.max(0, st.cloud.users - nOn) : all.filter(x => x.s === 'off').length;
+    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
+      + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
+    const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
+    const admin = isAdmin() ? `<div class="ladmin">👑 ${T('Logins today')}: <b>${st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1}</b></div>` : '';
+    return `<div class="lcount"><span title="${T('Online')}">🟢 ${nOn}</span><span title="${T('Playing')}">🎮 ${nPlay}</span><span title="${T('Offline')}">⚪ ${nOff}</span></div>${admin}
+      ${sec('★ ' + T('Friends'), g.friends)}${sec('🎮 ' + T('Playing'), g.play)}${sec('🟢 ' + T('In the lobby'), g.lobby)}${sec('⚪ ' + T('Offline'), g.off)}
+      ${all.length ? '' : `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`}<button class="btn mini-btn lplead" id="lLead">🏅 ${T('Leaderboard')}</button>`;
+  }
+  /* is this name free? Taken when someone else in the lobby uses it now, or (with the database) when it belongs to
+     someone with another PIN. Returns 'ok', 'new' (free, not yet registered), 'taken' or 'pin' (yours, wrong PIN) */
+  async function checkName(name, pinH) {
+    const k = nameKey(name);
+    // with the database the PIN decides (the same player may sign in on a second device); without it, a name in use is refused
+    if (!Cloud.on) return k !== nameKey(myName()) && knownNames().some(n => nameKey(n) === k) ? 'taken' : 'ok';
+    try {
+      const u = await Cloud.user(name);
+      if (!u) { await Cloud.claim(name, pinH); return 'new'; }
+      return u.pin === pinH ? 'ok' : 'pin';
+    } catch (e) { return 'ok'; }
+  }
+
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
   const renderL = () => { if (typeof renderDock === 'function') renderDock(); if (G && G.phase === 'idle') render(); if (ui.overlay === 'lchat') showLChat(); if (ui.overlay === 'tsetup') showTourSetup(ui.tsetId); };
   // clear the lobby chat on this device
-  function lclear() { st.lchat = []; st.lunread = 0; try { localStorage.removeItem('bridge-lobby-chat'); localStorage.setItem('bridge-lobby-cleared', String(Date.now())); } catch (e) {} renderL(); }
+  function lclear() { st.lchat = []; st.lunread = 0; st.dms = {}; saveDms(); try { localStorage.removeItem('bridge-lobby-chat'); localStorage.setItem('bridge-lobby-cleared', String(Date.now())); } catch (e) {} renderL(); }
   try { (JSON.parse(localStorage.getItem('bridge-lobby-chat') || '[]') || []).forEach(m => addL(m, true)); } catch (e) {}
   /* ---- "seat me at a table": ask the best table that still has a robot for a seat ---- */
   function quickJoin() {
@@ -1087,7 +1187,7 @@ const Net = (() => {
     openOv('net', `<h2>${T('Play online')}</h2>
       ${pendHtml()}
       <div class="muted">${T('Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.')}${st.slot ? '' : ' (' + T('connecting…') + ')'}</div>
-      <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="${T('Your name')}"></div>
+      <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" readonly value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Open tables')}</span>${tablesHtml()}</div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
       <div class="row2"><button class="btn new" id="nStart">${T('Open an online table')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
@@ -1098,7 +1198,7 @@ const Net = (() => {
     const offer = st.offer && 'room-' + st.offer.k === code ? st.offer : null;
     openOv('net', `<h2>${offer ? T("Join {0}'s table", esc(offer.host)) : T('Join table {0}', esc(code))}</h2>
       ${offer ? `<div class="muted">${[0, 1, 2, 3].map(s => SEAT[s] + ': ' + esc((offer.names || {})[s] || T('Robot'))).join(' · ')}. ${T('{0} decides whether you can sit.', esc(offer.host))}</div>` : ''}
-      <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" value="${esc(myName())}" placeholder="${T('Your name')}"></div>
+      <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" readonly value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Sit as')}</span><div class="seg2">${[['partner', T("The host's partner")], ['opp', T('An opponent')], ['any', T('Any free seat')], ['watch', '👁 ' + T('Watch')]].map(([v, l]) => `<button data-want="${v}" class="${st.want === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
       <div class="row2">${st.waiting ? '' : `<button class="btn gold" id="nJoin">${T('Join')}</button>`}<button class="btn" id="${st.waiting ? 'nCancel' : 'oClose'}">${st.waiting ? T('Cancel') : T('Not now')}</button></div>`);
@@ -1123,7 +1223,6 @@ const Net = (() => {
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {
       case "bNet": panel(); break;
-      case "bChat": toggleDock(); break;
       case "nSend": { const i = document.getElementById("nMsg"); if (i && i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } break; }
       case 'nStart': {
         const n = document.getElementById('nName');
@@ -1179,5 +1278,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, leaderHtml, Cloud, nameKey, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
