@@ -638,7 +638,7 @@ const Net = (() => {
     if (!names.length) return `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`;
     const sent = st.invited || [];
     const un = n => st.dmUnread[nameKey(n)] ? ` <span class="badge">${st.dmUnread[nameKey(n)]}</span>` : "";
-    return `<div class="people">${names.map(n => `<div class="person"><b>${esc(n)}</b><span class="pbtns"><button class="btn" data-dm="${esc(n)}" title="${T("Message")}">💬${un(n)}</button>${st.host ? (sent.includes(nameKey(n)) ? `<span class="muted">${T('invited')}</span>` : `<button class="btn gold" data-tblinv="${esc(n)}">${T('Invite to my table')}</button>`) : ''}</span></div>`).join('')}</div>
+    return `<div class="people">${names.map(n => `<div class="person"><b class="pname" data-who="${esc(n)}" title="${T('Player card')}">${esc(n)}</b><span class="pbtns"><button class="btn" data-dm="${esc(n)}" title="${T("Message")}">💬${un(n)}</button>${st.host ? (sent.includes(nameKey(n)) ? `<span class="muted">${T('invited')}</span>` : `<button class="btn gold" data-tblinv="${esc(n)}">${T('Invite to my table')}</button>`) : ''}</span></div>`).join('')}</div>
       ${st.host ? '' : `<div class="muted">${T('Open an online table to invite players to it.')}</div>`}`;
   }
   function onHostData(conn, d) {
