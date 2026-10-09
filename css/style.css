@@ -668,3 +668,7 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .hlang .sel{font-size:15px;padding:6px 8px;border-radius:8px}
 @media (max-width:600px){ #bar .lbt{display:none} }
 @media (max-width:600px){ #bar .tools{flex-wrap:nowrap;gap:4px} #bar .tools>.btn{flex:1 1 auto;min-width:0;font-size:13px;padding:7px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} #bar .tools>#bHome,#bar .tools>#bChat,#bar .tools>#bLeave,#bar .tools>#nLeave,#bar .tools>#nStop{flex:none} #bar .menuwrap{flex:none} }
+/* Watch a table (teal) and the Convention card (amber brown): their own colours, apart from the four main actions */
+.hbtns .btn.hwatch{background:#12808a;color:#fff;border-color:#0d636b}
+.hbtns .btn.hconv{background:#b5651d;color:#fff;border-color:#8f4f16}
+.hbtns .btn.hconv.on{background:#8f4f16;box-shadow:inset 0 0 0 3px #f2c94c}
