@@ -1315,7 +1315,7 @@ function seatLabel(seat) {
   let who = seat === meSeat() ? (mine || "You") : nm ? nm + (Net.st.away && Net.st.away[seat] ? " (" + T("away · robot plays") + ")" : g && userControls(seat) ? " (you play)" : "") : (g && userControls(seat) ? "You play" : "Robot");
   // the host can tap a player's name to remove them from the table (a robot takes the seat)
   if (online() && !guest() && nm && seat !== meSeat()) who = `<b class="pname" data-kickask="${seat}" title="${T('Remove')}">${esc(who)}</b>`;
-  else if (seat === meSeat()) who = `<b class="pname" data-who="${esc(myNm() || T('You'))}">${esc(who)}</b>`;   // your own label opens your card (to change what the others see)
+  else if (seat === meSeat()) who = `<b class="pname" data-who="${esc(mine || T('You'))}">${esc(who)}</b>`;   // your own label opens your card (to change what the others see)
   const turn = (G.phase === 'bid' && bidTurn() === seat) || (G.phase === 'play' && g.turn === seat);
   return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> ${who} ${tags.join('')}</span>`;
 }
@@ -1522,13 +1522,13 @@ function renderDock() {
   if (d.dataset.key !== key) {
     d.dataset.key = key;
     const tabs = tbl ? `<div class="dtabs"><button data-dtab="table" class="${tab === 'table' ? 'on' : ''}">${T('Table')} <span id="dTn"></span></button><button data-dtab="lobby" class="${tab === 'lobby' ? 'on' : ''}">${T('Lobby')} <span id="dLn"></span></button></div>` : `<b>💬 ${T('Lobby chat')}</b>`;
-    d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div>${tab === "lobby" ? `<div class="who" id="dWho"></div>` : ""}<div class="lmsgs" id="dList"></div>
+    d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}
       <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
   if (L && L.innerHTML !== html) { L.innerHTML = html; L.scrollTop = L.scrollHeight; }
-  { const w = $('dWho'), h = whoHtml(); if (w && w.innerHTML !== h) w.innerHTML = h; }
+  friendsCheck();   // the players are listed under 👥, not above the chat; a friend's arrival is still announced
   if (tab === 'table') Net.st.unread = 0; else Net.st.lunread = 0;
   const tn = $('dTn'), ln = $('dLn');
   if (tn) tn.textContent = Net.st.unread ? '(' + Net.st.unread + ')' : '';
@@ -1618,7 +1618,7 @@ function homeShell() {
       <div id="hPend"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
-    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="who" id="hWho"></div><div class="lmsgs" id="hChat"></div>
+    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lmsgs" id="hChat"></div>
       <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></aside>
   </div><div id="hSheet"></div></div>`;
 }
@@ -1665,7 +1665,7 @@ function renderHome() {
     set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
     if (want === 'chat') N.st.lunread = 0;
     set('hTours', toursHtml()); set('hPeople', N.peopleHtml());
-    set('hWho', whoHtml());
+    friendsCheck();
     set('hPeopleN', String(N.lobbyCount()));   // how many are in the lobby, on the Players button
   }
   set('hConv', convCardHtml());
@@ -1927,9 +1927,9 @@ function showPlayer(name) {
   // your own card: change what the others see (name, system, level, country; the conventions on the card itself)
   const edit = me ? `<div class="pedit"><div class="pedh">✏️ ${T('Edit my card')}</div>
       <label><span>${T('Name')}</span><input id="pName" class="tok" maxlength="20" value="${esc(myNm())}" placeholder="${T('Name')}"></label>
-      <label><span>${T('System')}</span><select id="pSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(s.n)}</option>`).join('')}</select></label>
-      <label><span>${T('Skill level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
-      <label><span>${T('Country/Region')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
+      <label><span>${T('System')}</span><select id="pSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label>
+      <label><span>${T('Level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
+      <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
       <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
   openOv('player', `<div class="pcard">
     <div class="phead"><div class="pav">${esc((shown.trim()[0] || '?').toUpperCase())}</div>
