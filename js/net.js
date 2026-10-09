@@ -450,7 +450,7 @@ const Net = (() => {
   function lchatHtml() {
     const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myName() || 'Player';
     const L = st.lchat || [];
-    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b class="pname" data-who="${esc(m.from)}">${esc(m.from)}</b> ${esc(m.text)}<small>${t(m.ts)}</small></div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
+    return L.length ? L.slice(-60).map(m => `<div class="cm${m.from === me ? ' me' : ''}"><b class="pname" data-who="${esc(m.from)}">${esc(m.from)}</b> ${esc(m.text)}</div>`).join('') : `<div class="muted">${T('No messages yet — say hello!')}</div>`;
   }
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
