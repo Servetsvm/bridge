@@ -653,3 +653,14 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 .hbtns .hopen{grid-column:auto}
 .hbtns .htour{font-size:17px}
 .hbtns .htour.on{background:#2f6f4a;color:#fff}
+/* the home page: each main action has its own colour */
+.hbtns .btn.hopen{background:#1f5f8b;color:#fff;border-color:#174a6d}
+.hbtns .btn.htour{background:#6a3fa0;color:#fff;border-color:#55308a}
+.hbtns .btn.htour.on{background:#55308a;box-shadow:inset 0 0 0 3px #f2c94c}
+.hbtns .btn.hconv.on{box-shadow:inset 0 0 0 3px #2f6f4a}
+.hbtns .hrow3 .hwatch,.hbtns .hrow3 .hconv{flex:1 1 0}
+/* Settings and Help: small round buttons next to the languages */
+.hhr{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.hico{width:38px;height:38px;border-radius:50%;border:1px solid #c9c4ad;background:#fff;font-size:18px;line-height:1;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.hico:hover{background:#eef3ec}
+.hico{color:#1b2a4e;font-weight:800;font-size:20px;background:#f6f3e8;border-color:#b9b39a}
