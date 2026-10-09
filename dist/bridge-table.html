@@ -4346,6 +4346,7 @@ function seatLabel(seat) {
   let who = seat === meSeat() ? (mine || "You") : nm ? nm + (Net.st.away && Net.st.away[seat] ? " (" + T("away · robot plays") + ")" : g && userControls(seat) ? " (you play)" : "") : (g && userControls(seat) ? "You play" : "Robot");
   // the host can tap a player's name to remove them from the table (a robot takes the seat)
   if (online() && !guest() && nm && seat !== meSeat()) who = `<b class="pname" data-kickask="${seat}" title="${T('Remove')}">${esc(who)}</b>`;
+  else if (seat === meSeat()) who = `<b class="pname" data-who="${esc(myNm() || T('You'))}">${esc(who)}</b>`;   // your own label opens your card (to change what the others see)
   const turn = (G.phase === 'bid' && bidTurn() === seat) || (G.phase === 'play' && g.turn === seat);
   return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> ${who} ${tags.join('')}</span>`;
 }
