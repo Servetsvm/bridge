@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 120;
+const APP_V = 121;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1641,6 +1641,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
   if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
   { const pc = ev_.target.closest("div.pconv"); if (pc) { pc.classList.toggle("open"); return; } }   // the convention line on a card: tap to read it all
+  { const gs = ev_.target.closest("[data-gsug]"); if (gs) { const i = $("gName"); if (i) i.value = gs.dataset.gsug; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; } }   // a free name offered on the name screen
   if (ev_.target.closest("[data-stats]")) { ui.statData = null; showStats(); return; }   // the administrator's visitor statistics
   const pw = ev_.target.closest('[data-who]'); if (pw) { showPlayer(pw.dataset.who); return; }
   const pwx = ev_.target.closest('[data-pairwith]'); if (pwx) { closeOv(); Net.playWith(pwx.dataset.pairwith); return; }
@@ -1696,6 +1697,7 @@ document.addEventListener('click', ev_ => {
     }
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
     if (seg === "stattab") { ui.statTab = v; showStats(); return; }
+    if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
     if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
@@ -1885,31 +1887,43 @@ async function pinHash(name, pin) {
 const needGate = () => typeof Net !== 'undefined' && (!myNm() || !SET.pinH || SET.pinFor !== Net.nameKey(myNm()));
 function showGate(rename) {
   ui.gateRename = !!rename;
+  const mode = ui.gateMode || 'new';
   const keep = id => $(id) ? $(id).value : '';
   const nm = $('gName') ? keep('gName') : rename ? '' : myNm();
-  openOv('gate', `<h2>👋 ${T(rename ? 'Change your name' : myNm() ? 'Choose a PIN' : 'Welcome!')}</h2>
-    <div class="muted">${T('Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.')}</div>
+  const sug = ui.gateSug && ui.gateSug.length ? `<div class="gsug">${T('Free names:')} ${ui.gateSug.map(s => `<button class="btn mini-btn" data-gsug="${esc(s)}">${esc(s)}</button>`).join(' ')}</div>` : '';
+  openOv('gate', `<h2>👋 ${T(rename ? 'Change your name' : 'Welcome!')}</h2>
+    <div class="seg gmode" data-seg="gmode"><button data-v="new" class="${mode === 'new' ? 'on' : ''}">🆕 ${T("I'm new here")}</button><button data-v="login" class="${mode === 'login' ? 'on' : ''}">🔑 ${T('I have a name')}</button></div>
+    <div class="muted">${T(mode === 'new' ? 'Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.' : 'Write your name and your PIN.')}</div>
     <div class="grp"><span>${T('Name')}</span><input id="gName" class="tok" maxlength="20" value="${esc(nm)}" autocomplete="nickname"></div>
     <div class="grp"><span>${T('PIN (4 digits)')}</span><input id="gPin" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin'))}"></div>
-    <div class="grp"><span>${T('PIN again')}</span><input id="gPin2" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin2'))}"></div>
-    ${ui.gateErr ? `<div class="err">${esc(ui.gateErr)}</div>` : ''}
-    <div class="row2"><button class="btn new" id="gGo">${T('Continue')}</button>${rename ? `<button class="btn" id="oClose">${T('Cancel')}</button>` : ''}</div>`);
+    ${mode === 'new' ? `<div class="grp"><span>${T('PIN again')}</span><input id="gPin2" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin2'))}"></div>` : ''}
+    ${ui.gateErr ? `<div class="err">${esc(ui.gateErr)}</div>` : ''}${sug}
+    <div class="row2"><button class="btn new" id="gGo">${T(mode === 'new' ? 'Continue' : 'Sign in')}</button>${rename ? `<button class="btn" id="oClose">${T('Cancel')}</button>` : ''}</div>`);
   setTimeout(() => { const i = $(nm ? 'gPin' : 'gName'); if (i) i.focus(); }, 50);
 }
 async function gateGo() {
-  const name = ($('gName') ? $('gName').value : '').trim().replace(/\s+/g, ' ').slice(0, 20), pin = $('gPin') ? $('gPin').value : '', pin2 = $('gPin2') ? $('gPin2').value : '';
-  const err = m => { ui.gateErr = m; showGate(ui.gateRename); };
+  const mode = ui.gateMode || 'new';
+  const name = ($('gName') ? $('gName').value : '').trim().replace(/\s+/g, ' ').slice(0, 20), pin = $('gPin') ? $('gPin').value : '', pin2 = $('gPin2') ? $('gPin2').value : pin;
+  const err = (m, sug) => { ui.gateErr = m; ui.gateSug = sug || null; showGate(ui.gateRename); };
   if (name.length < 2) return err(T('Write a name of at least 2 letters.'));
   if (['player', 'guest', 'robot', 'you', 'host'].includes(Net.nameKey(name))) return err(T('Choose another name.'));
   if (!/^\d{4}$/.test(pin)) return err(T('The PIN is 4 digits.'));
-  if (pin !== pin2) return err(T('The two PINs are not the same.'));
-  ui.gateErr = T('Checking…'); showGate(ui.gateRename);
-  const h = await pinHash(name, pin), r = await Net.checkName(name, h);
-  if (r === 'taken') return err(T('{0} is already used by another player. Choose another name.', name));
-  if (r === 'pin') return err(T('This name is registered with another PIN. If it is yours, enter your PIN.'));
+  if (mode === 'new' && pin !== pin2) return err(T('The two PINs are not the same.'));
+  ui.gateErr = T('Checking…'); ui.gateSug = null; showGate(ui.gateRename);
+  const h = await pinHash(name, pin);
+  if (mode === 'new') {
+    // a new player: the name must be free; if it is taken, say so and offer free names close to it
+    const r = await Net.register(name, h);
+    if (r === 'taken') return err(T('The name {0} is already taken. Please choose another name.', name), await Net.suggestNames(name));
+  } else {
+    const r = await Net.login(name, h);
+    if (r === 'nouser') return err(T('Nobody has the name {0} yet. Choose "I\'m new here" to take it.', name));
+    if (r === 'pin') return err(T('Wrong PIN for {0}.', name));
+    if (r === 'offline') return err(T('The online database could not be reached.'));
+  }
   try { localStorage.setItem('bridge-table-name', name); } catch (e) {}
   SET.pinH = h; SET.pinFor = Net.nameKey(name); Store.saveSettings(SET); save();
-  ui.gateErr = null; ui.overlay = null; $('ov').hidden = true;
+  ui.gateErr = null; ui.gateSug = null; ui.overlay = null; $('ov').hidden = true;
   Net.st.claimed = true; Net.shareInfo(); Net.Cloud.beat(); render();
   flash(T('Welcome, {0}!', name), 2000);
   checkSharedDeal();

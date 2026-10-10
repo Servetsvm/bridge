@@ -1027,3 +1027,4 @@ body.classic .fan.ovl .card .ix i{font-size:calc(var(--cw)*.48)}
 .composer .sendb{width:38px}
 :root[data-theme="dark"] .composer{background:#2a312d;border-color:#8a7020}
 #dock .composer{margin-top:4px}
+.gsug{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}.gsug .mini-btn{float:none;margin:0}.gmode button{font-size:14px}

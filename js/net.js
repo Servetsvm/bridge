@@ -680,6 +680,31 @@ const Net = (() => {
     } catch (e) { return 'ok'; }
   }
 
+  /* a new player takes a name (refused when it is taken, with free names suggested); a player who has one signs in
+     with it and the PIN */
+  async function nameFree(name) {
+    const k = nameKey(name);
+    if (k !== nameKey(myName()) && knownNames().some(n => nameKey(n) === k)) return false;
+    if (!Cloud.on) return true;
+    try { return !(await Cloud.user(name)); } catch (e) { return true; }
+  }
+  async function register(name, pinH) {
+    if (!(await nameFree(name))) return 'taken';
+    if (Cloud.on) { try { await Cloud.claim(name, pinH); } catch (e) {} }
+    return 'ok';
+  }
+  async function login(name, pinH) {
+    if (!Cloud.on) return 'offline';
+    try { const u = await Cloud.user(name); return !u ? 'nouser' : u.pin === pinH ? 'ok' : 'pin'; } catch (e) { return 'offline'; }
+  }
+  // free names close to the one asked for (Servet2, Servet_NO, Servet35 …)
+  async function suggestNames(name) {
+    const base = String(name).trim().slice(0, 16), ctry = SET.ctry || '', out = [];
+    const tries = [base + '2', base + '3', ctry ? base + '_' + ctry : null, base + (10 + Math.floor(Math.random() * 89)), base + '.' + (new Date().getFullYear() % 100)].filter(Boolean);
+    for (const t of tries) { if (out.length >= 3) break; if (await nameFree(t)) out.push(t.slice(0, 20)); }
+    return out;
+  }
+
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
   const renderL = () => { if (typeof renderDock === 'function') renderDock(); if (G && G.phase === 'idle') render(); if (ui.overlay === 'lchat') showLChat(); if (ui.overlay === 'tsetup') showTourSetup(ui.tsetId); };
@@ -1319,5 +1344,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, register, login, suggestNames, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

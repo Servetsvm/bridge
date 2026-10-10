@@ -1042,6 +1042,7 @@ body.classic .fan.ovl .card .ix i{font-size:calc(var(--cw)*.48)}
 .composer .sendb{width:38px}
 :root[data-theme="dark"] .composer{background:#2a312d;border-color:#8a7020}
 #dock .composer{margin-top:4px}
+.gsug{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}.gsug .mini-btn{float:none;margin:0}.gmode button{font-size:14px}
 
 </style>
 
@@ -3372,6 +3373,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Free names:": "Boş isimler:", "I have a name": "Hesabım var", "I'm new here": "Yeni oyuncuyum", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "{0} adında kayıtlı kimse yok. Bu adı almak için \"Yeni oyuncuyum\"u seç.", "The name {0} is already taken. Please choose another name.": "{0} adı alınmış. Lütfen başka bir isim seç.", "Wrong PIN for {0}.": "{0} için PIN yanlış.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Kimsenin kullanmadığı bir isim ve 4 rakamlı bir PIN seç. Bu isim ve PIN ile başka telefon ya da PC'den de girebilirsin.", "Write your name and your PIN.": "Adını ve PIN'ini yaz.", "Sign in": "Giriş yap",
     "Who gets the message": "Mesaj kime gidecek",
     "Add friend": "Arkadaş ekle", "Asked the other players for a new deal": "Diğer oyunculara yeni el soruldu", "Host": "Masa sahibi", "Show offline": "Çevrimdışıları göster", "The other players said no": "Diğer oyuncular kabul etmedi", "{0} asks for a new deal": "{0} yeni el istiyor", "{0} is now a friend": "{0} artık arkadaşın",
     "30 days": "30 gün", "365 days": "365 gün", "7 days": "7 gün", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Her internet adresi her dönemde bir kez sayılır. Bu sayfayı sadece sen (admin) görürsün.", "Loading…": "Yükleniyor…", "Nobody yet.": "Henüz kimse yok.", "Refresh": "Yenile", "The online database could not be reached.": "Çevrimiçi veritabanına ulaşılamadı.", "Unknown": "Bilinmiyor", "Visitor statistics": "Ziyaretçi istatistiği", "{0} visitors": "{0} ziyaretçi",
@@ -3466,6 +3468,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Free names:": "Ledige navn:", "I have a name": "Jeg har et navn", "I'm new here": "Jeg er ny her", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Ingen har navnet {0} ennå. Velg \"Jeg er ny her\" for å ta det.", "The name {0} is already taken. Please choose another name.": "Navnet {0} er allerede tatt. Velg et annet navn.", "Wrong PIN for {0}.": "Feil PIN for {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Velg et navn ingen bruker og en firesifret PIN. Med navnet og PIN-en kan du logge inn på en annen telefon eller PC også.", "Write your name and your PIN.": "Skriv navnet ditt og PIN-en.", "Sign in": "Logg inn",
     "Who gets the message": "Hvem får meldingen",
     "Add friend": "Legg til venn", "Asked the other players for a new deal": "Spurte de andre spillerne om nytt spill", "Host": "Vert", "Show offline": "Vis frakoblede", "The other players said no": "De andre spillerne sa nei", "{0} asks for a new deal": "{0} ber om nytt spill", "{0} is now a friend": "{0} er nå en venn",
     "30 days": "30 dager", "365 days": "365 dager", "7 days": "7 dager", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Hver internettadresse telles én gang per periode. Bare du (administrator) ser denne siden.", "Loading…": "Laster…", "Nobody yet.": "Ingen ennå.", "Refresh": "Oppdater", "The online database could not be reached.": "Fikk ikke kontakt med databasen.", "Unknown": "Ukjent", "Visitor statistics": "Besøksstatistikk", "{0} visitors": "{0} besøkende",
@@ -3560,6 +3563,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Free names:": "Nombres libres:", "I have a name": "Ya tengo nombre", "I'm new here": "Soy nuevo", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Nadie tiene aún el nombre {0}. Elige \"Soy nuevo\" para tomarlo.", "The name {0} is already taken. Please choose another name.": "El nombre {0} ya está ocupado. Elige otro.", "Wrong PIN for {0}.": "PIN incorrecto para {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Elige un nombre que nadie use y un PIN de 4 cifras. Con ellos entras también desde otro móvil o PC.", "Write your name and your PIN.": "Escribe tu nombre y tu PIN.", "Sign in": "Entrar",
     "Who gets the message": "Quién recibe el mensaje",
     "Add friend": "Añadir amigo", "Asked the other players for a new deal": "Se pidió una mano nueva a los demás", "Host": "Anfitrión", "Show offline": "Mostrar desconectados", "The other players said no": "Los demás dijeron que no", "{0} asks for a new deal": "{0} pide una mano nueva", "{0} is now a friend": "{0} ya es tu amigo",
     "30 days": "30 días", "365 days": "365 días", "7 days": "7 días", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Cada dirección de internet cuenta una vez por periodo. Solo tú (administrador) ves esta página.", "Loading…": "Cargando…", "Nobody yet.": "Nadie todavía.", "Refresh": "Actualizar", "The online database could not be reached.": "No se pudo acceder a la base de datos.", "Unknown": "Desconocido", "Visitor statistics": "Estadísticas de visitas", "{0} visitors": "{0} visitantes",
@@ -3682,6 +3686,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Free names:": "Noms libres :", "I have a name": "J'ai déjà un nom", "I'm new here": "Je suis nouveau", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Personne n'a encore le nom {0}. Choisissez \"Je suis nouveau\" pour le prendre.", "The name {0} is already taken. Please choose another name.": "Le nom {0} est déjà pris. Choisissez-en un autre.", "Wrong PIN for {0}.": "PIN incorrect pour {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Choisissez un nom libre et un PIN à 4 chiffres. Avec eux, vous vous connectez aussi sur un autre téléphone ou PC.", "Write your name and your PIN.": "Écrivez votre nom et votre PIN.", "Sign in": "Se connecter",
     "Who gets the message": "Qui reçoit le message",
     "Add friend": "Ajouter un ami", "Asked the other players for a new deal": "Nouvelle donne demandée aux autres joueurs", "Host": "Hôte", "Show offline": "Afficher hors ligne", "The other players said no": "Les autres joueurs ont refusé", "{0} asks for a new deal": "{0} demande une nouvelle donne", "{0} is now a friend": "{0} est maintenant votre ami",
     "30 days": "30 jours", "365 days": "365 jours", "7 days": "7 jours", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Chaque adresse internet compte une fois par période. Vous seul (administrateur) voyez cette page.", "Loading…": "Chargement…", "Nobody yet.": "Personne pour l’instant.", "Refresh": "Actualiser", "The online database could not be reached.": "Base de données injoignable.", "Unknown": "Inconnu", "Visitor statistics": "Statistiques des visites", "{0} visitors": "{0} visiteurs",
@@ -3804,6 +3809,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Free names:": "Nomi liberi:", "I have a name": "Ho già un nome", "I'm new here": "Sono nuovo", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Nessuno ha ancora il nome {0}. Scegli \"Sono nuovo\" per prenderlo.", "The name {0} is already taken. Please choose another name.": "Il nome {0} è già preso. Scegline un altro.", "Wrong PIN for {0}.": "PIN errato per {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Scegli un nome libero e un PIN di 4 cifre. Con questi entri anche da un altro telefono o PC.", "Write your name and your PIN.": "Scrivi il tuo nome e il PIN.", "Sign in": "Accedi",
     "Who gets the message": "Chi riceve il messaggio",
     "Add friend": "Aggiungi amico", "Asked the other players for a new deal": "Chiesta una nuova smazzata agli altri", "Host": "Host", "Show offline": "Mostra offline", "The other players said no": "Gli altri hanno detto di no", "{0} asks for a new deal": "{0} chiede una nuova smazzata", "{0} is now a friend": "{0} ora è tuo amico",
     "30 days": "30 giorni", "365 days": "365 giorni", "7 days": "7 giorni", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Ogni indirizzo internet conta una volta per periodo. Solo tu (amministratore) vedi questa pagina.", "Loading…": "Caricamento…", "Nobody yet.": "Ancora nessuno.", "Refresh": "Aggiorna", "The online database could not be reached.": "Database non raggiungibile.", "Unknown": "Sconosciuto", "Visitor statistics": "Statistiche visite", "{0} visitors": "{0} visitatori",
@@ -3926,6 +3932,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Free names:": "Freie Namen:", "I have a name": "Ich habe einen Namen", "I'm new here": "Ich bin neu", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Den Namen {0} hat noch niemand. Wähle \"Ich bin neu\", um ihn zu nehmen.", "The name {0} is already taken. Please choose another name.": "Der Name {0} ist schon vergeben. Bitte wähle einen anderen.", "Wrong PIN for {0}.": "Falsche PIN für {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Wähle einen freien Namen und eine 4-stellige PIN. Damit meldest du dich auch auf einem anderen Handy oder PC an.", "Write your name and your PIN.": "Schreibe deinen Namen und deine PIN.", "Sign in": "Anmelden",
     "Who gets the message": "Wer bekommt die Nachricht",
     "Add friend": "Freund hinzufügen", "Asked the other players for a new deal": "Die anderen Spieler wurden um ein neues Board gebeten", "Host": "Gastgeber", "Show offline": "Offline zeigen", "The other players said no": "Die anderen Spieler haben abgelehnt", "{0} asks for a new deal": "{0} möchte ein neues Board", "{0} is now a friend": "{0} ist jetzt dein Freund",
     "30 days": "30 Tage", "365 days": "365 Tage", "7 days": "7 Tage", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Jede Internetadresse zählt einmal pro Zeitraum. Nur du (Administrator) siehst diese Seite.", "Loading…": "Wird geladen…", "Nobody yet.": "Noch niemand.", "Refresh": "Aktualisieren", "The online database could not be reached.": "Die Datenbank ist nicht erreichbar.", "Unknown": "Unbekannt", "Visitor statistics": "Besucherstatistik", "{0} visitors": "{0} Besucher",
@@ -4048,6 +4055,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Free names:": "Свободные имена:", "I have a name": "У меня есть имя", "I'm new here": "Я новичок", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Имени {0} пока ни у кого нет. Выберите \"Я новичок\", чтобы взять его.", "The name {0} is already taken. Please choose another name.": "Имя {0} уже занято. Выберите другое.", "Wrong PIN for {0}.": "Неверный PIN для {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Выберите свободное имя и PIN из 4 цифр. С ними вы войдёте и с другого телефона или ПК.", "Write your name and your PIN.": "Введите имя и PIN.", "Sign in": "Войти",
     "Who gets the message": "Кому сообщение",
     "Add friend": "Добавить друга", "Asked the other players for a new deal": "Другим игрокам предложена новая сдача", "Host": "Хозяин", "Show offline": "Показать не в сети", "The other players said no": "Другие игроки отказались", "{0} asks for a new deal": "{0} просит новую сдачу", "{0} is now a friend": "{0} теперь ваш друг",
     "30 days": "30 дней", "365 days": "365 дней", "7 days": "7 дней", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Каждый интернет-адрес считается один раз за период. Эту страницу видите только вы (администратор).", "Loading…": "Загрузка…", "Nobody yet.": "Пока никого.", "Refresh": "Обновить", "The online database could not be reached.": "База данных недоступна.", "Unknown": "Неизвестно", "Visitor statistics": "Статистика посещений", "{0} visitors": "Посетителей: {0}",
@@ -4170,6 +4178,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Free names:": "Wolne imiona:", "I have a name": "Mam już imię", "I'm new here": "Jestem nowy", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Nikt jeszcze nie ma imienia {0}. Wybierz \"Jestem nowy\", aby je zająć.", "The name {0} is already taken. Please choose another name.": "Imię {0} jest już zajęte. Wybierz inne.", "Wrong PIN for {0}.": "Zły PIN dla {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Wybierz wolne imię i 4-cyfrowy PIN. Dzięki nim zalogujesz się też na innym telefonie lub komputerze.", "Write your name and your PIN.": "Wpisz imię i PIN.", "Sign in": "Zaloguj",
     "Who gets the message": "Kto dostanie wiadomość",
     "Add friend": "Dodaj znajomego", "Asked the other players for a new deal": "Poproszono innych graczy o nowe rozdanie", "Host": "Gospodarz", "Show offline": "Pokaż offline", "The other players said no": "Inni gracze odmówili", "{0} asks for a new deal": "{0} prosi o nowe rozdanie", "{0} is now a friend": "{0} jest teraz znajomym",
     "30 days": "30 dni", "365 days": "365 dni", "7 days": "7 dni", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Każdy adres internetowy liczy się raz w okresie. Tę stronę widzisz tylko ty (administrator).", "Loading…": "Ładowanie…", "Nobody yet.": "Jeszcze nikogo.", "Refresh": "Odśwież", "The online database could not be reached.": "Baza danych jest niedostępna.", "Unknown": "Nieznany", "Visitor statistics": "Statystyki odwiedzin", "{0} visitors": "{0} odwiedzających",
@@ -4292,6 +4301,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Free names:": "可用名字:", "I have a name": "我已有名字", "I'm new here": "我是新玩家", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "还没有人叫 {0}。选择\"我是新玩家\"来使用它。", "The name {0} is already taken. Please choose another name.": "名字 {0} 已被占用,请换一个。", "Wrong PIN for {0}.": "{0} 的 PIN 不正确。", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "选择一个没人用的名字和 4 位 PIN。用它们也能在其他手机或电脑上登录。", "Write your name and your PIN.": "输入你的名字和 PIN。", "Sign in": "登录",
     "Who gets the message": "消息发给谁",
     "Add friend": "添加好友", "Asked the other players for a new deal": "已请其他玩家同意新牌", "Host": "桌主", "Show offline": "显示离线", "The other players said no": "其他玩家拒绝了", "{0} asks for a new deal": "{0} 请求新牌", "{0} is now a friend": "{0} 已成为好友",
     "30 days": "30 天", "365 days": "365 天", "7 days": "7 天", "Each internet address counts once in each period. Only you (the administrator) see this page.": "每个网络地址在每个时段只计一次。只有你(管理员)能看到此页。", "Loading…": "加载中…", "Nobody yet.": "还没有人。", "Refresh": "刷新", "The online database could not be reached.": "无法连接在线数据库。", "Unknown": "未知", "Visitor statistics": "访客统计", "{0} visitors": "{0} 位访客",
@@ -5010,7 +5020,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 120;
+const APP_V = 121;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6643,6 +6653,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
   if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
   { const pc = ev_.target.closest("div.pconv"); if (pc) { pc.classList.toggle("open"); return; } }   // the convention line on a card: tap to read it all
+  { const gs = ev_.target.closest("[data-gsug]"); if (gs) { const i = $("gName"); if (i) i.value = gs.dataset.gsug; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; } }   // a free name offered on the name screen
   if (ev_.target.closest("[data-stats]")) { ui.statData = null; showStats(); return; }   // the administrator's visitor statistics
   const pw = ev_.target.closest('[data-who]'); if (pw) { showPlayer(pw.dataset.who); return; }
   const pwx = ev_.target.closest('[data-pairwith]'); if (pwx) { closeOv(); Net.playWith(pwx.dataset.pairwith); return; }
@@ -6698,6 +6709,7 @@ document.addEventListener('click', ev_ => {
     }
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
     if (seg === "stattab") { ui.statTab = v; showStats(); return; }
+    if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
     if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
@@ -6887,31 +6899,43 @@ async function pinHash(name, pin) {
 const needGate = () => typeof Net !== 'undefined' && (!myNm() || !SET.pinH || SET.pinFor !== Net.nameKey(myNm()));
 function showGate(rename) {
   ui.gateRename = !!rename;
+  const mode = ui.gateMode || 'new';
   const keep = id => $(id) ? $(id).value : '';
   const nm = $('gName') ? keep('gName') : rename ? '' : myNm();
-  openOv('gate', `<h2>👋 ${T(rename ? 'Change your name' : myNm() ? 'Choose a PIN' : 'Welcome!')}</h2>
-    <div class="muted">${T('Your name is how the other players know you. A 4-digit PIN keeps it yours: nobody else can take it, and you use it to sign in on another phone or PC.')}</div>
+  const sug = ui.gateSug && ui.gateSug.length ? `<div class="gsug">${T('Free names:')} ${ui.gateSug.map(s => `<button class="btn mini-btn" data-gsug="${esc(s)}">${esc(s)}</button>`).join(' ')}</div>` : '';
+  openOv('gate', `<h2>👋 ${T(rename ? 'Change your name' : 'Welcome!')}</h2>
+    <div class="seg gmode" data-seg="gmode"><button data-v="new" class="${mode === 'new' ? 'on' : ''}">🆕 ${T("I'm new here")}</button><button data-v="login" class="${mode === 'login' ? 'on' : ''}">🔑 ${T('I have a name')}</button></div>
+    <div class="muted">${T(mode === 'new' ? 'Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.' : 'Write your name and your PIN.')}</div>
     <div class="grp"><span>${T('Name')}</span><input id="gName" class="tok" maxlength="20" value="${esc(nm)}" autocomplete="nickname"></div>
     <div class="grp"><span>${T('PIN (4 digits)')}</span><input id="gPin" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin'))}"></div>
-    <div class="grp"><span>${T('PIN again')}</span><input id="gPin2" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin2'))}"></div>
-    ${ui.gateErr ? `<div class="err">${esc(ui.gateErr)}</div>` : ''}
-    <div class="row2"><button class="btn new" id="gGo">${T('Continue')}</button>${rename ? `<button class="btn" id="oClose">${T('Cancel')}</button>` : ''}</div>`);
+    ${mode === 'new' ? `<div class="grp"><span>${T('PIN again')}</span><input id="gPin2" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off" value="${esc(keep('gPin2'))}"></div>` : ''}
+    ${ui.gateErr ? `<div class="err">${esc(ui.gateErr)}</div>` : ''}${sug}
+    <div class="row2"><button class="btn new" id="gGo">${T(mode === 'new' ? 'Continue' : 'Sign in')}</button>${rename ? `<button class="btn" id="oClose">${T('Cancel')}</button>` : ''}</div>`);
   setTimeout(() => { const i = $(nm ? 'gPin' : 'gName'); if (i) i.focus(); }, 50);
 }
 async function gateGo() {
-  const name = ($('gName') ? $('gName').value : '').trim().replace(/\s+/g, ' ').slice(0, 20), pin = $('gPin') ? $('gPin').value : '', pin2 = $('gPin2') ? $('gPin2').value : '';
-  const err = m => { ui.gateErr = m; showGate(ui.gateRename); };
+  const mode = ui.gateMode || 'new';
+  const name = ($('gName') ? $('gName').value : '').trim().replace(/\s+/g, ' ').slice(0, 20), pin = $('gPin') ? $('gPin').value : '', pin2 = $('gPin2') ? $('gPin2').value : pin;
+  const err = (m, sug) => { ui.gateErr = m; ui.gateSug = sug || null; showGate(ui.gateRename); };
   if (name.length < 2) return err(T('Write a name of at least 2 letters.'));
   if (['player', 'guest', 'robot', 'you', 'host'].includes(Net.nameKey(name))) return err(T('Choose another name.'));
   if (!/^\d{4}$/.test(pin)) return err(T('The PIN is 4 digits.'));
-  if (pin !== pin2) return err(T('The two PINs are not the same.'));
-  ui.gateErr = T('Checking…'); showGate(ui.gateRename);
-  const h = await pinHash(name, pin), r = await Net.checkName(name, h);
-  if (r === 'taken') return err(T('{0} is already used by another player. Choose another name.', name));
-  if (r === 'pin') return err(T('This name is registered with another PIN. If it is yours, enter your PIN.'));
+  if (mode === 'new' && pin !== pin2) return err(T('The two PINs are not the same.'));
+  ui.gateErr = T('Checking…'); ui.gateSug = null; showGate(ui.gateRename);
+  const h = await pinHash(name, pin);
+  if (mode === 'new') {
+    // a new player: the name must be free; if it is taken, say so and offer free names close to it
+    const r = await Net.register(name, h);
+    if (r === 'taken') return err(T('The name {0} is already taken. Please choose another name.', name), await Net.suggestNames(name));
+  } else {
+    const r = await Net.login(name, h);
+    if (r === 'nouser') return err(T('Nobody has the name {0} yet. Choose "I\'m new here" to take it.', name));
+    if (r === 'pin') return err(T('Wrong PIN for {0}.', name));
+    if (r === 'offline') return err(T('The online database could not be reached.'));
+  }
   try { localStorage.setItem('bridge-table-name', name); } catch (e) {}
   SET.pinH = h; SET.pinFor = Net.nameKey(name); Store.saveSettings(SET); save();
-  ui.gateErr = null; ui.overlay = null; $('ov').hidden = true;
+  ui.gateErr = null; ui.gateSug = null; ui.overlay = null; $('ov').hidden = true;
   Net.st.claimed = true; Net.shareInfo(); Net.Cloud.beat(); render();
   flash(T('Welcome, {0}!', name), 2000);
   checkSharedDeal();
@@ -7722,6 +7746,31 @@ const Net = (() => {
     } catch (e) { return 'ok'; }
   }
 
+  /* a new player takes a name (refused when it is taken, with free names suggested); a player who has one signs in
+     with it and the PIN */
+  async function nameFree(name) {
+    const k = nameKey(name);
+    if (k !== nameKey(myName()) && knownNames().some(n => nameKey(n) === k)) return false;
+    if (!Cloud.on) return true;
+    try { return !(await Cloud.user(name)); } catch (e) { return true; }
+  }
+  async function register(name, pinH) {
+    if (!(await nameFree(name))) return 'taken';
+    if (Cloud.on) { try { await Cloud.claim(name, pinH); } catch (e) {} }
+    return 'ok';
+  }
+  async function login(name, pinH) {
+    if (!Cloud.on) return 'offline';
+    try { const u = await Cloud.user(name); return !u ? 'nouser' : u.pin === pinH ? 'ok' : 'pin'; } catch (e) { return 'offline'; }
+  }
+  // free names close to the one asked for (Servet2, Servet_NO, Servet35 …)
+  async function suggestNames(name) {
+    const base = String(name).trim().slice(0, 16), ctry = SET.ctry || '', out = [];
+    const tries = [base + '2', base + '3', ctry ? base + '_' + ctry : null, base + (10 + Math.floor(Math.random() * 89)), base + '.' + (new Date().getFullYear() % 100)].filter(Boolean);
+    for (const t of tries) { if (out.length >= 3) break; if (await nameFree(t)) out.push(t.slice(0, 20)); }
+    return out;
+  }
+
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
   const renderL = () => { if (typeof renderDock === 'function') renderDock(); if (G && G.phase === 'idle') render(); if (ui.overlay === 'lchat') showLChat(); if (ui.overlay === 'tsetup') showTourSetup(ui.tsetId); };
@@ -8361,7 +8410,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, register, login, suggestNames, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>
