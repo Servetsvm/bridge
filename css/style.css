@@ -1015,3 +1015,6 @@ body.classic .fan.ovl .card .ix b{font-size:calc(var(--cw)*.5)}
 body.classic .fan.ovl .card .ix i{font-size:calc(var(--cw)*.48)}
 /* the cards sliding in and out of the trick stay inside the felt (no moment of scrolling) */
 #table,body.classic #table{overflow:hidden}
+/* the send button: an arrow in the table's green and gold, like the button for who gets the message */
+.sendb{flex:none!important;width:44px;padding:5px 0!important;font-size:18px;line-height:1;background:#1f6b3d!important;color:#f2d27a!important;border:1px solid #c9a227!important;border-radius:999px!important;box-shadow:none!important}
+.sendb:hover{background:#26834a!important}

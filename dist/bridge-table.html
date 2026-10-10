@@ -1030,6 +1030,9 @@ body.classic .fan.ovl .card .ix b{font-size:calc(var(--cw)*.5)}
 body.classic .fan.ovl .card .ix i{font-size:calc(var(--cw)*.48)}
 /* the cards sliding in and out of the trick stay inside the felt (no moment of scrolling) */
 #table,body.classic #table{overflow:hidden}
+/* the send button: an arrow in the table's green and gold, like the button for who gets the message */
+.sendb{flex:none!important;width:44px;padding:5px 0!important;font-size:18px;line-height:1;background:#1f6b3d!important;color:#f2d27a!important;border:1px solid #c9a227!important;border-radius:999px!important;box-shadow:none!important}
+.sendb:hover{background:#26834a!important}
 
 </style>
 
@@ -4998,7 +5001,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 118;
+const APP_V = 119;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -5750,7 +5753,7 @@ function renderDock() {
       <div class="${tab === 'table' ? 'dbody' : 'lsplit dsplit'}">${tab === 'table' ? '' : `<div class="lplayers"><div id="dPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div>`}<div class="lcol"><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>` : ''}
       <div class="pmto" id="dPmTo"></div>
-      <div class="row2"><button class="btn rcpt" id="dRcpt" title="${T("Who gets the message")}">${rcptLabel("dock")}</button><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div></div></div>`;
+      <div class="row2"><button class="btn rcpt" id="dRcpt" title="${T("Who gets the message")}">${rcptLabel("dock")}</button><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn sendb" id="dSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></div></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
   { const p = $('dPlayers'), h = tab === 'table' ? '' : Net.playersHtml(); if (p && p.innerHTML !== h) p.innerHTML = h; }   // the players beside the lobby chat
@@ -5872,7 +5875,7 @@ function homeShell() {
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
     <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
-      <div class="row2"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></div></div></aside>
+      <div class="row2"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn sendb" id="lSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></div></div></aside>
   </div><div id="hSheet"></div></div>`;
 }
 // the section opened with the buttons at the top of the home page (tournaments, our card, players, chat on a phone)
@@ -5880,7 +5883,7 @@ function homeSection(k) {
   if (k === 'tours') return `<div class="hcard"><h3>🏆 ${T('Tournaments')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hTours"></div></div>`;
   if (k === 'conv') return `<div class="hcard"><h3>📋 ${T('Our convention card (with partner)')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hConv"></div></div>`;
   if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="pPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="pChat"></div><div class="pmto" id="pPmTo"></div>
-    <div class="row2"><button class="btn rcpt" id="pRcpt" title="${T("Who gets the message")}">🌐 ▾</button><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div></div></div>`;
+    <div class="row2"><button class="btn rcpt" id="pRcpt" title="${T("Who gets the message")}">🌐 ▾</button><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn sendb" id="lSend2" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></div></div></div>`;
   return '';
 }
 // our card: every convention with a switch; tap a name for its description
@@ -6295,7 +6298,7 @@ function showDm(name) {
   const list = conv && conv.list.length ? conv.list.map(m => `<div class="cm${m.me ? ' me' : ''}"><b>${esc(m.from)}</b> ${esc(m.text)}<small>${t(m.ts)}${m.me && m.id ? (m.ok ? ' ✓' : ' ⏳') : ''}</small></div>`).join('') : `<div class="muted">${T('Write a private message to {0}.', esc(name))}</div>`;
   const draft = $('dmMsg') ? $('dmMsg').value : '';
   openOv('dm', `<h2>✉ ${esc(name)}</h2><div class="lmsgs pop" id="dmList">${list}</div>
-    <div class="row2"><input class="tok" id="dmMsg" maxlength="300" placeholder="${T('Write a message…')}" value="${esc(draft)}"><button class="btn gold" id="dmSend">${T('Send')}</button></div>
+    <div class="row2"><input class="tok" id="dmMsg" maxlength="300" placeholder="${T('Write a message…')}" value="${esc(draft)}"><button class="btn sendb" id="dmSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div>
     <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
   const L = $('dmList'); if (L) L.scrollTop = L.scrollHeight;
   const i = $('dmMsg'); if (i) i.focus();
@@ -6305,7 +6308,7 @@ function showLChat() {
   Net.st.lunread = 0;
   const draft = $('lMsg2') ? $('lMsg2').value : '';
   openOv('lchat', `<h2>💬 ${T('Lobby chat')} <small class="muted">${T('{0} in the lobby', Net.lobbyCount())}</small></h2><div class="lmsgs pop" id="ovLChat">${Net.lchatHtml()}</div>
-    <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}" value="${esc(draft)}"><button class="btn gold" id="lSend2">${T('Send')}</button></div>
+    <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}" value="${esc(draft)}"><button class="btn sendb" id="lSend2" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div>
     <div class="row2"><button class="btn" id="lClear">🗑 ${T('Clear the chat')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
   const c = $('ovLChat'); if (c) c.scrollTop = c.scrollHeight;
   if (document.activeElement !== $('lMsg2') && draft) $('lMsg2').focus();
