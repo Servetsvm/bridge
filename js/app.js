@@ -499,7 +499,10 @@ function fanHtml(seat, max) {
 }
 function dummyCols(seat) {
   const { ctl, leg } = ctlInfo(seat), h = handsNow()[seat];
-  return `<div class="dcols">${ORDER.map(s => `<div class="dcol">${E.desc(E.inSuit(h, s)).map(c => cardHtml(c, 'dc' + (ctl ? (leg.includes(c) ? ' play' : ' dim') : '') + (c === ui.hintCard ? ' hint' : ''))).join('')}</div>`).join('')}</div>`;
+  // the card size follows the screen height, so the longest suit fits and the page never has to scroll
+  const n = Math.max(1, ...ORDER.map(s => E.inSuit(h, s).length)), fit = ui.dwFit && ui.dwFit.h === innerHeight && ui.dwFit.w === innerWidth ? ui.dwFit.dw : 99;
+  const dw = Math.round(Math.max(26, Math.min(innerWidth <= 600 ? 40 : 52, fit, innerHeight * 0.25 / (1.3 + (n - 1) * 0.5))));
+  return `<div class="dcols" style="--dw:${dw}" data-dw="${dw}" data-n="${n}">${ORDER.map(s => `<div class="dcol">${E.desc(E.inSuit(h, s)).map(c => cardHtml(c, 'dc' + (ctl ? (leg.includes(c) ? ' play' : ' dim') : '') + (c === ui.hintCard ? ' hint' : ''))).join('')}</div>`).join('')}</div>`;
 }
 function vHand(seat) {
   const { ctl, leg } = ctlInfo(seat);
@@ -652,7 +655,15 @@ function renderTable() {
     C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
-  layoutFans();
+  layoutFans(); fitTable();
+}
+// still taller than the window (a long suit in dummy): make the dummy's cards smaller until the page fits
+function fitTable() {
+  const d = document.querySelector(".dcols"); if (!d || !G || G.phase === "idle") return;
+  const over = document.documentElement.scrollHeight - innerHeight; if (over <= 0) return;
+  const n = +d.dataset.n || 1, cur = +d.dataset.dw || 52, dw = Math.max(26, Math.floor(cur - over / (1.3 + (n - 1) * 0.5)) - 1);
+  if (dw >= cur) return;
+  ui.dwFit = { h: innerHeight, w: innerWidth, dw }; d.style.setProperty("--dw", dw); d.dataset.dw = dw;
 }
 function layoutFans() {
   document.querySelectorAll('.fan').forEach(el => {
@@ -1326,9 +1337,17 @@ function resultLine(e) {
   const c = e.c, d = e.tricks - (c.level + 6);
   return `${conKey(c)} · ${T('{0} tricks', e.tricks)} (${d >= 0 ? (d ? '+' + d : '=') : d}) · <span class="${e.us >= 0 ? 'pos' : 'neg'}">${fmtSigned(e.us)}</span>`;
 }
-function openOv(name, html) { if (ui.overlay === "gate" && name !== "gate" && needGate()) return; ui.overlay = name; $('ov').innerHTML = `<div class="sheet">${html}</div>`; $('ov').hidden = false; }
+function openOv(name, html) {
+  if (ui.overlay === "gate" && name !== "gate" && needGate()) return;
+  // during a game on a wider screen, a player card or a private chat is a small window you can drag aside (the table stays usable)
+  const fl = ["player", "dm"].includes(name) && G && G.phase !== "idle" && innerWidth >= 700, ov = $("ov");
+  ui.overlay = name; ov.classList.toggle("float", fl);
+  ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}">${fl ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
+  ov.hidden = false;
+  if (fl && ui.fpos) { const s = ov.firstChild; s.style.left = ui.fpos.x + "px"; s.style.top = ui.fpos.y + "px"; s.style.right = "auto"; }
+}
 function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no way past the name and PIN
-  if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; }
+  if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; $('ov').classList.remove('float'); }
 function showEnd() {
   const e = G.result; if (!e) return;
   const f = G.field || { tables: [], done: false, dd: {} };
@@ -1734,7 +1753,7 @@ document.addEventListener('click', ev_ => {
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && /^g(Name|Pin|Pin2)$/.test(e.target.id)) { e.preventDefault(); gateGo(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dMsg') { e.preventDefault(); const v = e.target.value; e.target.value = ''; dockSend(v); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dmMsg') { e.preventDefault(); $('dmSend').click(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); lobbySend(e.target.value); e.target.value = ""; } });
-window.addEventListener('resize', layoutFans);
+window.addEventListener('resize', () => { layoutFans(); clearTimeout(ui.rsz); ui.rsz = setTimeout(() => { if (G && G.phase !== 'idle') render(); }, 150); });   // the dummy's card size follows the window height
 
 /* ---- a deal as a link: 2 bits a card (who holds it) make 13 bytes, 18 letters in the address after #d= ---- */
 function dealCode(deal) {
@@ -1861,3 +1880,15 @@ async function gateGo() {
   flash(T('Welcome, {0}!', name), 2000);
   checkSharedDeal();
 }
+// drag the small window by its top bar
+document.addEventListener('pointerdown', e => {
+  const bar = e.target.closest('.fbar'); if (!bar || e.target.closest('button')) return;
+  const s = bar.parentElement, r = s.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+  bar.setPointerCapture(e.pointerId);
+  const move = ev => {
+    const x = Math.max(0, Math.min(innerWidth - 80, ev.clientX - dx)), y = Math.max(0, Math.min(innerHeight - 40, ev.clientY - dy));
+    s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.right = 'auto'; ui.fpos = { x, y };
+  };
+  const up = () => { bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', up); };
+  bar.addEventListener('pointermove', move); bar.addEventListener('pointerup', up);
+});

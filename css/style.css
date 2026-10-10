@@ -827,3 +827,9 @@ body.bigcards .mini{transform:scale(1.15);transform-origin:bottom}
 #dock .dsplit .lplayers{margin:0;font-size:12.5px}
 #dock .lcol{gap:6px}
 @media (min-width:1100px){ #dock{width:420px} body.withdock #app{margin:0 450px 0 auto} }
+/* a player card or private chat during a game: a small window that can be dragged aside */
+.ov.float{background:none;pointer-events:none;display:block;padding:0}
+.ov.float .sheet{pointer-events:auto;position:fixed;right:24px;top:70px;width:min(380px,92vw);max-height:80vh;box-shadow:0 12px 34px rgba(0,0,0,.55)}
+.fbar{display:flex;justify-content:space-between;align-items:center;cursor:move;margin:-8px -8px 0;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.07);user-select:none;touch-action:none;font-size:15px;color:#7c7b70}
+.fbar .mini-btn{float:none}
+:root[data-theme="dark"] .fbar{background:rgba(255,255,255,.07)}
