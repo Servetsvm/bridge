@@ -671,7 +671,7 @@ function layoutFans() {
     const W = el.clientWidth, max = +el.dataset.max || 70;
     // classic cards: as wide as fits, and on short screens low enough for the hand to stay in view
     const big = SET.big ? 1.3 : 1;
-    if (SET.style !== "modern") { const cw = Math.max(20, Math.min(60 * big, (W - (n - 1)) / n, innerHeight * 0.2 * big / 1.95)); el.style.setProperty("--cw", cw + "px"); el.style.setProperty("--ov", "1px"); return; }
+    if (SET.style !== "modern") { const cw = Math.max(20, Math.min(60 * big, (W - (n - 1)) / n, innerHeight * (innerHeight < 450 ? 0.14 : innerHeight < 600 ? 0.155 : 0.2) * big / 1.95)); el.style.setProperty("--cw", cw + "px"); el.style.setProperty("--ov", "1px"); return; }
     const cw = Math.max(28, Math.min(max * big, W / (1 + (n - 1) * 0.44)));
     const step = n > 1 ? Math.min(cw * 1.04, (W - cw) / (n - 1)) : 0;
     el.style.setProperty('--cw', cw + 'px'); el.style.setProperty('--ov', (step - cw) + 'px');
