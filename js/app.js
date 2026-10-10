@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 115;
+const APP_V = 116;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -663,6 +663,8 @@ function renderTable() {
 }
 // still taller than the window (a long suit in dummy): make the dummy's cards smaller until the page fits
 function fitTable() {
+  // the cards of the trick: North's on top and South's at the bottom of the middle must never meet, so their size follows the room
+  { const c = $("center"); if (c && c.clientHeight) { const w = Math.max(26, Math.min(80, (c.clientHeight - 16) / (2 * 1.95 + 0.25), c.clientWidth / 3.3)); c.style.setProperty("--tcw", w.toFixed(1) + "px"); } }
   const d = document.querySelector(".dcols"); if (!d || !G || G.phase === "idle") return;
   const over = document.documentElement.scrollHeight - innerHeight; if (over <= 0) return;
   const n = +d.dataset.n || 1, cur = +d.dataset.dw || 52, dw = Math.max(26, Math.floor(cur - over / (1.3 + (n - 1) * 0.5)) - 1);

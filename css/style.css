@@ -965,3 +965,6 @@ textarea.pconv{font-size:12.5px;min-height:0}
   .vh .mini,body.classic .mini{width:29px;height:46px;font-size:17px;margin-left:-7px}
   body.classic .mini i{font-size:19px}
 }
+/* the trick cards take their size from the room in the middle of the table (set by fitTable) */
+#center .card.tc,body.classic #center .card.tc{--cw:var(--tcw,58px)}
+#center .trick{height:calc(100% - 4px)!important}
