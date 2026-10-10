@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 131;
+const APP_V = 132;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1003,7 +1003,7 @@ function tableBoard() {
   Net.note(T('Tournament board {0} of {1}', b, t.n));
 }
 // the next deal after a board: tournaments go on with their own boards
-function nextDeal() { if (G && G.tour) nextTourBoard(); else if (G && G.tprac) practiceTour(G.tprac.id, G.tprac.b + 1); else newBoard(); }
+function nextDeal() { if (G && G.tour) nextTourBoard(); else if (G && G.tprac) practiceTour(G.tprac.id, G.tprac.b + 1); else if (!(ui.dealQ && nextFileDeal())) newBoard(); }
 /* practice a tournament's boards again (yours or one you did not play): nothing is recorded in the tournament;
    after each board your score is compared with everyone who played it there */
 function practiceTour(id, b) {
@@ -1581,12 +1581,112 @@ function parsePBN(txt) {
   for (let i = 0; i < 4; i++) hands[(first + i) % 4] = m[i + 2] === '-' ? null : parseHand(m[i + 2]);
   return hands;
 }
+/* ---- hand records as files: PBN (all boards from Results, or one board) and LIN (one board) out; PBN or LIN files in,
+   their deals played one after the other ---- */
+const RK = '23456789TJQKA', SL = 'CDHS';
+const handStr = h => [3, 2, 1, 0].map(s => h.filter(c => S(c) === s).sort((a, b) => R(b) - R(a)).map(c => RK[R(c)]).join('')).join('.');
+const pbnCall = c => c === 'P' ? 'Pass' : c === 'X' || c === 'XX' ? c : LV(c) + (ST(c) === 4 ? 'NT' : SL[ST(c)]);
+const vulTag = b => vulOf(b, 0) && vulOf(b, 1) ? 'All' : vulOf(b, 0) ? 'NS' : vulOf(b, 1) ? 'EW' : 'None';
+function pbnOf(e) {
+  const d = new Date(e.ts || Date.now()), q = v => `"${String(v).replace(/"/g, "'")}"`;
+  const who = s => s === e.seat ? (myNm() || 'You') : 'Robot';
+  const tag = (k, v) => `[${k} ${q(v)}]\n`;
+  let o = tag('Event', 'Bridge Table') + tag('Site', location.host || 'Bridge Table') + tag('Date', `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`)
+    + tag('Board', e.board) + tag('West', who(3)) + tag('North', who(0)) + tag('East', who(1)) + tag('South', who(2))
+    + tag('Dealer', 'NESW'[e.dealer ?? dealerOf(e.board)]) + tag('Vulnerable', vulTag(e.board))
+    + tag('Deal', 'N:' + [0, 1, 2, 3].map(s => handStr(e.deal[s])).join(' ')) + tag('Scoring', SET.mode === 'MP' ? 'MP' : 'IMP');
+  if (e.passed || !e.c) o += tag('Declarer', '') + tag('Contract', 'Pass') + tag('Result', '');
+  else o += tag('Declarer', 'NESW'[e.c.decl]) + tag('Contract', LV(B(e.c.level, e.c.strain)) + (e.c.strain === 4 ? 'NT' : SL[e.c.strain]) + (e.c.dbl === 1 ? 'X' : e.c.dbl === 2 ? 'XX' : '')) + tag('Result', e.tricks);
+  if (e.auc && e.auc.length) {
+    o += `[Auction "${'NESW'[e.dealer ?? dealerOf(e.board)]}"]\n`;
+    for (let i = 0; i < e.auc.length; i += 4) o += e.auc.slice(i, i + 4).map(a => pbnCall(a[1])).join(' ') + '\n';
+  }
+  if (e.pl && e.pl.length && e.c) {
+    const L = (e.c.decl + 1) % 4; o += `[Play "${'NESW'[L]}"]\n`;
+    for (const t of e.pl) { const by = {}; for (const [s, c] of t) by[s] = SL[S(c)] + RK[R(c)]; o += [0, 1, 2, 3].map(k => by[(L + k) % 4] || '-').join(' ') + '\n'; }
+    if (e.pl.length < 13) o += '*\n';
+  }
+  return o;
+}
+/* LIN: the seats go South, West, North, East; the dealer is 1 = South … 4 = East */
+function linOf(e) {
+  const hs = h => [3, 2, 1, 0].map(s => SL[s] + h.filter(c => S(c) === s).sort((a, b) => R(b) - R(a)).map(c => RK[R(c)]).join('')).join('');
+  const who = s => s === e.seat ? (myNm() || 'You') : 'Robot', dl = e.dealer ?? dealerOf(e.board);
+  let o = `pn|${[2, 3, 0, 1].map(who).join(',')}|st||md|${(dl + 2) % 4 + 1}${[2, 3, 0].map(s => hs(e.deal[s])).join(',')},${hs(e.deal[1])}|rh||ah|Board ${e.board}|sv|${({ None: 'o', NS: 'n', EW: 'e', All: 'b' })[vulTag(e.board)]}|`;
+  for (const [, c] of e.auc || []) o += `mb|${c === 'P' ? 'p' : c === 'X' ? 'd' : c === 'XX' ? 'r' : LV(c) + (ST(c) === 4 ? 'N' : SL[ST(c)])}|`;
+  for (const t of e.pl || []) { o += 'pg||'; for (const [, c] of t) o += `pc|${SL[S(c)]}${RK[R(c)]}|`; }
+  if (e.c && e.pl && e.pl.length < 13) o += `mc|${e.tricks}|`;
+  return o + 'pg||\n';
+}
+function saveFile(name, text) {
+  const a = document.createElement('a'), url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+const fileDay = () => new Date().toISOString().slice(0, 10);
+function exportPBN(list) {
+  const L = list.filter(e => e.deal); if (!L.length) { flash(T('No boards to save yet'), 2000); return; }
+  saveFile(`bridge-${fileDay()}.pbn`, '% PBN 2.1\n% EXPORT\n' + L.map(e => pbnOf(e)).join('\n'));
+}
+/* the board number with this dealer and vulnerability (1–16) */
+function boardFor(dealer, vul) { for (let b = 1; b <= 16; b++) if (dealerOf(b) === dealer && vulTag(b) === vul) return b; return dealer + 1; }
+/* every deal in a PBN or LIN file: [{ hands, bn }] */
+function readDealFile(txt) {
+  const out = [];
+  if (/\bmd\|/.test(txt)) {
+    for (const m of txt.matchAll(/md\|(\d)([^|]*)\|([\s\S]*?)(?=md\||$)/g)) {
+      const dl = (+m[1] + 1) % 4, parts = m[2].split(','), seats = [2, 3, 0, 1], hands = [null, null, null, null];
+      parts.forEach((p, i) => { if (i < 4 && p) hands[seats[i]] = parseLinHand(p); });
+      const sv = (m[3].match(/sv\|(\w)/) || [])[1] || 'o', bm = m[3].match(/ah\|Board (\d+)/);
+      const vul = ({ o: 'None', n: 'NS', e: 'EW', b: 'All' })[sv.toLowerCase()] || 'None';
+      out.push({ hands, bn: bm && dealerOf(+bm[1]) === dl && vulTag(+bm[1]) === vul ? +bm[1] : boardFor(dl, vul) });
+    }
+  } else {
+    for (const rec of txt.split(/\n\s*\n|(?=\[Event )/)) {
+      const tag = k => { const m = rec.match(new RegExp('\\[' + k + '\\s+"([^"]*)"\\]', 'i')); return m ? m[1] : null; };
+      const deal = tag('Deal'); if (!deal) continue;
+      const hands = parsePBN(deal); if (!hands) continue;
+      const dl = Math.max(0, 'NESW'.indexOf((tag('Dealer') || 'N').toUpperCase())), vul = ({ none: 'None', love: 'None', '-': 'None', ns: 'NS', ew: 'EW', all: 'All', both: 'All' })[(tag('Vulnerable') || 'None').toLowerCase()] || 'None';
+      const b = +(tag('Board') || 0);
+      out.push({ hands, bn: b && dealerOf(b) === dl && vulTag(b) === vul ? b : boardFor(dl, vul) });
+    }
+  }
+  // a missing fourth hand gets the cards left over; only complete deals are kept
+  return out.filter(d => {
+    const used = new Set(d.hands.flat().filter(c => c != null)), empty = d.hands.map((h, s) => h && h.length ? -1 : s).filter(s => s >= 0);
+    if (empty.length === 1) d.hands[empty[0]] = [...Array(52).keys()].filter(c => !used.has(c));
+    return d.hands.every(h => h && h.length === 13) && new Set(d.hands.flat()).size === 52;
+  });
+}
+function parseLinHand(p) {
+  const h = []; let s = -1;
+  for (const ch of p.toUpperCase()) { if ("SHDC".includes(ch)) { s = SL.indexOf(ch); continue; } const r = RK.indexOf(ch); if (s >= 0 && r >= 0) h.push(s * 13 + r); }
+  return h;
+}
+async function importDeals(file) {
+  try {
+    const list = readDealFile(await file.text());
+    if (!list.length) { showDealEntry(T('No deals found in this file.')); return; }
+    ui.dealQ = { list, i: 0 };
+    ui.photoHands = null; ui.photoMsg = null; ui.dealForm = null; closeOv();
+    newBoard(list[0].hands, list[0].bn);
+    flash(T('{0} deals read from the file. Deal 1 of {0}.', list.length), 2500);
+  } catch (e) { showDealEntry(e.message); }
+}
+/* the next deal from the file; false when there is none left */
+function nextFileDeal() {
+  const q = ui.dealQ; if (!q) return false;
+  q.i++; if (q.i >= q.list.length) { ui.dealQ = null; newBoard(); flash(T('That was the last deal from the file.'), 2500); return true; }
+  newBoard(q.list[q.i].hands, q.list[q.i].bn);
+  flash(T('Deal {0} of {1} from the file.', q.i + 1, q.list.length), 2000);
+  return true;
+}
 function showDealEntry(err) {
   const v = ui.dealForm || { pbn: '', h: ['', '', '', ''], dealer: 0, vul: 0 };
   ui.dealForm = v;
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([val, l]) => `<button data-v="${val}" class="${String(cur) === String(val) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   openOv('deal', `<h2>${T('Enter a deal')}</h2>
    <div class="row2"><label class="btn gold" for="dPhoto" role="button">📷 ${T('Read from a photo or screenshot')}</label><input type="file" id="dPhoto" accept="image/*" hidden></div>
+   <div class="row2"><label class="btn" for="dFile" role="button">📄 ${T('Open a PBN or LIN file')}</label><input type="file" id="dFile" accept=".pbn,.lin,.txt,text/plain" hidden></div>
    <div class="muted">${T('Works with the end-of-board screen of your bridge app (four open hands) and with hand records that list ♠ ♥ ♦ ♣ for each hand. The picture is only read on this device: it is not saved or uploaded, and it is cleared from memory as soon as the cards are read. The cards it reads appear below as a code — check them before you play.')} ${T('You can also type the hands: spades.hearts.diamonds.clubs, e.g.')} <b>AKQ2.K73.J5.T942</b> (T = 10). ${T('Leave one hand empty and it is filled with the remaining cards.')}</div>
    ${ui.photoMsg ? `<div class="${ui.photoErr ? "err" : "okmsg"}">${ui.photoMsg}</div>` : ""}
    ${ui.photoHands ? dealHtml(ui.photoHands.map(h => h || []), U()) : ""}
@@ -1642,7 +1742,7 @@ function showResults() {
     const rows = HIST.slice(-100).reverse().map(e => `<tr class="rev" data-rev="${e.id}"><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.passed ? T('Pass') : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
     body = `<div class="muted">${T('Tap a board to see the auction and how it was played.')}</div><div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th>${T('Tr')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   }
-  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Boards')}</button></div>${body}<div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Boards')}</button></div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 
 /* replay of a finished board, one card at a time: ui.revStep cards have been played.
@@ -1703,7 +1803,7 @@ function showReview(id, sel) {
     ${anaHtml(e)}
     <div class="grp"><span>${T('Auction')}</span>${aucHtml}</div>
     <div class="row2"><button class="btn" data-revgo="-1" ${hi > 0 ? '' : 'disabled'}>◀ ${T('Previous deal')}</button><button class="btn" data-revgo="1" ${hi >= 0 && hi < HIST.length - 1 ? '' : 'disabled'}>${T('Next deal')} ▶</button></div>
-    ${e.deal && !e.tour ? `<div class="row2"><button class="btn" id="oRevShare">🔗 ${T("Share this deal")}</button></div>` : ""}
+    ${e.deal && !e.tour ? `<div class="row2"><button class="btn" id="oRevShare">🔗 ${T("Share this deal")}</button><button class="btn" id="oRevPbn">💾 PBN</button><button class="btn" id="oRevLin">💾 LIN</button></div>` : ""}
     <div class="row2"><button class="btn" id="oRevBack">${T('Back to the list')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 /* the boards played today, from the table: contract, result, score, IMPs and MP against the
@@ -1743,6 +1843,7 @@ document.addEventListener('change', e => {
   if (t.id === 'hSys') { SET.sys = t.value; SET.conv = { ...E.sysOf(t.value).conv }; SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(E.sysOf(t.value).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
   if (t.id === 'hName') { try { localStorage.setItem('bridge-table-name', t.value.trim().slice(0, 20)); } catch (e) {} return; }
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
+  if (t.id === 'dFile' && t.files && t.files[0]) { importDeals(t.files[0]); t.value = ''; return; }
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {
@@ -1917,6 +2018,8 @@ document.addEventListener('click', ev_ => {
     case "oShared": { const d = ui.sharedDeal; ui.sharedDeal = null; closeOv(); if (d) { ui.saved = null; newBoard(d.hands, d.b); } break; }
     case "oShare": if (G && G.deal) shareDeal(G.deal, G.board); break;
     case "oRevShare": { const e = HIST.find(h => h.id === ui.revId); if (e && e.deal) shareDeal(e.deal, e.board); break; }
+    case "oRevPbn": case "oRevLin": { const e = HIST.find(h => h.id === ui.revId); if (e && e.deal) { if (t.id === "oRevPbn") saveFile(`bridge-board-${e.board}.pbn`, '% PBN 2.1\n' + pbnOf(e)); else saveFile(`bridge-board-${e.board}.lin`, linOf(e)); } break; }
+    case "rPbn": exportPBN(HIST.filter(e => !e.tour)); break;
   }
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
