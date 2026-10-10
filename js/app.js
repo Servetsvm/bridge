@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 128;
+const APP_V = 129;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -194,7 +194,7 @@ const Ana = {
     if (!this.w) { this.w = Field.mk(); }
     if (this.w) {
       this.w.onmessage = m => { if (m.data && m.data.type === 'ana' && m.data.id === e.id) done(m.data.list); else if (m.data && m.data.type === 'error') done(null); };
-      this.w.postMessage({ type: 'ana', id: e.id, deal: e.deal, c: e.c, pl: e.pl, seats, limit: 4e6 });
+      this.w.postMessage({ type: 'ana', id: e.id, deal: e.deal, c: e.c, pl: e.pl, seats, limit: 2e7 });
     } else setTimeout(() => { try { done(E.analysePlay(e.deal, e.c, e.pl, seats, 4e5)); } catch (x) { done(null); } }, 50);
   },
   redraw(e) {
