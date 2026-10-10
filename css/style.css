@@ -1053,3 +1053,26 @@ body.felt-red #table,body.felt-red.classic #table{background:radial-gradient(ell
 .bkx{display:inline-block;width:18px;height:26px;border-radius:3px;border:1.5px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.35);vertical-align:middle}
 /* the card picked with the arrow keys */
 .card.kb{outline:3px solid #2f8ae0;outline-offset:1px;transform:translateY(-10px)!important}
+/* animations: the deal, the newest call, the result */
+body.dealing .fan .card{animation:dealIn .42s cubic-bezier(.2,.8,.3,1) both}
+@keyframes dealIn{from{opacity:0;transform:translateY(-60px) rotate(-8deg) scale(.7)}}
+body.dealing .fan .card:nth-child(1){animation-delay:0ms}
+body.dealing .fan .card:nth-child(2){animation-delay:45ms}
+body.dealing .fan .card:nth-child(3){animation-delay:90ms}
+body.dealing .fan .card:nth-child(4){animation-delay:135ms}
+body.dealing .fan .card:nth-child(5){animation-delay:180ms}
+body.dealing .fan .card:nth-child(6){animation-delay:225ms}
+body.dealing .fan .card:nth-child(7){animation-delay:270ms}
+body.dealing .fan .card:nth-child(8){animation-delay:315ms}
+body.dealing .fan .card:nth-child(9){animation-delay:360ms}
+body.dealing .fan .card:nth-child(10){animation-delay:405ms}
+body.dealing .fan .card:nth-child(11){animation-delay:450ms}
+body.dealing .fan .card:nth-child(12){animation-delay:495ms}
+body.dealing .fan .card:nth-child(13){animation-delay:540ms}
+#center .auction .c.newc{animation:callIn .35s cubic-bezier(.2,.8,.3,1.3) both}
+@keyframes callIn{from{opacity:0;transform:translateY(-14px) scale(1.5)}}
+.donebanner.good{animation:goodGlow 1.4s ease-out 1}
+@keyframes goodGlow{0%{box-shadow:0 0 0 0 rgba(242,201,76,.9)}50%{box-shadow:0 0 30px 12px rgba(242,201,76,.6)}100%{box-shadow:0 0 0 0 rgba(242,201,76,0)}}
+.donebanner.bad{animation:badShake .5s ease-in-out 1}
+@keyframes badShake{0%,100%{translate:0}20%{translate:-8px}40%{translate:7px}60%{translate:-5px}80%{translate:3px}}
+@media (prefers-reduced-motion:reduce){body.dealing .fan .card,#center .auction .c.newc,.donebanner.good,.donebanner.bad{animation:none}}

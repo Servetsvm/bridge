@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 125;
+const APP_V = 126;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -255,6 +255,8 @@ function freshDeal(dealer) {
 /* replay: a deal to play again or an entered deal; boardNo: board number for an entered deal (sets dealer and vulnerability) */
 function newBoard(replay, boardNo, tour) {
   clearTimeout(timer);
+  // the cards are dealt: they fly into the hands one after the other
+  document.body.classList.add("dealing"); clearTimeout(ui.dealT); ui.dealT = setTimeout(() => document.body.classList.remove("dealing"), 1100);
   if (!replay) BOARD++;
   const bn = boardNo || BOARD;
   const deal = replay ? replay.map(h => h.slice()) : freshDeal(dealerOf(bn));
@@ -577,10 +579,12 @@ function explHtml(e, prefix) {
 }
 // rv: a finished board from Results ({ board, dealer, seat, sel }): its calls are tapped with data-ri
 function auctionTable(auction, phaseBid, rv) {
+  const aucKey = G ? G.id + ":" + auction.length : "";   // the newest call drops in once
+  setTimeout(() => { if (!rv) ui.aucSeen = aucKey; }, 0);
   const cols = [3, 0, 1, 2], board = rv ? rv.board : G.board, me = rv ? rv.seat : U(), sel = rv ? rv.sel : ui.lastExpl;
   let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}">${SEAT[s]}</th>`).join('') + '</tr></thead><tbody><tr>';
   let col = cols.indexOf(rv ? rv.dealer : G.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
-  auction.forEach((e, i) => { o += `<td><span class="c${i === sel ? ' sel' : ''}${e.m && e.m.cv ? ' cvb' : ''}${e.al ? ' alrt' : ''}" ${rv ? 'data-ri' : 'data-ai'}="${i}">${callHtml(e.call)}${e.al ? '!' : ''}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
+  auction.forEach((e, i) => { o += `<td><span class="c${i === sel ? " sel" : ""}${!rv && i === auction.length - 1 && G && G.phase === "bid" && ui.aucSeen !== G.id + ":" + auction.length ? " newc" : ""}${e.m && e.m.cv ? ' cvb' : ''}${e.al ? ' alrt' : ''}" ${rv ? 'data-ri' : 'data-ai'}="${i}">${callHtml(e.call)}${e.al ? '!' : ''}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
   if (phaseBid) o += '<td>?</td>';
   return o + '</tr></tbody></table>';
 }
@@ -656,7 +660,8 @@ function renderTable() {
   } else {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
-    C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
+    { const first = ui.doneSeen !== G.id; if (first) setTimeout(() => { ui.doneSeen = G.id; }, 0); var doneCls = first ? (e && e.us > 0 ? " good" : e && e.us < 0 ? " bad" : "") : ""; }
+    C.innerHTML = e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans(); fitTable(); updateRcpt();

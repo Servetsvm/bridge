@@ -1068,6 +1068,29 @@ body.felt-red #table,body.felt-red.classic #table{background:radial-gradient(ell
 .bkx{display:inline-block;width:18px;height:26px;border-radius:3px;border:1.5px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.35);vertical-align:middle}
 /* the card picked with the arrow keys */
 .card.kb{outline:3px solid #2f8ae0;outline-offset:1px;transform:translateY(-10px)!important}
+/* animations: the deal, the newest call, the result */
+body.dealing .fan .card{animation:dealIn .42s cubic-bezier(.2,.8,.3,1) both}
+@keyframes dealIn{from{opacity:0;transform:translateY(-60px) rotate(-8deg) scale(.7)}}
+body.dealing .fan .card:nth-child(1){animation-delay:0ms}
+body.dealing .fan .card:nth-child(2){animation-delay:45ms}
+body.dealing .fan .card:nth-child(3){animation-delay:90ms}
+body.dealing .fan .card:nth-child(4){animation-delay:135ms}
+body.dealing .fan .card:nth-child(5){animation-delay:180ms}
+body.dealing .fan .card:nth-child(6){animation-delay:225ms}
+body.dealing .fan .card:nth-child(7){animation-delay:270ms}
+body.dealing .fan .card:nth-child(8){animation-delay:315ms}
+body.dealing .fan .card:nth-child(9){animation-delay:360ms}
+body.dealing .fan .card:nth-child(10){animation-delay:405ms}
+body.dealing .fan .card:nth-child(11){animation-delay:450ms}
+body.dealing .fan .card:nth-child(12){animation-delay:495ms}
+body.dealing .fan .card:nth-child(13){animation-delay:540ms}
+#center .auction .c.newc{animation:callIn .35s cubic-bezier(.2,.8,.3,1.3) both}
+@keyframes callIn{from{opacity:0;transform:translateY(-14px) scale(1.5)}}
+.donebanner.good{animation:goodGlow 1.4s ease-out 1}
+@keyframes goodGlow{0%{box-shadow:0 0 0 0 rgba(242,201,76,.9)}50%{box-shadow:0 0 30px 12px rgba(242,201,76,.6)}100%{box-shadow:0 0 0 0 rgba(242,201,76,0)}}
+.donebanner.bad{animation:badShake .5s ease-in-out 1}
+@keyframes badShake{0%,100%{translate:0}20%{translate:-8px}40%{translate:7px}60%{translate:-5px}80%{translate:3px}}
+@media (prefers-reduced-motion:reduce){body.dealing .fan .card,#center .auction .c.newc,.donebanner.good,.donebanner.bad{animation:none}}
 
 </style>
 
@@ -5072,7 +5095,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 125;
+const APP_V = 126;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -5319,6 +5342,8 @@ function freshDeal(dealer) {
 /* replay: a deal to play again or an entered deal; boardNo: board number for an entered deal (sets dealer and vulnerability) */
 function newBoard(replay, boardNo, tour) {
   clearTimeout(timer);
+  // the cards are dealt: they fly into the hands one after the other
+  document.body.classList.add("dealing"); clearTimeout(ui.dealT); ui.dealT = setTimeout(() => document.body.classList.remove("dealing"), 1100);
   if (!replay) BOARD++;
   const bn = boardNo || BOARD;
   const deal = replay ? replay.map(h => h.slice()) : freshDeal(dealerOf(bn));
@@ -5641,10 +5666,12 @@ function explHtml(e, prefix) {
 }
 // rv: a finished board from Results ({ board, dealer, seat, sel }): its calls are tapped with data-ri
 function auctionTable(auction, phaseBid, rv) {
+  const aucKey = G ? G.id + ":" + auction.length : "";   // the newest call drops in once
+  setTimeout(() => { if (!rv) ui.aucSeen = aucKey; }, 0);
   const cols = [3, 0, 1, 2], board = rv ? rv.board : G.board, me = rv ? rv.seat : U(), sel = rv ? rv.sel : ui.lastExpl;
   let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}">${SEAT[s]}</th>`).join('') + '</tr></thead><tbody><tr>';
   let col = cols.indexOf(rv ? rv.dealer : G.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
-  auction.forEach((e, i) => { o += `<td><span class="c${i === sel ? ' sel' : ''}${e.m && e.m.cv ? ' cvb' : ''}${e.al ? ' alrt' : ''}" ${rv ? 'data-ri' : 'data-ai'}="${i}">${callHtml(e.call)}${e.al ? '!' : ''}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
+  auction.forEach((e, i) => { o += `<td><span class="c${i === sel ? " sel" : ""}${!rv && i === auction.length - 1 && G && G.phase === "bid" && ui.aucSeen !== G.id + ":" + auction.length ? " newc" : ""}${e.m && e.m.cv ? ' cvb' : ''}${e.al ? ' alrt' : ''}" ${rv ? 'data-ri' : 'data-ai'}="${i}">${callHtml(e.call)}${e.al ? '!' : ''}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
   if (phaseBid) o += '<td>?</td>';
   return o + '</tr></tbody></table>';
 }
@@ -5720,7 +5747,8 @@ function renderTable() {
   } else {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
-    C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
+    { const first = ui.doneSeen !== G.id; if (first) setTimeout(() => { ui.doneSeen = G.id; }, 0); var doneCls = first ? (e && e.us > 0 ? " good" : e && e.us < 0 ? " bad" : "") : ""; }
+    C.innerHTML = e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans(); fitTable(); updateRcpt();
