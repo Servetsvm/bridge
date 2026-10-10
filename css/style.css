@@ -833,3 +833,25 @@ body.bigcards .mini{transform:scale(1.15);transform-origin:bottom}
 .fbar{display:flex;justify-content:space-between;align-items:center;cursor:move;margin:-8px -8px 0;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.07);user-select:none;touch-action:none;font-size:15px;color:#7c7b70}
 .fbar .mini-btn{float:none}
 :root[data-theme="dark"] .fbar{background:rgba(255,255,255,.07)}
+/* the player card, compact: small header, the details in two columns, the convention line shortened (tap to open) */
+.sheet:has(.pcard){width:min(400px,100%);padding:12px;gap:8px}
+.pcard{gap:6px;font-size:13.5px}
+.phead{padding:8px 10px;gap:10px;border-radius:10px}
+.pav{width:38px;height:38px;font-size:19px}
+.pnm{font-size:17px}
+.pnm .pctry{font-size:12.5px}
+.psub{font-size:12px;margin-top:2px}
+.pfields{font-size:13px}
+.pfields tbody{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+.pfields tr{display:flex;flex-direction:column;border:0}
+.pfields th{width:auto;padding:0;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.pfields td{padding:0 0 2px}
+.pfields tr+tr th,.pfields tr+tr td{border-top:0}
+div.pconv{font-size:12.5px;padding:5px 8px;max-height:4.7em;overflow:hidden;cursor:pointer;position:relative}
+div.pconv.open{max-height:none}
+textarea.pconv{font-size:12.5px;min-height:0}
+.pcard .res{font-size:12.5px}
+.pcard .res th,.pcard .res td{padding:3px 4px}
+.pcard .row2{gap:6px;flex-wrap:wrap}
+.pcard .row2 .btn{padding:6px 9px;font-size:13px}
+.pcard .row2 .btn{flex:1 1 auto;white-space:nowrap}
