@@ -996,10 +996,10 @@ body.classic #pos0,body.classic #pos2{gap:0}
 #bidbox .r2 button.st.nt{font-size:17px}
 @media (max-height:600px){ #bidbox .r1 button{padding:3px 0;font-size:15px} #bidbox .r2 button.st{padding:1px 0;font-size:18px} }
 /* who the message goes to (beside the message box) and its menu */
-.rcpt{flex:none;max-width:45%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#2f5fa8!important;color:#fff!important;font-size:13px;padding:6px 9px}
+.rcpt{flex:none;max-width:45%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#1f6b3d!important;color:#f2d27a!important;border:1px solid #c9a227!important;border-radius:999px!important;font-size:14px;padding:5px 10px}
 .rcptmenu{position:fixed;z-index:60;width:210px;max-height:50vh;overflow:auto;background:var(--sheet,#f6f3e8);color:var(--sheet-ink,#222);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.45);padding:4px;display:flex;flex-direction:column;gap:2px}
 .rcptmenu button{text-align:left;background:none;border:0;border-radius:6px;padding:7px 9px;font:inherit;font-size:14px;color:inherit;cursor:pointer}
-.rcptmenu button:hover{background:rgba(47,95,168,.15)}
+.rcptmenu button:hover{background:rgba(31,107,61,.18)}
 /* under the players list */
 .lpfoot{display:flex;flex-direction:column;gap:5px;margin-top:8px;padding-top:6px;border-top:1px solid #e3e1d4;font-size:12.5px}
 .lpoff{display:flex;align-items:center;gap:6px;cursor:pointer}

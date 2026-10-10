@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 117;
+const APP_V = 118;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -760,7 +760,7 @@ function renderDock() {
       <div class="${tab === 'table' ? 'dbody' : 'lsplit dsplit'}">${tab === 'table' ? '' : `<div class="lplayers"><div id="dPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div>`}<div class="lcol"><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>` : ''}
       <div class="pmto" id="dPmTo"></div>
-      <div class="row2"><button class="btn rcpt" id="dRcpt">${rcptLabel("dock")}</button><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div></div></div>`;
+      <div class="row2"><button class="btn rcpt" id="dRcpt" title="${T("Who gets the message")}">${rcptLabel("dock")}</button><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div></div></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
   { const p = $('dPlayers'), h = tab === 'table' ? '' : Net.playersHtml(); if (p && p.innerHTML !== h) p.innerHTML = h; }   // the players beside the lobby chat
@@ -882,7 +882,7 @@ function homeShell() {
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
     <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
-      <div class="row2"><button class="btn rcpt" id="lRcpt">→ ${T("Lobby")}</button><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></div></div></aside>
+      <div class="row2"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></div></div></aside>
   </div><div id="hSheet"></div></div>`;
 }
 // the section opened with the buttons at the top of the home page (tournaments, our card, players, chat on a phone)
@@ -890,7 +890,7 @@ function homeSection(k) {
   if (k === 'tours') return `<div class="hcard"><h3>🏆 ${T('Tournaments')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hTours"></div></div>`;
   if (k === 'conv') return `<div class="hcard"><h3>📋 ${T('Our convention card (with partner)')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hConv"></div></div>`;
   if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="pPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="pChat"></div><div class="pmto" id="pPmTo"></div>
-    <div class="row2"><button class="btn rcpt" id="pRcpt">→ ${T("Lobby")}</button><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div></div></div>`;
+    <div class="row2"><button class="btn rcpt" id="pRcpt" title="${T("Who gets the message")}">🌐 ▾</button><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div></div></div>`;
   return '';
 }
 // our card: every convention with a switch; tap a name for its description
@@ -1994,9 +1994,9 @@ function addFriendFrom(btn) {
 /* ---- who the message goes to: the button beside the message box shows it; tap it to choose the table, the lobby
    or one player (a private message) ---- */
 function rcptLabel(where) {
-  if (ui.pmTo) return '🔒 ' + ui.pmTo;
-  if (where === 'dock' && online() && (ui.dockTab || 'table') === 'table') return '→ ' + T('Table');
-  return '→ ' + T('Lobby');
+  if (ui.pmTo) return '🔒 ' + ui.pmTo + ' ▾';
+  if (where === 'dock' && online() && (ui.dockTab || 'table') === 'table') return '🃏 ▾';
+  return '🌐 ▾';
 }
 function updateRcpt() {
   for (const [id, w] of [['dRcpt', 'dock'], ['lRcpt', 'home'], ['pRcpt', 'home']]) { const b = $(id); if (b) { const t = rcptLabel(w); if (b.textContent !== t) b.textContent = t; } }
@@ -2004,7 +2004,7 @@ function updateRcpt() {
 function showRcptMenu(btn) {
   const where = btn.id === 'dRcpt' ? 'dock' : 'home';
   const people = [...new Set([...Net.knownNames(), ...friends()])].slice(0, 30);
-  const opts = (where === 'dock' && online() ? [['table', '💬 ' + T('Table')]] : []).concat([['lobby', '🌐 ' + T('Lobby')]], people.map(n => ['pm:' + n, '🔒 ' + n]));
+  const opts = (where === 'dock' && online() ? [['table', '🃏 ' + T('Table')]] : []).concat([['lobby', '🌐 ' + T('Lobby')]], people.map(n => ['pm:' + n, '🔒 ' + n]));
   const old = document.querySelector('.rcptmenu'); if (old) old.remove();
   const m = document.createElement('div'); m.className = 'rcptmenu';
   m.innerHTML = opts.map(([v, l]) => `<button data-rcpt="${esc(v)}">${esc(l)}</button>`).join('');
