@@ -1035,3 +1035,19 @@ body.four .card.s1,body.four .mini.s1,body.four .sym.s1,body.four .sy.s1,body.fo
 .lbl>span:first-child,body.classic .lbl>span:first-child{background:#2e7d32;color:#fff}
 .lbl>span.vn:first-child,body.classic .lbl>span.vn:first-child,.lbl.turn>span.vn:first-child{background:#c62828;color:#fff}
 .lbl.turn>span:first-child{color:#fff}
+/* ==== our own card face: warm ivory, a fine gold line inside the edge, the rank in a serif type ==== */
+body.classic .card{background:linear-gradient(170deg,#fffdf7 0%,#fbf6e8 100%);border:1px solid #b9ad8f;border-radius:7px}
+body.classic .card::after{content:"";position:absolute;inset:2px;border:1px solid rgba(201,162,39,.35);border-radius:5px;pointer-events:none}
+body.classic .card .ix b{font-family:Bitter,Georgia,"Times New Roman",serif;font-weight:700;letter-spacing:-.04em}
+body.classic .card.dim{filter:none;background:linear-gradient(170deg,#ecebe4,#e2e0d6)}
+/* card backs (Settings → Card back) */
+.backs i{background:repeating-linear-gradient(45deg,#1f4fa0 0 3px,#2b63c2 3px 6px)}
+body.back-green .backs i{background:radial-gradient(circle at 50% 50%,#2f8a52 0 25%,transparent 26%) 0 0/6px 6px,#1b5e3a}
+body.back-red .backs i{background:repeating-linear-gradient(-45deg,#8e1b2c 0 3px,#b72c40 3px 6px)}
+body.back-navy .backs i{background:linear-gradient(135deg,transparent 40%,#d9b25c 40% 60%,transparent 60%) 0 0/7px 7px,#14213d}
+/* table cloth (Settings → Table) */
+body.felt-blue #table,body.felt-blue.classic #table{background:radial-gradient(ellipse at 50% 45%,#2d6aa8 0%,#1c4f84 55%,#123760 100%)!important}
+body.felt-wood #table,body.felt-wood.classic #table{background:radial-gradient(ellipse at 50% 45%,rgba(255,255,255,.08),transparent 60%),repeating-linear-gradient(92deg,#7a4a24 0 14px,#83512a 14px 22px,#6e4220 22px 34px)!important}
+body.felt-dark #table,body.felt-dark.classic #table{background:radial-gradient(ellipse at 50% 45%,#3a3f44 0%,#26292d 60%,#1a1c1f 100%)!important}
+body.felt-red #table,body.felt-red.classic #table{background:radial-gradient(ellipse at 50% 45%,#9c2a35 0%,#7a1e28 55%,#58141c 100%)!important}
+.bkx{display:inline-block;width:18px;height:26px;border-radius:3px;border:1.5px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.35);vertical-align:middle}

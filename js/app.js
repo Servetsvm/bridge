@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 122;
+const APP_V = 123;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -845,6 +845,8 @@ function applyLook() {
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.body.classList.toggle('bigcards', !!SET.big);
   document.body.classList.toggle('four', !!SET.four);   // four-colour deck
+  for (const k of ['green', 'red', 'navy']) document.body.classList.toggle('back-' + k, SET.back === k);   // card backs
+  for (const k of ['blue', 'wood', 'dark', 'red']) document.body.classList.toggle('felt-' + k, SET.felt === k);   // table cloth
 }
 try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyLook()); } catch (e) {}
 // browsers only allow sound after a tap: unlock it on the first one
@@ -1412,6 +1414,8 @@ function showSettings() {
    <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div></div>
    <div class="grp"><span>${T('Table sounds')}</span>${seg('sfx', [[1, T('On')], [0, T('Off')]], SET.sfx ? 1 : 0)}</div>
    <div class="grp"><span>${T('Screen')}</span>${seg('theme', [['auto', T('Automatic')], ['light', T('Light')], ['dark', T('Dark')]], SET.theme || 'auto')}</div>
+   <div class="grp"><span>${T('Table')}</span>${seg('felt', [['green', '🟩 ' + T('Green')], ['blue', '🟦 ' + T('Blue')], ['wood', '🟫 ' + T('Wood')], ['red', '🟥 ' + T('Red')], ['dark', '⬛ ' + T('Dark')]], SET.felt || 'green')}</div>
+   <div class="grp"><span>${T('Card back')}</span>${seg('back', [['blue', '<span class="bkx" style="background:repeating-linear-gradient(45deg,#1f4fa0 0 3px,#2b63c2 3px 6px)"></span>'], ['green', '<span class="bkx" style="background:radial-gradient(circle,#2f8a52 0 25%,transparent 26%) 0 0/6px 6px,#1b5e3a"></span>'], ['red', '<span class="bkx" style="background:repeating-linear-gradient(-45deg,#8e1b2c 0 3px,#b72c40 3px 6px)"></span>'], ['navy', '<span class="bkx" style="background:linear-gradient(135deg,transparent 40%,#d9b25c 40% 60%,transparent 60%) 0 0/7px 7px,#14213d"></span>']], SET.back || 'blue')}</div>
    <div class="grp"><span>${T('Deck')}</span>${seg('four', [[0, T('2 colours') + ' <span class="sym s3">♠</span><span class="sym s2 red">♥</span><span class="sym s1 red">♦</span><span class="sym s0">♣</span>'], [1, T('4 colours') + ' <b style="color:#1b1b1b">♠</b><b style="color:#c4122f">♥</b><b style="color:#e07000">♦</b><b style="color:#1a8a3a">♣</b>']], SET.four ? 1 : 0)}</div>
    <div class="grp"><span>${T('Card size')}</span>${seg('big', [[0, T('Normal')], [1, T('Large')]], SET.big ? 1 : 0)}</div>
    <div class="grp"><span>${T('Our convention card (with partner)')}</span>${convCardHtml()}</div>
@@ -1705,7 +1709,7 @@ document.addEventListener('click', ev_ => {
     if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
     if (seg === 'alert') { SET.alert = v; if (v !== 'off') beep(); }
     if (seg === 'notify') { setNotify(v === '1'); return; }
-    if (seg === 'four') SET.four = v === '1';
+    if (seg === 'four') SET.four = v === '1'; if (seg === 'felt') SET.felt = v; if (seg === 'back') SET.back = v;
     if (seg === 'sfx') { SET.sfx = v === '1'; sfx('card'); } if (seg === 'theme') SET.theme = v; if (seg === 'big') SET.big = v === '1';
     if (seg === "style") SET.style = v;
     if (seg === "mode") SET.mode = v; if (seg === 'opp') SET.opp = v;
