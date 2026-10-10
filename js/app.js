@@ -1962,3 +1962,5 @@ async function showStats() {
     <div class="muted">${T('Each internet address counts once in each period. Only you (the administrator) see this page.')}</div>
     <div class="row2"><button class="btn" id="sRefresh">🔄 ${T('Refresh')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+// an app installed while it was still locked upright keeps that lock until the phone or tablet updates it: free it now
+try { if (screen.orientation && screen.orientation.lock && matchMedia('(display-mode: standalone)').matches) screen.orientation.lock('any').catch(() => {}); } catch (e) {}
