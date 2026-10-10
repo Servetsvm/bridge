@@ -865,7 +865,7 @@ textarea.pconv{font-size:12.5px;min-height:0}
 .grip.gripx{position:absolute;left:-7px;top:12px;bottom:12px;width:12px;cursor:ew-resize;z-index:5;border-radius:6px}
 .grip.gripc{cursor:col-resize;border-radius:4px;align-self:stretch;margin-bottom:8px}
 .grip:hover,.grip.drag{background:rgba(201,162,39,.45)}
-.lsplit,#dock .dsplit{grid-template-columns:minmax(80px,var(--plw)) 8px minmax(0,1fr);gap:0}
+.lsplit,#dock .dsplit{grid-template-columns:minmax(80px,min(var(--plw),45%)) 8px minmax(0,1fr);gap:0}
 #dock .dsplit .grip.gripc{margin-bottom:0}
 @media (max-width:900px){ .hchat .gripx{display:none} }
 @media (max-width:1099px){ #dock .gripx{display:none} }
@@ -968,3 +968,50 @@ textarea.pconv{font-size:12.5px;min-height:0}
 /* the trick cards take their size from the room in the middle of the table (set by fitTable) */
 #center .card.tc,body.classic #center .card.tc{--cw:var(--tcw,58px)}
 #center .trick{height:calc(100% - 4px)!important}
+/* ==== the table as on the big bridge sites ====
+   short cards with the rank and suit at the top; the name plate covers the lower part of a hand; the four cards of
+   the trick lie together in a small cross in the middle; the same card size for the hands and the trick */
+body.classic .card{height:calc(var(--cw)*1.5)}
+body.classic .card .ix{padding-top:calc(var(--cw)*.04)}
+body.classic .card .ix b{font-size:calc(var(--cw)*.66);letter-spacing:-.06em}
+body.classic .card .ix i{font-size:calc(var(--cw)*.6);margin-top:0}
+body.classic #pos0 .lbl{position:relative;z-index:3;margin-top:calc(var(--fcw,50px)*-.26)}
+body.classic #pos2:has(.fan) .lbl{order:2;position:relative;z-index:3;margin-top:calc(var(--fcw,50px)*-.26)}
+body.classic #pos0,body.classic #pos2{gap:0}
+/* the trick: a small cross around the middle of the table (North above, South below, West left, East right) */
+#center .trick{left:50%!important;top:50%!important;width:0!important;height:0!important;transform:none!important}
+#center .card.tc{position:absolute;left:0!important;top:0!important;right:auto!important;bottom:auto!important}
+#center .tc.p2{transform:translate(-62%,-104%)}
+#center .tc.p0{transform:translate(-38%,-2%)}
+#center .tc.p1{transform:translate(-130%,-56%)}
+#center .tc.p3{transform:translate(30%,-46%)}
+#center .tc.p0{z-index:4}#center .tc.p1{z-index:2}#center .tc.p2{z-index:1}#center .tc.p3{z-index:3}
+/* the bidding box: two rows, narrow, under the table */
+#bidbox{max-width:640px;width:100%;margin:0 auto;gap:4px;padding:5px}
+#bidbox .row{gap:3px}
+#bidbox .r1 button{font-size:17px;padding:6px 0}
+#bidbox .r1 .pass{flex:2.2;font-size:15px}
+#bidbox .r1 .dbl,#bidbox .r1 .rdbl{flex:1.1;font-size:15px}
+#bidbox .r2 button.st{font-size:22px;padding:3px 0}
+#bidbox .r2 button.st.nt{font-size:17px}
+@media (max-height:600px){ #bidbox .r1 button{padding:3px 0;font-size:15px} #bidbox .r2 button.st{padding:1px 0;font-size:18px} }
+/* who the message goes to (beside the message box) and its menu */
+.rcpt{flex:none;max-width:45%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:#2f5fa8!important;color:#fff!important;font-size:13px;padding:6px 9px}
+.rcptmenu{position:fixed;z-index:60;width:210px;max-height:50vh;overflow:auto;background:var(--sheet,#f6f3e8);color:var(--sheet-ink,#222);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.45);padding:4px;display:flex;flex-direction:column;gap:2px}
+.rcptmenu button{text-align:left;background:none;border:0;border-radius:6px;padding:7px 9px;font:inherit;font-size:14px;color:inherit;cursor:pointer}
+.rcptmenu button:hover{background:rgba(47,95,168,.15)}
+/* under the players list */
+.lpfoot{display:flex;flex-direction:column;gap:5px;margin-top:8px;padding-top:6px;border-top:1px solid #e3e1d4;font-size:12.5px}
+.lpoff{display:flex;align-items:center;gap:6px;cursor:pointer}
+.lpadd{display:flex;gap:4px}
+.lpadd .tok{flex:1;min-width:0;padding:4px 6px;font-size:12.5px}
+:root[data-theme="dark"] .lpfoot{border-top-color:#3a443e}
+.row2 .rcpt,#dock .rcpt{flex:0 0 auto!important;min-width:min(max-content,45%)}
+/* overlapping cards (narrow screens): the rank and suit at the left edge, like a hand held in the fingers */
+body.classic .fan.ovl .card{margin-left:var(--ov)}
+body.classic .fan.ovl .card:first-child{margin-left:0}
+body.classic .fan.ovl .card .ix{align-items:flex-start;padding-left:calc(var(--cw)*.07)}
+body.classic .fan.ovl .card .ix b{font-size:calc(var(--cw)*.5)}
+body.classic .fan.ovl .card .ix i{font-size:calc(var(--cw)*.48)}
+/* the cards sliding in and out of the trick stay inside the felt (no moment of scrolling) */
+#table,body.classic #table{overflow:hidden}

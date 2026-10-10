@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Add friend": "Arkadaş ekle", "Asked the other players for a new deal": "Diğer oyunculara yeni el soruldu", "Host": "Masa sahibi", "Show offline": "Çevrimdışıları göster", "The other players said no": "Diğer oyuncular kabul etmedi", "{0} asks for a new deal": "{0} yeni el istiyor", "{0} is now a friend": "{0} artık arkadaşın",
     "30 days": "30 gün", "365 days": "365 gün", "7 days": "7 gün", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Her internet adresi her dönemde bir kez sayılır. Bu sayfayı sadece sen (admin) görürsün.", "Loading…": "Yükleniyor…", "Nobody yet.": "Henüz kimse yok.", "Refresh": "Yenile", "The online database could not be reached.": "Çevrimiçi veritabanına ulaşılamadı.", "Unknown": "Bilinmiyor", "Visitor statistics": "Ziyaretçi istatistiği", "{0} visitors": "{0} ziyaretçi",
     "Drag to resize": "Boyutlandırmak için sürükle", "Smaller": "Küçült", "Larger": "Büyüt",
     "Drag to move": "Taşımak için sürükle",
@@ -95,6 +96,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Add friend": "Legg til venn", "Asked the other players for a new deal": "Spurte de andre spillerne om nytt spill", "Host": "Vert", "Show offline": "Vis frakoblede", "The other players said no": "De andre spillerne sa nei", "{0} asks for a new deal": "{0} ber om nytt spill", "{0} is now a friend": "{0} er nå en venn",
     "30 days": "30 dager", "365 days": "365 dager", "7 days": "7 dager", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Hver internettadresse telles én gang per periode. Bare du (administrator) ser denne siden.", "Loading…": "Laster…", "Nobody yet.": "Ingen ennå.", "Refresh": "Oppdater", "The online database could not be reached.": "Fikk ikke kontakt med databasen.", "Unknown": "Ukjent", "Visitor statistics": "Besøksstatistikk", "{0} visitors": "{0} besøkende",
     "Drag to resize": "Dra for å endre størrelse", "Smaller": "Mindre", "Larger": "Større",
     "Drag to move": "Dra for å flytte",
@@ -187,6 +189,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Add friend": "Añadir amigo", "Asked the other players for a new deal": "Se pidió una mano nueva a los demás", "Host": "Anfitrión", "Show offline": "Mostrar desconectados", "The other players said no": "Los demás dijeron que no", "{0} asks for a new deal": "{0} pide una mano nueva", "{0} is now a friend": "{0} ya es tu amigo",
     "30 days": "30 días", "365 days": "365 días", "7 days": "7 días", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Cada dirección de internet cuenta una vez por periodo. Solo tú (administrador) ves esta página.", "Loading…": "Cargando…", "Nobody yet.": "Nadie todavía.", "Refresh": "Actualizar", "The online database could not be reached.": "No se pudo acceder a la base de datos.", "Unknown": "Desconocido", "Visitor statistics": "Estadísticas de visitas", "{0} visitors": "{0} visitantes",
     "Drag to resize": "Arrastra para cambiar el tamaño", "Smaller": "Más pequeño", "Larger": "Más grande",
     "Drag to move": "Arrastra para mover",
@@ -307,6 +310,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Add friend": "Ajouter un ami", "Asked the other players for a new deal": "Nouvelle donne demandée aux autres joueurs", "Host": "Hôte", "Show offline": "Afficher hors ligne", "The other players said no": "Les autres joueurs ont refusé", "{0} asks for a new deal": "{0} demande une nouvelle donne", "{0} is now a friend": "{0} est maintenant votre ami",
     "30 days": "30 jours", "365 days": "365 jours", "7 days": "7 jours", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Chaque adresse internet compte une fois par période. Vous seul (administrateur) voyez cette page.", "Loading…": "Chargement…", "Nobody yet.": "Personne pour l’instant.", "Refresh": "Actualiser", "The online database could not be reached.": "Base de données injoignable.", "Unknown": "Inconnu", "Visitor statistics": "Statistiques des visites", "{0} visitors": "{0} visiteurs",
     "Drag to resize": "Faites glisser pour redimensionner", "Smaller": "Plus petit", "Larger": "Plus grand",
     "Drag to move": "Faites glisser pour déplacer",
@@ -427,6 +431,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Add friend": "Aggiungi amico", "Asked the other players for a new deal": "Chiesta una nuova smazzata agli altri", "Host": "Host", "Show offline": "Mostra offline", "The other players said no": "Gli altri hanno detto di no", "{0} asks for a new deal": "{0} chiede una nuova smazzata", "{0} is now a friend": "{0} ora è tuo amico",
     "30 days": "30 giorni", "365 days": "365 giorni", "7 days": "7 giorni", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Ogni indirizzo internet conta una volta per periodo. Solo tu (amministratore) vedi questa pagina.", "Loading…": "Caricamento…", "Nobody yet.": "Ancora nessuno.", "Refresh": "Aggiorna", "The online database could not be reached.": "Database non raggiungibile.", "Unknown": "Sconosciuto", "Visitor statistics": "Statistiche visite", "{0} visitors": "{0} visitatori",
     "Drag to resize": "Trascina per ridimensionare", "Smaller": "Più piccolo", "Larger": "Più grande",
     "Drag to move": "Trascina per spostare",
@@ -547,6 +552,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Add friend": "Freund hinzufügen", "Asked the other players for a new deal": "Die anderen Spieler wurden um ein neues Board gebeten", "Host": "Gastgeber", "Show offline": "Offline zeigen", "The other players said no": "Die anderen Spieler haben abgelehnt", "{0} asks for a new deal": "{0} möchte ein neues Board", "{0} is now a friend": "{0} ist jetzt dein Freund",
     "30 days": "30 Tage", "365 days": "365 Tage", "7 days": "7 Tage", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Jede Internetadresse zählt einmal pro Zeitraum. Nur du (Administrator) siehst diese Seite.", "Loading…": "Wird geladen…", "Nobody yet.": "Noch niemand.", "Refresh": "Aktualisieren", "The online database could not be reached.": "Die Datenbank ist nicht erreichbar.", "Unknown": "Unbekannt", "Visitor statistics": "Besucherstatistik", "{0} visitors": "{0} Besucher",
     "Drag to resize": "Zum Ändern der Größe ziehen", "Smaller": "Kleiner", "Larger": "Größer",
     "Drag to move": "Zum Verschieben ziehen",
@@ -667,6 +673,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Add friend": "Добавить друга", "Asked the other players for a new deal": "Другим игрокам предложена новая сдача", "Host": "Хозяин", "Show offline": "Показать не в сети", "The other players said no": "Другие игроки отказались", "{0} asks for a new deal": "{0} просит новую сдачу", "{0} is now a friend": "{0} теперь ваш друг",
     "30 days": "30 дней", "365 days": "365 дней", "7 days": "7 дней", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Каждый интернет-адрес считается один раз за период. Эту страницу видите только вы (администратор).", "Loading…": "Загрузка…", "Nobody yet.": "Пока никого.", "Refresh": "Обновить", "The online database could not be reached.": "База данных недоступна.", "Unknown": "Неизвестно", "Visitor statistics": "Статистика посещений", "{0} visitors": "Посетителей: {0}",
     "Drag to resize": "Потяните, чтобы изменить размер", "Smaller": "Меньше", "Larger": "Больше",
     "Drag to move": "Перетащите, чтобы сдвинуть",
@@ -787,6 +794,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Add friend": "Dodaj znajomego", "Asked the other players for a new deal": "Poproszono innych graczy o nowe rozdanie", "Host": "Gospodarz", "Show offline": "Pokaż offline", "The other players said no": "Inni gracze odmówili", "{0} asks for a new deal": "{0} prosi o nowe rozdanie", "{0} is now a friend": "{0} jest teraz znajomym",
     "30 days": "30 dni", "365 days": "365 dni", "7 days": "7 dni", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Każdy adres internetowy liczy się raz w okresie. Tę stronę widzisz tylko ty (administrator).", "Loading…": "Ładowanie…", "Nobody yet.": "Jeszcze nikogo.", "Refresh": "Odśwież", "The online database could not be reached.": "Baza danych jest niedostępna.", "Unknown": "Nieznany", "Visitor statistics": "Statystyki odwiedzin", "{0} visitors": "{0} odwiedzających",
     "Drag to resize": "Przeciągnij, aby zmienić rozmiar", "Smaller": "Mniejszy", "Larger": "Większy",
     "Drag to move": "Przeciągnij, aby przesunąć",
@@ -907,6 +915,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Add friend": "添加好友", "Asked the other players for a new deal": "已请其他玩家同意新牌", "Host": "桌主", "Show offline": "显示离线", "The other players said no": "其他玩家拒绝了", "{0} asks for a new deal": "{0} 请求新牌", "{0} is now a friend": "{0} 已成为好友",
     "30 days": "30 天", "365 days": "365 天", "7 days": "7 天", "Each internet address counts once in each period. Only you (the administrator) see this page.": "每个网络地址在每个时段只计一次。只有你(管理员)能看到此页。", "Loading…": "加载中…", "Nobody yet.": "还没有人。", "Refresh": "刷新", "The online database could not be reached.": "无法连接在线数据库。", "Unknown": "未知", "Visitor statistics": "访客统计", "{0} visitors": "{0} 位访客",
     "Drag to resize": "拖动以调整大小", "Smaller": "缩小", "Larger": "放大",
     "Drag to move": "拖动以移动",

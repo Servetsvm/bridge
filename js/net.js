@@ -651,7 +651,7 @@ const Net = (() => {
     for (const f of fr) if (nameKey(f) !== me && !here.has(nameKey(f))) off.set(nameKey(f), f);
     const G_ = { friends: [], play: [], lobby: [], off: [] };
     for (const [k, n] of here) { const s = status(n); (fr.some(f => nameKey(f) === k) ? G_.friends : s.s === 'play' ? G_.play : G_.lobby).push({ n, ...s }); }
-    for (const [k, n] of off) (fr.some(f => nameKey(f) === k) ? G_.friends : G_.off).push({ n, s: 'off' });
+    if (SET.showOff) for (const [k, n] of off) (fr.some(f => nameKey(f) === k) ? G_.friends : G_.off).push({ n, s: 'off' });
     for (const g in G_) G_[g].sort((a, b) => a.n.localeCompare(b.n));
     return G_;
   }
@@ -665,7 +665,7 @@ const Net = (() => {
     const admin = isAdmin() ? `<div class="ladmin" data-stats="1" title="${T('Visitor statistics')}">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
     return `<div class="lcount"><span title="${T('Online')}">🟢 ${nOn}</span><span title="${T('Playing')}">🎮 ${nPlay}</span><span title="${T('Offline')}">⚪ ${nOff}</span></div>${admin}
       ${sec('★ ' + T('Friends'), g.friends)}${sec('🎮 ' + T('Playing'), g.play)}${sec('🟢 ' + T('In the lobby'), g.lobby)}${sec('⚪ ' + T('Offline'), g.off)}
-      ${all.length ? '' : `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`}<button class="btn mini-btn lplead" id="lLead">🏅 ${T('Leaderboard')}</button>`;
+      ${all.length ? '' : `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`}`;
   }
   /* is this name free? Taken when someone else in the lobby uses it now, or (with the database) when it belongs to
      someone with another PIN. Returns 'ok', 'new' (free, not yet registered), 'taken' or 'pin' (yours, wrong PIN) */

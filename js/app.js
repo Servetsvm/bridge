@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 116;
+const APP_V = 117;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -659,12 +659,12 @@ function renderTable() {
     C.innerHTML = e ? `<button class="donebanner" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
-  layoutFans(); fitTable();
+  layoutFans(); fitTable(); updateRcpt();
 }
 // still taller than the window (a long suit in dummy): make the dummy's cards smaller until the page fits
 function fitTable() {
   // the cards of the trick: North's on top and South's at the bottom of the middle must never meet, so their size follows the room
-  { const c = $("center"); if (c && c.clientHeight) { const w = Math.max(26, Math.min(80, (c.clientHeight - 16) / (2 * 1.95 + 0.25), c.clientWidth / 3.3)); c.style.setProperty("--tcw", w.toFixed(1) + "px"); } }
+  { const c = $("center"); if (c && c.clientHeight) { const hand = parseFloat(getComputedStyle($("pos0")).getPropertyValue("--fcw")) || 64; const w = Math.max(26, Math.min(hand >= 45 ? hand : 80, 80, (c.clientHeight - 12) / 3.05, (c.clientWidth - 8) / 2.65));  /* on a phone (small hand cards) the trick may be bigger */ c.style.setProperty("--tcw", w.toFixed(1) + "px"); } }
   const d = document.querySelector(".dcols"); if (!d || !G || G.phase === "idle") return;
   const over = document.documentElement.scrollHeight - innerHeight; if (over <= 0) return;
   const n = +d.dataset.n || 1, cur = +d.dataset.dw || 52, dw = Math.max(26, Math.floor(cur - over / (1.3 + (n - 1) * 0.5)) - 1);
@@ -677,7 +677,15 @@ function layoutFans() {
     const W = el.clientWidth, max = +el.dataset.max || 70;
     // classic cards: as wide as fits, and on short screens low enough for the hand to stay in view
     const big = SET.big ? 1.3 : 1;
-    if (SET.style !== "modern") { const cw = Math.max(20, Math.min(60 * big, (W - (n - 1)) / n, innerHeight * (innerHeight < 450 ? 0.14 : innerHeight < 600 ? 0.155 : 0.2) * big / 1.95)); el.style.setProperty("--cw", cw + "px"); el.style.setProperty("--ov", "1px"); return; }
+    if (SET.style !== "modern") {
+      // short cards (as on the big bridge sites): the name plate covers their lower part, the rank and suit stay in view
+      const hmax = innerHeight * (innerHeight < 450 ? 0.14 : innerHeight < 600 ? 0.155 : 0.2) * big / 1.25, side = (W - (n - 1)) / n;
+      let cw = Math.max(20, Math.min(64 * big, side, hmax)), ov = 1;
+      // a narrow screen: the cards overlap a little (the rank stays in view at the left) so they can be bigger
+      if (side < 44 && n > 1) { cw = Math.max(20, Math.min(64 * big, hmax, W / (1 + (n - 1) * 0.68))); ov = Math.min(1, (W - cw) / (n - 1) - cw); }
+      el.classList.toggle("ovl", ov < 0);
+      el.style.setProperty("--cw", cw + "px"); el.style.setProperty("--ov", ov + "px"); if (el.parentElement) el.parentElement.style.setProperty("--fcw", cw + "px"); return;
+    }
     const cw = Math.max(28, Math.min(max * big, W / (1 + (n - 1) * 0.44)));
     const step = n > 1 ? Math.min(cw * 1.04, (W - cw) / (n - 1)) : 0;
     el.style.setProperty('--cw', cw + 'px'); el.style.setProperty('--ov', (step - cw) + 'px');
@@ -689,7 +697,8 @@ function renderBidbox() {
   bb.hidden = false; const L = legalCalls(G.auction, U());
   const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st${red(s) ? ' r' : ''}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
-  const html = `<div class="row"><button data-call="P" class="pass">${T('Pass')}</button><button data-call="X" class="dbl" ${L.includes('X') ? '' : 'disabled'}>${T('Double')}</button><button data-call="XX" class="rdbl" ${L.includes('XX') ? '' : 'disabled'}>${T('Redouble')}</button></div><div class="row">${lv}</div><div class="row">${sts}</div>`;
+  // two rows, as on the big bridge sites: Pass, X, XX and the levels; then the suits of the chosen level
+  const html = `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
   // redraw only when something changed, so the alert text being typed keeps its focus
   if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; const i = $('alTxt'); if (i) i.value = ui.alertTxt || ''; }
 }
@@ -748,13 +757,14 @@ function renderDock() {
     d.dataset.key = key;
     const tabs = tbl ? `<div class="dtabs"><button data-dtab="table" class="${tab === 'table' ? 'on' : ''}">${T('Table')} <span id="dTn"></span></button><button data-dtab="lobby" class="${tab === 'lobby' ? 'on' : ''}">${T('Lobby')} <span id="dLn"></span></button></div>` : `<b>💬 ${T('Lobby chat')}</b>`;
     d.innerHTML = `<div class="grip gripx" data-grip="dockw" title="${T('Drag to resize')}"></div><div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div>
-      <div class="${tab === 'table' ? 'dbody' : 'lsplit dsplit'}">${tab === 'table' ? '' : `<div class="lplayers" id="dPlayers"></div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div>`}<div class="lcol"><div class="lmsgs" id="dList"></div>
+      <div class="${tab === 'table' ? 'dbody' : 'lsplit dsplit'}">${tab === 'table' ? '' : `<div class="lplayers"><div id="dPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div>`}<div class="lcol"><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>` : ''}
       <div class="pmto" id="dPmTo"></div>
-      <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div></div></div>`;
+      <div class="row2"><button class="btn rcpt" id="dRcpt">${rcptLabel("dock")}</button><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div></div></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
   { const p = $('dPlayers'), h = tab === 'table' ? '' : Net.playersHtml(); if (p && p.innerHTML !== h) p.innerHTML = h; }   // the players beside the lobby chat
+  updateRcpt();
   { const p = $("dPmTo"), h = tab !== "table" && ui.pmTo ? `🔒 ${T("Private message to {0}", esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : ""; if (p && p.innerHTML !== h) p.innerHTML = h; }
   if (L && L.innerHTML !== html) { L.innerHTML = html; L.scrollTop = L.scrollHeight; }
   friendsCheck();   // the players are listed under 👥, not above the chat; a friend's arrival is still announced
@@ -871,16 +881,16 @@ function homeShell() {
       <div id="hPend"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
-    <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers" id="hPlayers"></div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
-      <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></div></div></aside>
+    <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
+      <div class="row2"><button class="btn rcpt" id="lRcpt">→ ${T("Lobby")}</button><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></div></div></aside>
   </div><div id="hSheet"></div></div>`;
 }
 // the section opened with the buttons at the top of the home page (tournaments, our card, players, chat on a phone)
 function homeSection(k) {
   if (k === 'tours') return `<div class="hcard"><h3>🏆 ${T('Tournaments')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hTours"></div></div>`;
   if (k === 'conv') return `<div class="hcard"><h3>📋 ${T('Our convention card (with partner)')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hConv"></div></div>`;
-  if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lsplit"><div class="lplayers" id="pPlayers"></div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="pChat"></div><div class="pmto" id="pPmTo"></div>
-    <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div></div></div>`;
+  if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="pPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="pChat"></div><div class="pmto" id="pPmTo"></div>
+    <div class="row2"><button class="btn rcpt" id="pRcpt">→ ${T("Lobby")}</button><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div></div></div>`;
   return '';
 }
 // our card: every convention with a switch; tap a name for its description
@@ -926,7 +936,7 @@ function renderHome() {
     set('hCount', T('{0} in the lobby', N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
     set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
     if (want === 'chat') N.st.lunread = 0;
-    set('hTours', toursHtml());
+    set('hTours', toursHtml()); updateRcpt();
     const pl = N.playersHtml(); set('hPlayers', pl); set('pPlayers', pl);
     const pm = ui.pmTo ? `🔒 ${T('Private message to {0}', esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : '';
     set('hPmTo', pm); set('pPmTo', pm);
@@ -1969,3 +1979,54 @@ async function showStats() {
 }
 // an app installed while it was still locked upright keeps that lock until the phone or tablet updates it: free it now
 try { if (screen.orientation && screen.orientation.lock && matchMedia('(display-mode: standalone)').matches) screen.orientation.lock('any').catch(() => {}); } catch (e) {}
+/* ---- under the players list: show the offline players or not, add a friend by name, the leaderboard ---- */
+function playersFoot() {
+  return `<div class="lpfoot"><label class="lpoff"><input type="checkbox" data-showoff="1" ${SET.showOff ? 'checked' : ''}> ${T('Show offline')}</label>
+    <div class="lpadd"><input class="tok" data-fadd="1" maxlength="20" placeholder="${T('Add friend')}"><button class="btn mini-btn" data-faddbtn="1">${T('Add')}</button></div>
+    <button class="btn mini-btn lplead" id="lLead">🏅 ${T('Leaderboard')}</button></div>`;
+}
+function addFriendFrom(btn) {
+  const i = btn.parentElement.querySelector('[data-fadd]'), n = i ? i.value.trim().slice(0, 20) : '';
+  if (!n) return;
+  if (!isFriend(n)) toggleFriend(n);
+  i.value = ''; flash('★ ' + T('{0} is now a friend', n), 1800); render(); renderDock();
+}
+/* ---- who the message goes to: the button beside the message box shows it; tap it to choose the table, the lobby
+   or one player (a private message) ---- */
+function rcptLabel(where) {
+  if (ui.pmTo) return '🔒 ' + ui.pmTo;
+  if (where === 'dock' && online() && (ui.dockTab || 'table') === 'table') return '→ ' + T('Table');
+  return '→ ' + T('Lobby');
+}
+function updateRcpt() {
+  for (const [id, w] of [['dRcpt', 'dock'], ['lRcpt', 'home'], ['pRcpt', 'home']]) { const b = $(id); if (b) { const t = rcptLabel(w); if (b.textContent !== t) b.textContent = t; } }
+}
+function showRcptMenu(btn) {
+  const where = btn.id === 'dRcpt' ? 'dock' : 'home';
+  const people = [...new Set([...Net.knownNames(), ...friends()])].slice(0, 30);
+  const opts = (where === 'dock' && online() ? [['table', '💬 ' + T('Table')]] : []).concat([['lobby', '🌐 ' + T('Lobby')]], people.map(n => ['pm:' + n, '🔒 ' + n]));
+  const old = document.querySelector('.rcptmenu'); if (old) old.remove();
+  const m = document.createElement('div'); m.className = 'rcptmenu';
+  m.innerHTML = opts.map(([v, l]) => `<button data-rcpt="${esc(v)}">${esc(l)}</button>`).join('');
+  document.body.appendChild(m);
+  const r = btn.getBoundingClientRect(); m.style.left = Math.max(4, Math.min(innerWidth - 220, r.left)) + 'px'; m.style.bottom = (innerHeight - r.top + 4) + 'px';
+  m.dataset.where = where;
+}
+document.addEventListener('click', e => {
+  const opt = e.target.closest('[data-rcpt]');
+  const menu = document.querySelector('.rcptmenu');
+  if (opt) {
+    const v = opt.dataset.rcpt;
+    if (v === 'table') { ui.pmTo = null; ui.dockTab = 'table'; }
+    else if (v === 'lobby') { ui.pmTo = null; ui.dockTab = 'lobby'; }
+    else ui.pmTo = v.slice(3), ui.dockTab = 'lobby';
+    menu && menu.remove(); render(); renderDock(); updateRcpt();
+    const i = ['dMsg', 'lMsg', 'lMsg2'].map($).find(x => x && x.offsetParent); if (i) i.focus();
+    return;
+  }
+  if (menu && !e.target.closest('.rcpt')) menu.remove();
+  const rb = e.target.closest('.rcpt'); if (rb) { if (menu) menu.remove(); else showRcptMenu(rb); return; }
+  const fb = e.target.closest('[data-faddbtn]'); if (fb) addFriendFrom(fb);
+}, true);
+document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.showoff) { SET.showOff = e.target.checked; Store.saveSettings(SET); save(); render(); renderDock(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.fadd) { e.preventDefault(); addFriendFrom(e.target); } });
