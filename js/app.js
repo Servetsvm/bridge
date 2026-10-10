@@ -7,6 +7,8 @@ let SET = { style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: '
 let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
+// the version of the app (the same number as in sw.js), shown at the bottom of Settings
+const APP_V = 115;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1403,7 +1405,8 @@ function showSettings() {
    ${GitSync.enabled ? `<div><b>${T('Connected.')}</b> ${syncState.msg || (GitSync.last ? T('Last sync') + ' ' + new Date(GitSync.last).toLocaleString() : "")}</div><div class="row2"><button class="btn gold" id="sNow">${T('Sync now')}</button><button class="btn" id="sOff">${T('Disconnect')}</button></div>` : `<div class="muted">1. ${T('Open')} <a href="https://github.com/settings/tokens/new?scopes=gist&description=Bridge%20Table" target="_blank" rel="noopener">github.com → new token</a> (${T('scope: <b>gist</b> only, expiration: no expiration) and copy the token.')}<br>2. ${T('Paste it here on each device (PC and phone).')}</div><div class="row2"><input id="syncToken" type="password" autocomplete="off" placeholder="ghp_…" class="tok"><button class="btn gold" id="sSave">${T('Connect')}</button></div>${syncState.msg ? `<div class="muted">${syncState.msg}</div>` : ""}`}</div>
    <div class="muted">${T('Changes apply from the next deal.')} ${Store.online ? T('Settings and scores are saved to your account.') : T('Scores are saved on this device.')} ${T('Every deal you get is new — a deal is never dealt to you twice.')}</div>
    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button><button class="btn" id="sReset">${T('Delete score history')}</button></div>
-   <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>`);
+   <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>
+   <div class="muted ver">v${APP_V} · ${innerWidth}×${innerHeight} · ×${Math.round(devicePixelRatio * 100) / 100}</div>`);
 }
 /* ---- user guide in three languages: open it, or download it to read offline ---- */
 function showHelp() {
