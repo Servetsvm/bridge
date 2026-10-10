@@ -557,7 +557,6 @@ function renderBar() {
      ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
      <span class="menuwrap">${(n => `<button class="btn${n ? " gold" : ""}" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰${n ? `<span class="cbn">${n}</span>` : ""}</button>`)(typeof Net !== "undefined" ? (Net.st.unread || 0) + (Net.st.lunread || 0) : 0)}${ui.menu ? `<div class="menu" role="menu">
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
-       <span class="zrow"><button class="btn" id="bZoomOut" title="${T('Smaller')}">🔍−</button><b>${Math.round((SET.zoom || 1) * 100)}%</b><button class="btn" id="bZoomIn" title="${T('Larger')}">🔍+</button></span>
        <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
        <button class="btn" id="bHist">📜 ${T('History')}</button>
        <button class="btn" id="bRes">📊 ${T('Results')}</button>
@@ -828,7 +827,6 @@ function applyLook() {
   const dark = SET.theme === 'dark' || (SET.theme !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.body.classList.toggle('bigcards', !!SET.big);
-  document.documentElement.style.setProperty('--zoom', SET.zoom || 1);
 }
 try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyLook()); } catch (e) {}
 // browsers only allow sound after a tap: unlock it on the first one
@@ -1743,7 +1741,6 @@ document.addEventListener('click', ev_ => {
     case "oReplay": replayDeal(); break;
     case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
-    case "bZoomIn": case "bZoomOut": { SET.zoom = Math.round(Math.max(0.6, Math.min(1.6, (SET.zoom || 1) + (t.id === "bZoomIn" ? 0.1 : -0.1))) * 10) / 10; Store.saveSettings(SET); save(); applyLook(); ui.menu = true; render(); break; }
     case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), () => {
       if (online()) { flash(T('Close the online table first'), 2000); return; }
       try { localStorage.removeItem('bridge-table-name'); } catch (e) {}
