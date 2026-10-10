@@ -1018,3 +1018,12 @@ body.classic .fan.ovl .card .ix i{font-size:calc(var(--cw)*.48)}
 /* the send button: an arrow in the table's green and gold, like the button for who gets the message */
 .sendb{flex:none!important;width:44px;padding:5px 0!important;font-size:18px;line-height:1;background:#1f6b3d!important;color:#f2d27a!important;border:1px solid #c9a227!important;border-radius:999px!important;box-shadow:none!important}
 .sendb:hover{background:#26834a!important}
+/* the message bar: one rounded bar under the whole chat — who gets it, the message (grows to three lines), send */
+.composer{display:flex;align-items:flex-end;gap:6px;background:#fff;border:1.5px solid #c9a227;border-radius:22px;padding:4px;margin-top:6px;flex:none}
+.composer:focus-within{box-shadow:0 0 0 3px rgba(201,162,39,.3)}
+.composer .cmsg{flex:1;min-width:0;border:0;outline:0;resize:none;background:transparent;color:inherit;font:inherit;font-size:15px;line-height:1.35;padding:7px 4px;height:34px;max-height:96px;overflow-y:auto}
+.composer .rcpt,.composer .sendb{height:34px;align-self:flex-end;margin:0}
+.composer .rcpt{max-width:40%}
+.composer .sendb{width:38px}
+:root[data-theme="dark"] .composer{background:#2a312d;border-color:#8a7020}
+#dock .composer{margin-top:4px}

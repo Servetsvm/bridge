@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 119;
+const APP_V = 120;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -760,7 +760,7 @@ function renderDock() {
       <div class="${tab === 'table' ? 'dbody' : 'lsplit dsplit'}">${tab === 'table' ? '' : `<div class="lplayers"><div id="dPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div>`}<div class="lcol"><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>` : ''}
       <div class="pmto" id="dPmTo"></div>
-      <div class="row2"><button class="btn rcpt" id="dRcpt" title="${T("Who gets the message")}">${rcptLabel("dock")}</button><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn sendb" id="dSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></div></div>`;
+      </div></div><div class="composer"><button class="btn rcpt" id="dRcpt" title="${T("Who gets the message")}">${rcptLabel("dock")}</button><textarea class="cmsg" id="dMsg" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="dSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
   { const p = $('dPlayers'), h = tab === 'table' ? '' : Net.playersHtml(); if (p && p.innerHTML !== h) p.innerHTML = h; }   // the players beside the lobby chat
@@ -882,7 +882,7 @@ function homeShell() {
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
     <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
-      <div class="row2"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn sendb" id="lSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></div></div></aside>
+      </div></div><div class="composer"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><textarea class="cmsg" id="lMsg" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="lSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></aside>
   </div><div id="hSheet"></div></div>`;
 }
 // the section opened with the buttons at the top of the home page (tournaments, our card, players, chat on a phone)
@@ -890,7 +890,7 @@ function homeSection(k) {
   if (k === 'tours') return `<div class="hcard"><h3>🏆 ${T('Tournaments')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hTours"></div></div>`;
   if (k === 'conv') return `<div class="hcard"><h3>📋 ${T('Our convention card (with partner)')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hConv"></div></div>`;
   if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="pPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="pChat"></div><div class="pmto" id="pPmTo"></div>
-    <div class="row2"><button class="btn rcpt" id="pRcpt" title="${T("Who gets the message")}">🌐 ▾</button><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn sendb" id="lSend2" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></div></div></div>`;
+    </div></div><div class="composer"><button class="btn rcpt" id="pRcpt" title="${T("Who gets the message")}">🌐 ▾</button><textarea class="cmsg" id="lMsg2" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="lSend2" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></div>`;
   return '';
 }
 // our card: every convention with a switch; tap a name for its description
@@ -1786,7 +1786,7 @@ document.addEventListener('click', ev_ => {
   }
 });
 $('ov').addEventListener('click', e => { if (e.target.id === 'ov') closeOv(); });
-document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && /^g(Name|Pin|Pin2)$/.test(e.target.id)) { e.preventDefault(); gateGo(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dMsg') { e.preventDefault(); const v = e.target.value; e.target.value = ''; dockSend(v); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dmMsg') { e.preventDefault(); $('dmSend').click(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); lobbySend(e.target.value); e.target.value = ""; } });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && /^g(Name|Pin|Pin2)$/.test(e.target.id)) { e.preventDefault(); gateGo(); return; } if (e.key === 'Enter' && !e.shiftKey && e.target && e.target.id === 'dMsg') { e.preventDefault(); const v = e.target.value; e.target.value = ''; dockSend(v); return; } if (e.key === 'Enter' && e.target && e.target.id === 'dmMsg') { e.preventDefault(); $('dmSend').click(); return; } if (e.key === 'Enter' && e.target && e.target.id === 'tAdd') { e.preventDefault(); $('tAddBtn').click(); return; } if (e.key === 'Enter' && !e.shiftKey && e.target && (e.target.id === 'lMsg' || e.target.id === 'lMsg2') && e.target.value.trim()) { e.preventDefault(); lobbySend(e.target.value); e.target.value = ""; } });
 window.addEventListener('resize', () => { layoutFans(); clearTimeout(ui.rsz); ui.rsz = setTimeout(() => { if (G && G.phase !== 'idle') render(); }, 150); });   // the dummy's card size follows the window height
 
 /* ---- a deal as a link: 2 bits a card (who holds it) make 13 bytes, 18 letters in the address after #d= ---- */
@@ -2030,3 +2030,8 @@ document.addEventListener('click', e => {
 }, true);
 document.addEventListener('change', e => { if (e.target.dataset && e.target.dataset.showoff) { SET.showOff = e.target.checked; Store.saveSettings(SET); save(); render(); renderDock(); } });
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.fadd) { e.preventDefault(); addFriendFrom(e.target); } });
+// the message box grows with the text (up to three lines) and shrinks back when it is sent
+function fitMsg(t) { if (!t || !t.classList || !t.classList.contains('cmsg')) return; t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 96) + 'px'; }
+document.addEventListener('input', e => fitMsg(e.target));
+document.addEventListener('keyup', e => { if (e.key === 'Enter') fitMsg(e.target); });
+document.addEventListener('click', () => setTimeout(() => document.querySelectorAll('.cmsg').forEach(t => { if (!t.value) t.style.height = ''; }), 0));
