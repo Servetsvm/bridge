@@ -849,11 +849,11 @@ const Net = (() => {
   // the players seen in the lobby; with your table open, each can be invited with one tap
   function peopleHtml() {
     const names = knownNames();
-    if (!names.length) return `<div class="muted">${T("Nobody else is in the lobby right now.")}</div>${leaderHtml()}`;
+    if (!names.length) return `<div class="muted">${T("Nobody else is in the lobby right now.")}</div>`;
     const sent = st.invited || [];
     const un = n => st.dmUnread[nameKey(n)] ? ` <span class="badge">${st.dmUnread[nameKey(n)]}</span>` : "";
     return `<div class="people">${names.map(n => `<div class="person"><b class="pname" data-who="${esc(n)}" title="${T('Player card')}">${esc(n)}</b><span class="pbtns"><button class="btn" data-dm="${esc(n)}" title="${T("Message")}">💬${un(n)}</button>${st.host ? (sent.includes(nameKey(n)) ? `<span class="muted">${T('invited')}</span>` : `<button class="btn gold" data-tblinv="${esc(n)}">${T('Invite to my table')}</button>`) : ''}</span></div>`).join('')}</div>
-      ${st.host ? '' : `<div class="muted">${T('Open an online table to invite players to it.')}</div>`}${leaderHtml()}`;
+      ${st.host ? '' : `<div class="muted">${T('Open an online table to invite players to it.')}</div>`}`;
   }
   function onHostData(conn, d) {
     if (!d || !d.t) return;
@@ -1200,9 +1200,8 @@ const Net = (() => {
       openOv('net', `<h2>${T('Your online table')}</h2>
         ${pendHtml()}
         <div class="grp"><span>👥 ${T('Invite players')}${st.priv ? ' · 🔒 ' + T('Private table') : ''}</span>${peopleHtml()}</div>
-        <div class="grp"><span>${T('App link')}</span><input class="tok wide" id="nLink" readonly value="${esc(L)}"></div>
         <div class="row2"><a class="btn gold" href="${wa}" target="_blank" rel="noopener">${T('Send on WhatsApp')}</a><button class="btn" id="nCopy">${T('Copy link')}</button></div>
-        <div class="grp"><span>${T('Seats')}</span>${[0, 1, 2, 3].map(s => `<div class="helprow"><span><b>${SEAT[s]}</b></span><span>${st.seats[s] === 'host' ? esc(st.names[s]) + ' (' + T('you') + ')' : st.seats[s] ? esc(st.names[s]) + ` <button class="btn" data-kick="${s}">${T('Remove')}</button>` : `<i>${T('Robot')}</i>`}</span></div>`).join('')}</div>
+        <div class="grp seats"><span>${T('Seats')}</span>${[0, 1, 2, 3].map(s => `<div class="helprow"><span><b>${SEAT[s]}</b></span><span>${st.seats[s] === 'host' ? esc(st.names[s]) + ' (' + T('you') + ')' : st.seats[s] ? esc(st.names[s]) + ` <button class="btn" data-kick="${s}">${T('Remove')}</button>` : `<i>${T('Robot')}</i>`}</span></div>`).join('')}</div>
         <div class="muted">${T('Anyone who opens the app link while your table is open can ask to join; you accept or decline each request. Keep this app open while you play: your device runs the table. Robots play any seat that is empty or whose player leaves.')}</div>
         ${st.msg ? `<div class="err">${esc(T(st.msg))}</div>` : ''}
         ${scoreHtml()}

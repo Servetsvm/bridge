@@ -1342,12 +1342,11 @@ function resultLine(e) {
 function openOv(name, html) {
   if (ui.overlay === "gate" && name !== "gate" && needGate()) return;
   // during a game on a wider screen, a player card or a private chat is a small window you can drag aside (the table stays usable)
-  const fl = ["player", "dm"].includes(name) && G && G.phase !== "idle" && innerWidth >= 700, ov = $("ov");
+  const fl = ["player", "dm", "net", "lead"].includes(name) && G && G.phase !== "idle" && innerWidth >= 700, ov = $("ov");
   ui.overlay = name; ov.classList.toggle("float", fl);
-  ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}">${fl ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
+  ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}${["end", "res", "rev", "set", "hist", "tour", "tsetup", "deal", "help", "auc"].includes(name) ? " wide" : ""}" data-ov="${name}">${fl ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
   ov.hidden = false;
-  if (fl && typeof SIZES !== "undefined" && SIZES.fw) { const s = ov.firstChild; s.style.width = SIZES.fw + "px"; s.style.height = SIZES.fh + "px"; }
-  if (fl && typeof ResizeObserver !== "undefined") { try { (ui.fro || (ui.fro = new ResizeObserver(L => { for (const x of L) if (x.target.isConnected && $("ov").classList.contains("float")) { SIZES.fw = Math.round(x.target.offsetWidth); SIZES.fh = Math.round(x.target.offsetHeight); saveSizes(); } }))).observe(ov.firstChild); } catch (e) {} }
+  if (fl && typeof SIZES !== "undefined" && SIZES.fw2) { const s = ov.firstChild; s.style.width = SIZES.fw2 + "px"; s.style.height = SIZES.fh2 + "px"; }
   if (fl && ui.fpos) { const s = ov.firstChild; s.style.left = ui.fpos.x + "px"; s.style.top = ui.fpos.y + "px"; s.style.right = "auto"; }
 }
 function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no way past the name and PIN
@@ -1922,4 +1921,11 @@ document.addEventListener('pointerdown', e => {
   };
   const up = () => { g.classList.remove('drag'); g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up); saveSizes(); if (G && G.phase !== 'idle') render(); };
   g.addEventListener('pointermove', move); g.addEventListener('pointerup', up);
+});
+// the card window keeps the size you give it by dragging its lower right corner (only then is it remembered)
+document.addEventListener('pointerdown', e => {
+  const s = e.target.closest && e.target.closest('.fsheet'); if (!s) return;
+  const r = s.getBoundingClientRect(); if (r.right - e.clientX > 22 || r.bottom - e.clientY > 22) return;
+  const up = () => { document.removeEventListener('pointerup', up); SIZES.fw2 = Math.round(s.offsetWidth); SIZES.fh2 = Math.round(s.offsetHeight); saveSizes(); };
+  document.addEventListener('pointerup', up);
 });
