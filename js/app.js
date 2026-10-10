@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 126;
+const APP_V = 127;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1250,9 +1250,10 @@ function showPlayer(name) {
       <label><span>${T('System')}</span><select id="pSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label>
       <label><span>${T('Level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
       <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
+      <div class="pavpick"><span>${T("Picture")}</span><div>${["", ...Net.AVATARS].map(a => `<button class="${(SET.av || "") === a ? "on" : ""}" data-av="${a}">${a || "Aa"}</button>`).join("")}</div></div>
       <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
   openOv('player', `<div class="pcard">
-    <div class="phead"><div class="pav">${esc((shown.trim()[0] || '?').toUpperCase())}</div>
+    <div class="phead"><div class="pav${p && p.av ? " emo" : ""}">${p && p.av ? p.av : esc((shown.trim()[0] || "?").toUpperCase())}</div>
       <div class="pmain"><div class="pnm">${esc(shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
         <div class="psub">${where ? `<span class="pwhere">● ${esc(where)}</span>` : ''}</div></div></div>
     <table class="pfields">${fields.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>
@@ -1651,6 +1652,7 @@ document.addEventListener('click', ev_ => {
   const pmb = ev_.target.closest("[data-pm]"); if (pmb) { pmTo(pmb.dataset.pm); return; }
   if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
   if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
+  { const av = ev_.target.closest("[data-av]"); if (av) { SET.av = av.dataset.av; Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T("You")); return; } }   // your picture
   { const pc = ev_.target.closest("div.pconv"); if (pc) { pc.classList.toggle("open"); return; } }   // the convention line on a card: tap to read it all
   { const gs = ev_.target.closest("[data-gsug]"); if (gs) { const i = $("gName"); if (i) i.value = gs.dataset.gsug; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; } }   // a free name offered on the name screen
   if (ev_.target.closest("[data-stats]")) { ui.statData = null; showStats(); return; }   // the administrator's visitor statistics

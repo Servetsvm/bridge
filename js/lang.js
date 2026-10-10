@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Picture": "Simge",
     "You cannot play that card": "O kartı oynayamazsın",
     "Blue": "Mavi", "Card back": "Kart arkası", "Green": "Yeşil", "Red": "Kırmızı", "Wood": "Ahşap",
     "Deck": "Deste", "2 colours": "2 renk", "4 colours": "4 renk",
@@ -101,6 +102,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Picture": "Bilde",
     "You cannot play that card": "Du kan ikke spille det kortet",
     "Blue": "Blå", "Card back": "Kortbaksiden", "Green": "Grønn", "Red": "Rød", "Wood": "Tre",
     "Deck": "Kortstokk", "2 colours": "2 farger", "4 colours": "4 farger",
@@ -199,6 +201,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Picture": "Imagen",
     "You cannot play that card": "No puedes jugar esa carta",
     "Blue": "Azul", "Card back": "Dorso", "Green": "Verde", "Red": "Rojo", "Wood": "Madera",
     "Deck": "Baraja", "2 colours": "2 colores", "4 colours": "4 colores",
@@ -325,6 +328,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Picture": "Image",
     "You cannot play that card": "Vous ne pouvez pas jouer cette carte",
     "Blue": "Bleu", "Card back": "Dos des cartes", "Green": "Vert", "Red": "Rouge", "Wood": "Bois",
     "Deck": "Jeu de cartes", "2 colours": "2 couleurs", "4 colours": "4 couleurs",
@@ -451,6 +455,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Picture": "Immagine",
     "You cannot play that card": "Non puoi giocare quella carta",
     "Blue": "Blu", "Card back": "Dorso", "Green": "Verde", "Red": "Rosso", "Wood": "Legno",
     "Deck": "Mazzo", "2 colours": "2 colori", "4 colours": "4 colori",
@@ -577,6 +582,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Picture": "Bild",
     "You cannot play that card": "Diese Karte kannst du nicht spielen",
     "Blue": "Blau", "Card back": "Kartenrücken", "Green": "Grün", "Red": "Rot", "Wood": "Holz",
     "Deck": "Kartenspiel", "2 colours": "2 Farben", "4 colours": "4 Farben",
@@ -703,6 +709,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Picture": "Значок",
     "You cannot play that card": "Эту карту сыграть нельзя",
     "Blue": "Синий", "Card back": "Рубашка карт", "Green": "Зелёный", "Red": "Красный", "Wood": "Дерево",
     "Deck": "Колода", "2 colours": "2 цвета", "4 colours": "4 цвета",
@@ -829,6 +836,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Picture": "Obrazek",
     "You cannot play that card": "Nie możesz zagrać tej karty",
     "Blue": "Niebieski", "Card back": "Rewers kart", "Green": "Zielony", "Red": "Czerwony", "Wood": "Drewno",
     "Deck": "Talia", "2 colours": "2 kolory", "4 colours": "4 kolory",
@@ -955,6 +963,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Picture": "头像",
     "You cannot play that card": "不能出这张牌",
     "Blue": "蓝色", "Card back": "牌背", "Green": "绿色", "Red": "红色", "Wood": "木纹",
     "Deck": "牌面颜色", "2 colours": "双色", "4 colours": "四色",

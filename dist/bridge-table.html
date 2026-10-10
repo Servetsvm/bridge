@@ -1091,6 +1091,13 @@ body.dealing .fan .card:nth-child(13){animation-delay:540ms}
 .donebanner.bad{animation:badShake .5s ease-in-out 1}
 @keyframes badShake{0%,100%{translate:0}20%{translate:-8px}40%{translate:7px}60%{translate:-5px}80%{translate:3px}}
 @media (prefers-reduced-motion:reduce){body.dealing .fan .card,#center .auction .c.newc,.donebanner.good,.donebanner.bad{animation:none}}
+/* player pictures */
+.pav.emo{background:#fff8e1;font-size:24px}
+.pavpick{grid-column:1/-1;display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:#5b5a50}
+.pavpick>div{display:flex;flex-wrap:wrap;gap:3px}
+.pavpick button{width:30px;height:30px;border:1px solid #d6d2c0;border-radius:8px;background:#fff;font-size:17px;line-height:1;cursor:pointer;padding:0}
+.pavpick button.on{border-color:#c9a227;box-shadow:0 0 0 2px #c9a227;background:#fff8e1}
+:root[data-theme="dark"] .pavpick button{background:#2a312d;border-color:#4a564f}
 
 </style>
 
@@ -3421,6 +3428,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Picture": "Simge",
     "You cannot play that card": "O kartı oynayamazsın",
     "Blue": "Mavi", "Card back": "Kart arkası", "Green": "Yeşil", "Red": "Kırmızı", "Wood": "Ahşap",
     "Deck": "Deste", "2 colours": "2 renk", "4 colours": "4 renk",
@@ -3519,6 +3527,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Picture": "Bilde",
     "You cannot play that card": "Du kan ikke spille det kortet",
     "Blue": "Blå", "Card back": "Kortbaksiden", "Green": "Grønn", "Red": "Rød", "Wood": "Tre",
     "Deck": "Kortstokk", "2 colours": "2 farger", "4 colours": "4 farger",
@@ -3617,6 +3626,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Picture": "Imagen",
     "You cannot play that card": "No puedes jugar esa carta",
     "Blue": "Azul", "Card back": "Dorso", "Green": "Verde", "Red": "Rojo", "Wood": "Madera",
     "Deck": "Baraja", "2 colours": "2 colores", "4 colours": "4 colores",
@@ -3743,6 +3753,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Picture": "Image",
     "You cannot play that card": "Vous ne pouvez pas jouer cette carte",
     "Blue": "Bleu", "Card back": "Dos des cartes", "Green": "Vert", "Red": "Rouge", "Wood": "Bois",
     "Deck": "Jeu de cartes", "2 colours": "2 couleurs", "4 colours": "4 couleurs",
@@ -3869,6 +3880,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Picture": "Immagine",
     "You cannot play that card": "Non puoi giocare quella carta",
     "Blue": "Blu", "Card back": "Dorso", "Green": "Verde", "Red": "Rosso", "Wood": "Legno",
     "Deck": "Mazzo", "2 colours": "2 colori", "4 colours": "4 colori",
@@ -3995,6 +4007,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Picture": "Bild",
     "You cannot play that card": "Diese Karte kannst du nicht spielen",
     "Blue": "Blau", "Card back": "Kartenrücken", "Green": "Grün", "Red": "Rot", "Wood": "Holz",
     "Deck": "Kartenspiel", "2 colours": "2 Farben", "4 colours": "4 Farben",
@@ -4121,6 +4134,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Picture": "Значок",
     "You cannot play that card": "Эту карту сыграть нельзя",
     "Blue": "Синий", "Card back": "Рубашка карт", "Green": "Зелёный", "Red": "Красный", "Wood": "Дерево",
     "Deck": "Колода", "2 colours": "2 цвета", "4 colours": "4 цвета",
@@ -4247,6 +4261,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Picture": "Obrazek",
     "You cannot play that card": "Nie możesz zagrać tej karty",
     "Blue": "Niebieski", "Card back": "Rewers kart", "Green": "Zielony", "Red": "Czerwony", "Wood": "Drewno",
     "Deck": "Talia", "2 colours": "2 kolory", "4 colours": "4 kolory",
@@ -4373,6 +4388,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Picture": "头像",
     "You cannot play that card": "不能出这张牌",
     "Blue": "蓝色", "Card back": "牌背", "Green": "绿色", "Red": "红色", "Wood": "木纹",
     "Deck": "牌面颜色", "2 colours": "双色", "4 colours": "四色",
@@ -5095,7 +5111,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 126;
+const APP_V = 127;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6337,9 +6353,10 @@ function showPlayer(name) {
       <label><span>${T('System')}</span><select id="pSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label>
       <label><span>${T('Level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
       <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
+      <div class="pavpick"><span>${T("Picture")}</span><div>${["", ...Net.AVATARS].map(a => `<button class="${(SET.av || "") === a ? "on" : ""}" data-av="${a}">${a || "Aa"}</button>`).join("")}</div></div>
       <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
   openOv('player', `<div class="pcard">
-    <div class="phead"><div class="pav">${esc((shown.trim()[0] || '?').toUpperCase())}</div>
+    <div class="phead"><div class="pav${p && p.av ? " emo" : ""}">${p && p.av ? p.av : esc((shown.trim()[0] || "?").toUpperCase())}</div>
       <div class="pmain"><div class="pnm">${esc(shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
         <div class="psub">${where ? `<span class="pwhere">● ${esc(where)}</span>` : ''}</div></div></div>
     <table class="pfields">${fields.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>
@@ -6738,6 +6755,7 @@ document.addEventListener('click', ev_ => {
   const pmb = ev_.target.closest("[data-pm]"); if (pmb) { pmTo(pmb.dataset.pm); return; }
   if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
   if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
+  { const av = ev_.target.closest("[data-av]"); if (av) { SET.av = av.dataset.av; Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T("You")); return; } }   // your picture
   { const pc = ev_.target.closest("div.pconv"); if (pc) { pc.classList.toggle("open"); return; } }   // the convention line on a card: tap to read it all
   { const gs = ev_.target.closest("[data-gsug]"); if (gs) { const i = $("gName"); if (i) i.value = gs.dataset.gsug; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; } }   // a free name offered on the name screen
   if (ev_.target.closest("[data-stats]")) { ui.statData = null; showStats(); return; }   // the administrator's visitor statistics
@@ -7301,7 +7319,7 @@ const Net = (() => {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
     return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
-      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), ...ratingOf(HIST) };   // the player card: level, country, a few words
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', ...ratingOf(HIST) };   // the player card: level, country, a few words
   }
   /* the rating: 1500 plus 150 × the IMPs won against the robot field over the last 200 scored boards, shrunk for a
      player with few boards (so ten lucky boards do not make a champion). Every app sends its own; the lobby keeps the
@@ -7329,6 +7347,8 @@ const Net = (() => {
       <div class="muted">${T('Rating: 1500 + your IMPs against the robot tables over your last 200 boards.')}</div></div>`;
   }
 
+  // the pictures a player can choose for the player card and the lists
+  const AVATARS = ['🦁', '🐯', '🦊', '🐻', '🐼', '🐨', '🐸', '🐵', '🦉', '🦅', '🐬', '🐙', '🦄', '🐝', '🐞', '🌹', '🌻', '🌵', '⭐', '🌙', '☀️', '⚡', '🔥', '❄️', '🍀', '🎩', '👑', '🎯', '🎲', '🏆', '⚓', '🚀'];
   // a profile received from another app, kept to the fields we know
   const num = v => v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
   function cleanProf(q, conv) {
@@ -7339,7 +7359,7 @@ const Net = (() => {
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
       joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
-      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
+      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   function whereIs(name) {
@@ -7850,7 +7870,7 @@ const Net = (() => {
     const g = lobbyGroups(), all = [...g.friends, ...g.play, ...g.lobby, ...g.off];
     const nOn = 1 + all.filter(x => x.s !== 'off').length, nPlay = all.filter(x => x.s === 'play').length + (G && G.phase !== 'idle' ? 1 : 0);
     const nOff = st.cloud && Cloud.on && st.cloud.users ? Math.max(0, st.cloud.users - nOn) : all.filter(x => x.s === 'off').length;
-    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
+    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${(p => p && p.av ? p.av + ' ' : '')(profOf(x.n))}${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
       + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
     const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
     const admin = isAdmin() ? `<div class="ladmin" data-stats="1" title="${T('Visitor statistics')}">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
@@ -8564,7 +8584,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

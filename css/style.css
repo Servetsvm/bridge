@@ -1076,3 +1076,10 @@ body.dealing .fan .card:nth-child(13){animation-delay:540ms}
 .donebanner.bad{animation:badShake .5s ease-in-out 1}
 @keyframes badShake{0%,100%{translate:0}20%{translate:-8px}40%{translate:7px}60%{translate:-5px}80%{translate:3px}}
 @media (prefers-reduced-motion:reduce){body.dealing .fan .card,#center .auction .c.newc,.donebanner.good,.donebanner.bad{animation:none}}
+/* player pictures */
+.pav.emo{background:#fff8e1;font-size:24px}
+.pavpick{grid-column:1/-1;display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:#5b5a50}
+.pavpick>div{display:flex;flex-wrap:wrap;gap:3px}
+.pavpick button{width:30px;height:30px;border:1px solid #d6d2c0;border-radius:8px;background:#fff;font-size:17px;line-height:1;cursor:pointer;padding:0}
+.pavpick button.on{border-color:#c9a227;box-shadow:0 0 0 2px #c9a227;background:#fff8e1}
+:root[data-theme="dark"] .pavpick button{background:#2a312d;border-color:#4a564f}

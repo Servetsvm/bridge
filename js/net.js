@@ -110,7 +110,7 @@ const Net = (() => {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
     return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
-      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), ...ratingOf(HIST) };   // the player card: level, country, a few words
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', ...ratingOf(HIST) };   // the player card: level, country, a few words
   }
   /* the rating: 1500 plus 150 × the IMPs won against the robot field over the last 200 scored boards, shrunk for a
      player with few boards (so ten lucky boards do not make a champion). Every app sends its own; the lobby keeps the
@@ -138,6 +138,8 @@ const Net = (() => {
       <div class="muted">${T('Rating: 1500 + your IMPs against the robot tables over your last 200 boards.')}</div></div>`;
   }
 
+  // the pictures a player can choose for the player card and the lists
+  const AVATARS = ['🦁', '🐯', '🦊', '🐻', '🐼', '🐨', '🐸', '🐵', '🦉', '🦅', '🐬', '🐙', '🦄', '🐝', '🐞', '🌹', '🌻', '🌵', '⭐', '🌙', '☀️', '⚡', '🔥', '❄️', '🍀', '🎩', '👑', '🎯', '🎲', '🏆', '⚓', '🚀'];
   // a profile received from another app, kept to the fields we know
   const num = v => v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
   function cleanProf(q, conv) {
@@ -148,7 +150,7 @@ const Net = (() => {
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
       joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
-      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
+      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   function whereIs(name) {
@@ -659,7 +661,7 @@ const Net = (() => {
     const g = lobbyGroups(), all = [...g.friends, ...g.play, ...g.lobby, ...g.off];
     const nOn = 1 + all.filter(x => x.s !== 'off').length, nPlay = all.filter(x => x.s === 'play').length + (G && G.phase !== 'idle' ? 1 : 0);
     const nOff = st.cloud && Cloud.on && st.cloud.users ? Math.max(0, st.cloud.users - nOn) : all.filter(x => x.s === 'off').length;
-    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
+    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${(p => p && p.av ? p.av + ' ' : '')(profOf(x.n))}${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
       + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
     const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
     const admin = isAdmin() ? `<div class="ladmin" data-stats="1" title="${T('Visitor statistics')}">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
@@ -1373,5 +1375,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
