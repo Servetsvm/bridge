@@ -1112,3 +1112,5 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .tclub{font-size:12px;padding:1px 6px;border-radius:8px;background:#efe3c2;color:#6b4c00;white-space:nowrap}
 :root[data-theme="dark"] .tclub{background:#4a3d1c;color:#ffe199}
 [data-lscope]{margin-bottom:8px}
+/* narrow phones: the open side hands wrap, so the middle keeps room for the result */
+@media (max-width:430px){#table{grid-template-columns:minmax(0,auto) minmax(112px,1fr) minmax(0,auto)}#pos1,#pos3{min-width:0}#pos1 .vh .row,#pos3 .vh .row{flex-wrap:wrap;row-gap:2px}}

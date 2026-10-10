@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 133;
+const APP_V = 134;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -95,6 +95,7 @@ function mergeCloud(recs, settings) {
   for (const r of recs) if (!have.has(r.id)) HIST.push(r);
   HIST.sort((a, b) => (a.ts || 0) - (b.ts || 0));
   if (settings) { SET = Object.assign(SET, settings); SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) }; }
+  if (SET.seatHome != null) { SET.seat = SET.seatHome; delete SET.seatHome; }   // the seat you had before an online table moved you (the app was closed there)
   BOARD = Math.max(BOARD, ...HIST.map(h => h.board || 0));
   save(); render();
 }

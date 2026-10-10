@@ -1127,6 +1127,8 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .tclub{font-size:12px;padding:1px 6px;border-radius:8px;background:#efe3c2;color:#6b4c00;white-space:nowrap}
 :root[data-theme="dark"] .tclub{background:#4a3d1c;color:#ffe199}
 [data-lscope]{margin-bottom:8px}
+/* narrow phones: the open side hands wrap, so the middle keeps room for the result */
+@media (max-width:430px){#table{grid-template-columns:minmax(0,auto) minmax(112px,1fr) minmax(0,auto)}#pos1,#pos3{min-width:0}#pos1 .vh .row,#pos3 .vh .row{flex-wrap:wrap;row-gap:2px}}
 
 </style>
 
@@ -3681,6 +3683,15 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Close it for everyone": "Herkes için kapat",
+    "Hand the table to {0}": "Masayı {0} oyuncusuna devret",
+    "The host left and the table could not be moved.": "Masa sahibi ayrıldı, masa taşınamadı.",
+    "The host left — you now host the table. Start a new board when everyone is back.": "Masa sahibi ayrıldı — masa artık senin. Herkes dönünce yeni el başlat.",
+    "The host left — {0} now hosts the table": "Masa sahibi ayrıldı — masa artık {0} oyuncusunda",
+    "{0} can host the table, so the others go on playing (robots play your seat).": "{0} masayı devralabilir, böylece diğerleri oynamaya devam eder (senin yerinde robot oynar).",
+    "{0} left — you now host the table": "{0} ayrıldı — masa artık senin",
+    "{0} left — {1} now hosts the table": "{0} ayrıldı — masa artık {1} oyuncusunda",
+    "{0} now hosts the table — moving there…": "Masa artık {0} oyuncusunda — oraya geçiliyor…",
     "Club": "Kulüp",
     "Your bridge club (optional)": "Briç kulübün (isteğe bağlı)",
     "Everyone": "Herkes",
@@ -3815,6 +3826,15 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Close it for everyone": "Steng det for alle",
+    "Hand the table to {0}": "Gi bordet til {0}",
+    "The host left and the table could not be moved.": "Verten gikk, og bordet kunne ikke flyttes.",
+    "The host left — you now host the table. Start a new board when everyone is back.": "Verten gikk — nå er du vert. Start et nytt spill når alle er tilbake.",
+    "The host left — {0} now hosts the table": "Verten gikk — {0} er nå vert",
+    "{0} can host the table, so the others go on playing (robots play your seat).": "{0} kan overta bordet, så de andre kan spille videre (en robot spiller plassen din).",
+    "{0} left — you now host the table": "{0} gikk — nå er du vert",
+    "{0} left — {1} now hosts the table": "{0} gikk — {1} er nå vert",
+    "{0} now hosts the table — moving there…": "{0} er nå vert — flytter dit…",
     "Club": "Klubb",
     "Your bridge club (optional)": "Bridgeklubben din (valgfritt)",
     "Everyone": "Alle",
@@ -3949,6 +3969,15 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Close it for everyone": "Cerrarla para todos",
+    "Hand the table to {0}": "Pasar la mesa a {0}",
+    "The host left and the table could not be moved.": "El anfitrión se fue y no se pudo trasladar la mesa.",
+    "The host left — you now host the table. Start a new board when everyone is back.": "El anfitrión se fue — ahora la mesa es tuya. Empieza una mano nueva cuando vuelvan todos.",
+    "The host left — {0} now hosts the table": "El anfitrión se fue — ahora {0} lleva la mesa",
+    "{0} can host the table, so the others go on playing (robots play your seat).": "{0} puede llevar la mesa para que los demás sigan jugando (un robot juega tu puesto).",
+    "{0} left — you now host the table": "{0} se fue — ahora la mesa es tuya",
+    "{0} left — {1} now hosts the table": "{0} se fue — ahora {1} lleva la mesa",
+    "{0} now hosts the table — moving there…": "Ahora {0} lleva la mesa — pasando allí…",
     "Club": "Club",
     "Your bridge club (optional)": "Tu club de bridge (opcional)",
     "Everyone": "Todos",
@@ -4111,6 +4140,15 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Close it for everyone": "La fermer pour tous",
+    "Hand the table to {0}": "Confier la table à {0}",
+    "The host left and the table could not be moved.": "L'hôte est parti et la table n'a pas pu être déplacée.",
+    "The host left — you now host the table. Start a new board when everyone is back.": "L'hôte est parti — vous tenez maintenant la table. Lancez une nouvelle donne quand tout le monde est revenu.",
+    "The host left — {0} now hosts the table": "L'hôte est parti — {0} tient maintenant la table",
+    "{0} can host the table, so the others go on playing (robots play your seat).": "{0} peut reprendre la table pour que les autres continuent (un robot joue votre place).",
+    "{0} left — you now host the table": "{0} est parti — vous tenez maintenant la table",
+    "{0} left — {1} now hosts the table": "{0} est parti — {1} tient maintenant la table",
+    "{0} now hosts the table — moving there…": "{0} tient maintenant la table — on y va…",
     "Club": "Club",
     "Your bridge club (optional)": "Votre club de bridge (facultatif)",
     "Everyone": "Tout le monde",
@@ -4273,6 +4311,15 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Close it for everyone": "Chiudilo per tutti",
+    "Hand the table to {0}": "Passa il tavolo a {0}",
+    "The host left and the table could not be moved.": "L'host è uscito e il tavolo non è stato spostato.",
+    "The host left — you now host the table. Start a new board when everyone is back.": "L'host è uscito — ora il tavolo è tuo. Inizia una nuova smazzata quando tutti sono tornati.",
+    "The host left — {0} now hosts the table": "L'host è uscito — ora il tavolo è di {0}",
+    "{0} can host the table, so the others go on playing (robots play your seat).": "{0} può prendere il tavolo, così gli altri continuano (un robot gioca al tuo posto).",
+    "{0} left — you now host the table": "{0} è uscito — ora il tavolo è tuo",
+    "{0} left — {1} now hosts the table": "{0} è uscito — ora il tavolo è di {1}",
+    "{0} now hosts the table — moving there…": "Ora il tavolo è di {0} — ci spostiamo…",
     "Club": "Circolo",
     "Your bridge club (optional)": "Il tuo circolo di bridge (facoltativo)",
     "Everyone": "Tutti",
@@ -4435,6 +4482,15 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Close it for everyone": "Für alle schließen",
+    "Hand the table to {0}": "Tisch an {0} übergeben",
+    "The host left and the table could not be moved.": "Der Gastgeber ist gegangen, der Tisch konnte nicht umziehen.",
+    "The host left — you now host the table. Start a new board when everyone is back.": "Der Gastgeber ist gegangen — jetzt führst du den Tisch. Starte ein neues Board, wenn alle zurück sind.",
+    "The host left — {0} now hosts the table": "Der Gastgeber ist gegangen — jetzt führt {0} den Tisch",
+    "{0} can host the table, so the others go on playing (robots play your seat).": "{0} kann den Tisch übernehmen, damit die anderen weiterspielen (ein Roboter spielt deinen Platz).",
+    "{0} left — you now host the table": "{0} ist gegangen — jetzt führst du den Tisch",
+    "{0} left — {1} now hosts the table": "{0} ist gegangen — jetzt führt {1} den Tisch",
+    "{0} now hosts the table — moving there…": "Jetzt führt {0} den Tisch — wechsle dorthin…",
     "Club": "Klub",
     "Your bridge club (optional)": "Dein Bridgeklub (freiwillig)",
     "Everyone": "Alle",
@@ -4597,6 +4653,15 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Close it for everyone": "Закрыть для всех",
+    "Hand the table to {0}": "Передать стол игроку {0}",
+    "The host left and the table could not be moved.": "Хозяин ушёл, перенести стол не удалось.",
+    "The host left — you now host the table. Start a new board when everyone is back.": "Хозяин ушёл — теперь стол ваш. Начните новую сдачу, когда все вернутся.",
+    "The host left — {0} now hosts the table": "Хозяин ушёл — теперь стол у {0}",
+    "{0} can host the table, so the others go on playing (robots play your seat).": "{0} может взять стол, чтобы остальные продолжили (за вас играет робот).",
+    "{0} left — you now host the table": "{0} ушёл — теперь стол ваш",
+    "{0} left — {1} now hosts the table": "{0} ушёл — теперь стол у {1}",
+    "{0} now hosts the table — moving there…": "Теперь стол у {0} — переходим…",
     "Club": "Клуб",
     "Your bridge club (optional)": "Ваш бридж-клуб (необязательно)",
     "Everyone": "Все",
@@ -4759,6 +4824,15 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Close it for everyone": "Zamknij dla wszystkich",
+    "Hand the table to {0}": "Przekaż stół graczowi {0}",
+    "The host left and the table could not be moved.": "Gospodarz wyszedł i stołu nie udało się przenieść.",
+    "The host left — you now host the table. Start a new board when everyone is back.": "Gospodarz wyszedł — teraz to twój stół. Rozpocznij nowe rozdanie, gdy wszyscy wrócą.",
+    "The host left — {0} now hosts the table": "Gospodarz wyszedł — teraz stół prowadzi {0}",
+    "{0} can host the table, so the others go on playing (robots play your seat).": "{0} może przejąć stół, aby pozostali grali dalej (za ciebie gra robot).",
+    "{0} left — you now host the table": "{0} wyszedł — teraz to twój stół",
+    "{0} left — {1} now hosts the table": "{0} wyszedł — teraz stół prowadzi {1}",
+    "{0} now hosts the table — moving there…": "Teraz stół prowadzi {0} — przechodzę…",
     "Club": "Klub",
     "Your bridge club (optional)": "Twój klub brydżowy (opcjonalnie)",
     "Everyone": "Wszyscy",
@@ -4921,6 +4995,15 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Close it for everyone": "为所有人关闭",
+    "Hand the table to {0}": "把牌桌交给 {0}",
+    "The host left and the table could not be moved.": "桌主离开了,牌桌无法转移。",
+    "The host left — you now host the table. Start a new board when everyone is back.": "桌主离开了——现在由你主持牌桌。大家回来后开始新的一副牌。",
+    "The host left — {0} now hosts the table": "桌主离开了——现在由 {0} 主持牌桌",
+    "{0} can host the table, so the others go on playing (robots play your seat).": "{0} 可以接管牌桌,其他人可以继续打(机器人替你打)。",
+    "{0} left — you now host the table": "{0} 离开了——现在由你主持牌桌",
+    "{0} left — {1} now hosts the table": "{0} 离开了——现在由 {1} 主持牌桌",
+    "{0} now hosts the table — moving there…": "现在由 {0} 主持牌桌——正在过去…",
     "Club": "俱乐部",
     "Your bridge club (optional)": "你的桥牌俱乐部(可选)",
     "Everyone": "所有人",
@@ -5679,7 +5762,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 133;
+const APP_V = 134;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -5766,6 +5849,7 @@ function mergeCloud(recs, settings) {
   for (const r of recs) if (!have.has(r.id)) HIST.push(r);
   HIST.sort((a, b) => (a.ts || 0) - (b.ts || 0));
   if (settings) { SET = Object.assign(SET, settings); SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) }; }
+  if (SET.seatHome != null) { SET.seat = SET.seatHome; delete SET.seatHome; }   // the seat you had before an online table moved you (the app was closed there)
   BOARD = Math.max(BOARD, ...HIST.map(h => h.board || 0));
   save(); render();
 }
@@ -8063,6 +8147,8 @@ const Net = (() => {
     }
     v.ctl = [0, 1, 2, 3].map(owner); v.names = st.names; v.away = Object.keys(st.away || {}).map(Number); v.score = st.score; v.profs = st.profs || {};
     v.watchers = [...(st.watch || new Map()).values()].map(w => w.name);
+    // where each player's own table opens: if the host disappears, the players left move to the first of them
+    v.ks = Object.fromEntries([0, 1, 2, 3].map(s => [s, st.seats[s] === 'host' ? (st.slot ? st.slot.k : 0) : (st.ks || {})[(st.toks || {})[s]] || 0]));
     return v;
   }
   function broadcast() {
@@ -8312,9 +8398,9 @@ const Net = (() => {
   // open your tournament table: a private online table, the other players are invited straight to their seats
   async function openTourTable(id) {
     const t = st.tours[id], me = t && myTourSeat(t); if (!me || st.on) return;
-    st.seatBak = SET.seat; SET.seat = me.seat;
+    st.seatBak = SET.seat; SET.seatHome = SET.seat; SET.seat = me.seat;
     await host(false);   // listed in the lobby: a newcomer can ask for a robot's seat (you accept)
-    if (!st.host) { SET.seat = st.seatBak; st.seatBak = null; return; }
+    if (!st.host) { SET.seat = st.seatBak; st.seatBak = null; delete SET.seatHome; return; }
     st.tour = { id, ti: me.ti }; st.invSeat = {};
     t.tables[me.ti].forEach((n, s) => {
       if (!n || s === me.seat) return;
@@ -8949,6 +9035,7 @@ const Net = (() => {
       return;
     }
     if (d.t === 'hello') {
+      if (d.tok && +d.k > 0) (st.ks || (st.ks = {}))[d.tok] = +d.k;   // where this player's own table would open (for a hand-over)
       if (d.tok && (st.banned || []).includes(d.tok)) { conn.send({ t: 'kick' }); setTimeout(() => conn.close(), 500); return; }
       // spectators: a player alone with robots can be watched while at a board (they accept); a spectator who comes back is let in again at once
       // a board played with robots may be watched by anyone who asks (the player accepts or declines); a tournament
@@ -9038,9 +9125,55 @@ const Net = (() => {
     } else { try { c && c.send({ t: 'movedeclined' }); } catch (e) {} }
     broadcast(); panelRefresh(); render(); tick();
   }
-  function stop() {
-    if (st.seatBak != null) { SET.seat = st.seatBak; st.seatBak = null; } st.tour = null; st.invSeat = {};
-    for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
+  /* ---- when the host leaves during a board, the table can go on: the board (with every hand) goes to one player,
+     who opens the table at their own address; the others are told to reconnect there, and robots play their seats
+     until they are back. The guests' addresses are learnt when they sit down (hello). ---- */
+  function hoCandidate() {
+    if (!st.host || !G || ['lobby', 'idle'].includes(G.phase) || G.tour) return null;
+    const ks = st.ks || {}, toks = st.toks || {};
+    for (const s of [0, 1, 2, 3]) {
+      const id = st.seats[s]; if (!id || id === 'host' || (st.away && st.away[s])) continue;
+      const c = st.conns.get(id), k = ks[toks[s]];
+      if (c && c.open && k) return { s, c, k, name: st.names[s] || SEAT[s] };
+    }
+    return null;
+  }
+  function handOver() {
+    const h = hoCandidate(); if (!h) return false;
+    const hs = +Object.keys(st.seats).find(k => st.seats[k] === 'host'), names = { ...st.names }, toks = { ...(st.toks || {}) };
+    delete names[hs]; delete toks[hs];   // the host's seat: a robot plays it
+    const code = 'room-' + h.k, from = st.names[hs] || myName() || 'Host';
+    try { h.c.send({ t: 'handover', g: JSON.parse(JSON.stringify(G)), names, toks, score: st.score, profs: st.profs || {}, chat: (st.chat || []).slice(-50), priv: !!st.priv, from }); } catch (e) { return false; }
+    for (const [id, c] of st.conns) if (c !== h.c && c.open) { try { c.send({ t: 'moveto', code, host: h.name }); } catch (e) {} }
+    stop(true);
+    return true;
+  }
+  // you were given the table: open it at your own address with the same board, seats and score
+  async function takeOver(d) {
+    const mySeat = st.seat, old = st.conn, oldPeer = st.peer;
+    Object.assign(st, { guest: false, on: false, rejoin: null, conn: null, reconnecting: false }); forgetTable();
+    try { old && old.close(); } catch (e) {} setTimeout(() => { try { oldPeer && oldPeer.destroy(); } catch (e) {} }, 300);
+    await claimSlot();
+    if (!st.slot) { G = st.savedG && st.savedG.phase !== 'lobby' ? st.savedG : idleG(); st.savedG = null; flash(T('The host left and the table could not be moved.'), 3500); render(); tick(); return; }
+    st.seatBak = SET.seat; SET.seatHome = SET.seat; SET.seat = mySeat;
+    becomeHost();
+    G = d.g; st.savedG = null; st.priv = !!d.priv;
+    st.names = { ...d.names, [mySeat]: myName() || 'Host' }; st.score = d.score || st.score; st.profs = { ...(d.profs || {}), [mySeat]: prof() };
+    st.chat = Array.isArray(d.chat) ? d.chat : []; st.toks = {}; st.away = {};
+    for (const s in d.names) {
+      if (+s === mySeat) continue;
+      st.seats[s] = 'moved-' + s; if (d.toks && d.toks[s]) st.toks[s] = d.toks[s];
+      // a robot plays the seat until its player is back (two minutes)
+      const who = d.names[s];
+      st.away[s] = { t: setTimeout(() => { if (!st.away[s] || st.seats[s] !== 'moved-' + s) return; delete st.away[s]; delete st.seats[s]; delete st.names[s]; delete st.toks[s]; addChat(null, who + ' did not come back — the seat is free'); broadcast(); panelRefresh(); render(); tick(); }, 120000) };
+    }
+    addChat(null, T('{0} left — {1} now hosts the table', d.from, myName() || 'Host'));
+    flash(T('{0} left — you now host the table', d.from), 3500);
+    save(); broadcast(); panelRefresh(); render(); tick(); shareInfo();
+  }
+  function stop(moved) {   // moved: the table was handed to a player (the others were told where it went)
+    if (st.seatBak != null) { SET.seat = st.seatBak; st.seatBak = null; } delete SET.seatHome; st.tour = null; st.invSeat = {};
+    if (!moved) for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
     for (const w of (st.watch || new Map()).values()) { try { w.conn.send({ t: 'bye' }); } catch (e) {} setTimeout(() => { try { w.conn.close(); } catch (e) {} }, 500); }
     st.watch = new Map(); st.watchToks = []; st.priv = false; st.invited = [];
     for (const a of Object.values(st.away || {})) clearTimeout(a.t); st.away = {};
@@ -9071,9 +9204,10 @@ const Net = (() => {
       setTimeout(() => { if (!welcomed && !waiting) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
       peer.on('error', e => { if (e.type === 'peer-unavailable') fail('That table is not open any more.'); });
       peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
-      conn.on('open', () => conn.send({ t: 'hello', name, want, rq, tok: devTok(), prof: prof(), seat: retry ? st.seat : undefined }));
+      conn.on('open', () => conn.send({ t: 'hello', name, want, rq, tok: devTok(), prof: prof(), seat: retry ? st.seat : undefined, k: st.slot ? st.slot.k : undefined }));
       conn.on('data', d => {
         if (!d) return;
+        st.lastHost = Date.now();
         if (d.t === 'welcome') {
           welcomed = true; clearTimeout(timer);
           st.waiting = false; st.watching = !!d.watch;
@@ -9095,6 +9229,8 @@ const Net = (() => {
         else if (d.t === "declined") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The host did not accept the request.'; showJoin(code); }
         else if (d.t === "kick") { st.rejoin = null; if (st.guest) leave('The host removed you from the table.'); else { st.msg = 'The host removed you from this table.'; showJoin(code); } }
         else if (d.t === "bye") { st.rejoin = null; if (st.guest) leave('The host closed the table.'); }
+        else if (d.t === "handover" && st.guest && st.conn === conn) takeOver(d);
+        else if (d.t === "moveto" && st.guest && typeof d.code === "string" && /^room-\d+$/.test(d.code)) { if (st.rejoin) { st.rejoin = { ...st.rejoin, code: d.code }; rememberTable({ code: d.code, name: st.rejoin.name, want: st.rejoin.want }); } flash(T("{0} now hosts the table — moving there…", d.host), 3000); }
         else if (d.t === "hint" && G && d.id === G.id && G.phase === "play") { ui.hintCard = d.c; render(); }
       });
       conn.on('close', () => { if (st.guest && st.conn === conn) lost(); });
@@ -9116,12 +9252,39 @@ const Net = (() => {
     join(t.code, t.name, st.want, undefined, true);
   }
   // the connection dropped: keep the table on screen and try to get back in for two minutes
+  /* the host's app is gone and did not come back: the players left keep their table. The first of them (by seat)
+     opens it at their own address with the same players and score, and starts a new board when everyone is back;
+     the others reconnect there. (The board that was being played cannot go on: only the host had all the hands.) */
+  function fallback(r) {
+    const g = G, ks = g && g.ks, ctl = st.ctl || (g && g.ctl), names = st.names || {};
+    if (!ks || !ctl || st.fellBack) return false;
+    const left = [0, 1, 2, 3].filter(s => ctl[s] && ctl[s] !== 'host' && ctl[s] !== 'robot' && names[s] && ks[s]);
+    if (left.length < 2 || !left.includes(st.seat)) return false;
+    st.fellBack = true;
+    const succ = left[0], code = 'room-' + ks[succ];
+    if (succ !== st.seat) { st.rejoin = { ...r, code }; rememberTable({ code, name: r.name, want: r.want }); flash(T('{0} now hosts the table — moving there…', names[succ]), 3000); return 'retry'; }
+    const mySeat = st.seat, score = st.score, old = st.peer;
+    Object.assign(st, { guest: false, on: false, rejoin: null, conn: null, reconnecting: false }); forgetTable();
+    try { old && old.destroy(); } catch (e) {}
+    claimSlot().then(() => {
+      if (!st.slot || st.slot.k !== ks[mySeat]) { leave('Could not get back to the table. Open the invite link again to rejoin.'); return; }
+      st.seatBak = SET.seat; SET.seatHome = SET.seat; SET.seat = mySeat; G = null; st.ctl = null;
+      becomeHost(); if (score) st.score = score;
+      st.invited = left.filter(s => s !== mySeat).map(s => nameKey(names[s])); st.invSeat = Object.fromEntries(left.filter(s => s !== mySeat).map(s => [nameKey(names[s]), s]));
+      addChat(null, T('The host left — {0} now hosts the table', myName() || 'Host'));
+      flash(T('The host left — you now host the table. Start a new board when everyone is back.'), 4500);
+      save(); panel(); render(); tick(); shareInfo();
+    });
+    return true;
+  }
   function lost() {
     if (st.reconnecting || !st.rejoin) { if (!st.reconnecting) leave('The connection to the table was lost.'); return; }
     st.reconnecting = true; st.conn = null;
-    const until = Date.now() + 120000, r = st.rejoin;
+    const t0 = Date.now(), until = t0 + 120000, r = st.rejoin;
     const tryOnce = () => {
       if (!st.guest || st.rejoin !== r) { st.reconnecting = false; return; }
+      // after a minute without the host, the players left go on at the first player's table (when this device is online)
+      if (Date.now() > t0 + 60000 && navigator.onLine !== false) { const f = fallback(r); if (f === 'retry') { st.reconnecting = false; st.conn = null; lost(); return; } if (f) { st.reconnecting = false; return; } }
       if (Date.now() > until) { st.reconnecting = false; leave('Could not get back to the table. Open the invite link again to rejoin.'); return; }
       flash('Connection lost — reconnecting…', 2500);
       try { st.peer && st.peer.destroy(); } catch (e) {}
@@ -9134,8 +9297,10 @@ const Net = (() => {
   function ping() {
     clearInterval(pingT);
     pingT = setInterval(() => {
+      // the host pings every 10 s: 30 s of silence means its app is gone (a closed app does not always close the line)
+      if (st.guest && st.conn && st.lastHost && Date.now() - st.lastHost > 30000 && !st.reconnecting) { const c = st.conn; st.lastHost = 0; try { c.close(); } catch (e) {} if (st.conn === c) lost(); return; }
       if (st.guest) { if (st.conn && st.conn.open) { try { st.conn.send({ t: 'ping' }); } catch (e) {} } }
-      else if (st.host) { for (const c of st.conns.values()) if (c.open) { try { c.send({ t: 'ping' }); } catch (e) {} } }
+      else if (st.host) { for (const c of st.conns.values()) if (c.open) { try { c.send({ t: 'ping' }); } catch (e) {} } for (const w of (st.watch || new Map()).values()) if (w.conn.open) { try { w.conn.send({ t: 'ping' }); } catch (e) {} } }
       else clearInterval(pingT);
     }, 10000);
   }
@@ -9170,7 +9335,7 @@ const Net = (() => {
     // leave the table first, then close the line: closing can report "connection lost" at once, and that
     // must not start a reconnection
     const c = st.conn, p = st.peer, back = st.savedG;
-    Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null, rejoin: null, reconnecting: false, watching: false });
+    Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null, rejoin: null, reconnecting: false, watching: false, fellBack: false });
     try { if (c && c.open && !msg) c.send({ t: 'leave' }); } catch (e) {}   // tell the host, so the seat is freed at once
     setTimeout(() => { try { c && c.close(); } catch (e) {} try { p && p.destroy(); } catch (e) {} }, 300);
     wakeOff();
@@ -9337,7 +9502,15 @@ const Net = (() => {
       }
       case 'nFind': findTables(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
-      case 'nStop': if (ui.overlay === 'net') { stop(); closeOv(); } else askYes(T('Close the table?'), () => { stop(); closeOv(); goHome(); }); break;
+      case 'nStop': {
+        // during a board with other players: hand the table to one of them, or close it for everyone
+        const h = hoCandidate();
+        if (h) { openOv('handq', `<div class="big">${T('Close the table?')}</div><div class="muted">${T('{0} can host the table, so the others go on playing (robots play your seat).', esc(h.name))}</div>
+          <div class="row2"><button class="btn new" id="nHand">👥 ${T('Hand the table to {0}', esc(h.name))}</button><button class="btn" id="nStopAll">✖ ${T('Close it for everyone')}</button></div><div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`); break; }
+        if (ui.overlay === 'net') { stop(); closeOv(); } else askYes(T('Close the table?'), () => { stop(); closeOv(); goHome(); }); break;
+      }
+      case 'nHand': if (!handOver()) stop(); closeOv(); goHome(); break;
+      case 'nStopAll': stop(); closeOv(); goHome(); break;
       case 'nLeave': if (ui.overlay === 'net') { leave(); closeOv(); } else askYes(T('Leave the table?'), () => { leave(); closeOv(); }); break;
       case 'nRst': resetScore(); break;
       case 'nRstQ': send({ t: 'rsreq' }); flash(T('Ask to reset the score') + ' ✓', 1500); break;

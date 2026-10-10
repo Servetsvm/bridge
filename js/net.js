@@ -58,6 +58,8 @@ const Net = (() => {
     }
     v.ctl = [0, 1, 2, 3].map(owner); v.names = st.names; v.away = Object.keys(st.away || {}).map(Number); v.score = st.score; v.profs = st.profs || {};
     v.watchers = [...(st.watch || new Map()).values()].map(w => w.name);
+    // where each player's own table opens: if the host disappears, the players left move to the first of them
+    v.ks = Object.fromEntries([0, 1, 2, 3].map(s => [s, st.seats[s] === 'host' ? (st.slot ? st.slot.k : 0) : (st.ks || {})[(st.toks || {})[s]] || 0]));
     return v;
   }
   function broadcast() {
@@ -307,9 +309,9 @@ const Net = (() => {
   // open your tournament table: a private online table, the other players are invited straight to their seats
   async function openTourTable(id) {
     const t = st.tours[id], me = t && myTourSeat(t); if (!me || st.on) return;
-    st.seatBak = SET.seat; SET.seat = me.seat;
+    st.seatBak = SET.seat; SET.seatHome = SET.seat; SET.seat = me.seat;
     await host(false);   // listed in the lobby: a newcomer can ask for a robot's seat (you accept)
-    if (!st.host) { SET.seat = st.seatBak; st.seatBak = null; return; }
+    if (!st.host) { SET.seat = st.seatBak; st.seatBak = null; delete SET.seatHome; return; }
     st.tour = { id, ti: me.ti }; st.invSeat = {};
     t.tables[me.ti].forEach((n, s) => {
       if (!n || s === me.seat) return;
@@ -944,6 +946,7 @@ const Net = (() => {
       return;
     }
     if (d.t === 'hello') {
+      if (d.tok && +d.k > 0) (st.ks || (st.ks = {}))[d.tok] = +d.k;   // where this player's own table would open (for a hand-over)
       if (d.tok && (st.banned || []).includes(d.tok)) { conn.send({ t: 'kick' }); setTimeout(() => conn.close(), 500); return; }
       // spectators: a player alone with robots can be watched while at a board (they accept); a spectator who comes back is let in again at once
       // a board played with robots may be watched by anyone who asks (the player accepts or declines); a tournament
@@ -1033,9 +1036,55 @@ const Net = (() => {
     } else { try { c && c.send({ t: 'movedeclined' }); } catch (e) {} }
     broadcast(); panelRefresh(); render(); tick();
   }
-  function stop() {
-    if (st.seatBak != null) { SET.seat = st.seatBak; st.seatBak = null; } st.tour = null; st.invSeat = {};
-    for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
+  /* ---- when the host leaves during a board, the table can go on: the board (with every hand) goes to one player,
+     who opens the table at their own address; the others are told to reconnect there, and robots play their seats
+     until they are back. The guests' addresses are learnt when they sit down (hello). ---- */
+  function hoCandidate() {
+    if (!st.host || !G || ['lobby', 'idle'].includes(G.phase) || G.tour) return null;
+    const ks = st.ks || {}, toks = st.toks || {};
+    for (const s of [0, 1, 2, 3]) {
+      const id = st.seats[s]; if (!id || id === 'host' || (st.away && st.away[s])) continue;
+      const c = st.conns.get(id), k = ks[toks[s]];
+      if (c && c.open && k) return { s, c, k, name: st.names[s] || SEAT[s] };
+    }
+    return null;
+  }
+  function handOver() {
+    const h = hoCandidate(); if (!h) return false;
+    const hs = +Object.keys(st.seats).find(k => st.seats[k] === 'host'), names = { ...st.names }, toks = { ...(st.toks || {}) };
+    delete names[hs]; delete toks[hs];   // the host's seat: a robot plays it
+    const code = 'room-' + h.k, from = st.names[hs] || myName() || 'Host';
+    try { h.c.send({ t: 'handover', g: JSON.parse(JSON.stringify(G)), names, toks, score: st.score, profs: st.profs || {}, chat: (st.chat || []).slice(-50), priv: !!st.priv, from }); } catch (e) { return false; }
+    for (const [id, c] of st.conns) if (c !== h.c && c.open) { try { c.send({ t: 'moveto', code, host: h.name }); } catch (e) {} }
+    stop(true);
+    return true;
+  }
+  // you were given the table: open it at your own address with the same board, seats and score
+  async function takeOver(d) {
+    const mySeat = st.seat, old = st.conn, oldPeer = st.peer;
+    Object.assign(st, { guest: false, on: false, rejoin: null, conn: null, reconnecting: false }); forgetTable();
+    try { old && old.close(); } catch (e) {} setTimeout(() => { try { oldPeer && oldPeer.destroy(); } catch (e) {} }, 300);
+    await claimSlot();
+    if (!st.slot) { G = st.savedG && st.savedG.phase !== 'lobby' ? st.savedG : idleG(); st.savedG = null; flash(T('The host left and the table could not be moved.'), 3500); render(); tick(); return; }
+    st.seatBak = SET.seat; SET.seatHome = SET.seat; SET.seat = mySeat;
+    becomeHost();
+    G = d.g; st.savedG = null; st.priv = !!d.priv;
+    st.names = { ...d.names, [mySeat]: myName() || 'Host' }; st.score = d.score || st.score; st.profs = { ...(d.profs || {}), [mySeat]: prof() };
+    st.chat = Array.isArray(d.chat) ? d.chat : []; st.toks = {}; st.away = {};
+    for (const s in d.names) {
+      if (+s === mySeat) continue;
+      st.seats[s] = 'moved-' + s; if (d.toks && d.toks[s]) st.toks[s] = d.toks[s];
+      // a robot plays the seat until its player is back (two minutes)
+      const who = d.names[s];
+      st.away[s] = { t: setTimeout(() => { if (!st.away[s] || st.seats[s] !== 'moved-' + s) return; delete st.away[s]; delete st.seats[s]; delete st.names[s]; delete st.toks[s]; addChat(null, who + ' did not come back — the seat is free'); broadcast(); panelRefresh(); render(); tick(); }, 120000) };
+    }
+    addChat(null, T('{0} left — {1} now hosts the table', d.from, myName() || 'Host'));
+    flash(T('{0} left — you now host the table', d.from), 3500);
+    save(); broadcast(); panelRefresh(); render(); tick(); shareInfo();
+  }
+  function stop(moved) {   // moved: the table was handed to a player (the others were told where it went)
+    if (st.seatBak != null) { SET.seat = st.seatBak; st.seatBak = null; } delete SET.seatHome; st.tour = null; st.invSeat = {};
+    if (!moved) for (const c of st.conns.values()) { try { c.send({ t: 'bye' }); } catch (e) {} }
     for (const w of (st.watch || new Map()).values()) { try { w.conn.send({ t: 'bye' }); } catch (e) {} setTimeout(() => { try { w.conn.close(); } catch (e) {} }, 500); }
     st.watch = new Map(); st.watchToks = []; st.priv = false; st.invited = [];
     for (const a of Object.values(st.away || {})) clearTimeout(a.t); st.away = {};
@@ -1066,9 +1115,10 @@ const Net = (() => {
       setTimeout(() => { if (!welcomed && !waiting) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
       peer.on('error', e => { if (e.type === 'peer-unavailable') fail('That table is not open any more.'); });
       peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
-      conn.on('open', () => conn.send({ t: 'hello', name, want, rq, tok: devTok(), prof: prof(), seat: retry ? st.seat : undefined }));
+      conn.on('open', () => conn.send({ t: 'hello', name, want, rq, tok: devTok(), prof: prof(), seat: retry ? st.seat : undefined, k: st.slot ? st.slot.k : undefined }));
       conn.on('data', d => {
         if (!d) return;
+        st.lastHost = Date.now();
         if (d.t === 'welcome') {
           welcomed = true; clearTimeout(timer);
           st.waiting = false; st.watching = !!d.watch;
@@ -1090,6 +1140,8 @@ const Net = (() => {
         else if (d.t === "declined") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The host did not accept the request.'; showJoin(code); }
         else if (d.t === "kick") { st.rejoin = null; if (st.guest) leave('The host removed you from the table.'); else { st.msg = 'The host removed you from this table.'; showJoin(code); } }
         else if (d.t === "bye") { st.rejoin = null; if (st.guest) leave('The host closed the table.'); }
+        else if (d.t === "handover" && st.guest && st.conn === conn) takeOver(d);
+        else if (d.t === "moveto" && st.guest && typeof d.code === "string" && /^room-\d+$/.test(d.code)) { if (st.rejoin) { st.rejoin = { ...st.rejoin, code: d.code }; rememberTable({ code: d.code, name: st.rejoin.name, want: st.rejoin.want }); } flash(T("{0} now hosts the table — moving there…", d.host), 3000); }
         else if (d.t === "hint" && G && d.id === G.id && G.phase === "play") { ui.hintCard = d.c; render(); }
       });
       conn.on('close', () => { if (st.guest && st.conn === conn) lost(); });
@@ -1111,12 +1163,39 @@ const Net = (() => {
     join(t.code, t.name, st.want, undefined, true);
   }
   // the connection dropped: keep the table on screen and try to get back in for two minutes
+  /* the host's app is gone and did not come back: the players left keep their table. The first of them (by seat)
+     opens it at their own address with the same players and score, and starts a new board when everyone is back;
+     the others reconnect there. (The board that was being played cannot go on: only the host had all the hands.) */
+  function fallback(r) {
+    const g = G, ks = g && g.ks, ctl = st.ctl || (g && g.ctl), names = st.names || {};
+    if (!ks || !ctl || st.fellBack) return false;
+    const left = [0, 1, 2, 3].filter(s => ctl[s] && ctl[s] !== 'host' && ctl[s] !== 'robot' && names[s] && ks[s]);
+    if (left.length < 2 || !left.includes(st.seat)) return false;
+    st.fellBack = true;
+    const succ = left[0], code = 'room-' + ks[succ];
+    if (succ !== st.seat) { st.rejoin = { ...r, code }; rememberTable({ code, name: r.name, want: r.want }); flash(T('{0} now hosts the table — moving there…', names[succ]), 3000); return 'retry'; }
+    const mySeat = st.seat, score = st.score, old = st.peer;
+    Object.assign(st, { guest: false, on: false, rejoin: null, conn: null, reconnecting: false }); forgetTable();
+    try { old && old.destroy(); } catch (e) {}
+    claimSlot().then(() => {
+      if (!st.slot || st.slot.k !== ks[mySeat]) { leave('Could not get back to the table. Open the invite link again to rejoin.'); return; }
+      st.seatBak = SET.seat; SET.seatHome = SET.seat; SET.seat = mySeat; G = null; st.ctl = null;
+      becomeHost(); if (score) st.score = score;
+      st.invited = left.filter(s => s !== mySeat).map(s => nameKey(names[s])); st.invSeat = Object.fromEntries(left.filter(s => s !== mySeat).map(s => [nameKey(names[s]), s]));
+      addChat(null, T('The host left — {0} now hosts the table', myName() || 'Host'));
+      flash(T('The host left — you now host the table. Start a new board when everyone is back.'), 4500);
+      save(); panel(); render(); tick(); shareInfo();
+    });
+    return true;
+  }
   function lost() {
     if (st.reconnecting || !st.rejoin) { if (!st.reconnecting) leave('The connection to the table was lost.'); return; }
     st.reconnecting = true; st.conn = null;
-    const until = Date.now() + 120000, r = st.rejoin;
+    const t0 = Date.now(), until = t0 + 120000, r = st.rejoin;
     const tryOnce = () => {
       if (!st.guest || st.rejoin !== r) { st.reconnecting = false; return; }
+      // after a minute without the host, the players left go on at the first player's table (when this device is online)
+      if (Date.now() > t0 + 60000 && navigator.onLine !== false) { const f = fallback(r); if (f === 'retry') { st.reconnecting = false; st.conn = null; lost(); return; } if (f) { st.reconnecting = false; return; } }
       if (Date.now() > until) { st.reconnecting = false; leave('Could not get back to the table. Open the invite link again to rejoin.'); return; }
       flash('Connection lost — reconnecting…', 2500);
       try { st.peer && st.peer.destroy(); } catch (e) {}
@@ -1129,8 +1208,10 @@ const Net = (() => {
   function ping() {
     clearInterval(pingT);
     pingT = setInterval(() => {
+      // the host pings every 10 s: 30 s of silence means its app is gone (a closed app does not always close the line)
+      if (st.guest && st.conn && st.lastHost && Date.now() - st.lastHost > 30000 && !st.reconnecting) { const c = st.conn; st.lastHost = 0; try { c.close(); } catch (e) {} if (st.conn === c) lost(); return; }
       if (st.guest) { if (st.conn && st.conn.open) { try { st.conn.send({ t: 'ping' }); } catch (e) {} } }
-      else if (st.host) { for (const c of st.conns.values()) if (c.open) { try { c.send({ t: 'ping' }); } catch (e) {} } }
+      else if (st.host) { for (const c of st.conns.values()) if (c.open) { try { c.send({ t: 'ping' }); } catch (e) {} } for (const w of (st.watch || new Map()).values()) if (w.conn.open) { try { w.conn.send({ t: 'ping' }); } catch (e) {} } }
       else clearInterval(pingT);
     }, 10000);
   }
@@ -1165,7 +1246,7 @@ const Net = (() => {
     // leave the table first, then close the line: closing can report "connection lost" at once, and that
     // must not start a reconnection
     const c = st.conn, p = st.peer, back = st.savedG;
-    Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null, rejoin: null, reconnecting: false, watching: false });
+    Object.assign(st, { on: false, guest: false, me: 'local', peer: null, conn: null, ctl: null, names: {}, code: null, savedG: null, rejoin: null, reconnecting: false, watching: false, fellBack: false });
     try { if (c && c.open && !msg) c.send({ t: 'leave' }); } catch (e) {}   // tell the host, so the seat is freed at once
     setTimeout(() => { try { c && c.close(); } catch (e) {} try { p && p.destroy(); } catch (e) {} }, 300);
     wakeOff();
@@ -1332,7 +1413,15 @@ const Net = (() => {
       }
       case 'nFind': findTables(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
-      case 'nStop': if (ui.overlay === 'net') { stop(); closeOv(); } else askYes(T('Close the table?'), () => { stop(); closeOv(); goHome(); }); break;
+      case 'nStop': {
+        // during a board with other players: hand the table to one of them, or close it for everyone
+        const h = hoCandidate();
+        if (h) { openOv('handq', `<div class="big">${T('Close the table?')}</div><div class="muted">${T('{0} can host the table, so the others go on playing (robots play your seat).', esc(h.name))}</div>
+          <div class="row2"><button class="btn new" id="nHand">👥 ${T('Hand the table to {0}', esc(h.name))}</button><button class="btn" id="nStopAll">✖ ${T('Close it for everyone')}</button></div><div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`); break; }
+        if (ui.overlay === 'net') { stop(); closeOv(); } else askYes(T('Close the table?'), () => { stop(); closeOv(); goHome(); }); break;
+      }
+      case 'nHand': if (!handOver()) stop(); closeOv(); goHome(); break;
+      case 'nStopAll': stop(); closeOv(); goHome(); break;
       case 'nLeave': if (ui.overlay === 'net') { leave(); closeOv(); } else askYes(T('Leave the table?'), () => { leave(); closeOv(); }); break;
       case 'nRst': resetScore(); break;
       case 'nRstQ': send({ t: 'rsreq' }); flash(T('Ask to reset the score') + ' ✓', 1500); break;
