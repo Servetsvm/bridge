@@ -903,7 +903,7 @@ function renderHome() {
   }
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
-  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `👑 ${T('Logins today')}: ${N.loginsToday()} · ` : ''}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
+  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
   // the open section is rebuilt only when it changes (so typing in it is not lost); its contents are refreshed
   // the chat opens as a panel at the bottom of the screen (phones and narrow windows); the others under the buttons
   const hs = $('hSec'), want = ui.hsec || '', top = want === 'chat' ? '' : want;
@@ -1621,6 +1621,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
   if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
   { const pc = ev_.target.closest("div.pconv"); if (pc) { pc.classList.toggle("open"); return; } }   // the convention line on a card: tap to read it all
+  if (ev_.target.closest("[data-stats]")) { ui.statData = null; showStats(); return; }   // the administrator's visitor statistics
   const pw = ev_.target.closest('[data-who]'); if (pw) { showPlayer(pw.dataset.who); return; }
   const pwx = ev_.target.closest('[data-pairwith]'); if (pwx) { closeOv(); Net.playWith(pwx.dataset.pairwith); return; }
   const fr = ev_.target.closest('[data-friend]'); if (fr) { toggleFriend(fr.dataset.friend); showPlayer(fr.dataset.friend); render(); return; }
@@ -1674,6 +1675,7 @@ document.addEventListener('click', ev_ => {
       showTourSetup(ui.tsetId); return;
     }
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
+    if (seg === "stattab") { ui.statTab = v; showStats(); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
     if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
@@ -1741,6 +1743,7 @@ document.addEventListener('click', ev_ => {
     case "oReplay": replayDeal(); break;
     case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
+    case "sRefresh": ui.statData = null; showStats(); break;
     case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), () => {
       if (online()) { flash(T('Close the online table first'), 2000); return; }
       try { localStorage.removeItem('bridge-table-name'); } catch (e) {}
@@ -1926,3 +1929,20 @@ document.addEventListener('pointerdown', e => {
   const up = () => { document.removeEventListener('pointerup', up); SIZES.fw2 = Math.round(s.offsetWidth); SIZES.fh2 = Math.round(s.offsetHeight); saveSizes(); };
   document.addEventListener('pointerup', up);
 });
+/* ---- the administrator's visitor statistics: today, the last 7, 30 and 365 days, by country (once per internet address) ---- */
+async function showStats() {
+  if (!Net.isAdmin()) return;
+  ui.statTab = ui.statTab || 'day';
+  if (!ui.statData) { openOv('stats', `<h2>📊 ${T('Visitor statistics')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`); try { ui.statData = await Net.loginStats(); } catch (e) { ui.statData = null; } }
+  const d = ui.statData;
+  if (!d) { openOv('stats', `<h2>📊 ${T('Visitor statistics')}</h2><div class="muted">${T('The online database could not be reached.')}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`); return; }
+  const P = d[ui.statTab], L = Object.entries(P.by).sort((a, b) => b[1] - a[1]), max = Math.max(1, ...L.map(x => x[1]));
+  const tabs = [['day', T('Today')], ['week', T('7 days')], ['month', T('30 days')], ['year', T('365 days')]];
+  const rows = L.map(([c, n]) => `<tr><td>${c === '?' ? '❔ ' + T('Unknown') : flagOf(c) + ' ' + esc(ctryName(c))}</td><td class="n"><b>${n}</b></td><td class="sbar"><i style="width:${Math.round(n / max * 100)}%"></i></td></tr>`).join('');
+  openOv('stats', `<h2>📊 ${T('Visitor statistics')}</h2>
+    <div class="seg" data-seg="stattab">${tabs.map(([v, l]) => `<button data-v="${v}" class="${ui.statTab === v ? 'on' : ''}">${l} <small>(${d[v].total})</small></button>`).join('')}</div>
+    <div class="big">${T('{0} visitors', P.total)}</div>
+    ${L.length ? `<table class="res stats">${rows}</table>` : `<div class="muted">${T('Nobody yet.')}</div>`}
+    <div class="muted">${T('Each internet address counts once in each period. Only you (the administrator) see this page.')}</div>
+    <div class="row2"><button class="btn" id="sRefresh">🔄 ${T('Refresh')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}

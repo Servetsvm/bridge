@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "30 days": "30 gün", "365 days": "365 gün", "7 days": "7 gün", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Her internet adresi her dönemde bir kez sayılır. Bu sayfayı sadece sen (admin) görürsün.", "Loading…": "Yükleniyor…", "Nobody yet.": "Henüz kimse yok.", "Refresh": "Yenile", "The online database could not be reached.": "Çevrimiçi veritabanına ulaşılamadı.", "Unknown": "Bilinmiyor", "Visitor statistics": "Ziyaretçi istatistiği", "{0} visitors": "{0} ziyaretçi",
     "Drag to resize": "Boyutlandırmak için sürükle", "Smaller": "Küçült", "Larger": "Büyüt",
     "Drag to move": "Taşımak için sürükle",
     "Close this tournament for everyone?": "Bu turnuva herkes için kapatılsın mı?", "Log out": "Çıkış yap", "Log out? You can sign in again with your name and PIN, or choose another name.": "Çıkış yapılsın mı? Adın ve PIN’inle tekrar girebilir ya da başka bir ad seçebilirsin.", "The robots do not accept an undo": "Robotlar geri almayı kabul etmiyor",
@@ -94,6 +95,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "30 days": "30 dager", "365 days": "365 dager", "7 days": "7 dager", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Hver internettadresse telles én gang per periode. Bare du (administrator) ser denne siden.", "Loading…": "Laster…", "Nobody yet.": "Ingen ennå.", "Refresh": "Oppdater", "The online database could not be reached.": "Fikk ikke kontakt med databasen.", "Unknown": "Ukjent", "Visitor statistics": "Besøksstatistikk", "{0} visitors": "{0} besøkende",
     "Drag to resize": "Dra for å endre størrelse", "Smaller": "Mindre", "Larger": "Større",
     "Drag to move": "Dra for å flytte",
     "Close this tournament for everyone?": "Lukke denne turneringen for alle?", "Log out": "Logg ut", "Log out? You can sign in again with your name and PIN, or choose another name.": "Logge ut? Du kan logge inn igjen med navn og PIN, eller velge et annet navn.", "The robots do not accept an undo": "Robotene godtar ikke angring",
@@ -185,6 +187,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "30 days": "30 días", "365 days": "365 días", "7 days": "7 días", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Cada dirección de internet cuenta una vez por periodo. Solo tú (administrador) ves esta página.", "Loading…": "Cargando…", "Nobody yet.": "Nadie todavía.", "Refresh": "Actualizar", "The online database could not be reached.": "No se pudo acceder a la base de datos.", "Unknown": "Desconocido", "Visitor statistics": "Estadísticas de visitas", "{0} visitors": "{0} visitantes",
     "Drag to resize": "Arrastra para cambiar el tamaño", "Smaller": "Más pequeño", "Larger": "Más grande",
     "Drag to move": "Arrastra para mover",
     "Close this tournament for everyone?": "¿Cerrar este torneo para todos?", "Log out": "Cerrar sesión", "Log out? You can sign in again with your name and PIN, or choose another name.": "¿Cerrar sesión? Puedes volver a entrar con tu nombre y PIN, o elegir otro nombre.", "The robots do not accept an undo": "Los robots no aceptan deshacer",
@@ -304,6 +307,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "30 days": "30 jours", "365 days": "365 jours", "7 days": "7 jours", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Chaque adresse internet compte une fois par période. Vous seul (administrateur) voyez cette page.", "Loading…": "Chargement…", "Nobody yet.": "Personne pour l’instant.", "Refresh": "Actualiser", "The online database could not be reached.": "Base de données injoignable.", "Unknown": "Inconnu", "Visitor statistics": "Statistiques des visites", "{0} visitors": "{0} visiteurs",
     "Drag to resize": "Faites glisser pour redimensionner", "Smaller": "Plus petit", "Larger": "Plus grand",
     "Drag to move": "Faites glisser pour déplacer",
     "Close this tournament for everyone?": "Fermer ce tournoi pour tout le monde ?", "Log out": "Se déconnecter", "Log out? You can sign in again with your name and PIN, or choose another name.": "Se déconnecter ? Vous pourrez revenir avec votre nom et votre PIN, ou choisir un autre nom.", "The robots do not accept an undo": "Les robots n’acceptent pas d’annulation",
@@ -423,6 +427,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "30 days": "30 giorni", "365 days": "365 giorni", "7 days": "7 giorni", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Ogni indirizzo internet conta una volta per periodo. Solo tu (amministratore) vedi questa pagina.", "Loading…": "Caricamento…", "Nobody yet.": "Ancora nessuno.", "Refresh": "Aggiorna", "The online database could not be reached.": "Database non raggiungibile.", "Unknown": "Sconosciuto", "Visitor statistics": "Statistiche visite", "{0} visitors": "{0} visitatori",
     "Drag to resize": "Trascina per ridimensionare", "Smaller": "Più piccolo", "Larger": "Più grande",
     "Drag to move": "Trascina per spostare",
     "Close this tournament for everyone?": "Chiudere questo torneo per tutti?", "Log out": "Esci", "Log out? You can sign in again with your name and PIN, or choose another name.": "Uscire? Potrai rientrare con nome e PIN, o scegliere un altro nome.", "The robots do not accept an undo": "I robot non accettano l’annullamento",
@@ -542,6 +547,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "30 days": "30 Tage", "365 days": "365 Tage", "7 days": "7 Tage", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Jede Internetadresse zählt einmal pro Zeitraum. Nur du (Administrator) siehst diese Seite.", "Loading…": "Wird geladen…", "Nobody yet.": "Noch niemand.", "Refresh": "Aktualisieren", "The online database could not be reached.": "Die Datenbank ist nicht erreichbar.", "Unknown": "Unbekannt", "Visitor statistics": "Besucherstatistik", "{0} visitors": "{0} Besucher",
     "Drag to resize": "Zum Ändern der Größe ziehen", "Smaller": "Kleiner", "Larger": "Größer",
     "Drag to move": "Zum Verschieben ziehen",
     "Close this tournament for everyone?": "Dieses Turnier für alle schließen?", "Log out": "Abmelden", "Log out? You can sign in again with your name and PIN, or choose another name.": "Abmelden? Du kannst dich mit Name und PIN wieder anmelden oder einen anderen Namen wählen.", "The robots do not accept an undo": "Die Roboter akzeptieren kein Zurücknehmen",
@@ -661,6 +667,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "30 days": "30 дней", "365 days": "365 дней", "7 days": "7 дней", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Каждый интернет-адрес считается один раз за период. Эту страницу видите только вы (администратор).", "Loading…": "Загрузка…", "Nobody yet.": "Пока никого.", "Refresh": "Обновить", "The online database could not be reached.": "База данных недоступна.", "Unknown": "Неизвестно", "Visitor statistics": "Статистика посещений", "{0} visitors": "Посетителей: {0}",
     "Drag to resize": "Потяните, чтобы изменить размер", "Smaller": "Меньше", "Larger": "Больше",
     "Drag to move": "Перетащите, чтобы сдвинуть",
     "Close this tournament for everyone?": "Закрыть этот турнир для всех?", "Log out": "Выйти", "Log out? You can sign in again with your name and PIN, or choose another name.": "Выйти? Вы сможете снова войти с именем и PIN или выбрать другое имя.", "The robots do not accept an undo": "Роботы не принимают отмену хода",
@@ -780,6 +787,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "30 days": "30 dni", "365 days": "365 dni", "7 days": "7 dni", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Każdy adres internetowy liczy się raz w okresie. Tę stronę widzisz tylko ty (administrator).", "Loading…": "Ładowanie…", "Nobody yet.": "Jeszcze nikogo.", "Refresh": "Odśwież", "The online database could not be reached.": "Baza danych jest niedostępna.", "Unknown": "Nieznany", "Visitor statistics": "Statystyki odwiedzin", "{0} visitors": "{0} odwiedzających",
     "Drag to resize": "Przeciągnij, aby zmienić rozmiar", "Smaller": "Mniejszy", "Larger": "Większy",
     "Drag to move": "Przeciągnij, aby przesunąć",
     "Close this tournament for everyone?": "Zamknąć ten turniej dla wszystkich?", "Log out": "Wyloguj", "Log out? You can sign in again with your name and PIN, or choose another name.": "Wylogować? Możesz wrócić z imieniem i PIN-em albo wybrać inne imię.", "The robots do not accept an undo": "Roboty nie akceptują cofnięcia",
@@ -899,6 +907,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "30 days": "30 天", "365 days": "365 天", "7 days": "7 天", "Each internet address counts once in each period. Only you (the administrator) see this page.": "每个网络地址在每个时段只计一次。只有你(管理员)能看到此页。", "Loading…": "加载中…", "Nobody yet.": "还没有人。", "Refresh": "刷新", "The online database could not be reached.": "无法连接在线数据库。", "Unknown": "未知", "Visitor statistics": "访客统计", "{0} visitors": "{0} 位访客",
     "Drag to resize": "拖动以调整大小", "Smaller": "缩小", "Larger": "放大",
     "Drag to move": "拖动以移动",
     "Close this tournament for everyone?": "为所有人关闭这个比赛?", "Log out": "退出登录", "Log out? You can sign in again with your name and PIN, or choose another name.": "退出登录?你可以用名字和 PIN 重新登录,或换一个名字。", "The robots do not accept an undo": "机器人不接受撤回",

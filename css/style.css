@@ -936,3 +936,10 @@ textarea.pconv{font-size:12.5px;min-height:0}
 /* on a computer every pop-up window can be made bigger or smaller from its lower right corner */
 @media (min-width:900px) and (pointer:fine){ .ov .sheet{resize:both;overflow:auto;min-width:300px;min-height:160px;max-width:96vw;max-height:96vh} }
 @media (min-width:1100px){ body.withdock .ov:not(.float){padding-right:calc(var(--dockw) + 30px)} }
+/* the administrator's visitor statistics */
+.res.stats td{padding:5px 4px}
+.res.stats .sbar{width:40%}
+.res.stats .sbar i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,#5b3aa0,#9b7be0)}
+.hadm,.ladmin{cursor:pointer}
+.hadm{color:#7a5a00;font-weight:700}
+:root[data-theme="dark"] .hadm{color:#f3d36b}

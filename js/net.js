@@ -584,7 +584,7 @@ const Net = (() => {
           st.claimed = true;
         }
         await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof() });
-        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ip: await ipTag() }); st.loggedDay = today(); }
+        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()) }); st.loggedDay = today(); }
         const [on, users, logins] = await Promise.all([Cloud.get('online'), Cloud.get('users?shallow=true'), isAdmin() ? Cloud.get('logins/' + today()) : null]);
         st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: Object.keys(users || {}).length, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
@@ -592,15 +592,32 @@ const Net = (() => {
       } catch (e) {}
     },
   };
-  /* today's logins are counted once per internet address (several names from the same place count once). The address
-     comes from ipify; only a short one-way code of it is stored, never the address itself. */
+  /* today's logins are counted once per internet address (several names from the same place count once), and the
+     administrator sees which countries they come from. The address and its country come from country.is; only the
+     country and a short one-way code of the address are stored, never the address itself. */
   async function ipTag() {
     try {
       const ctl = new AbortController(); setTimeout(() => ctl.abort(), 5000);
-      const { ip } = await (await fetch('https://api.ipify.org?format=json', { signal: ctl.signal })).json();
+      const { ip, country } = await (await fetch('https://api.country.is/', { signal: ctl.signal })).json();
       const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('bridge-ip:' + ip));
-      return [...new Uint8Array(h)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join('');
-    } catch (e) { return null; }
+      return { ip: [...new Uint8Array(h)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join(''), c: /^[A-Z]{2}$/.test(country || '') ? country : null };
+    } catch (e) { return {}; }
+  }
+  // the administrator's visitor statistics: every day's logins (once per internet address in each period), by country
+  async function loginStats() {
+    if (!Cloud.on || !isAdmin()) return null;
+    const all = await Cloud.get('logins') || {}, now = Date.now(), out = {};
+    const periods = { day: 1, week: 7, month: 30, year: 365 };
+    for (const [p, days] of Object.entries(periods)) {
+      const from = new Date(now - (days - 1) * 864e5).toISOString().slice(0, 10), seen = new Map();
+      for (const day in all) if (day >= from) for (const x of Object.values(all[day] || {})) {
+        if (!x) continue; const k = x.ip || 'n:' + nameKey(x.name);
+        if (!seen.has(k) || (!seen.get(k) && x.c)) seen.set(k, x.c || seen.get(k) || '');
+      }
+      const by = {}; for (const c of seen.values()) by[c || '?'] = (by[c || '?'] || 0) + 1;
+      out[p] = { total: seen.size, by };
+    }
+    return out;
   }
   setInterval(() => Cloud.beat(), 60e3); setTimeout(() => Cloud.beat(), 3000);
   // the real administrator: Servet, with the PIN checked
@@ -645,7 +662,7 @@ const Net = (() => {
     const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
       + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
     const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
-    const admin = isAdmin() ? `<div class="ladmin">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
+    const admin = isAdmin() ? `<div class="ladmin" data-stats="1" title="${T('Visitor statistics')}">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
     return `<div class="lcount"><span title="${T('Online')}">🟢 ${nOn}</span><span title="${T('Playing')}">🎮 ${nPlay}</span><span title="${T('Offline')}">⚪ ${nOff}</span></div>${admin}
       ${sec('★ ' + T('Friends'), g.friends)}${sec('🎮 ' + T('Playing'), g.play)}${sec('🟢 ' + T('In the lobby'), g.lobby)}${sec('⚪ ' + T('Offline'), g.off)}
       ${all.length ? '' : `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`}<button class="btn mini-btn lplead" id="lLead">🏅 ${T('Leaderboard')}</button>`;
@@ -1302,5 +1319,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, loginsToday, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

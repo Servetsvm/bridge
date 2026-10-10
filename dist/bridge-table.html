@@ -951,6 +951,13 @@ textarea.pconv{font-size:12.5px;min-height:0}
 /* on a computer every pop-up window can be made bigger or smaller from its lower right corner */
 @media (min-width:900px) and (pointer:fine){ .ov .sheet{resize:both;overflow:auto;min-width:300px;min-height:160px;max-width:96vw;max-height:96vh} }
 @media (min-width:1100px){ body.withdock .ov:not(.float){padding-right:calc(var(--dockw) + 30px)} }
+/* the administrator's visitor statistics */
+.res.stats td{padding:5px 4px}
+.res.stats .sbar{width:40%}
+.res.stats .sbar i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,#5b3aa0,#9b7be0)}
+.hadm,.ladmin{cursor:pointer}
+.hadm{color:#7a5a00;font-weight:700}
+:root[data-theme="dark"] .hadm{color:#f3d36b}
 
 </style>
 
@@ -3281,6 +3288,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "30 days": "30 gün", "365 days": "365 gün", "7 days": "7 gün", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Her internet adresi her dönemde bir kez sayılır. Bu sayfayı sadece sen (admin) görürsün.", "Loading…": "Yükleniyor…", "Nobody yet.": "Henüz kimse yok.", "Refresh": "Yenile", "The online database could not be reached.": "Çevrimiçi veritabanına ulaşılamadı.", "Unknown": "Bilinmiyor", "Visitor statistics": "Ziyaretçi istatistiği", "{0} visitors": "{0} ziyaretçi",
     "Drag to resize": "Boyutlandırmak için sürükle", "Smaller": "Küçült", "Larger": "Büyüt",
     "Drag to move": "Taşımak için sürükle",
     "Close this tournament for everyone?": "Bu turnuva herkes için kapatılsın mı?", "Log out": "Çıkış yap", "Log out? You can sign in again with your name and PIN, or choose another name.": "Çıkış yapılsın mı? Adın ve PIN’inle tekrar girebilir ya da başka bir ad seçebilirsin.", "The robots do not accept an undo": "Robotlar geri almayı kabul etmiyor",
@@ -3372,6 +3380,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "30 days": "30 dager", "365 days": "365 dager", "7 days": "7 dager", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Hver internettadresse telles én gang per periode. Bare du (administrator) ser denne siden.", "Loading…": "Laster…", "Nobody yet.": "Ingen ennå.", "Refresh": "Oppdater", "The online database could not be reached.": "Fikk ikke kontakt med databasen.", "Unknown": "Ukjent", "Visitor statistics": "Besøksstatistikk", "{0} visitors": "{0} besøkende",
     "Drag to resize": "Dra for å endre størrelse", "Smaller": "Mindre", "Larger": "Større",
     "Drag to move": "Dra for å flytte",
     "Close this tournament for everyone?": "Lukke denne turneringen for alle?", "Log out": "Logg ut", "Log out? You can sign in again with your name and PIN, or choose another name.": "Logge ut? Du kan logge inn igjen med navn og PIN, eller velge et annet navn.", "The robots do not accept an undo": "Robotene godtar ikke angring",
@@ -3463,6 +3472,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "30 days": "30 días", "365 days": "365 días", "7 days": "7 días", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Cada dirección de internet cuenta una vez por periodo. Solo tú (administrador) ves esta página.", "Loading…": "Cargando…", "Nobody yet.": "Nadie todavía.", "Refresh": "Actualizar", "The online database could not be reached.": "No se pudo acceder a la base de datos.", "Unknown": "Desconocido", "Visitor statistics": "Estadísticas de visitas", "{0} visitors": "{0} visitantes",
     "Drag to resize": "Arrastra para cambiar el tamaño", "Smaller": "Más pequeño", "Larger": "Más grande",
     "Drag to move": "Arrastra para mover",
     "Close this tournament for everyone?": "¿Cerrar este torneo para todos?", "Log out": "Cerrar sesión", "Log out? You can sign in again with your name and PIN, or choose another name.": "¿Cerrar sesión? Puedes volver a entrar con tu nombre y PIN, o elegir otro nombre.", "The robots do not accept an undo": "Los robots no aceptan deshacer",
@@ -3582,6 +3592,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "30 days": "30 jours", "365 days": "365 jours", "7 days": "7 jours", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Chaque adresse internet compte une fois par période. Vous seul (administrateur) voyez cette page.", "Loading…": "Chargement…", "Nobody yet.": "Personne pour l’instant.", "Refresh": "Actualiser", "The online database could not be reached.": "Base de données injoignable.", "Unknown": "Inconnu", "Visitor statistics": "Statistiques des visites", "{0} visitors": "{0} visiteurs",
     "Drag to resize": "Faites glisser pour redimensionner", "Smaller": "Plus petit", "Larger": "Plus grand",
     "Drag to move": "Faites glisser pour déplacer",
     "Close this tournament for everyone?": "Fermer ce tournoi pour tout le monde ?", "Log out": "Se déconnecter", "Log out? You can sign in again with your name and PIN, or choose another name.": "Se déconnecter ? Vous pourrez revenir avec votre nom et votre PIN, ou choisir un autre nom.", "The robots do not accept an undo": "Les robots n’acceptent pas d’annulation",
@@ -3701,6 +3712,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "30 days": "30 giorni", "365 days": "365 giorni", "7 days": "7 giorni", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Ogni indirizzo internet conta una volta per periodo. Solo tu (amministratore) vedi questa pagina.", "Loading…": "Caricamento…", "Nobody yet.": "Ancora nessuno.", "Refresh": "Aggiorna", "The online database could not be reached.": "Database non raggiungibile.", "Unknown": "Sconosciuto", "Visitor statistics": "Statistiche visite", "{0} visitors": "{0} visitatori",
     "Drag to resize": "Trascina per ridimensionare", "Smaller": "Più piccolo", "Larger": "Più grande",
     "Drag to move": "Trascina per spostare",
     "Close this tournament for everyone?": "Chiudere questo torneo per tutti?", "Log out": "Esci", "Log out? You can sign in again with your name and PIN, or choose another name.": "Uscire? Potrai rientrare con nome e PIN, o scegliere un altro nome.", "The robots do not accept an undo": "I robot non accettano l’annullamento",
@@ -3820,6 +3832,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "30 days": "30 Tage", "365 days": "365 Tage", "7 days": "7 Tage", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Jede Internetadresse zählt einmal pro Zeitraum. Nur du (Administrator) siehst diese Seite.", "Loading…": "Wird geladen…", "Nobody yet.": "Noch niemand.", "Refresh": "Aktualisieren", "The online database could not be reached.": "Die Datenbank ist nicht erreichbar.", "Unknown": "Unbekannt", "Visitor statistics": "Besucherstatistik", "{0} visitors": "{0} Besucher",
     "Drag to resize": "Zum Ändern der Größe ziehen", "Smaller": "Kleiner", "Larger": "Größer",
     "Drag to move": "Zum Verschieben ziehen",
     "Close this tournament for everyone?": "Dieses Turnier für alle schließen?", "Log out": "Abmelden", "Log out? You can sign in again with your name and PIN, or choose another name.": "Abmelden? Du kannst dich mit Name und PIN wieder anmelden oder einen anderen Namen wählen.", "The robots do not accept an undo": "Die Roboter akzeptieren kein Zurücknehmen",
@@ -3939,6 +3952,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "30 days": "30 дней", "365 days": "365 дней", "7 days": "7 дней", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Каждый интернет-адрес считается один раз за период. Эту страницу видите только вы (администратор).", "Loading…": "Загрузка…", "Nobody yet.": "Пока никого.", "Refresh": "Обновить", "The online database could not be reached.": "База данных недоступна.", "Unknown": "Неизвестно", "Visitor statistics": "Статистика посещений", "{0} visitors": "Посетителей: {0}",
     "Drag to resize": "Потяните, чтобы изменить размер", "Smaller": "Меньше", "Larger": "Больше",
     "Drag to move": "Перетащите, чтобы сдвинуть",
     "Close this tournament for everyone?": "Закрыть этот турнир для всех?", "Log out": "Выйти", "Log out? You can sign in again with your name and PIN, or choose another name.": "Выйти? Вы сможете снова войти с именем и PIN или выбрать другое имя.", "The robots do not accept an undo": "Роботы не принимают отмену хода",
@@ -4058,6 +4072,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "30 days": "30 dni", "365 days": "365 dni", "7 days": "7 dni", "Each internet address counts once in each period. Only you (the administrator) see this page.": "Każdy adres internetowy liczy się raz w okresie. Tę stronę widzisz tylko ty (administrator).", "Loading…": "Ładowanie…", "Nobody yet.": "Jeszcze nikogo.", "Refresh": "Odśwież", "The online database could not be reached.": "Baza danych jest niedostępna.", "Unknown": "Nieznany", "Visitor statistics": "Statystyki odwiedzin", "{0} visitors": "{0} odwiedzających",
     "Drag to resize": "Przeciągnij, aby zmienić rozmiar", "Smaller": "Mniejszy", "Larger": "Większy",
     "Drag to move": "Przeciągnij, aby przesunąć",
     "Close this tournament for everyone?": "Zamknąć ten turniej dla wszystkich?", "Log out": "Wyloguj", "Log out? You can sign in again with your name and PIN, or choose another name.": "Wylogować? Możesz wrócić z imieniem i PIN-em albo wybrać inne imię.", "The robots do not accept an undo": "Roboty nie akceptują cofnięcia",
@@ -4177,6 +4192,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "30 days": "30 天", "365 days": "365 天", "7 days": "7 天", "Each internet address counts once in each period. Only you (the administrator) see this page.": "每个网络地址在每个时段只计一次。只有你(管理员)能看到此页。", "Loading…": "加载中…", "Nobody yet.": "还没有人。", "Refresh": "刷新", "The online database could not be reached.": "无法连接在线数据库。", "Unknown": "未知", "Visitor statistics": "访客统计", "{0} visitors": "{0} 位访客",
     "Drag to resize": "拖动以调整大小", "Smaller": "缩小", "Larger": "放大",
     "Drag to move": "拖动以移动",
     "Close this tournament for everyone?": "为所有人关闭这个比赛?", "Log out": "退出登录", "Log out? You can sign in again with your name and PIN, or choose another name.": "退出登录?你可以用名字和 PIN 重新登录,或换一个名字。", "The robots do not accept an undo": "机器人不接受撤回",
@@ -5787,7 +5803,7 @@ function renderHome() {
   }
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
-  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `👑 ${T('Logins today')}: ${N.loginsToday()} · ` : ''}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
+  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
   // the open section is rebuilt only when it changes (so typing in it is not lost); its contents are refreshed
   // the chat opens as a panel at the bottom of the screen (phones and narrow windows); the others under the buttons
   const hs = $('hSec'), want = ui.hsec || '', top = want === 'chat' ? '' : want;
@@ -6505,6 +6521,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
   if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
   { const pc = ev_.target.closest("div.pconv"); if (pc) { pc.classList.toggle("open"); return; } }   // the convention line on a card: tap to read it all
+  if (ev_.target.closest("[data-stats]")) { ui.statData = null; showStats(); return; }   // the administrator's visitor statistics
   const pw = ev_.target.closest('[data-who]'); if (pw) { showPlayer(pw.dataset.who); return; }
   const pwx = ev_.target.closest('[data-pairwith]'); if (pwx) { closeOv(); Net.playWith(pwx.dataset.pairwith); return; }
   const fr = ev_.target.closest('[data-friend]'); if (fr) { toggleFriend(fr.dataset.friend); showPlayer(fr.dataset.friend); render(); return; }
@@ -6558,6 +6575,7 @@ document.addEventListener('click', ev_ => {
       showTourSetup(ui.tsetId); return;
     }
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
+    if (seg === "stattab") { ui.statTab = v; showStats(); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
     if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
@@ -6625,6 +6643,7 @@ document.addEventListener('click', ev_ => {
     case "oReplay": replayDeal(); break;
     case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
+    case "sRefresh": ui.statData = null; showStats(); break;
     case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), () => {
       if (online()) { flash(T('Close the online table first'), 2000); return; }
       try { localStorage.removeItem('bridge-table-name'); } catch (e) {}
@@ -6810,6 +6829,23 @@ document.addEventListener('pointerdown', e => {
   const up = () => { document.removeEventListener('pointerup', up); SIZES.fw2 = Math.round(s.offsetWidth); SIZES.fh2 = Math.round(s.offsetHeight); saveSizes(); };
   document.addEventListener('pointerup', up);
 });
+/* ---- the administrator's visitor statistics: today, the last 7, 30 and 365 days, by country (once per internet address) ---- */
+async function showStats() {
+  if (!Net.isAdmin()) return;
+  ui.statTab = ui.statTab || 'day';
+  if (!ui.statData) { openOv('stats', `<h2>📊 ${T('Visitor statistics')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`); try { ui.statData = await Net.loginStats(); } catch (e) { ui.statData = null; } }
+  const d = ui.statData;
+  if (!d) { openOv('stats', `<h2>📊 ${T('Visitor statistics')}</h2><div class="muted">${T('The online database could not be reached.')}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`); return; }
+  const P = d[ui.statTab], L = Object.entries(P.by).sort((a, b) => b[1] - a[1]), max = Math.max(1, ...L.map(x => x[1]));
+  const tabs = [['day', T('Today')], ['week', T('7 days')], ['month', T('30 days')], ['year', T('365 days')]];
+  const rows = L.map(([c, n]) => `<tr><td>${c === '?' ? '❔ ' + T('Unknown') : flagOf(c) + ' ' + esc(ctryName(c))}</td><td class="n"><b>${n}</b></td><td class="sbar"><i style="width:${Math.round(n / max * 100)}%"></i></td></tr>`).join('');
+  openOv('stats', `<h2>📊 ${T('Visitor statistics')}</h2>
+    <div class="seg" data-seg="stattab">${tabs.map(([v, l]) => `<button data-v="${v}" class="${ui.statTab === v ? 'on' : ''}">${l} <small>(${d[v].total})</small></button>`).join('')}</div>
+    <div class="big">${T('{0} visitors', P.total)}</div>
+    ${L.length ? `<table class="res stats">${rows}</table>` : `<div class="muted">${T('Nobody yet.')}</div>`}
+    <div class="muted">${T('Each internet address counts once in each period. Only you (the administrator) see this page.')}</div>
+    <div class="row2"><button class="btn" id="sRefresh">🔄 ${T('Refresh')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
 
 </script>
 <script>
@@ -7399,7 +7435,7 @@ const Net = (() => {
           st.claimed = true;
         }
         await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof() });
-        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ip: await ipTag() }); st.loggedDay = today(); }
+        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()) }); st.loggedDay = today(); }
         const [on, users, logins] = await Promise.all([Cloud.get('online'), Cloud.get('users?shallow=true'), isAdmin() ? Cloud.get('logins/' + today()) : null]);
         st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: Object.keys(users || {}).length, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
@@ -7407,15 +7443,32 @@ const Net = (() => {
       } catch (e) {}
     },
   };
-  /* today's logins are counted once per internet address (several names from the same place count once). The address
-     comes from ipify; only a short one-way code of it is stored, never the address itself. */
+  /* today's logins are counted once per internet address (several names from the same place count once), and the
+     administrator sees which countries they come from. The address and its country come from country.is; only the
+     country and a short one-way code of the address are stored, never the address itself. */
   async function ipTag() {
     try {
       const ctl = new AbortController(); setTimeout(() => ctl.abort(), 5000);
-      const { ip } = await (await fetch('https://api.ipify.org?format=json', { signal: ctl.signal })).json();
+      const { ip, country } = await (await fetch('https://api.country.is/', { signal: ctl.signal })).json();
       const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('bridge-ip:' + ip));
-      return [...new Uint8Array(h)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join('');
-    } catch (e) { return null; }
+      return { ip: [...new Uint8Array(h)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join(''), c: /^[A-Z]{2}$/.test(country || '') ? country : null };
+    } catch (e) { return {}; }
+  }
+  // the administrator's visitor statistics: every day's logins (once per internet address in each period), by country
+  async function loginStats() {
+    if (!Cloud.on || !isAdmin()) return null;
+    const all = await Cloud.get('logins') || {}, now = Date.now(), out = {};
+    const periods = { day: 1, week: 7, month: 30, year: 365 };
+    for (const [p, days] of Object.entries(periods)) {
+      const from = new Date(now - (days - 1) * 864e5).toISOString().slice(0, 10), seen = new Map();
+      for (const day in all) if (day >= from) for (const x of Object.values(all[day] || {})) {
+        if (!x) continue; const k = x.ip || 'n:' + nameKey(x.name);
+        if (!seen.has(k) || (!seen.get(k) && x.c)) seen.set(k, x.c || seen.get(k) || '');
+      }
+      const by = {}; for (const c of seen.values()) by[c || '?'] = (by[c || '?'] || 0) + 1;
+      out[p] = { total: seen.size, by };
+    }
+    return out;
   }
   setInterval(() => Cloud.beat(), 60e3); setTimeout(() => Cloud.beat(), 3000);
   // the real administrator: Servet, with the PIN checked
@@ -7460,7 +7513,7 @@ const Net = (() => {
     const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
       + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
     const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
-    const admin = isAdmin() ? `<div class="ladmin">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
+    const admin = isAdmin() ? `<div class="ladmin" data-stats="1" title="${T('Visitor statistics')}">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
     return `<div class="lcount"><span title="${T('Online')}">🟢 ${nOn}</span><span title="${T('Playing')}">🎮 ${nPlay}</span><span title="${T('Offline')}">⚪ ${nOff}</span></div>${admin}
       ${sec('★ ' + T('Friends'), g.friends)}${sec('🎮 ' + T('Playing'), g.play)}${sec('🟢 ' + T('In the lobby'), g.lobby)}${sec('⚪ ' + T('Offline'), g.off)}
       ${all.length ? '' : `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`}<button class="btn mini-btn lplead" id="lLead">🏅 ${T('Leaderboard')}</button>`;
@@ -8117,7 +8170,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, loginsToday, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>
