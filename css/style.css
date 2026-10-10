@@ -1109,3 +1109,6 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .pzvals div{padding:3px 8px;border-radius:6px;background:rgba(127,127,127,.12)}
 .pzvals div.best{background:rgba(47,143,78,.22)}
 .pzvals b{display:inline-block;min-width:76px}
+.tclub{font-size:12px;padding:1px 6px;border-radius:8px;background:#efe3c2;color:#6b4c00;white-space:nowrap}
+:root[data-theme="dark"] .tclub{background:#4a3d1c;color:#ffe199}
+[data-lscope]{margin-bottom:8px}

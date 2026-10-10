@@ -1124,6 +1124,9 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .pzvals div{padding:3px 8px;border-radius:6px;background:rgba(127,127,127,.12)}
 .pzvals div.best{background:rgba(47,143,78,.22)}
 .pzvals b{display:inline-block;min-width:76px}
+.tclub{font-size:12px;padding:1px 6px;border-radius:8px;background:#efe3c2;color:#6b4c00;white-space:nowrap}
+:root[data-theme="dark"] .tclub{background:#4a3d1c;color:#ffe199}
+[data-lscope]{margin-bottom:8px}
 
 </style>
 
@@ -3678,6 +3681,12 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Club": "Kulüp",
+    "Your bridge club (optional)": "Briç kulübün (isteğe bağlı)",
+    "Everyone": "Herkes",
+    "Club ranking — this week": "Kulüp sıralaması — bu hafta",
+    "Who can play": "Kimler oynayabilir",
+    "A club tournament is shown only to the players who wrote the same club on their card.": "Kulüp turnuvası yalnızca kartına aynı kulübü yazan oyunculara görünür.",
     "Save as PBN file": "PBN dosyası olarak kaydet",
     "Open a PBN or LIN file": "PBN ya da LIN dosyası aç",
     "No boards to save yet": "Henüz kaydedilecek el yok",
@@ -3806,6 +3815,12 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Club": "Klubb",
+    "Your bridge club (optional)": "Bridgeklubben din (valgfritt)",
+    "Everyone": "Alle",
+    "Club ranking — this week": "Klubbrangering — denne uken",
+    "Who can play": "Hvem kan spille",
+    "A club tournament is shown only to the players who wrote the same club on their card.": "En klubbturnering vises bare for spillere som har skrevet samme klubb på kortet sitt.",
     "Save as PBN file": "Lagre som PBN-fil",
     "Open a PBN or LIN file": "Åpne en PBN- eller LIN-fil",
     "No boards to save yet": "Ingen spill å lagre ennå",
@@ -3934,6 +3949,12 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Club": "Club",
+    "Your bridge club (optional)": "Tu club de bridge (opcional)",
+    "Everyone": "Todos",
+    "Club ranking — this week": "Clasificación del club — esta semana",
+    "Who can play": "Quién puede jugar",
+    "A club tournament is shown only to the players who wrote the same club on their card.": "Un torneo de club solo lo ven los jugadores que pusieron el mismo club en su ficha.",
     "Save as PBN file": "Guardar como archivo PBN",
     "Open a PBN or LIN file": "Abrir un archivo PBN o LIN",
     "No boards to save yet": "Aún no hay manos para guardar",
@@ -4090,6 +4111,12 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Club": "Club",
+    "Your bridge club (optional)": "Votre club de bridge (facultatif)",
+    "Everyone": "Tout le monde",
+    "Club ranking — this week": "Classement du club — cette semaine",
+    "Who can play": "Qui peut jouer",
+    "A club tournament is shown only to the players who wrote the same club on their card.": "Un tournoi de club n'est visible que pour les joueurs ayant indiqué le même club sur leur fiche.",
     "Save as PBN file": "Enregistrer en fichier PBN",
     "Open a PBN or LIN file": "Ouvrir un fichier PBN ou LIN",
     "No boards to save yet": "Pas encore de donne à enregistrer",
@@ -4246,6 +4273,12 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Club": "Circolo",
+    "Your bridge club (optional)": "Il tuo circolo di bridge (facoltativo)",
+    "Everyone": "Tutti",
+    "Club ranking — this week": "Classifica del circolo — questa settimana",
+    "Who can play": "Chi può giocare",
+    "A club tournament is shown only to the players who wrote the same club on their card.": "Un torneo di circolo è visibile solo a chi ha scritto lo stesso circolo sulla propria scheda.",
     "Save as PBN file": "Salva come file PBN",
     "Open a PBN or LIN file": "Apri un file PBN o LIN",
     "No boards to save yet": "Ancora nessuna smazzata da salvare",
@@ -4402,6 +4435,12 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Club": "Klub",
+    "Your bridge club (optional)": "Dein Bridgeklub (freiwillig)",
+    "Everyone": "Alle",
+    "Club ranking — this week": "Klubrangliste — diese Woche",
+    "Who can play": "Wer spielen darf",
+    "A club tournament is shown only to the players who wrote the same club on their card.": "Ein Klubturnier sehen nur Spieler, die denselben Klub auf ihrer Karte angegeben haben.",
     "Save as PBN file": "Als PBN-Datei speichern",
     "Open a PBN or LIN file": "PBN- oder LIN-Datei öffnen",
     "No boards to save yet": "Noch keine Boards zum Speichern",
@@ -4558,6 +4597,12 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Club": "Клуб",
+    "Your bridge club (optional)": "Ваш бридж-клуб (необязательно)",
+    "Everyone": "Все",
+    "Club ranking — this week": "Рейтинг клуба — эта неделя",
+    "Who can play": "Кто может играть",
+    "A club tournament is shown only to the players who wrote the same club on their card.": "Клубный турнир видят только игроки, указавшие тот же клуб в своей карточке.",
     "Save as PBN file": "Сохранить как PBN-файл",
     "Open a PBN or LIN file": "Открыть файл PBN или LIN",
     "No boards to save yet": "Пока нечего сохранять",
@@ -4714,6 +4759,12 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Club": "Klub",
+    "Your bridge club (optional)": "Twój klub brydżowy (opcjonalnie)",
+    "Everyone": "Wszyscy",
+    "Club ranking — this week": "Ranking klubu — ten tydzień",
+    "Who can play": "Kto może grać",
+    "A club tournament is shown only to the players who wrote the same club on their card.": "Turniej klubowy widzą tylko gracze, którzy wpisali ten sam klub na swojej karcie.",
     "Save as PBN file": "Zapisz jako plik PBN",
     "Open a PBN or LIN file": "Otwórz plik PBN lub LIN",
     "No boards to save yet": "Brak rozdań do zapisania",
@@ -4870,6 +4921,12 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Club": "俱乐部",
+    "Your bridge club (optional)": "你的桥牌俱乐部(可选)",
+    "Everyone": "所有人",
+    "Club ranking — this week": "俱乐部排名——本周",
+    "Who can play": "谁可以参加",
+    "A club tournament is shown only to the players who wrote the same club on their card.": "俱乐部比赛只对名片上填写了同一俱乐部的玩家显示。",
     "Save as PBN file": "保存为 PBN 文件",
     "Open a PBN or LIN file": "打开 PBN 或 LIN 文件",
     "No boards to save yet": "还没有可保存的牌",
@@ -5622,7 +5679,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 132;
+const APP_V = 133;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6775,7 +6832,7 @@ function toursHtml() {
     const players = Math.max(Object.keys(t.joined).length, Object.keys(Net.st.tres[t.id] || {}).length);
     const status = t.state === 'setup' ? `<span class="tst reg">${T('Registering')}</span>` : `<span class="tst run">${T('Running')}</span>`;
     const r = tourRowBtns(t, me);
-    return `<tr><td data-l=""><b>🏆 ${esc(t.name)}</b><small>${T('started by {0}', esc(t.by))}</small>${r.note ? `<small class="tnote">${r.note}</small>` : ''}</td>
+    return `<tr><td data-l=""><b>🏆 ${esc(t.name)}</b>${t.club ? ` <span class="tclub">🏛 ${esc(t.club)}</span>` : ""}<small>${T('started by {0}', esc(t.by))}</small>${r.note ? `<small class="tnote">${r.note}</small>` : ''}</td>
       <td data-l="${T('Format')}">${TOUR_KINDS[t.kind] && t.kind !== 'custom' ? `${TOUR_KINDS[t.kind].icon} ${T(TOUR_KINDS[t.kind].n)}` : t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')}</td><td data-l="${T('Boards')}" class="n">${t.n}</td><td data-l="${T('Ranking')}">${t.scoring === 'imp' ? 'IMP' : 'MP %'}</td>
       <td data-l="${T('Players')}" class="n">${players}</td><td data-l="${T('Status')}">${status}</td><td data-l="${T('Ends in')}">${left(t)}</td>
       <td data-l="" class="tact">${r.btns}${Net.isMine(t) || Net.isAdmin() ? `<button class="btn tdel" data-tdel="${t.id}" title="${T('Cancel the tournament')}">✕</button>` : ''}</td></tr>`;
@@ -6832,6 +6889,7 @@ function showTourSetup(id) {
       : `<div class="grp"><span>${T('Players to invite')}</span>
       <div class="invlist">${known.length ? known.map(n => `<label class="invrow"><input type="checkbox" data-tinv="${esc(n)}" ${sel.names.has(n) ? 'checked' : ''}><b>${esc(n)}</b>${st(n)}</label>`).join('') : `<div class="muted">${T('Nobody else is in the lobby right now — type a name below.')}</div>`}</div>
       <div class="row2"><input class="tok" id="tAdd" maxlength="20" placeholder="${T('Add a player by name')}"><button class="btn" id="tAddBtn">${T('Add')}</button></div></div>`}
+    ${SET.club && t.format !== 'tables' ? `<div class="grp"><span>${T('Who can play')}</span>${opt('tclub', [['', '🌍 ' + T('Everyone')], ['club', '🏛 ' + esc(SET.club)]], t.club ? 'club' : '')}<div class="muted">${T('A club tournament is shown only to the players who wrote the same club on their card.')}</div></div>` : ''}
     <div class="grp"><span>${T('Ranking')}</span>${opt('tscoring', [['mp', 'MP %'], ['imp', 'IMP']], t.scoring)}</div>
     <div class="grp"><span>${T('Keep the tournament for')}</span>${opt('thours', [[3, T('{0} hours', 3)], [24, T('1 day')], [72, T('3 days')]], t.hours)}</div>
     <div class="grp"><span>${T('Answers')}</span><div>${esc(t.by)} <span class="ok">✓ ${T('organiser')}</span>${Object.values(t.joined).filter(n => n !== t.by).map(n => ` · ${esc(n)} <span class="ok">✓</span>`).join('')}${Object.values(t.declined).map(n => ` · ${esc(n)} <span class="no">✗</span>`).join('')}</div></div>
@@ -6856,7 +6914,8 @@ function showPlayer(name) {
   const boards = tot ? tot[0] || 0 : 0;
   const fields = [
     [T("Rating"), p && p.rtn ? `<b class="prt">${p.rt}</b> <small>(${p.rtn} ${T("boards")})</small>` : "—"],
-    [T('Skill level'), lvl ? `<span class="plvl l-${lvl}">${T(LEVEL_N[lvl])}</span>` : '—'],
+    [T('Club'), p && p.club ? `🏛 ${esc(p.club)}` : '—'],
+    [T('Skill level'), lvl ?`<span class="plvl l-${lvl}">${T(LEVEL_N[lvl])}</span>` : '—'],
     [T('Joined'), p && p.joined ? esc(p.joined) : '—'],
     [T('Logins'), p && p.logins ? loginsTxt(p.logins) : '—'],
     [T('Title'), `<b>${T(titleOf(boards))}</b>`],
@@ -6868,6 +6927,7 @@ function showPlayer(name) {
       <label><span>${T('System')}</span><select id="pSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label>
       <label><span>${T('Level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
       <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
+      <label><span>${T('Club')}</span><input id="pClub" class="tok" maxlength="24" value="${esc(SET.club || '')}" placeholder="${T('Your bridge club (optional)')}"></label>
       <div class="pavpick"><span>${T("Picture")}</span><div>${["", ...Net.AVATARS].map(a => `<button class="${(SET.av || "") === a ? "on" : ""}" data-av="${a}">${a || "Aa"}</button>`).join("")}</div></div>
       <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
   openOv('player', `<div class="pcard">
@@ -7451,6 +7511,7 @@ document.addEventListener('change', e => {
   if (t.dataset.tinv != null && ui.tsel) { if (t.checked) ui.tsel.names.add(t.dataset.tinv); else ui.tsel.names.delete(t.dataset.tinv); return; }
   // your own player card: level, country and a few words, sent with your profile
   if (t.id === 'pSys') { SET.sys = t.value; SET.conv = { ...E.sysOf(t.value).conv }; SET.practice = ''; Store.saveSettings(SET); save(); Net.shareInfo(); render(); showPlayer(myNm() || T('You')); return; }
+  if (t.id === 'pClub') { SET.club = t.value.trim().replace(/\s+/g, ' ').slice(0, 24); Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T('You')); return; }
   if (t.id === 'pCline') { SET.cline = t.value.trim().slice(0, 300); Store.saveSettings(SET); save(); Net.shareInfo(); flash('✓', 800); return; }   // your convention line, written by hand
   if (t.id === 'pLvl' || t.id === 'pCtry') { SET[{ pLvl: 'lvl', pCtry: 'ctry' }[t.id]] = t.value; Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T('You')); return; }
   if (t.id === 'hLang') { SET.lang = t.value; applyLang(); Store.saveSettings(SET); save(); render(); return; }
@@ -7484,7 +7545,9 @@ document.addEventListener('click', ev_ => {
   // a name in the players list (or a private message): write to that player privately
   const pmb = ev_.target.closest("[data-pm]"); if (pmb) { pmTo(pmb.dataset.pm); return; }
   if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
-  if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
+  { const ls = ev_.target.closest("[data-lscope] button"); if (ls) { ui.lscope = ls.dataset.v; showLead(); return; } }
+  if (ev_.target.closest("#lLead")) { showLead(); return; }
+  function showLead() { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml(ui.lscope === "club") || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); }
   { const av = ev_.target.closest("[data-av]"); if (av) { SET.av = av.dataset.av; Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T("You")); return; } }   // your picture
   { const pc = ev_.target.closest("div.pconv"); if (pc) { pc.classList.toggle("open"); return; } }   // the convention line on a card: tap to read it all
   { const gs = ev_.target.closest("[data-gsug]"); if (gs) { const i = $("gName"); if (i) i.value = gs.dataset.gsug; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; } }   // a free name offered on the name screen
@@ -7531,11 +7594,12 @@ document.addEventListener('click', ev_ => {
     const seg = t.closest('.seg').dataset.seg, v = t.dataset.v;
     if (seg === 'lang') { SET.lang = v; applyLang(); Store.saveSettings(SET); save(); render(); return; }
     if (seg === 'sys') { SET.sys = v; SET.conv = { ...E.sysOf(v).conv }; SET.practice = ''; Store.saveSettings(SET); save(); if (ui.overlay === 'set') showSettings(); else render(); flash(E.sysOf(v).n + ' — ' + T('from the next deal'), 2200); return; }
-    if (ui.overlay === 'tsetup' && ['tn', 'tformat', 'ttables', 'tscoring', 'thours', 'tkind'].includes(seg)) {
+    if (ui.overlay === 'tsetup' && ['tn', 'tformat', 'ttables', 'tscoring', 'thours', 'tkind', 'tclub'].includes(seg)) {
       readTourSeats(); const t = Net.st.tours[ui.tsetId]; if (!t) return;
       // a tournament type fills in the options at once (they can still be changed one by one)
       if (seg === 'tkind') { const k = TOUR_KINDS[v]; t.kind = v; if (k.set) { Object.assign(t, { format: k.set.format, n: k.set.n, scoring: k.set.scoring, hours: k.set.hours }); if (k.set.tables) { while (t.tables.length < k.set.tables) t.tables.push(['', '', '', '']); t.tables.length = k.set.tables; if (!t.tables[0][0]) t.tables[0][0] = t.by; } } }
       if (seg === 'tformat' && t.kind === 'teams' && v !== 'tables') t.kind = 'custom';
+      if (seg === 'tclub') t.club = v ? SET.club || '' : '';
       if (seg === 'tn') t.n = +v; if (seg === 'tscoring') t.scoring = v; if (seg === 'thours') t.hours = +v;
       if (seg === 'tformat') { t.format = v; if (v === 'tables' && !t.tables.length) t.tables = [[Net.st.tours[ui.tsetId].by, '', '', '']]; }
       if (seg === 'ttables') { const n = +v; while (t.tables.length < n) t.tables.push(['', '', '', '']); t.tables.length = n; }
@@ -8051,7 +8115,7 @@ const Net = (() => {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
     return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
-      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', ...ratingOf(HIST) };   // the player card: level, country, a few words
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', club: String(SET.club || '').trim().slice(0, 24), ...ratingOf(HIST) };   // the player card: level, country, a few words
   }
   /* the rating: 1500 plus 150 × the IMPs won against the robot field over the last 200 scored boards, shrunk for a
      player with few boards (so ten lucky boards do not make a champion). Every app sends its own; the lobby keeps the
@@ -8063,19 +8127,23 @@ const Net = (() => {
   st.rated = (() => { try { return JSON.parse(localStorage.getItem('bridge-rated') || '{}') || {}; } catch (e) { return {}; } })();
   function noteRating(name, p) {
     if (!name || !p || !p.rt || !p.rtn) return;
-    st.rated[nameKey(name)] = { name: String(name).slice(0, 20), rt: p.rt, rtn: p.rtn, ctry: p.ctry || '', ts: Date.now() };
+    st.rated[nameKey(name)] = { name: String(name).slice(0, 20), rt: p.rt, rtn: p.rtn, ctry: p.ctry || '', club: p.club || '', ts: Date.now() };
     for (const k in st.rated) if (Date.now() - st.rated[k].ts > 7 * 864e5) delete st.rated[k];
     try { localStorage.setItem('bridge-rated', JSON.stringify(st.rated)); } catch (e) {}
   }
   // the ten best ratings among the players seen this week (you included)
-  function leaderHtml() {
-    const me = prof(), L = Object.entries(st.rated).filter(([k]) => k !== nameKey(myName() || '')).map(([, r]) => r);
-    if (me.rtn) L.push({ name: myName() || T('You'), rt: me.rt, rtn: me.rtn, ctry: me.ctry, me: true });
-    if (!L.length) return '';
+  // club: only the players of your club (the club ranking)
+  function leaderHtml(club) {
+    const me = prof(), ck = nameKey(SET.club || ''); club = club && ck;
+    let L = Object.entries(st.rated).filter(([k]) => k !== nameKey(myName() || '')).map(([, r]) => r);
+    if (me.rtn) L.push({ name: myName() || T('You'), rt: me.rt, rtn: me.rtn, ctry: me.ctry, club: me.club, me: true });
+    if (club) L = L.filter(r => r.club && nameKey(r.club) === ck);
+    const tabs = ck ? `<div class="seg" data-lscope><button data-v="all" class="${club ? '' : 'on'}">🌍 ${T('Everyone')}</button><button data-v="club" class="${club ? 'on' : ''}">🏛 ${esc(SET.club)}</button></div>` : '';
+    if (!L.length) return tabs;
     L.sort((a, b) => b.rt - a.rt);
     const top = L.slice(0, 10), mine = L.findIndex(r => r.me);
     const row = (r, i) => `<tr class="${r.me ? 'meRow' : ''}"><td>${i + 1}</td><td><b class="pname" data-who="${esc(r.name)}">${esc(r.name)}</b></td><td class="n"><b>${r.rt}</b></td><td class="n">${r.rtn}</td></tr>`;
-    return `<div class="grp leader"><span>🏅 ${T('Leaderboard — this week')}</span><div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Rating')}</th><th class="n">${T('boards')}</th></tr></thead><tbody>${top.map(row).join('')}${mine >= 10 ? row(L[mine], mine) : ''}</tbody></table></div>
+    return `${tabs}<div class="grp leader"><span>🏅 ${club ? T('Club ranking — this week') : T('Leaderboard — this week')}</span><div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Rating')}</th><th class="n">${T('boards')}</th></tr></thead><tbody>${top.map(row).join('')}${mine >= 10 ? row(L[mine], mine) : ''}</tbody></table></div>
       <div class="muted">${T('Rating: 1500 + your IMPs against the robot tables over your last 200 boards.')}</div></div>`;
   }
 
@@ -8091,7 +8159,7 @@ const Net = (() => {
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
       joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
-      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
+      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   function whereIs(name) {
@@ -8136,7 +8204,7 @@ const Net = (() => {
       // options: format "ind" (everyone alone with robots) or "tables" (players sit together; seats N E S W named
       // in advance, empty = robot), ranking by matchpoints or IMPs, and how many hours the tournament is kept
       kind: ['speed', 'robot', 'daylong', 'pairs', 'imppairs', 'teams', 'custom'].includes(t.kind) ? t.kind : 'custom',
-      format: t.format === "tables" ? "tables" : "ind", scoring: t.scoring === "imp" ? "imp" : "mp", hours: [3, 24, 72].includes(+t.hours) ? +t.hours : 72,
+      format: t.format === "tables" ? "tables" : "ind", scoring: t.scoring === "imp" ? "imp" : "mp", hours: [3, 24, 72].includes(+t.hours) ? +t.hours : 72, club: String(t.club || "").slice(0, 24),
       tables: (Array.isArray(t.tables) ? t.tables : []).slice(0, 8).map(r => [0, 1, 2, 3].map(s => String((r || [])[s] || "").slice(0, 20))) };
   }
   // tournaments made by test devices while the app was being built (they reached the real lobby by mistake)
@@ -8194,7 +8262,7 @@ const Net = (() => {
   function meshSend(m) { for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send(m); } catch (e) {} } }
   const isMine = t => !!t && t.byKey === devId();
   // an individual tournament is open to everyone in the lobby: anyone can join and play its boards while it is kept
-  const openTour = t => !!t && t.format !== 'tables' && t.state !== 'off' && !(t.byKey === 'daily' && t.id !== dailyId());   // an earlier day's daily one only shows its ranking
+  const openTour = t => !!t && t.format !== 'tables' && t.state !== 'off' && !(t.byKey === 'daily' && t.id !== dailyId()) && (!t.club || nameKey(t.club) === nameKey(SET.club || ''));   // an earlier day's daily one only shows its ranking
   // the organiser publishes a new version of the tournament
   function pubTour(t) { t.v = (t.v || 0) + 1; saveTours(); meshSend({ t: 'tour', tour: t }); renderL(); }
   function newTour(n) {

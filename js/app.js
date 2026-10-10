@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 132;
+const APP_V = 133;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1161,7 +1161,7 @@ function toursHtml() {
     const players = Math.max(Object.keys(t.joined).length, Object.keys(Net.st.tres[t.id] || {}).length);
     const status = t.state === 'setup' ? `<span class="tst reg">${T('Registering')}</span>` : `<span class="tst run">${T('Running')}</span>`;
     const r = tourRowBtns(t, me);
-    return `<tr><td data-l=""><b>🏆 ${esc(t.name)}</b><small>${T('started by {0}', esc(t.by))}</small>${r.note ? `<small class="tnote">${r.note}</small>` : ''}</td>
+    return `<tr><td data-l=""><b>🏆 ${esc(t.name)}</b>${t.club ? ` <span class="tclub">🏛 ${esc(t.club)}</span>` : ""}<small>${T('started by {0}', esc(t.by))}</small>${r.note ? `<small class="tnote">${r.note}</small>` : ''}</td>
       <td data-l="${T('Format')}">${TOUR_KINDS[t.kind] && t.kind !== 'custom' ? `${TOUR_KINDS[t.kind].icon} ${T(TOUR_KINDS[t.kind].n)}` : t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')}</td><td data-l="${T('Boards')}" class="n">${t.n}</td><td data-l="${T('Ranking')}">${t.scoring === 'imp' ? 'IMP' : 'MP %'}</td>
       <td data-l="${T('Players')}" class="n">${players}</td><td data-l="${T('Status')}">${status}</td><td data-l="${T('Ends in')}">${left(t)}</td>
       <td data-l="" class="tact">${r.btns}${Net.isMine(t) || Net.isAdmin() ? `<button class="btn tdel" data-tdel="${t.id}" title="${T('Cancel the tournament')}">✕</button>` : ''}</td></tr>`;
@@ -1218,6 +1218,7 @@ function showTourSetup(id) {
       : `<div class="grp"><span>${T('Players to invite')}</span>
       <div class="invlist">${known.length ? known.map(n => `<label class="invrow"><input type="checkbox" data-tinv="${esc(n)}" ${sel.names.has(n) ? 'checked' : ''}><b>${esc(n)}</b>${st(n)}</label>`).join('') : `<div class="muted">${T('Nobody else is in the lobby right now — type a name below.')}</div>`}</div>
       <div class="row2"><input class="tok" id="tAdd" maxlength="20" placeholder="${T('Add a player by name')}"><button class="btn" id="tAddBtn">${T('Add')}</button></div></div>`}
+    ${SET.club && t.format !== 'tables' ? `<div class="grp"><span>${T('Who can play')}</span>${opt('tclub', [['', '🌍 ' + T('Everyone')], ['club', '🏛 ' + esc(SET.club)]], t.club ? 'club' : '')}<div class="muted">${T('A club tournament is shown only to the players who wrote the same club on their card.')}</div></div>` : ''}
     <div class="grp"><span>${T('Ranking')}</span>${opt('tscoring', [['mp', 'MP %'], ['imp', 'IMP']], t.scoring)}</div>
     <div class="grp"><span>${T('Keep the tournament for')}</span>${opt('thours', [[3, T('{0} hours', 3)], [24, T('1 day')], [72, T('3 days')]], t.hours)}</div>
     <div class="grp"><span>${T('Answers')}</span><div>${esc(t.by)} <span class="ok">✓ ${T('organiser')}</span>${Object.values(t.joined).filter(n => n !== t.by).map(n => ` · ${esc(n)} <span class="ok">✓</span>`).join('')}${Object.values(t.declined).map(n => ` · ${esc(n)} <span class="no">✗</span>`).join('')}</div></div>
@@ -1242,7 +1243,8 @@ function showPlayer(name) {
   const boards = tot ? tot[0] || 0 : 0;
   const fields = [
     [T("Rating"), p && p.rtn ? `<b class="prt">${p.rt}</b> <small>(${p.rtn} ${T("boards")})</small>` : "—"],
-    [T('Skill level'), lvl ? `<span class="plvl l-${lvl}">${T(LEVEL_N[lvl])}</span>` : '—'],
+    [T('Club'), p && p.club ? `🏛 ${esc(p.club)}` : '—'],
+    [T('Skill level'), lvl ?`<span class="plvl l-${lvl}">${T(LEVEL_N[lvl])}</span>` : '—'],
     [T('Joined'), p && p.joined ? esc(p.joined) : '—'],
     [T('Logins'), p && p.logins ? loginsTxt(p.logins) : '—'],
     [T('Title'), `<b>${T(titleOf(boards))}</b>`],
@@ -1254,6 +1256,7 @@ function showPlayer(name) {
       <label><span>${T('System')}</span><select id="pSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label>
       <label><span>${T('Level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
       <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
+      <label><span>${T('Club')}</span><input id="pClub" class="tok" maxlength="24" value="${esc(SET.club || '')}" placeholder="${T('Your bridge club (optional)')}"></label>
       <div class="pavpick"><span>${T("Picture")}</span><div>${["", ...Net.AVATARS].map(a => `<button class="${(SET.av || "") === a ? "on" : ""}" data-av="${a}">${a || "Aa"}</button>`).join("")}</div></div>
       <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
   openOv('player', `<div class="pcard">
@@ -1837,6 +1840,7 @@ document.addEventListener('change', e => {
   if (t.dataset.tinv != null && ui.tsel) { if (t.checked) ui.tsel.names.add(t.dataset.tinv); else ui.tsel.names.delete(t.dataset.tinv); return; }
   // your own player card: level, country and a few words, sent with your profile
   if (t.id === 'pSys') { SET.sys = t.value; SET.conv = { ...E.sysOf(t.value).conv }; SET.practice = ''; Store.saveSettings(SET); save(); Net.shareInfo(); render(); showPlayer(myNm() || T('You')); return; }
+  if (t.id === 'pClub') { SET.club = t.value.trim().replace(/\s+/g, ' ').slice(0, 24); Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T('You')); return; }
   if (t.id === 'pCline') { SET.cline = t.value.trim().slice(0, 300); Store.saveSettings(SET); save(); Net.shareInfo(); flash('✓', 800); return; }   // your convention line, written by hand
   if (t.id === 'pLvl' || t.id === 'pCtry') { SET[{ pLvl: 'lvl', pCtry: 'ctry' }[t.id]] = t.value; Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T('You')); return; }
   if (t.id === 'hLang') { SET.lang = t.value; applyLang(); Store.saveSettings(SET); save(); render(); return; }
@@ -1870,7 +1874,9 @@ document.addEventListener('click', ev_ => {
   // a name in the players list (or a private message): write to that player privately
   const pmb = ev_.target.closest("[data-pm]"); if (pmb) { pmTo(pmb.dataset.pm); return; }
   if (ev_.target.closest("[data-pmx]")) { ui.pmTo = null; render(); renderDock(); return; }
-  if (ev_.target.closest("#lLead")) { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml() || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); return; }
+  { const ls = ev_.target.closest("[data-lscope] button"); if (ls) { ui.lscope = ls.dataset.v; showLead(); return; } }
+  if (ev_.target.closest("#lLead")) { showLead(); return; }
+  function showLead() { openOv("lead", `<h2>🏅 ${T("Leaderboard")}</h2>${Net.leaderHtml(ui.lscope === "club") || `<div class="muted">${T("Nobody has a rating yet.")}</div>`}<div class="row2"><button class="btn gold" id="oClose">${T("Close")}</button></div>`); }
   { const av = ev_.target.closest("[data-av]"); if (av) { SET.av = av.dataset.av; Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T("You")); return; } }   // your picture
   { const pc = ev_.target.closest("div.pconv"); if (pc) { pc.classList.toggle("open"); return; } }   // the convention line on a card: tap to read it all
   { const gs = ev_.target.closest("[data-gsug]"); if (gs) { const i = $("gName"); if (i) i.value = gs.dataset.gsug; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; } }   // a free name offered on the name screen
@@ -1917,11 +1923,12 @@ document.addEventListener('click', ev_ => {
     const seg = t.closest('.seg').dataset.seg, v = t.dataset.v;
     if (seg === 'lang') { SET.lang = v; applyLang(); Store.saveSettings(SET); save(); render(); return; }
     if (seg === 'sys') { SET.sys = v; SET.conv = { ...E.sysOf(v).conv }; SET.practice = ''; Store.saveSettings(SET); save(); if (ui.overlay === 'set') showSettings(); else render(); flash(E.sysOf(v).n + ' — ' + T('from the next deal'), 2200); return; }
-    if (ui.overlay === 'tsetup' && ['tn', 'tformat', 'ttables', 'tscoring', 'thours', 'tkind'].includes(seg)) {
+    if (ui.overlay === 'tsetup' && ['tn', 'tformat', 'ttables', 'tscoring', 'thours', 'tkind', 'tclub'].includes(seg)) {
       readTourSeats(); const t = Net.st.tours[ui.tsetId]; if (!t) return;
       // a tournament type fills in the options at once (they can still be changed one by one)
       if (seg === 'tkind') { const k = TOUR_KINDS[v]; t.kind = v; if (k.set) { Object.assign(t, { format: k.set.format, n: k.set.n, scoring: k.set.scoring, hours: k.set.hours }); if (k.set.tables) { while (t.tables.length < k.set.tables) t.tables.push(['', '', '', '']); t.tables.length = k.set.tables; if (!t.tables[0][0]) t.tables[0][0] = t.by; } } }
       if (seg === 'tformat' && t.kind === 'teams' && v !== 'tables') t.kind = 'custom';
+      if (seg === 'tclub') t.club = v ? SET.club || '' : '';
       if (seg === 'tn') t.n = +v; if (seg === 'tscoring') t.scoring = v; if (seg === 'thours') t.hours = +v;
       if (seg === 'tformat') { t.format = v; if (v === 'tables' && !t.tables.length) t.tables = [[Net.st.tours[ui.tsetId].by, '', '', '']]; }
       if (seg === 'ttables') { const n = +v; while (t.tables.length < n) t.tables.push(['', '', '', '']); t.tables.length = n; }

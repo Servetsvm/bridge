@@ -110,7 +110,7 @@ const Net = (() => {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
     return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
-      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', ...ratingOf(HIST) };   // the player card: level, country, a few words
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', club: String(SET.club || '').trim().slice(0, 24), ...ratingOf(HIST) };   // the player card: level, country, a few words
   }
   /* the rating: 1500 plus 150 × the IMPs won against the robot field over the last 200 scored boards, shrunk for a
      player with few boards (so ten lucky boards do not make a champion). Every app sends its own; the lobby keeps the
@@ -122,19 +122,23 @@ const Net = (() => {
   st.rated = (() => { try { return JSON.parse(localStorage.getItem('bridge-rated') || '{}') || {}; } catch (e) { return {}; } })();
   function noteRating(name, p) {
     if (!name || !p || !p.rt || !p.rtn) return;
-    st.rated[nameKey(name)] = { name: String(name).slice(0, 20), rt: p.rt, rtn: p.rtn, ctry: p.ctry || '', ts: Date.now() };
+    st.rated[nameKey(name)] = { name: String(name).slice(0, 20), rt: p.rt, rtn: p.rtn, ctry: p.ctry || '', club: p.club || '', ts: Date.now() };
     for (const k in st.rated) if (Date.now() - st.rated[k].ts > 7 * 864e5) delete st.rated[k];
     try { localStorage.setItem('bridge-rated', JSON.stringify(st.rated)); } catch (e) {}
   }
   // the ten best ratings among the players seen this week (you included)
-  function leaderHtml() {
-    const me = prof(), L = Object.entries(st.rated).filter(([k]) => k !== nameKey(myName() || '')).map(([, r]) => r);
-    if (me.rtn) L.push({ name: myName() || T('You'), rt: me.rt, rtn: me.rtn, ctry: me.ctry, me: true });
-    if (!L.length) return '';
+  // club: only the players of your club (the club ranking)
+  function leaderHtml(club) {
+    const me = prof(), ck = nameKey(SET.club || ''); club = club && ck;
+    let L = Object.entries(st.rated).filter(([k]) => k !== nameKey(myName() || '')).map(([, r]) => r);
+    if (me.rtn) L.push({ name: myName() || T('You'), rt: me.rt, rtn: me.rtn, ctry: me.ctry, club: me.club, me: true });
+    if (club) L = L.filter(r => r.club && nameKey(r.club) === ck);
+    const tabs = ck ? `<div class="seg" data-lscope><button data-v="all" class="${club ? '' : 'on'}">🌍 ${T('Everyone')}</button><button data-v="club" class="${club ? 'on' : ''}">🏛 ${esc(SET.club)}</button></div>` : '';
+    if (!L.length) return tabs;
     L.sort((a, b) => b.rt - a.rt);
     const top = L.slice(0, 10), mine = L.findIndex(r => r.me);
     const row = (r, i) => `<tr class="${r.me ? 'meRow' : ''}"><td>${i + 1}</td><td><b class="pname" data-who="${esc(r.name)}">${esc(r.name)}</b></td><td class="n"><b>${r.rt}</b></td><td class="n">${r.rtn}</td></tr>`;
-    return `<div class="grp leader"><span>🏅 ${T('Leaderboard — this week')}</span><div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Rating')}</th><th class="n">${T('boards')}</th></tr></thead><tbody>${top.map(row).join('')}${mine >= 10 ? row(L[mine], mine) : ''}</tbody></table></div>
+    return `${tabs}<div class="grp leader"><span>🏅 ${club ? T('Club ranking — this week') : T('Leaderboard — this week')}</span><div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Rating')}</th><th class="n">${T('boards')}</th></tr></thead><tbody>${top.map(row).join('')}${mine >= 10 ? row(L[mine], mine) : ''}</tbody></table></div>
       <div class="muted">${T('Rating: 1500 + your IMPs against the robot tables over your last 200 boards.')}</div></div>`;
   }
 
@@ -150,7 +154,7 @@ const Net = (() => {
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
       joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
-      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
+      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   function whereIs(name) {
@@ -195,7 +199,7 @@ const Net = (() => {
       // options: format "ind" (everyone alone with robots) or "tables" (players sit together; seats N E S W named
       // in advance, empty = robot), ranking by matchpoints or IMPs, and how many hours the tournament is kept
       kind: ['speed', 'robot', 'daylong', 'pairs', 'imppairs', 'teams', 'custom'].includes(t.kind) ? t.kind : 'custom',
-      format: t.format === "tables" ? "tables" : "ind", scoring: t.scoring === "imp" ? "imp" : "mp", hours: [3, 24, 72].includes(+t.hours) ? +t.hours : 72,
+      format: t.format === "tables" ? "tables" : "ind", scoring: t.scoring === "imp" ? "imp" : "mp", hours: [3, 24, 72].includes(+t.hours) ? +t.hours : 72, club: String(t.club || "").slice(0, 24),
       tables: (Array.isArray(t.tables) ? t.tables : []).slice(0, 8).map(r => [0, 1, 2, 3].map(s => String((r || [])[s] || "").slice(0, 20))) };
   }
   // tournaments made by test devices while the app was being built (they reached the real lobby by mistake)
@@ -253,7 +257,7 @@ const Net = (() => {
   function meshSend(m) { for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send(m); } catch (e) {} } }
   const isMine = t => !!t && t.byKey === devId();
   // an individual tournament is open to everyone in the lobby: anyone can join and play its boards while it is kept
-  const openTour = t => !!t && t.format !== 'tables' && t.state !== 'off' && !(t.byKey === 'daily' && t.id !== dailyId());   // an earlier day's daily one only shows its ranking
+  const openTour = t => !!t && t.format !== 'tables' && t.state !== 'off' && !(t.byKey === 'daily' && t.id !== dailyId()) && (!t.club || nameKey(t.club) === nameKey(SET.club || ''));   // an earlier day's daily one only shows its ranking
   // the organiser publishes a new version of the tournament
   function pubTour(t) { t.v = (t.v || 0) + 1; saveTours(); meshSend({ t: 'tour', tour: t }); renderL(); }
   function newTour(n) {
