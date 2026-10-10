@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 123;
+const APP_V = 124;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2056,3 +2056,40 @@ function fitMsg(t) { if (!t || !t.classList || !t.classList.contains('cmsg')) re
 document.addEventListener('input', e => fitMsg(e.target));
 document.addEventListener('keyup', e => { if (e.key === 'Enter') fitMsg(e.target); });
 document.addEventListener('click', () => setTimeout(() => document.querySelectorAll('.cmsg').forEach(t => { if (!t.value) t.style.height = ''; }), 0));
+/* ---- keyboard on a computer: bidding "1" then "s" = 1♠ (c d h s n), p = pass, x = double, r = redouble;
+   playing: ← → pick among the cards you can play and Enter (or Space) plays it, or type the card: "a" then "s" = A♠ ---- */
+const KB = { lvl: 0, rank: null, sel: -1 };
+function kbCards() {
+  if (!G || G.phase !== 'play') return [];
+  const g = G.play, s = g.turn; if (g.trick.length >= 4 || !userControls(s)) return [];
+  const leg = E.legalFor(g, s);
+  return [...document.querySelectorAll('.card[data-c].play')].map(e => +e.dataset.c).filter(c => leg.includes(c));
+}
+function kbMark() {
+  document.querySelectorAll('.card.kb').forEach(e => e.classList.remove('kb'));
+  const L = kbCards(); if (KB.sel < 0 || !L.length) return;
+  KB.sel = Math.min(KB.sel, L.length - 1);
+  const el = document.querySelector(`.card[data-c="${L[KB.sel]}"].play`); if (el) el.classList.add('kb');
+}
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey || !G) return;
+  const tg = e.target; if (tg && (tg.tagName === 'INPUT' || tg.tagName === 'TEXTAREA' || tg.tagName === 'SELECT' || tg.isContentEditable)) return;
+  if (ui.overlay) return;
+  const k = e.key.toLowerCase();
+  if (G.phase === 'bid' && bidTurn() === meSeat()) {
+    const L = legalCalls(G.auction, U()), call = c => { if (L.includes(c)) { e.preventDefault(); KB.lvl = 0; ui.selLvl = 0; makeCall(U(), c); return true; } return false; };
+    if (/^[1-7]$/.test(k)) { KB.lvl = +k; ui.selLvl = +k; renderBidbox(); e.preventDefault(); return; }
+    if (KB.lvl && 'cdhsn'.includes(k) && k.length === 1) { call(B(KB.lvl, 'cdhsn'.indexOf(k))); return; }
+    if (k === 'p') { call('P'); return; }
+    if (k === 'x') { call('X'); return; }
+    if (k === 'r') { call('XX'); return; }
+    return;
+  }
+  const L = kbCards(); if (!L.length) return;
+  if (k === 'arrowright' || k === 'arrowleft') { e.preventDefault(); KB.sel = KB.sel < 0 ? 0 : (KB.sel + (k === 'arrowright' ? 1 : L.length - 1)) % L.length; kbMark(); return; }
+  if ((k === 'enter' || k === ' ') && KB.sel >= 0) { e.preventDefault(); const c = L[Math.min(KB.sel, L.length - 1)]; KB.sel = -1; playCard(G.play.turn, c); return; }
+  const rk = { a: 12, k: 11, q: 10, j: 9, t: 8, '1': 8, '9': 7, '8': 6, '7': 5, '6': 4, '5': 3, '4': 2, '3': 1, '2': 0 };
+  if (k in rk && KB.rank == null) { KB.rank = rk[k]; setTimeout(() => { KB.rank = null; }, 1500); e.preventDefault(); return; }
+  if (KB.rank != null && 'cdhs'.includes(k) && k.length === 1) { const c = 'cdhs'.indexOf(k) * 13 + KB.rank; KB.rank = null; if (L.includes(c)) { e.preventDefault(); playCard(G.play.turn, c); } else flash(T('You cannot play that card'), 1200); return; }
+  if (k === '0' && KB.rank === 8) return;   // "10" typed as 1 then 0
+});
