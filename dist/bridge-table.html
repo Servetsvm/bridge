@@ -836,6 +836,12 @@ body.bigcards .mini{transform:scale(1.15);transform-origin:bottom}
 :root[data-theme="dark"] .ladmin{background:#3b3a22;border-color:#6b6230;color:#f3e7b0}
 :root[data-theme="dark"] .lcount{border-bottom-color:#3a443e}
 .tinfo{background:none;border:0;color:#7c7b70;font-size:12.5px;padding:0 3px;margin-left:2px;cursor:pointer;border-radius:4px}.tinfo:hover{background:#eef3ec;color:#222}:root[data-theme="dark"] .tinfo:hover{background:#2a312d;color:#e8ece4}
+/* the chat panel at the table: the players beside the lobby chat */
+#dock .dbody,#dock .dsplit{flex:1;min-height:0;display:flex;flex-direction:column}
+#dock .dsplit{display:grid;grid-template-columns:minmax(100px,1fr) 2fr;gap:6px}
+#dock .dsplit .lplayers{margin:0;font-size:12.5px}
+#dock .lcol{gap:6px}
+@media (min-width:1100px){ #dock{width:420px} body.withdock #app{margin:0 450px 0 auto} }
 
 </style>
 
@@ -3166,6 +3172,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Close this tournament for everyone?": "Bu turnuva herkes için kapatılsın mı?", "Log out": "Çıkış yap", "Log out? You can sign in again with your name and PIN, or choose another name.": "Çıkış yapılsın mı? Adın ve PIN’inle tekrar girebilir ya da başka bir ad seçebilirsin.", "The robots do not accept an undo": "Robotlar geri almayı kabul etmiyor",
     "Day / night": "Gündüz / gece", "Day": "Gündüz", "Night": "Gece",
     "Checking…": "Kontrol ediliyor…", "Choose another name.": "Başka bir ad seç.", "Friends": "Arkadaşlar", "Leaderboard": "Liderlik tablosu", "Logins today": "Bugün giriş", "Nobody has a rating yet.": "Henüz kimsenin puanı yok.", "Offline": "Çevrimdışı", "Playing": "Oyunda", "Online": "Çevrimiçi",
     "PIN (4 digits)": "PIN (4 rakam)", "PIN again": "PIN tekrar", "Private message": "Özel mesaj", "Private message to {0}": "{0} kişisine özel mesaj", "Reply privately": "Özel cevap ver", "The PIN is 4 digits.": "PIN 4 rakamdan oluşur.", "The two PINs are not the same.": "İki PIN aynı değil.",
@@ -3254,6 +3261,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Close this tournament for everyone?": "Lukke denne turneringen for alle?", "Log out": "Logg ut", "Log out? You can sign in again with your name and PIN, or choose another name.": "Logge ut? Du kan logge inn igjen med navn og PIN, eller velge et annet navn.", "The robots do not accept an undo": "Robotene godtar ikke angring",
     "Day / night": "Dag / natt", "Day": "Dag", "Night": "Natt",
     "Checking…": "Sjekker…", "Choose another name.": "Velg et annet navn.", "Friends": "Venner", "Leaderboard": "Toppliste", "Logins today": "Innlogginger i dag", "Nobody has a rating yet.": "Ingen har rating ennå.", "Offline": "Frakoblet", "Playing": "Spiller", "Online": "Pålogget",
     "PIN (4 digits)": "PIN (4 sifre)", "PIN again": "PIN igjen", "Private message": "Privat melding", "Private message to {0}": "Privat melding til {0}", "Reply privately": "Svar privat", "The PIN is 4 digits.": "PIN-koden har 4 sifre.", "The two PINs are not the same.": "De to PIN-kodene er ikke like.",
@@ -3342,6 +3350,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Close this tournament for everyone?": "¿Cerrar este torneo para todos?", "Log out": "Cerrar sesión", "Log out? You can sign in again with your name and PIN, or choose another name.": "¿Cerrar sesión? Puedes volver a entrar con tu nombre y PIN, o elegir otro nombre.", "The robots do not accept an undo": "Los robots no aceptan deshacer",
     "Day / night": "Día / noche", "Day": "Día", "Night": "Noche",
     "Checking…": "Comprobando…", "Choose another name.": "Elige otro nombre.", "Friends": "Amigos", "Leaderboard": "Clasificación", "Logins today": "Entradas hoy", "Nobody has a rating yet.": "Nadie tiene rating todavía.", "Offline": "Desconectados", "Playing": "Jugando", "Online": "Conectados",
     "PIN (4 digits)": "PIN (4 cifras)", "PIN again": "Repite el PIN", "Private message": "Mensaje privado", "Private message to {0}": "Mensaje privado a {0}", "Reply privately": "Responder en privado", "The PIN is 4 digits.": "El PIN tiene 4 cifras.", "The two PINs are not the same.": "Los dos PIN no coinciden.",
@@ -3458,6 +3467,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Close this tournament for everyone?": "Fermer ce tournoi pour tout le monde ?", "Log out": "Se déconnecter", "Log out? You can sign in again with your name and PIN, or choose another name.": "Se déconnecter ? Vous pourrez revenir avec votre nom et votre PIN, ou choisir un autre nom.", "The robots do not accept an undo": "Les robots n’acceptent pas d’annulation",
     "Day / night": "Jour / nuit", "Day": "Jour", "Night": "Nuit",
     "Checking…": "Vérification…", "Choose another name.": "Choisissez un autre nom.", "Friends": "Amis", "Leaderboard": "Classement", "Logins today": "Connexions aujourd’hui", "Nobody has a rating yet.": "Personne n’a encore de classement.", "Offline": "Hors ligne", "Playing": "En jeu", "Online": "En ligne",
     "PIN (4 digits)": "PIN (4 chiffres)", "PIN again": "PIN à nouveau", "Private message": "Message privé", "Private message to {0}": "Message privé à {0}", "Reply privately": "Répondre en privé", "The PIN is 4 digits.": "Le PIN a 4 chiffres.", "The two PINs are not the same.": "Les deux PIN ne sont pas identiques.",
@@ -3574,6 +3584,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Close this tournament for everyone?": "Chiudere questo torneo per tutti?", "Log out": "Esci", "Log out? You can sign in again with your name and PIN, or choose another name.": "Uscire? Potrai rientrare con nome e PIN, o scegliere un altro nome.", "The robots do not accept an undo": "I robot non accettano l’annullamento",
     "Day / night": "Giorno / notte", "Day": "Giorno", "Night": "Notte",
     "Checking…": "Verifica…", "Choose another name.": "Scegli un altro nome.", "Friends": "Amici", "Leaderboard": "Classifica", "Logins today": "Accessi oggi", "Nobody has a rating yet.": "Nessuno ha ancora un rating.", "Offline": "Offline", "Playing": "In gioco", "Online": "Online",
     "PIN (4 digits)": "PIN (4 cifre)", "PIN again": "Ripeti il PIN", "Private message": "Messaggio privato", "Private message to {0}": "Messaggio privato a {0}", "Reply privately": "Rispondi in privato", "The PIN is 4 digits.": "Il PIN ha 4 cifre.", "The two PINs are not the same.": "I due PIN non coincidono.",
@@ -3690,6 +3701,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Close this tournament for everyone?": "Dieses Turnier für alle schließen?", "Log out": "Abmelden", "Log out? You can sign in again with your name and PIN, or choose another name.": "Abmelden? Du kannst dich mit Name und PIN wieder anmelden oder einen anderen Namen wählen.", "The robots do not accept an undo": "Die Roboter akzeptieren kein Zurücknehmen",
     "Day / night": "Tag / Nacht", "Day": "Tag", "Night": "Nacht",
     "Checking…": "Wird geprüft…", "Choose another name.": "Wähle einen anderen Namen.", "Friends": "Freunde", "Leaderboard": "Bestenliste", "Logins today": "Anmeldungen heute", "Nobody has a rating yet.": "Noch niemand hat ein Rating.", "Offline": "Offline", "Playing": "Am Spielen", "Online": "Online",
     "PIN (4 digits)": "PIN (4 Ziffern)", "PIN again": "PIN wiederholen", "Private message": "Private Nachricht", "Private message to {0}": "Private Nachricht an {0}", "Reply privately": "Privat antworten", "The PIN is 4 digits.": "Die PIN hat 4 Ziffern.", "The two PINs are not the same.": "Die beiden PINs stimmen nicht überein.",
@@ -3806,6 +3818,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Close this tournament for everyone?": "Закрыть этот турнир для всех?", "Log out": "Выйти", "Log out? You can sign in again with your name and PIN, or choose another name.": "Выйти? Вы сможете снова войти с именем и PIN или выбрать другое имя.", "The robots do not accept an undo": "Роботы не принимают отмену хода",
     "Day / night": "День / ночь", "Day": "День", "Night": "Ночь",
     "Checking…": "Проверяем…", "Choose another name.": "Выберите другое имя.", "Friends": "Друзья", "Leaderboard": "Лучшие", "Logins today": "Входов сегодня", "Nobody has a rating yet.": "Пока ни у кого нет рейтинга.", "Offline": "Не в сети", "Playing": "Играют", "Online": "В сети",
     "PIN (4 digits)": "PIN (4 цифры)", "PIN again": "PIN ещё раз", "Private message": "Личное сообщение", "Private message to {0}": "Личное сообщение: {0}", "Reply privately": "Ответить лично", "The PIN is 4 digits.": "PIN — это 4 цифры.", "The two PINs are not the same.": "PIN-коды не совпадают.",
@@ -3922,6 +3935,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Close this tournament for everyone?": "Zamknąć ten turniej dla wszystkich?", "Log out": "Wyloguj", "Log out? You can sign in again with your name and PIN, or choose another name.": "Wylogować? Możesz wrócić z imieniem i PIN-em albo wybrać inne imię.", "The robots do not accept an undo": "Roboty nie akceptują cofnięcia",
     "Day / night": "Dzień / noc", "Day": "Dzień", "Night": "Noc",
     "Checking…": "Sprawdzanie…", "Choose another name.": "Wybierz inne imię.", "Friends": "Znajomi", "Leaderboard": "Ranking", "Logins today": "Logowania dziś", "Nobody has a rating yet.": "Nikt nie ma jeszcze rankingu.", "Offline": "Offline", "Playing": "Grają", "Online": "Online",
     "PIN (4 digits)": "PIN (4 cyfry)", "PIN again": "Powtórz PIN", "Private message": "Prywatna wiadomość", "Private message to {0}": "Prywatna wiadomość do {0}", "Reply privately": "Odpowiedz prywatnie", "The PIN is 4 digits.": "PIN ma 4 cyfry.", "The two PINs are not the same.": "Kody PIN się różnią.",
@@ -4038,6 +4052,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Close this tournament for everyone?": "为所有人关闭这个比赛?", "Log out": "退出登录", "Log out? You can sign in again with your name and PIN, or choose another name.": "退出登录?你可以用名字和 PIN 重新登录,或换一个名字。", "The robots do not accept an undo": "机器人不接受撤回",
     "Day / night": "日间 / 夜间", "Day": "日间", "Night": "夜间",
     "Checking…": "正在检查…", "Choose another name.": "请换一个名字。", "Friends": "好友", "Leaderboard": "排行榜", "Logins today": "今日登录", "Nobody has a rating yet.": "还没有人有等级分。", "Offline": "离线", "Playing": "在打牌", "Online": "在线",
     "PIN (4 digits)": "PIN(4 位数字)", "PIN again": "再输一次 PIN", "Private message": "私信", "Private message to {0}": "私信给 {0}", "Reply privately": "私下回复", "The PIN is 4 digits.": "PIN 是 4 位数字。", "The two PINs are not the same.": "两次 PIN 不一致。",
@@ -5207,7 +5222,7 @@ function replayDeal() {
   if (guest()) { Net.send({ t: "replay" }); HIST = HIST.filter(h => h.id !== G.id); closeOv(); return; }
   const d = G.deal; HIST = HIST.filter(h => h.id !== G.id); BOARD = G.board; newBoard(d);
 }
-function flash(msg, ms) { msg = T(msg); notify(String(msg).replace(/<[^>]*>/g, "")); ui.toast = msg; render(); setTimeout(() => { if (ui.toast === msg) { ui.toast = null; render(); } }, ms); }
+function flash(msg, ms) { ui.toastChat = false; msg = T(msg); notify(String(msg).replace(/<[^>]*>/g, "")); ui.toast = msg; render(); setTimeout(() => { if (ui.toast === msg) { ui.toast = null; render(); } }, ms); }
 
 /* ================= rendering ================= */
 // the seat drawn at the bottom: normally yours; while your robot partner declares and you play both hands,
@@ -5295,10 +5310,8 @@ function renderBar() {
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
      ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
      <span class="menuwrap">${(n => `<button class="btn${n ? " gold" : ""}" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰${n ? `<span class="cbn">${n}</span>` : ""}</button>`)(typeof Net !== "undefined" ? (Net.st.unread || 0) + (Net.st.lunread || 0) : 0)}${ui.menu ? `<div class="menu" role="menu">
-       ${typeof Net !== "undefined" ? `<button class="btn" id="bChat">💬 ${T('Chat')}${(n => n ? ` (${n})` : '')((Net.st.unread || 0) + (Net.st.lunread || 0))}</button>` : ""}
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
        <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
-       <button class="btn" id="bTheme2">${document.documentElement.dataset.theme === "dark" ? "☀️ " + T("Day") : "🌙 " + T("Night")}</button>
        <button class="btn" id="bHist">📜 ${T('History')}</button>
        <button class="btn" id="bRes">📊 ${T('Results')}</button>
        <button class="btn" id="bSet">⚙ ${T('Settings')}</button>
@@ -5473,12 +5486,14 @@ function renderDock() {
   if (d.dataset.key !== key) {
     d.dataset.key = key;
     const tabs = tbl ? `<div class="dtabs"><button data-dtab="table" class="${tab === 'table' ? 'on' : ''}">${T('Table')} <span id="dTn"></span></button><button data-dtab="lobby" class="${tab === 'lobby' ? 'on' : ''}">${T('Lobby')} <span id="dLn"></span></button></div>` : `<b>💬 ${T('Lobby chat')}</b>`;
-    d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div><div class="lmsgs" id="dList"></div>
+    d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div>
+      <div class="${tab === 'table' ? 'dbody' : 'lsplit dsplit'}">${tab === 'table' ? '' : '<div class="lplayers" id="dPlayers"></div>'}<div class="lcol"><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>` : ''}
       <div class="pmto" id="dPmTo"></div>
-      <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div>`;
+      <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div></div></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
+  { const p = $('dPlayers'), h = tab === 'table' ? '' : Net.playersHtml(); if (p && p.innerHTML !== h) p.innerHTML = h; }   // the players beside the lobby chat
   { const p = $("dPmTo"), h = tab !== "table" && ui.pmTo ? `🔒 ${T("Private message to {0}", esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : ""; if (p && p.innerHTML !== h) p.innerHTML = h; }
   if (L && L.innerHTML !== html) { L.innerHTML = html; L.scrollTop = L.scrollHeight; }
   friendsCheck();   // the players are listed under 👥, not above the chat; a friend's arrival is still announced
@@ -5627,14 +5642,14 @@ function renderHome() {
   // the daily tournament: your progress and your place so far
   if (N && N.dailyId) {
     const id = N.dailyId(), t = N.st.tours[id];
-    if (t) {
+    if (t && t.state !== "off") {
       const done = Object.keys(myTour(id)).length, rows = tourRank(id), i = rows.findIndex(r => r.k === N.devId());
       set("hDaily", `🗓 <b>${T("Daily tournament")}</b> · ${done >= t.n ? T("finished") : done ? T("{0} of {1} boards", done, t.n) : T("{0} boards — play now", t.n)}${i >= 0 && rows.length > 1 ? " · " + T("place {0} of {1}", i + 1, rows.length) : rows.length ? " · " + T("{0} players", rows.length) : ""} ›`);
-    }
+    } else set("hDaily", "");
   }
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
-  set('hStats', `${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
+  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `👑 ${T('Logins today')}: ${N.loginsToday()} · ` : ''}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
   // the open section is rebuilt only when it changes (so typing in it is not lost); its contents are refreshed
   // the chat opens as a panel at the bottom of the screen (phones and narrow windows); the others under the buttons
   const hs = $('hSec'), want = ui.hsec || '', top = want === 'chat' ? '' : want;
@@ -5866,7 +5881,7 @@ function toursHtml() {
     return `<tr><td data-l=""><b>🏆 ${esc(t.name)}</b><small>${T('started by {0}', esc(t.by))}</small>${r.note ? `<small class="tnote">${r.note}</small>` : ''}</td>
       <td data-l="${T('Format')}">${TOUR_KINDS[t.kind] && t.kind !== 'custom' ? `${TOUR_KINDS[t.kind].icon} ${T(TOUR_KINDS[t.kind].n)}` : t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')}</td><td data-l="${T('Boards')}" class="n">${t.n}</td><td data-l="${T('Ranking')}">${t.scoring === 'imp' ? 'IMP' : 'MP %'}</td>
       <td data-l="${T('Players')}" class="n">${players}</td><td data-l="${T('Status')}">${status}</td><td data-l="${T('Ends in')}">${left(t)}</td>
-      <td data-l="" class="tact">${r.btns}${Net.isMine(t) ? `<button class="btn tdel" data-tdel="${t.id}" title="${T('Cancel the tournament')}">✕</button>` : ''}</td></tr>`;
+      <td data-l="" class="tact">${r.btns}${Net.isMine(t) || Net.isAdmin() ? `<button class="btn tdel" data-tdel="${t.id}" title="${T('Cancel the tournament')}">✕</button>` : ''}</td></tr>`;
   }).join('');
   const table = rows ? `<div class="ttwrap"><table class="ttab"><thead><tr><th>${T('Tournament')}</th><th>${T('Format')}</th><th class="n">${T('Boards')}</th><th>${T('Ranking')}</th><th class="n">${T('Players')}</th><th>${T('Status')}</th><th>${T('Ends in')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `<div class="muted">${L.length ? T('No tournaments here.') : T('No tournaments yet. Create one and invite the players you want.')}</div>`;
@@ -6052,8 +6067,8 @@ function showOpenChoice() {
 // back to the home page from a board played alone (the board is kept for Continue)
 function goHome() {
   if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
-  // leaving the table ends the board: the home page is fresh (no "Continue"), as when the app is opened
-  clearTimeout(timer); ui.saved = null;
+  // an unfinished board is kept: "Play with robots" carries on from where it was
+  clearTimeout(timer); ui.saved = G && (G.phase === 'bid' || G.phase === 'play') ? G : null;
   G = idleG(); closeOv(); save(); render();
 }
 
@@ -6119,7 +6134,8 @@ function showSettings() {
    <div class="grp"><span>${T('Sync between devices (GitHub)')}</span><div class="muted">${T('Scores, statistics and the list of deals you have seen are kept in a private gist on your GitHub account. Play offline on any device; everything merges when it is online again.')}</div>
    ${GitSync.enabled ? `<div><b>${T('Connected.')}</b> ${syncState.msg || (GitSync.last ? T('Last sync') + ' ' + new Date(GitSync.last).toLocaleString() : "")}</div><div class="row2"><button class="btn gold" id="sNow">${T('Sync now')}</button><button class="btn" id="sOff">${T('Disconnect')}</button></div>` : `<div class="muted">1. ${T('Open')} <a href="https://github.com/settings/tokens/new?scopes=gist&description=Bridge%20Table" target="_blank" rel="noopener">github.com → new token</a> (${T('scope: <b>gist</b> only, expiration: no expiration) and copy the token.')}<br>2. ${T('Paste it here on each device (PC and phone).')}</div><div class="row2"><input id="syncToken" type="password" autocomplete="off" placeholder="ghp_…" class="tok"><button class="btn gold" id="sSave">${T('Connect')}</button></div>${syncState.msg ? `<div class="muted">${syncState.msg}</div>` : ""}`}</div>
    <div class="muted">${T('Changes apply from the next deal.')} ${Store.online ? T('Settings and scores are saved to your account.') : T('Scores are saved on this device.')} ${T('Every deal you get is new — a deal is never dealt to you twice.')}</div>
-   <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button><button class="btn" id="sReset">${T('Delete score history')}</button></div>`);
+   <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button><button class="btn" id="sReset">${T('Delete score history')}</button></div>
+   <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>`);
 }
 /* ---- user guide in three languages: open it, or download it to read offline ---- */
 function showHelp() {
@@ -6352,7 +6368,7 @@ document.addEventListener('click', ev_ => {
   const dmb = ev_.target.closest('[data-dm]'); if (dmb) { showDm(dmb.dataset.dm); return; }
   const tq = ev_.target.closest('[data-tset],[data-tyes],[data-tno]'); if (tq) { if (tq.dataset.tset) { ui.tsel = null; showTourSetup(tq.dataset.tset); } else Net.tourAnswer(tq.dataset.tyes || tq.dataset.tno, !!tq.dataset.tyes); return; }
   // ✕ on a tournament (shown to its organiser only): cancel it for everyone
-  const td = ev_.target.closest('[data-tdel]'); if (td) { const t = Net.st.tours[td.dataset.tdel]; if (!t) return; if (Net.isMine(t)) askYes(T('Cancel the tournament?'), () => { Net.tourCancel(t.id); render(); }); return; }
+  const td = ev_.target.closest('[data-tdel]'); if (td) { const t = Net.st.tours[td.dataset.tdel]; if (!t) return; if (Net.isMine(t)) askYes(T("Cancel the tournament?"), () => { Net.tourCancel(t.id); render(); }); else if (Net.isAdmin()) askYes(T("Close this tournament for everyone?"), () => { Net.adminCloseTour(t.id); render(); }); return; }
   const ts = ev_.target.closest('[data-tstand]'); if (ts) { showStandings(ts.dataset.tstand); return; }
   const rv = ev_.target.closest('[data-rev]'); if (rv) { ui.revFrom = rv.dataset.from || 'res'; ui.revSel = null; ui.revStep = 0; stopRev(); showReview(rv.dataset.rev); return; }
   // previous / next deal in the replay
@@ -6362,7 +6378,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest('#oRevBack')) { stopRev(); if (ui.revFrom === 'hist') showHist(); else { ui.resTab = 'list'; showResults(); } return; }
   const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
-  if (t.id === 'toast') { ui.toast = null; render(); return; }
+  if (t.id === 'toast') { if (ui.toastChat && G && G.phase !== 'idle') { ui.toastChat = false; ui.dockOpen = true; renderDock(); } ui.toast = null; render(); return; }   // a message: tap it to open the chat
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
@@ -6421,7 +6437,7 @@ document.addEventListener('click', ev_ => {
     case "bClaim": claim(); break;
     case "bUndo": {
       if (online() && !guest()) { requestUndo("host", Net.st.names[SET.seat] || "Host", SET.seat).then(ok => { if (ok === false) flash(T("Nothing to take back, or the other side said no"), 1800); }); break; }
-      const ok = undo(); if (ok === false) flash("Nothing of yours to take back", 1500); break;
+      flash('🤖 ' + T('The robots do not accept an undo'), 1800); break;
     }
     case "sDeal": showDealEntry(); break;
     case "dPlay": startEnteredDeal(); break;
@@ -6432,7 +6448,7 @@ document.addEventListener('click', ev_ => {
     case "bLeave": askYes(T("Leave the table?"), goHome); break;   // playing alone with robots: back to a fresh home page
     case "bAlert": ui.alertOn = !ui.alertOn; renderBidbox(); if (ui.alertOn) setTimeout(() => { const i = $('alTxt'); if (i) i.focus(); }, 30); break;
     // the turn sound on and off from the top bar
-    case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; } else { SET.alert = SET.alertOn || "online"; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }
+    case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; SET.sfxOn = SET.sfx; SET.sfx = false; } else { SET.alert = SET.alertOn || "online"; SET.sfx = SET.sfxOn !== false; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }
     case "bSet": showSettings(); break;
     case 'bRes': showResults(); break;
     case 'bHome': goHome(); break;
@@ -6461,6 +6477,12 @@ document.addEventListener('click', ev_ => {
     case "oReplay": replayDeal(); break;
     case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
+    case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), () => {
+      if (online()) { flash(T('Close the online table first'), 2000); return; }
+      try { localStorage.removeItem('bridge-table-name'); } catch (e) {}
+      SET.pinH = null; SET.pinFor = null; Store.saveSettings(SET); save(); Net.st.claimed = false; ui.pmTo = null;
+      G = idleG(); ui.saved = null; render(); ui.gateErr = null; showGate();
+    }); break;
     case "pRename": showGate(true); break;
     case "oShared": { const d = ui.sharedDeal; ui.sharedDeal = null; closeOv(); if (d) { ui.saved = null; newBoard(d.hands, d.b); } break; }
     case "oShare": if (G && G.deal) shareDeal(G.deal, G.board); break;
@@ -6505,8 +6527,8 @@ function start(data) {
   load(data && data.G ? data : null);
   Field.init();
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
-  // every opening starts fresh on the home page (an unfinished board is not kept)
-  ui.saved = null;
+  // an unfinished board (bidding or play) waits for "Play with robots" to carry on
+  ui.saved = G && G.id !== 'idle' && (G.phase === 'bid' || G.phase === 'play') ? G : null;
   G = idleG(); render();
   { const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (needGate()) showGate(); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
   Store.initCloud(mergeCloud);
@@ -6763,6 +6785,9 @@ const Net = (() => {
     for (const t of (st.tables || [])) { if (nameKey(t.host) === k && t.prof) return cleanProf(t.prof, true); for (const s in (t.names || {})) if (nameKey(t.names[s]) === k && t.profs && t.profs[s]) return cleanProf(t.profs[s], true); }
     for (const m of (st.lchat || []).slice().reverse()) if (nameKey(m.from) === k && m.p) return m.p;   // from the lobby chat
     if (k === nameKey(myName() || '')) return prof();
+    const pr = (st.present || {})[k]; if (pr && pr.p) return pr.p;
+    const co = st.cloud && st.cloud.on && st.cloud.on.find(x => nameKey(x.name) === k); if (co && co.p) return cleanProf(co.p, true);
+    const kn = st.known && st.known[k]; if (kn && kn.p) return kn.p;
     return null;
   }
   const sysShort = p => p && p.sys ? ({ twoone: '2/1', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' })[p.sys] || '' : '';
@@ -6824,14 +6849,22 @@ const Net = (() => {
      everyone; it is played alone with robots, results travel like any tournament's and it is kept three days */
   const ymd = d => d.toISOString().slice(0, 10);
   const dailyId = (d = new Date()) => 'daily-' + ymd(d);
+  /* the administrator can close any tournament, the daily one too; the closing travels along the lobby lines */
+  const dailyOff = () => { try { return JSON.parse(localStorage.getItem('bridge-daily-off') || '[]') || []; } catch (e) { return []; } };
+  function closeTourLocal(id) {
+    if (/^daily-/.test(id)) { const L = dailyOff(); if (!L.includes(id)) { L.push(id); try { localStorage.setItem('bridge-daily-off', JSON.stringify(L.slice(-10))); } catch (e) {} } }
+    const t = st.tours[id]; if (!t) return;
+    t.state = 'off'; t.v = (t.v || 0) + 1000; saveTours(); renderL();
+  }
+  function adminCloseTour(id) { if (!isAdmin()) return; closeTourLocal(id); meshSend({ t: 'tadmin', id, by: myName() }); }
   function ensureDaily() {
     for (let back = 0; back < 3; back++) {   // today, and the two days before (their rankings are still shown)
       const d = new Date(Date.now() - back * 864e5), id = dailyId(d), ts = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
       const name = T("Daily tournament") + " · " + new Date(ts).toLocaleDateString(undefined, { timeZone: "UTC" });   // in the chosen language
-      if (st.tours[id]) { st.tours[id].name = name; st.tours[id].by = T("Daily"); continue; }
+      if (st.tours[id]) { st.tours[id].name = name; st.tours[id].by = T("Daily"); if (dailyOff().includes(id)) st.tours[id].state = 'off'; continue; }
       let seed = 2166136261; for (const ch of id) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
       st.tours[id] = cleanTour({ id, name, by: T("Daily"), byKey: 'daily', n: 8, seed: seed >>> 0,
-        ts, state: "live", inv: [], joined: {}, declined: {}, v: 1, format: "ind", kind: "robot", scoring: "mp", hours: 72 });
+        ts, state: dailyOff().includes(id) ? "off" : "live", inv: [], joined: {}, declined: {}, v: 1, format: "ind", kind: "robot", scoring: "mp", hours: 72 });
     }
     for (const k of Object.keys(st.tours)) if (/^daily-/.test(k) && Date.now() - st.tours[k].ts > 72 * 3600e3) delete st.tours[k];
     saveTours();
@@ -6841,7 +6874,7 @@ const Net = (() => {
   function meshSend(m) { for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send(m); } catch (e) {} } }
   const isMine = t => !!t && t.byKey === devId();
   // an individual tournament is open to everyone in the lobby: anyone can join and play its boards while it is kept
-  const openTour = t => !!t && t.format !== 'tables' && t.state !== 'off';
+  const openTour = t => !!t && t.format !== 'tables' && t.state !== 'off' && !(t.byKey === 'daily' && t.id !== dailyId());   // an earlier day's daily one only shows its ranking
   // the organiser publishes a new version of the tournament
   function pubTour(t) { t.v = (t.v || 0) + 1; saveTours(); meshSend({ t: 'tour', tour: t }); renderL(); }
   function newTour(n) {
@@ -6962,7 +6995,7 @@ const Net = (() => {
     const from = String(d.from || 'Player').slice(0, 20), text = String(d.text).slice(0, 300);
     addDm(from, { from, text, ts: +d.ts || Date.now(), me: false });
     if (ui.overlay === 'dm' && nameKey(ui.dmWith || '') === nameKey(from)) showDm(from);
-    else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; st.lunread = (st.lunread || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); beep(); renderL(); }
+    else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; st.lunread = (st.lunread || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); ui.toastChat = true; beep(); renderL(); }
   }
   // an individual board played: the score for your side (dir 'EW' when you sit East or West) and, once the
   // robot tables have played it, your IMPs and MP % against them
@@ -6994,6 +7027,7 @@ const Net = (() => {
       if (!st.tourResumed) { st.tourResumed = true; setTimeout(() => tourResume(), 2500); }   // back online: return to a running tournament table
       let ch = false;
       for (const id in (d.tours || {})) ch = mergeTour(d.tours[id]) || ch;
+      for (const id of (Array.isArray(d.dailyOff) ? d.dailyOff : [])) if (/^daily-[\d-]{10}$/.test(id) && !dailyOff().includes(id)) { closeTourLocal(id); ch = true; }
       for (const id in (d.res || {})) for (const k in d.res[id]) ch = mergeRes(id, k, d.res[id][k]) || ch;
       if (ch) { saveTours(); renderL(); }
       return true;
@@ -7021,6 +7055,7 @@ const Net = (() => {
     if (d.t === 'lhist') { (d.list || []).forEach(m => addL(m, true)); renderL(); return true; }
     if (d.t === 'tblinv') { gotTableInvite(d); return true; }
     if (d.t === 'dm') { gotDm(d); return true; }
+    if (d.t === 'tadmin') { if (nameKey(d.by) === 'servet') closeTourLocal(d.id); return true; }
     if (d.t === 'dmack') { dmAcked(d); return true; }
     if (onTourData(d)) return true;
     return false;
@@ -7039,7 +7074,7 @@ const Net = (() => {
     conn.on('close', () => { if (m.get(conn.peer) === conn) { m.delete(conn.peer); renderL(); } });
     // ask the newcomer who they are, so they show in the lobby at once (not only after the next scan)
     try { conn.send({ t: 'inforeq' }); } catch (e) {}
-    try { conn.send({ t: 'lhist', list: (st.lchat || []).slice(-30) }); conn.send({ t: 'tsync', tours: st.tours, res: st.tres }); } catch (e) {}
+    try { conn.send({ t: 'lhist', list: (st.lchat || []).slice(-30) }); conn.send({ t: 'tsync', tours: st.tours, res: st.tres, dailyOff: dailyOff() }); } catch (e) {}
     renderL(); deliverOut();
   }
   function gotInfo(d) {
@@ -7047,9 +7082,9 @@ const Net = (() => {
     if (st.collect && !st.collect.some(o => o.k === d.k)) st.collect.push(d);
     if (d.host) (st.roomOf || (st.roomOf = {}))[nameKey(d.host)] = d.k;   // each player's own lobby line (also when sitting elsewhere)
     // everyone who answered is in the lobby, also a player sitting at someone else's table (who has no table of their own)
-    if (d.host) (st.present || (st.present = {}))[nameKey(d.host)] = { name: String(d.host).slice(0, 20), ts: Date.now(), k: d.k };
+    if (d.host) (st.present || (st.present = {}))[nameKey(d.host)] = { name: String(d.host).slice(0, 20), ts: Date.now(), k: d.k, p: d.prof ? cleanProf(d.prof, true) : undefined };
     if (d.host && d.prof) noteRating(d.host, cleanProf(d.prof));
-    if (d.host) noteSeen(d.host);
+    if (d.host) noteSeen(d.host, d.prof ? cleanProf(d.prof, true) : null);
     if (d.busy) { st.tables = (st.tables || []).filter(t => t.k !== d.k); }
     else st.tables = [...(st.tables || []).filter(t => t.k !== d.k), d].sort((a, b) => a.k - b.k);   // show each table as soon as it answers
     render(); panelRefresh(); deliverOut();
@@ -7110,7 +7145,7 @@ const Net = (() => {
       const btn = t.state === 'setup' ? (isMine(t) ? `<button class="btn gold" data-tset="${t.id}">${T('Players and start')}</button>` : t.joined[me] ? `<span class="muted">${T('Waiting for {0} to start', esc(t.by))}</span>` : `<button class="btn new" data-tyes="${t.id}">${T('Register')}</button>`)
         : t.format === 'tables' ? `<button class="btn" data-tstand="${t.id}">${T('Standings')}</button>`
         : `<button class="btn new" data-tplay="${t.id}">${t.joined[me] ? T('Play') : T('Join and play')}</button>`;
-      return `<div class="otour"><div><b>🏆 ${esc(t.name)}</b><small>${k} · ${T('{0} boards', t.n)} · ${T('{0} players', players)} · ${t.state === 'setup' ? T('Registering') : T('Running')}</small></div><div class="otb">${btn}</div></div>`;
+      return `<div class="otour"><div><b>🏆 ${esc(t.name)}</b><small>${k} · ${T('{0} boards', t.n)} · ${T('{0} players', players)} · ${t.state === 'setup' ? T('Registering') : T('Running')}</small></div><div class="otb">${btn}${isAdmin() || isMine(t) ? `<button class="btn tdel" data-tdel="${t.id}" title="${T("Close")}">✕</button>` : ""}</div></div>`;
     }).join('');
     const empty = !rows && !tours ? `<div class="muted">${T('No other tables are open right now.')}</div>` : '';
     return `<div class="tables">${tours ? `<div class="otours">${tours}</div>` : ''}${rows}${empty}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
@@ -7123,7 +7158,7 @@ const Net = (() => {
     if ((+m.ts || 0) <= lclearTs()) return;   // cleared on this device: older messages do not come back from the others
     if (L.some(x => x.id === m.id)) return;
     L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: cleanProf(m.p) });
-    noteRating(m.from, L[L.length - 1].p); noteSeen(m.from);
+    noteRating(m.from, L[L.length - 1].p); noteSeen(m.from, L[L.length - 1].p);
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
     try { localStorage.setItem('bridge-lobby-chat', JSON.stringify(L.slice(-50))); } catch (e) {}
     if (!quiet) { if (m.from !== (myName() || 'Player') && ui.overlay !== 'lchat') st.lunread = (st.lunread || 0) + 1; renderL(); }
@@ -7171,10 +7206,11 @@ const Net = (() => {
           else if (u.pin !== SET.pinH) { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
           st.claimed = true;
         }
-        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w });
+        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof() });
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now() }); st.loggedDay = today(); }
         const [on, users, logins] = await Promise.all([Cloud.get('online'), Cloud.get('users?shallow=true'), isAdmin() ? Cloud.get('logins/' + today() + '?shallow=true') : null]);
         st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: Object.keys(users || {}).length, logins: logins ? Object.keys(logins).length : null };
+        for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
         renderL();
       } catch (e) {}
     },
@@ -7182,13 +7218,14 @@ const Net = (() => {
   setInterval(() => Cloud.beat(), 60e3); setTimeout(() => Cloud.beat(), 3000);
   // the real administrator: Servet, with the PIN checked
   const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
+  const loginsToday = () => st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1;
   /* everyone seen in the lobby lately (kept a week, for the offline list) and today (for the administrator's count) */
   st.known = (() => { try { return JSON.parse(localStorage.getItem('bridge-known') || '{}') || {}; } catch (e) { return {}; } })();
-  function noteSeen(name) {
+  function noteSeen(name, p) {
     if (!name || ['player', 'guest', 'robot'].includes(nameKey(name))) return;
     const k = nameKey(name), cur = st.known[k];
-    if (cur && Date.now() - cur.ts < 60e3) return;
-    st.known[k] = { name: String(name).slice(0, 20), ts: Date.now(), day: today() };
+    if (cur && Date.now() - cur.ts < 60e3 && (!p || cur.p)) return;
+    st.known[k] = { name: String(name).slice(0, 20), ts: Date.now(), day: today(), p: p || (cur && cur.p) || undefined };
     for (const x in st.known) if (Date.now() - st.known[x].ts > 7 * 864e5) delete st.known[x];
     try { localStorage.setItem('bridge-known', JSON.stringify(st.known)); } catch (e) {}
   }
@@ -7221,7 +7258,7 @@ const Net = (() => {
     const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
       + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
     const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
-    const admin = isAdmin() ? `<div class="ladmin">👑 ${T('Logins today')}: <b>${st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1}</b></div>` : '';
+    const admin = isAdmin() ? `<div class="ladmin">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
     return `<div class="lcount"><span title="${T('Online')}">🟢 ${nOn}</span><span title="${T('Playing')}">🎮 ${nPlay}</span><span title="${T('Offline')}">⚪ ${nOff}</span></div>${admin}
       ${sec('★ ' + T('Friends'), g.friends)}${sec('🎮 ' + T('Playing'), g.play)}${sec('🟢 ' + T('In the lobby'), g.lobby)}${sec('⚪ ' + T('Offline'), g.off)}
       ${all.length ? '' : `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`}<button class="btn mini-btn lplead" id="lLead">🏅 ${T('Leaderboard')}</button>`;
@@ -7685,7 +7722,7 @@ const Net = (() => {
     if (!mine) { st.chat.push(m); if (st.chat.length > 200) st.chat.shift(); }
     if (typeof renderDock === 'function') renderDock();
     if (ui.overlay === 'chat') { chatPanel(); return; }
-    if (m.from !== myTableName() && !(ui.dockOpen || dockWide())) { st.unread++; flash((m.from ? m.from + ': ' : '') + m.text, 2600); }
+    if (m.from !== myTableName() && !(ui.dockOpen || dockWide())) { st.unread++; flash((m.from ? m.from + ': ' : '') + m.text, 2600); ui.toastChat = true; }
     renderBar();
   }
   function sendChat(text) {
@@ -7879,7 +7916,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, leaderHtml, Cloud, nameKey, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, loginsToday, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

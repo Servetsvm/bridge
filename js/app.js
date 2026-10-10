@@ -465,7 +465,7 @@ function replayDeal() {
   if (guest()) { Net.send({ t: "replay" }); HIST = HIST.filter(h => h.id !== G.id); closeOv(); return; }
   const d = G.deal; HIST = HIST.filter(h => h.id !== G.id); BOARD = G.board; newBoard(d);
 }
-function flash(msg, ms) { msg = T(msg); notify(String(msg).replace(/<[^>]*>/g, "")); ui.toast = msg; render(); setTimeout(() => { if (ui.toast === msg) { ui.toast = null; render(); } }, ms); }
+function flash(msg, ms) { ui.toastChat = false; msg = T(msg); notify(String(msg).replace(/<[^>]*>/g, "")); ui.toast = msg; render(); setTimeout(() => { if (ui.toast === msg) { ui.toast = null; render(); } }, ms); }
 
 /* ================= rendering ================= */
 // the seat drawn at the bottom: normally yours; while your robot partner declares and you play both hands,
@@ -553,10 +553,8 @@ function renderBar() {
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
      ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
      <span class="menuwrap">${(n => `<button class="btn${n ? " gold" : ""}" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰${n ? `<span class="cbn">${n}</span>` : ""}</button>`)(typeof Net !== "undefined" ? (Net.st.unread || 0) + (Net.st.lunread || 0) : 0)}${ui.menu ? `<div class="menu" role="menu">
-       ${typeof Net !== "undefined" ? `<button class="btn" id="bChat">💬 ${T('Chat')}${(n => n ? ` (${n})` : '')((Net.st.unread || 0) + (Net.st.lunread || 0))}</button>` : ""}
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
        <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
-       <button class="btn" id="bTheme2">${document.documentElement.dataset.theme === "dark" ? "☀️ " + T("Day") : "🌙 " + T("Night")}</button>
        <button class="btn" id="bHist">📜 ${T('History')}</button>
        <button class="btn" id="bRes">📊 ${T('Results')}</button>
        <button class="btn" id="bSet">⚙ ${T('Settings')}</button>
@@ -731,12 +729,14 @@ function renderDock() {
   if (d.dataset.key !== key) {
     d.dataset.key = key;
     const tabs = tbl ? `<div class="dtabs"><button data-dtab="table" class="${tab === 'table' ? 'on' : ''}">${T('Table')} <span id="dTn"></span></button><button data-dtab="lobby" class="${tab === 'lobby' ? 'on' : ''}">${T('Lobby')} <span id="dLn"></span></button></div>` : `<b>💬 ${T('Lobby chat')}</b>`;
-    d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div><div class="lmsgs" id="dList"></div>
+    d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div>
+      <div class="${tab === 'table' ? 'dbody' : 'lsplit dsplit'}">${tab === 'table' ? '' : '<div class="lplayers" id="dPlayers"></div>'}<div class="lcol"><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>` : ''}
       <div class="pmto" id="dPmTo"></div>
-      <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div>`;
+      <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div></div></div>`;
   }
   const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
+  { const p = $('dPlayers'), h = tab === 'table' ? '' : Net.playersHtml(); if (p && p.innerHTML !== h) p.innerHTML = h; }   // the players beside the lobby chat
   { const p = $("dPmTo"), h = tab !== "table" && ui.pmTo ? `🔒 ${T("Private message to {0}", esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : ""; if (p && p.innerHTML !== h) p.innerHTML = h; }
   if (L && L.innerHTML !== html) { L.innerHTML = html; L.scrollTop = L.scrollHeight; }
   friendsCheck();   // the players are listed under 👥, not above the chat; a friend's arrival is still announced
@@ -885,14 +885,14 @@ function renderHome() {
   // the daily tournament: your progress and your place so far
   if (N && N.dailyId) {
     const id = N.dailyId(), t = N.st.tours[id];
-    if (t) {
+    if (t && t.state !== "off") {
       const done = Object.keys(myTour(id)).length, rows = tourRank(id), i = rows.findIndex(r => r.k === N.devId());
       set("hDaily", `🗓 <b>${T("Daily tournament")}</b> · ${done >= t.n ? T("finished") : done ? T("{0} of {1} boards", done, t.n) : T("{0} boards — play now", t.n)}${i >= 0 && rows.length > 1 ? " · " + T("place {0} of {1}", i + 1, rows.length) : rows.length ? " · " + T("{0} players", rows.length) : ""} ›`);
-    }
+    } else set("hDaily", "");
   }
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
-  set('hStats', `${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
+  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `👑 ${T('Logins today')}: ${N.loginsToday()} · ` : ''}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
   // the open section is rebuilt only when it changes (so typing in it is not lost); its contents are refreshed
   // the chat opens as a panel at the bottom of the screen (phones and narrow windows); the others under the buttons
   const hs = $('hSec'), want = ui.hsec || '', top = want === 'chat' ? '' : want;
@@ -1124,7 +1124,7 @@ function toursHtml() {
     return `<tr><td data-l=""><b>🏆 ${esc(t.name)}</b><small>${T('started by {0}', esc(t.by))}</small>${r.note ? `<small class="tnote">${r.note}</small>` : ''}</td>
       <td data-l="${T('Format')}">${TOUR_KINDS[t.kind] && t.kind !== 'custom' ? `${TOUR_KINDS[t.kind].icon} ${T(TOUR_KINDS[t.kind].n)}` : t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')}</td><td data-l="${T('Boards')}" class="n">${t.n}</td><td data-l="${T('Ranking')}">${t.scoring === 'imp' ? 'IMP' : 'MP %'}</td>
       <td data-l="${T('Players')}" class="n">${players}</td><td data-l="${T('Status')}">${status}</td><td data-l="${T('Ends in')}">${left(t)}</td>
-      <td data-l="" class="tact">${r.btns}${Net.isMine(t) ? `<button class="btn tdel" data-tdel="${t.id}" title="${T('Cancel the tournament')}">✕</button>` : ''}</td></tr>`;
+      <td data-l="" class="tact">${r.btns}${Net.isMine(t) || Net.isAdmin() ? `<button class="btn tdel" data-tdel="${t.id}" title="${T('Cancel the tournament')}">✕</button>` : ''}</td></tr>`;
   }).join('');
   const table = rows ? `<div class="ttwrap"><table class="ttab"><thead><tr><th>${T('Tournament')}</th><th>${T('Format')}</th><th class="n">${T('Boards')}</th><th>${T('Ranking')}</th><th class="n">${T('Players')}</th><th>${T('Status')}</th><th>${T('Ends in')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `<div class="muted">${L.length ? T('No tournaments here.') : T('No tournaments yet. Create one and invite the players you want.')}</div>`;
@@ -1310,8 +1310,8 @@ function showOpenChoice() {
 // back to the home page from a board played alone (the board is kept for Continue)
 function goHome() {
   if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
-  // leaving the table ends the board: the home page is fresh (no "Continue"), as when the app is opened
-  clearTimeout(timer); ui.saved = null;
+  // an unfinished board is kept: "Play with robots" carries on from where it was
+  clearTimeout(timer); ui.saved = G && (G.phase === 'bid' || G.phase === 'play') ? G : null;
   G = idleG(); closeOv(); save(); render();
 }
 
@@ -1377,7 +1377,8 @@ function showSettings() {
    <div class="grp"><span>${T('Sync between devices (GitHub)')}</span><div class="muted">${T('Scores, statistics and the list of deals you have seen are kept in a private gist on your GitHub account. Play offline on any device; everything merges when it is online again.')}</div>
    ${GitSync.enabled ? `<div><b>${T('Connected.')}</b> ${syncState.msg || (GitSync.last ? T('Last sync') + ' ' + new Date(GitSync.last).toLocaleString() : "")}</div><div class="row2"><button class="btn gold" id="sNow">${T('Sync now')}</button><button class="btn" id="sOff">${T('Disconnect')}</button></div>` : `<div class="muted">1. ${T('Open')} <a href="https://github.com/settings/tokens/new?scopes=gist&description=Bridge%20Table" target="_blank" rel="noopener">github.com → new token</a> (${T('scope: <b>gist</b> only, expiration: no expiration) and copy the token.')}<br>2. ${T('Paste it here on each device (PC and phone).')}</div><div class="row2"><input id="syncToken" type="password" autocomplete="off" placeholder="ghp_…" class="tok"><button class="btn gold" id="sSave">${T('Connect')}</button></div>${syncState.msg ? `<div class="muted">${syncState.msg}</div>` : ""}`}</div>
    <div class="muted">${T('Changes apply from the next deal.')} ${Store.online ? T('Settings and scores are saved to your account.') : T('Scores are saved on this device.')} ${T('Every deal you get is new — a deal is never dealt to you twice.')}</div>
-   <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button><button class="btn" id="sReset">${T('Delete score history')}</button></div>`);
+   <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button><button class="btn" id="sReset">${T('Delete score history')}</button></div>
+   <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>`);
 }
 /* ---- user guide in three languages: open it, or download it to read offline ---- */
 function showHelp() {
@@ -1610,7 +1611,7 @@ document.addEventListener('click', ev_ => {
   const dmb = ev_.target.closest('[data-dm]'); if (dmb) { showDm(dmb.dataset.dm); return; }
   const tq = ev_.target.closest('[data-tset],[data-tyes],[data-tno]'); if (tq) { if (tq.dataset.tset) { ui.tsel = null; showTourSetup(tq.dataset.tset); } else Net.tourAnswer(tq.dataset.tyes || tq.dataset.tno, !!tq.dataset.tyes); return; }
   // ✕ on a tournament (shown to its organiser only): cancel it for everyone
-  const td = ev_.target.closest('[data-tdel]'); if (td) { const t = Net.st.tours[td.dataset.tdel]; if (!t) return; if (Net.isMine(t)) askYes(T('Cancel the tournament?'), () => { Net.tourCancel(t.id); render(); }); return; }
+  const td = ev_.target.closest('[data-tdel]'); if (td) { const t = Net.st.tours[td.dataset.tdel]; if (!t) return; if (Net.isMine(t)) askYes(T("Cancel the tournament?"), () => { Net.tourCancel(t.id); render(); }); else if (Net.isAdmin()) askYes(T("Close this tournament for everyone?"), () => { Net.adminCloseTour(t.id); render(); }); return; }
   const ts = ev_.target.closest('[data-tstand]'); if (ts) { showStandings(ts.dataset.tstand); return; }
   const rv = ev_.target.closest('[data-rev]'); if (rv) { ui.revFrom = rv.dataset.from || 'res'; ui.revSel = null; ui.revStep = 0; stopRev(); showReview(rv.dataset.rev); return; }
   // previous / next deal in the replay
@@ -1620,7 +1621,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest('#oRevBack')) { stopRev(); if (ui.revFrom === 'hist') showHist(); else { ui.resTab = 'list'; showResults(); } return; }
   const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
-  if (t.id === 'toast') { ui.toast = null; render(); return; }
+  if (t.id === 'toast') { if (ui.toastChat && G && G.phase !== 'idle') { ui.toastChat = false; ui.dockOpen = true; renderDock(); } ui.toast = null; render(); return; }   // a message: tap it to open the chat
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
@@ -1679,7 +1680,7 @@ document.addEventListener('click', ev_ => {
     case "bClaim": claim(); break;
     case "bUndo": {
       if (online() && !guest()) { requestUndo("host", Net.st.names[SET.seat] || "Host", SET.seat).then(ok => { if (ok === false) flash(T("Nothing to take back, or the other side said no"), 1800); }); break; }
-      const ok = undo(); if (ok === false) flash("Nothing of yours to take back", 1500); break;
+      flash('🤖 ' + T('The robots do not accept an undo'), 1800); break;
     }
     case "sDeal": showDealEntry(); break;
     case "dPlay": startEnteredDeal(); break;
@@ -1690,7 +1691,7 @@ document.addEventListener('click', ev_ => {
     case "bLeave": askYes(T("Leave the table?"), goHome); break;   // playing alone with robots: back to a fresh home page
     case "bAlert": ui.alertOn = !ui.alertOn; renderBidbox(); if (ui.alertOn) setTimeout(() => { const i = $('alTxt'); if (i) i.focus(); }, 30); break;
     // the turn sound on and off from the top bar
-    case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; } else { SET.alert = SET.alertOn || "online"; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }
+    case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; SET.sfxOn = SET.sfx; SET.sfx = false; } else { SET.alert = SET.alertOn || "online"; SET.sfx = SET.sfxOn !== false; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }
     case "bSet": showSettings(); break;
     case 'bRes': showResults(); break;
     case 'bHome': goHome(); break;
@@ -1719,6 +1720,12 @@ document.addEventListener('click', ev_ => {
     case "oReplay": replayDeal(); break;
     case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
+    case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), () => {
+      if (online()) { flash(T('Close the online table first'), 2000); return; }
+      try { localStorage.removeItem('bridge-table-name'); } catch (e) {}
+      SET.pinH = null; SET.pinFor = null; Store.saveSettings(SET); save(); Net.st.claimed = false; ui.pmTo = null;
+      G = idleG(); ui.saved = null; render(); ui.gateErr = null; showGate();
+    }); break;
     case "pRename": showGate(true); break;
     case "oShared": { const d = ui.sharedDeal; ui.sharedDeal = null; closeOv(); if (d) { ui.saved = null; newBoard(d.hands, d.b); } break; }
     case "oShare": if (G && G.deal) shareDeal(G.deal, G.board); break;
@@ -1763,8 +1770,8 @@ function start(data) {
   load(data && data.G ? data : null);
   Field.init();
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
-  // every opening starts fresh on the home page (an unfinished board is not kept)
-  ui.saved = null;
+  // an unfinished board (bidding or play) waits for "Play with robots" to carry on
+  ui.saved = G && G.id !== 'idle' && (G.phase === 'bid' || G.phase === 'play') ? G : null;
   G = idleG(); render();
   { const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (needGate()) showGate(); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
   Store.initCloud(mergeCloud);

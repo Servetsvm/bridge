@@ -162,6 +162,9 @@ const Net = (() => {
     for (const t of (st.tables || [])) { if (nameKey(t.host) === k && t.prof) return cleanProf(t.prof, true); for (const s in (t.names || {})) if (nameKey(t.names[s]) === k && t.profs && t.profs[s]) return cleanProf(t.profs[s], true); }
     for (const m of (st.lchat || []).slice().reverse()) if (nameKey(m.from) === k && m.p) return m.p;   // from the lobby chat
     if (k === nameKey(myName() || '')) return prof();
+    const pr = (st.present || {})[k]; if (pr && pr.p) return pr.p;
+    const co = st.cloud && st.cloud.on && st.cloud.on.find(x => nameKey(x.name) === k); if (co && co.p) return cleanProf(co.p, true);
+    const kn = st.known && st.known[k]; if (kn && kn.p) return kn.p;
     return null;
   }
   const sysShort = p => p && p.sys ? ({ twoone: '2/1', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' })[p.sys] || '' : '';
@@ -223,14 +226,22 @@ const Net = (() => {
      everyone; it is played alone with robots, results travel like any tournament's and it is kept three days */
   const ymd = d => d.toISOString().slice(0, 10);
   const dailyId = (d = new Date()) => 'daily-' + ymd(d);
+  /* the administrator can close any tournament, the daily one too; the closing travels along the lobby lines */
+  const dailyOff = () => { try { return JSON.parse(localStorage.getItem('bridge-daily-off') || '[]') || []; } catch (e) { return []; } };
+  function closeTourLocal(id) {
+    if (/^daily-/.test(id)) { const L = dailyOff(); if (!L.includes(id)) { L.push(id); try { localStorage.setItem('bridge-daily-off', JSON.stringify(L.slice(-10))); } catch (e) {} } }
+    const t = st.tours[id]; if (!t) return;
+    t.state = 'off'; t.v = (t.v || 0) + 1000; saveTours(); renderL();
+  }
+  function adminCloseTour(id) { if (!isAdmin()) return; closeTourLocal(id); meshSend({ t: 'tadmin', id, by: myName() }); }
   function ensureDaily() {
     for (let back = 0; back < 3; back++) {   // today, and the two days before (their rankings are still shown)
       const d = new Date(Date.now() - back * 864e5), id = dailyId(d), ts = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
       const name = T("Daily tournament") + " · " + new Date(ts).toLocaleDateString(undefined, { timeZone: "UTC" });   // in the chosen language
-      if (st.tours[id]) { st.tours[id].name = name; st.tours[id].by = T("Daily"); continue; }
+      if (st.tours[id]) { st.tours[id].name = name; st.tours[id].by = T("Daily"); if (dailyOff().includes(id)) st.tours[id].state = 'off'; continue; }
       let seed = 2166136261; for (const ch of id) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
       st.tours[id] = cleanTour({ id, name, by: T("Daily"), byKey: 'daily', n: 8, seed: seed >>> 0,
-        ts, state: "live", inv: [], joined: {}, declined: {}, v: 1, format: "ind", kind: "robot", scoring: "mp", hours: 72 });
+        ts, state: dailyOff().includes(id) ? "off" : "live", inv: [], joined: {}, declined: {}, v: 1, format: "ind", kind: "robot", scoring: "mp", hours: 72 });
     }
     for (const k of Object.keys(st.tours)) if (/^daily-/.test(k) && Date.now() - st.tours[k].ts > 72 * 3600e3) delete st.tours[k];
     saveTours();
@@ -240,7 +251,7 @@ const Net = (() => {
   function meshSend(m) { for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send(m); } catch (e) {} } }
   const isMine = t => !!t && t.byKey === devId();
   // an individual tournament is open to everyone in the lobby: anyone can join and play its boards while it is kept
-  const openTour = t => !!t && t.format !== 'tables' && t.state !== 'off';
+  const openTour = t => !!t && t.format !== 'tables' && t.state !== 'off' && !(t.byKey === 'daily' && t.id !== dailyId());   // an earlier day's daily one only shows its ranking
   // the organiser publishes a new version of the tournament
   function pubTour(t) { t.v = (t.v || 0) + 1; saveTours(); meshSend({ t: 'tour', tour: t }); renderL(); }
   function newTour(n) {
@@ -361,7 +372,7 @@ const Net = (() => {
     const from = String(d.from || 'Player').slice(0, 20), text = String(d.text).slice(0, 300);
     addDm(from, { from, text, ts: +d.ts || Date.now(), me: false });
     if (ui.overlay === 'dm' && nameKey(ui.dmWith || '') === nameKey(from)) showDm(from);
-    else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; st.lunread = (st.lunread || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); beep(); renderL(); }
+    else { const k = nameKey(from); st.dmUnread[k] = (st.dmUnread[k] || 0) + 1; st.lunread = (st.lunread || 0) + 1; flash('✉ ' + from + ': ' + text.slice(0, 60), 3500); ui.toastChat = true; beep(); renderL(); }
   }
   // an individual board played: the score for your side (dir 'EW' when you sit East or West) and, once the
   // robot tables have played it, your IMPs and MP % against them
@@ -393,6 +404,7 @@ const Net = (() => {
       if (!st.tourResumed) { st.tourResumed = true; setTimeout(() => tourResume(), 2500); }   // back online: return to a running tournament table
       let ch = false;
       for (const id in (d.tours || {})) ch = mergeTour(d.tours[id]) || ch;
+      for (const id of (Array.isArray(d.dailyOff) ? d.dailyOff : [])) if (/^daily-[\d-]{10}$/.test(id) && !dailyOff().includes(id)) { closeTourLocal(id); ch = true; }
       for (const id in (d.res || {})) for (const k in d.res[id]) ch = mergeRes(id, k, d.res[id][k]) || ch;
       if (ch) { saveTours(); renderL(); }
       return true;
@@ -420,6 +432,7 @@ const Net = (() => {
     if (d.t === 'lhist') { (d.list || []).forEach(m => addL(m, true)); renderL(); return true; }
     if (d.t === 'tblinv') { gotTableInvite(d); return true; }
     if (d.t === 'dm') { gotDm(d); return true; }
+    if (d.t === 'tadmin') { if (nameKey(d.by) === 'servet') closeTourLocal(d.id); return true; }
     if (d.t === 'dmack') { dmAcked(d); return true; }
     if (onTourData(d)) return true;
     return false;
@@ -438,7 +451,7 @@ const Net = (() => {
     conn.on('close', () => { if (m.get(conn.peer) === conn) { m.delete(conn.peer); renderL(); } });
     // ask the newcomer who they are, so they show in the lobby at once (not only after the next scan)
     try { conn.send({ t: 'inforeq' }); } catch (e) {}
-    try { conn.send({ t: 'lhist', list: (st.lchat || []).slice(-30) }); conn.send({ t: 'tsync', tours: st.tours, res: st.tres }); } catch (e) {}
+    try { conn.send({ t: 'lhist', list: (st.lchat || []).slice(-30) }); conn.send({ t: 'tsync', tours: st.tours, res: st.tres, dailyOff: dailyOff() }); } catch (e) {}
     renderL(); deliverOut();
   }
   function gotInfo(d) {
@@ -446,9 +459,9 @@ const Net = (() => {
     if (st.collect && !st.collect.some(o => o.k === d.k)) st.collect.push(d);
     if (d.host) (st.roomOf || (st.roomOf = {}))[nameKey(d.host)] = d.k;   // each player's own lobby line (also when sitting elsewhere)
     // everyone who answered is in the lobby, also a player sitting at someone else's table (who has no table of their own)
-    if (d.host) (st.present || (st.present = {}))[nameKey(d.host)] = { name: String(d.host).slice(0, 20), ts: Date.now(), k: d.k };
+    if (d.host) (st.present || (st.present = {}))[nameKey(d.host)] = { name: String(d.host).slice(0, 20), ts: Date.now(), k: d.k, p: d.prof ? cleanProf(d.prof, true) : undefined };
     if (d.host && d.prof) noteRating(d.host, cleanProf(d.prof));
-    if (d.host) noteSeen(d.host);
+    if (d.host) noteSeen(d.host, d.prof ? cleanProf(d.prof, true) : null);
     if (d.busy) { st.tables = (st.tables || []).filter(t => t.k !== d.k); }
     else st.tables = [...(st.tables || []).filter(t => t.k !== d.k), d].sort((a, b) => a.k - b.k);   // show each table as soon as it answers
     render(); panelRefresh(); deliverOut();
@@ -509,7 +522,7 @@ const Net = (() => {
       const btn = t.state === 'setup' ? (isMine(t) ? `<button class="btn gold" data-tset="${t.id}">${T('Players and start')}</button>` : t.joined[me] ? `<span class="muted">${T('Waiting for {0} to start', esc(t.by))}</span>` : `<button class="btn new" data-tyes="${t.id}">${T('Register')}</button>`)
         : t.format === 'tables' ? `<button class="btn" data-tstand="${t.id}">${T('Standings')}</button>`
         : `<button class="btn new" data-tplay="${t.id}">${t.joined[me] ? T('Play') : T('Join and play')}</button>`;
-      return `<div class="otour"><div><b>🏆 ${esc(t.name)}</b><small>${k} · ${T('{0} boards', t.n)} · ${T('{0} players', players)} · ${t.state === 'setup' ? T('Registering') : T('Running')}</small></div><div class="otb">${btn}</div></div>`;
+      return `<div class="otour"><div><b>🏆 ${esc(t.name)}</b><small>${k} · ${T('{0} boards', t.n)} · ${T('{0} players', players)} · ${t.state === 'setup' ? T('Registering') : T('Running')}</small></div><div class="otb">${btn}${isAdmin() || isMine(t) ? `<button class="btn tdel" data-tdel="${t.id}" title="${T("Close")}">✕</button>` : ""}</div></div>`;
     }).join('');
     const empty = !rows && !tours ? `<div class="muted">${T('No other tables are open right now.')}</div>` : '';
     return `<div class="tables">${tours ? `<div class="otours">${tours}</div>` : ''}${rows}${empty}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
@@ -522,7 +535,7 @@ const Net = (() => {
     if ((+m.ts || 0) <= lclearTs()) return;   // cleared on this device: older messages do not come back from the others
     if (L.some(x => x.id === m.id)) return;
     L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: cleanProf(m.p) });
-    noteRating(m.from, L[L.length - 1].p); noteSeen(m.from);
+    noteRating(m.from, L[L.length - 1].p); noteSeen(m.from, L[L.length - 1].p);
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
     try { localStorage.setItem('bridge-lobby-chat', JSON.stringify(L.slice(-50))); } catch (e) {}
     if (!quiet) { if (m.from !== (myName() || 'Player') && ui.overlay !== 'lchat') st.lunread = (st.lunread || 0) + 1; renderL(); }
@@ -570,10 +583,11 @@ const Net = (() => {
           else if (u.pin !== SET.pinH) { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
           st.claimed = true;
         }
-        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w });
+        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof() });
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now() }); st.loggedDay = today(); }
         const [on, users, logins] = await Promise.all([Cloud.get('online'), Cloud.get('users?shallow=true'), isAdmin() ? Cloud.get('logins/' + today() + '?shallow=true') : null]);
         st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: Object.keys(users || {}).length, logins: logins ? Object.keys(logins).length : null };
+        for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
         renderL();
       } catch (e) {}
     },
@@ -581,13 +595,14 @@ const Net = (() => {
   setInterval(() => Cloud.beat(), 60e3); setTimeout(() => Cloud.beat(), 3000);
   // the real administrator: Servet, with the PIN checked
   const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
+  const loginsToday = () => st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1;
   /* everyone seen in the lobby lately (kept a week, for the offline list) and today (for the administrator's count) */
   st.known = (() => { try { return JSON.parse(localStorage.getItem('bridge-known') || '{}') || {}; } catch (e) { return {}; } })();
-  function noteSeen(name) {
+  function noteSeen(name, p) {
     if (!name || ['player', 'guest', 'robot'].includes(nameKey(name))) return;
     const k = nameKey(name), cur = st.known[k];
-    if (cur && Date.now() - cur.ts < 60e3) return;
-    st.known[k] = { name: String(name).slice(0, 20), ts: Date.now(), day: today() };
+    if (cur && Date.now() - cur.ts < 60e3 && (!p || cur.p)) return;
+    st.known[k] = { name: String(name).slice(0, 20), ts: Date.now(), day: today(), p: p || (cur && cur.p) || undefined };
     for (const x in st.known) if (Date.now() - st.known[x].ts > 7 * 864e5) delete st.known[x];
     try { localStorage.setItem('bridge-known', JSON.stringify(st.known)); } catch (e) {}
   }
@@ -620,7 +635,7 @@ const Net = (() => {
     const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
       + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
     const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
-    const admin = isAdmin() ? `<div class="ladmin">👑 ${T('Logins today')}: <b>${st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1}</b></div>` : '';
+    const admin = isAdmin() ? `<div class="ladmin">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
     return `<div class="lcount"><span title="${T('Online')}">🟢 ${nOn}</span><span title="${T('Playing')}">🎮 ${nPlay}</span><span title="${T('Offline')}">⚪ ${nOff}</span></div>${admin}
       ${sec('★ ' + T('Friends'), g.friends)}${sec('🎮 ' + T('Playing'), g.play)}${sec('🟢 ' + T('In the lobby'), g.lobby)}${sec('⚪ ' + T('Offline'), g.off)}
       ${all.length ? '' : `<div class="muted">${T('Nobody else is in the lobby right now.')}</div>`}<button class="btn mini-btn lplead" id="lLead">🏅 ${T('Leaderboard')}</button>`;
@@ -1084,7 +1099,7 @@ const Net = (() => {
     if (!mine) { st.chat.push(m); if (st.chat.length > 200) st.chat.shift(); }
     if (typeof renderDock === 'function') renderDock();
     if (ui.overlay === 'chat') { chatPanel(); return; }
-    if (m.from !== myTableName() && !(ui.dockOpen || dockWide())) { st.unread++; flash((m.from ? m.from + ': ' : '') + m.text, 2600); }
+    if (m.from !== myTableName() && !(ui.dockOpen || dockWide())) { st.unread++; flash((m.from ? m.from + ': ' : '') + m.text, 2600); ui.toastChat = true; }
     renderBar();
   }
   function sendChat(text) {
@@ -1278,5 +1293,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, leaderHtml, Cloud, nameKey, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, isAdmin, loginsToday, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
