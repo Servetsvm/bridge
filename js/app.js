@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 135;
+const APP_V = 136;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -519,6 +519,11 @@ function vHand(seat) {
   }
   return o + '</div>';
 }
+// the name of the player at a seat (you, a player at an online table, or a robot)
+function seatName(seat) {
+  if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
+  return online() && Net.st.names[seat] ? Net.st.names[seat] : T('Robot');
+}
 function seatLabel(seat) {
   const g = G.play, tags = [];
   if (seat === G.dealer && G.phase === 'bid') tags.push('<span class="tag">D</span>');
@@ -530,7 +535,7 @@ function seatLabel(seat) {
   const mine = (online() && Net.st.names[U()]) || myNm;
   let who = seat === meSeat() ? (mine || T("You")) : nm ? nm + (Net.st.away && Net.st.away[seat] ? " (" + T("away · robot plays") + ")" : g && userControls(seat) ? " (" + T("you play") + ")" : "") : (g && userControls(seat) ? T("You play") : T("Robot"));
   // the host can tap a player's name to remove them from the table (a robot takes the seat)
-  if (online() && !guest() && nm && seat !== meSeat()) who = `<b class="pname" data-kickask="${seat}" title="${T('Remove')}">${esc(who)}</b>`;
+  if (online() && !guest() && nm && seat !== meSeat()) who = `<b class="pname" data-kickask="${seat}" title="${T('Remove')}">${esc(who)}</b><button class="kickx" data-kickask="${seat}" title="${T('Remove')}">✕</button>`;
   else if (seat === meSeat()) who = `<b class="pname" data-who="${esc(mine || T('You'))}">${esc(who)}</b>`;   // your own label opens your card (to change what the others see)
   const turn = (G.phase === 'bid' && bidTurn() === seat) || (G.phase === 'play' && g.turn === seat);
   return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> ${who} ${tags.join('')}</span>`;
@@ -560,7 +565,7 @@ function renderBar() {
      <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>${T('Undo')}</button>
      <button class="btn gold" id="bHint">${T('Hint')}</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
-     ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
+     ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button><button class="btn" id="nHostLeave" title="${T("Leave")}">🚶<span class="lbt"> ${T("Leave")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
      ${typeof Net !== "undefined" ? (n => `<button class="btn narrowonly${n ? " gold" : ""}" id="bChat" title="${T("Chat")}">💬${n ? `<span class="cbn">${n}</span>` : ""}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ""}
      <span class="menuwrap">${(n => `<button class="btn${n ? " gold" : ""}" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰${n ? `<span class="cbn">${n}</span>` : ""}</button>`)(typeof Net !== "undefined" ? (Net.st.unread || 0) + (Net.st.lunread || 0) : 0)}${ui.menu ? `<div class="menu" role="menu">
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
@@ -583,7 +588,8 @@ function auctionTable(auction, phaseBid, rv) {
   const aucKey = G ? G.id + ":" + auction.length : "";   // the newest call drops in once
   setTimeout(() => { if (!rv) ui.aucSeen = aucKey; }, 0);
   const cols = [3, 0, 1, 2], board = rv ? rv.board : G.board, me = rv ? rv.seat : U(), sel = rv ? rv.sel : ui.lastExpl;
-  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}">${SEAT[s]}</th>`).join('') + '</tr></thead><tbody><tr>';
+  const turnS = !rv && phaseBid && G && G.phase === 'bid' ? bidTurn() : -1;
+  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}${s === turnS ? ' turn' : ''}">${SEAT[s]}${rv ? '' : `<small>${esc(seatName(s))}</small>`}</th>`).join('') + '</tr></thead><tbody><tr>';
   let col = cols.indexOf(rv ? rv.dealer : G.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
   auction.forEach((e, i) => { o += `<td><span class="c${i === sel ? " sel" : ""}${!rv && i === auction.length - 1 && G && G.phase === "bid" && ui.aucSeen !== G.id + ":" + auction.length ? " newc" : ""}${e.m && e.m.cv ? ' cvb' : ''}${e.al ? ' alrt' : ''}" ${rv ? 'data-ri' : 'data-ai'}="${i}">${callHtml(e.call)}${e.al ? '!' : ''}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
   if (phaseBid) o += '<td>?</td>';
@@ -643,6 +649,7 @@ function renderTable() {
     // dummy opposite you is laid out as on a real table: one column per suit
     if (isVisible(seat)) inner = r === 2 ? fanHtml(seat, 78) : vHand(seat);   // your partner's dummy opposite: a fan like your own hand, easy to pick from
     else if (G.phase === 'play') inner = backs(G.play.hands[seat].length);
+    else if (G.phase === 'bid' && G.deal && G.deal[seat]) inner = backs(G.deal[seat].length);   // wider screens show the players beside you while bidding
     el.innerHTML = seatLabel(seat) + inner;
   }
   $('table').classList.toggle('bidding', G.phase === 'bid');

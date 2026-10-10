@@ -1114,3 +1114,11 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 [data-lscope]{margin-bottom:8px}
 /* narrow phones: the open side hands wrap, so the middle keeps room for the result */
 @media (max-width:430px){#table{grid-template-columns:minmax(0,auto) minmax(112px,1fr) minmax(0,auto)}#pos1,#pos3{min-width:0}#pos1 .vh .row,#pos3 .vh .row{flex-wrap:wrap;row-gap:2px}}
+/* wider screens: the players beside you stay at the table during the auction (name and cards face down) */
+@media (min-width:700px){#table.bidding #pos1,#table.bidding #pos3{display:flex}#table.bidding #center{grid-column:2}}
+/* the auction header: each seat with its player under it; the seat to call is lit */
+.auction th small{display:block;font-weight:500;font-size:11px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.auction th.turn{box-shadow:inset 0 -3px 0 #f4c430;background:#fff3c4!important;color:#3a2a00!important}
+.auction th.turn.v{background:#ffd27a!important}
+.kickx{margin-left:4px;border:0;border-radius:50%;width:18px;height:18px;line-height:16px;padding:0;font-size:11px;background:rgba(255,255,255,.25);color:#fff;cursor:pointer}
+.kickx:hover{background:#c62828}

@@ -1129,6 +1129,14 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 [data-lscope]{margin-bottom:8px}
 /* narrow phones: the open side hands wrap, so the middle keeps room for the result */
 @media (max-width:430px){#table{grid-template-columns:minmax(0,auto) minmax(112px,1fr) minmax(0,auto)}#pos1,#pos3{min-width:0}#pos1 .vh .row,#pos3 .vh .row{flex-wrap:wrap;row-gap:2px}}
+/* wider screens: the players beside you stay at the table during the auction (name and cards face down) */
+@media (min-width:700px){#table.bidding #pos1,#table.bidding #pos3{display:flex}#table.bidding #center{grid-column:2}}
+/* the auction header: each seat with its player under it; the seat to call is lit */
+.auction th small{display:block;font-weight:500;font-size:11px;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.auction th.turn{box-shadow:inset 0 -3px 0 #f4c430;background:#fff3c4!important;color:#3a2a00!important}
+.auction th.turn.v{background:#ffd27a!important}
+.kickx{margin-left:4px;border:0;border-radius:50%;width:18px;height:18px;line-height:16px;padding:0;font-size:11px;background:rgba(255,255,255,.25);color:#fff;cursor:pointer}
+.kickx:hover{background:#c62828}
 
 </style>
 
@@ -3683,6 +3691,8 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Leave the table? {0} will host it and the others go on playing.": "Masadan ayrılmak istiyor musun? Masayı {0} devralır, diğerleri oynamaya devam eder.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Masada başka oyuncu yok — ayrılırsan masa kapanır. Ayrılmak istiyor musun?",
     "Close it for everyone": "Herkes için kapat",
     "Hand the table to {0}": "Masayı {0} oyuncusuna devret",
     "The host left and the table could not be moved.": "Masa sahibi ayrıldı, masa taşınamadı.",
@@ -3826,6 +3836,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Leave the table? {0} will host it and the others go on playing.": "Forlate bordet? {0} overtar det og de andre spiller videre.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Ingen andre ved bordet — går du, stenges det. Gå?",
     "Close it for everyone": "Steng det for alle",
     "Hand the table to {0}": "Gi bordet til {0}",
     "The host left and the table could not be moved.": "Verten gikk, og bordet kunne ikke flyttes.",
@@ -3969,6 +3981,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Leave the table? {0} will host it and the others go on playing.": "¿Dejar la mesa? {0} la llevará y los demás seguirán jugando.",
+    "Nobody else is at the table — leaving closes it. Leave?": "No hay nadie más en la mesa: si te vas, se cierra. ¿Salir?",
     "Close it for everyone": "Cerrarla para todos",
     "Hand the table to {0}": "Pasar la mesa a {0}",
     "The host left and the table could not be moved.": "El anfitrión se fue y no se pudo trasladar la mesa.",
@@ -4140,6 +4154,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Leave the table? {0} will host it and the others go on playing.": "Quitter la table ? {0} la reprend et les autres continuent.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Personne d'autre à la table — partir la ferme. Partir ?",
     "Close it for everyone": "La fermer pour tous",
     "Hand the table to {0}": "Confier la table à {0}",
     "The host left and the table could not be moved.": "L'hôte est parti et la table n'a pas pu être déplacée.",
@@ -4311,6 +4327,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Leave the table? {0} will host it and the others go on playing.": "Lasciare il tavolo? Lo prende {0} e gli altri continuano.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Al tavolo non c'è nessun altro — uscendo si chiude. Uscire?",
     "Close it for everyone": "Chiudilo per tutti",
     "Hand the table to {0}": "Passa il tavolo a {0}",
     "The host left and the table could not be moved.": "L'host è uscito e il tavolo non è stato spostato.",
@@ -4482,6 +4500,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Leave the table? {0} will host it and the others go on playing.": "Tisch verlassen? {0} übernimmt ihn und die anderen spielen weiter.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Sonst ist niemand am Tisch — wenn du gehst, wird er geschlossen. Gehen?",
     "Close it for everyone": "Für alle schließen",
     "Hand the table to {0}": "Tisch an {0} übergeben",
     "The host left and the table could not be moved.": "Der Gastgeber ist gegangen, der Tisch konnte nicht umziehen.",
@@ -4653,6 +4673,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Leave the table? {0} will host it and the others go on playing.": "Покинуть стол? Его возьмёт {0}, остальные продолжат.",
+    "Nobody else is at the table — leaving closes it. Leave?": "За столом больше никого — если уйти, он закроется. Уйти?",
     "Close it for everyone": "Закрыть для всех",
     "Hand the table to {0}": "Передать стол игроку {0}",
     "The host left and the table could not be moved.": "Хозяин ушёл, перенести стол не удалось.",
@@ -4824,6 +4846,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Leave the table? {0} will host it and the others go on playing.": "Opuścić stół? Przejmie go {0}, a pozostali grają dalej.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Przy stole nikogo więcej — wyjście go zamknie. Wyjść?",
     "Close it for everyone": "Zamknij dla wszystkich",
     "Hand the table to {0}": "Przekaż stół graczowi {0}",
     "The host left and the table could not be moved.": "Gospodarz wyszedł i stołu nie udało się przenieść.",
@@ -4995,6 +5019,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Leave the table? {0} will host it and the others go on playing.": "离开牌桌?{0} 将接管,其他人继续打。",
+    "Nobody else is at the table — leaving closes it. Leave?": "牌桌上没有其他人——离开会关闭牌桌。要离开吗?",
     "Close it for everyone": "为所有人关闭",
     "Hand the table to {0}": "把牌桌交给 {0}",
     "The host left and the table could not be moved.": "桌主离开了,牌桌无法转移。",
@@ -5762,7 +5788,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 135;
+const APP_V = 136;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6273,6 +6299,11 @@ function vHand(seat) {
   }
   return o + '</div>';
 }
+// the name of the player at a seat (you, a player at an online table, or a robot)
+function seatName(seat) {
+  if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
+  return online() && Net.st.names[seat] ? Net.st.names[seat] : T('Robot');
+}
 function seatLabel(seat) {
   const g = G.play, tags = [];
   if (seat === G.dealer && G.phase === 'bid') tags.push('<span class="tag">D</span>');
@@ -6284,7 +6315,7 @@ function seatLabel(seat) {
   const mine = (online() && Net.st.names[U()]) || myNm;
   let who = seat === meSeat() ? (mine || T("You")) : nm ? nm + (Net.st.away && Net.st.away[seat] ? " (" + T("away · robot plays") + ")" : g && userControls(seat) ? " (" + T("you play") + ")" : "") : (g && userControls(seat) ? T("You play") : T("Robot"));
   // the host can tap a player's name to remove them from the table (a robot takes the seat)
-  if (online() && !guest() && nm && seat !== meSeat()) who = `<b class="pname" data-kickask="${seat}" title="${T('Remove')}">${esc(who)}</b>`;
+  if (online() && !guest() && nm && seat !== meSeat()) who = `<b class="pname" data-kickask="${seat}" title="${T('Remove')}">${esc(who)}</b><button class="kickx" data-kickask="${seat}" title="${T('Remove')}">✕</button>`;
   else if (seat === meSeat()) who = `<b class="pname" data-who="${esc(mine || T('You'))}">${esc(who)}</b>`;   // your own label opens your card (to change what the others see)
   const turn = (G.phase === 'bid' && bidTurn() === seat) || (G.phase === 'play' && g.turn === seat);
   return `<span class="lbl${turn ? ' turn' : ''}"><span class="${vulOf(G.board, seat) ? 'vn' : ''}">${SEAT[seat]}</span> ${who} ${tags.join('')}</span>`;
@@ -6314,7 +6345,7 @@ function renderBar() {
      <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>${T('Undo')}</button>
      <button class="btn gold" id="bHint">${T('Hint')}</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
-     ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
+     ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button><button class="btn" id="nHostLeave" title="${T("Leave")}">🚶<span class="lbt"> ${T("Leave")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
      ${typeof Net !== "undefined" ? (n => `<button class="btn narrowonly${n ? " gold" : ""}" id="bChat" title="${T("Chat")}">💬${n ? `<span class="cbn">${n}</span>` : ""}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ""}
      <span class="menuwrap">${(n => `<button class="btn${n ? " gold" : ""}" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰${n ? `<span class="cbn">${n}</span>` : ""}</button>`)(typeof Net !== "undefined" ? (Net.st.unread || 0) + (Net.st.lunread || 0) : 0)}${ui.menu ? `<div class="menu" role="menu">
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
@@ -6337,7 +6368,8 @@ function auctionTable(auction, phaseBid, rv) {
   const aucKey = G ? G.id + ":" + auction.length : "";   // the newest call drops in once
   setTimeout(() => { if (!rv) ui.aucSeen = aucKey; }, 0);
   const cols = [3, 0, 1, 2], board = rv ? rv.board : G.board, me = rv ? rv.seat : U(), sel = rv ? rv.sel : ui.lastExpl;
-  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}">${SEAT[s]}</th>`).join('') + '</tr></thead><tbody><tr>';
+  const turnS = !rv && phaseBid && G && G.phase === 'bid' ? bidTurn() : -1;
+  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}${s === turnS ? ' turn' : ''}">${SEAT[s]}${rv ? '' : `<small>${esc(seatName(s))}</small>`}</th>`).join('') + '</tr></thead><tbody><tr>';
   let col = cols.indexOf(rv ? rv.dealer : G.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
   auction.forEach((e, i) => { o += `<td><span class="c${i === sel ? " sel" : ""}${!rv && i === auction.length - 1 && G && G.phase === "bid" && ui.aucSeen !== G.id + ":" + auction.length ? " newc" : ""}${e.m && e.m.cv ? ' cvb' : ''}${e.al ? ' alrt' : ''}" ${rv ? 'data-ri' : 'data-ai'}="${i}">${callHtml(e.call)}${e.al ? '!' : ''}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
   if (phaseBid) o += '<td>?</td>';
@@ -6397,6 +6429,7 @@ function renderTable() {
     // dummy opposite you is laid out as on a real table: one column per suit
     if (isVisible(seat)) inner = r === 2 ? fanHtml(seat, 78) : vHand(seat);   // your partner's dummy opposite: a fan like your own hand, easy to pick from
     else if (G.phase === 'play') inner = backs(G.play.hands[seat].length);
+    else if (G.phase === 'bid' && G.deal && G.deal[seat]) inner = backs(G.deal[seat].length);   // wider screens show the players beside you while bidding
     el.innerHTML = seatLabel(seat) + inner;
   }
   $('table').classList.toggle('bidding', G.phase === 'bid');
@@ -8515,7 +8548,7 @@ const Net = (() => {
     for (const m of (st.lchat || [])) if (Date.now() - m.ts < 6 * 3600e3) out.set(nameKey(m.from), m.from);
     // players whose app answered lately and still has an open lobby line
     const lines = st.mesh || new Map();
-    for (const k in (st.present || {})) { const p = st.present[k], c = lines.get(ROOM(p.k)); if (Date.now() - p.ts < 15 * 60e3 && (!c || c.open)) out.set(k, p.name); }
+    for (const k in (st.present || {})) { const p = st.present[k], c = lines.get(ROOM(p.k)); if (Date.now() - p.ts < 3 * 60e3 && (!c || c.open)) out.set(k, p.name); }
     out.delete(me); out.delete(nameKey('Player'));
     return [...out.values()].sort((a, b) => a.localeCompare(b));
   }
@@ -8525,6 +8558,8 @@ const Net = (() => {
   function onLobbyData(conn, d) {
     if (d.t === 'inforeq' || (d.t === 'info' && d.k == null)) { try { conn.send(tableInfo()); } catch (e) {} meshAdd(conn); return true; }
     if (d.t === 'info') { gotInfo(d); return true; }
+    // an app was closed: it leaves the lobby lists at once (it comes back with the next scan if it was only reloaded)
+    if (d.t === 'gone') { const k = nameKey(d.host || ''); if (k && st.present) delete st.present[k]; if (k && st.roomOf) delete st.roomOf[k]; if (d.k) st.tables = (st.tables || []).filter(t => t.k !== d.k); if (st.cloud && st.cloud.on) st.cloud.on = st.cloud.on.filter(x => nameKey(x.name) !== k); renderL(); render(); return true; }
     if (d.t === 'lchat') { addL(d.m); return true; }
     if (d.t === 'lhist') { (d.list || []).forEach(m => addL(m, true)); renderL(); return true; }
     if (d.t === 'tblinv') { gotTableInvite(d); return true; }
@@ -8536,6 +8571,7 @@ const Net = (() => {
   }
   function onSlotData(conn, d) {
     if (!d || !d.t) return;
+    conn._seen = Date.now();
     if (onLobbyData(conn, d)) return;
     if (d.t === 'hello' && st.guest) { try { conn.send({ t: 'declined' }); } catch (e) {} return; }   // sitting at someone else's table
     onHostData(conn, d);
@@ -8717,6 +8753,13 @@ const Net = (() => {
     return out;
   }
   setInterval(() => Cloud.beat(), 60e3); setTimeout(() => Cloud.beat(), 3000);
+  // the app is closed (or reloaded): tell the lobby at once and take this player off the online list
+  window.addEventListener('pagehide', () => {
+    const name = myName(); if (!name) return;
+    const msg = { t: 'gone', k: st.slot ? st.slot.k : 0, host: name };
+    for (const c of (st.mesh || new Map()).values()) { try { if (c.open) c.send(msg); } catch (e) {} }
+    if (Cloud.on && SET.pinH) { try { fetch(DB_URL + '/online/' + fbKey(name) + '.json', { method: 'DELETE', keepalive: true }); } catch (e) {} }
+  });
   // the real administrator: Servet, with the PIN checked
   const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
   const loginsToday = () => st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1;
@@ -9128,8 +9171,8 @@ const Net = (() => {
   /* ---- when the host leaves during a board, the table can go on: the board (with every hand) goes to one player,
      who opens the table at their own address; the others are told to reconnect there, and robots play their seats
      until they are back. The guests' addresses are learnt when they sit down (hello). ---- */
-  function hoCandidate() {
-    if (!st.host || !G || ['lobby', 'idle'].includes(G.phase) || G.tour) return null;
+  function hoCandidate(any) {   // any: also between boards (the host leaves the table)
+    if (!st.host || !G || G.phase === 'idle' || (!any && G.phase === 'lobby') || G.tour) return null;
     const ks = st.ks || {}, toks = st.toks || {};
     for (const s of [0, 1, 2, 3]) {
       const id = st.seats[s]; if (!id || id === 'host' || (st.away && st.away[s])) continue;
@@ -9138,8 +9181,8 @@ const Net = (() => {
     }
     return null;
   }
-  function handOver() {
-    const h = hoCandidate(); if (!h) return false;
+  function handOver(any) {
+    const h = hoCandidate(any); if (!h) return false;
     const hs = +Object.keys(st.seats).find(k => st.seats[k] === 'host'), names = { ...st.names }, toks = { ...(st.toks || {}) };
     delete names[hs]; delete toks[hs];   // the host's seat: a robot plays it
     const code = 'room-' + h.k, from = st.names[hs] || myName() || 'Host';
@@ -9297,9 +9340,11 @@ const Net = (() => {
   function ping() {
     clearInterval(pingT);
     pingT = setInterval(() => {
-      // the host pings every 10 s: 30 s of silence means its app is gone (a closed app does not always close the line)
-      if (st.guest && st.conn && st.lastHost && Date.now() - st.lastHost > 30000 && !st.reconnecting) { const c = st.conn; st.lastHost = 0; try { c.close(); } catch (e) {} if (st.conn === c) lost(); return; }
+      // the host pings every 10 s: 45 s of silence means its app is gone (a closed app does not always close the line)
+      if (st.guest && st.conn && st.lastHost && Date.now() - st.lastHost > 45000 && !st.reconnecting) { const c = st.conn; st.lastHost = 0; try { c.close(); } catch (e) {} if (st.conn === c) lost(); return; }
       if (st.guest) { if (st.conn && st.conn.open) { try { st.conn.send({ t: 'ping' }); } catch (e) {} } }
+      // a player or spectator silent for 45 s has closed the app or lost the network: a robot takes over the seat
+      if (st.host) { const now = Date.now(); for (const c of [...st.conns.values(), ...[...(st.watch || new Map()).values()].map(w => w.conn)]) if (c._seen && now - c._seen > 45000) { c._seen = 0; try { c.close(); } catch (e) {} drop(c); } }
       else if (st.host) { for (const c of st.conns.values()) if (c.open) { try { c.send({ t: 'ping' }); } catch (e) {} } for (const w of (st.watch || new Map()).values()) if (w.conn.open) { try { w.conn.send({ t: 'ping' }); } catch (e) {} } }
       else clearInterval(pingT);
     }, 10000);
@@ -9511,6 +9556,8 @@ const Net = (() => {
       }
       case 'nHand': if (!handOver()) stop(); closeOv(); goHome(); break;
       case 'nStopAll': stop(); closeOv(); goHome(); break;
+      // the host leaves: the table goes on with another player as host (or closes when nobody else is there)
+      case 'nHostLeave': { const h = hoCandidate(true); if (h) askYes(T('Leave the table? {0} will host it and the others go on playing.', h.name), () => { handOver(true); closeOv(); goHome(); }); else askYes(T('Nobody else is at the table — leaving closes it. Leave?'), () => { stop(); closeOv(); goHome(); }); break; }
       case 'nLeave': if (ui.overlay === 'net') { leave(); closeOv(); } else askYes(T('Leave the table?'), () => { leave(); closeOv(); }); break;
       case 'nRst': resetScore(); break;
       case 'nRstQ': send({ t: 'rsreq' }); flash(T('Ask to reset the score') + ' ✓', 1500); break;

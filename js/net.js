@@ -426,7 +426,7 @@ const Net = (() => {
     for (const m of (st.lchat || [])) if (Date.now() - m.ts < 6 * 3600e3) out.set(nameKey(m.from), m.from);
     // players whose app answered lately and still has an open lobby line
     const lines = st.mesh || new Map();
-    for (const k in (st.present || {})) { const p = st.present[k], c = lines.get(ROOM(p.k)); if (Date.now() - p.ts < 15 * 60e3 && (!c || c.open)) out.set(k, p.name); }
+    for (const k in (st.present || {})) { const p = st.present[k], c = lines.get(ROOM(p.k)); if (Date.now() - p.ts < 3 * 60e3 && (!c || c.open)) out.set(k, p.name); }
     out.delete(me); out.delete(nameKey('Player'));
     return [...out.values()].sort((a, b) => a.localeCompare(b));
   }
@@ -436,6 +436,8 @@ const Net = (() => {
   function onLobbyData(conn, d) {
     if (d.t === 'inforeq' || (d.t === 'info' && d.k == null)) { try { conn.send(tableInfo()); } catch (e) {} meshAdd(conn); return true; }
     if (d.t === 'info') { gotInfo(d); return true; }
+    // an app was closed: it leaves the lobby lists at once (it comes back with the next scan if it was only reloaded)
+    if (d.t === 'gone') { const k = nameKey(d.host || ''); if (k && st.present) delete st.present[k]; if (k && st.roomOf) delete st.roomOf[k]; if (d.k) st.tables = (st.tables || []).filter(t => t.k !== d.k); if (st.cloud && st.cloud.on) st.cloud.on = st.cloud.on.filter(x => nameKey(x.name) !== k); renderL(); render(); return true; }
     if (d.t === 'lchat') { addL(d.m); return true; }
     if (d.t === 'lhist') { (d.list || []).forEach(m => addL(m, true)); renderL(); return true; }
     if (d.t === 'tblinv') { gotTableInvite(d); return true; }
@@ -447,6 +449,7 @@ const Net = (() => {
   }
   function onSlotData(conn, d) {
     if (!d || !d.t) return;
+    conn._seen = Date.now();
     if (onLobbyData(conn, d)) return;
     if (d.t === 'hello' && st.guest) { try { conn.send({ t: 'declined' }); } catch (e) {} return; }   // sitting at someone else's table
     onHostData(conn, d);
@@ -628,6 +631,13 @@ const Net = (() => {
     return out;
   }
   setInterval(() => Cloud.beat(), 60e3); setTimeout(() => Cloud.beat(), 3000);
+  // the app is closed (or reloaded): tell the lobby at once and take this player off the online list
+  window.addEventListener('pagehide', () => {
+    const name = myName(); if (!name) return;
+    const msg = { t: 'gone', k: st.slot ? st.slot.k : 0, host: name };
+    for (const c of (st.mesh || new Map()).values()) { try { if (c.open) c.send(msg); } catch (e) {} }
+    if (Cloud.on && SET.pinH) { try { fetch(DB_URL + '/online/' + fbKey(name) + '.json', { method: 'DELETE', keepalive: true }); } catch (e) {} }
+  });
   // the real administrator: Servet, with the PIN checked
   const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
   const loginsToday = () => st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1;
@@ -1039,8 +1049,8 @@ const Net = (() => {
   /* ---- when the host leaves during a board, the table can go on: the board (with every hand) goes to one player,
      who opens the table at their own address; the others are told to reconnect there, and robots play their seats
      until they are back. The guests' addresses are learnt when they sit down (hello). ---- */
-  function hoCandidate() {
-    if (!st.host || !G || ['lobby', 'idle'].includes(G.phase) || G.tour) return null;
+  function hoCandidate(any) {   // any: also between boards (the host leaves the table)
+    if (!st.host || !G || G.phase === 'idle' || (!any && G.phase === 'lobby') || G.tour) return null;
     const ks = st.ks || {}, toks = st.toks || {};
     for (const s of [0, 1, 2, 3]) {
       const id = st.seats[s]; if (!id || id === 'host' || (st.away && st.away[s])) continue;
@@ -1049,8 +1059,8 @@ const Net = (() => {
     }
     return null;
   }
-  function handOver() {
-    const h = hoCandidate(); if (!h) return false;
+  function handOver(any) {
+    const h = hoCandidate(any); if (!h) return false;
     const hs = +Object.keys(st.seats).find(k => st.seats[k] === 'host'), names = { ...st.names }, toks = { ...(st.toks || {}) };
     delete names[hs]; delete toks[hs];   // the host's seat: a robot plays it
     const code = 'room-' + h.k, from = st.names[hs] || myName() || 'Host';
@@ -1208,9 +1218,11 @@ const Net = (() => {
   function ping() {
     clearInterval(pingT);
     pingT = setInterval(() => {
-      // the host pings every 10 s: 30 s of silence means its app is gone (a closed app does not always close the line)
-      if (st.guest && st.conn && st.lastHost && Date.now() - st.lastHost > 30000 && !st.reconnecting) { const c = st.conn; st.lastHost = 0; try { c.close(); } catch (e) {} if (st.conn === c) lost(); return; }
+      // the host pings every 10 s: 45 s of silence means its app is gone (a closed app does not always close the line)
+      if (st.guest && st.conn && st.lastHost && Date.now() - st.lastHost > 45000 && !st.reconnecting) { const c = st.conn; st.lastHost = 0; try { c.close(); } catch (e) {} if (st.conn === c) lost(); return; }
       if (st.guest) { if (st.conn && st.conn.open) { try { st.conn.send({ t: 'ping' }); } catch (e) {} } }
+      // a player or spectator silent for 45 s has closed the app or lost the network: a robot takes over the seat
+      if (st.host) { const now = Date.now(); for (const c of [...st.conns.values(), ...[...(st.watch || new Map()).values()].map(w => w.conn)]) if (c._seen && now - c._seen > 45000) { c._seen = 0; try { c.close(); } catch (e) {} drop(c); } }
       else if (st.host) { for (const c of st.conns.values()) if (c.open) { try { c.send({ t: 'ping' }); } catch (e) {} } for (const w of (st.watch || new Map()).values()) if (w.conn.open) { try { w.conn.send({ t: 'ping' }); } catch (e) {} } }
       else clearInterval(pingT);
     }, 10000);
@@ -1422,6 +1434,8 @@ const Net = (() => {
       }
       case 'nHand': if (!handOver()) stop(); closeOv(); goHome(); break;
       case 'nStopAll': stop(); closeOv(); goHome(); break;
+      // the host leaves: the table goes on with another player as host (or closes when nobody else is there)
+      case 'nHostLeave': { const h = hoCandidate(true); if (h) askYes(T('Leave the table? {0} will host it and the others go on playing.', h.name), () => { handOver(true); closeOv(); goHome(); }); else askYes(T('Nobody else is at the table — leaving closes it. Leave?'), () => { stop(); closeOv(); goHome(); }); break; }
       case 'nLeave': if (ui.overlay === 'net') { leave(); closeOv(); } else askYes(T('Leave the table?'), () => { leave(); closeOv(); }); break;
       case 'nRst': resetScore(); break;
       case 'nRstQ': send({ t: 'rsreq' }); flash(T('Ask to reset the score') + ' ✓', 1500); break;

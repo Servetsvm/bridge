@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Leave the table? {0} will host it and the others go on playing.": "Masadan ayrılmak istiyor musun? Masayı {0} devralır, diğerleri oynamaya devam eder.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Masada başka oyuncu yok — ayrılırsan masa kapanır. Ayrılmak istiyor musun?",
     "Close it for everyone": "Herkes için kapat",
     "Hand the table to {0}": "Masayı {0} oyuncusuna devret",
     "The host left and the table could not be moved.": "Masa sahibi ayrıldı, masa taşınamadı.",
@@ -146,6 +148,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Leave the table? {0} will host it and the others go on playing.": "Forlate bordet? {0} overtar det og de andre spiller videre.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Ingen andre ved bordet — går du, stenges det. Gå?",
     "Close it for everyone": "Steng det for alle",
     "Hand the table to {0}": "Gi bordet til {0}",
     "The host left and the table could not be moved.": "Verten gikk, og bordet kunne ikke flyttes.",
@@ -289,6 +293,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Leave the table? {0} will host it and the others go on playing.": "¿Dejar la mesa? {0} la llevará y los demás seguirán jugando.",
+    "Nobody else is at the table — leaving closes it. Leave?": "No hay nadie más en la mesa: si te vas, se cierra. ¿Salir?",
     "Close it for everyone": "Cerrarla para todos",
     "Hand the table to {0}": "Pasar la mesa a {0}",
     "The host left and the table could not be moved.": "El anfitrión se fue y no se pudo trasladar la mesa.",
@@ -460,6 +466,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Leave the table? {0} will host it and the others go on playing.": "Quitter la table ? {0} la reprend et les autres continuent.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Personne d'autre à la table — partir la ferme. Partir ?",
     "Close it for everyone": "La fermer pour tous",
     "Hand the table to {0}": "Confier la table à {0}",
     "The host left and the table could not be moved.": "L'hôte est parti et la table n'a pas pu être déplacée.",
@@ -631,6 +639,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Leave the table? {0} will host it and the others go on playing.": "Lasciare il tavolo? Lo prende {0} e gli altri continuano.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Al tavolo non c'è nessun altro — uscendo si chiude. Uscire?",
     "Close it for everyone": "Chiudilo per tutti",
     "Hand the table to {0}": "Passa il tavolo a {0}",
     "The host left and the table could not be moved.": "L'host è uscito e il tavolo non è stato spostato.",
@@ -802,6 +812,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Leave the table? {0} will host it and the others go on playing.": "Tisch verlassen? {0} übernimmt ihn und die anderen spielen weiter.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Sonst ist niemand am Tisch — wenn du gehst, wird er geschlossen. Gehen?",
     "Close it for everyone": "Für alle schließen",
     "Hand the table to {0}": "Tisch an {0} übergeben",
     "The host left and the table could not be moved.": "Der Gastgeber ist gegangen, der Tisch konnte nicht umziehen.",
@@ -973,6 +985,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Leave the table? {0} will host it and the others go on playing.": "Покинуть стол? Его возьмёт {0}, остальные продолжат.",
+    "Nobody else is at the table — leaving closes it. Leave?": "За столом больше никого — если уйти, он закроется. Уйти?",
     "Close it for everyone": "Закрыть для всех",
     "Hand the table to {0}": "Передать стол игроку {0}",
     "The host left and the table could not be moved.": "Хозяин ушёл, перенести стол не удалось.",
@@ -1144,6 +1158,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Leave the table? {0} will host it and the others go on playing.": "Opuścić stół? Przejmie go {0}, a pozostali grają dalej.",
+    "Nobody else is at the table — leaving closes it. Leave?": "Przy stole nikogo więcej — wyjście go zamknie. Wyjść?",
     "Close it for everyone": "Zamknij dla wszystkich",
     "Hand the table to {0}": "Przekaż stół graczowi {0}",
     "The host left and the table could not be moved.": "Gospodarz wyszedł i stołu nie udało się przenieść.",
@@ -1315,6 +1331,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Leave the table? {0} will host it and the others go on playing.": "离开牌桌?{0} 将接管,其他人继续打。",
+    "Nobody else is at the table — leaving closes it. Leave?": "牌桌上没有其他人——离开会关闭牌桌。要离开吗?",
     "Close it for everyone": "为所有人关闭",
     "Hand the table to {0}": "把牌桌交给 {0}",
     "The host left and the table could not be moved.": "桌主离开了,牌桌无法转移。",
