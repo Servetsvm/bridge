@@ -742,8 +742,6 @@ function aiPlay(g, seat, opt) {
   return heurPlay(g, seat);
 }
 
-/* after the board: every card our side played is checked double dummy against the other legal cards. A card that
-   gave away tricks is reported with the best card instead (trick number, seat, played, better, tricks lost). */
 /* the opening lead: how many tricks the defence takes after each card the leader could lead (double dummy).
    One solve gives the defence's best; every lead then starts its search there, and touching cards (K Q, J 10 9) share a value.
    each(card, value) is told every result as it comes. */
@@ -760,6 +758,8 @@ function leadValues(deal, c, limit, each) {
   }
   return out;
 }
+/* after the board: every card our side played is checked double dummy against the other legal cards. A card that
+   gave away tricks is reported with the best card instead (trick number, seat, played, better, tricks lost). */
 function analysePlay(deal, c, pl, seats, limit) {
   const hands = deal.map(h => h.slice()), trump = c.strain < 4 ? c.strain : -1, out = [], lim = limit || 3e6;
   DD.trump = trump;

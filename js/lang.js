@@ -3,6 +3,9 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Opponent robots": "Rakip robotlar",
+    "Medium": "Orta",
+    "Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.": "Yalnızca robotlarla tek başına oynarken; ortağın her zaman en iyisini oynar. Turnuvalarda ve online masalarda robotlar hep uzmandır.",
     "What do you open?": "Ne açarsın?",
     "Partner opened. What do you answer?": "Ortağın açtı. Ne cevap verirsin?",
     "What do you lead?": "Hangi kartla atak yaparsın?",
@@ -121,6 +124,9 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Opponent robots": "Motstander-roboter",
+    "Medium": "Middels",
+    "Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.": "Bare når du spiller alene med roboter; makker spiller alltid sitt beste. Turneringer og nettbord bruker alltid ekspert-roboter.",
     "What do you open?": "Hva åpner du med?",
     "Partner opened. What do you answer?": "Makker åpnet. Hva svarer du?",
     "What do you lead?": "Hva spiller du ut?",
@@ -239,6 +245,9 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Opponent robots": "Robots rivales",
+    "Medium": "Medio",
+    "Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.": "Solo cuando juegas solo con robots; tu compañero siempre juega lo mejor. En torneos y mesas online los robots son siempre expertos.",
     "What do you open?": "¿Qué abres?",
     "Partner opened. What do you answer?": "Tu compañero abrió. ¿Qué respondes?",
     "What do you lead?": "¿Qué sales?",
@@ -385,6 +394,9 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Opponent robots": "Robots adverses",
+    "Medium": "Moyen",
+    "Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.": "Seulement quand vous jouez seul avec les robots ; votre partenaire joue toujours au mieux. Tournois et tables en ligne : robots experts.",
     "What do you open?": "Qu'ouvrez-vous ?",
     "Partner opened. What do you answer?": "Votre partenaire a ouvert. Que répondez-vous ?",
     "What do you lead?": "Qu'entamez-vous ?",
@@ -531,6 +543,9 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Opponent robots": "Robot avversari",
+    "Medium": "Medio",
+    "Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.": "Solo quando giochi da solo con i robot; il compagno gioca sempre al meglio. Nei tornei e ai tavoli online i robot sono sempre esperti.",
     "What do you open?": "Che cosa apri?",
     "Partner opened. What do you answer?": "Il compagno ha aperto. Che cosa rispondi?",
     "What do you lead?": "Che cosa attacchi?",
@@ -677,6 +692,9 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Opponent robots": "Gegner-Roboter",
+    "Medium": "Mittel",
+    "Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.": "Nur wenn du allein mit Robotern spielst; dein Partner spielt immer sein Bestes. Turniere und Online-Tische nutzen immer Experten-Roboter.",
     "What do you open?": "Was eröffnest du?",
     "Partner opened. What do you answer?": "Partner hat eröffnet. Was antwortest du?",
     "What do you lead?": "Was spielst du aus?",
@@ -823,6 +841,9 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Opponent robots": "Роботы-соперники",
+    "Medium": "Средний",
+    "Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.": "Только когда вы играете один с роботами; партнёр всегда играет лучше всего. В турнирах и за онлайн-столами роботы всегда эксперты.",
     "What do you open?": "Чем вы открываете?",
     "Partner opened. What do you answer?": "Партнёр открыл. Что вы отвечаете?",
     "What do you lead?": "С какой карты вы ходите?",
@@ -969,6 +990,9 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Opponent robots": "Roboty przeciwników",
+    "Medium": "Średni",
+    "Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.": "Tylko gdy grasz sam z robotami; partner zawsze gra najlepiej. W turniejach i przy stołach online roboty są zawsze ekspertami.",
     "What do you open?": "Czym otwierasz?",
     "Partner opened. What do you answer?": "Partner otworzył. Co odpowiadasz?",
     "What do you lead?": "Co wistujesz?",
@@ -1115,6 +1139,9 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Opponent robots": "对手机器人",
+    "Medium": "中等",
+    "Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.": "仅在你独自与机器人对打时有效;同伴始终打出最佳。比赛和在线牌桌始终使用专家机器人。",
     "What do you open?": "你开叫什么?",
     "Partner opened. What do you answer?": "同伴开叫了。你怎么应叫?",
     "What do you lead?": "你首攻哪张牌?",

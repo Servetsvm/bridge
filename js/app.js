@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 130;
+const APP_V = 131;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -368,7 +368,7 @@ function tick() {
       const t = g.turn, left = g.hands[t].length;
       // a robot side about to lead may claim the rest (asked once per trick, near the end of the board)
       const mayClaim = !g.trick.length && g.rcl !== g.history.length && robot(pd(t)) && left >= 2 && left <= 8;
-      timer = setTimeout(async () => { if (mayClaim && await robotClaim(g, t)) return; if (G && G.play === g && g.turn === t) playCard(t, E.aiPlay(g, t)); }, delay());
+      timer = setTimeout(async () => { if (mayClaim && await robotClaim(g, t)) return; if (G && G.play === g && g.turn === t) playCard(t, robotCard(g, t)); }, delay());
     }
     else if (!userControls(g.turn)) { /* a friend is to play */ }
     else { const leg = E.legalFor(g, g.turn); if (leg.length === 1 && g.trick.length > 0 && SET.auto) timer = setTimeout(() => playCard(g.turn, leg[0]), 450); }
@@ -1511,6 +1511,14 @@ function showAuction() {
   if (!G.auction.length) return;
   openOv('auc', `<h2>${T('Auction')}</h2><div class="auction">${auctionTable(G.auction, false)}</div><div class="expl">${explHtml(ui.lastExpl != null ? G.auction[ui.lastExpl] : null)}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+/* opponent robots by level (only when you play alone with robots): a beginner looks less far ahead and sometimes plays a careless card */
+function robotCard(g, t) {
+  const lv = SET.robotLvl || 'expert';
+  if (lv === 'expert' || online() || G.tour || G.tprac || sideOf(t) === sideOf(U())) return E.aiPlay(g, t);
+  if (lv === 'mid') return E.aiPlay(g, t, { budget: 250, maxSamples: 12, ddTricks: 6 });
+  const leg = E.legalFor(g, t);
+  return Math.random() < 0.25 ? leg[Math.floor(Math.random() * leg.length)] : E.aiPlay(g, t, { budget: 40, maxSamples: 3, ddTricks: 2 });
+}
 function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
@@ -1522,6 +1530,7 @@ function showSettings() {
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
    <div class="grp"><span>${T('Scoring')}</span>${seg('mode', [['IMP', 'IMP'], ['MP', T('Matchpoints (%)')]], SET.mode)}</div>
    <div class="grp"><span>${T("Opponents' system")}</span>${seg('opp', [['same', T('Same as ours')], ['sayc', T('Standard (SAYC)')]], SET.opp)}</div>
+   <div class="grp"><span>${T('Opponent robots')}</span>${seg('rlvl', [['easy', '🙂 ' + T('Beginner')], ['mid', '😐 ' + T('Medium')], ['expert', '😈 ' + T('Expert')]], SET.robotLvl || 'expert')}<div class="muted">${T('Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.')}</div></div>
    <div class="grp"><span>${T('Robot speed')}</span>${seg('speed', [[0, T('Slow')], [1, T('Normal')], [2, T('Fast')]], SET.speed)}</div>
    <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
    <div class="grp"><span>${T('Play a forced card automatically')}</span>${seg('auto', [[1, T('On')], [0, T('Off')]], SET.auto ? 1 : 0)}</div>
@@ -1822,7 +1831,7 @@ document.addEventListener('click', ev_ => {
     if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
-    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
+    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'rlvl') SET.robotLvl = v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
     if (seg === 'alert') { SET.alert = v; if (v !== 'off') beep(); }
     if (seg === 'notify') { setNotify(v === '1'); return; }
     if (seg === 'four') SET.four = v === '1'; if (seg === 'felt') SET.felt = v; if (seg === 'back') SET.back = v;
