@@ -7207,14 +7207,24 @@ const Net = (() => {
           st.claimed = true;
         }
         await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof() });
-        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now() }); st.loggedDay = today(); }
-        const [on, users, logins] = await Promise.all([Cloud.get('online'), Cloud.get('users?shallow=true'), isAdmin() ? Cloud.get('logins/' + today() + '?shallow=true') : null]);
-        st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: Object.keys(users || {}).length, logins: logins ? Object.keys(logins).length : null };
+        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ip: await ipTag() }); st.loggedDay = today(); }
+        const [on, users, logins] = await Promise.all([Cloud.get('online'), Cloud.get('users?shallow=true'), isAdmin() ? Cloud.get('logins/' + today()) : null]);
+        st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: Object.keys(users || {}).length, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
         renderL();
       } catch (e) {}
     },
   };
+  /* today's logins are counted once per internet address (several names from the same place count once). The address
+     comes from ipify; only a short one-way code of it is stored, never the address itself. */
+  async function ipTag() {
+    try {
+      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 5000);
+      const { ip } = await (await fetch('https://api.ipify.org?format=json', { signal: ctl.signal })).json();
+      const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('bridge-ip:' + ip));
+      return [...new Uint8Array(h)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join('');
+    } catch (e) { return null; }
+  }
   setInterval(() => Cloud.beat(), 60e3); setTimeout(() => Cloud.beat(), 3000);
   // the real administrator: Servet, with the PIN checked
   const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
