@@ -633,7 +633,7 @@ function renderTable() {
     if (r === 0) { el.innerHTML = fanHtml(seat, 78) + seatLabel(seat); continue; }
     let inner = '';
     // dummy opposite you is laid out as on a real table: one column per suit
-    if (isVisible(seat)) inner = r === 2 ? (G.phase === 'play' && seat === G.play.dummy ? dummyCols(seat) : fanHtml(seat, 78)) : vHand(seat);
+    if (isVisible(seat)) inner = r === 2 ? fanHtml(seat, 78) : vHand(seat);   // your partner's dummy opposite: a fan like your own hand, easy to pick from
     else if (G.phase === 'play') inner = backs(G.play.hands[seat].length);
     el.innerHTML = seatLabel(seat) + inner;
   }
