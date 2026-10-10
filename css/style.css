@@ -955,3 +955,8 @@ textarea.pconv{font-size:12.5px;min-height:0}
   body.classic .mini i{font-size:21px}
   .vh{gap:3px}
 }
+/* big screens: East and West cards bigger still */
+@media (min-width:1200px) and (min-height:800px){
+  body.classic .mini{width:40px;height:66px;margin-left:-10px;font-size:22px}
+  body.classic .mini i{font-size:25px}
+}
