@@ -557,6 +557,7 @@ function renderBar() {
      ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
      <span class="menuwrap">${(n => `<button class="btn${n ? " gold" : ""}" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰${n ? `<span class="cbn">${n}</span>` : ""}</button>`)(typeof Net !== "undefined" ? (Net.st.unread || 0) + (Net.st.lunread || 0) : 0)}${ui.menu ? `<div class="menu" role="menu">
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
+       <span class="zrow"><button class="btn" id="bZoomOut" title="${T('Smaller')}">🔍−</button><b>${Math.round((SET.zoom || 1) * 100)}%</b><button class="btn" id="bZoomIn" title="${T('Larger')}">🔍+</button></span>
        <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
        <button class="btn" id="bHist">📜 ${T('History')}</button>
        <button class="btn" id="bRes">📊 ${T('Results')}</button>
@@ -740,8 +741,8 @@ function renderDock() {
   if (d.dataset.key !== key) {
     d.dataset.key = key;
     const tabs = tbl ? `<div class="dtabs"><button data-dtab="table" class="${tab === 'table' ? 'on' : ''}">${T('Table')} <span id="dTn"></span></button><button data-dtab="lobby" class="${tab === 'lobby' ? 'on' : ''}">${T('Lobby')} <span id="dLn"></span></button></div>` : `<b>💬 ${T('Lobby chat')}</b>`;
-    d.innerHTML = `<div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div>
-      <div class="${tab === 'table' ? 'dbody' : 'lsplit dsplit'}">${tab === 'table' ? '' : '<div class="lplayers" id="dPlayers"></div>'}<div class="lcol"><div class="lmsgs" id="dList"></div>
+    d.innerHTML = `<div class="grip gripx" data-grip="dockw" title="${T('Drag to resize')}"></div><div class="dhead">${tabs}<span class="dbtns"><button class="btn mini-btn" id="dClear" title="${T('Clear the chat')}">🗑</button><button class="btn mini-btn dclose" id="dClose">✕</button></span></div>
+      <div class="${tab === 'table' ? 'dbody' : 'lsplit dsplit'}">${tab === 'table' ? '' : `<div class="lplayers" id="dPlayers"></div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div>`}<div class="lcol"><div class="lmsgs" id="dList"></div>
       ${tab === 'table' ? `<div class="quick">${Net.QUICK.map(q => `<button data-dq="${esc(T(q))}">${esc(T(q))}</button>`).join('')}</div>` : ''}
       <div class="pmto" id="dPmTo"></div>
       <div class="row2"><input class="tok" id="dMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="dSend">${T('Send')}</button></div></div></div>`;
@@ -827,6 +828,7 @@ function applyLook() {
   const dark = SET.theme === 'dark' || (SET.theme !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.body.classList.toggle('bigcards', !!SET.big);
+  document.documentElement.style.setProperty('--zoom', SET.zoom || 1);
 }
 try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyLook()); } catch (e) {}
 // browsers only allow sound after a tap: unlock it on the first one
@@ -864,7 +866,7 @@ function homeShell() {
       <div id="hPend"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
-    <aside class="hcard hchat"><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers" id="hPlayers"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
+    <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers" id="hPlayers"></div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
       <div class="row2"><input class="tok" id="lMsg" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend">${T('Send')}</button></div></div></div></aside>
   </div><div id="hSheet"></div></div>`;
 }
@@ -872,7 +874,7 @@ function homeShell() {
 function homeSection(k) {
   if (k === 'tours') return `<div class="hcard"><h3>🏆 ${T('Tournaments')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hTours"></div></div>`;
   if (k === 'conv') return `<div class="hcard"><h3>📋 ${T('Our convention card (with partner)')}<button class="btn mini-btn" data-hsec="">✕</button></h3><div id="hConv"></div></div>`;
-  if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lsplit"><div class="lplayers" id="pPlayers"></div><div class="lcol"><div class="lmsgs" id="pChat"></div><div class="pmto" id="pPmTo"></div>
+  if (k === 'chat') return `<div class="hcard pchat"><h3>💬 ${T('Lobby chat')} <small id="pCount"></small><button class="btn mini-btn" data-hsec="">✕</button><button class="btn mini-btn" id="lClear">🗑</button></h3><div class="lsplit"><div class="lplayers" id="pPlayers"></div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="pChat"></div><div class="pmto" id="pPmTo"></div>
     <div class="row2"><input class="tok" id="lMsg2" maxlength="200" placeholder="${T('Write a message…')}"><button class="btn gold" id="lSend2">${T('Send')}</button></div></div></div></div>`;
   return '';
 }
@@ -1344,6 +1346,8 @@ function openOv(name, html) {
   ui.overlay = name; ov.classList.toggle("float", fl);
   ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}">${fl ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
   ov.hidden = false;
+  if (fl && typeof SIZES !== "undefined" && SIZES.fw) { const s = ov.firstChild; s.style.width = SIZES.fw + "px"; s.style.height = SIZES.fh + "px"; }
+  if (fl && typeof ResizeObserver !== "undefined") { try { (ui.fro || (ui.fro = new ResizeObserver(L => { for (const x of L) if (x.target.isConnected && $("ov").classList.contains("float")) { SIZES.fw = Math.round(x.target.offsetWidth); SIZES.fh = Math.round(x.target.offsetHeight); saveSizes(); } }))).observe(ov.firstChild); } catch (e) {} }
   if (fl && ui.fpos) { const s = ov.firstChild; s.style.left = ui.fpos.x + "px"; s.style.top = ui.fpos.y + "px"; s.style.right = "auto"; }
 }
 function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no way past the name and PIN
@@ -1740,6 +1744,7 @@ document.addEventListener('click', ev_ => {
     case "oReplay": replayDeal(); break;
     case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
+    case "bZoomIn": case "bZoomOut": { SET.zoom = Math.round(Math.max(0.6, Math.min(1.6, (SET.zoom || 1) + (t.id === "bZoomIn" ? 0.1 : -0.1))) * 10) / 10; Store.saveSettings(SET); save(); applyLook(); ui.menu = true; render(); break; }
     case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), () => {
       if (online()) { flash(T('Close the online table first'), 2000); return; }
       try { localStorage.removeItem('bridge-table-name'); } catch (e) {}
@@ -1892,4 +1897,29 @@ document.addEventListener('pointerdown', e => {
   };
   const up = () => { bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', up); };
   bar.addEventListener('pointermove', move); bar.addEventListener('pointerup', up);
+});
+/* sizes you set by dragging: the lobby chat column, the chat panel at the table, the players list beside the chat and
+   the small card window; kept on this device */
+const SIZES = (() => { try { return JSON.parse(localStorage.getItem('bridge-sizes') || '{}') || {}; } catch (e) { return {}; } })();
+function applySizes() {
+  const r = document.documentElement.style;
+  if (SIZES.chatw) r.setProperty('--chatw', SIZES.chatw + 'px');
+  if (SIZES.dockw) r.setProperty('--dockw', SIZES.dockw + 'px');
+  if (SIZES.plw) r.setProperty('--plw', SIZES.plw + 'px');
+}
+applySizes();
+const saveSizes = () => { try { localStorage.setItem('bridge-sizes', JSON.stringify(SIZES)); } catch (e) {} };
+document.addEventListener('pointerdown', e => {
+  const g = e.target.closest('[data-grip]'); if (!g) return;
+  e.preventDefault(); g.setPointerCapture(e.pointerId); g.classList.add('drag');
+  const k = g.dataset.grip, box = g.parentElement;
+  const move = ev => {
+    const R = box.getBoundingClientRect();
+    if (k === 'chatw') SIZES.chatw = Math.round(Math.max(300, Math.min(Math.min(900, innerWidth - 420), R.right - ev.clientX)));
+    else if (k === 'dockw') SIZES.dockw = Math.round(Math.max(280, Math.min(Math.min(900, innerWidth - 480), R.right - ev.clientX)));
+    else if (k === 'plw') SIZES.plw = Math.round(Math.max(80, Math.min(R.width - 150, ev.clientX - R.left)));
+    applySizes(); layoutFans();
+  };
+  const up = () => { g.classList.remove('drag'); g.removeEventListener('pointermove', move); g.removeEventListener('pointerup', up); saveSizes(); if (G && G.phase !== 'idle') render(); };
+  g.addEventListener('pointermove', move); g.addEventListener('pointerup', up);
 });

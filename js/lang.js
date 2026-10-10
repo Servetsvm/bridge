@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Drag to resize": "Boyutlandırmak için sürükle", "Smaller": "Küçült", "Larger": "Büyüt",
     "Drag to move": "Taşımak için sürükle",
     "Close this tournament for everyone?": "Bu turnuva herkes için kapatılsın mı?", "Log out": "Çıkış yap", "Log out? You can sign in again with your name and PIN, or choose another name.": "Çıkış yapılsın mı? Adın ve PIN’inle tekrar girebilir ya da başka bir ad seçebilirsin.", "The robots do not accept an undo": "Robotlar geri almayı kabul etmiyor",
     "Day / night": "Gündüz / gece", "Day": "Gündüz", "Night": "Gece",
@@ -93,6 +94,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Drag to resize": "Dra for å endre størrelse", "Smaller": "Mindre", "Larger": "Større",
     "Drag to move": "Dra for å flytte",
     "Close this tournament for everyone?": "Lukke denne turneringen for alle?", "Log out": "Logg ut", "Log out? You can sign in again with your name and PIN, or choose another name.": "Logge ut? Du kan logge inn igjen med navn og PIN, eller velge et annet navn.", "The robots do not accept an undo": "Robotene godtar ikke angring",
     "Day / night": "Dag / natt", "Day": "Dag", "Night": "Natt",
@@ -183,6 +185,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Drag to resize": "Arrastra para cambiar el tamaño", "Smaller": "Más pequeño", "Larger": "Más grande",
     "Drag to move": "Arrastra para mover",
     "Close this tournament for everyone?": "¿Cerrar este torneo para todos?", "Log out": "Cerrar sesión", "Log out? You can sign in again with your name and PIN, or choose another name.": "¿Cerrar sesión? Puedes volver a entrar con tu nombre y PIN, o elegir otro nombre.", "The robots do not accept an undo": "Los robots no aceptan deshacer",
     "Day / night": "Día / noche", "Day": "Día", "Night": "Noche",
@@ -301,6 +304,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Drag to resize": "Faites glisser pour redimensionner", "Smaller": "Plus petit", "Larger": "Plus grand",
     "Drag to move": "Faites glisser pour déplacer",
     "Close this tournament for everyone?": "Fermer ce tournoi pour tout le monde ?", "Log out": "Se déconnecter", "Log out? You can sign in again with your name and PIN, or choose another name.": "Se déconnecter ? Vous pourrez revenir avec votre nom et votre PIN, ou choisir un autre nom.", "The robots do not accept an undo": "Les robots n’acceptent pas d’annulation",
     "Day / night": "Jour / nuit", "Day": "Jour", "Night": "Nuit",
@@ -419,6 +423,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Drag to resize": "Trascina per ridimensionare", "Smaller": "Più piccolo", "Larger": "Più grande",
     "Drag to move": "Trascina per spostare",
     "Close this tournament for everyone?": "Chiudere questo torneo per tutti?", "Log out": "Esci", "Log out? You can sign in again with your name and PIN, or choose another name.": "Uscire? Potrai rientrare con nome e PIN, o scegliere un altro nome.", "The robots do not accept an undo": "I robot non accettano l’annullamento",
     "Day / night": "Giorno / notte", "Day": "Giorno", "Night": "Notte",
@@ -537,6 +542,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Drag to resize": "Zum Ändern der Größe ziehen", "Smaller": "Kleiner", "Larger": "Größer",
     "Drag to move": "Zum Verschieben ziehen",
     "Close this tournament for everyone?": "Dieses Turnier für alle schließen?", "Log out": "Abmelden", "Log out? You can sign in again with your name and PIN, or choose another name.": "Abmelden? Du kannst dich mit Name und PIN wieder anmelden oder einen anderen Namen wählen.", "The robots do not accept an undo": "Die Roboter akzeptieren kein Zurücknehmen",
     "Day / night": "Tag / Nacht", "Day": "Tag", "Night": "Nacht",
@@ -655,6 +661,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Drag to resize": "Потяните, чтобы изменить размер", "Smaller": "Меньше", "Larger": "Больше",
     "Drag to move": "Перетащите, чтобы сдвинуть",
     "Close this tournament for everyone?": "Закрыть этот турнир для всех?", "Log out": "Выйти", "Log out? You can sign in again with your name and PIN, or choose another name.": "Выйти? Вы сможете снова войти с именем и PIN или выбрать другое имя.", "The robots do not accept an undo": "Роботы не принимают отмену хода",
     "Day / night": "День / ночь", "Day": "День", "Night": "Ночь",
@@ -773,6 +780,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Drag to resize": "Przeciągnij, aby zmienić rozmiar", "Smaller": "Mniejszy", "Larger": "Większy",
     "Drag to move": "Przeciągnij, aby przesunąć",
     "Close this tournament for everyone?": "Zamknąć ten turniej dla wszystkich?", "Log out": "Wyloguj", "Log out? You can sign in again with your name and PIN, or choose another name.": "Wylogować? Możesz wrócić z imieniem i PIN-em albo wybrać inne imię.", "The robots do not accept an undo": "Roboty nie akceptują cofnięcia",
     "Day / night": "Dzień / noc", "Day": "Dzień", "Night": "Noc",
@@ -891,6 +899,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Drag to resize": "拖动以调整大小", "Smaller": "缩小", "Larger": "放大",
     "Drag to move": "拖动以移动",
     "Close this tournament for everyone?": "为所有人关闭这个比赛?", "Log out": "退出登录", "Log out? You can sign in again with your name and PIN, or choose another name.": "退出登录?你可以用名字和 PIN 重新登录,或换一个名字。", "The robots do not accept an undo": "机器人不接受撤回",
     "Day / night": "日间 / 夜间", "Day": "日间", "Night": "夜间",

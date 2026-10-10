@@ -855,3 +855,21 @@ textarea.pconv{font-size:12.5px;min-height:0}
 .pcard .row2{gap:6px;flex-wrap:wrap}
 .pcard .row2 .btn{padding:6px 9px;font-size:13px}
 .pcard .row2 .btn{flex:1 1 auto;white-space:nowrap}
+/* ---- windows you can resize: drag the edge of the lobby chat or of the chat panel at the table, the line between
+   the players and the messages, or the lower right corner of a card window ---- */
+:root{--chatw:470px;--dockw:420px;--plw:33%}
+@media (min-width:901px){ .hgrid{grid-template-columns:minmax(0,1fr) var(--chatw)} }
+@media (min-width:1100px){ #dock{width:var(--dockw)} body.withdock #app{margin:0 calc(var(--dockw) + 30px) 0 auto} }
+.grip{touch-action:none;user-select:none}
+.grip.gripx{position:absolute;left:-7px;top:12px;bottom:12px;width:12px;cursor:ew-resize;z-index:5;border-radius:6px}
+.grip.gripc{cursor:col-resize;border-radius:4px;align-self:stretch;margin-bottom:8px}
+.grip:hover,.grip.drag{background:rgba(201,162,39,.45)}
+.lsplit,#dock .dsplit{grid-template-columns:minmax(80px,var(--plw)) 8px minmax(0,1fr);gap:0}
+#dock .dsplit .grip.gripc{margin-bottom:0}
+@media (max-width:900px){ .hchat .gripx{display:none} }
+@media (max-width:1099px){ #dock .gripx{display:none} }
+.ov.float .sheet{resize:both;overflow:auto;min-width:260px;min-height:160px;max-height:none;max-width:90vw}
+/* the table's zoom (☰ menu) */
+body:not(.athome) #app{zoom:var(--zoom,1)}
+.zrow{display:flex;align-items:center;gap:6px;justify-content:space-between}
+.zrow b{font-size:13px;min-width:44px;text-align:center}
