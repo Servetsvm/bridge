@@ -705,6 +705,35 @@ const Net = (() => {
     return out;
   }
 
+  /* your results on every device: kept in the database under a key made from your name and PIN (only someone who
+     knows both can find them). Boards from both sides are merged; your settings come along to a new device. */
+  const SYNC_KEYS = ['sys', 'conv', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style'];
+  let syncing = null, syncT = null;
+  async function cloudSync() {
+    if (!Cloud.on || !SET.pinH || syncing) return syncing;
+    syncing = (async () => {
+      const path = 'data/' + SET.pinH;
+      let remote = null; try { remote = await Cloud.get(path); } catch (e) { return; }
+      const rh = remote && Array.isArray(remote.hist) ? remote.hist.filter(Boolean) : [];
+      const map = new Map(rh.map(r => [r.id, r])); let localNew = false;
+      for (const l of HIST) { const r = map.get(l.id); if (!r) { map.set(l.id, l); localNew = true; continue; } const m = { ...r, ...l }; if (l.imp == null && r.imp != null) { m.imp = r.imp; m.mp = r.mp; } map.set(l.id, m); if (l.imp != null && r.imp == null) localNew = true; }
+      const merged = [...map.values()].sort((a, b) => (a.ts || 0) - (b.ts || 0));
+      const gotNew = merged.length > HIST.length;
+      if (gotNew) { HIST = merged; BOARD = Math.max(BOARD, ...HIST.map(h => h.board || 0)); }
+      // settings: a device that has not had them yet takes them from the database
+      if (remote && remote.set && !SET.cloudSet) { for (const k of SYNC_KEYS) if (remote.set[k] !== undefined) SET[k] = remote.set[k]; SET.cloudSet = 1; if (typeof applyLang === 'function') applyLang(); }
+      if (gotNew || (remote && remote.set && SET.cloudSet === 1)) { SET.cloudSet = 2; Store.saveSettings(SET); save(); render(); }
+      if (localNew || !remote) {
+        const set = {}; for (const k of SYNC_KEYS) if (SET[k] !== undefined) set[k] = SET[k];
+        try { await Cloud.put(path, { v: 1, updated: Date.now(), name: myName(), hist: merged.slice(-400).map(Store.compact), set }); } catch (e) {}
+        SET.cloudSet = 2;
+      }
+    })().finally(() => { syncing = null; });
+    return syncing;
+  }
+  const cloudSyncSoon = () => { clearTimeout(syncT); syncT = setTimeout(cloudSync, 4000); };
+  setTimeout(() => cloudSync(), 6000);
+
   const lobbyCount = () => 1 + [...(st.mesh || new Map()).values()].filter(c => c.open).length;
   // redraw what shows lobby things: the home page, the chat window (phones) and the tournament set-up
   const renderL = () => { if (typeof renderDock === 'function') renderDock(); if (G && G.phase === 'idle') render(); if (ui.overlay === 'lchat') showLChat(); if (ui.overlay === 'tsetup') showTourSetup(ui.tsetId); };
@@ -1344,5 +1373,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, register, login, suggestNames, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 124;
+const APP_V = 125;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -114,7 +114,7 @@ function syncNow(quiet) {
     save(); renderBar(); if (ui.overlay === "set") showSettings(); else if (ui.overlay === "res") showResults();
   }).catch(e => { syncState.msg = e.message === "offline" ? "Offline — will sync when back online" : "Sync failed: " + e.message; if (ui.overlay === "set") showSettings(); });
 }
-function scheduleSync() { clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(true), 2500); }
+function scheduleSync() { clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(true), 2500); if (typeof Net !== "undefined" && Net.cloudSyncSoon) Net.cloudSyncSoon(); }
 
 /* ================= virtual field (background worker) ================= */
 /* the virtual field: 10 expert robot tables play the same deal in two background workers;
@@ -1932,6 +1932,7 @@ async function gateGo() {
   SET.pinH = h; SET.pinFor = Net.nameKey(name); Store.saveSettings(SET); save();
   ui.gateErr = null; ui.gateSug = null; ui.overlay = null; $('ov').hidden = true;
   Net.st.claimed = true; Net.shareInfo(); Net.Cloud.beat(); render();
+  SET.cloudSet = 0; Net.cloudSync();   // your results and settings from your other devices
   flash(T('Welcome, {0}!', name), 2000);
   checkSharedDeal();
 }
