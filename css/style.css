@@ -1083,3 +1083,29 @@ body.dealing .fan .card:nth-child(13){animation-delay:540ms}
 .pavpick button{width:30px;height:30px;border:1px solid #d6d2c0;border-radius:8px;background:#fff;font-size:17px;line-height:1;cursor:pointer;padding:0}
 .pavpick button.on{border-color:#c9a227;box-shadow:0 0 0 2px #c9a227;background:#fff8e1}
 :root[data-theme="dark"] .pavpick button{background:#2a312d;border-color:#4a564f}
+
+/* the problem of the day */
+.pzbox{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-start;margin:8px 0}
+.pzhand{font-size:1.15em;line-height:1.45;font-weight:600;padding:6px 10px;border-radius:10px;background:var(--panel2,rgba(0,0,0,.06))}
+.pzhand small{display:block;font-weight:400;opacity:.7;font-size:.75em}
+.pzbox .auction{flex:1 1 100%;min-width:0;overflow:hidden;font-size:16px}
+.pzbox .auction th:not(.v){background:rgba(0,0,0,.07)!important}
+.pzbids{display:flex;flex-direction:column;gap:4px;margin:6px 0}
+.pzrow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.pzrow:first-child{grid-template-columns:2fr 1fr 2fr}
+.pzbids button,.pzcards button{padding:5px 2px;border-radius:8px;border:1px solid #bbb;background:#fff;color:#111;font:inherit;font-weight:700;cursor:pointer;min-height:32px}
+.pzbids button.pass{background:#2f8f4e;color:#fff;border-color:#2f8f4e}
+.pzbids button:hover,.pzcards button:hover{outline:2px solid var(--gold,#d4a017)}
+.pzcards{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}
+.pzcards button{min-width:44px;color:#111;background:#fff}
+.pzcards button.rd{color:#c0262d}
+body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e06a00}
+.sheet[data-ov="puzzle"] .okmsg,.sheet[data-ov="puzzle"] .err{font-weight:700;margin:8px 0 4px}
+.hpuzzle{border-color:#e8d39a;background:linear-gradient(90deg,#fff6dc,#fffbef);color:#5a4200}
+.hpuzzle b{color:#8a5d00}
+:root[data-theme="dark"] .hpuzzle{background:#3a3220;color:#f3e2b0;border-color:#6b5a2c}
+:root[data-theme="dark"] .hpuzzle b{color:#ffd770}
+.pzvals{margin:6px 0;display:flex;flex-direction:column;gap:3px}
+.pzvals div{padding:3px 8px;border-radius:6px;background:rgba(127,127,127,.12)}
+.pzvals div.best{background:rgba(47,143,78,.22)}
+.pzvals b{display:inline-block;min-width:76px}

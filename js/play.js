@@ -744,6 +744,22 @@ function aiPlay(g, seat, opt) {
 
 /* after the board: every card our side played is checked double dummy against the other legal cards. A card that
    gave away tricks is reported with the best card instead (trick number, seat, played, better, tricks lost). */
+/* the opening lead: how many tricks the defence takes after each card the leader could lead (double dummy).
+   One solve gives the defence's best; every lead then starts its search there, and touching cards (K Q, J 10 9) share a value.
+   each(card, value) is told every result as it comes. */
+function leadValues(deal, c, limit, each) {
+  const L = (c.decl + 1) % 4, hands = deal.map(h => h.slice()), out = {}, trump = c.strain < 4 ? c.strain : -1;
+  let best = ddFull(hands, L, sideOf(L), trump, limit || 2e7, null);
+  DD.trump = trump;
+  const mine = hands[L].slice().sort((a, b) => S(b) - S(a) || R(b) - R(a));
+  for (let i = 0; i < mine.length; i++) {
+    const x = mine[i], up = mine[i - 1];
+    if (i && S(up) === S(x) && R(up) === R(x) + 1 && up in out) out[x] = out[up];   // the card just above it in the same suit
+    else { try { out[x] = ddEval(hands, [], L, x, limit || 2e7, best); } catch (e) { if (e !== DDX) throw e; out[x] = null; } }
+    if (each) each(x, out[x]);
+  }
+  return out;
+}
 function analysePlay(deal, c, pl, seats, limit) {
   const hands = deal.map(h => h.slice()), trump = c.strain < 4 ? c.strain : -1, out = [], lim = limit || 3e6;
   DD.trump = trump;
@@ -782,5 +798,5 @@ function analysePlay(deal, c, pl, seats, limit) {
   return out;
 }
 
-Object.assign(E, { DD, DDF, analysePlay, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
+Object.assign(E, { DD, DDF, analysePlay, leadValues, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
 });

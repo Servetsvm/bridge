@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 129;
+const APP_V = 130;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -883,6 +883,7 @@ function homeShell() {
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         
         <button class="hdaily" id="hDaily"></button>
+        <button class="hdaily hpuzzle" id="hPuzzle"></button>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div id="hSec"></div>
@@ -926,6 +927,9 @@ function renderHome() {
       set("hDaily", `🗓 <b>${T("Daily tournament")}</b> · ${done >= t.n ? T("finished") : done ? T("{0} of {1} boards", done, t.n) : T("{0} boards — play now", t.n)}${i >= 0 && rows.length > 1 ? " · " + T("place {0} of {1}", i + 1, rows.length) : rows.length ? " · " + T("{0} players", rows.length) : ""} ›`);
     } else set("hDaily", "");
   }
+  { const p = pzState(), today = new Date().toISOString().slice(0, 10), done = p.day === today;   // the problem of the day
+    set("hPuzzle", done ? `${p.ok ? "✅" : "❌"} <b>${T("Problem of the day")}</b> · ${T("Days in a row: {0}", p.streak || 0)} ›` : `🧩 <b>${T("Problem of the day")}</b> · ${T("A new question every day")} ›`); }
+
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
   set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
@@ -1377,6 +1381,111 @@ function openOv(name, html) {
 }
 function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no way past the name and PIN
   if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; $('ov').classList.remove('float'); }
+/* ---- the problem of the day: the same deal and question for everyone each day (from the date), in turn
+   "what do you open?", "partner opened: what do you answer?" and "what do you lead?". The answer is the robot's call
+   (with its meaning), or for a lead the cards that give the defence the most tricks (double dummy). ---- */
+function pzState() { const PZ_KEY = 'bridge-puzzle'; try { return JSON.parse(localStorage.getItem(PZ_KEY) || '{}') || {}; } catch (e) { return {}; } }
+function pzSave(s) { const PZ_KEY = 'bridge-puzzle'; try { localStorage.setItem(PZ_KEY, JSON.stringify(s)); } catch (e) {} }
+function pzToday() {
+  const day = new Date().toISOString().slice(0, 10);
+  if (ui.pz && ui.pz.day === day && ui.pz.sys === (SET.sys || 'twoone')) return ui.pz;
+  let seed = 2166136261; for (const ch of 'puzzle-' + day) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
+  const kind = ['open', 'answer', 'lead'][Math.floor(Date.parse(day) / 864e5) % 3], cards = sideCards();
+  let pz = null;
+  for (let k = 0; k < 400 && !pz; k++) {
+    E.seed(((seed >>> 0) + k * 7919) >>> 0 || 1);
+    const d = E.shuffle([...Array(52).keys()]), deal = [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13));
+    const hcp = ev(deal[2]).hcp;
+    if (kind === 'open') { if (hcp >= 11 && hcp <= 21) pz = { kind, deal, dealer: 2, auction: [] }; }
+    else if (kind === 'answer') {
+      if (hcp < 6) continue;
+      const auc = [], a1 = E.aiBid(auc, 0, deal[0], cards); auc.push({ seat: 0, call: a1.call, m: a1.m });
+      if (a1.call === 'P') continue;
+      const a2 = E.aiBid(auc, 1, deal[1], cards); auc.push({ seat: 1, call: a2.call, m: a2.m });
+      if (a2.call !== 'P') continue;
+      pz = { kind, deal, dealer: 0, auction: auc };
+    } else {
+      const dealer = k % 4, auc = [];
+      while (!auctionOver(auc) && auc.length < 40) { const t = (dealer + auc.length) % 4, r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); }
+      const c = contractOf(auc);
+      if (c && c.decl === 1 && c.level >= 2 && !c.dbl) pz = { kind, deal, dealer, auction: auc, c };
+    }
+  }
+  E.seed(null);
+  if (!pz) return null;
+  pz.day = day; pz.sys = SET.sys || 'twoone';
+  if (pz.kind !== 'lead') { const r = E.aiBid(pz.auction, 2, pz.deal[2], cards); pz.best = r.call; pz.bestM = r.m; }
+  ui.pz = pz; return pz;
+}
+function pzQuestion(k) { return T(k === 'open' ? 'What do you open?' : k === 'answer' ? 'Partner opened. What do you answer?' : 'What do you lead?'); }
+function pzHand(h) { return `<div class="pzhand">${[3, 2, 1, 0].map(s => `<div>${symHtml(s)} ${E.desc(E.inSuit(h, s)).map(c => RTXT[R(c)]).join(' ') || '—'}</div>`).join('')}<small>${ev(h).hcp} HCP</small></div>`; }
+function showPuzzle() {
+  const pz = pzToday(); if (!pz) { flash(T('No problem today — try again later'), 2000); return; }
+  const st = pzState(), done = st.day === pz.day ? st : null;
+  const auc = pz.auction.length || pz.kind !== 'open' ? `<div class="auction">${auctionTable(pz.auction, pz.kind !== 'lead' && !done, { board: 1, dealer: pz.dealer, seat: 2, sel: ui.pzSel ?? null }).replace(/data-ri=/g, "data-pzi=")}${ui.pzSel != null && pz.auction[ui.pzSel] ? `<div class="expl">${explHtml(pz.auction[ui.pzSel])}</div>` : ''}</div>` : `<div class="muted">${T('You are the dealer. Nobody is vulnerable.')}</div>`;
+  let ctl = '';
+  if (!done) {
+    if (pz.kind === 'lead') ctl = `<div class="pzcards">${pz.deal[2].slice().sort((a, b) => S(b) - S(a) || R(b) - R(a)).map(c => `<button class="pzc s${S(c)}${red(S(c)) ? ' rd' : ''}" data-pzc="${c}">${RTXT[R(c)]}${STR[S(c)]}</button>`).join('')}</div>`;
+    else {
+      const L = legalCalls(pz.auction, 2);
+      const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<div class="pzrow">${[0, 1, 2, 3, 4].map(s => { const c = B(l, s); return L.includes(c) ? `<button data-pzb="${c}">${callHtml(c)}</button>` : '<span></span>'; }).join('')}</div>`).join('');
+      ctl = `<div class="pzbids"><div class="pzrow"><button class="pass" data-pzb="P">${T('Pass')}</button>${L.includes('X') ? `<button data-pzb="X">X</button>` : ''}</div>${lv}</div>`;
+    }
+  }
+  let res = '';
+  if (done) {
+    if (pz.kind === 'lead') {
+      if (!done.full) { pzLeads(); const n = Object.keys(done.vals || {}).length; res = `<div class="muted">⏳ ${T('Working out every lead…')} ${n}/${pz.deal[2].length}</div>`; }
+      else {
+        const v = done.vals, best = Math.max(...Object.values(v).filter(x => x != null)), mine = v[done.ans];
+        res = `<div class="${mine === best ? 'okmsg' : 'err'}">${mine === best ? '✅ ' + T('Well done! That is a best lead.') : '❌ ' + T('Not the best lead.')}</div>
+          <div>${T('Your lead')} <b>${RTXT[R(done.ans)]}${symHtml(S(done.ans))}</b>: ${T('the defence takes {0} tricks', mine)}. </div>
+          <div class="pzvals">${[...new Set(Object.values(v))].sort((a, b) => (b ?? -1) - (a ?? -1)).map(n => `<div${n === best ? ' class="best"' : ''}><b>${n == null ? '?' : T('{0} tricks', n)}</b> ${Object.keys(v).filter(c => v[c] === n).map(Number).sort((a, b) => S(b) - S(a) || R(b) - R(a)).map(c => RTXT[R(c)] + symHtml(S(c))).join(' ')}</div>`).join('')}</div>
+          <div class="muted">${T('Contract')} ${conKey(pz.c)} · ${T('double dummy: every hand open, best play on both sides.')}</div>`;
+      }
+    } else {
+      const ok = done.ans === String(pz.best), ex = c => { const m = E.explainCall(pz.auction, 2, c, sideCards()); return m && m.t ? symText(bidTxt(m.t)) : ''; };
+      const ans = done.ans === 'P' || done.ans === 'X' ? done.ans : +done.ans;
+      res = `<div class="${ok ? 'okmsg' : 'err'}">${ok ? '✅ ' + T('Well done! The robot bids the same.') : '❌ ' + T('The robot bids differently.')}</div>
+        <div>${T('Your answer')} <b>${callHtml(ans)}</b> — ${ex(ans)}</div>
+        ${ok ? '' : `<div>${T('Robot')}: <b>${callHtml(pz.best)}</b> — ${ex(pz.best)}</div>`}
+        <div class="muted">${T('With your system ({0}).', esc(E.sysOf(SET.sys).n))}</div>`;
+    }
+    if (done.ok != null) res += `<details class="pzdeal"><summary>${T('Show all four hands')}</summary>${dealHtml(pz.deal, 2)}</details>`;
+    if (done.ok != null) res += `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
+  }
+  openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2><div class="big">${pzQuestion(pz.kind)}</div>
+    <div class="pzbox">${pzHand(pz.deal[2])}${auc}</div>${ctl}${res}
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+function pzAnswer(ans) {
+  const pz = pzToday(); if (!pz) return;
+  const st = pzState(); if (st.day === pz.day) return;
+  const next = { day: pz.day, ans: pz.kind === 'lead' ? +ans : String(ans), streak: st.streak || 0, lastOk: st.lastOk, prev: st.lastOk, prevStreak: st.streak || 0 };
+  if (pz.kind === 'lead') { next.vals = {}; pzSave(next); pzLeads(); showPuzzle(); return; }
+  pzFinish(next, String(ans) === String(pz.best));
+}
+/* a right answer on the day after the last right one makes the run longer */
+function pzFinish(s, ok) {
+  const yday = new Date(Date.parse(s.day) - 864e5).toISOString().slice(0, 10);
+  s.ok = ok; if (ok) { s.streak = s.prev === yday ? s.prevStreak + 1 : 1; s.lastOk = s.day; } else s.streak = 0;
+  pzSave(s); if (ui.overlay === 'puzzle') showPuzzle(); render();
+}
+/* the leads are worked out in the background; each value shows as it comes */
+function pzLeads() {
+  const pz = pzToday(); if (!pz || ui.pzRun === pz.day) return; ui.pzRun = pz.day;
+  const got = (x, v) => { const s = pzState(); if (s.day !== pz.day) return; s.vals = s.vals || {}; s.vals[x] = v; pzSave(s); if (ui.overlay === 'puzzle') showPuzzle(); };
+  const end = v => { ui.pzRun = null; const s = pzState(); if (s.day !== pz.day) return; s.vals = v; s.full = true; const best = Math.max(...Object.values(v).filter(x => x != null)); pzFinish(s, v[s.ans] === best); };
+  const w = Field.mk();
+  if (w) { w.onmessage = m => { const d = m.data || {}; if (d.type === 'lead1') got(d.x, d.v); if (d.type === 'leads') { w.terminate(); end(d.v); } }; w.postMessage({ type: 'leads', id: 'pz', deal: pz.deal, c: pz.c, limit: 2e7 }); }
+  else setTimeout(() => end(E.leadValues(pz.deal, pz.c, 3e6)), 50);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-pzb]'); if (b) { pzAnswer(b.dataset.pzb); return; }
+  const c = e.target.closest('[data-pzc]'); if (c) { pzAnswer(+c.dataset.pzc); return; }
+  const pi = e.target.closest('[data-pzi]'); if (pi) { const i = +pi.dataset.pzi; ui.pzSel = ui.pzSel === i ? null : i; showPuzzle(); return; }
+  if (e.target.closest('#hPuzzle')) { ui.pzSel = null; showPuzzle(); }
+});
 function showEnd() {
   const e = G.result; if (!e) return;
   const f = G.field || { tables: [], done: false, dd: {} };

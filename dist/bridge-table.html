@@ -1099,6 +1099,32 @@ body.dealing .fan .card:nth-child(13){animation-delay:540ms}
 .pavpick button.on{border-color:#c9a227;box-shadow:0 0 0 2px #c9a227;background:#fff8e1}
 :root[data-theme="dark"] .pavpick button{background:#2a312d;border-color:#4a564f}
 
+/* the problem of the day */
+.pzbox{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:flex-start;margin:8px 0}
+.pzhand{font-size:1.15em;line-height:1.45;font-weight:600;padding:6px 10px;border-radius:10px;background:var(--panel2,rgba(0,0,0,.06))}
+.pzhand small{display:block;font-weight:400;opacity:.7;font-size:.75em}
+.pzbox .auction{flex:1 1 100%;min-width:0;overflow:hidden;font-size:16px}
+.pzbox .auction th:not(.v){background:rgba(0,0,0,.07)!important}
+.pzbids{display:flex;flex-direction:column;gap:4px;margin:6px 0}
+.pzrow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.pzrow:first-child{grid-template-columns:2fr 1fr 2fr}
+.pzbids button,.pzcards button{padding:5px 2px;border-radius:8px;border:1px solid #bbb;background:#fff;color:#111;font:inherit;font-weight:700;cursor:pointer;min-height:32px}
+.pzbids button.pass{background:#2f8f4e;color:#fff;border-color:#2f8f4e}
+.pzbids button:hover,.pzcards button:hover{outline:2px solid var(--gold,#d4a017)}
+.pzcards{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}
+.pzcards button{min-width:44px;color:#111;background:#fff}
+.pzcards button.rd{color:#c0262d}
+body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e06a00}
+.sheet[data-ov="puzzle"] .okmsg,.sheet[data-ov="puzzle"] .err{font-weight:700;margin:8px 0 4px}
+.hpuzzle{border-color:#e8d39a;background:linear-gradient(90deg,#fff6dc,#fffbef);color:#5a4200}
+.hpuzzle b{color:#8a5d00}
+:root[data-theme="dark"] .hpuzzle{background:#3a3220;color:#f3e2b0;border-color:#6b5a2c}
+:root[data-theme="dark"] .hpuzzle b{color:#ffd770}
+.pzvals{margin:6px 0;display:flex;flex-direction:column;gap:3px}
+.pzvals div{padding:3px 8px;border-radius:6px;background:rgba(127,127,127,.12)}
+.pzvals div.best{background:rgba(47,143,78,.22)}
+.pzvals b{display:inline-block;min-width:76px}
+
 </style>
 
 <div id="app">
@@ -3076,6 +3102,22 @@ function aiPlay(g, seat, opt) {
 
 /* after the board: every card our side played is checked double dummy against the other legal cards. A card that
    gave away tricks is reported with the best card instead (trick number, seat, played, better, tricks lost). */
+/* the opening lead: how many tricks the defence takes after each card the leader could lead (double dummy).
+   One solve gives the defence's best; every lead then starts its search there, and touching cards (K Q, J 10 9) share a value.
+   each(card, value) is told every result as it comes. */
+function leadValues(deal, c, limit, each) {
+  const L = (c.decl + 1) % 4, hands = deal.map(h => h.slice()), out = {}, trump = c.strain < 4 ? c.strain : -1;
+  let best = ddFull(hands, L, sideOf(L), trump, limit || 2e7, null);
+  DD.trump = trump;
+  const mine = hands[L].slice().sort((a, b) => S(b) - S(a) || R(b) - R(a));
+  for (let i = 0; i < mine.length; i++) {
+    const x = mine[i], up = mine[i - 1];
+    if (i && S(up) === S(x) && R(up) === R(x) + 1 && up in out) out[x] = out[up];   // the card just above it in the same suit
+    else { try { out[x] = ddEval(hands, [], L, x, limit || 2e7, best); } catch (e) { if (e !== DDX) throw e; out[x] = null; } }
+    if (each) each(x, out[x]);
+  }
+  return out;
+}
 function analysePlay(deal, c, pl, seats, limit) {
   const hands = deal.map(h => h.slice()), trump = c.strain < 4 ? c.strain : -1, out = [], lim = limit || 3e6;
   DD.trump = trump;
@@ -3114,7 +3156,7 @@ function analysePlay(deal, c, pl, seats, limit) {
   return out;
 }
 
-Object.assign(E, { DD, DDF, analysePlay, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
+Object.assign(E, { DD, DDF, analysePlay, leadValues, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
 });
 
 </script>
@@ -3160,6 +3202,8 @@ function workerMain(E) {
           self.postMessage({ type: "table", id: m.id, i, r });
         }
         self.postMessage({ type: "part", id: m.id });
+      } else if (m.type === 'leads') {
+        self.postMessage({ type: 'leads', id: m.id, v: E.leadValues(m.deal, m.c, m.limit, (x, v) => self.postMessage({ type: 'lead1', id: m.id, x, v })) });
       } else if (m.type === 'ana') {
         self.postMessage({ type: 'ana', id: m.id, list: E.analysePlay(m.deal, m.c, m.pl, m.seats, m.limit) });
       } else if (m.type === 'dd') {
@@ -3634,6 +3678,25 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "What do you open?": "Ne açarsın?",
+    "Partner opened. What do you answer?": "Ortağın açtı. Ne cevap verirsin?",
+    "What do you lead?": "Hangi kartla atak yaparsın?",
+    "Your answer": "Cevabın",
+    "Problem of the day": "Günün problemi",
+    "A new question every day": "Her gün yeni bir soru",
+    "Days in a row: {0}": "Üst üste gün: {0}",
+    "No problem today — try again later": "Bugün problem yok — sonra yine dene",
+    "Not the best lead.": "En iyi atak değil.",
+    "Show all four hands": "Dört eli göster",
+    "The robot bids differently.": "Robot başka deklare ediyor.",
+    "Well done! That is a best lead.": "Aferin! En iyi ataklardan biri.",
+    "Well done! The robot bids the same.": "Aferin! Robot da aynısını deklare ediyor.",
+    "With your system ({0}).": "Senin sisteminle ({0}).",
+    "Working out every lead…": "Her atak hesaplanıyor…",
+    "You are the dealer. Nobody is vulnerable.": "Dağıtıcı sensin. Kimse zonda değil.",
+    "Your lead": "Atağın",
+    "double dummy: every hand open, best play on both sides.": "double dummy: bütün eller açık, iki taraf da en iyi oynuyor.",
+    "the defence takes {0} tricks": "savunma {0} löve alır",
     "Picture": "Simge",
     "You cannot play that card": "O kartı oynayamazsın",
     "Blue": "Mavi", "Card back": "Kart arkası", "Green": "Yeşil", "Red": "Kırmızı", "Wood": "Ahşap",
@@ -3733,6 +3796,25 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "What do you open?": "Hva åpner du med?",
+    "Partner opened. What do you answer?": "Makker åpnet. Hva svarer du?",
+    "What do you lead?": "Hva spiller du ut?",
+    "Your answer": "Ditt svar",
+    "Problem of the day": "Dagens oppgave",
+    "A new question every day": "Et nytt spørsmål hver dag",
+    "Days in a row: {0}": "Dager på rad: {0}",
+    "No problem today — try again later": "Ingen oppgave i dag — prøv igjen senere",
+    "Not the best lead.": "Ikke det beste utspillet.",
+    "Show all four hands": "Vis alle fire hender",
+    "The robot bids differently.": "Roboten melder annerledes.",
+    "Well done! That is a best lead.": "Bra! Det er et av de beste utspillene.",
+    "Well done! The robot bids the same.": "Bra! Roboten melder det samme.",
+    "With your system ({0}).": "Med ditt system ({0}).",
+    "Working out every lead…": "Regner ut hvert utspill…",
+    "You are the dealer. Nobody is vulnerable.": "Du er giver. Ingen er i sonen.",
+    "Your lead": "Ditt utspill",
+    "double dummy: every hand open, best play on both sides.": "double dummy: alle hender åpne, beste spill på begge sider.",
+    "the defence takes {0} tricks": "forsvaret tar {0} stikk",
     "Picture": "Bilde",
     "You cannot play that card": "Du kan ikke spille det kortet",
     "Blue": "Blå", "Card back": "Kortbaksiden", "Green": "Grønn", "Red": "Rød", "Wood": "Tre",
@@ -3832,6 +3914,25 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "What do you open?": "¿Qué abres?",
+    "Partner opened. What do you answer?": "Tu compañero abrió. ¿Qué respondes?",
+    "What do you lead?": "¿Qué sales?",
+    "Your answer": "Tu respuesta",
+    "Problem of the day": "Problema del día",
+    "A new question every day": "Una pregunta nueva cada día",
+    "Days in a row: {0}": "Días seguidos: {0}",
+    "No problem today — try again later": "Hoy no hay problema — inténtalo más tarde",
+    "Not the best lead.": "No es la mejor salida.",
+    "Show all four hands": "Ver las cuatro manos",
+    "The robot bids differently.": "El robot canta otra cosa.",
+    "Well done! That is a best lead.": "¡Bien! Es una de las mejores salidas.",
+    "Well done! The robot bids the same.": "¡Bien! El robot canta lo mismo.",
+    "With your system ({0}).": "Con tu sistema ({0}).",
+    "Working out every lead…": "Calculando cada salida…",
+    "You are the dealer. Nobody is vulnerable.": "Eres el dador. Nadie es vulnerable.",
+    "Your lead": "Tu salida",
+    "double dummy: every hand open, best play on both sides.": "doble muerto: todas las manos a la vista, el mejor juego por ambos lados.",
+    "the defence takes {0} tricks": "la defensa hace {0} bazas",
     "Picture": "Imagen",
     "You cannot play that card": "No puedes jugar esa carta",
     "Blue": "Azul", "Card back": "Dorso", "Green": "Verde", "Red": "Rojo", "Wood": "Madera",
@@ -3959,6 +4060,25 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "What do you open?": "Qu'ouvrez-vous ?",
+    "Partner opened. What do you answer?": "Votre partenaire a ouvert. Que répondez-vous ?",
+    "What do you lead?": "Qu'entamez-vous ?",
+    "Your answer": "Votre réponse",
+    "Problem of the day": "Problème du jour",
+    "A new question every day": "Une nouvelle question chaque jour",
+    "Days in a row: {0}": "Jours d'affilée : {0}",
+    "No problem today — try again later": "Pas de problème aujourd'hui — réessayez plus tard",
+    "Not the best lead.": "Pas la meilleure entame.",
+    "Show all four hands": "Voir les quatre mains",
+    "The robot bids differently.": "Le robot annonce autre chose.",
+    "Well done! That is a best lead.": "Bravo ! C'est une des meilleures entames.",
+    "Well done! The robot bids the same.": "Bravo ! Le robot annonce la même chose.",
+    "With your system ({0}).": "Avec votre système ({0}).",
+    "Working out every lead…": "Calcul de chaque entame…",
+    "You are the dealer. Nobody is vulnerable.": "Vous êtes donneur. Personne n'est vulnérable.",
+    "Your lead": "Votre entame",
+    "double dummy: every hand open, best play on both sides.": "double mort : toutes les mains visibles, meilleur jeu des deux côtés.",
+    "the defence takes {0} tricks": "la défense fait {0} levées",
     "Picture": "Image",
     "You cannot play that card": "Vous ne pouvez pas jouer cette carte",
     "Blue": "Bleu", "Card back": "Dos des cartes", "Green": "Vert", "Red": "Rouge", "Wood": "Bois",
@@ -4086,6 +4206,25 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "What do you open?": "Che cosa apri?",
+    "Partner opened. What do you answer?": "Il compagno ha aperto. Che cosa rispondi?",
+    "What do you lead?": "Che cosa attacchi?",
+    "Your answer": "La tua risposta",
+    "Problem of the day": "Problema del giorno",
+    "A new question every day": "Una domanda nuova ogni giorno",
+    "Days in a row: {0}": "Giorni di fila: {0}",
+    "No problem today — try again later": "Oggi nessun problema — riprova più tardi",
+    "Not the best lead.": "Non è il miglior attacco.",
+    "Show all four hands": "Mostra le quattro mani",
+    "The robot bids differently.": "Il robot licita diversamente.",
+    "Well done! That is a best lead.": "Bravo! È uno dei migliori attacchi.",
+    "Well done! The robot bids the same.": "Bravo! Il robot licita lo stesso.",
+    "With your system ({0}).": "Con il tuo sistema ({0}).",
+    "Working out every lead…": "Calcolo di ogni attacco…",
+    "You are the dealer. Nobody is vulnerable.": "Sei il mazziere. Nessuno è in zona.",
+    "Your lead": "Il tuo attacco",
+    "double dummy: every hand open, best play on both sides.": "doppio morto: tutte le mani scoperte, gioco migliore da entrambe le parti.",
+    "the defence takes {0} tricks": "la difesa fa {0} prese",
     "Picture": "Immagine",
     "You cannot play that card": "Non puoi giocare quella carta",
     "Blue": "Blu", "Card back": "Dorso", "Green": "Verde", "Red": "Rosso", "Wood": "Legno",
@@ -4213,6 +4352,25 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "What do you open?": "Was eröffnest du?",
+    "Partner opened. What do you answer?": "Partner hat eröffnet. Was antwortest du?",
+    "What do you lead?": "Was spielst du aus?",
+    "Your answer": "Deine Antwort",
+    "Problem of the day": "Problem des Tages",
+    "A new question every day": "Jeden Tag eine neue Frage",
+    "Days in a row: {0}": "Tage in Folge: {0}",
+    "No problem today — try again later": "Heute kein Problem — später noch einmal",
+    "Not the best lead.": "Nicht das beste Ausspiel.",
+    "Show all four hands": "Alle vier Hände zeigen",
+    "The robot bids differently.": "Der Roboter reizt anders.",
+    "Well done! That is a best lead.": "Gut gemacht! Das ist eines der besten Ausspiele.",
+    "Well done! The robot bids the same.": "Gut gemacht! Der Roboter reizt dasselbe.",
+    "With your system ({0}).": "Mit deinem System ({0}).",
+    "Working out every lead…": "Jedes Ausspiel wird berechnet…",
+    "You are the dealer. Nobody is vulnerable.": "Du bist Teiler. Niemand ist in Gefahr.",
+    "Your lead": "Dein Ausspiel",
+    "double dummy: every hand open, best play on both sides.": "Double Dummy: alle Hände offen, bestes Spiel auf beiden Seiten.",
+    "the defence takes {0} tricks": "die Verteidigung macht {0} Stiche",
     "Picture": "Bild",
     "You cannot play that card": "Diese Karte kannst du nicht spielen",
     "Blue": "Blau", "Card back": "Kartenrücken", "Green": "Grün", "Red": "Rot", "Wood": "Holz",
@@ -4340,6 +4498,25 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "What do you open?": "Чем вы открываете?",
+    "Partner opened. What do you answer?": "Партнёр открыл. Что вы отвечаете?",
+    "What do you lead?": "С какой карты вы ходите?",
+    "Your answer": "Ваш ответ",
+    "Problem of the day": "Задача дня",
+    "A new question every day": "Каждый день новый вопрос",
+    "Days in a row: {0}": "Дней подряд: {0}",
+    "No problem today — try again later": "Сегодня задачи нет — попробуйте позже",
+    "Not the best lead.": "Не лучший ход.",
+    "Show all four hands": "Показать все четыре руки",
+    "The robot bids differently.": "Робот заявляет иначе.",
+    "Well done! That is a best lead.": "Отлично! Это один из лучших ходов.",
+    "Well done! The robot bids the same.": "Отлично! Робот заявляет то же.",
+    "With your system ({0}).": "В вашей системе ({0}).",
+    "Working out every lead…": "Считаем каждый ход…",
+    "You are the dealer. Nobody is vulnerable.": "Вы сдающий. Все до зоны.",
+    "Your lead": "Ваш ход",
+    "double dummy: every hand open, best play on both sides.": "дабл-дамми: все руки открыты, лучшая игра с обеих сторон.",
+    "the defence takes {0} tricks": "защита берёт {0} взяток",
     "Picture": "Значок",
     "You cannot play that card": "Эту карту сыграть нельзя",
     "Blue": "Синий", "Card back": "Рубашка карт", "Green": "Зелёный", "Red": "Красный", "Wood": "Дерево",
@@ -4467,6 +4644,25 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "What do you open?": "Czym otwierasz?",
+    "Partner opened. What do you answer?": "Partner otworzył. Co odpowiadasz?",
+    "What do you lead?": "Co wistujesz?",
+    "Your answer": "Twoja odpowiedź",
+    "Problem of the day": "Problem dnia",
+    "A new question every day": "Codziennie nowe pytanie",
+    "Days in a row: {0}": "Dni z rzędu: {0}",
+    "No problem today — try again later": "Dziś brak problemu — spróbuj później",
+    "Not the best lead.": "To nie najlepszy wist.",
+    "Show all four hands": "Pokaż wszystkie cztery ręce",
+    "The robot bids differently.": "Robot licytuje inaczej.",
+    "Well done! That is a best lead.": "Brawo! To jeden z najlepszych wistów.",
+    "Well done! The robot bids the same.": "Brawo! Robot licytuje tak samo.",
+    "With your system ({0}).": "W twoim systemie ({0}).",
+    "Working out every lead…": "Liczę każdy wist…",
+    "You are the dealer. Nobody is vulnerable.": "Rozdajesz. Wszyscy przed partią.",
+    "Your lead": "Twój wist",
+    "double dummy: every hand open, best play on both sides.": "double dummy: wszystkie ręce odkryte, najlepsza gra obu stron.",
+    "the defence takes {0} tricks": "obrona bierze {0} lew",
     "Picture": "Obrazek",
     "You cannot play that card": "Nie możesz zagrać tej karty",
     "Blue": "Niebieski", "Card back": "Rewers kart", "Green": "Zielony", "Red": "Czerwony", "Wood": "Drewno",
@@ -4594,6 +4790,25 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "What do you open?": "你开叫什么?",
+    "Partner opened. What do you answer?": "同伴开叫了。你怎么应叫?",
+    "What do you lead?": "你首攻哪张牌?",
+    "Your answer": "你的回答",
+    "Problem of the day": "每日一题",
+    "A new question every day": "每天一道新题",
+    "Days in a row: {0}": "连续天数:{0}",
+    "No problem today — try again later": "今天没有题目——稍后再试",
+    "Not the best lead.": "不是最佳首攻。",
+    "Show all four hands": "显示四家牌",
+    "The robot bids differently.": "机器人叫的不一样。",
+    "Well done! That is a best lead.": "很好!这是最佳首攻之一。",
+    "Well done! The robot bids the same.": "很好!机器人也这样叫。",
+    "With your system ({0}).": "按你的体系({0})。",
+    "Working out every lead…": "正在计算每张首攻…",
+    "You are the dealer. Nobody is vulnerable.": "你是发牌人。双方无局。",
+    "Your lead": "你的首攻",
+    "double dummy: every hand open, best play on both sides.": "双明手:四家牌全部明摊,双方都打最佳。",
+    "the defence takes {0} tricks": "防守方得 {0} 墩",
     "Picture": "头像",
     "You cannot play that card": "不能出这张牌",
     "Blue": "蓝色", "Card back": "牌背", "Green": "绿色", "Red": "红色", "Wood": "木纹",
@@ -5317,7 +5532,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 129;
+const APP_V = 130;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6192,6 +6407,7 @@ function homeShell() {
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         
         <button class="hdaily" id="hDaily"></button>
+        <button class="hdaily hpuzzle" id="hPuzzle"></button>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div id="hSec"></div>
@@ -6235,6 +6451,9 @@ function renderHome() {
       set("hDaily", `🗓 <b>${T("Daily tournament")}</b> · ${done >= t.n ? T("finished") : done ? T("{0} of {1} boards", done, t.n) : T("{0} boards — play now", t.n)}${i >= 0 && rows.length > 1 ? " · " + T("place {0} of {1}", i + 1, rows.length) : rows.length ? " · " + T("{0} players", rows.length) : ""} ›`);
     } else set("hDaily", "");
   }
+  { const p = pzState(), today = new Date().toISOString().slice(0, 10), done = p.day === today;   // the problem of the day
+    set("hPuzzle", done ? `${p.ok ? "✅" : "❌"} <b>${T("Problem of the day")}</b> · ${T("Days in a row: {0}", p.streak || 0)} ›` : `🧩 <b>${T("Problem of the day")}</b> · ${T("A new question every day")} ›`); }
+
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
   set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
@@ -6686,6 +6905,111 @@ function openOv(name, html) {
 }
 function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no way past the name and PIN
   if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; $('ov').classList.remove('float'); }
+/* ---- the problem of the day: the same deal and question for everyone each day (from the date), in turn
+   "what do you open?", "partner opened: what do you answer?" and "what do you lead?". The answer is the robot's call
+   (with its meaning), or for a lead the cards that give the defence the most tricks (double dummy). ---- */
+function pzState() { const PZ_KEY = 'bridge-puzzle'; try { return JSON.parse(localStorage.getItem(PZ_KEY) || '{}') || {}; } catch (e) { return {}; } }
+function pzSave(s) { const PZ_KEY = 'bridge-puzzle'; try { localStorage.setItem(PZ_KEY, JSON.stringify(s)); } catch (e) {} }
+function pzToday() {
+  const day = new Date().toISOString().slice(0, 10);
+  if (ui.pz && ui.pz.day === day && ui.pz.sys === (SET.sys || 'twoone')) return ui.pz;
+  let seed = 2166136261; for (const ch of 'puzzle-' + day) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
+  const kind = ['open', 'answer', 'lead'][Math.floor(Date.parse(day) / 864e5) % 3], cards = sideCards();
+  let pz = null;
+  for (let k = 0; k < 400 && !pz; k++) {
+    E.seed(((seed >>> 0) + k * 7919) >>> 0 || 1);
+    const d = E.shuffle([...Array(52).keys()]), deal = [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13));
+    const hcp = ev(deal[2]).hcp;
+    if (kind === 'open') { if (hcp >= 11 && hcp <= 21) pz = { kind, deal, dealer: 2, auction: [] }; }
+    else if (kind === 'answer') {
+      if (hcp < 6) continue;
+      const auc = [], a1 = E.aiBid(auc, 0, deal[0], cards); auc.push({ seat: 0, call: a1.call, m: a1.m });
+      if (a1.call === 'P') continue;
+      const a2 = E.aiBid(auc, 1, deal[1], cards); auc.push({ seat: 1, call: a2.call, m: a2.m });
+      if (a2.call !== 'P') continue;
+      pz = { kind, deal, dealer: 0, auction: auc };
+    } else {
+      const dealer = k % 4, auc = [];
+      while (!auctionOver(auc) && auc.length < 40) { const t = (dealer + auc.length) % 4, r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); }
+      const c = contractOf(auc);
+      if (c && c.decl === 1 && c.level >= 2 && !c.dbl) pz = { kind, deal, dealer, auction: auc, c };
+    }
+  }
+  E.seed(null);
+  if (!pz) return null;
+  pz.day = day; pz.sys = SET.sys || 'twoone';
+  if (pz.kind !== 'lead') { const r = E.aiBid(pz.auction, 2, pz.deal[2], cards); pz.best = r.call; pz.bestM = r.m; }
+  ui.pz = pz; return pz;
+}
+function pzQuestion(k) { return T(k === 'open' ? 'What do you open?' : k === 'answer' ? 'Partner opened. What do you answer?' : 'What do you lead?'); }
+function pzHand(h) { return `<div class="pzhand">${[3, 2, 1, 0].map(s => `<div>${symHtml(s)} ${E.desc(E.inSuit(h, s)).map(c => RTXT[R(c)]).join(' ') || '—'}</div>`).join('')}<small>${ev(h).hcp} HCP</small></div>`; }
+function showPuzzle() {
+  const pz = pzToday(); if (!pz) { flash(T('No problem today — try again later'), 2000); return; }
+  const st = pzState(), done = st.day === pz.day ? st : null;
+  const auc = pz.auction.length || pz.kind !== 'open' ? `<div class="auction">${auctionTable(pz.auction, pz.kind !== 'lead' && !done, { board: 1, dealer: pz.dealer, seat: 2, sel: ui.pzSel ?? null }).replace(/data-ri=/g, "data-pzi=")}${ui.pzSel != null && pz.auction[ui.pzSel] ? `<div class="expl">${explHtml(pz.auction[ui.pzSel])}</div>` : ''}</div>` : `<div class="muted">${T('You are the dealer. Nobody is vulnerable.')}</div>`;
+  let ctl = '';
+  if (!done) {
+    if (pz.kind === 'lead') ctl = `<div class="pzcards">${pz.deal[2].slice().sort((a, b) => S(b) - S(a) || R(b) - R(a)).map(c => `<button class="pzc s${S(c)}${red(S(c)) ? ' rd' : ''}" data-pzc="${c}">${RTXT[R(c)]}${STR[S(c)]}</button>`).join('')}</div>`;
+    else {
+      const L = legalCalls(pz.auction, 2);
+      const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<div class="pzrow">${[0, 1, 2, 3, 4].map(s => { const c = B(l, s); return L.includes(c) ? `<button data-pzb="${c}">${callHtml(c)}</button>` : '<span></span>'; }).join('')}</div>`).join('');
+      ctl = `<div class="pzbids"><div class="pzrow"><button class="pass" data-pzb="P">${T('Pass')}</button>${L.includes('X') ? `<button data-pzb="X">X</button>` : ''}</div>${lv}</div>`;
+    }
+  }
+  let res = '';
+  if (done) {
+    if (pz.kind === 'lead') {
+      if (!done.full) { pzLeads(); const n = Object.keys(done.vals || {}).length; res = `<div class="muted">⏳ ${T('Working out every lead…')} ${n}/${pz.deal[2].length}</div>`; }
+      else {
+        const v = done.vals, best = Math.max(...Object.values(v).filter(x => x != null)), mine = v[done.ans];
+        res = `<div class="${mine === best ? 'okmsg' : 'err'}">${mine === best ? '✅ ' + T('Well done! That is a best lead.') : '❌ ' + T('Not the best lead.')}</div>
+          <div>${T('Your lead')} <b>${RTXT[R(done.ans)]}${symHtml(S(done.ans))}</b>: ${T('the defence takes {0} tricks', mine)}. </div>
+          <div class="pzvals">${[...new Set(Object.values(v))].sort((a, b) => (b ?? -1) - (a ?? -1)).map(n => `<div${n === best ? ' class="best"' : ''}><b>${n == null ? '?' : T('{0} tricks', n)}</b> ${Object.keys(v).filter(c => v[c] === n).map(Number).sort((a, b) => S(b) - S(a) || R(b) - R(a)).map(c => RTXT[R(c)] + symHtml(S(c))).join(' ')}</div>`).join('')}</div>
+          <div class="muted">${T('Contract')} ${conKey(pz.c)} · ${T('double dummy: every hand open, best play on both sides.')}</div>`;
+      }
+    } else {
+      const ok = done.ans === String(pz.best), ex = c => { const m = E.explainCall(pz.auction, 2, c, sideCards()); return m && m.t ? symText(bidTxt(m.t)) : ''; };
+      const ans = done.ans === 'P' || done.ans === 'X' ? done.ans : +done.ans;
+      res = `<div class="${ok ? 'okmsg' : 'err'}">${ok ? '✅ ' + T('Well done! The robot bids the same.') : '❌ ' + T('The robot bids differently.')}</div>
+        <div>${T('Your answer')} <b>${callHtml(ans)}</b> — ${ex(ans)}</div>
+        ${ok ? '' : `<div>${T('Robot')}: <b>${callHtml(pz.best)}</b> — ${ex(pz.best)}</div>`}
+        <div class="muted">${T('With your system ({0}).', esc(E.sysOf(SET.sys).n))}</div>`;
+    }
+    if (done.ok != null) res += `<details class="pzdeal"><summary>${T('Show all four hands')}</summary>${dealHtml(pz.deal, 2)}</details>`;
+    if (done.ok != null) res += `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
+  }
+  openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2><div class="big">${pzQuestion(pz.kind)}</div>
+    <div class="pzbox">${pzHand(pz.deal[2])}${auc}</div>${ctl}${res}
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+function pzAnswer(ans) {
+  const pz = pzToday(); if (!pz) return;
+  const st = pzState(); if (st.day === pz.day) return;
+  const next = { day: pz.day, ans: pz.kind === 'lead' ? +ans : String(ans), streak: st.streak || 0, lastOk: st.lastOk, prev: st.lastOk, prevStreak: st.streak || 0 };
+  if (pz.kind === 'lead') { next.vals = {}; pzSave(next); pzLeads(); showPuzzle(); return; }
+  pzFinish(next, String(ans) === String(pz.best));
+}
+/* a right answer on the day after the last right one makes the run longer */
+function pzFinish(s, ok) {
+  const yday = new Date(Date.parse(s.day) - 864e5).toISOString().slice(0, 10);
+  s.ok = ok; if (ok) { s.streak = s.prev === yday ? s.prevStreak + 1 : 1; s.lastOk = s.day; } else s.streak = 0;
+  pzSave(s); if (ui.overlay === 'puzzle') showPuzzle(); render();
+}
+/* the leads are worked out in the background; each value shows as it comes */
+function pzLeads() {
+  const pz = pzToday(); if (!pz || ui.pzRun === pz.day) return; ui.pzRun = pz.day;
+  const got = (x, v) => { const s = pzState(); if (s.day !== pz.day) return; s.vals = s.vals || {}; s.vals[x] = v; pzSave(s); if (ui.overlay === 'puzzle') showPuzzle(); };
+  const end = v => { ui.pzRun = null; const s = pzState(); if (s.day !== pz.day) return; s.vals = v; s.full = true; const best = Math.max(...Object.values(v).filter(x => x != null)); pzFinish(s, v[s.ans] === best); };
+  const w = Field.mk();
+  if (w) { w.onmessage = m => { const d = m.data || {}; if (d.type === 'lead1') got(d.x, d.v); if (d.type === 'leads') { w.terminate(); end(d.v); } }; w.postMessage({ type: 'leads', id: 'pz', deal: pz.deal, c: pz.c, limit: 2e7 }); }
+  else setTimeout(() => end(E.leadValues(pz.deal, pz.c, 3e6)), 50);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-pzb]'); if (b) { pzAnswer(b.dataset.pzb); return; }
+  const c = e.target.closest('[data-pzc]'); if (c) { pzAnswer(+c.dataset.pzc); return; }
+  const pi = e.target.closest('[data-pzi]'); if (pi) { const i = +pi.dataset.pzi; ui.pzSel = ui.pzSel === i ? null : i; showPuzzle(); return; }
+  if (e.target.closest('#hPuzzle')) { ui.pzSel = null; showPuzzle(); }
+});
 function showEnd() {
   const e = G.result; if (!e) return;
   const f = G.field || { tables: [], done: false, dd: {} };

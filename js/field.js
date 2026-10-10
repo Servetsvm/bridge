@@ -39,6 +39,8 @@ function workerMain(E) {
           self.postMessage({ type: "table", id: m.id, i, r });
         }
         self.postMessage({ type: "part", id: m.id });
+      } else if (m.type === 'leads') {
+        self.postMessage({ type: 'leads', id: m.id, v: E.leadValues(m.deal, m.c, m.limit, (x, v) => self.postMessage({ type: 'lead1', id: m.id, x, v })) });
       } else if (m.type === 'ana') {
         self.postMessage({ type: 'ana', id: m.id, list: E.analysePlay(m.deal, m.c, m.pl, m.seats, m.limit) });
       } else if (m.type === 'dd') {
