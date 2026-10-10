@@ -438,6 +438,7 @@ async function requestUndo(owner, name, seat) {
 function askText(a) {
   if (a.kind === 'claim') return T('{0} claims {1} of the last {2} tricks', a.who, a.n, a.left);
   if (a.kind === 'rclaim') return T('The robots claim all of the last {0} tricks', a.left);
+  if (a.kind === 'nd') return T('{0} asks for a new deal', a.who);
   return T('{0} wants to take back their last {1}', a.who, T(a.what || 'move'));
 }
 // a yes/no question inside the page (instead of the browser's own pop-up with the site's address)
@@ -555,6 +556,7 @@ function renderBar() {
      <button class="btn gold" id="bHint">${T('Hint')}</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
      ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
+     ${typeof Net !== "undefined" ? (n => `<button class="btn narrowonly${n ? " gold" : ""}" id="bChat" title="${T("Chat")}">💬${n ? `<span class="cbn">${n}</span>` : ""}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ""}
      <span class="menuwrap">${(n => `<button class="btn${n ? " gold" : ""}" id="bMenu" title="${T('Menu')}" aria-expanded="${ui.menu ? 'true' : 'false'}">☰${n ? `<span class="cbn">${n}</span>` : ""}</button>`)(typeof Net !== "undefined" ? (Net.st.unread || 0) + (Net.st.lunread || 0) : 0)}${ui.menu ? `<div class="menu" role="menu">
        <button class="btn${online() ? " gold" : ""}" id="bNet">${online() ? T("Online") + " ●" : T("Online")}</button>
        <button class="btn" id="bBell" title="${T("Sound when it is your turn")}">${(SET.alert || "online") === "off" ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on")}</button>
@@ -722,16 +724,17 @@ function toggleDock() {
 }
 // the new-message count on 💬 in the top bar
 function chatBadge() {
-  const bc = $('bMenu'), n = (Net.st.unread || 0) + (Net.st.lunread || 0); if (!bc) return;
+  const n = (Net.st.unread || 0) + (Net.st.lunread || 0);
+  for (const bc of [$('bMenu'), $('bChat')]) { if (!bc) continue;
   let s = bc.querySelector('.cbn');
   if (n) { if (!s) { s = document.createElement('span'); s.className = 'cbn'; bc.appendChild(s); } s.textContent = n; } else if (s) s.remove();
-  bc.classList.toggle('gold', !!n);
+  bc.classList.toggle('gold', !!n); }
 }
 function renderDock() {
   const d = $('dock'); if (!d || typeof Net === 'undefined' || !G) return;
   const athome = G.phase === 'idle', wide = dockWide();
   chatBadge();
-  const cb = $('chatBtn'); if (cb) { cb.hidden = true; const n = (Net.st.unread || 0) + (Net.st.lunread || 0); const s = $('chatBtnN'); if (s) s.textContent = n ? '(' + n + ')' : ''; }
+  const cb = $('chatBtn'); if (cb) { cb.hidden = athome || wide; const n = (Net.st.unread || 0) + (Net.st.lunread || 0); const s = $('chatBtnN'); if (s) s.textContent = n ? '(' + n + ')' : ''; }
   const show = !athome && (wide || ui.dockOpen);
   document.body.classList.toggle('withdock', !athome && wide);
   d.hidden = !show; if (!show) return;
@@ -1324,6 +1327,7 @@ function goHome() {
   // an unfinished board is kept: "Play with robots" carries on from where it was
   clearTimeout(timer); ui.saved = G && (G.phase === 'bid' || G.phase === 'play') ? G : null;
   G = idleG(); closeOv(); save(); render();
+  if (typeof Net !== "undefined" && Net.shareInfo) Net.shareInfo();   // the lobby sees you are back on the home page
 }
 
 /* ================= overlays ================= */
@@ -1342,7 +1346,8 @@ function openOv(name, html) {
   // during a game on a wider screen, a player card or a private chat is a small window you can drag aside (the table stays usable)
   const fl = ["player", "dm", "net", "lead"].includes(name) && G && G.phase !== "idle" && innerWidth >= 700, ov = $("ov");
   ui.overlay = name; ov.classList.toggle("float", fl);
-  ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}${["end", "res", "rev", "set", "hist", "tour", "tsetup", "deal", "help", "auc"].includes(name) ? " wide" : ""}" data-ov="${name}">${fl ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
+  const bar = fl || (name !== "gate" && innerWidth >= 900 && matchMedia("(pointer:fine)").matches);   // on a computer every window can be dragged by its top bar
+  ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}${["end", "res", "rev", "set", "hist", "tour", "tsetup", "deal", "help", "auc"].includes(name) ? " wide" : ""}" data-ov="${name}">${bar ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
   ov.hidden = false;
   if (fl && typeof SIZES !== "undefined" && SIZES.fw2) { const s = ov.firstChild; s.style.width = SIZES.fw2 + "px"; s.style.height = SIZES.fh2 + "px"; }
   if (fl && ui.fpos) { const s = ov.firstChild; s.style.left = ui.fpos.x + "px"; s.style.top = ui.fpos.y + "px"; s.style.right = "auto"; }
@@ -1690,6 +1695,14 @@ document.addEventListener('click', ev_ => {
     case "bNew": case "oNext2":
       if (G && G.tour && !guest()) { if (G.phase === 'done') nextTourBoard(); else flash(T('Finish this tournament board first'), 2000); break; }
       if (guest()) { if (G.phase === "done") Net.send({ t: "next" }); else Net.askNewDeal(); break; }
+      if (online() && (G.phase === "bid" || G.phase === "play")) {
+        const humans = [...new Set([0, 1, 2, 3].map(s => Net.owner(s)))].filter(o => o && o !== "robot" && o !== "host");
+        if (humans.length) {
+          flash(T("Asked the other players for a new deal"), 2000);
+          Net.askOwners(humans, { kind: "nd", who: Net.st.names[SET.seat] || T("Host") }).then(ok => { if (ok) newBoard(); else flash(T("The other players said no"), 2200); });
+          break;
+        }
+      }
       if (t.id === "oNext2" || G.phase === "done" || ui.confirmNew > Date.now()) { ui.confirmNew = 0; newBoard(); }
       else { ui.confirmNew = Date.now() + 3000; renderBar(); setTimeout(renderBar, 3100); }
       break;
@@ -1703,6 +1716,7 @@ document.addEventListener('click', ev_ => {
     case "bClaim": claim(); break;
     case "bUndo": {
       if (online() && !guest()) { requestUndo("host", Net.st.names[SET.seat] || "Host", SET.seat).then(ok => { if (ok === false) flash(T("Nothing to take back, or the other side said no"), 1800); }); break; }
+      if (guest()) { undo(); break; }
       flash('🤖 ' + T('The robots do not accept an undo'), 1800); break;
     }
     case "sDeal": showDealEntry(); break;
@@ -1889,10 +1903,12 @@ async function gateGo() {
 document.addEventListener('pointerdown', e => {
   const bar = e.target.closest('.fbar'); if (!bar || e.target.closest('button')) return;
   const s = bar.parentElement, r = s.getBoundingClientRect(), dx = e.clientX - r.left, dy = e.clientY - r.top;
+  // a centred window starts moving from where it is
+  if (getComputedStyle(s).position !== "fixed") Object.assign(s.style, { position: "fixed", left: r.left + "px", top: r.top + "px", width: r.width + "px", margin: "0" });
   bar.setPointerCapture(e.pointerId);
   const move = ev => {
     const x = Math.max(0, Math.min(innerWidth - 80, ev.clientX - dx)), y = Math.max(0, Math.min(innerHeight - 40, ev.clientY - dy));
-    s.style.left = x + 'px'; s.style.top = y + 'px'; s.style.right = 'auto'; ui.fpos = { x, y };
+    s.style.left = x + "px"; s.style.top = y + "px"; s.style.right = "auto"; if (s.classList.contains("fsheet")) ui.fpos = { x, y };
   };
   const up = () => { bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', up); };
   bar.addEventListener('pointermove', move); bar.addEventListener('pointerup', up);

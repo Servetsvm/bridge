@@ -983,8 +983,8 @@ const Net = (() => {
     setTimeout(() => { for (const c of cs) { try { c.close(); } catch (e) {} } }, 500);
     wakeOff();
     Object.assign(st, { on: false, host: false, guest: false, me: 'local', peer: null, conn: null, conns: new Map(), seats: {}, names: {}, ctl: null, code: null, msg: '' });
-    if (G && G.phase === "lobby") { G = idleG(); render(); return; }   // nobody started: back to the start screen
-    render(); tick();
+    if (G && G.phase === "lobby") { G = idleG(); render(); shareInfo(); return; }   // nobody started: back to the start screen
+    render(); tick(); shareInfo();   // the lobby sees at once that the table is closed
   }
 
   /* ---- guest ---- */
