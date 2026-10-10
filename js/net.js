@@ -575,12 +575,59 @@ const Net = (() => {
   const DB_URL = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');
   const fbKey = n => encodeURIComponent(encodeURIComponent(nameKey(n)).replace(/\./g, '%2E'));
   const today = () => new Date().toISOString().slice(0, 10);
+  /* every device signs in to the database with a hidden guest account (Firebase anonymous sign-in, no password).
+     The database rules then let each player change only their own name, online line and results, and nobody can
+     read the PINs: a session (sess/<account>) is accepted only with the right PIN, and it decides what you may write. */
+  const API_KEY = 'AIzaSyDNugZ1tf4rXu7lDYzyZg9v1V3is7xz_Mc';
+  const Auth = {
+    tok: null, exp: 0, uid: null, p: null,
+    async token(force) {
+      if (!force && this.tok && Date.now() < this.exp - 60e3) return this.tok;
+      return this.p || (this.p = this.fresh().finally(() => { this.p = null; }));
+    },
+    async fresh() {
+      let rt = null; try { rt = localStorage.getItem('bridge-auth-rt'); } catch (e) {}
+      const keep = (tok, ref, uid, sec) => { this.tok = tok; this.exp = Date.now() + (+sec || 3600) * 1000; if (this.uid !== uid) st.sess = null; this.uid = uid; try { localStorage.setItem('bridge-auth-rt', ref); } catch (e) {} return tok; };
+      if (rt) {   // the same account as before (a new one only when it was cleaned up after 30 days unused)
+        try {
+          const r = await fetch('https://securetoken.googleapis.com/v1/token?key=' + API_KEY, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(rt) });
+          if (r.ok) { const d = await r.json(); return keep(d.id_token, d.refresh_token, d.user_id, d.expires_in); }
+        } catch (e) {}
+      }
+      const r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + API_KEY, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"returnSecureToken":true}' });
+      if (!r.ok) throw new Error('auth ' + r.status);
+      const d = await r.json(); return keep(d.idToken, d.refreshToken, d.localId, d.expiresIn);
+    },
+  };
+  // the name as the database rules see it (the key of users/…, online/…)
+  const ruleKey = n => decodeURIComponent(fbKey(n));
+  async function dbReq(path, opt, retry) {
+    const [p, q] = path.split('?'); let tok = null; try { tok = await Auth.token(retry); } catch (e) {}
+    const r = await fetch(DB_URL + '/' + p + '.json' + (q || tok ? '?' : '') + (q || '') + (tok ? (q ? '&' : '') + 'auth=' + tok : ''), opt);
+    if (r.status === 401 && !retry && tok && Date.now() > Auth.exp - 300e3) return dbReq(path, opt, true);   // an old token: once more with a new one
+    if (!r.ok) throw new Error('db ' + r.status);
+    return r.json();
+  }
   const Cloud = {
     get on() { return !!DB_URL && navigator.onLine; },
-    async get(path) { const [p, q] = path.split('?'); const r = await fetch(DB_URL + '/' + p + '.json' + (q ? '?' + q : '')); if (!r.ok) throw new Error('db ' + r.status); return r.json(); },
-    async put(path, v) { const r = await fetch(DB_URL + '/' + path + '.json', { method: 'PUT', body: JSON.stringify(v) }); if (!r.ok) throw new Error('db ' + r.status); return r.json(); },
-    user: name => Cloud.get('users/' + fbKey(name)),
+    get: path => dbReq(path),
+    put: (path, v) => dbReq(path, { method: 'PUT', body: JSON.stringify(v) }),
+    // is the name registered? (only the name can be read, never the PIN)
+    async exists(name) { return (await Cloud.get('users/' + fbKey(name) + '/name')) != null; },
     claim: (name, pin) => Cloud.put('users/' + fbKey(name), { name: String(name).slice(0, 20), pin, ts: Date.now() }),
+    /* sign this device in as the player: the rules accept the session only when the PIN is right. Returns true or false.
+       (With the database rules from before the sessions, the PIN is still compared here.) */
+    async session(name, pin) {
+      const k = ruleKey(name);
+      try { await Auth.token(); } catch (e) {}
+      if (st.sess === Auth.uid + ':' + k + ':' + pin) return true;
+      try { await Cloud.put('sess/' + Auth.uid, { k, pin, ts: Date.now() }); st.sess = Auth.uid + ':' + k + ':' + pin; return true; }
+      catch (e) {
+        if (!/db 40[13]/.test(e.message)) throw e;
+        try { const u = await Cloud.get('users/' + fbKey(name)); if (u && u.pin) { const ok = u.pin === pin; if (ok) st.sess = Auth.uid + ':' + k + ':' + pin; return ok; } } catch (x) {}
+        return false;
+      }
+    },
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
       const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
@@ -588,16 +635,16 @@ const Net = (() => {
       try {
         // a name chosen before the database existed is registered now; if someone else holds it with another PIN,
         // this player chooses again
-        if (!st.claimed) {
-          const u = await Cloud.user(name);
-          if (!u) await Cloud.claim(name, SET.pinH);
-          else if (u.pin !== SET.pinH) { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
-          st.claimed = true;
+        if (!(await Cloud.exists(name))) await Cloud.claim(name, SET.pinH);
+        if (!(await Cloud.session(name, SET.pinH))) {
+          if (st.claimed) return;   // was signed in already: a passing error, not a wrong PIN
+          { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
         }
+        st.claimed = true;
         await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof() });
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()) }); st.loggedDay = today(); }
-        const [on, users, logins] = await Promise.all([Cloud.get('online'), Cloud.get('users?shallow=true'), isAdmin() ? Cloud.get('logins/' + today()) : null]);
-        st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: Object.keys(users || {}).length, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
+        const [on, users, logins] = await Promise.all([Cloud.get('online'), isAdmin() ? Cloud.get('users?shallow=true').catch(() => null) : null, isAdmin() ? Cloud.get('logins/' + today()).catch(() => null) : null]);   // the number of players and the logins: the administrator only
+        st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: users ? Object.keys(users).length : null, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
         renderL();
       } catch (e) {}
@@ -636,7 +683,7 @@ const Net = (() => {
     const name = myName(); if (!name) return;
     const msg = { t: 'gone', k: st.slot ? st.slot.k : 0, host: name };
     for (const c of (st.mesh || new Map()).values()) { try { if (c.open) c.send(msg); } catch (e) {} }
-    if (Cloud.on && SET.pinH) { try { fetch(DB_URL + '/online/' + fbKey(name) + '.json', { method: 'DELETE', keepalive: true }); } catch (e) {} }
+    if (Cloud.on && SET.pinH) { try { fetch(DB_URL + '/online/' + fbKey(name) + '.json' + (Auth.tok ? '?auth=' + Auth.tok : ''), { method: 'DELETE', keepalive: true }); } catch (e) {} }
   });
   // the real administrator: Servet, with the PIN checked
   const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
@@ -692,9 +739,8 @@ const Net = (() => {
     // with the database the PIN decides (the same player may sign in on a second device); without it, a name in use is refused
     if (!Cloud.on) return k !== nameKey(myName()) && knownNames().some(n => nameKey(n) === k) ? 'taken' : 'ok';
     try {
-      const u = await Cloud.user(name);
-      if (!u) { await Cloud.claim(name, pinH); return 'new'; }
-      return u.pin === pinH ? 'ok' : 'pin';
+      if (!(await Cloud.exists(name))) { await Cloud.claim(name, pinH); await Cloud.session(name, pinH); return 'new'; }
+      return (await Cloud.session(name, pinH)) ? 'ok' : 'pin';
     } catch (e) { return 'ok'; }
   }
 
@@ -704,16 +750,16 @@ const Net = (() => {
     const k = nameKey(name);
     if (k !== nameKey(myName()) && knownNames().some(n => nameKey(n) === k)) return false;
     if (!Cloud.on) return true;
-    try { return !(await Cloud.user(name)); } catch (e) { return true; }
+    try { return !(await Cloud.exists(name)); } catch (e) { return true; }
   }
   async function register(name, pinH) {
     if (!(await nameFree(name))) return 'taken';
-    if (Cloud.on) { try { await Cloud.claim(name, pinH); } catch (e) {} }
+    if (Cloud.on) { try { await Cloud.claim(name, pinH); await Cloud.session(name, pinH); } catch (e) {} }
     return 'ok';
   }
   async function login(name, pinH) {
     if (!Cloud.on) return 'offline';
-    try { const u = await Cloud.user(name); return !u ? 'nouser' : u.pin === pinH ? 'ok' : 'pin'; } catch (e) { return 'offline'; }
+    try { if (!(await Cloud.exists(name))) return 'nouser'; return (await Cloud.session(name, pinH)) ? 'ok' : 'pin'; } catch (e) { return 'offline'; }
   }
   // free names close to the one asked for (Servet2, Servet_NO, Servet35 …)
   async function suggestNames(name) {
@@ -731,7 +777,7 @@ const Net = (() => {
     if (!Cloud.on || !SET.pinH || syncing) return syncing;
     syncing = (async () => {
       const path = 'data/' + SET.pinH;
-      let remote = null; try { remote = await Cloud.get(path); } catch (e) { return; }
+      let remote = null; try { if (!(await Cloud.session(myName(), SET.pinH))) return; remote = await Cloud.get(path); } catch (e) { return; }
       const rh = remote && Array.isArray(remote.hist) ? remote.hist.filter(Boolean) : [];
       const map = new Map(rh.map(r => [r.id, r])); let localNew = false;
       for (const l of HIST) { const r = map.get(l.id); if (!r) { map.set(l.id, l); localNew = true; continue; } const m = { ...r, ...l }; if (l.imp == null && r.imp != null) { m.imp = r.imp; m.mp = r.mp; } map.set(l.id, m); if (l.imp != null && r.imp == null) localNew = true; }
