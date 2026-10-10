@@ -1028,3 +1028,10 @@ body.classic .fan.ovl .card .ix i{font-size:calc(var(--cw)*.48)}
 :root[data-theme="dark"] .composer{background:#2a312d;border-color:#8a7020}
 #dock .composer{margin-top:4px}
 .gsug{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}.gsug .mini-btn{float:none;margin:0}.gmode button{font-size:14px}
+/* four-colour deck (Settings → Deck): clubs green, diamonds orange */
+body.four .card.s0,body.four .mini.s0,body.four .sym.s0,body.four .sy.s0,body.four #bidbox .st.s0{color:#1a8a3a!important}
+body.four .card.s1,body.four .mini.s1,body.four .sym.s1,body.four .sy.s1,body.four #bidbox .st.s1{color:#e07000!important}
+/* vulnerability on the name plates: the seat in red when vulnerable, in green when not */
+.lbl>span:first-child,body.classic .lbl>span:first-child{background:#2e7d32;color:#fff}
+.lbl>span.vn:first-child,body.classic .lbl>span.vn:first-child,.lbl.turn>span.vn:first-child{background:#c62828;color:#fff}
+.lbl.turn>span:first-child{color:#fff}

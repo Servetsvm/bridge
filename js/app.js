@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 121;
+const APP_V = 122;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -46,10 +46,10 @@ const meSeat = () => (guest() && Net.st.watching ? -1 : U());
 const delay = () => [1100, 650, 250][SET.speed];
 const $ = id => document.getElementById(id);
 const red = s => s === 1 || s === 2;
-const symHtml = s => s === 4 ? 'NT' : `<span class="sym${red(s) ? ' red' : ''}">${STR[s]}</span>`;
+const symHtml = s => s === 4 ? "NT" : `<span class="sym s${s}${red(s) ? " red" : ""}">${STR[s]}</span>`;
 const callHtml = c => isNum(c) ? LV(c) + symHtml(ST(c)) : callTxt(c);
 /* enlarges and colours the suit symbols inside a text */
-const symText = t => String(t || '').replace(/[♣♦♥♠]/g, ch => `<span class="sym${ch === '♥' || ch === '♦' ? ' red' : ''}">${ch}</span>`);
+const symText = t => String(t || "").replace(/[♣♦♥♠]/g, ch => `<span class="sym s${"♣♦♥♠".indexOf(ch)}${ch === "♥" || ch === "♦" ? " red" : ""}">${ch}</span>`);
 const conKey = c => c ? `${LV(B(c.level, c.strain))}${symHtml(c.strain)}${c.dbl === 1 ? 'X' : c.dbl === 2 ? 'XX' : ''} ${SEAT_AB[c.decl]}` : 'Pass';
 const conId = c => c ? `${c.level}${c.strain}${c.dbl}${c.decl}` : 'P';
 const fmtSigned = v => (v > 0 ? '+' : '') + v;
@@ -479,7 +479,7 @@ const ORDER = [3, 2, 0, 1];
 const sortHand = h => h.slice().sort((a, b) => ORDER.indexOf(S(a)) - ORDER.indexOf(S(b)) || R(b) - R(a));
 function cardHtml(c, cls) {
   const s = S(c), r = R(c), face = r >= 9 && r <= 11;
-  return `<div class="card${red(s) ? ' rd' : ''}${face ? ' face' : ''}${cls ? ' ' + cls : ''}" data-c="${c}"><span class="ix"><b>${RTXT[r]}</b><i>${SUIT[s]}</i></span><span class="pip">${face ? `<em>${RTXT[r]}</em>` : ''}${SUIT[s]}</span></div>`;
+  return `<div class="card s${s}${red(s) ? " rd" : ""}${face ? ' face' : ''}${cls ? ' ' + cls : ''}" data-c="${c}"><span class="ix"><b>${RTXT[r]}</b><i>${SUIT[s]}</i></span><span class="pip">${face ? `<em>${RTXT[r]}</em>` : ''}${SUIT[s]}</span></div>`;
 }
 const handsNow = () => G.phase === "play" ? (ui.ask && ui.ask.hands) || G.play.hands : G.deal;   // a claim being asked shows every remaining card
 function isVisible(seat) {
@@ -512,7 +512,7 @@ function vHand(seat) {
   let o = '<div class="vh">';
   for (const s of ORDER) {
     const cs = E.desc(E.inSuit(handsNow()[seat], s));
-    o += `<div class="row"><span class="sy${red(s) ? ' red' : ''}">${SUIT[s]}</span>${cs.map(c => `<span class="mini${red(s) ? " rd" : ""}${ctl ? (leg.includes(c) ? " play" : " dim") : ""}${c === ui.hintCard ? " hint" : ""}" data-c="${c}">${RTXT[R(c)]}<i>${SUIT[s]}</i></span>`).join('')}</div>`;
+    o += `<div class="row"><span class="sy s${s}${red(s) ? " red" : ""}">${SUIT[s]}</span>${cs.map(c => `<span class="mini s${s}${red(s) ? " rd" : ""}${ctl ? (leg.includes(c) ? " play" : " dim") : ""}${c === ui.hintCard ? " hint" : ""}" data-c="${c}">${RTXT[R(c)]}<i>${SUIT[s]}</i></span>`).join('')}</div>`;
   }
   return o + '</div>';
 }
@@ -696,7 +696,7 @@ function renderBidbox() {
   if (G.phase !== 'bid' || bidTurn() !== meSeat()) { bb.innerHTML = ''; bb.dataset.k = ''; bb.hidden = true; return; }
   bb.hidden = false; const L = legalCalls(G.auction, U());
   const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
-  const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st${red(s) ? ' r' : ''}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
+  const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st s${s}${red(s) ? " r" : ""}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
   // two rows, as on the big bridge sites: Pass, X, XX and the levels; then the suits of the chosen level
   const html = `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
   // redraw only when something changed, so the alert text being typed keeps its focus
@@ -844,6 +844,7 @@ function applyLook() {
   const dark = SET.theme === 'dark' || (SET.theme !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.body.classList.toggle('bigcards', !!SET.big);
+  document.body.classList.toggle('four', !!SET.four);   // four-colour deck
 }
 try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => applyLook()); } catch (e) {}
 // browsers only allow sound after a tap: unlock it on the first one
@@ -1411,6 +1412,7 @@ function showSettings() {
    <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div></div>
    <div class="grp"><span>${T('Table sounds')}</span>${seg('sfx', [[1, T('On')], [0, T('Off')]], SET.sfx ? 1 : 0)}</div>
    <div class="grp"><span>${T('Screen')}</span>${seg('theme', [['auto', T('Automatic')], ['light', T('Light')], ['dark', T('Dark')]], SET.theme || 'auto')}</div>
+   <div class="grp"><span>${T('Deck')}</span>${seg('four', [[0, T('2 colours') + ' <span class="sym s3">♠</span><span class="sym s2 red">♥</span><span class="sym s1 red">♦</span><span class="sym s0">♣</span>'], [1, T('4 colours') + ' <b style="color:#1b1b1b">♠</b><b style="color:#c4122f">♥</b><b style="color:#e07000">♦</b><b style="color:#1a8a3a">♣</b>']], SET.four ? 1 : 0)}</div>
    <div class="grp"><span>${T('Card size')}</span>${seg('big', [[0, T('Normal')], [1, T('Large')]], SET.big ? 1 : 0)}</div>
    <div class="grp"><span>${T('Our convention card (with partner)')}</span>${convCardHtml()}</div>
    <div class="grp"><span>${T('Sync between devices (GitHub)')}</span><div class="muted">${T('Scores, statistics and the list of deals you have seen are kept in a private gist on your GitHub account. Play offline on any device; everything merges when it is online again.')}</div>
@@ -1703,6 +1705,7 @@ document.addEventListener('click', ev_ => {
     if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
     if (seg === 'alert') { SET.alert = v; if (v !== 'off') beep(); }
     if (seg === 'notify') { setNotify(v === '1'); return; }
+    if (seg === 'four') SET.four = v === '1';
     if (seg === 'sfx') { SET.sfx = v === '1'; sfx('card'); } if (seg === 'theme') SET.theme = v; if (seg === 'big') SET.big = v === '1';
     if (seg === "style") SET.style = v;
     if (seg === "mode") SET.mode = v; if (seg === 'opp') SET.opp = v;

@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Deck": "Deste", "2 colours": "2 renk", "4 colours": "4 renk",
     "Free names:": "Boş isimler:", "I have a name": "Hesabım var", "I'm new here": "Yeni oyuncuyum", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "{0} adında kayıtlı kimse yok. Bu adı almak için \"Yeni oyuncuyum\"u seç.", "The name {0} is already taken. Please choose another name.": "{0} adı alınmış. Lütfen başka bir isim seç.", "Wrong PIN for {0}.": "{0} için PIN yanlış.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Kimsenin kullanmadığı bir isim ve 4 rakamlı bir PIN seç. Bu isim ve PIN ile başka telefon ya da PC'den de girebilirsin.", "Write your name and your PIN.": "Adını ve PIN'ini yaz.", "Sign in": "Giriş yap",
     "Who gets the message": "Mesaj kime gidecek",
     "Add friend": "Arkadaş ekle", "Asked the other players for a new deal": "Diğer oyunculara yeni el soruldu", "Host": "Masa sahibi", "Show offline": "Çevrimdışıları göster", "The other players said no": "Diğer oyuncular kabul etmedi", "{0} asks for a new deal": "{0} yeni el istiyor", "{0} is now a friend": "{0} artık arkadaşın",
@@ -98,6 +99,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Deck": "Kortstokk", "2 colours": "2 farger", "4 colours": "4 farger",
     "Free names:": "Ledige navn:", "I have a name": "Jeg har et navn", "I'm new here": "Jeg er ny her", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Ingen har navnet {0} ennå. Velg \"Jeg er ny her\" for å ta det.", "The name {0} is already taken. Please choose another name.": "Navnet {0} er allerede tatt. Velg et annet navn.", "Wrong PIN for {0}.": "Feil PIN for {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Velg et navn ingen bruker og en firesifret PIN. Med navnet og PIN-en kan du logge inn på en annen telefon eller PC også.", "Write your name and your PIN.": "Skriv navnet ditt og PIN-en.", "Sign in": "Logg inn",
     "Who gets the message": "Hvem får meldingen",
     "Add friend": "Legg til venn", "Asked the other players for a new deal": "Spurte de andre spillerne om nytt spill", "Host": "Vert", "Show offline": "Vis frakoblede", "The other players said no": "De andre spillerne sa nei", "{0} asks for a new deal": "{0} ber om nytt spill", "{0} is now a friend": "{0} er nå en venn",
@@ -193,6 +195,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Deck": "Baraja", "2 colours": "2 colores", "4 colours": "4 colores",
     "Free names:": "Nombres libres:", "I have a name": "Ya tengo nombre", "I'm new here": "Soy nuevo", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Nadie tiene aún el nombre {0}. Elige \"Soy nuevo\" para tomarlo.", "The name {0} is already taken. Please choose another name.": "El nombre {0} ya está ocupado. Elige otro.", "Wrong PIN for {0}.": "PIN incorrecto para {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Elige un nombre que nadie use y un PIN de 4 cifras. Con ellos entras también desde otro móvil o PC.", "Write your name and your PIN.": "Escribe tu nombre y tu PIN.", "Sign in": "Entrar",
     "Who gets the message": "Quién recibe el mensaje",
     "Add friend": "Añadir amigo", "Asked the other players for a new deal": "Se pidió una mano nueva a los demás", "Host": "Anfitrión", "Show offline": "Mostrar desconectados", "The other players said no": "Los demás dijeron que no", "{0} asks for a new deal": "{0} pide una mano nueva", "{0} is now a friend": "{0} ya es tu amigo",
@@ -316,6 +319,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Deck": "Jeu de cartes", "2 colours": "2 couleurs", "4 colours": "4 couleurs",
     "Free names:": "Noms libres :", "I have a name": "J'ai déjà un nom", "I'm new here": "Je suis nouveau", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Personne n'a encore le nom {0}. Choisissez \"Je suis nouveau\" pour le prendre.", "The name {0} is already taken. Please choose another name.": "Le nom {0} est déjà pris. Choisissez-en un autre.", "Wrong PIN for {0}.": "PIN incorrect pour {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Choisissez un nom libre et un PIN à 4 chiffres. Avec eux, vous vous connectez aussi sur un autre téléphone ou PC.", "Write your name and your PIN.": "Écrivez votre nom et votre PIN.", "Sign in": "Se connecter",
     "Who gets the message": "Qui reçoit le message",
     "Add friend": "Ajouter un ami", "Asked the other players for a new deal": "Nouvelle donne demandée aux autres joueurs", "Host": "Hôte", "Show offline": "Afficher hors ligne", "The other players said no": "Les autres joueurs ont refusé", "{0} asks for a new deal": "{0} demande une nouvelle donne", "{0} is now a friend": "{0} est maintenant votre ami",
@@ -439,6 +443,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Deck": "Mazzo", "2 colours": "2 colori", "4 colours": "4 colori",
     "Free names:": "Nomi liberi:", "I have a name": "Ho già un nome", "I'm new here": "Sono nuovo", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Nessuno ha ancora il nome {0}. Scegli \"Sono nuovo\" per prenderlo.", "The name {0} is already taken. Please choose another name.": "Il nome {0} è già preso. Scegline un altro.", "Wrong PIN for {0}.": "PIN errato per {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Scegli un nome libero e un PIN di 4 cifre. Con questi entri anche da un altro telefono o PC.", "Write your name and your PIN.": "Scrivi il tuo nome e il PIN.", "Sign in": "Accedi",
     "Who gets the message": "Chi riceve il messaggio",
     "Add friend": "Aggiungi amico", "Asked the other players for a new deal": "Chiesta una nuova smazzata agli altri", "Host": "Host", "Show offline": "Mostra offline", "The other players said no": "Gli altri hanno detto di no", "{0} asks for a new deal": "{0} chiede una nuova smazzata", "{0} is now a friend": "{0} ora è tuo amico",
@@ -562,6 +567,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Deck": "Kartenspiel", "2 colours": "2 Farben", "4 colours": "4 Farben",
     "Free names:": "Freie Namen:", "I have a name": "Ich habe einen Namen", "I'm new here": "Ich bin neu", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Den Namen {0} hat noch niemand. Wähle \"Ich bin neu\", um ihn zu nehmen.", "The name {0} is already taken. Please choose another name.": "Der Name {0} ist schon vergeben. Bitte wähle einen anderen.", "Wrong PIN for {0}.": "Falsche PIN für {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Wähle einen freien Namen und eine 4-stellige PIN. Damit meldest du dich auch auf einem anderen Handy oder PC an.", "Write your name and your PIN.": "Schreibe deinen Namen und deine PIN.", "Sign in": "Anmelden",
     "Who gets the message": "Wer bekommt die Nachricht",
     "Add friend": "Freund hinzufügen", "Asked the other players for a new deal": "Die anderen Spieler wurden um ein neues Board gebeten", "Host": "Gastgeber", "Show offline": "Offline zeigen", "The other players said no": "Die anderen Spieler haben abgelehnt", "{0} asks for a new deal": "{0} möchte ein neues Board", "{0} is now a friend": "{0} ist jetzt dein Freund",
@@ -685,6 +691,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Deck": "Колода", "2 colours": "2 цвета", "4 colours": "4 цвета",
     "Free names:": "Свободные имена:", "I have a name": "У меня есть имя", "I'm new here": "Я новичок", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Имени {0} пока ни у кого нет. Выберите \"Я новичок\", чтобы взять его.", "The name {0} is already taken. Please choose another name.": "Имя {0} уже занято. Выберите другое.", "Wrong PIN for {0}.": "Неверный PIN для {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Выберите свободное имя и PIN из 4 цифр. С ними вы войдёте и с другого телефона или ПК.", "Write your name and your PIN.": "Введите имя и PIN.", "Sign in": "Войти",
     "Who gets the message": "Кому сообщение",
     "Add friend": "Добавить друга", "Asked the other players for a new deal": "Другим игрокам предложена новая сдача", "Host": "Хозяин", "Show offline": "Показать не в сети", "The other players said no": "Другие игроки отказались", "{0} asks for a new deal": "{0} просит новую сдачу", "{0} is now a friend": "{0} теперь ваш друг",
@@ -808,6 +815,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Deck": "Talia", "2 colours": "2 kolory", "4 colours": "4 kolory",
     "Free names:": "Wolne imiona:", "I have a name": "Mam już imię", "I'm new here": "Jestem nowy", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "Nikt jeszcze nie ma imienia {0}. Wybierz \"Jestem nowy\", aby je zająć.", "The name {0} is already taken. Please choose another name.": "Imię {0} jest już zajęte. Wybierz inne.", "Wrong PIN for {0}.": "Zły PIN dla {0}.", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "Wybierz wolne imię i 4-cyfrowy PIN. Dzięki nim zalogujesz się też na innym telefonie lub komputerze.", "Write your name and your PIN.": "Wpisz imię i PIN.", "Sign in": "Zaloguj",
     "Who gets the message": "Kto dostanie wiadomość",
     "Add friend": "Dodaj znajomego", "Asked the other players for a new deal": "Poproszono innych graczy o nowe rozdanie", "Host": "Gospodarz", "Show offline": "Pokaż offline", "The other players said no": "Inni gracze odmówili", "{0} asks for a new deal": "{0} prosi o nowe rozdanie", "{0} is now a friend": "{0} jest teraz znajomym",
@@ -931,6 +939,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Deck": "牌面颜色", "2 colours": "双色", "4 colours": "四色",
     "Free names:": "可用名字:", "I have a name": "我已有名字", "I'm new here": "我是新玩家", "Nobody has the name {0} yet. Choose \"I'm new here\" to take it.": "还没有人叫 {0}。选择\"我是新玩家\"来使用它。", "The name {0} is already taken. Please choose another name.": "名字 {0} 已被占用,请换一个。", "Wrong PIN for {0}.": "{0} 的 PIN 不正确。", "Choose a name nobody uses yet and a 4-digit PIN. With the name and the PIN you can sign in on another phone or PC too.": "选择一个没人用的名字和 4 位 PIN。用它们也能在其他手机或电脑上登录。", "Write your name and your PIN.": "输入你的名字和 PIN。", "Sign in": "登录",
     "Who gets the message": "消息发给谁",
     "Add friend": "添加好友", "Asked the other players for a new deal": "已请其他玩家同意新牌", "Host": "桌主", "Show offline": "显示离线", "The other players said no": "其他玩家拒绝了", "{0} asks for a new deal": "{0} 请求新牌", "{0} is now a friend": "{0} 已成为好友",
