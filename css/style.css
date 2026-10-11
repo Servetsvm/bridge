@@ -1237,3 +1237,15 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .prac .prrow .prpicksel.on{color:#fff;border-color:#f2c94c;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f2c94c' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"),linear-gradient(170deg,#3a9a63,#24704a)}
 .prac .prrow .prpicksel option,.prac .prrow .prpicksel optgroup{color:#1f2a22;background:#fffaf0;font-weight:600}
+/* practise conventions: the title, then the base system and the convention choice side by side */
+.prac .prtitle{margin:0 0 8px;font-size:16px;font-weight:800;color:#f2c94c;font-family:inherit;letter-spacing:0}
+.prac .prrow2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.prac .prf{display:flex;flex-direction:column;gap:4px;min-width:0}
+.prac .prf > span{font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:#cfe3d5}
+.prac .prpicksel{width:100%;min-width:0;appearance:none;-webkit-appearance:none;border:2px solid #f2c94c;border-radius:10px;padding:9px 30px 9px 10px;font:inherit;font-size:14.5px;font-weight:800;color:#1f4f33;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.18);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b8891c' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"),linear-gradient(170deg,#fffaf0,#f6e7b8);background-repeat:no-repeat;background-position:right 8px center,0 0}
+.prac .prpicksel:hover{box-shadow:0 0 0 3px rgba(242,201,76,.45),0 2px 8px rgba(0,0,0,.18)}
+.prac .prpicksel.sys{color:#5a3d00;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23b8891c' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"),linear-gradient(170deg,#ffe9a8,#f2c94c)}
+.prac .prpicksel.on{color:#fff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f2c94c' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"),linear-gradient(170deg,#3a9a63,#24704a)}
+.prac .prpicksel option,.prac .prpicksel optgroup{color:#1f2a22;background:#fffaf0;font-weight:600}
+@media (max-width:380px){.prac .prpicksel{font-size:13.5px;padding:8px 26px 8px 8px}}
