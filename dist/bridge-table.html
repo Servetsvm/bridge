@@ -1291,6 +1291,24 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .pdi.on{background:#1f3a2a;color:#9fe0b4}
 :root[data-theme="dark"] .prac .pdh{color:#f2c94c}
 @media (max-width:420px){.prac .prdrop{font-size:13.5px;padding:8px 9px}.prac .pdpanel.wide{right:0}}
+/* practise conventions on top of the page: royal navy and wine with a gold rim, so it stands out from the green table */
+.hcard.prac{position:relative;overflow:visible;background:linear-gradient(135deg,#1b2a6b 0%,#3a2470 45%,#7a1f45 100%);border:2px solid #f2c94c;box-shadow:0 12px 32px rgba(58,36,112,.38),inset 0 1px 0 rgba(255,255,255,.18)}
+.hcard.prac::before{content:"♠ ♥ ♦ ♣";position:absolute;right:14px;bottom:6px;font-size:44px;letter-spacing:6px;color:rgba(255,255,255,.07);pointer-events:none;white-space:nowrap}
+.prac .prtop .prtitle{font-size:19px;color:#ffd966;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.prac .prtop .prdesc{color:#efe6ff}
+.prac .prdrop.on{color:#fff;background:linear-gradient(170deg,#ff9a4d,#e8463a);border-color:#ffd966}
+.prac .prdrop.on i{color:#fff}
+.prac .prdrop:not(.on):not(.sys){animation:prpulse 2.2s ease-in-out infinite}
+@keyframes prpulse{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.25),0 0 0 0 rgba(255,217,102,.6)}50%{box-shadow:0 2px 8px rgba(0,0,0,.25),0 0 0 7px rgba(255,217,102,0)}}
+.prac .prval{color:#ffe9a8}
+.prac .pdi.on{background:#fff1d6;color:#8a3b12}
+.prac .pdi input{accent-color:#e8463a}
+.prac .prplay,body.classic .prac .prplay{display:block;width:100%;margin:12px 0 8px;padding:12px;font-size:16.5px;font-weight:800;color:#3b2600;border:0;border-radius:12px;background:linear-gradient(170deg,#ffe58a,#f2b82c);box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer}
+.prac .prplay:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.prac .prask{color:#ffd966;border-color:rgba(255,217,102,.7)}
+:root[data-theme="dark"] .hcard.prac{background:linear-gradient(135deg,#141f52 0%,#2c1b57 45%,#5c1735 100%)}
+:root[data-theme="dark"] .prac .pdi.on{background:#3a2a1a;color:#ffc48a}
+@media (prefers-reduced-motion:reduce){.prac .prdrop{animation:none!important}}
 
 </style>
 
@@ -3845,6 +3863,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Deal me a practice hand": "Bana çalışma eli dağıt",
     "{0} conventions": "{0} konvansiyon",
     "Base system and conventions": "Temel sistem ve konvansiyonlar",
     "In your system": "Sisteminde olanlar",
@@ -4030,6 +4049,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Deal me a practice hand": "Del ut en øvingshånd",
     "{0} conventions": "{0} konvensjoner",
     "Base system and conventions": "Grunnsystem og konvensjoner",
     "In your system": "I systemet ditt",
@@ -4215,6 +4235,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Deal me a practice hand": "Repárteme una mano de práctica",
     "{0} conventions": "{0} convenciones",
     "Base system and conventions": "Sistema base y convenciones",
     "In your system": "En tu sistema",
@@ -4428,6 +4449,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Deal me a practice hand": "Distribuez-moi une main d'entraînement",
     "{0} conventions": "{0} conventions",
     "Base system and conventions": "Système de base et conventions",
     "In your system": "Dans votre système",
@@ -4641,6 +4663,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Deal me a practice hand": "Dammi una mano di allenamento",
     "{0} conventions": "{0} convenzioni",
     "Base system and conventions": "Sistema base e convenzioni",
     "In your system": "Nel tuo sistema",
@@ -4854,6 +4877,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Deal me a practice hand": "Teil mir eine Übungshand aus",
     "{0} conventions": "{0} Konventionen",
     "Base system and conventions": "Grundsystem und Konventionen",
     "In your system": "In deinem System",
@@ -5067,6 +5091,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Deal me a practice hand": "Сдать мне тренировочную руку",
     "{0} conventions": "Конвенций: {0}",
     "Base system and conventions": "Базовая система и конвенции",
     "In your system": "В вашей системе",
@@ -5280,6 +5305,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Deal me a practice hand": "Rozdaj mi rękę do ćwiczeń",
     "{0} conventions": "Konwencje: {0}",
     "Base system and conventions": "System bazowy i konwencje",
     "In your system": "W twoim systemie",
@@ -5493,6 +5519,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Deal me a practice hand": "给我发一手练习牌",
     "{0} conventions": "{0} 个约定叫",
     "Base system and conventions": "基本体系和约定叫",
     "In your system": "你体系中的",
@@ -6302,7 +6329,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 149;
+const APP_V = 150;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -7206,6 +7233,7 @@ function pracHtml() {
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
+    ${sel.length ? `<button class="btn prplay" id="pdPlay">▶ ${T('Deal me a practice hand')}</button>` : ''}
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
@@ -7235,6 +7263,7 @@ function homeShell() {
       <button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button></div></header>
   <div class="hgrid">
     <section class="hmain">
+      <div class="hcard prac" id="hPrac"></div>
       <div class="hcard hero hsmall">
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
@@ -7242,7 +7271,6 @@ function homeShell() {
       </div>
       <div id="hSec"></div>
       <div id="hPend"></div>
-      <div class="hcard prac" id="hPrac"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
     <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
@@ -8267,6 +8295,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'toast') { if (ui.toastChat && G && G.phase !== 'idle') { ui.toastChat = false; ui.dockOpen = true; renderDock(); } ui.toast = null; render(); return; }   // a message: tap it to open the chat
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
+  if (t.id === "pdPlay") { ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }

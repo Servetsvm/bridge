@@ -1276,3 +1276,21 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .pdi.on{background:#1f3a2a;color:#9fe0b4}
 :root[data-theme="dark"] .prac .pdh{color:#f2c94c}
 @media (max-width:420px){.prac .prdrop{font-size:13.5px;padding:8px 9px}.prac .pdpanel.wide{right:0}}
+/* practise conventions on top of the page: royal navy and wine with a gold rim, so it stands out from the green table */
+.hcard.prac{position:relative;overflow:visible;background:linear-gradient(135deg,#1b2a6b 0%,#3a2470 45%,#7a1f45 100%);border:2px solid #f2c94c;box-shadow:0 12px 32px rgba(58,36,112,.38),inset 0 1px 0 rgba(255,255,255,.18)}
+.hcard.prac::before{content:"♠ ♥ ♦ ♣";position:absolute;right:14px;bottom:6px;font-size:44px;letter-spacing:6px;color:rgba(255,255,255,.07);pointer-events:none;white-space:nowrap}
+.prac .prtop .prtitle{font-size:19px;color:#ffd966;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+.prac .prtop .prdesc{color:#efe6ff}
+.prac .prdrop.on{color:#fff;background:linear-gradient(170deg,#ff9a4d,#e8463a);border-color:#ffd966}
+.prac .prdrop.on i{color:#fff}
+.prac .prdrop:not(.on):not(.sys){animation:prpulse 2.2s ease-in-out infinite}
+@keyframes prpulse{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.25),0 0 0 0 rgba(255,217,102,.6)}50%{box-shadow:0 2px 8px rgba(0,0,0,.25),0 0 0 7px rgba(255,217,102,0)}}
+.prac .prval{color:#ffe9a8}
+.prac .pdi.on{background:#fff1d6;color:#8a3b12}
+.prac .pdi input{accent-color:#e8463a}
+.prac .prplay,body.classic .prac .prplay{display:block;width:100%;margin:12px 0 8px;padding:12px;font-size:16.5px;font-weight:800;color:#3b2600;border:0;border-radius:12px;background:linear-gradient(170deg,#ffe58a,#f2b82c);box-shadow:0 6px 18px rgba(0,0,0,.3);cursor:pointer}
+.prac .prplay:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.prac .prask{color:#ffd966;border-color:rgba(255,217,102,.7)}
+:root[data-theme="dark"] .hcard.prac{background:linear-gradient(135deg,#141f52 0%,#2c1b57 45%,#5c1735 100%)}
+:root[data-theme="dark"] .prac .pdi.on{background:#3a2a1a;color:#ffc48a}
+@media (prefers-reduced-motion:reduce){.prac .prdrop{animation:none!important}}
