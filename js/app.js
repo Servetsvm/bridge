@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 145;
+const APP_V = 146;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -897,7 +897,7 @@ function pracHtml() {
       <select id="hPracSel" class="sel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>
         ${on.length ? `<optgroup label="${esc(T('In your system'))}">${on.map(opt).join('')}</optgroup>` : ''}${off.length ? `<optgroup label="${esc(T('Not in your system'))}">${off.map(opt).join('')}</optgroup>` : ''}</select></div>
     <p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p>
-    ${ui.pracOpen ? `<div class="prsys">${convCardHtml()}</div>` : ''}
+    ${ui.pracOpen ? `<div class="prsys">${convCardHtml()}</div>` : `<button class="prsum" id="hPracSum"><span>${T('Base system')}:</span> <b>${esc(E.sysOf(SET.sys).n.replace(/ (.*)/, ''))}</b> · ${T('{0} conventions', E.CONVS.filter(c => SET.conv[c.k]).length)} ▸</button>`}
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
@@ -1948,7 +1948,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
-  if (t.id === 'hPracTog') { ui.pracOpen = !ui.pracOpen; render(); return; }   // open / close the base system and conventions
+  if (t.id === 'hPracTog' || t.id === 'hPracSum') { ui.pracOpen = !ui.pracOpen; render(); return; }   // open / close the base system and conventions
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }

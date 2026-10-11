@@ -1223,3 +1223,9 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .prac .prtoggle{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-align:left;flex:0 0 auto}
 .prac .prtoggle:hover h2{text-decoration:underline;text-underline-offset:3px}
 .prac .prchev{display:inline-block;margin-left:4px;font-size:13px;color:#f2c94c}
+.prac .prsum{display:block;width:100%;text-align:left;margin:0 0 10px;padding:9px 12px;border-radius:10px;border:1px solid rgba(242,201,76,.5);background:#fbf6e6;color:#2b2a22;font:inherit;font-size:14px;cursor:pointer}
+.prac .prsum span{color:#1f4f33;font-weight:600}
+.prac .prsum b{color:#1f4f33}
+.prac .prsum:hover{box-shadow:0 0 0 2px #f2c94c}
+:root[data-theme="dark"] .prac .prsum{background:#1d2a23;color:#e8efe9}
+:root[data-theme="dark"] .prac .prsum span,:root[data-theme="dark"] .prac .prsum b{color:#f2c94c}
