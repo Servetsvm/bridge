@@ -1223,6 +1223,15 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .cvreq .cvx{font-family:monospace;font-size:13px;color:#555;margin-bottom:6px}
 .cvreq .mini-btn{float:none}
 .prac .prrow{flex-wrap:nowrap}.prac .prrow .sel{flex:1 1 0;width:0}
+/* base system and the conventions within it, inside the practice card: a light panel */
+.prac .prsys{background:#fbf6e6;color:#2b2a22;border-radius:12px;padding:10px 12px;margin:4px 0 10px}
+.prac .prsys .grp{margin:0 0 8px}
+.prac .prsys .grp:last-child{margin-bottom:0}
+.prac .prsys .grp > span{color:#1f4f33}
+.prac .prsys .muted{color:#5b5a50}
+:root[data-theme="dark"] .prac .prsys{background:#1d2a23;color:#e8efe9}
+:root[data-theme="dark"] .prac .prsys .grp > span{color:#f2c94c}
+:root[data-theme="dark"] .prac .prsys .muted{color:#b9c6bd}
 
 </style>
 
@@ -3777,6 +3786,8 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "In your system": "Sisteminde olanlar",
+    "Not in your system": "Sisteminde olmayanlar",
     "Add a convention": "Konvansiyon ekle",
     "An example auction (optional)": "Örnek bir ihale (isteğe bağlı)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Bu konvansiyonları robotlara eklemesini Claude'dan isteyin; sonra listeden kaldırın.",
@@ -3958,6 +3969,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "In your system": "I systemet ditt",
+    "Not in your system": "Ikke i systemet ditt",
     "Add a convention": "Legg til en konvensjon",
     "An example auction (optional)": "Et eksempel på melding (valgfritt)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Be Claude legge disse konvensjonene til robotene; fjern dem deretter fra listen.",
@@ -4139,6 +4152,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "In your system": "En tu sistema",
+    "Not in your system": "Fuera de tu sistema",
     "Add a convention": "Añadir una convención",
     "An example auction (optional)": "Una subasta de ejemplo (opcional)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Pide a Claude que añada estas convenciones a los robots; luego quítalas de la lista.",
@@ -4348,6 +4363,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "In your system": "Dans votre système",
+    "Not in your system": "Hors de votre système",
     "Add a convention": "Ajouter une convention",
     "An example auction (optional)": "Un exemple de séquence (facultatif)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Demandez à Claude d'ajouter ces conventions aux robots, puis retirez-les de la liste.",
@@ -4557,6 +4574,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "In your system": "Nel tuo sistema",
+    "Not in your system": "Fuori dal tuo sistema",
     "Add a convention": "Aggiungi una convenzione",
     "An example auction (optional)": "Una licita di esempio (facoltativa)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Chiedi a Claude di aggiungere queste convenzioni ai robot; poi toglile dalla lista.",
@@ -4766,6 +4785,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "In your system": "In deinem System",
+    "Not in your system": "Nicht in deinem System",
     "Add a convention": "Konvention hinzufügen",
     "An example auction (optional)": "Eine Beispielreizung (freiwillig)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Bitte Claude, diese Konventionen den Robotern beizubringen; entferne sie dann aus der Liste.",
@@ -4975,6 +4996,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "In your system": "В вашей системе",
+    "Not in your system": "Вне вашей системы",
     "Add a convention": "Добавить конвенцию",
     "An example auction (optional)": "Пример торговли (необязательно)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Попросите Claude добавить эти конвенции роботам, затем уберите их из списка.",
@@ -5184,6 +5207,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "In your system": "W twoim systemie",
+    "Not in your system": "Poza twoim systemem",
     "Add a convention": "Dodaj konwencję",
     "An example auction (optional)": "Przykładowa licytacja (opcjonalnie)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Poproś Claude, by dodał te konwencje robotom; potem usuń je z listy.",
@@ -5393,6 +5418,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "In your system": "你体系中的",
+    "Not in your system": "不在你体系中的",
     "Add a convention": "添加约定叫",
     "An example auction (optional)": "叫牌示例(可选)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "请 Claude 把这些约定叫加入机器人;然后从列表中删除。",
@@ -6198,7 +6225,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 142;
+const APP_V = 143;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -7080,9 +7107,14 @@ const PRAC_GROUPS = [
 ];
 // the same choice as in Settings, on the home page: the convention the next deals are dealt for
 function pracHtml() {
+  // the choice: first the conventions of your system, then the others (choosing one of those puts it on your card)
+  const on = E.CONVS.filter(c => SET.conv[c.k]), off = E.CONVS.filter(c => !SET.conv[c.k]);
+  const opt = c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`;
   return `<div class="prrow"><h2>📚 ${T('Practise conventions')}</h2>
-      <select id="hPracSel" class="sel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select></div>
+      <select id="hPracSel" class="sel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>
+        ${on.length ? `<optgroup label="${esc(T('In your system'))}">${on.map(opt).join('')}</optgroup>` : ''}${off.length ? `<optgroup label="${esc(T('Not in your system'))}">${off.map(opt).join('')}</optgroup>` : ''}</select></div>
     <p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p>
+    <div class="prsys">${convCardHtml()}</div>
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
@@ -7105,8 +7137,7 @@ function homeShell() {
   <div class="hgrid">
     <section class="hmain">
       <div class="hcard hero hsmall">
-        <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label>
-        <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
+        <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label></div>
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>

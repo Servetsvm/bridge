@@ -1208,3 +1208,12 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .cvreq .cvx{font-family:monospace;font-size:13px;color:#555;margin-bottom:6px}
 .cvreq .mini-btn{float:none}
 .prac .prrow{flex-wrap:nowrap}.prac .prrow .sel{flex:1 1 0;width:0}
+/* base system and the conventions within it, inside the practice card: a light panel */
+.prac .prsys{background:#fbf6e6;color:#2b2a22;border-radius:12px;padding:10px 12px;margin:4px 0 10px}
+.prac .prsys .grp{margin:0 0 8px}
+.prac .prsys .grp:last-child{margin-bottom:0}
+.prac .prsys .grp > span{color:#1f4f33}
+.prac .prsys .muted{color:#5b5a50}
+:root[data-theme="dark"] .prac .prsys{background:#1d2a23;color:#e8efe9}
+:root[data-theme="dark"] .prac .prsys .grp > span{color:#f2c94c}
+:root[data-theme="dark"] .prac .prsys .muted{color:#b9c6bd}

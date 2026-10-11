@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 142;
+const APP_V = 143;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -890,9 +890,14 @@ const PRAC_GROUPS = [
 ];
 // the same choice as in Settings, on the home page: the convention the next deals are dealt for
 function pracHtml() {
+  // the choice: first the conventions of your system, then the others (choosing one of those puts it on your card)
+  const on = E.CONVS.filter(c => SET.conv[c.k]), off = E.CONVS.filter(c => !SET.conv[c.k]);
+  const opt = c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`;
   return `<div class="prrow"><h2>📚 ${T('Practise conventions')}</h2>
-      <select id="hPracSel" class="sel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select></div>
+      <select id="hPracSel" class="sel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>
+        ${on.length ? `<optgroup label="${esc(T('In your system'))}">${on.map(opt).join('')}</optgroup>` : ''}${off.length ? `<optgroup label="${esc(T('Not in your system'))}">${off.map(opt).join('')}</optgroup>` : ''}</select></div>
     <p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p>
+    <div class="prsys">${convCardHtml()}</div>
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
@@ -915,8 +920,7 @@ function homeShell() {
   <div class="hgrid">
     <section class="hmain">
       <div class="hcard hero hsmall">
-        <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label>
-        <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
+        <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label></div>
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>

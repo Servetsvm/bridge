@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "In your system": "Sisteminde olanlar",
+    "Not in your system": "Sisteminde olmayanlar",
     "Add a convention": "Konvansiyon ekle",
     "An example auction (optional)": "Örnek bir ihale (isteğe bağlı)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Bu konvansiyonları robotlara eklemesini Claude'dan isteyin; sonra listeden kaldırın.",
@@ -184,6 +186,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "In your system": "I systemet ditt",
+    "Not in your system": "Ikke i systemet ditt",
     "Add a convention": "Legg til en konvensjon",
     "An example auction (optional)": "Et eksempel på melding (valgfritt)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Be Claude legge disse konvensjonene til robotene; fjern dem deretter fra listen.",
@@ -365,6 +369,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "In your system": "En tu sistema",
+    "Not in your system": "Fuera de tu sistema",
     "Add a convention": "Añadir una convención",
     "An example auction (optional)": "Una subasta de ejemplo (opcional)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Pide a Claude que añada estas convenciones a los robots; luego quítalas de la lista.",
@@ -574,6 +580,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "In your system": "Dans votre système",
+    "Not in your system": "Hors de votre système",
     "Add a convention": "Ajouter une convention",
     "An example auction (optional)": "Un exemple de séquence (facultatif)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Demandez à Claude d'ajouter ces conventions aux robots, puis retirez-les de la liste.",
@@ -783,6 +791,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "In your system": "Nel tuo sistema",
+    "Not in your system": "Fuori dal tuo sistema",
     "Add a convention": "Aggiungi una convenzione",
     "An example auction (optional)": "Una licita di esempio (facoltativa)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Chiedi a Claude di aggiungere queste convenzioni ai robot; poi toglile dalla lista.",
@@ -992,6 +1002,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "In your system": "In deinem System",
+    "Not in your system": "Nicht in deinem System",
     "Add a convention": "Konvention hinzufügen",
     "An example auction (optional)": "Eine Beispielreizung (freiwillig)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Bitte Claude, diese Konventionen den Robotern beizubringen; entferne sie dann aus der Liste.",
@@ -1201,6 +1213,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "In your system": "В вашей системе",
+    "Not in your system": "Вне вашей системы",
     "Add a convention": "Добавить конвенцию",
     "An example auction (optional)": "Пример торговли (необязательно)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Попросите Claude добавить эти конвенции роботам, затем уберите их из списка.",
@@ -1410,6 +1424,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "In your system": "W twoim systemie",
+    "Not in your system": "Poza twoim systemem",
     "Add a convention": "Dodaj konwencję",
     "An example auction (optional)": "Przykładowa licytacja (opcjonalnie)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "Poproś Claude, by dodał te konwencje robotom; potem usuń je z listy.",
@@ -1619,6 +1635,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "In your system": "你体系中的",
+    "Not in your system": "不在你体系中的",
     "Add a convention": "添加约定叫",
     "An example auction (optional)": "叫牌示例(可选)",
     "Ask Claude to add these conventions to the robots; then remove them from the list.": "请 Claude 把这些约定叫加入机器人;然后从列表中删除。",
