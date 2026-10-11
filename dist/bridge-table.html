@@ -1207,6 +1207,22 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .prsel option{background:#1d2a23;color:#f2e9cc}
 @media (max-width:520px){.prac .prbox .prsel{font-size:16.5px;padding:14px 44px 14px 50px}}
 @media (prefers-reduced-motion:reduce){.prac .prpick:not(.on) .prbox{animation:none}}
+/* practise conventions, compact: the title and the choice side by side (the choice as in Settings) */
+.hcard.prac{padding:12px 14px}
+.prac .prrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.prac .prrow h2{margin:0;font-size:15px;font-weight:800;color:#f2c94c;white-space:nowrap;font-family:inherit;letter-spacing:0}
+.prac .prrow .sel{flex:1 1 200px;min-width:0;max-width:340px;font-size:15px}
+.prac .prdesc{margin:8px 0 6px;font-size:13px;line-height:1.4;color:#e3dcc5}
+.prac .prask{background:none;border:1px dashed rgba(242,201,76,.7);color:#f2c94c;border-radius:8px;padding:6px 10px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+.prac .prask:hover{background:rgba(242,201,76,.12)}
+.prac .praskrow{display:flex;gap:8px;flex-wrap:wrap}
+.cvreq{border:1px solid var(--line,#ddd);border-radius:10px;padding:9px 11px;margin:8px 0;background:rgba(127,127,127,.06)}
+.cvreq .cvh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.cvreq .cvh small{color:#888}
+.cvreq .cvb{margin:6px 0;white-space:pre-wrap;font-size:14px;line-height:1.4}
+.cvreq .cvx{font-family:monospace;font-size:13px;color:#555;margin-bottom:6px}
+.cvreq .mini-btn{float:none}
+.prac .prrow{flex-wrap:nowrap}.prac .prrow .sel{flex:1 1 0;width:0}
 
 </style>
 
@@ -3761,6 +3777,22 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Add a convention": "Konvansiyon ekle",
+    "An example auction (optional)": "Örnek bir ihale (isteğe bağlı)",
+    "Ask Claude to add these conventions to the robots; then remove them from the list.": "Bu konvansiyonları robotlara eklemesini Claude'dan isteyin; sonra listeden kaldırın.",
+    "Convention requests": "Konvansiyon istekleri",
+    "Could not remove": "Kaldırılamadı",
+    "Could not send — sign in with your name and PIN first.": "Gönderilemedi — önce adın ve PIN'inle giriş yap.",
+    "Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.": "Robotların henüz oynamadığı bir konvansiyonu anlat. İsteğin yöneticiye gider; konvansiyon robotlara ve listeye eklenir.",
+    "Done — remove": "Eklendi — kaldır",
+    "How does it work?": "Nasıl çalışıyor?",
+    "Name of the convention": "Konvansiyonun adı",
+    "No internet connection — try again later.": "İnternet bağlantısı yok — sonra tekrar dene.",
+    "No requests yet.": "Henüz istek yok.",
+    "Thank you! Your request was sent to the administrator.": "Teşekkürler! İsteğin yöneticiye gönderildi.",
+    "When is it used, what does each bid mean, how does partner answer?": "Ne zaman kullanılır, her teklif ne anlama gelir, ortak nasıl cevap verir?",
+    "Write the name and how it works": "Adını ve nasıl çalıştığını yaz",
+    "e.g. Puppet Stayman": "ör. Puppet Stayman",
     "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Bundan sonra başlattığın her oyunda {0} çıkan eller dağıtılır: robotlarla, online masanda ya da çalışırken.",
     "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Bir konvansiyon seç; başlattığın her oyunda o konvansiyonun çıktığı eller dağıtılsın. Kapalı: normal rastgele eller.",
     "Practising {0}: the next deals use it": "{0} çalışılıyor: sonraki eller buna göre dağıtılacak",
@@ -3926,6 +3958,22 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Add a convention": "Legg til en konvensjon",
+    "An example auction (optional)": "Et eksempel på melding (valgfritt)",
+    "Ask Claude to add these conventions to the robots; then remove them from the list.": "Be Claude legge disse konvensjonene til robotene; fjern dem deretter fra listen.",
+    "Convention requests": "Ønskede konvensjoner",
+    "Could not remove": "Kunne ikke fjerne",
+    "Could not send — sign in with your name and PIN first.": "Kunne ikke sende — logg inn med navn og PIN først.",
+    "Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.": "Beskriv en konvensjon robotene ikke spiller ennå. Ønsket går til administratoren, og den legges til robotene og listen.",
+    "Done — remove": "Lagt til — fjern",
+    "How does it work?": "Hvordan virker den?",
+    "Name of the convention": "Navnet på konvensjonen",
+    "No internet connection — try again later.": "Ingen internettforbindelse — prøv igjen senere.",
+    "No requests yet.": "Ingen ønsker ennå.",
+    "Thank you! Your request was sent to the administrator.": "Takk! Ønsket ditt er sendt til administratoren.",
+    "When is it used, what does each bid mean, how does partner answer?": "Når brukes den, hva betyr hver melding, hvordan svarer makker?",
+    "Write the name and how it works": "Skriv navnet og hvordan den virker",
+    "e.g. Puppet Stayman": "f.eks. Puppet Stayman",
     "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Hvert spill du starter nå gir hender der {0} dukker opp: med roboter, ved nettbordet ditt eller for øving.",
     "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Velg en konvensjon, så gir hvert spill du starter hender der den dukker opp. Av: vanlige tilfeldige spill.",
     "Practising {0}: the next deals use it": "Øver på {0}: de neste spillene bruker den",
@@ -4091,6 +4139,22 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Add a convention": "Añadir una convención",
+    "An example auction (optional)": "Una subasta de ejemplo (opcional)",
+    "Ask Claude to add these conventions to the robots; then remove them from the list.": "Pide a Claude que añada estas convenciones a los robots; luego quítalas de la lista.",
+    "Convention requests": "Convenciones pedidas",
+    "Could not remove": "No se pudo quitar",
+    "Could not send — sign in with your name and PIN first.": "No se pudo enviar — entra antes con tu nombre y PIN.",
+    "Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.": "Describe una convención que los robots aún no juegan. Tu petición va al administrador, y se añade a los robots y a la lista.",
+    "Done — remove": "Añadida — quitar",
+    "How does it work?": "¿Cómo funciona?",
+    "Name of the convention": "Nombre de la convención",
+    "No internet connection — try again later.": "Sin conexión a internet — inténtalo más tarde.",
+    "No requests yet.": "Aún no hay peticiones.",
+    "Thank you! Your request was sent to the administrator.": "¡Gracias! Tu petición se ha enviado al administrador.",
+    "When is it used, what does each bid mean, how does partner answer?": "¿Cuándo se usa, qué significa cada voz, cómo responde el compañero?",
+    "Write the name and how it works": "Escribe el nombre y cómo funciona",
+    "e.g. Puppet Stayman": "p. ej. Puppet Stayman",
     "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Cada partida que empieces reparte manos donde aparece {0}: con robots, en tu mesa online o para practicar.",
     "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Elige una convención y cada partida que empieces repartirá manos donde aparezca. Desactivado: manos normales al azar.",
     "Practising {0}: the next deals use it": "Practicando {0}: las próximas manos la usan",
@@ -4284,6 +4348,22 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Add a convention": "Ajouter une convention",
+    "An example auction (optional)": "Un exemple de séquence (facultatif)",
+    "Ask Claude to add these conventions to the robots; then remove them from the list.": "Demandez à Claude d'ajouter ces conventions aux robots, puis retirez-les de la liste.",
+    "Convention requests": "Conventions demandées",
+    "Could not remove": "Impossible de retirer",
+    "Could not send — sign in with your name and PIN first.": "Envoi impossible — connectez-vous d'abord avec votre nom et PIN.",
+    "Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.": "Décrivez une convention que les robots ne jouent pas encore. Votre demande va à l'administrateur, puis elle est ajoutée aux robots et à la liste.",
+    "Done — remove": "Ajoutée — retirer",
+    "How does it work?": "Comment fonctionne-t-elle ?",
+    "Name of the convention": "Nom de la convention",
+    "No internet connection — try again later.": "Pas de connexion internet — réessayez plus tard.",
+    "No requests yet.": "Pas encore de demande.",
+    "Thank you! Your request was sent to the administrator.": "Merci ! Votre demande a été envoyée à l'administrateur.",
+    "When is it used, what does each bid mean, how does partner answer?": "Quand l'utilise-t-on, que signifie chaque enchère, comment répond le partenaire ?",
+    "Write the name and how it works": "Indiquez le nom et le fonctionnement",
+    "e.g. Puppet Stayman": "ex. Puppet Stayman",
     "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Chaque partie que vous lancez distribue des mains où {0} apparaît : avec les robots, à votre table en ligne ou pour l'entraînement.",
     "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Choisissez une convention : chaque partie lancée distribuera des mains où elle apparaît. Désactivé : donnes aléatoires normales.",
     "Practising {0}: the next deals use it": "Entraînement {0} : les prochaines donnes l'utilisent",
@@ -4477,6 +4557,22 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Add a convention": "Aggiungi una convenzione",
+    "An example auction (optional)": "Una licita di esempio (facoltativa)",
+    "Ask Claude to add these conventions to the robots; then remove them from the list.": "Chiedi a Claude di aggiungere queste convenzioni ai robot; poi toglile dalla lista.",
+    "Convention requests": "Convenzioni richieste",
+    "Could not remove": "Impossibile togliere",
+    "Could not send — sign in with your name and PIN first.": "Invio non riuscito — accedi prima con nome e PIN.",
+    "Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.": "Descrivi una convenzione che i robot non giocano ancora. La richiesta va all'amministratore e viene aggiunta ai robot e alla lista.",
+    "Done — remove": "Aggiunta — togli",
+    "How does it work?": "Come funziona?",
+    "Name of the convention": "Nome della convenzione",
+    "No internet connection — try again later.": "Nessuna connessione — riprova più tardi.",
+    "No requests yet.": "Ancora nessuna richiesta.",
+    "Thank you! Your request was sent to the administrator.": "Grazie! La tua richiesta è stata inviata all'amministratore.",
+    "When is it used, what does each bid mean, how does partner answer?": "Quando si usa, cosa significa ogni licita, come risponde il compagno?",
+    "Write the name and how it works": "Scrivi il nome e come funziona",
+    "e.g. Puppet Stayman": "es. Puppet Stayman",
     "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Ogni partita che avvii distribuisce mani in cui compare {0}: con i robot, al tuo tavolo online o per allenamento.",
     "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Scegli una convenzione e ogni partita che avvii distribuirà mani in cui compare. Disattivato: mani casuali normali.",
     "Practising {0}: the next deals use it": "Allenamento {0}: le prossime mani la usano",
@@ -4670,6 +4766,22 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Add a convention": "Konvention hinzufügen",
+    "An example auction (optional)": "Eine Beispielreizung (freiwillig)",
+    "Ask Claude to add these conventions to the robots; then remove them from the list.": "Bitte Claude, diese Konventionen den Robotern beizubringen; entferne sie dann aus der Liste.",
+    "Convention requests": "Gewünschte Konventionen",
+    "Could not remove": "Konnte nicht entfernt werden",
+    "Could not send — sign in with your name and PIN first.": "Senden nicht möglich — melde dich zuerst mit Name und PIN an.",
+    "Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.": "Beschreibe eine Konvention, die die Roboter noch nicht spielen. Dein Wunsch geht an den Administrator; sie wird den Robotern und der Liste hinzugefügt.",
+    "Done — remove": "Erledigt — entfernen",
+    "How does it work?": "Wie funktioniert sie?",
+    "Name of the convention": "Name der Konvention",
+    "No internet connection — try again later.": "Keine Internetverbindung — versuche es später erneut.",
+    "No requests yet.": "Noch keine Wünsche.",
+    "Thank you! Your request was sent to the administrator.": "Danke! Dein Wunsch wurde an den Administrator gesendet.",
+    "When is it used, what does each bid mean, how does partner answer?": "Wann wird sie benutzt, was bedeutet jedes Gebot, wie antwortet der Partner?",
+    "Write the name and how it works": "Schreibe den Namen und wie sie funktioniert",
+    "e.g. Puppet Stayman": "z. B. Puppet Stayman",
     "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Jedes Spiel, das du jetzt startest, teilt Hände, in denen {0} vorkommt: mit Robotern, an deinem Online-Tisch oder zum Üben.",
     "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Wähle eine Konvention, dann teilt jedes Spiel, das du startest, Hände, in denen sie vorkommt. Aus: normale Zufallsverteilungen.",
     "Practising {0}: the next deals use it": "{0} wird geübt: die nächsten Verteilungen nutzen sie",
@@ -4863,6 +4975,22 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Add a convention": "Добавить конвенцию",
+    "An example auction (optional)": "Пример торговли (необязательно)",
+    "Ask Claude to add these conventions to the robots; then remove them from the list.": "Попросите Claude добавить эти конвенции роботам, затем уберите их из списка.",
+    "Convention requests": "Запрошенные конвенции",
+    "Could not remove": "Не удалось убрать",
+    "Could not send — sign in with your name and PIN first.": "Не удалось отправить — сначала войдите с именем и PIN.",
+    "Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.": "Опишите конвенцию, которую роботы пока не играют. Запрос уйдёт администратору, и она будет добавлена роботам и в список.",
+    "Done — remove": "Добавлено — убрать",
+    "How does it work?": "Как она работает?",
+    "Name of the convention": "Название конвенции",
+    "No internet connection — try again later.": "Нет интернета — попробуйте позже.",
+    "No requests yet.": "Запросов пока нет.",
+    "Thank you! Your request was sent to the administrator.": "Спасибо! Ваш запрос отправлен администратору.",
+    "When is it used, what does each bid mean, how does partner answer?": "Когда применяется, что означает каждая заявка, как отвечает партнёр?",
+    "Write the name and how it works": "Напишите название и как она работает",
+    "e.g. Puppet Stayman": "напр. Puppet Stayman",
     "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Каждая игра, которую вы начнёте, будет сдавать руки, где встречается {0}: с роботами, за вашим онлайн-столом или для тренировки.",
     "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Выберите конвенцию, и каждая начатая игра будет сдавать руки, где она встречается. Выкл.: обычные случайные сдачи.",
     "Practising {0}: the next deals use it": "Тренировка {0}: следующие сдачи её используют",
@@ -5056,6 +5184,22 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Add a convention": "Dodaj konwencję",
+    "An example auction (optional)": "Przykładowa licytacja (opcjonalnie)",
+    "Ask Claude to add these conventions to the robots; then remove them from the list.": "Poproś Claude, by dodał te konwencje robotom; potem usuń je z listy.",
+    "Convention requests": "Prośby o konwencje",
+    "Could not remove": "Nie udało się usunąć",
+    "Could not send — sign in with your name and PIN first.": "Nie udało się wysłać — najpierw zaloguj się imieniem i PIN-em.",
+    "Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.": "Opisz konwencję, której roboty jeszcze nie grają. Prośba trafi do administratora, a konwencja zostanie dodana robotom i do listy.",
+    "Done — remove": "Dodano — usuń",
+    "How does it work?": "Jak działa?",
+    "Name of the convention": "Nazwa konwencji",
+    "No internet connection — try again later.": "Brak internetu — spróbuj później.",
+    "No requests yet.": "Na razie brak próśb.",
+    "Thank you! Your request was sent to the administrator.": "Dziękujemy! Prośba została wysłana do administratora.",
+    "When is it used, what does each bid mean, how does partner answer?": "Kiedy się jej używa, co znaczy każda odzywka, jak odpowiada partner?",
+    "Write the name and how it works": "Wpisz nazwę i opis działania",
+    "e.g. Puppet Stayman": "np. Puppet Stayman",
     "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Każda gra, którą rozpoczniesz, rozda ręce, w których pojawia się {0}: z robotami, przy twoim stole online lub do ćwiczeń.",
     "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Wybierz konwencję, a każda rozpoczęta gra rozda ręce, w których się pojawia. Wyłączone: zwykłe losowe rozdania.",
     "Practising {0}: the next deals use it": "Ćwiczenie {0}: następne rozdania ją wykorzystają",
@@ -5249,6 +5393,22 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Add a convention": "添加约定叫",
+    "An example auction (optional)": "叫牌示例(可选)",
+    "Ask Claude to add these conventions to the robots; then remove them from the list.": "请 Claude 把这些约定叫加入机器人;然后从列表中删除。",
+    "Convention requests": "约定叫请求",
+    "Could not remove": "无法删除",
+    "Could not send — sign in with your name and PIN first.": "无法发送——请先用名字和 PIN 登录。",
+    "Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.": "描述一个机器人还不会的约定叫。你的请求会发给管理员,之后它会被加入机器人和列表。",
+    "Done — remove": "已添加——删除",
+    "How does it work?": "它怎么用?",
+    "Name of the convention": "约定叫名称",
+    "No internet connection — try again later.": "没有网络——请稍后再试。",
+    "No requests yet.": "还没有请求。",
+    "Thank you! Your request was sent to the administrator.": "谢谢!你的请求已发送给管理员。",
+    "When is it used, what does each bid mean, how does partner answer?": "什么时候用,每个叫品是什么意思,同伴如何回答?",
+    "Write the name and how it works": "请写下名称和用法",
+    "e.g. Puppet Stayman": "例如 Puppet Stayman",
     "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "你现在开始的每一局都会发出用到 {0} 的牌:和机器人对打、在你的在线牌桌或练习时。",
     "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "选择一个约定叫,之后开始的每一局都会发出用到它的牌。关闭:普通随机牌。",
     "Practising {0}: the next deals use it": "正在练习 {0}:接下来的牌会用到它",
@@ -6038,7 +6198,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 141;
+const APP_V = 142;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6920,9 +7080,10 @@ const PRAC_GROUPS = [
 ];
 // the same choice as in Settings, on the home page: the convention the next deals are dealt for
 function pracHtml() {
-  return `<h2>📚 ${T('Practise conventions')}</h2>
+  return `<div class="prrow"><h2>📚 ${T('Practise conventions')}</h2>
+      <select id="hPracSel" class="sel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select></div>
     <p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p>
-    <label class="prpick${SET.practice ? ' on' : ''}"><span class="prlab">${T('Practice a convention')}</span><span class="prbox"><span class="pric" aria-hidden="true">${SET.practice ? '✓' : '🎯'}</span><select id="hPracSel" class="prsel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select></span></label>`;
+    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
 function setPractice(k) {
@@ -7973,7 +8134,10 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
-  if (t.dataset.prac) { Net.st.soloPub = true; startPractice(t.dataset.prac); return; }   // a convention to practise
+  if (t.id === 'hConvAsk') { showConvAsk(); return; }
+  if (t.id === 'cvaSend') { sendConvAsk(); return; }
+  if (t.id === 'hConvReq') { showConvRequests(); return; }
+  if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === "bPrac") { askYes(T("Stop practising {0}?", (E.CONVS.find(c => c.k === SET.practice) || {}).n || ""), () => { closeOv(); stopPractice(); }); return; }
   const sol = ev_.target.closest("[data-solo]"); if (sol) { Net.st.soloPub = sol.dataset.solo === "pub"; closeOv(); resume(); return; }
   const dtb = ev_.target.closest("[data-dtab]"); if (dtb) { ui.dockTab = dtb.dataset.dtab; renderDock(); return; }
@@ -8287,6 +8451,35 @@ document.addEventListener('pointerdown', e => {
   document.addEventListener('pointerup', up);
 });
 /* ---- the administrator's visitor statistics: today, the last 7, 30 and 365 days, by country (once per internet address) ---- */
+/* "Add a convention": a player describes a convention the robots do not know; the request goes to the administrator,
+   and it is then added to the robots' bidding (and to the list above) */
+function showConvAsk(err) {
+  openOv('convask', `<h2>➕ ${T('Add a convention')}</h2>
+    <div class="muted">${T('Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.')}</div>
+    <div class="grp"><span>${T('Name of the convention')}</span><input id="cvaName" class="tok wide" maxlength="40" placeholder="${T('e.g. Puppet Stayman')}"></div>
+    <div class="grp"><span>${T('How does it work?')}</span><textarea id="cvaHow" class="tok wide" rows="5" maxlength="1000" placeholder="${T('When is it used, what does each bid mean, how does partner answer?')}"></textarea></div>
+    <div class="grp"><span>${T('An example auction (optional)')}</span><input id="cvaEx" class="tok wide" maxlength="300" placeholder="1NT – 3♣ – 3♦ …"></div>
+    ${err ? `<div class="err">${err}</div>` : ''}
+    <div class="row2"><button class="btn new" id="cvaSend">📨 ${T('Send')}</button><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
+}
+async function sendConvAsk() {
+  const ad = ($('cvaName').value || '').trim(), how = ($('cvaHow').value || '').trim(), ex = ($('cvaEx').value || '').trim();
+  if (ad.length < 2 || how.length < 10) { flash(T('Write the name and how it works'), 2200); return; }
+  try { await Net.convAsk(ad, how, ex); closeOv(); flash('✅ ' + T('Thank you! Your request was sent to the administrator.'), 3000); }
+  catch (e) { const keep = [ad, how, ex]; showConvAsk(e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.')); $('cvaName').value = keep[0]; $('cvaHow').value = keep[1]; $('cvaEx').value = keep[2]; }
+}
+async function showConvRequests() {
+  if (!Net.isAdmin()) return;
+  openOv('convreq', `<h2>📥 ${T('Convention requests')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let L = []; try { L = await Net.convRequests(); } catch (e) {}
+  if (ui.overlay !== 'convreq') return;
+  openOv('convreq', `<h2>📥 ${T('Convention requests')}</h2>
+    <div class="muted">${T('Ask Claude to add these conventions to the robots; then remove them from the list.')}</div>
+    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${esc(r.ad)}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleDateString()}</small></div>
+      <div class="cvb">${symText(esc(r.acik))}</div>${r.ornek ? `<div class="cvx">${symText(esc(r.ornek))}</div>` : ''}
+      <button class="btn mini-btn" data-cvdone="${esc(r.path)}">✓ ${T('Done — remove')}</button></div>`).join('') : `<div class="muted">${T('No requests yet.')}</div>`}
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
 async function showStats() {
   if (!Net.isAdmin()) return;
   ui.statTab = ui.statTab || 'day';
@@ -9064,6 +9257,21 @@ const Net = (() => {
       return { ip: [...new Uint8Array(h)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join(''), c: /^[A-Z]{2}$/.test(country || '') ? country : null };
     } catch (e) { return {}; }
   }
+  /* a player asks for a convention the robots do not know yet: kept under istek/<player>/<id> (only the
+     administrator can read the list); the requests are then added to the robots by hand */
+  async function convAsk(ad, acik, ornek) {
+    const name = myName(); if (!Cloud.on || !name || !SET.pinH) throw new Error('offline');
+    if (!(await Cloud.session(name, SET.pinH))) throw new Error('signin');
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    await Cloud.put('istek/' + fbKey(name) + '/' + id, { ad: String(ad).slice(0, 40), acik: String(acik).slice(0, 1000), ornek: String(ornek || '').slice(0, 300), kim: name, ts: Date.now() });
+  }
+  async function convRequests() {
+    if (!Cloud.on || !isAdmin()) return [];
+    const all = await Cloud.get('istek') || {}, out = [];
+    for (const [k, list] of Object.entries(all)) for (const [id, r] of Object.entries(list || {})) if (r && r.ad) out.push({ ...r, path: k + '/' + id });
+    return out.sort((a, b) => b.ts - a.ts);
+  }
+  const convDone = path => Cloud.put('istek/' + path, null);
   // the administrator's visitor statistics: every day's logins (once per internet address in each period), by country
   async function loginStats() {
     if (!Cloud.on || !isAdmin()) return null;
@@ -9931,7 +10139,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, convAsk, convRequests, convDone, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

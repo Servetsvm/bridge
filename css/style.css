@@ -1192,3 +1192,19 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .prsel option{background:#1d2a23;color:#f2e9cc}
 @media (max-width:520px){.prac .prbox .prsel{font-size:16.5px;padding:14px 44px 14px 50px}}
 @media (prefers-reduced-motion:reduce){.prac .prpick:not(.on) .prbox{animation:none}}
+/* practise conventions, compact: the title and the choice side by side (the choice as in Settings) */
+.hcard.prac{padding:12px 14px}
+.prac .prrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.prac .prrow h2{margin:0;font-size:15px;font-weight:800;color:#f2c94c;white-space:nowrap;font-family:inherit;letter-spacing:0}
+.prac .prrow .sel{flex:1 1 200px;min-width:0;max-width:340px;font-size:15px}
+.prac .prdesc{margin:8px 0 6px;font-size:13px;line-height:1.4;color:#e3dcc5}
+.prac .prask{background:none;border:1px dashed rgba(242,201,76,.7);color:#f2c94c;border-radius:8px;padding:6px 10px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+.prac .prask:hover{background:rgba(242,201,76,.12)}
+.prac .praskrow{display:flex;gap:8px;flex-wrap:wrap}
+.cvreq{border:1px solid var(--line,#ddd);border-radius:10px;padding:9px 11px;margin:8px 0;background:rgba(127,127,127,.06)}
+.cvreq .cvh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.cvreq .cvh small{color:#888}
+.cvreq .cvb{margin:6px 0;white-space:pre-wrap;font-size:14px;line-height:1.4}
+.cvreq .cvx{font-family:monospace;font-size:13px;color:#555;margin-bottom:6px}
+.cvreq .mini-btn{float:none}
+.prac .prrow{flex-wrap:nowrap}.prac .prrow .sel{flex:1 1 0;width:0}

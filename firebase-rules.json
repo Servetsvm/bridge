@@ -30,11 +30,31 @@
         ".write": "auth != null && root.child('sess').child(auth.uid).child('pin').val() === $k && root.child('users').child(root.child('sess').child(auth.uid).child('k').val()).child('pin').val() === $k"
       }
     },
+    "istek": {
+      ".read": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
+      ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
+      "$name": {
+        "$id": {
+          ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $name && !data.exists()",
+          ".validate": "newData.hasChildren(['ad', 'acik', 'ts']) && newData.child('ad').isString() && newData.child('ad').val().length <= 40 && newData.child('acik').isString() && newData.child('acik').val().length <= 1000"
+        }
+      }
+    },
     "test": {
       "$ns": {
         ".read": false,
         ".write": false,
-        "users": {
+        "istek": {
+              ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
+              ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
+              "$name": {
+                "$id": {
+                  ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name && !data.exists()",
+                  ".validate": "newData.hasChildren(['ad', 'acik', 'ts']) && newData.child('ad').isString() && newData.child('ad').val().length <= 40 && newData.child('acik').isString() && newData.child('acik').val().length <= 1000"
+                }
+              }
+            },
+                    "users": {
           ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
           "$name": {
             ".write": "auth != null && (!data.exists() || root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name)",

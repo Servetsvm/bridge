@@ -661,6 +661,21 @@ const Net = (() => {
       return { ip: [...new Uint8Array(h)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join(''), c: /^[A-Z]{2}$/.test(country || '') ? country : null };
     } catch (e) { return {}; }
   }
+  /* a player asks for a convention the robots do not know yet: kept under istek/<player>/<id> (only the
+     administrator can read the list); the requests are then added to the robots by hand */
+  async function convAsk(ad, acik, ornek) {
+    const name = myName(); if (!Cloud.on || !name || !SET.pinH) throw new Error('offline');
+    if (!(await Cloud.session(name, SET.pinH))) throw new Error('signin');
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    await Cloud.put('istek/' + fbKey(name) + '/' + id, { ad: String(ad).slice(0, 40), acik: String(acik).slice(0, 1000), ornek: String(ornek || '').slice(0, 300), kim: name, ts: Date.now() });
+  }
+  async function convRequests() {
+    if (!Cloud.on || !isAdmin()) return [];
+    const all = await Cloud.get('istek') || {}, out = [];
+    for (const [k, list] of Object.entries(all)) for (const [id, r] of Object.entries(list || {})) if (r && r.ad) out.push({ ...r, path: k + '/' + id });
+    return out.sort((a, b) => b.ts - a.ts);
+  }
+  const convDone = path => Cloud.put('istek/' + path, null);
   // the administrator's visitor statistics: every day's logins (once per internet address in each period), by country
   async function loginStats() {
     if (!Cloud.on || !isAdmin()) return null;
@@ -1528,5 +1543,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, convAsk, convRequests, convDone, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

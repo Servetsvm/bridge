@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 141;
+const APP_V = 142;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -890,9 +890,10 @@ const PRAC_GROUPS = [
 ];
 // the same choice as in Settings, on the home page: the convention the next deals are dealt for
 function pracHtml() {
-  return `<h2>📚 ${T('Practise conventions')}</h2>
+  return `<div class="prrow"><h2>📚 ${T('Practise conventions')}</h2>
+      <select id="hPracSel" class="sel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select></div>
     <p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p>
-    <label class="prpick${SET.practice ? ' on' : ''}"><span class="prlab">${T('Practice a convention')}</span><span class="prbox"><span class="pric" aria-hidden="true">${SET.practice ? '✓' : '🎯'}</span><select id="hPracSel" class="prsel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select></span></label>`;
+    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
 function setPractice(k) {
@@ -1943,7 +1944,10 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
-  if (t.dataset.prac) { Net.st.soloPub = true; startPractice(t.dataset.prac); return; }   // a convention to practise
+  if (t.id === 'hConvAsk') { showConvAsk(); return; }
+  if (t.id === 'cvaSend') { sendConvAsk(); return; }
+  if (t.id === 'hConvReq') { showConvRequests(); return; }
+  if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === "bPrac") { askYes(T("Stop practising {0}?", (E.CONVS.find(c => c.k === SET.practice) || {}).n || ""), () => { closeOv(); stopPractice(); }); return; }
   const sol = ev_.target.closest("[data-solo]"); if (sol) { Net.st.soloPub = sol.dataset.solo === "pub"; closeOv(); resume(); return; }
   const dtb = ev_.target.closest("[data-dtab]"); if (dtb) { ui.dockTab = dtb.dataset.dtab; renderDock(); return; }
@@ -2257,6 +2261,35 @@ document.addEventListener('pointerdown', e => {
   document.addEventListener('pointerup', up);
 });
 /* ---- the administrator's visitor statistics: today, the last 7, 30 and 365 days, by country (once per internet address) ---- */
+/* "Add a convention": a player describes a convention the robots do not know; the request goes to the administrator,
+   and it is then added to the robots' bidding (and to the list above) */
+function showConvAsk(err) {
+  openOv('convask', `<h2>➕ ${T('Add a convention')}</h2>
+    <div class="muted">${T('Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.')}</div>
+    <div class="grp"><span>${T('Name of the convention')}</span><input id="cvaName" class="tok wide" maxlength="40" placeholder="${T('e.g. Puppet Stayman')}"></div>
+    <div class="grp"><span>${T('How does it work?')}</span><textarea id="cvaHow" class="tok wide" rows="5" maxlength="1000" placeholder="${T('When is it used, what does each bid mean, how does partner answer?')}"></textarea></div>
+    <div class="grp"><span>${T('An example auction (optional)')}</span><input id="cvaEx" class="tok wide" maxlength="300" placeholder="1NT – 3♣ – 3♦ …"></div>
+    ${err ? `<div class="err">${err}</div>` : ''}
+    <div class="row2"><button class="btn new" id="cvaSend">📨 ${T('Send')}</button><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
+}
+async function sendConvAsk() {
+  const ad = ($('cvaName').value || '').trim(), how = ($('cvaHow').value || '').trim(), ex = ($('cvaEx').value || '').trim();
+  if (ad.length < 2 || how.length < 10) { flash(T('Write the name and how it works'), 2200); return; }
+  try { await Net.convAsk(ad, how, ex); closeOv(); flash('✅ ' + T('Thank you! Your request was sent to the administrator.'), 3000); }
+  catch (e) { const keep = [ad, how, ex]; showConvAsk(e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.')); $('cvaName').value = keep[0]; $('cvaHow').value = keep[1]; $('cvaEx').value = keep[2]; }
+}
+async function showConvRequests() {
+  if (!Net.isAdmin()) return;
+  openOv('convreq', `<h2>📥 ${T('Convention requests')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let L = []; try { L = await Net.convRequests(); } catch (e) {}
+  if (ui.overlay !== 'convreq') return;
+  openOv('convreq', `<h2>📥 ${T('Convention requests')}</h2>
+    <div class="muted">${T('Ask Claude to add these conventions to the robots; then remove them from the list.')}</div>
+    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${esc(r.ad)}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleDateString()}</small></div>
+      <div class="cvb">${symText(esc(r.acik))}</div>${r.ornek ? `<div class="cvx">${symText(esc(r.ornek))}</div>` : ''}
+      <button class="btn mini-btn" data-cvdone="${esc(r.path)}">✓ ${T('Done — remove')}</button></div>`).join('') : `<div class="muted">${T('No requests yet.')}</div>`}
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
 async function showStats() {
   if (!Net.isAdmin()) return;
   ui.statTab = ui.statTab || 'day';
