@@ -1378,6 +1378,16 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .prac .prweak{border:0;border-radius:8px;padding:6px 10px;font:inherit;font-size:12.5px;font-weight:800;letter-spacing:0;text-transform:none;color:#fff;background:#d0453b;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)}
 .prac .prweak:hover{filter:brightness(1.08)}
 .prretry{display:block;width:100%;margin-top:8px}
+.prv.pd{border-left-color:#1f5f8b;background:rgba(31,95,139,.08)}
+.prv.pd b{color:#1f5f8b}
+.prv .prvd{margin-top:3px;font-size:13px;opacity:.85}
+:root[data-theme="dark"] .prv.pd b{color:#8fc3ea}
+/* practice: the switch for the chance sign, and the sign over the bidding box */
+.prac .prhintsw{display:flex;align-items:center;gap:8px;margin:12px 2px 0;font-size:14px;font-weight:600;color:#1f2a22;cursor:pointer}
+.prac .prhintsw input{width:18px;height:18px;accent-color:#1f5f8b;margin:0}
+:root[data-theme="dark"] .prac .prhintsw{color:#e8efe9}
+.prhint{margin:0 0 6px;padding:6px 10px;border-radius:8px;background:#fff4c4;color:#5a3d00;font-weight:700;font-size:13.5px;text-align:center;animation:prhintIn .3s ease-out}
+@keyframes prhintIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 
 </style>
 
@@ -3933,6 +3943,9 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Partner's call": "Ortağının teklifi",
+    "A convention you are practising can be used here": "Burada çalıştığın bir konvansiyonu kullanabilirsin",
+    "Show me when a practised convention can be used": "Teklif sırasında konvansiyon fırsatını göster",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: temel sisteminde bu konvansiyonun çıktığı bir el bulunamadı — bu sistemde olmayabilir.",
     "No hand with {0} came up quickly — here is a normal deal": "{0} içeren bir el hızlıca bulunamadı — normal bir el dağıtıldı",
     "Practise my weak spots": "Zayıf yanlarımı çalıştır",
@@ -4131,6 +4144,9 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Partner's call": "Makkers melding",
+    "A convention you are practising can be used here": "Her kan du bruke en konvensjon du øver på",
+    "Show me when a practised convention can be used": "Vis meg når en konvensjon jeg øver på kan brukes",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: ingen hånd med den dukket opp i grunnsystemet ditt — den er kanskje ikke en del av det.",
     "No hand with {0} came up quickly — here is a normal deal": "Fant ingen hånd med {0} raskt — her er et vanlig spill",
     "Practise my weak spots": "Øv på mine svake sider",
@@ -4329,6 +4345,9 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Partner's call": "Voz del compañero",
+    "A convention you are practising can be used here": "Aquí puedes usar una convención que practicas",
+    "Show me when a practised convention can be used": "Avisarme cuando pueda usar una convención que practico",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: no apareció ninguna mano con ella en tu sistema base — puede que no forme parte de él.",
     "No hand with {0} came up quickly — here is a normal deal": "No se encontró rápido una mano con {0} — aquí tienes una mano normal",
     "Practise my weak spots": "Practicar mis puntos débiles",
@@ -4555,6 +4574,9 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Partner's call": "Enchère du partenaire",
+    "A convention you are practising can be used here": "Ici, vous pouvez utiliser une convention que vous travaillez",
+    "Show me when a practised convention can be used": "M'indiquer quand une convention travaillée peut être utilisée",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0} : aucune main ne l'a utilisée dans votre système de base — elle n'en fait peut-être pas partie.",
     "No hand with {0} came up quickly — here is a normal deal": "Aucune main avec {0} trouvée rapidement — voici une donne normale",
     "Practise my weak spots": "Travailler mes points faibles",
@@ -4781,6 +4803,9 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Partner's call": "Dichiarazione del compagno",
+    "A convention you are practising can be used here": "Qui puoi usare una convenzione che stai allenando",
+    "Show me when a practised convention can be used": "Avvisami quando posso usare una convenzione che alleno",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: nessuna mano l'ha usata nel tuo sistema base — potrebbe non farne parte.",
     "No hand with {0} came up quickly — here is a normal deal": "Nessuna mano con {0} trovata in fretta — ecco una smazzata normale",
     "Practise my weak spots": "Allena i miei punti deboli",
@@ -5007,6 +5032,9 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Partner's call": "Gebot des Partners",
+    "A convention you are practising can be used here": "Hier kannst du eine Konvention einsetzen, die du übst",
+    "Show me when a practised convention can be used": "Zeig mir, wann eine geübte Konvention passt",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: In deinem Grundsystem kam keine Hand damit vor — sie gehört vielleicht nicht dazu.",
     "No hand with {0} came up quickly — here is a normal deal": "Keine Hand mit {0} schnell gefunden — hier ist eine normale Verteilung",
     "Practise my weak spots": "Meine Schwächen üben",
@@ -5233,6 +5261,9 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Partner's call": "Заявка партнёра",
+    "A convention you are practising can be used here": "Здесь можно применить конвенцию, которую вы тренируете",
+    "Show me when a practised convention can be used": "Подсказывать, когда можно применить тренируемую конвенцию",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: в вашей базовой системе не нашлось ни одной сдачи с этой конвенцией — возможно, её там нет.",
     "No hand with {0} came up quickly — here is a normal deal": "Сдача с {0} быстро не нашлась — вот обычная сдача",
     "Practise my weak spots": "Тренировать слабые места",
@@ -5459,6 +5490,9 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Partner's call": "Odzywka partnera",
+    "A convention you are practising can be used here": "Tu możesz użyć konwencji, którą ćwiczysz",
+    "Show me when a practised convention can be used": "Pokaż, kiedy mogę użyć ćwiczonej konwencji",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: w twoim systemie bazowym nie pojawiło się żadne rozdanie z tą konwencją — może nie być jego częścią.",
     "No hand with {0} came up quickly — here is a normal deal": "Nie znaleziono szybko rozdania z {0} — oto zwykłe rozdanie",
     "Practise my weak spots": "Ćwicz moje słabe strony",
@@ -5685,6 +5719,9 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Partner's call": "同伴的叫品",
+    "A convention you are practising can be used here": "这里可以用到你正在练习的约定叫",
+    "Show me when a practised convention can be used": "在可以使用练习中的约定叫时提示我",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}:在你的基础体系中没有出现用到它的牌——它可能不属于该体系。",
     "No hand with {0} came up quickly — here is a normal deal": "没有很快找到用到 {0} 的牌——这是一副普通牌",
     "Practise my weak spots": "练习我的弱项",
@@ -6507,7 +6544,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 161;
+const APP_V = 162;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -7009,9 +7046,12 @@ function finishBoard() {
       const k = want.includes(a.sg.cv) ? a.sg.cv : a.m && want.includes(a.m.cv) ? a.m.cv : null;
       if (k) rv.push({ i, k, call: a.call, sc: a.sg.c, ok: a.call === a.sg.c, st: a.sg.t, ut: (a.m && a.m.t) || '' });
     });
+    // partner's calls with a practised convention: shown with what they mean (not scored)
+    G.auction.forEach((a, i) => { if (a.seat === (U() + 2) % 4 && a.m && want.includes(a.m.cv)) rv.push({ i, k: a.m.cv, call: a.call, pd: 1, ut: a.m.t || '' }); });
+    rv.sort((a, b) => a.i - b.i);
     if (rv.length) {
       e.prv = rv; SET.pracS = SET.pracS || {};
-      rv.forEach(r => { const s = SET.pracS[r.k] || (SET.pracS[r.k] = { n: 0, ok: 0 }); s.n++; if (r.ok) s.ok++; });
+      rv.filter(r => !r.pd).forEach(r => { const s = SET.pracS[r.k] || (SET.pracS[r.k] = { n: 0, ok: 0 }); s.n++; if (r.ok) s.ok++; });
       Store.saveSettings(SET);
     }
   }
@@ -7373,6 +7413,14 @@ function layoutFans() {
     el.style.setProperty('--cw', cw + 'px'); el.style.setProperty('--ov', (step - cw) + 'px');
   });
 }
+// practising with "show the chance" on: a quiet sign over the bidding box when the system would use a practised
+// convention right now (it does not say which call)
+function pracHintHtml() {
+  if (!SET.pracHint || !pracList().length || online() || G.tour || G.phase !== 'bid' || bidTurn() !== U()) return '';
+  const key = G.id + ':' + G.auction.length;
+  if (!ui.pracOpp || ui.pracOpp.key !== key) { const r = E.aiBid(G.auction, U(), G.deal[U()], G.cards); ui.pracOpp = { key, on: !!(r.m && pracList().includes(r.m.cv)) }; }
+  return ui.pracOpp.on ? `<div class="prhint">📚 ${T('A convention you are practising can be used here')}</div>` : '';
+}
 function renderBidbox() {
   const bb = $('bidbox');
   if (G.phase !== 'bid' || bidTurn() !== meSeat()) { bb.innerHTML = ''; bb.dataset.k = ''; bb.hidden = true; return; }
@@ -7380,7 +7428,7 @@ function renderBidbox() {
   const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st s${s}${red(s) ? " r" : ""}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
   // two rows, as on the big bridge sites: Pass, X, XX and the levels; then the suits of the chosen level
-  const html = `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
+  const html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
   // redraw only when something changed, so the alert text being typed keeps its focus
   if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; const i = $('alTxt'); if (i) i.value = ui.alertTxt || ''; }
 }
@@ -7572,6 +7620,7 @@ function pracHtml() {
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
+    <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Show me when a practised convention can be used")}</label>
     ${pracWarnHtml()}
     ${pracProgHtml()}
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
@@ -8217,12 +8266,16 @@ document.addEventListener('click', e => {
 // the practice review of a board: per convention ✓ when every call where it came up was the system's, else ✗
 function prvSum(rv) {
   const ks = [...new Set(rv.map(r => r.k))];
-  return '📚 ' + ks.map(k => esc(pracName(k)) + ' ' + (rv.every(r => r.k !== k || r.ok) ? '✓' : '✗')).join(' · ');
+  return '📚 ' + ks.map(k => { const mine = rv.filter(r => r.k === k && !r.pd); return esc(pracName(k)) + ' ' + (!mine.length ? '🤝' : mine.every(r => r.ok) ? '✓' : '✗'); }).join(' · ');
 }
 function prvHtml(rv) {
-  return rv.map(r => `<div class="prv ${r.ok ? 'ok' : 'no'}"><b>${r.ok ? '✓' : '✗'} ${esc(pracName(r.k))}</b>
+  return rv.map(r => {
+    if (r.pd) { const ci = E.convInfo(r.k); return `<div class="prv pd"><b>🤝 ${esc(pracName(r.k))}</b>
+      <div>${T("Partner's call")} ${callHtml(r.call)} — ${symText(bidTxt(r.ut))}</div>${ci && ci.d ? `<div class="prvd">${symText(ci.d)}</div>` : ''}</div>`; }
+    return `<div class="prv ${r.ok ? 'ok' : 'no'}"><b>${r.ok ? '✓' : '✗'} ${esc(pracName(r.k))}</b>
     <div>${T('You bid')} ${callHtml(r.call)}${r.ok ? ` — ${symText(bidTxt(r.st || r.ut))}` : `${r.ut ? ` (${symText(bidTxt(r.ut))})` : ''}`}</div>
-    ${r.ok ? '' : `<div class="prvfix">${T('The system bids')} ${callHtml(r.sc)} — ${symText(bidTxt(r.st))}</div>`}</div>`).join('');
+    ${r.ok ? '' : `<div class="prvfix">${T('The system bids')} ${callHtml(r.sc)} — ${symText(bidTxt(r.st))}</div>`}</div>`;
+  }).join('');
 }
 // the conventions you get wrong most (under 80% right), the weakest first, at most three
 function pracWeak() {
@@ -8251,7 +8304,7 @@ function showEnd() {
   const norm = f.normC;
   openOv('end', `<h2>${T('Board')} ${e.board}</h2><div class="big">${resultLine(e)}</div>${G.claimed ? `<div class="muted">${T('The remaining tricks were settled by claim.')}</div>` : ''}
    ${scoreTxt}
-   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}${e.prv.some(r => !r.ok) && !G.tour ? `<button class="btn gold prretry" id="oReplayP">🔁 ${T('Play this hand again and find the right call')}</button>` : ''}</div>` : ''}
+   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}${e.prv.some(r => !r.ok && !r.pd) && !G.tour ? `<button class="btn gold prretry" id="oReplayP">🔁 ${T('Play this hand again and find the right call')}</button>` : ''}</div>` : ''}
    <div class="grp"><span>${T('Par check')}</span><div>${T('Normal contract (most common at the robot tables)')}: ${f.done ? (norm ? conKey(norm) + ' — ' + T('double dummy') + ' ' + ddTxt('norm', norm) : T('Pass')) : '…'}</div>
    ${e.c ? `<div>${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${ddTxt('you', e.c)}</div>` : ''}</div>
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
@@ -8598,6 +8651,7 @@ document.addEventListener('change', e => {
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === 'dFile' && t.files && t.files[0]) { importDeals(t.files[0]); t.value = ''; return; }
   if (t.id === "hPracSel") { setPractice(t.value); render(); return; }
+  if (t.id === "pdHint") { SET.pracHint = t.checked; Store.saveSettings(SET); save(); return; }
   // the two drop-downs on the home page: a base system (one), conventions to practise (any number)
   if (t.dataset.pdsys) { SET.sys = t.dataset.pdsys; SET.conv = { ...E.sysOf(SET.sys).conv }; SET.practice = ''; Store.saveSettings(SET); save(); ui.pracDrop = null; render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
   if (t.dataset.pdconv) { togglePractice(t.dataset.pdconv, t.checked); render(); return; }
@@ -9922,7 +9976,7 @@ const Net = (() => {
 
   /* your results on every device: kept in the database under a key made from your name and PIN (only someone who
      knows both can find them). Boards from both sides are merged; your settings come along to a new device. */
-  const SYNC_KEYS = ['sys', 'conv', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN', 'pracS'];
+  const SYNC_KEYS = ['sys', 'conv', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN', 'pracS', 'pracHint'];
   let syncing = null, syncT = null;
   async function cloudSync() {
     if (!Cloud.on || !SET.pinH || syncing) return syncing;

@@ -3,6 +3,9 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Partner's call": "Ortağının teklifi",
+    "A convention you are practising can be used here": "Burada çalıştığın bir konvansiyonu kullanabilirsin",
+    "Show me when a practised convention can be used": "Teklif sırasında konvansiyon fırsatını göster",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: temel sisteminde bu konvansiyonun çıktığı bir el bulunamadı — bu sistemde olmayabilir.",
     "No hand with {0} came up quickly — here is a normal deal": "{0} içeren bir el hızlıca bulunamadı — normal bir el dağıtıldı",
     "Practise my weak spots": "Zayıf yanlarımı çalıştır",
@@ -201,6 +204,9 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Partner's call": "Makkers melding",
+    "A convention you are practising can be used here": "Her kan du bruke en konvensjon du øver på",
+    "Show me when a practised convention can be used": "Vis meg når en konvensjon jeg øver på kan brukes",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: ingen hånd med den dukket opp i grunnsystemet ditt — den er kanskje ikke en del av det.",
     "No hand with {0} came up quickly — here is a normal deal": "Fant ingen hånd med {0} raskt — her er et vanlig spill",
     "Practise my weak spots": "Øv på mine svake sider",
@@ -399,6 +405,9 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Partner's call": "Voz del compañero",
+    "A convention you are practising can be used here": "Aquí puedes usar una convención que practicas",
+    "Show me when a practised convention can be used": "Avisarme cuando pueda usar una convención que practico",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: no apareció ninguna mano con ella en tu sistema base — puede que no forme parte de él.",
     "No hand with {0} came up quickly — here is a normal deal": "No se encontró rápido una mano con {0} — aquí tienes una mano normal",
     "Practise my weak spots": "Practicar mis puntos débiles",
@@ -625,6 +634,9 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Partner's call": "Enchère du partenaire",
+    "A convention you are practising can be used here": "Ici, vous pouvez utiliser une convention que vous travaillez",
+    "Show me when a practised convention can be used": "M'indiquer quand une convention travaillée peut être utilisée",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0} : aucune main ne l'a utilisée dans votre système de base — elle n'en fait peut-être pas partie.",
     "No hand with {0} came up quickly — here is a normal deal": "Aucune main avec {0} trouvée rapidement — voici une donne normale",
     "Practise my weak spots": "Travailler mes points faibles",
@@ -851,6 +863,9 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Partner's call": "Dichiarazione del compagno",
+    "A convention you are practising can be used here": "Qui puoi usare una convenzione che stai allenando",
+    "Show me when a practised convention can be used": "Avvisami quando posso usare una convenzione che alleno",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: nessuna mano l'ha usata nel tuo sistema base — potrebbe non farne parte.",
     "No hand with {0} came up quickly — here is a normal deal": "Nessuna mano con {0} trovata in fretta — ecco una smazzata normale",
     "Practise my weak spots": "Allena i miei punti deboli",
@@ -1077,6 +1092,9 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Partner's call": "Gebot des Partners",
+    "A convention you are practising can be used here": "Hier kannst du eine Konvention einsetzen, die du übst",
+    "Show me when a practised convention can be used": "Zeig mir, wann eine geübte Konvention passt",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: In deinem Grundsystem kam keine Hand damit vor — sie gehört vielleicht nicht dazu.",
     "No hand with {0} came up quickly — here is a normal deal": "Keine Hand mit {0} schnell gefunden — hier ist eine normale Verteilung",
     "Practise my weak spots": "Meine Schwächen üben",
@@ -1303,6 +1321,9 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Partner's call": "Заявка партнёра",
+    "A convention you are practising can be used here": "Здесь можно применить конвенцию, которую вы тренируете",
+    "Show me when a practised convention can be used": "Подсказывать, когда можно применить тренируемую конвенцию",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: в вашей базовой системе не нашлось ни одной сдачи с этой конвенцией — возможно, её там нет.",
     "No hand with {0} came up quickly — here is a normal deal": "Сдача с {0} быстро не нашлась — вот обычная сдача",
     "Practise my weak spots": "Тренировать слабые места",
@@ -1529,6 +1550,9 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Partner's call": "Odzywka partnera",
+    "A convention you are practising can be used here": "Tu możesz użyć konwencji, którą ćwiczysz",
+    "Show me when a practised convention can be used": "Pokaż, kiedy mogę użyć ćwiczonej konwencji",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: w twoim systemie bazowym nie pojawiło się żadne rozdanie z tą konwencją — może nie być jego częścią.",
     "No hand with {0} came up quickly — here is a normal deal": "Nie znaleziono szybko rozdania z {0} — oto zwykłe rozdanie",
     "Practise my weak spots": "Ćwicz moje słabe strony",
@@ -1755,6 +1779,9 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Partner's call": "同伴的叫品",
+    "A convention you are practising can be used here": "这里可以用到你正在练习的约定叫",
+    "Show me when a practised convention can be used": "在可以使用练习中的约定叫时提示我",
     "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}:在你的基础体系中没有出现用到它的牌——它可能不属于该体系。",
     "No hand with {0} came up quickly — here is a normal deal": "没有很快找到用到 {0} 的牌——这是一副普通牌",
     "Practise my weak spots": "练习我的弱项",

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 161;
+const APP_V = 162;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -510,9 +510,12 @@ function finishBoard() {
       const k = want.includes(a.sg.cv) ? a.sg.cv : a.m && want.includes(a.m.cv) ? a.m.cv : null;
       if (k) rv.push({ i, k, call: a.call, sc: a.sg.c, ok: a.call === a.sg.c, st: a.sg.t, ut: (a.m && a.m.t) || '' });
     });
+    // partner's calls with a practised convention: shown with what they mean (not scored)
+    G.auction.forEach((a, i) => { if (a.seat === (U() + 2) % 4 && a.m && want.includes(a.m.cv)) rv.push({ i, k: a.m.cv, call: a.call, pd: 1, ut: a.m.t || '' }); });
+    rv.sort((a, b) => a.i - b.i);
     if (rv.length) {
       e.prv = rv; SET.pracS = SET.pracS || {};
-      rv.forEach(r => { const s = SET.pracS[r.k] || (SET.pracS[r.k] = { n: 0, ok: 0 }); s.n++; if (r.ok) s.ok++; });
+      rv.filter(r => !r.pd).forEach(r => { const s = SET.pracS[r.k] || (SET.pracS[r.k] = { n: 0, ok: 0 }); s.n++; if (r.ok) s.ok++; });
       Store.saveSettings(SET);
     }
   }
@@ -874,6 +877,14 @@ function layoutFans() {
     el.style.setProperty('--cw', cw + 'px'); el.style.setProperty('--ov', (step - cw) + 'px');
   });
 }
+// practising with "show the chance" on: a quiet sign over the bidding box when the system would use a practised
+// convention right now (it does not say which call)
+function pracHintHtml() {
+  if (!SET.pracHint || !pracList().length || online() || G.tour || G.phase !== 'bid' || bidTurn() !== U()) return '';
+  const key = G.id + ':' + G.auction.length;
+  if (!ui.pracOpp || ui.pracOpp.key !== key) { const r = E.aiBid(G.auction, U(), G.deal[U()], G.cards); ui.pracOpp = { key, on: !!(r.m && pracList().includes(r.m.cv)) }; }
+  return ui.pracOpp.on ? `<div class="prhint">📚 ${T('A convention you are practising can be used here')}</div>` : '';
+}
 function renderBidbox() {
   const bb = $('bidbox');
   if (G.phase !== 'bid' || bidTurn() !== meSeat()) { bb.innerHTML = ''; bb.dataset.k = ''; bb.hidden = true; return; }
@@ -881,7 +892,7 @@ function renderBidbox() {
   const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st s${s}${red(s) ? " r" : ""}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
   // two rows, as on the big bridge sites: Pass, X, XX and the levels; then the suits of the chosen level
-  const html = `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
+  const html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
   // redraw only when something changed, so the alert text being typed keeps its focus
   if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; const i = $('alTxt'); if (i) i.value = ui.alertTxt || ''; }
 }
@@ -1073,6 +1084,7 @@ function pracHtml() {
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
+    <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Show me when a practised convention can be used")}</label>
     ${pracWarnHtml()}
     ${pracProgHtml()}
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
@@ -1718,12 +1730,16 @@ document.addEventListener('click', e => {
 // the practice review of a board: per convention ✓ when every call where it came up was the system's, else ✗
 function prvSum(rv) {
   const ks = [...new Set(rv.map(r => r.k))];
-  return '📚 ' + ks.map(k => esc(pracName(k)) + ' ' + (rv.every(r => r.k !== k || r.ok) ? '✓' : '✗')).join(' · ');
+  return '📚 ' + ks.map(k => { const mine = rv.filter(r => r.k === k && !r.pd); return esc(pracName(k)) + ' ' + (!mine.length ? '🤝' : mine.every(r => r.ok) ? '✓' : '✗'); }).join(' · ');
 }
 function prvHtml(rv) {
-  return rv.map(r => `<div class="prv ${r.ok ? 'ok' : 'no'}"><b>${r.ok ? '✓' : '✗'} ${esc(pracName(r.k))}</b>
+  return rv.map(r => {
+    if (r.pd) { const ci = E.convInfo(r.k); return `<div class="prv pd"><b>🤝 ${esc(pracName(r.k))}</b>
+      <div>${T("Partner's call")} ${callHtml(r.call)} — ${symText(bidTxt(r.ut))}</div>${ci && ci.d ? `<div class="prvd">${symText(ci.d)}</div>` : ''}</div>`; }
+    return `<div class="prv ${r.ok ? 'ok' : 'no'}"><b>${r.ok ? '✓' : '✗'} ${esc(pracName(r.k))}</b>
     <div>${T('You bid')} ${callHtml(r.call)}${r.ok ? ` — ${symText(bidTxt(r.st || r.ut))}` : `${r.ut ? ` (${symText(bidTxt(r.ut))})` : ''}`}</div>
-    ${r.ok ? '' : `<div class="prvfix">${T('The system bids')} ${callHtml(r.sc)} — ${symText(bidTxt(r.st))}</div>`}</div>`).join('');
+    ${r.ok ? '' : `<div class="prvfix">${T('The system bids')} ${callHtml(r.sc)} — ${symText(bidTxt(r.st))}</div>`}</div>`;
+  }).join('');
 }
 // the conventions you get wrong most (under 80% right), the weakest first, at most three
 function pracWeak() {
@@ -1752,7 +1768,7 @@ function showEnd() {
   const norm = f.normC;
   openOv('end', `<h2>${T('Board')} ${e.board}</h2><div class="big">${resultLine(e)}</div>${G.claimed ? `<div class="muted">${T('The remaining tricks were settled by claim.')}</div>` : ''}
    ${scoreTxt}
-   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}${e.prv.some(r => !r.ok) && !G.tour ? `<button class="btn gold prretry" id="oReplayP">🔁 ${T('Play this hand again and find the right call')}</button>` : ''}</div>` : ''}
+   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}${e.prv.some(r => !r.ok && !r.pd) && !G.tour ? `<button class="btn gold prretry" id="oReplayP">🔁 ${T('Play this hand again and find the right call')}</button>` : ''}</div>` : ''}
    <div class="grp"><span>${T('Par check')}</span><div>${T('Normal contract (most common at the robot tables)')}: ${f.done ? (norm ? conKey(norm) + ' — ' + T('double dummy') + ' ' + ddTxt('norm', norm) : T('Pass')) : '…'}</div>
    ${e.c ? `<div>${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${ddTxt('you', e.c)}</div>` : ''}</div>
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
@@ -2099,6 +2115,7 @@ document.addEventListener('change', e => {
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === 'dFile' && t.files && t.files[0]) { importDeals(t.files[0]); t.value = ''; return; }
   if (t.id === "hPracSel") { setPractice(t.value); render(); return; }
+  if (t.id === "pdHint") { SET.pracHint = t.checked; Store.saveSettings(SET); save(); return; }
   // the two drop-downs on the home page: a base system (one), conventions to practise (any number)
   if (t.dataset.pdsys) { SET.sys = t.dataset.pdsys; SET.conv = { ...E.sysOf(SET.sys).conv }; SET.practice = ''; Store.saveSettings(SET); save(); ui.pracDrop = null; render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
   if (t.dataset.pdconv) { togglePractice(t.dataset.pdconv, t.checked); render(); return; }
