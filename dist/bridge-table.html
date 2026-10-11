@@ -6397,7 +6397,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 154;
+const APP_V = 155;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6959,7 +6959,7 @@ function renderBar() {
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
    <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
    ${pracList().length && !online() && !G.tour
-     ? `<button class="box prbox" id="bPrac" title="${T('Tap to stop practising')}"><small>📚 ${T('Practising')}</small><b>${esc(pracNames())}</b><span class="tr">${T('{0} hands', pracList().reduce((a, k) => a + ((SET.pracN || {})[k] || 0), 0))} · ✕</span></button>`
+     ? `<div class="box prbox" id="bPrac"><small>📚 ${T('Practising')}</small><b>${esc(pracNames())}</b><span class="tr">${T('{0} hands', pracList().reduce((a, k) => a + ((SET.pracN || {})[k] || 0), 0))}</span></div>`
      : `<div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>`}
    <div class="spacer"></div>
    <div class="tools">
@@ -8376,7 +8376,6 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
-  if (t.id === "bPrac") { askYes(T("Stop practising {0}?", pracNames()), () => { closeOv(); stopPractice(); }); return; }
   const sol = ev_.target.closest("[data-solo]"); if (sol) { Net.st.soloPub = sol.dataset.solo === "pub"; closeOv(); resume(); return; }
   const dtb = ev_.target.closest("[data-dtab]"); if (dtb) { ui.dockTab = dtb.dataset.dtab; renderDock(); return; }
   const dq = ev_.target.closest("[data-dq]"); if (dq) { dockSend(dq.dataset.dq); return; }
