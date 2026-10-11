@@ -1173,3 +1173,22 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .prsel{background:#22302a;color:#f2c94c}
 .prac .prdesc{margin:4px 0 10px;font-size:14.5px;line-height:1.45;color:#e3dcc5;max-width:640px}
 .prac > .prsel{display:block;width:100%;max-width:420px}
+/* the convention choice: a big, glowing golden picker */
+.prac .prpick{display:block;max-width:460px;margin-top:2px;cursor:pointer}
+.prac .prlab{display:block;font-size:11.5px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#f2c94c;margin:0 0 6px 4px}
+.prac .prbox{position:relative;display:flex;align-items:center;border-radius:16px;padding:3px;background:linear-gradient(135deg,#f7dc7a,#d4a62a 45%,#f7dc7a 70%,#b8891c);box-shadow:0 8px 24px rgba(0,0,0,.28),0 0 0 0 rgba(242,201,76,.55);transition:transform .15s ease,box-shadow .2s ease}
+.prac .prpick:not(.on) .prbox{animation:prglow 2.4s ease-in-out infinite}
+@keyframes prglow{0%,100%{box-shadow:0 8px 24px rgba(0,0,0,.28),0 0 0 0 rgba(242,201,76,.5)}50%{box-shadow:0 8px 24px rgba(0,0,0,.28),0 0 0 9px rgba(242,201,76,0)}}
+.prac .prbox:hover{transform:translateY(-2px)}
+.prac .pric{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:22px;pointer-events:none;z-index:1}
+.prac .prpick.on .pric{color:#fff;background:#2f8a58;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;font-size:17px;font-weight:800;left:13px}
+.prac .prbox .prsel{appearance:none;-webkit-appearance:none;width:100%;max-width:none;margin:0;border:0;border-radius:13px;padding:15px 48px 15px 52px;font:inherit;font-size:18px;font-weight:800;letter-spacing:.2px;color:#173d27;cursor:pointer;
+  background:#fffaf0 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='%23b8891c' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 16px center;box-shadow:inset 0 2px 6px rgba(0,0,0,.08)}
+.prac .prbox .prsel:focus{outline:none;box-shadow:inset 0 0 0 2px #2f8a58}
+.prac .prpick.on .prsel{background-color:#f3fbf5;color:#1f6440}
+.prac .prsel option{font-size:16px;font-weight:600;color:#173d27;background:#fffaf0}
+:root[data-theme="dark"] .prac .prbox .prsel{background-color:#1d2a23;color:#f2c94c}
+:root[data-theme="dark"] .prac .prpick.on .prsel{background-color:#1f3a2a;color:#9fe0b4}
+:root[data-theme="dark"] .prac .prsel option{background:#1d2a23;color:#f2e9cc}
+@media (max-width:520px){.prac .prbox .prsel{font-size:16.5px;padding:14px 44px 14px 50px}}
+@media (prefers-reduced-motion:reduce){.prac .prpick:not(.on) .prbox{animation:none}}

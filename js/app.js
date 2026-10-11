@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 140;
+const APP_V = 141;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -892,7 +892,7 @@ const PRAC_GROUPS = [
 function pracHtml() {
   return `<h2>📚 ${T('Practise conventions')}</h2>
     <p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p>
-    <select id="hPracSel" class="sel prsel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select>`;
+    <label class="prpick${SET.practice ? ' on' : ''}"><span class="prlab">${T('Practice a convention')}</span><span class="prbox"><span class="pric" aria-hidden="true">${SET.practice ? '✓' : '🎯'}</span><select id="hPracSel" class="prsel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select></span></label>`;
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
 function setPractice(k) {
