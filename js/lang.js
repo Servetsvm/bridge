@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Base system and conventions": "Temel sistem ve konvansiyonlar",
     "In your system": "Sisteminde olanlar",
     "Not in your system": "Sisteminde olmayanlar",
     "Add a convention": "Konvansiyon ekle",
@@ -186,6 +187,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Base system and conventions": "Grunnsystem og konvensjoner",
     "In your system": "I systemet ditt",
     "Not in your system": "Ikke i systemet ditt",
     "Add a convention": "Legg til en konvensjon",
@@ -369,6 +371,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Base system and conventions": "Sistema base y convenciones",
     "In your system": "En tu sistema",
     "Not in your system": "Fuera de tu sistema",
     "Add a convention": "Añadir una convención",
@@ -580,6 +583,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Base system and conventions": "Système de base et conventions",
     "In your system": "Dans votre système",
     "Not in your system": "Hors de votre système",
     "Add a convention": "Ajouter une convention",
@@ -791,6 +795,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Base system and conventions": "Sistema base e convenzioni",
     "In your system": "Nel tuo sistema",
     "Not in your system": "Fuori dal tuo sistema",
     "Add a convention": "Aggiungi una convenzione",
@@ -1002,6 +1007,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Base system and conventions": "Grundsystem und Konventionen",
     "In your system": "In deinem System",
     "Not in your system": "Nicht in deinem System",
     "Add a convention": "Konvention hinzufügen",
@@ -1213,6 +1219,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Base system and conventions": "Базовая система и конвенции",
     "In your system": "В вашей системе",
     "Not in your system": "Вне вашей системы",
     "Add a convention": "Добавить конвенцию",
@@ -1424,6 +1431,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Base system and conventions": "System bazowy i konwencje",
     "In your system": "W twoim systemie",
     "Not in your system": "Poza twoim systemem",
     "Add a convention": "Dodaj konwencję",
@@ -1635,6 +1643,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Base system and conventions": "基本体系和约定叫",
     "In your system": "你体系中的",
     "Not in your system": "不在你体系中的",
     "Add a convention": "添加约定叫",
