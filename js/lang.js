@@ -3,6 +3,10 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: temel sisteminde bu konvansiyonun çıktığı bir el bulunamadı — bu sistemde olmayabilir.",
+    "No hand with {0} came up quickly — here is a normal deal": "{0} içeren bir el hızlıca bulunamadı — normal bir el dağıtıldı",
+    "Practise my weak spots": "Zayıf yanlarımı çalıştır",
+    "Play this hand again and find the right call": "Bu eli tekrar oyna, doğru teklifi bul",
     "{0} of {1} calls right": "{1} teklifte {0} doğru",
     "You bid": "Senin teklifin",
     "The system bids": "Sistemde doğrusu",
@@ -197,6 +201,10 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: ingen hånd med den dukket opp i grunnsystemet ditt — den er kanskje ikke en del av det.",
+    "No hand with {0} came up quickly — here is a normal deal": "Fant ingen hånd med {0} raskt — her er et vanlig spill",
+    "Practise my weak spots": "Øv på mine svake sider",
+    "Play this hand again and find the right call": "Spill hånden igjen og finn riktig melding",
     "{0} of {1} calls right": "{0} av {1} meldinger riktige",
     "You bid": "Du meldte",
     "The system bids": "Systemet melder",
@@ -391,6 +399,10 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: no apareció ninguna mano con ella en tu sistema base — puede que no forme parte de él.",
+    "No hand with {0} came up quickly — here is a normal deal": "No se encontró rápido una mano con {0} — aquí tienes una mano normal",
+    "Practise my weak spots": "Practicar mis puntos débiles",
+    "Play this hand again and find the right call": "Juega esta mano otra vez y encuentra la voz correcta",
     "{0} of {1} calls right": "{0} de {1} voces correctas",
     "You bid": "Tu voz",
     "The system bids": "El sistema dice",
@@ -613,6 +625,10 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "{0}: no hand with it came up in your base system — it may not be part of it.": "{0} : aucune main ne l'a utilisée dans votre système de base — elle n'en fait peut-être pas partie.",
+    "No hand with {0} came up quickly — here is a normal deal": "Aucune main avec {0} trouvée rapidement — voici une donne normale",
+    "Practise my weak spots": "Travailler mes points faibles",
+    "Play this hand again and find the right call": "Rejouez cette main et trouvez la bonne enchère",
     "{0} of {1} calls right": "{0} enchères justes sur {1}",
     "You bid": "Votre enchère",
     "The system bids": "Le système annonce",
@@ -835,6 +851,10 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: nessuna mano l'ha usata nel tuo sistema base — potrebbe non farne parte.",
+    "No hand with {0} came up quickly — here is a normal deal": "Nessuna mano con {0} trovata in fretta — ecco una smazzata normale",
+    "Practise my weak spots": "Allena i miei punti deboli",
+    "Play this hand again and find the right call": "Rigioca questa mano e trova la dichiarazione giusta",
     "{0} of {1} calls right": "{0} dichiarazioni giuste su {1}",
     "You bid": "La tua dichiarazione",
     "The system bids": "Il sistema dichiara",
@@ -1057,6 +1077,10 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: In deinem Grundsystem kam keine Hand damit vor — sie gehört vielleicht nicht dazu.",
+    "No hand with {0} came up quickly — here is a normal deal": "Keine Hand mit {0} schnell gefunden — hier ist eine normale Verteilung",
+    "Practise my weak spots": "Meine Schwächen üben",
+    "Play this hand again and find the right call": "Spiel die Hand noch einmal und finde das richtige Gebot",
     "{0} of {1} calls right": "{0} von {1} Geboten richtig",
     "You bid": "Dein Gebot",
     "The system bids": "Das System bietet",
@@ -1279,6 +1303,10 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: в вашей базовой системе не нашлось ни одной сдачи с этой конвенцией — возможно, её там нет.",
+    "No hand with {0} came up quickly — here is a normal deal": "Сдача с {0} быстро не нашлась — вот обычная сдача",
+    "Practise my weak spots": "Тренировать слабые места",
+    "Play this hand again and find the right call": "Сыграйте эту сдачу снова и найдите верную заявку",
     "{0} of {1} calls right": "{0} из {1} заявок верно",
     "You bid": "Ваша заявка",
     "The system bids": "По системе",
@@ -1501,6 +1529,10 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}: w twoim systemie bazowym nie pojawiło się żadne rozdanie z tą konwencją — może nie być jego częścią.",
+    "No hand with {0} came up quickly — here is a normal deal": "Nie znaleziono szybko rozdania z {0} — oto zwykłe rozdanie",
+    "Practise my weak spots": "Ćwicz moje słabe strony",
+    "Play this hand again and find the right call": "Zagraj to rozdanie jeszcze raz i znajdź właściwą odzywkę",
     "{0} of {1} calls right": "{0} z {1} odzywek dobrze",
     "You bid": "Twoja odzywka",
     "The system bids": "System licytuje",
@@ -1723,6 +1755,10 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "{0}: no hand with it came up in your base system — it may not be part of it.": "{0}:在你的基础体系中没有出现用到它的牌——它可能不属于该体系。",
+    "No hand with {0} came up quickly — here is a normal deal": "没有很快找到用到 {0} 的牌——这是一副普通牌",
+    "Practise my weak spots": "练习我的弱项",
+    "Play this hand again and find the right call": "再打一次这副牌，找出正确的叫品",
     "{0} of {1} calls right": "{1} 次叫牌中 {0} 次正确",
     "You bid": "你的叫品",
     "The system bids": "体系叫",

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 159;
+const APP_V = 160;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -260,10 +260,45 @@ function applyField(e, f) {
 /* the conventions being practised (SET.practice holds their keys, separated by commas; "" = off) */
 // the basics every system plays (no switch on the card) can be practised too
 const PRAC_BASICS = ['jtr', 'strong2c', 'weak2', 'nego', 'takeout', 'bw', 'cue', 'pre', 'runout'];
-const pracKnown = k => E.CONVS.some(c => c.k === k) || PRAC_BASICS.includes(k);
+// Lavinthal is a way of discarding: it never comes up in the bidding, so it cannot be practised here
+const pracKnown = k => k !== 'lav' && (E.CONVS.some(c => c.k === k) || PRAC_BASICS.includes(k));
 function pracList() { return String(SET.practice || '').split(',').filter(pracKnown); }
 const pracName = k => k === 'jtr' ? T('Transfer') : E.convInfo(k).n;   // plain "Transfer" in the practice list
 function pracNames() { return pracList().map(pracName).join(', '); }
+// does a practised convention ever come up in the base system? a short search in the background, one convention at a
+// time; the answer is kept per system and convention, and a "no" shows a warning under the choice. Rare conventions
+// (about one deal in a thousand or fewer) are not checked: a short search would miss them even where they belong.
+const PRAC_CHK = {}, PRAC_RARE = new Set(['gerber', 'smolen', 'texasInt', 'fsf', 'respx', 'gamb', 'sjs']), PRAC_Q = [];
+function pracCheck(k) {
+  if (PRAC_RARE.has(k)) return true;
+  const key = (SET.sys || 'twoone') + ':' + k;
+  if (key in PRAC_CHK) return PRAC_CHK[key];
+  PRAC_CHK[key] = null;   // queued / searching
+  PRAC_Q.push([key, k]); if (PRAC_Q.length === 1) setTimeout(pracProbe, 50);
+  return null;
+}
+function pracProbe() {
+  const [key, k] = PRAC_Q[0];
+  // the base system was changed while this one waited: drop it (it is asked again for the new system)
+  if (!key.startsWith((SET.sys || 'twoone') + ':')) { delete PRAC_CHK[key]; PRAC_Q.shift(); if (PRAC_Q.length) setTimeout(pracProbe, 0); return; }
+  const cards = sideCards(), t0 = performance.now();
+  const done = v => { PRAC_CHK[key] = v; PRAC_Q.shift(); if (!v) { const h = document.getElementById('hPrac'); if (h) h.innerHTML = pracHtml(); } if (PRAC_Q.length) setTimeout(pracProbe, 50); };
+  const step = () => {
+    if (!key.startsWith((SET.sys || 'twoone') + ':')) { delete PRAC_CHK[key]; PRAC_Q.shift(); if (PRAC_Q.length) setTimeout(pracProbe, 0); return; }
+    for (let i = 0; i < 15; i++) {
+      const d = E.shuffle([...Array(52).keys()]), deal = [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13)), dealer = Math.floor(Math.random() * 4), auc = [];
+      while (!auctionOver(auc) && auc.length < 60) { const t = (dealer + auc.length) % 4; const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); }
+      if (auc.some(e => sideOf(e.seat) === sideOf(U()) && e.m && e.m.cv === k)) return done(true);
+    }
+    if (performance.now() - t0 > 8000) return done(false);
+    setTimeout(step, 0);
+  };
+  step();
+}
+function pracWarnHtml() {
+  const bad = pracList().filter(k => pracCheck(k) === false);
+  return bad.length ? `<div class="prwarn">⚠ ${T('{0}: no hand with it came up in your base system — it may not be part of it.', esc(bad.map(pracName).join(', ')))}</div>` : '';
+}
 /* a never-seen deal; in practice mode, one where our side gets to use one of the chosen conventions */
 function freshDeal(dealer) {
   const want = pracList(), cards = sideCards(), t0 = performance.now();
@@ -281,7 +316,7 @@ function freshDeal(dealer) {
       if (!mine && !ours) { if (performance.now() - t0 < 4000) continue; }
       else if (!mine) { if (!fallback) fallback = { deal, key }; if (performance.now() - t0 < 2500) continue; }
       if (!mine && !ours && fallback) { SEEN.add(fallback.key); saveSeen(); return fallback.deal; }
-      if (!mine && !ours) flash('No practice deal found quickly — here is a normal deal', 2500);
+      if (!mine && !ours) flash('📚 ' + T('No hand with {0} came up quickly — here is a normal deal', pracNames()), 3000);
     }
     SEEN.add(key); saveSeen(); return deal;
   }
@@ -946,7 +981,7 @@ function pracHtml() {
   // (any number, your system's first); under each, what is chosen
   const sel = pracList(), cur = E.sysOf(SET.sys);
   const sysName = k => ({ twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' })[k] || (E.SYSTEMS.find(s => s.k === k) || {}).n || k;
-  const on = E.CONVS.filter(c => SET.conv[c.k]), off = E.CONVS.filter(c => !SET.conv[c.k]);
+  const on = E.CONVS.filter(c => SET.conv[c.k] && pracKnown(c.k)), off = E.CONVS.filter(c => !SET.conv[c.k] && pracKnown(c.k));
   const item = (attr, k, label, checked) => `<label class="pdi${checked ? ' on' : ''}"><input type="checkbox" ${attr}="${k}" ${checked ? 'checked' : ''}><span>${label}</span></label>`;
   const sysPanel = ui.pracDrop === 'sys' ? `<div class="pdpanel">${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), s.k === cur.k)).join('')}</div>` : '';
   const convPanel = ui.pracDrop === 'conv' ? `<div class="pdpanel wide">${item('data-pdoff', '1', T('Off — normal random deals'), !sel.length)}
@@ -959,6 +994,7 @@ function pracHtml() {
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
+    ${pracWarnHtml()}
     ${pracProgHtml()}
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
 }
@@ -1610,11 +1646,17 @@ function prvHtml(rv) {
     <div>${T('You bid')} ${callHtml(r.call)}${r.ok ? ` — ${symText(bidTxt(r.st || r.ut))}` : `${r.ut ? ` (${symText(bidTxt(r.ut))})` : ''}`}</div>
     ${r.ok ? '' : `<div class="prvfix">${T('The system bids')} ${callHtml(r.sc)} — ${symText(bidTxt(r.st))}</div>`}</div>`).join('');
 }
+// the conventions you get wrong most (under 80% right), the weakest first, at most three
+function pracWeak() {
+  const S = SET.pracS || {};
+  return Object.keys(S).filter(k => pracKnown(k) && S[k].n && S[k].ok / S[k].n < 0.8).sort((a, b) => S[a].ok / S[a].n - S[b].ok / S[b].n || S[b].n - S[a].n).slice(0, 3);
+}
 // how you are doing with each convention you have practised: hands played, and how often your calls were right
 function pracProgHtml() {
   const S = SET.pracS || {}, ks = Object.keys(S).filter(k => S[k] && S[k].n && pracKnown(k)).sort((a, b) => S[b].n - S[a].n);
   if (!ks.length) return '';
-  return `<div class="prprog"><div class="prph">${T('Your progress')}</div>${ks.map(k => { const s = S[k], p = Math.round(100 * s.ok / s.n), h = (SET.pracN || {})[k] || 0;
+  const weak = pracWeak();
+  return `<div class="prprog"><div class="prph"><span>${T('Your progress')}</span>${weak.length ? `<button class="prweak" id="pdWeak">🎯 ${T('Practise my weak spots')}</button>` : ''}</div>${ks.map(k => { const s = S[k], p = Math.round(100 * s.ok / s.n), h = (SET.pracN || {})[k] || 0;
     return `<div class="prpr"><span class="prpn">${esc(pracName(k))}</span><span class="prpbar"><i style="width:${p}%" class="${p >= 80 ? 'g' : p >= 50 ? 'm' : 'b'}"></i></span><span class="prpv">${p}%</span><small>${T('{0} hands', h)} · ${T('{0} of {1} calls right', s.ok, s.n)}</small></div>`; }).join('')}</div>`;
 }
 function showEnd() {
@@ -1631,7 +1673,7 @@ function showEnd() {
   const norm = f.normC;
   openOv('end', `<h2>${T('Board')} ${e.board}</h2><div class="big">${resultLine(e)}</div>${G.claimed ? `<div class="muted">${T('The remaining tricks were settled by claim.')}</div>` : ''}
    ${scoreTxt}
-   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}</div>` : ''}
+   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}${e.prv.some(r => !r.ok) && !G.tour ? `<button class="btn gold prretry" id="oReplayP">🔁 ${T('Play this hand again and find the right call')}</button>` : ''}</div>` : ''}
    <div class="grp"><span>${T('Par check')}</span><div>${T('Normal contract (most common at the robot tables)')}: ${f.done ? (norm ? conKey(norm) + ' — ' + T('double dummy') + ' ' + ddTxt('norm', norm) : T('Pass')) : '…'}</div>
    ${e.c ? `<div>${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${ddTxt('you', e.c)}</div>` : ''}</div>
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
@@ -2040,6 +2082,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'toast') { if (ui.toastChat && G && G.phase !== 'idle') { ui.toastChat = false; ui.dockOpen = true; renderDock(); } ui.toast = null; render(); return; }   // a message: tap it to open the chat
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
+  if (t.id === "pdWeak") { const w = pracWeak(); if (!w.length) return; SET.practice = ""; w.forEach(k => togglePractice(k, true)); flash("🎯 " + T("Practising {0}: the next deals use it", pracNames()), 2200); ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === "pdPlay") { if (!pracList().length) { ui.pracDrop = "conv"; render(); return; } ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
@@ -2153,7 +2196,7 @@ document.addEventListener('click', ev_ => {
       if (t && t.format === 'tables') { const me = Net.myTourSeat(t); if (me && me.seat === me.hostSeat) Net.openTourTable(id); } else if (t) playTour(id);
       break; }
     case 'tCancel': Net.tourCancel(ui.tsetId); closeOv(); render(); break;
-    case "oReplay": replayDeal(); break;
+    case "oReplay": case "oReplayP": closeOv(); replayDeal(); break;
     case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
     case "sRefresh": ui.statData = null; showStats(); break;

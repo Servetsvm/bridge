@@ -1356,3 +1356,10 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .prph{color:#8fc3ea}
 :root[data-theme="dark"] .prac .prpbar{background:#2c3a32}
 .prv.ok,.prv.no{color:inherit;font-weight:400}.prv .prvfix{font-weight:700}
+/* practice: the warning when a convention does not come up in the base system, the weak-spots button, the replay button */
+.prac .prwarn{margin:10px 0 0;padding:8px 11px;border-radius:10px;background:#fff4e0;border:1px solid #f0c27a;color:#7a4a00;font-size:13.5px;line-height:1.4;font-weight:600}
+:root[data-theme="dark"] .prac .prwarn{background:#3a2c14;border-color:#7a5a20;color:#ffd38a}
+.prac .prph{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.prac .prweak{border:0;border-radius:8px;padding:6px 10px;font:inherit;font-size:12.5px;font-weight:800;letter-spacing:0;text-transform:none;color:#fff;background:#d0453b;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.prac .prweak:hover{filter:brightness(1.08)}
+.prretry{display:block;width:100%;margin-top:8px}
