@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 163;
+const APP_V = 164;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -179,7 +179,7 @@ const Field = {
   },
   dd(id, key, deal, c) {
     if (this.ddBoard !== id || !this.dw) { if (this.dw) this.dw.terminate(); this.dw = this.mk(); this.ddBoard = id; if (this.dw) this.dw.onerror = () => this.onmsg({ type: 'dd', id, key, t: null }); }
-    if (this.dw) this.dw.postMessage({ type: 'dd', id, key, deal, c, limit: 4e7 });
+    if (this.dw) this.dw.postMessage({ type: 'dd', id, key, deal, c, limit: 1.2e8 });   // most deals need a few million nodes; about one in forty needs 30-40 million
     else setTimeout(() => this.onmsg({ type: 'dd', id, key, t: E.ddContract(deal, c, 1.5e6) }), 50);
   },
   fallback(msg) {

@@ -2947,7 +2947,7 @@ function declLead(g, seat) {
 /* ---- double-dummy solver ---- */
 const DD = { M: new Int32Array(16), pS: new Int8Array(64), pC: new Int8Array(64), ply: 0, tn: 0, leader: 0, left: 0, trump: -1, side: 0, nodes: 0, limit: 0, ws: 0, wm: 0 };
 const DDX = { limit: true };
-const DDF = { hint: true, qt: true, ord: true, ttMin: 3, lord: 900, lord2: 500, sec: -20, disc: 3, qx: true, olen: 0, lt: 0, rt: 0, wh: true, kt: true, k2: false, scan: 250, k0: false, cut: true };
+const DDF = { hint: true, qt: true, ord: true, ttMin: 3, lord: 900, lord2: 500, sec: -20, disc: 3, qx: true, wh: true, kt: true, scan: 250, cut: true };
 const pc32 = x => { x -= (x >>> 1) & 0x55555555; x = (x & 0x33333333) + ((x >>> 2) & 0x33333333); return Math.imul((x + (x >>> 4)) & 0x0F0F0F0F, 0x01010101) >>> 24; };
 /* transposition table for positions at the start of a trick (partition search). The search also reports which cards'
    ranks mattered for its result: a card that won a trick over a card of its own suit, the top cards behind the sure-trick
@@ -3031,13 +3031,8 @@ function ddMoves(seat, hint) {
     let all = M[s] | M[4 + s] | M[8 + s] | M[12 + s];
     for (let i = t0; i < DD.ply; i++) { const c = DD.pC[i]; if (((c / 13) | 0) === s) all |= 1 << (c % 13); }
     const len = pc32(my), top = 31 - Math.clz32(all), pTop = (M[p * 4 + s] >> top) & 1;
-    // trump play for a lead: an opponent who can ruff it, partner who can ruff it
+    // a lead in a side suit an opponent can ruff comes late, one partner can ruff comes early
     let lAdj = 0;
-    if (tn === 0 && (DDF.olen || DDF.lt || DDF.rt)) {
-      const lh = (seat + 1) & 3, rh = (seat + 3) & 3, tb = 1 << top;
-      lAdj -= DDF.olen * (pc32(M[lh * 4 + s]) + pc32(M[rh * 4 + s]));
-      if (!(my & tb) && !pTop) lAdj -= (M[lh * 4 + s] & tb ? DDF.lt : 0) + (M[rh * 4 + s] & tb ? DDF.rt : 0);
-    }
     if (tn === 0 && DDF.lord && tr >= 0 && s !== tr) {
       const lh = (seat + 1) & 3, rh = (seat + 3) & 3;
       if ((!M[lh * 4 + s] && M[lh * 4 + tr]) || (!M[rh * 4 + s] && M[rh * 4 + tr])) lAdj -= DDF.lord;
@@ -3126,13 +3121,12 @@ function ddSearch(alpha, beta) {
     if (r === 0) return 0;
     if (alpha >= r) return r; if (beta <= 0) return 0;
     if (r === 1) { const v = lastTrick(ld); RW[P4 + DD.ws] = DD.wm; return v; }
-    const ST_ = DDF.stats; if (ST_) ST_[r * 4]++;
     if (DDF.qt) {
       const q = quickTricks(ld, r), sm = DD.trump >= 0 ? sureTrumps(ld & 1) : 0, so = DD.trump >= 0 ? sureTrumps((ld & 1) ^ 1) : 0;
       const lbL = q > sm ? q : sm, mine = (ld & 1) === DD.side, lo = mine ? lbL : so, hi = r - (mine ? so : lbL);
       if (lo > alpha || hi < beta) {
         for (let s = 0; s < 4; s++) if (QD[s]) RW[P4 + s] = topMask(s, QD[s]);
-        if (lo >= beta || hi <= alpha) { if (ST_) ST_[r * 4 + 1]++; return lo >= beta ? lo : hi; }
+        if (lo >= beta || hi <= alpha) return lo >= beta ? lo : hi;
         if (lo > alpha) alpha = lo; if (hi < beta) beta = hi;
       }
     }
@@ -3143,17 +3137,14 @@ function ddSearch(alpha, beta) {
         const a = M[s], b = M[4 + s], c = M[8 + s], d = M[12 + s]; let all = a | b | c | d, v = 1, L = 0;
         while (all) { const bit = 1 << (31 - Math.clz32(all)); all ^= bit; v = (v << 2) | ((b & bit) ? 1 : (c & bit) ? 2 : (d & bit) ? 3 : 0); L++; }
         PV[P4 + s] = v; PL[P4 + s] = L;
-        if (L && !DDF.k0) lk2 |= ((v >>> (2 * L - 2)) & 3) << (6 + 2 * s);
-        if (DDF.k2 && L >= 2) lk2 |= ((v >>> (2 * L - 4)) & 3) << (14 + 2 * s);
+        if (L) lk2 |= ((v >>> (2 * L - 2)) & 3) << (6 + 2 * s);
         const ln = pc32(a) | (pc32(b) << 4) | (pc32(c) << 8) | (pc32(d) << 12);
         if (s < 2) lk0 |= ln << (16 * s); else lk1 |= ln << (16 * (s - 2));
       }
       hb = ttHash(lk0, lk1, lk2);
       let wh = -1;
-      if (ST_) ST_[57]++;
       for (let e = THead[hb], n = 0; e >= 0 && n < DDF.scan; e = ENx[e], n++) {
         const e3 = e * 3, e4 = e * 4, dp = ED[e];
-        if (ST_) ST_[56]++;
         if (EK[e3] !== lk0 || EK[e3 + 1] !== lk1 || EK[e3 + 2] !== lk2) continue;
         if (PV[P4] >>> 2 * (PL[P4] - (dp & 15)) !== EP[e4] || PV[P4 + 1] >>> 2 * (PL[P4 + 1] - (dp >> 4 & 15)) !== EP[e4 + 1] ||
             PV[P4 + 2] >>> 2 * (PL[P4 + 2] - (dp >> 8 & 15)) !== EP[e4 + 2] || PV[P4 + 3] >>> 2 * (PL[P4 + 3] - (dp >> 12)) !== EP[e4 + 3]) { if (wh < 0) wh = EV[e3 + 2]; continue; }
@@ -3166,7 +3157,7 @@ function ddSearch(alpha, beta) {
         }
         if (lo > alpha || hi < beta) {
           for (let s = 0; s < 4; s++) RW[P4 + s] |= topMask(s, (dp >> (4 * s)) & 15);
-          if (lo >= beta || hi <= alpha || lo === hi) { if (ST_) ST_[r * 4 + 2]++; return lo >= beta ? lo : hi <= alpha ? hi : lo; }
+          if (lo >= beta || hi <= alpha || lo === hi) return lo >= beta ? lo : hi <= alpha ? hi : lo;
           if (lo > alpha) alpha = lo; if (hi < beta) beta = hi;
         }
       }
@@ -3195,9 +3186,8 @@ function ddSearch(alpha, beta) {
     RW[P4] |= c0; RW[P4 + 1] |= c1; RW[P4 + 2] |= c2; RW[P4 + 3] |= c3;
     if (isMax ? v > best : v < best) { m0 = c0; m1 = c1; m2 = c2; m3 = c3; }
     if (isMax) { if (v > best) { best = v; bestC = c; } if (best > alpha) alpha = best; } else { if (v < best) { best = v; bestC = c; } if (best < beta) beta = best; }
-    if (alpha >= beta) { if (DDF.st2) { const z = (DD.tn * 2 + (isMax ? 1 : 0)) * 4; DDF.st2[z] += 1; DDF.st2[z + 1] += i === 0 ? 1 : 0; DDF.st2[z + 2] += i; } break; }
+    if (alpha >= beta) break;
   }
-  if (DDF.st2 && alpha < beta) { const z = (DD.tn * 2 + (isMax ? 1 : 0)) * 4; DDF.st2[z + 3] += 1; }
   // a cutoff rests on the one card that gave it: only the ranks that mattered below that card count
   if (DDF.cut && (isMax ? best >= b0 : best <= a0)) { RW[P4] = m0; RW[P4 + 1] = m1; RW[P4 + 2] = m2; RW[P4 + 3] = m3; }
   if (hb >= 0) {
@@ -3205,7 +3195,7 @@ function ddSearch(alpha, beta) {
     let dp = 0;
     for (let s = 0; s < 4; s++) {
       const L = PL[P4 + s]; if (!L) continue;
-      const rel = RW[P4 + s], dm = DDF.k0 ? 0 : DDF.k2 && L >= 2 ? 2 : 1; let d = dm;
+      const rel = RW[P4 + s], dm = 1; let d = dm;
       if (rel) { d = pc32((M[s] | M[4 + s] | M[8 + s] | M[12 + s]) >>> (31 - Math.clz32(rel & -rel))); if (d < dm) d = dm; }
       dp |= d << (4 * s); RW[P4 + s] = topMask(s, d);
     }
@@ -3219,7 +3209,6 @@ function ddSearch(alpha, beta) {
     if (f < 0) {
       if (EN >= TTP) ttCompact();
       f = EN++; ENx[f] = THead[hb]; THead[hb] = f; ER[f] = r;
-      if (DDF.stats) DDF.stats[r * 4 + 3]++;
       const e3 = f * 3, e4 = f * 4;
       EK[e3] = lk0; EK[e3 + 1] = lk1; EK[e3 + 2] = lk2; ED[f] = dp;
       EP[e4] = p0; EP[e4 + 1] = p1; EP[e4 + 2] = p2; EP[e4 + 3] = p3;
@@ -3246,7 +3235,6 @@ function ddSolve(lo, hi, guess) {
   while (lo < hi) {
     if (t <= lo) t = lo + 1; if (t > hi) t = hi;
     const v = ddSearch(t - 1, t);
-    if (DDF.trace) DDF.trace.push([t, v, DD.nodes, EN]);
     if (v >= t) { lo = Math.min(v, hi); t = lo + 1; } else { hi = Math.max(v, lo); t = hi; }
   }
   return lo;
@@ -6544,7 +6532,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 163;
+const APP_V = 164;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6715,7 +6703,7 @@ const Field = {
   },
   dd(id, key, deal, c) {
     if (this.ddBoard !== id || !this.dw) { if (this.dw) this.dw.terminate(); this.dw = this.mk(); this.ddBoard = id; if (this.dw) this.dw.onerror = () => this.onmsg({ type: 'dd', id, key, t: null }); }
-    if (this.dw) this.dw.postMessage({ type: 'dd', id, key, deal, c, limit: 4e7 });
+    if (this.dw) this.dw.postMessage({ type: 'dd', id, key, deal, c, limit: 1.2e8 });   // most deals need a few million nodes; about one in forty needs 30-40 million
     else setTimeout(() => this.onmsg({ type: 'dd', id, key, t: E.ddContract(deal, c, 1.5e6) }), 50);
   },
   fallback(msg) {
