@@ -1373,3 +1373,10 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .prhintsw{color:#e8efe9}
 .prhint{margin:0 0 6px;padding:6px 10px;border-radius:8px;background:#fff4c4;color:#5a3d00;font-weight:700;font-size:13.5px;text-align:center;animation:prhintIn .3s ease-out}
 @keyframes prhintIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+/* progress: closed it is one line, a tap opens the list */
+.prac .prptog{display:flex;align-items:baseline;gap:6px;background:none;border:0;padding:0;margin:0;font:inherit;font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:#1f5f8b;cursor:pointer}
+.prac .prptog i{font-style:normal;font-size:12px}
+.prac .prptog small{font-size:12px;letter-spacing:0;text-transform:none;font-weight:700;color:#6b6f66}
+.prac .prprog:not(.open){padding:8px 12px}
+.prac .prprog:not(.open) .prph{margin-bottom:0}
+:root[data-theme="dark"] .prac .prptog{color:#8fc3ea}

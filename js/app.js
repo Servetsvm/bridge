@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 164;
+const APP_V = 165;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1747,12 +1747,15 @@ function pracWeak() {
   return Object.keys(S).filter(k => pracKnown(k) && S[k].n && S[k].ok / S[k].n < 0.8).sort((a, b) => S[a].ok / S[a].n - S[b].ok / S[b].n || S[b].n - S[a].n).slice(0, 3);
 }
 // how you are doing with each convention you have practised: hands played, and how often your calls were right
+// closed it is one line (how many conventions, right overall); a tap opens the list
 function pracProgHtml() {
   const S = SET.pracS || {}, ks = Object.keys(S).filter(k => S[k] && S[k].n && pracKnown(k)).sort((a, b) => S[b].n - S[a].n);
   if (!ks.length) return '';
-  const weak = pracWeak();
-  return `<div class="prprog"><div class="prph"><span>${T('Your progress')}</span>${weak.length ? `<button class="prweak" id="pdWeak">🎯 ${T('Practise my weak spots')}</button>` : ''}</div>${ks.map(k => { const s = S[k], p = Math.round(100 * s.ok / s.n), h = (SET.pracN || {})[k] || 0;
-    return `<div class="prpr"><span class="prpn">${esc(pracName(k))}</span><span class="prpbar"><i style="width:${p}%" class="${p >= 80 ? 'g' : p >= 50 ? 'm' : 'b'}"></i></span><span class="prpv">${p}%</span><small>${T('{0} hands', h)} · ${T('{0} of {1} calls right', s.ok, s.n)}</small></div>`; }).join('')}</div>`;
+  const weak = pracWeak(), open = !!SET.progOpen;
+  const tot = ks.reduce((a, k) => [a[0] + S[k].ok, a[1] + S[k].n], [0, 0]), pAll = Math.round(100 * tot[0] / tot[1]);
+  const rows = open ? ks.map(k => { const s = S[k], p = Math.round(100 * s.ok / s.n), h = (SET.pracN || {})[k] || 0;
+    return `<div class="prpr"><span class="prpn">${esc(pracName(k))}</span><span class="prpbar"><i style="width:${p}%" class="${p >= 80 ? 'g' : p >= 50 ? 'm' : 'b'}"></i></span><span class="prpv">${p}%</span><small>${T('{0} hands', h)} · ${T('{0} of {1} calls right', s.ok, s.n)}</small></div>`; }).join('') : '';
+  return `<div class="prprog${open ? ' open' : ''}"><div class="prph"><button class="prptog" id="pdProg" aria-expanded="${open}">${T('Your progress')} <i>${open ? '▴' : '▾'}</i><small>${T('{0} conventions · {1}% right', ks.length, pAll)}</small></button>${weak.length ? `<button class="prweak" id="pdWeak">🎯 ${T('Practise my weak spots')}</button>` : ''}</div>${rows}</div>`;
 }
 function showEnd() {
   const e = G.result; if (!e) return;
@@ -2178,6 +2181,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'toast') { if (ui.toastChat && G && G.phase !== 'idle') { ui.toastChat = false; ui.dockOpen = true; renderDock(); } ui.toast = null; render(); return; }   // a message: tap it to open the chat
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
+  if (t.id === "pdProg") { SET.progOpen = !SET.progOpen; Store.saveSettings(SET); render(); return; }
   if (t.id === "pdWeak") { const w = pracWeak(); if (!w.length) return; SET.practice = ""; w.forEach(k => togglePractice(k, true)); flash("🎯 " + T("Practising {0}: the next deals use it", pracNames()), 2200); ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === "pdPlay") { if (!pracList().length) { ui.pracDrop = "conv"; render(); return; } ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }

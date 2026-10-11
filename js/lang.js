@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "{0} conventions · {1}% right": "{0} konvansiyon · %{1} doğru",
     "Partner's call": "Ortağının teklifi",
     "A convention you are practising can be used here": "Burada çalıştığın bir konvansiyonu kullanabilirsin",
     "Show me when a practised convention can be used": "Teklif sırasında konvansiyon fırsatını göster",
@@ -204,6 +205,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "{0} conventions · {1}% right": "{0} konvensjoner · {1} % riktig",
     "Partner's call": "Makkers melding",
     "A convention you are practising can be used here": "Her kan du bruke en konvensjon du øver på",
     "Show me when a practised convention can be used": "Vis meg når en konvensjon jeg øver på kan brukes",
@@ -405,6 +407,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "{0} conventions · {1}% right": "{0} convenciones · {1} % correctas",
     "Partner's call": "Voz del compañero",
     "A convention you are practising can be used here": "Aquí puedes usar una convención que practicas",
     "Show me when a practised convention can be used": "Avisarme cuando pueda usar una convención que practico",
@@ -634,6 +637,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "{0} conventions · {1}% right": "{0} conventions · {1} % justes",
     "Partner's call": "Enchère du partenaire",
     "A convention you are practising can be used here": "Ici, vous pouvez utiliser une convention que vous travaillez",
     "Show me when a practised convention can be used": "M'indiquer quand une convention travaillée peut être utilisée",
@@ -863,6 +867,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "{0} conventions · {1}% right": "{0} convenzioni · {1}% giuste",
     "Partner's call": "Dichiarazione del compagno",
     "A convention you are practising can be used here": "Qui puoi usare una convenzione che stai allenando",
     "Show me when a practised convention can be used": "Avvisami quando posso usare una convenzione che alleno",
@@ -1092,6 +1097,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "{0} conventions · {1}% right": "{0} Konventionen · {1} % richtig",
     "Partner's call": "Gebot des Partners",
     "A convention you are practising can be used here": "Hier kannst du eine Konvention einsetzen, die du übst",
     "Show me when a practised convention can be used": "Zeig mir, wann eine geübte Konvention passt",
@@ -1321,6 +1327,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "{0} conventions · {1}% right": "Конвенций: {0} · верно {1}%",
     "Partner's call": "Заявка партнёра",
     "A convention you are practising can be used here": "Здесь можно применить конвенцию, которую вы тренируете",
     "Show me when a practised convention can be used": "Подсказывать, когда можно применить тренируемую конвенцию",
@@ -1550,6 +1557,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "{0} conventions · {1}% right": "{0} konwencji · {1}% dobrze",
     "Partner's call": "Odzywka partnera",
     "A convention you are practising can be used here": "Tu możesz użyć konwencji, którą ćwiczysz",
     "Show me when a practised convention can be used": "Pokaż, kiedy mogę użyć ćwiczonej konwencji",
@@ -1779,6 +1787,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "{0} conventions · {1}% right": "{0} 个约定叫 · 正确 {1}%",
     "Partner's call": "同伴的叫品",
     "A convention you are practising can be used here": "这里可以用到你正在练习的约定叫",
     "Show me when a practised convention can be used": "在可以使用练习中的约定叫时提示我",
