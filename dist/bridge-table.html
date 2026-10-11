@@ -2282,6 +2282,11 @@ function ntResponses(x, add, lv, own) {
 function suitResponses(x, add, o, os) {
   const C = x.C, maj = os >= 2, rhoX = x.rhoCall === 'X', un = !x.passed;
   const two1 = C.twoOverOne && un;
+  // a strong jump shift (19+, a good suit) comes before the ordinary new-suit responses that the same hand also fits
+  if (C.sjs && un && !rhoX) for (const s of [1, 2, 3]) {
+    if (s <= os) continue;
+    add(B(2, s), h => h.len[s] >= 5 && h.hcp >= 19 && h.top5(s) >= 3, { min: 19, len: { [s]: 5 }, tag: "sjs", cv: "sjs", t: "Strong jump shift: 19+ points, good " + SUIT[s] + " suit, slam interest", f: 1, gf: 1 });
+  }
   if (rhoX) add('XX', h => h.hcp >= 10, { min: 10, t: 'Redouble: 10+ HCP' });
   if (maj) {
     if (C.drury && x.passed && !rhoX && x.auc.indexOf(x.opening) >= 2) add(B(2, 0), h => h.len[os] >= 3 && h.sup(os) >= 10, { min: 10, max: 11, len: { [os]: 3 }, tag: "drury", cv: "drury", t: "Drury: 3+ " + SUIT[os] + " support, 10-12 points (passed hand)", f: 1 });
@@ -2310,10 +2315,6 @@ function suitResponses(x, add, o, os) {
     if (os === 0) add(B(1, 1), h => h.hcp >= 6 && ((h.len[1] >= 5 && h.len[1] > Math.max(h.len[2], h.len[3])) || (h.len[1] >= 4 && h.len[2] < 4 && h.len[3] < 4)), { min: 6, len: { 1: 4 }, t: '4+ ♦, 6+ HCP', f: 1 });
     add(B(1, 2), h => h.hcp >= 6 && h.len[2] >= 4 && !(h.len[3] >= 5 && h.len[3] > h.len[2]), { min: 6, len: { 2: 4 }, t: '4+ ♥, 6+ HCP', f: 1 });
     add(B(1, 3), h => h.hcp >= 6 && h.len[3] >= 4, { min: 6, len: { 3: 4 }, t: '4+ ♠, 6+ HCP', f: 1 });
-  }
-  if (C.sjs && un && !rhoX) for (const s of [1, 2, 3]) {
-    if (s <= os) continue;
-    add(B(2, s), h => h.len[s] >= 5 && h.hcp >= 19 && h.top5(s) >= 3, { min: 19, len: { [s]: 5 }, tag: "sjs", cv: "sjs", t: "Strong jump shift: 19+ points, good " + SUIT[s] + " suit, slam interest", f: 1, gf: 1 });
   }
   if (C.wjs && !C.sjs && !rhoX) for (const s of [1, 2, 3]) {
     if (s <= os) continue;
@@ -6506,7 +6507,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 160;
+const APP_V = 161;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6798,12 +6799,91 @@ function pracWarnHtml() {
   return bad.length ? `<div class="prwarn">⚠ ${T('{0}: no hand with it came up in your base system — it may not be part of it.', esc(bad.map(pracName).join(', ')))}</div>` : '';
 }
 /* a never-seen deal; in practice mode, one where our side gets to use one of the chosen conventions */
+/* rare conventions (Gambling 3NT, Gerber, Smolen, ...) come up about once in a thousand deals or less, too seldom for
+   random deals: for them the hands that make the convention possible are built first (the rest of the pack is dealt
+   at random) and the auction then checks, as for any practice deal, that the convention really comes up. The roles
+   follow the dealer: the first of our pair to speak is the opener. Suits: 0 ♣, 1 ♦, 2 ♥, 3 ♠; ranks 12 = ace. */
+const hcpOf = h => h.reduce((a, c) => a + Math.max(0, E.R(c) - 8), 0);
+const lensOf = h => { const l = [0, 0, 0, 0]; h.forEach(c => l[E.S(c)]++); return l; };
+const balOf = l => l.every(x => x >= 2) && l.filter(x => x === 2).length <= 1;
+const honOf = (h, s, rs) => h.filter(c => E.S(c) === s && rs.includes(E.R(c))).length;
+// a hand of 13 from the cards left that passes ok, or null. shape (optional) first picks the suit lengths (from the
+// natural spread of hands, kept when shape accepts them) and the cards are then drawn suit by suit: far faster for
+// hands of a rare shape
+const SUITS52 = [...Array(52).keys()].map(c => E.S(c));
+function drawHand(left, ok, shape, tries = 20000) {
+  const bySuit = [0, 1, 2, 3].map(s => left.filter(c => E.S(c) === s)), rest = left.slice();
+  for (let i = 0; i < tries; i++) {
+    let h;
+    if (shape) {
+      let l = null;
+      for (let j = 0; j < 2000 && !l; j++) {
+        const x = [0, 0, 0, 0];
+        for (let n = 0; n < 13; n++) { const r = n + E.rnd(52 - n); [SUITS52[n], SUITS52[r]] = [SUITS52[r], SUITS52[n]]; x[SUITS52[n]]++; }
+        if (shape(x) && x.every((v, s) => v <= bySuit[s].length)) l = x;
+      }
+      if (!l) return null;
+      h = [].concat(...[0, 1, 2, 3].map(s => E.shuffle(bySuit[s]).slice(0, l[s])));
+    } else { E.shuffle(rest); h = rest.slice(0, 13); }
+    if (ok(h)) return h;
+  }
+  return null;
+}
+const ntShape = l => balOf(l) && l[0] <= 5 && l[1] <= 5;
+const ntOpen = (noMajor) => h => { const l = lensOf(h), p = hcpOf(h); return p >= 15 && p <= 17 && balOf(l) && l[0] <= 5 && l[1] <= 5 && (!noMajor || (l[2] < 4 && l[3] < 4)); };
+const PRAC_GEN = {
+  gerber: () => [['open', ntOpen(), null, ntShape], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 18 && p <= 20 && l.every(x => x >= 2) && l[2] < 4 && l[3] < 4; }, null, l => l.every(x => x >= 2) && l[2] < 4 && l[3] < 4]],
+  smolen: () => [['open', ntOpen(true)], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 10 && p <= 14 && ((l[2] === 4 && l[3] === 5) || (l[2] === 5 && l[3] === 4)); }]],
+  texasInt: () => [['open', ntOpen()], ['lho', h => { const l = lensOf(h), p = hcpOf(h); return p >= 9 && p <= 14 && (l[0] >= 6 || l[1] >= 6) && l[2] <= 2 && l[3] <= 2; }],
+    ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 8 && p <= 13 && (l[2] >= 6 || l[3] >= 6); }]],
+  fsf: () => [['open', h => { const l = lensOf(h), p = hcpOf(h); return p >= 12 && p <= 15 && l[1] === 5 && l[0] === 4 && l[2] <= 2 && l[3] <= 2; }, null, l => l[1] === 5 && l[0] === 4],
+    ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 12 && p <= 16 && l[3] >= 5 && l[2] >= 2 && l[2] <= 3 && honOf(h, 2, [10, 11, 12]) === 0 && l[1] <= 2 && l[0] <= 3; }, null, l => l[3] >= 5 && l[2] >= 2 && l[2] <= 3 && l[1] <= 2 && l[0] <= 3]],
+  sjs: () => [['open', h => { const l = lensOf(h), p = hcpOf(h); return p >= 12 && p <= 14 && (l[0] >= 5 || l[1] >= 5) && l[2] <= 3 && l[3] <= 3; }, null, l => (l[0] >= 5 || l[1] >= 5) && l[2] <= 3 && l[3] <= 3],
+    ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 19 && p <= 21 && [2, 3].some(s => l[s] >= 5 && honOf(h, s, [8, 9, 10, 11, 12]) >= 3); }, null, l => l[2] >= 5 || l[3] >= 5]],
+  // Gambling 3NT: built card by card (a solid seven-card minor, nothing outside)
+  gamb: () => [['open', null, left => {
+    const m = Math.random() < 0.5 ? 0 : 1, top = [12, 11, 10].map(r => m * 13 + r);
+    if (!top.every(c => left.includes(c))) return null;
+    const minor = E.shuffle(left.filter(c => E.S(c) === m && !top.includes(c))).slice(0, 4);
+    const other = E.shuffle(left.filter(c => E.S(c) !== m && E.R(c) < 9)).slice(0, 6);   // no honour outside: with 12+ the hand would open one of the minor
+    return minor.length === 4 && other.length === 6 ? top.concat(minor, other) : null;
+  }]],
+  // after their opening, partner's takeout double and their raise: the responsive double
+  respx: () => [['opp1', h => { const l = lensOf(h), p = hcpOf(h); return p >= 12 && p <= 14 && (l[2] >= 5 || l[3] >= 5); }, null, l => l[2] >= 5 || l[3] >= 5],
+    ['x', (h, H) => { const M = lensOf(H.opp1)[3] >= 5 ? 3 : 2, l = lensOf(h), p = hcpOf(h); return p >= 12 && p <= 14 && l[M] <= 2 && l.every((x, s) => s === M || x >= 3 && x <= 4); }, null, (l, H) => { const M = lensOf(H.opp1)[3] >= 5 ? 3 : 2; return l[M] <= 2 && l.every((x, s) => s === M || x >= 3 && x <= 4); }],
+    // the last opponent gets what is left: it must be a simple raise (6-9, three or four cards in their suit)
+    ['y', (h, H, left) => { const M = lensOf(H.opp1)[3] >= 5 ? 3 : 2, l = lensOf(h), p = hcpOf(h); if (!(p >= 8 && p <= 11 && l[M] <= 2 && l.filter((x, s) => s !== M && x >= 4).length >= 2)) return false; const o = left.filter(c => !h.includes(c)), lo = lensOf(o), po = hcpOf(o); return po >= 6 && po <= 9 && lo[M] >= 3 && lo[M] <= 4 && lo.every(x => x <= 5); }, null, (l, H) => { const M = lensOf(H.opp1)[3] >= 5 ? 3 : 2; return l[M] <= 2 && l.filter((x, s) => s !== M && x >= 4).length >= 2; }]],
+};
+// a deal for a rare convention k with this dealer (null if the hands could not be built)
+function genDeal(k, dealer) {
+  const me = U(), pa = (me + 2) % 4, first = [0, 1, 2, 3].map(i => (dealer + i) % 4).find(s => s === me || s === pa);
+  const seat = { open: first, resp: (first + 2) % 4, lho: (first + 1) % 4 };
+  // their opening, our double, their raise, our responsive double: the opener is the first opponent to speak
+  // (if one of us deals, that player passes first and doubles last)
+  const o1 = sideOf(dealer) !== sideOf(me) ? dealer : (dealer + 1) % 4;
+  Object.assign(seat, { opp1: o1, x: (o1 + 1) % 4, opp2: (o1 + 2) % 4, y: (o1 + 3) % 4 });
+  const deal = [null, null, null, null], H = {};
+  let left = [...Array(52).keys()];
+  for (const [role, ok, build, shape] of PRAC_GEN[k]()) {
+    const h = build ? build(left) : drawHand(left, x => ok(x, H, left), shape && (l => shape(l, H)), shape ? 400 : 20000);
+    if (!h) return null;
+    H[role] = h; deal[seat[role]] = h; left = left.filter(c => !h.includes(c));
+  }
+  E.shuffle(left);
+  for (let s = 0; s < 4; s++) if (!deal[s]) deal[s] = left.splice(0, 13);
+  const out = deal.map(h => h.slice().sort((a, b) => a - b));
+  // act: whether you are the one to make the conventional call (with this dealer it may have to be partner)
+  out.act = seat[k === 'gamb' ? 'open' : k === 'respx' ? 'y' : 'resp'] === me;
+  return out;
+}
 function freshDeal(dealer) {
   const want = pracList(), cards = sideCards(), t0 = performance.now();
   let fallback = null;
+  // rare conventions among the chosen: every other deal (every deal if all are rare) is built for one of them
+  const gens = want.filter(k => PRAC_GEN[k]), allRare = gens.length && gens.length === want.length;
   for (let i = 0; i < 20000; i++) {
-    const d = E.shuffle([...Array(52).keys()]);
-    const deal = [0, 1, 2, 3].map(k => d.slice(k * 13, k * 13 + 13));
+    let deal = gens.length && (allRare || i % 2 === 0) ? genDeal(gens[i % gens.length], dealer) : null;
+    if (!deal) { const d = E.shuffle([...Array(52).keys()]); deal = [0, 1, 2, 3].map(k => d.slice(k * 13, k * 13 + 13)); }
     const key = E.dealKey(deal);
     if (SEEN.has(key)) continue;
     if (want.length) {
@@ -6812,7 +6892,7 @@ function freshDeal(dealer) {
       const mine = auc.some(e => e.seat === U() && e.m && want.includes(e.m.cv));
       const ours = auc.some(e => sideOf(e.seat) === sideOf(U()) && e.m && want.includes(e.m.cv));
       if (!mine && !ours) { if (performance.now() - t0 < 4000) continue; }
-      else if (!mine) { if (!fallback) fallback = { deal, key }; if (performance.now() - t0 < 2500) continue; }
+      else if (!mine) { if (!fallback) fallback = { deal, key }; if (deal.act !== false && performance.now() - t0 < 2500) continue; }
       if (!mine && !ours && fallback) { SEEN.add(fallback.key); saveSeen(); return fallback.deal; }
       if (!mine && !ours) flash('📚 ' + T('No hand with {0} came up quickly — here is a normal deal', pracNames()), 3000);
     }

@@ -710,6 +710,11 @@ function ntResponses(x, add, lv, own) {
 function suitResponses(x, add, o, os) {
   const C = x.C, maj = os >= 2, rhoX = x.rhoCall === 'X', un = !x.passed;
   const two1 = C.twoOverOne && un;
+  // a strong jump shift (19+, a good suit) comes before the ordinary new-suit responses that the same hand also fits
+  if (C.sjs && un && !rhoX) for (const s of [1, 2, 3]) {
+    if (s <= os) continue;
+    add(B(2, s), h => h.len[s] >= 5 && h.hcp >= 19 && h.top5(s) >= 3, { min: 19, len: { [s]: 5 }, tag: "sjs", cv: "sjs", t: "Strong jump shift: 19+ points, good " + SUIT[s] + " suit, slam interest", f: 1, gf: 1 });
+  }
   if (rhoX) add('XX', h => h.hcp >= 10, { min: 10, t: 'Redouble: 10+ HCP' });
   if (maj) {
     if (C.drury && x.passed && !rhoX && x.auc.indexOf(x.opening) >= 2) add(B(2, 0), h => h.len[os] >= 3 && h.sup(os) >= 10, { min: 10, max: 11, len: { [os]: 3 }, tag: "drury", cv: "drury", t: "Drury: 3+ " + SUIT[os] + " support, 10-12 points (passed hand)", f: 1 });
@@ -738,10 +743,6 @@ function suitResponses(x, add, o, os) {
     if (os === 0) add(B(1, 1), h => h.hcp >= 6 && ((h.len[1] >= 5 && h.len[1] > Math.max(h.len[2], h.len[3])) || (h.len[1] >= 4 && h.len[2] < 4 && h.len[3] < 4)), { min: 6, len: { 1: 4 }, t: '4+ ♦, 6+ HCP', f: 1 });
     add(B(1, 2), h => h.hcp >= 6 && h.len[2] >= 4 && !(h.len[3] >= 5 && h.len[3] > h.len[2]), { min: 6, len: { 2: 4 }, t: '4+ ♥, 6+ HCP', f: 1 });
     add(B(1, 3), h => h.hcp >= 6 && h.len[3] >= 4, { min: 6, len: { 3: 4 }, t: '4+ ♠, 6+ HCP', f: 1 });
-  }
-  if (C.sjs && un && !rhoX) for (const s of [1, 2, 3]) {
-    if (s <= os) continue;
-    add(B(2, s), h => h.len[s] >= 5 && h.hcp >= 19 && h.top5(s) >= 3, { min: 19, len: { [s]: 5 }, tag: "sjs", cv: "sjs", t: "Strong jump shift: 19+ points, good " + SUIT[s] + " suit, slam interest", f: 1, gf: 1 });
   }
   if (C.wjs && !C.sjs && !rhoX) for (const s of [1, 2, 3]) {
     if (s <= os) continue;
