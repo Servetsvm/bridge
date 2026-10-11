@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 146;
+const APP_V = 147;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -894,7 +894,7 @@ function pracHtml() {
   const on = E.CONVS.filter(c => SET.conv[c.k]), off = E.CONVS.filter(c => !SET.conv[c.k]);
   const opt = c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`;
   return `<div class="prrow"><button class="prtoggle" id="hPracTog" aria-expanded="${ui.pracOpen ? 'true' : 'false'}" title="${T('Base system and conventions')}"><h2>📚 ${T('Practise conventions')} <span class="prchev">${ui.pracOpen ? '▾' : '▸'}</span></h2></button>
-      <select id="hPracSel" class="sel" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>
+      <select id="hPracSel" class="sel prpicksel${SET.practice ? ' on' : ''}" aria-label="${T('Practice a convention')}"><option value="">${T('Off — normal random deals')}</option>
         ${on.length ? `<optgroup label="${esc(T('In your system'))}">${on.map(opt).join('')}</optgroup>` : ''}${off.length ? `<optgroup label="${esc(T('Not in your system'))}">${off.map(opt).join('')}</optgroup>` : ''}</select></div>
     <p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p>
     ${ui.pracOpen ? `<div class="prsys">${convCardHtml()}</div>` : `<button class="prsum" id="hPracSum"><span>${T('Base system')}:</span> <b>${esc(E.sysOf(SET.sys).n.replace(/ (.*)/, ''))}</b> · ${T('{0} conventions', E.CONVS.filter(c => SET.conv[c.k]).length)} ▸</button>`}
