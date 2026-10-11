@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 157;
+const APP_V = 158;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -90,12 +90,25 @@ function detectLang() {
     'Europe/Warsaw': 'pl', 'Asia/Shanghai': 'zh', 'Asia/Chongqing': 'zh', 'Asia/Urumqi': 'zh', 'Asia/Hong_Kong': 'zh', 'Asia/Macau': 'zh', 'Asia/Taipei': 'zh' };
   return TZ[tz] || 'en';
 }
+// the country the visitor is in (looked up once, the same lookup as the visitor statistics) wins over the browser:
+// a first visit is re-set to that country's language as soon as it is known, unless the player has picked one
+const CTRY_LANG = { TR: 'tr', CY: 'tr', NO: 'no', SJ: 'no', ES: 'es', MX: 'es', AR: 'es', CO: 'es', PE: 'es', CL: 'es', VE: 'es', UY: 'es', EC: 'es', BO: 'es', PY: 'es', CR: 'es', PA: 'es', DO: 'es', GT: 'es', HN: 'es', SV: 'es', NI: 'es', CU: 'es', PR: 'es',
+  FR: 'fr', BE: 'fr', LU: 'fr', MC: 'fr', SN: 'fr', CI: 'fr', IT: 'it', SM: 'it', VA: 'it', DE: 'de', AT: 'de', CH: 'de', LI: 'de', RU: 'ru', BY: 'ru', KZ: 'ru', KG: 'ru', PL: 'pl', CN: 'zh', TW: 'zh', HK: 'zh', MO: 'zh' };
+window.addEventListener('load', () => langFromCountry());
+function langFromCountry() {
+  if (!SET.langAuto || typeof Net === 'undefined' || !Net.country) return;
+  Net.country().then(c => {
+    const v = c && CTRY_LANG[c];
+    if (!v || !SET.langAuto || v === SET.lang) return;
+    SET.lang = v; applyLang(); Store.saveSettings(SET); save(); render();
+  });
+}
 function load(d) {
   d = d || Store.loadLocal();
   if (d) { SET = Object.assign(SET, d.SET || {}); G = d.G || null; HIST = d.HIST || []; BOARD = d.BOARD || 0; }
   if (G && G.phase === "lobby") G = null; // an online waiting room is not restored after a restart
   SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) };
-  if (!SET.lang) SET.lang = detectLang();
+  if (!SET.lang) { SET.lang = detectLang(); SET.langAuto = true; }
   applyLang();
   // the player card's "joined" date (the first day this device played; from the oldest board for old players) and logins
   if (!SET.joined) { const t0 = Math.min(Date.now(), ...HIST.map(h => h.ts || Date.now())); SET.joined = new Date(t0).toISOString().slice(0, 10); }
@@ -1923,7 +1936,7 @@ document.addEventListener('change', e => {
   if (t.id === 'pClub') { SET.club = t.value.trim().replace(/\s+/g, ' ').slice(0, 24); Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T('You')); return; }
   if (t.id === 'pCline') { SET.cline = t.value.trim().slice(0, 300); Store.saveSettings(SET); save(); Net.shareInfo(); flash('✓', 800); return; }   // your convention line, written by hand
   if (t.id === 'pLvl' || t.id === 'pCtry') { SET[{ pLvl: 'lvl', pCtry: 'ctry' }[t.id]] = t.value; Store.saveSettings(SET); save(); Net.shareInfo(); showPlayer(myNm() || T('You')); return; }
-  if (t.id === 'hLang') { SET.lang = t.value; applyLang(); Store.saveSettings(SET); save(); render(); return; }
+  if (t.id === 'hLang') { SET.lang = t.value; SET.langAuto = false; applyLang(); Store.saveSettings(SET); save(); render(); return; }
   if (t.id === 'hSys') { SET.sys = t.value; SET.conv = { ...E.sysOf(t.value).conv }; SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(E.sysOf(t.value).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
   if (t.id === 'hName') { try { localStorage.setItem('bridge-table-name', t.value.trim().slice(0, 20)); } catch (e) {} return; }
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
@@ -2014,7 +2027,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.c != null && t.classList.contains('play')) { const c = +t.dataset.c; const seat = G.play.turn; if (G.play.hands[seat].includes(c)) playCard(seat, c); return; }
   if (t.closest('.seg')) {
     const seg = t.closest('.seg').dataset.seg, v = t.dataset.v;
-    if (seg === 'lang') { SET.lang = v; applyLang(); Store.saveSettings(SET); save(); render(); return; }
+    if (seg === 'lang') { SET.lang = v; SET.langAuto = false; applyLang(); Store.saveSettings(SET); save(); render(); return; }
     if (seg === 'sys') { SET.sys = v; SET.conv = { ...E.sysOf(v).conv }; SET.practice = ''; Store.saveSettings(SET); save(); if (ui.overlay === 'set') showSettings(); else render(); flash(E.sysOf(v).n + ' — ' + T('from the next deal'), 2200); return; }
     if (ui.overlay === 'tsetup' && ['tn', 'tformat', 'ttables', 'tscoring', 'thours', 'tkind', 'tclub'].includes(seg)) {
       readTourSeats(); const t = Net.st.tours[ui.tsetId]; if (!t) return;

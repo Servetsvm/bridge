@@ -653,10 +653,20 @@ const Net = (() => {
   /* today's logins are counted once per internet address (several names from the same place count once), and the
      administrator sees which countries they come from. The address and its country come from country.is; only the
      country and a short one-way code of the address are stored, never the address itself. */
+  // asked once per page; the first visit also uses the country to open in its language
+  let whereP = null;
+  function where() {
+    if (!whereP) whereP = (async () => {
+      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 5000);
+      return await (await fetch('https://api.country.is/', { signal: ctl.signal })).json();
+    })().catch(() => ({}));
+    return whereP;
+  }
+  const country = async () => { const c = (await where()).country; return /^[A-Z]{2}$/.test(c || '') ? c : null; };
   async function ipTag() {
     try {
-      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 5000);
-      const { ip, country } = await (await fetch('https://api.country.is/', { signal: ctl.signal })).json();
+      const { ip, country } = await where();
+      if (!ip) return {};
       const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('bridge-ip:' + ip));
       return { ip: [...new Uint8Array(h)].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join(''), c: /^[A-Z]{2}$/.test(country || '') ? country : null };
     } catch (e) { return {}; }
@@ -1543,5 +1553,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, convAsk, convRequests, convDone, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
