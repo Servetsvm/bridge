@@ -1339,6 +1339,10 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .prtop .prdesc{color:#c9d3cc}
 :root[data-theme="dark"] .prac .prval{color:#e8efe9}
 :root[data-theme="dark"] .prac .prask{color:#8fc3ea;border-color:rgba(143,195,234,.5)}
+/* the explanation beside the title: a little larger and darker */
+.prac .prtop .prdesc{font-size:14.5px;font-weight:600;color:#2b2a22;line-height:1.45}
+:root[data-theme="dark"] .prac .prtop .prdesc{color:#e3e9e4}
+@media (max-width:420px){.prac .prtop .prdesc{font-size:14px}}
 
 </style>
 
@@ -6377,7 +6381,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 152;
+const APP_V = 153;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};

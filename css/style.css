@@ -1324,3 +1324,7 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .prtop .prdesc{color:#c9d3cc}
 :root[data-theme="dark"] .prac .prval{color:#e8efe9}
 :root[data-theme="dark"] .prac .prask{color:#8fc3ea;border-color:rgba(143,195,234,.5)}
+/* the explanation beside the title: a little larger and darker */
+.prac .prtop .prdesc{font-size:14.5px;font-weight:600;color:#2b2a22;line-height:1.45}
+:root[data-theme="dark"] .prac .prtop .prdesc{color:#e3e9e4}
+@media (max-width:420px){.prac .prtop .prdesc{font-size:14px}}
