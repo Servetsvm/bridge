@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Deal practice": "Çalışma eli dağıt",
     "Transfer": "Transfer",
     "Basics (every system)": "Temeller (her sistemde)",
     "Deal me a practice hand": "Bana çalışma eli dağıt",
@@ -191,6 +192,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Deal practice": "Del øvingshånd",
     "Transfer": "Overføring",
     "Basics (every system)": "Grunnleggende (alle systemer)",
     "Deal me a practice hand": "Del ut en øvingshånd",
@@ -379,6 +381,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Deal practice": "Repartir práctica",
     "Transfer": "Transferencia",
     "Basics (every system)": "Básicos (todos los sistemas)",
     "Deal me a practice hand": "Repárteme una mano de práctica",
@@ -595,6 +598,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Deal practice": "Donne d'entraînement",
     "Transfer": "Transfert",
     "Basics (every system)": "Bases (tous les systèmes)",
     "Deal me a practice hand": "Distribuez-moi une main d'entraînement",
@@ -811,6 +815,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Deal practice": "Distribuisci",
     "Transfer": "Transfer",
     "Basics (every system)": "Basi (tutti i sistemi)",
     "Deal me a practice hand": "Dammi una mano di allenamento",
@@ -1027,6 +1032,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Deal practice": "Übung austeilen",
     "Transfer": "Transfer",
     "Basics (every system)": "Grundlagen (jedes System)",
     "Deal me a practice hand": "Teil mir eine Übungshand aus",
@@ -1243,6 +1249,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Deal practice": "Сдать тренировку",
     "Transfer": "Трансфер",
     "Basics (every system)": "Основы (в любой системе)",
     "Deal me a practice hand": "Сдать мне тренировочную руку",
@@ -1459,6 +1466,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Deal practice": "Rozdaj ćwiczenie",
     "Transfer": "Transfer",
     "Basics (every system)": "Podstawy (każdy system)",
     "Deal me a practice hand": "Rozdaj mi rękę do ćwiczeń",
@@ -1675,6 +1683,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Deal practice": "发练习牌",
     "Transfer": "转移叫",
     "Basics (every system)": "基础(所有体系)",
     "Deal me a practice hand": "给我发一手练习牌",

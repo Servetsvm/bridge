@@ -1328,3 +1328,10 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .prac .prtop .prdesc{font-size:14.5px;font-weight:600;color:#2b2a22;line-height:1.45}
 :root[data-theme="dark"] .prac .prtop .prdesc{color:#e3e9e4}
 @media (max-width:420px){.prac .prtop .prdesc{font-size:14px}}
+/* the title with the gold "Deal practice" button on its right; the explanation under them */
+.prac .prtop{display:block}
+.prac .prhd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.prac .prhd .prtitle{margin:0;white-space:nowrap}
+.prac .prhd .prplay,body.classic .prac .prhd .prplay{display:inline-block;width:auto;margin:0;padding:8px 14px;font-size:15px;white-space:nowrap;flex:0 0 auto}
+.prac .prtop .prdesc{margin:0}
+@media (max-width:380px){.prac .prhd .prtitle{font-size:16px}.prac .prhd .prplay{padding:7px 10px;font-size:14px}}
