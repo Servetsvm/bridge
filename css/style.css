@@ -1161,3 +1161,13 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .box.prbox{border:2px solid #f2c94c;background:linear-gradient(170deg,#fff7d6,#f2e2a8);cursor:pointer;text-align:left;font:inherit;color:#2b2a22}
 .box.prbox b{color:#1f4f33}
 @media (min-width:901px){ .hgrid{grid-template-columns:minmax(0,1fr) min(var(--chatw),40%)} }   /* practising conventions keeps most of the width */
+/* practise conventions: a title with the choice beside it, then what the convention is */
+.hcard.prac{padding:14px 16px}
+.prac .prhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0}
+.prac .prhead h2{margin:0;font-size:clamp(20px,3.6vw,26px);flex:0 1 auto}
+.prac .prsel{flex:1 1 220px;min-width:0;max-width:420px;font-size:16px;font-weight:600;padding:9px 10px;border-radius:10px;border:2px solid #f2c94c;background:#fffaf0;color:#1f4f33}
+.prac .prinfo{margin-top:10px;font-size:14px;line-height:1.45;color:#f4efe0;background:rgba(0,0,0,.18);border-radius:10px;padding:9px 11px}
+.prac .prinfo b{color:#f2c94c}
+.prac .prinfo .sym.red{color:#ff8a8a}
+.prac .prnote{margin-top:8px;font-size:13px;color:#cfe3d5}
+:root[data-theme="dark"] .prac .prsel{background:#22302a;color:#f2c94c}

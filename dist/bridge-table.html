@@ -1176,6 +1176,16 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .box.prbox{border:2px solid #f2c94c;background:linear-gradient(170deg,#fff7d6,#f2e2a8);cursor:pointer;text-align:left;font:inherit;color:#2b2a22}
 .box.prbox b{color:#1f4f33}
 @media (min-width:901px){ .hgrid{grid-template-columns:minmax(0,1fr) min(var(--chatw),40%)} }   /* practising conventions keeps most of the width */
+/* practise conventions: a title with the choice beside it, then what the convention is */
+.hcard.prac{padding:14px 16px}
+.prac .prhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0}
+.prac .prhead h2{margin:0;font-size:clamp(20px,3.6vw,26px);flex:0 1 auto}
+.prac .prsel{flex:1 1 220px;min-width:0;max-width:420px;font-size:16px;font-weight:600;padding:9px 10px;border-radius:10px;border:2px solid #f2c94c;background:#fffaf0;color:#1f4f33}
+.prac .prinfo{margin-top:10px;font-size:14px;line-height:1.45;color:#f4efe0;background:rgba(0,0,0,.18);border-radius:10px;padding:9px 11px}
+.prac .prinfo b{color:#f2c94c}
+.prac .prinfo .sym.red{color:#ff8a8a}
+.prac .prnote{margin-top:8px;font-size:13px;color:#cfe3d5}
+:root[data-theme="dark"] .prac .prsel{background:#22302a;color:#f2c94c}
 
 </style>
 
@@ -3730,6 +3740,9 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Bundan sonra başlattığın her oyunda {0} çıkan eller dağıtılır: robotlarla, online masanda ya da çalışırken.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Bir konvansiyon seç; başlattığın her oyunda o konvansiyonun çıktığı eller dağıtılsın. Kapalı: normal rastgele eller.",
+    "Practising {0}: the next deals use it": "{0} çalışılıyor: sonraki eller buna göre dağıtılacak",
     "Practise conventions": "Konvansiyon çalış",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Bir konvansiyon seç; robotlar sana tam o konvansiyonun çıktığı elleri dağıtsın. Her teklife dokunup anlamını gör, oynarken öğren.",
     "Continue: {0}": "Devam et: {0}",
@@ -3892,6 +3905,9 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Hvert spill du starter nå gir hender der {0} dukker opp: med roboter, ved nettbordet ditt eller for øving.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Velg en konvensjon, så gir hvert spill du starter hender der den dukker opp. Av: vanlige tilfeldige spill.",
+    "Practising {0}: the next deals use it": "Øver på {0}: de neste spillene bruker den",
     "Practise conventions": "Øv på konvensjoner",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Velg en konvensjon, så gir robotene deg hender der den dukker opp. Trykk på en melding for å se hva den betyr — og lær mens du spiller.",
     "Continue: {0}": "Fortsett: {0}",
@@ -4054,6 +4070,9 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Cada partida que empieces reparte manos donde aparece {0}: con robots, en tu mesa online o para practicar.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Elige una convención y cada partida que empieces repartirá manos donde aparezca. Desactivado: manos normales al azar.",
+    "Practising {0}: the next deals use it": "Practicando {0}: las próximas manos la usan",
     "Practise conventions": "Practica convenciones",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Elige una convención y los robots te reparten manos donde aparece. Toca cualquier voz para ver qué significa — y aprende jugando.",
     "Continue: {0}": "Seguir: {0}",
@@ -4244,6 +4263,9 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Chaque partie que vous lancez distribue des mains où {0} apparaît : avec les robots, à votre table en ligne ou pour l'entraînement.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Choisissez une convention : chaque partie lancée distribuera des mains où elle apparaît. Désactivé : donnes aléatoires normales.",
+    "Practising {0}: the next deals use it": "Entraînement {0} : les prochaines donnes l'utilisent",
     "Practise conventions": "S'entraîner aux conventions",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Choisissez une convention : les robots vous distribuent des mains où elle apparaît. Touchez une enchère pour voir ce qu'elle signifie — et apprenez en jouant.",
     "Continue: {0}": "Continuer : {0}",
@@ -4434,6 +4456,9 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Ogni partita che avvii distribuisce mani in cui compare {0}: con i robot, al tuo tavolo online o per allenamento.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Scegli una convenzione e ogni partita che avvii distribuirà mani in cui compare. Disattivato: mani casuali normali.",
+    "Practising {0}: the next deals use it": "Allenamento {0}: le prossime mani la usano",
     "Practise conventions": "Allenati sulle convenzioni",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Scegli una convenzione e i robot ti danno mani in cui compare. Tocca una licita per vederne il significato — e impara giocando.",
     "Continue: {0}": "Continua: {0}",
@@ -4624,6 +4649,9 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Jedes Spiel, das du jetzt startest, teilt Hände, in denen {0} vorkommt: mit Robotern, an deinem Online-Tisch oder zum Üben.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Wähle eine Konvention, dann teilt jedes Spiel, das du startest, Hände, in denen sie vorkommt. Aus: normale Zufallsverteilungen.",
+    "Practising {0}: the next deals use it": "{0} wird geübt: die nächsten Verteilungen nutzen sie",
     "Practise conventions": "Konventionen üben",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Wähle eine Konvention und die Roboter teilen dir Hände, in denen sie vorkommt. Tippe auf ein Gebot, um seine Bedeutung zu sehen — und lerne beim Spielen.",
     "Continue: {0}": "Weiter: {0}",
@@ -4814,6 +4842,9 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Каждая игра, которую вы начнёте, будет сдавать руки, где встречается {0}: с роботами, за вашим онлайн-столом или для тренировки.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Выберите конвенцию, и каждая начатая игра будет сдавать руки, где она встречается. Выкл.: обычные случайные сдачи.",
+    "Practising {0}: the next deals use it": "Тренировка {0}: следующие сдачи её используют",
     "Practise conventions": "Тренировка конвенций",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Выберите конвенцию, и роботы сдадут вам руки, где она встречается. Нажмите на любую заявку, чтобы увидеть её смысл, — учитесь во время игры.",
     "Continue: {0}": "Продолжить: {0}",
@@ -5004,6 +5035,9 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Każda gra, którą rozpoczniesz, rozda ręce, w których pojawia się {0}: z robotami, przy twoim stole online lub do ćwiczeń.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Wybierz konwencję, a każda rozpoczęta gra rozda ręce, w których się pojawia. Wyłączone: zwykłe losowe rozdania.",
+    "Practising {0}: the next deals use it": "Ćwiczenie {0}: następne rozdania ją wykorzystają",
     "Practise conventions": "Ćwicz konwencje",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Wybierz konwencję, a roboty rozdadzą ci ręce, w których się pojawia. Dotknij odzywki, aby zobaczyć jej znaczenie — i ucz się, grając.",
     "Continue: {0}": "Kontynuuj: {0}",
@@ -5194,6 +5228,9 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "你现在开始的每一局都会发出用到 {0} 的牌:和机器人对打、在你的在线牌桌或练习时。",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "选择一个约定叫,之后开始的每一局都会发出用到它的牌。关闭:普通随机牌。",
+    "Practising {0}: the next deals use it": "正在练习 {0}:接下来的牌会用到它",
     "Practise conventions": "约定叫练习",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "选择一个约定叫,机器人会发给你会用到它的牌。点击任意叫品查看含义——边打边学。",
     "Continue: {0}": "继续:{0}",
@@ -5980,7 +6017,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 138;
+const APP_V = 139;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6860,26 +6897,19 @@ const PRAC_GROUPS = [
   ['When they bid', ['capp', 'dont', 'michaels', 'supx', 'respx']],
   ['Responses and more', ['twoOverOne', 'invMin', 'wjs', 'sjs', 'nmf', 'fsf', 'ogust', 'gamb']],
 ];
+// the same choice as in Settings, on the home page: the convention the next deals are dealt for
 function pracHtml() {
-  const cur = SET.practice, n = SET.pracN || {}, c0 = cur && E.CONVS.find(c => c.k === cur);
-  const short = d => { const s = String(d || '').split(/(?<=[.!?])\s/)[0]; return s.length > 96 ? s.slice(0, 94) + '…' : s; };
-  const tile = k => {
-    const c = E.CONVS.find(x => x.k === k); if (!c) return '';
-    return `<button class="ptile${k === cur ? ' on' : ''}" data-prac="${k}"><b>${esc(c.n)}</b><small>${symText(esc(short(c.d)))}</small>${n[k] ? `<em>✓ ${T('{0} hands practised', n[k])}</em>` : ''}</button>`;
-  };
-  return `<div class="prhead"><div class="ptitle"><h2>📚 ${T('Practise conventions')}</h2>
-      <p>${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p></div>
-      ${c0 ? `<button class="btn new pcont" data-prac="${cur}">▶ ${T('Continue: {0}', esc(c0.n))}</button>` : ''}</div>
-    ${PRAC_GROUPS.map(([g, ks]) => `<div class="pgroup"><h4>${T(g)}</h4><div class="ptiles">${ks.map(tile).join('')}</div></div>`).join('')}`;
+  return `<div class="grp"><span>${T('Practice a convention')}</span><select id="hPracSel" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select></div>`;
 }
-function startPractice(k) {
-  const c = E.CONVS.find(y => y.k === k); if (!c) return;
-  SET.practice = k; SET.conv[k] = true; if (c.x) SET.conv[c.x] = false;   // the convention goes on our card (and the one it replaces off)
+// the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
+function setPractice(k) {
+  const c = k && E.CONVS.find(y => y.k === k);
+  SET.practice = c ? k : '';
+  if (c) { SET.conv[k] = true; if (c.x) SET.conv[c.x] = false; }
   Store.saveSettings(SET); save();
-  if (online()) { flash(T('Practice deals are for playing with robots — close the online table first'), 3000); return; }
-  ui.saved = null; flash('📚 ' + T('{0}: looking for a hand where it comes up…', c.n), 2500);
-  setTimeout(() => { closeOv(); newBoard(); }, 60);   // let the message show before the search
+  flash(c ? '📚 ' + T('Practising {0}: the next deals use it', c.n) : T('Practice ended — normal random deals'), 2200);
 }
+function startPractice(k) { setPractice(k); }
 function stopPractice() { SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(T('Practice ended — normal random deals'), 2000); }
 function homeShell() {
   const langs = LANGS;
@@ -6890,16 +6920,16 @@ function homeShell() {
       <button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button></div></header>
   <div class="hgrid">
     <section class="hmain">
-      <div class="hcard prac" id="hPrac"></div>
       <div class="hcard hero hsmall">
         <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label>
         <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
-        <div class="muted">${T('Or play freely: with robots, at an online table or in a tournament.')}</div>
+        <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div id="hSec"></div>
       <div id="hPend"></div>
+      <div class="hcard" id="hPrac"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
     <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
@@ -7861,6 +7891,7 @@ document.addEventListener('change', e => {
   if (t.id === 'hName') { try { localStorage.setItem('bridge-table-name', t.value.trim().slice(0, 20)); } catch (e) {} return; }
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === 'dFile' && t.files && t.files[0]) { importDeals(t.files[0]); t.value = ''; return; }
+  if (t.id === "hPracSel") { setPractice(t.value); render(); return; }
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {

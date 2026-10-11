@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 138;
+const APP_V = 139;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -888,26 +888,19 @@ const PRAC_GROUPS = [
   ['When they bid', ['capp', 'dont', 'michaels', 'supx', 'respx']],
   ['Responses and more', ['twoOverOne', 'invMin', 'wjs', 'sjs', 'nmf', 'fsf', 'ogust', 'gamb']],
 ];
+// the same choice as in Settings, on the home page: the convention the next deals are dealt for
 function pracHtml() {
-  const cur = SET.practice, n = SET.pracN || {}, c0 = cur && E.CONVS.find(c => c.k === cur);
-  const short = d => { const s = String(d || '').split(/(?<=[.!?])\s/)[0]; return s.length > 96 ? s.slice(0, 94) + '…' : s; };
-  const tile = k => {
-    const c = E.CONVS.find(x => x.k === k); if (!c) return '';
-    return `<button class="ptile${k === cur ? ' on' : ''}" data-prac="${k}"><b>${esc(c.n)}</b><small>${symText(esc(short(c.d)))}</small>${n[k] ? `<em>✓ ${T('{0} hands practised', n[k])}</em>` : ''}</button>`;
-  };
-  return `<div class="prhead"><div class="ptitle"><h2>📚 ${T('Practise conventions')}</h2>
-      <p>${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p></div>
-      ${c0 ? `<button class="btn new pcont" data-prac="${cur}">▶ ${T('Continue: {0}', esc(c0.n))}</button>` : ''}</div>
-    ${PRAC_GROUPS.map(([g, ks]) => `<div class="pgroup"><h4>${T(g)}</h4><div class="ptiles">${ks.map(tile).join('')}</div></div>`).join('')}`;
+  return `<div class="grp"><span>${T('Practice a convention')}</span><select id="hPracSel" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select></div>`;
 }
-function startPractice(k) {
-  const c = E.CONVS.find(y => y.k === k); if (!c) return;
-  SET.practice = k; SET.conv[k] = true; if (c.x) SET.conv[c.x] = false;   // the convention goes on our card (and the one it replaces off)
+// the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
+function setPractice(k) {
+  const c = k && E.CONVS.find(y => y.k === k);
+  SET.practice = c ? k : '';
+  if (c) { SET.conv[k] = true; if (c.x) SET.conv[c.x] = false; }
   Store.saveSettings(SET); save();
-  if (online()) { flash(T('Practice deals are for playing with robots — close the online table first'), 3000); return; }
-  ui.saved = null; flash('📚 ' + T('{0}: looking for a hand where it comes up…', c.n), 2500);
-  setTimeout(() => { closeOv(); newBoard(); }, 60);   // let the message show before the search
+  flash(c ? '📚 ' + T('Practising {0}: the next deals use it', c.n) : T('Practice ended — normal random deals'), 2200);
 }
+function startPractice(k) { setPractice(k); }
 function stopPractice() { SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(T('Practice ended — normal random deals'), 2000); }
 function homeShell() {
   const langs = LANGS;
@@ -918,16 +911,16 @@ function homeShell() {
       <button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button></div></header>
   <div class="hgrid">
     <section class="hmain">
-      <div class="hcard prac" id="hPrac"></div>
       <div class="hcard hero hsmall">
         <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label>
         <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
-        <div class="muted">${T('Or play freely: with robots, at an online table or in a tournament.')}</div>
+        <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div id="hSec"></div>
       <div id="hPend"></div>
+      <div class="hcard" id="hPrac"></div>
       <div class="hcard"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
     <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
@@ -1889,6 +1882,7 @@ document.addEventListener('change', e => {
   if (t.id === 'hName') { try { localStorage.setItem('bridge-table-name', t.value.trim().slice(0, 20)); } catch (e) {} return; }
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === 'dFile' && t.files && t.files[0]) { importDeals(t.files[0]); t.value = ''; return; }
+  if (t.id === "hPracSel") { setPractice(t.value); render(); return; }
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {

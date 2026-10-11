@@ -3,6 +3,9 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Bundan sonra başlattığın her oyunda {0} çıkan eller dağıtılır: robotlarla, online masanda ya da çalışırken.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Bir konvansiyon seç; başlattığın her oyunda o konvansiyonun çıktığı eller dağıtılsın. Kapalı: normal rastgele eller.",
+    "Practising {0}: the next deals use it": "{0} çalışılıyor: sonraki eller buna göre dağıtılacak",
     "Practise conventions": "Konvansiyon çalış",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Bir konvansiyon seç; robotlar sana tam o konvansiyonun çıktığı elleri dağıtsın. Her teklife dokunup anlamını gör, oynarken öğren.",
     "Continue: {0}": "Devam et: {0}",
@@ -165,6 +168,9 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Hvert spill du starter nå gir hender der {0} dukker opp: med roboter, ved nettbordet ditt eller for øving.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Velg en konvensjon, så gir hvert spill du starter hender der den dukker opp. Av: vanlige tilfeldige spill.",
+    "Practising {0}: the next deals use it": "Øver på {0}: de neste spillene bruker den",
     "Practise conventions": "Øv på konvensjoner",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Velg en konvensjon, så gir robotene deg hender der den dukker opp. Trykk på en melding for å se hva den betyr — og lær mens du spiller.",
     "Continue: {0}": "Fortsett: {0}",
@@ -327,6 +333,9 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Cada partida que empieces reparte manos donde aparece {0}: con robots, en tu mesa online o para practicar.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Elige una convención y cada partida que empieces repartirá manos donde aparezca. Desactivado: manos normales al azar.",
+    "Practising {0}: the next deals use it": "Practicando {0}: las próximas manos la usan",
     "Practise conventions": "Practica convenciones",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Elige una convención y los robots te reparten manos donde aparece. Toca cualquier voz para ver qué significa — y aprende jugando.",
     "Continue: {0}": "Seguir: {0}",
@@ -517,6 +526,9 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Chaque partie que vous lancez distribue des mains où {0} apparaît : avec les robots, à votre table en ligne ou pour l'entraînement.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Choisissez une convention : chaque partie lancée distribuera des mains où elle apparaît. Désactivé : donnes aléatoires normales.",
+    "Practising {0}: the next deals use it": "Entraînement {0} : les prochaines donnes l'utilisent",
     "Practise conventions": "S'entraîner aux conventions",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Choisissez une convention : les robots vous distribuent des mains où elle apparaît. Touchez une enchère pour voir ce qu'elle signifie — et apprenez en jouant.",
     "Continue: {0}": "Continuer : {0}",
@@ -707,6 +719,9 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Ogni partita che avvii distribuisce mani in cui compare {0}: con i robot, al tuo tavolo online o per allenamento.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Scegli una convenzione e ogni partita che avvii distribuirà mani in cui compare. Disattivato: mani casuali normali.",
+    "Practising {0}: the next deals use it": "Allenamento {0}: le prossime mani la usano",
     "Practise conventions": "Allenati sulle convenzioni",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Scegli una convenzione e i robot ti danno mani in cui compare. Tocca una licita per vederne il significato — e impara giocando.",
     "Continue: {0}": "Continua: {0}",
@@ -897,6 +912,9 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Jedes Spiel, das du jetzt startest, teilt Hände, in denen {0} vorkommt: mit Robotern, an deinem Online-Tisch oder zum Üben.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Wähle eine Konvention, dann teilt jedes Spiel, das du startest, Hände, in denen sie vorkommt. Aus: normale Zufallsverteilungen.",
+    "Practising {0}: the next deals use it": "{0} wird geübt: die nächsten Verteilungen nutzen sie",
     "Practise conventions": "Konventionen üben",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Wähle eine Konvention und die Roboter teilen dir Hände, in denen sie vorkommt. Tippe auf ein Gebot, um seine Bedeutung zu sehen — und lerne beim Spielen.",
     "Continue: {0}": "Weiter: {0}",
@@ -1087,6 +1105,9 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Каждая игра, которую вы начнёте, будет сдавать руки, где встречается {0}: с роботами, за вашим онлайн-столом или для тренировки.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Выберите конвенцию, и каждая начатая игра будет сдавать руки, где она встречается. Выкл.: обычные случайные сдачи.",
+    "Practising {0}: the next deals use it": "Тренировка {0}: следующие сдачи её используют",
     "Practise conventions": "Тренировка конвенций",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Выберите конвенцию, и роботы сдадут вам руки, где она встречается. Нажмите на любую заявку, чтобы увидеть её смысл, — учитесь во время игры.",
     "Continue: {0}": "Продолжить: {0}",
@@ -1277,6 +1298,9 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "Każda gra, którą rozpoczniesz, rozda ręce, w których pojawia się {0}: z robotami, przy twoim stole online lub do ćwiczeń.",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "Wybierz konwencję, a każda rozpoczęta gra rozda ręce, w których się pojawia. Wyłączone: zwykłe losowe rozdania.",
+    "Practising {0}: the next deals use it": "Ćwiczenie {0}: następne rozdania ją wykorzystają",
     "Practise conventions": "Ćwicz konwencje",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Wybierz konwencję, a roboty rozdadzą ci ręce, w których się pojawia. Dotknij odzywki, aby zobaczyć jej znaczenie — i ucz się, grając.",
     "Continue: {0}": "Kontynuuj: {0}",
@@ -1467,6 +1491,9 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Every game you start now deals hands where {0} comes up: with robots, at your online table or for practice.": "你现在开始的每一局都会发出用到 {0} 的牌:和机器人对打、在你的在线牌桌或练习时。",
+    "Choose a convention and every game you start deals hands where it comes up. Off: normal random deals.": "选择一个约定叫,之后开始的每一局都会发出用到它的牌。关闭:普通随机牌。",
+    "Practising {0}: the next deals use it": "正在练习 {0}:接下来的牌会用到它",
     "Practise conventions": "约定叫练习",
     "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "选择一个约定叫,机器人会发给你会用到它的牌。点击任意叫品查看含义——边打边学。",
     "Continue: {0}": "继续:{0}",
