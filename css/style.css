@@ -1380,3 +1380,6 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .prac .prprog:not(.open){padding:8px 12px}
 .prac .prprog:not(.open) .prph{margin-bottom:0}
 :root[data-theme="dark"] .prac .prptog{color:#8fc3ea}
+/* home page: the play buttons on the left, the open tables on the right (one above the other on a phone) */
+.hpair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px;align-items:start}
+.hpair > .hcard{min-width:0}
