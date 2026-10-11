@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 150;
+const APP_V = 151;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -231,8 +231,12 @@ function applyField(e, f) {
 
 /* ================= game flow ================= */
 /* the conventions being practised (SET.practice holds their keys, separated by commas; "" = off) */
-function pracList() { return String(SET.practice || '').split(',').filter(k => E.CONVS.some(c => c.k === k)); }
-function pracNames() { return pracList().map(k => E.CONVS.find(c => c.k === k).n).join(', '); }
+// the basics every system plays (no switch on the card) can be practised too
+const PRAC_BASICS = ['jtr', 'strong2c', 'weak2', 'nego', 'takeout', 'bw', 'cue', 'pre', 'runout'];
+const pracKnown = k => E.CONVS.some(c => c.k === k) || PRAC_BASICS.includes(k);
+function pracList() { return String(SET.practice || '').split(',').filter(pracKnown); }
+const pracName = k => k === 'jtr' ? T('Transfer') : E.convInfo(k).n;   // plain "Transfer" in the practice list
+function pracNames() { return pracList().map(pracName).join(', '); }
 /* a never-seen deal; in practice mode, one where our side gets to use one of the chosen conventions */
 function freshDeal(dealer) {
   const want = pracList(), cards = sideCards(), t0 = performance.now();
@@ -904,6 +908,7 @@ function pracHtml() {
   const item = (attr, k, label, checked) => `<label class="pdi${checked ? ' on' : ''}"><input type="checkbox" ${attr}="${k}" ${checked ? 'checked' : ''}><span>${label}</span></label>`;
   const sysPanel = ui.pracDrop === 'sys' ? `<div class="pdpanel">${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), s.k === cur.k)).join('')}</div>` : '';
   const convPanel = ui.pracDrop === 'conv' ? `<div class="pdpanel wide">${item('data-pdoff', '1', T('Off — normal random deals'), !sel.length)}
+      <div class="pdh">${T('Basics (every system)')}</div>${PRAC_BASICS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       ${on.length ? `<div class="pdh">${T('In your system')}</div>${on.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
@@ -917,9 +922,10 @@ function pracHtml() {
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
 function togglePractice(k, add) {
-  const c = E.CONVS.find(y => y.k === k); if (!c) return;
+  if (!pracKnown(k)) return;
+  const c = E.CONVS.find(y => y.k === k) || { k };
   let L = pracList().filter(x => x !== k);
-  if (add) { L.push(k); SET.conv[k] = true; if (c.x) { SET.conv[c.x] = false; L = L.filter(x => x !== c.x); } }
+  if (add) { L.push(k); if (c.n) SET.conv[k] = true; if (c.x) { SET.conv[c.x] = false; L = L.filter(x => x !== c.x); } }
   SET.practice = L.join(','); Store.saveSettings(SET); save();
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it

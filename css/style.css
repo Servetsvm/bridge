@@ -1294,3 +1294,13 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .hcard.prac{background:linear-gradient(135deg,#141f52 0%,#2c1b57 45%,#5c1735 100%)}
 :root[data-theme="dark"] .prac .pdi.on{background:#3a2a1a;color:#ffc48a}
 @media (prefers-reduced-motion:reduce){.prac .prdrop{animation:none!important}}
+/* the convention button: white with royal-purple text while off, bright sky blue once chosen (stands apart from the gold system button and the purple card) */
+.prac .prdrop:not(.sys){color:#4b2a9b;background:linear-gradient(170deg,#ffffff,#ece6ff);border-color:#ffd966}
+.prac .prdrop:not(.sys) i{color:#7b5cd6}
+.prac .prdrop.on{color:#fff;background:linear-gradient(170deg,#5fd0ff,#2a7de1);border-color:#ffd966;text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.prac .prdrop.on i{color:#fff}
+.prac .pdi.on{background:#e3f3ff;color:#1d5fae}
+.prac .pdi input{accent-color:#2a7de1}
+:root[data-theme="dark"] .prac .pdi.on{background:#1b3350;color:#9fd4ff}
+.prac .pdpanel{color-scheme:light}
+:root[data-theme="dark"] .prac .pdpanel{color-scheme:dark}

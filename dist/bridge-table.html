@@ -1309,6 +1309,16 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .hcard.prac{background:linear-gradient(135deg,#141f52 0%,#2c1b57 45%,#5c1735 100%)}
 :root[data-theme="dark"] .prac .pdi.on{background:#3a2a1a;color:#ffc48a}
 @media (prefers-reduced-motion:reduce){.prac .prdrop{animation:none!important}}
+/* the convention button: white with royal-purple text while off, bright sky blue once chosen (stands apart from the gold system button and the purple card) */
+.prac .prdrop:not(.sys){color:#4b2a9b;background:linear-gradient(170deg,#ffffff,#ece6ff);border-color:#ffd966}
+.prac .prdrop:not(.sys) i{color:#7b5cd6}
+.prac .prdrop.on{color:#fff;background:linear-gradient(170deg,#5fd0ff,#2a7de1);border-color:#ffd966;text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.prac .prdrop.on i{color:#fff}
+.prac .pdi.on{background:#e3f3ff;color:#1d5fae}
+.prac .pdi input{accent-color:#2a7de1}
+:root[data-theme="dark"] .prac .pdi.on{background:#1b3350;color:#9fd4ff}
+.prac .pdpanel{color-scheme:light}
+:root[data-theme="dark"] .prac .pdpanel{color-scheme:dark}
 
 </style>
 
@@ -3863,6 +3873,8 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Transfer": "Transfer",
+    "Basics (every system)": "Temeller (her sistemde)",
     "Deal me a practice hand": "Bana çalışma eli dağıt",
     "{0} conventions": "{0} konvansiyon",
     "Base system and conventions": "Temel sistem ve konvansiyonlar",
@@ -4049,6 +4061,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Transfer": "Overføring",
+    "Basics (every system)": "Grunnleggende (alle systemer)",
     "Deal me a practice hand": "Del ut en øvingshånd",
     "{0} conventions": "{0} konvensjoner",
     "Base system and conventions": "Grunnsystem og konvensjoner",
@@ -4235,6 +4249,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Transfer": "Transferencia",
+    "Basics (every system)": "Básicos (todos los sistemas)",
     "Deal me a practice hand": "Repárteme una mano de práctica",
     "{0} conventions": "{0} convenciones",
     "Base system and conventions": "Sistema base y convenciones",
@@ -4449,6 +4465,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Transfer": "Transfert",
+    "Basics (every system)": "Bases (tous les systèmes)",
     "Deal me a practice hand": "Distribuez-moi une main d'entraînement",
     "{0} conventions": "{0} conventions",
     "Base system and conventions": "Système de base et conventions",
@@ -4663,6 +4681,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Transfer": "Transfer",
+    "Basics (every system)": "Basi (tutti i sistemi)",
     "Deal me a practice hand": "Dammi una mano di allenamento",
     "{0} conventions": "{0} convenzioni",
     "Base system and conventions": "Sistema base e convenzioni",
@@ -4877,6 +4897,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Transfer": "Transfer",
+    "Basics (every system)": "Grundlagen (jedes System)",
     "Deal me a practice hand": "Teil mir eine Übungshand aus",
     "{0} conventions": "{0} Konventionen",
     "Base system and conventions": "Grundsystem und Konventionen",
@@ -5091,6 +5113,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Transfer": "Трансфер",
+    "Basics (every system)": "Основы (в любой системе)",
     "Deal me a practice hand": "Сдать мне тренировочную руку",
     "{0} conventions": "Конвенций: {0}",
     "Base system and conventions": "Базовая система и конвенции",
@@ -5305,6 +5329,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Transfer": "Transfer",
+    "Basics (every system)": "Podstawy (każdy system)",
     "Deal me a practice hand": "Rozdaj mi rękę do ćwiczeń",
     "{0} conventions": "Konwencje: {0}",
     "Base system and conventions": "System bazowy i konwencje",
@@ -5519,6 +5545,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Transfer": "转移叫",
+    "Basics (every system)": "基础(所有体系)",
     "Deal me a practice hand": "给我发一手练习牌",
     "{0} conventions": "{0} 个约定叫",
     "Base system and conventions": "基本体系和约定叫",
@@ -6329,7 +6357,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 150;
+const APP_V = 151;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6552,8 +6580,12 @@ function applyField(e, f) {
 
 /* ================= game flow ================= */
 /* the conventions being practised (SET.practice holds their keys, separated by commas; "" = off) */
-function pracList() { return String(SET.practice || '').split(',').filter(k => E.CONVS.some(c => c.k === k)); }
-function pracNames() { return pracList().map(k => E.CONVS.find(c => c.k === k).n).join(', '); }
+// the basics every system plays (no switch on the card) can be practised too
+const PRAC_BASICS = ['jtr', 'strong2c', 'weak2', 'nego', 'takeout', 'bw', 'cue', 'pre', 'runout'];
+const pracKnown = k => E.CONVS.some(c => c.k === k) || PRAC_BASICS.includes(k);
+function pracList() { return String(SET.practice || '').split(',').filter(pracKnown); }
+const pracName = k => k === 'jtr' ? T('Transfer') : E.convInfo(k).n;   // plain "Transfer" in the practice list
+function pracNames() { return pracList().map(pracName).join(', '); }
 /* a never-seen deal; in practice mode, one where our side gets to use one of the chosen conventions */
 function freshDeal(dealer) {
   const want = pracList(), cards = sideCards(), t0 = performance.now();
@@ -7225,6 +7257,7 @@ function pracHtml() {
   const item = (attr, k, label, checked) => `<label class="pdi${checked ? ' on' : ''}"><input type="checkbox" ${attr}="${k}" ${checked ? 'checked' : ''}><span>${label}</span></label>`;
   const sysPanel = ui.pracDrop === 'sys' ? `<div class="pdpanel">${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), s.k === cur.k)).join('')}</div>` : '';
   const convPanel = ui.pracDrop === 'conv' ? `<div class="pdpanel wide">${item('data-pdoff', '1', T('Off — normal random deals'), !sel.length)}
+      <div class="pdh">${T('Basics (every system)')}</div>${PRAC_BASICS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       ${on.length ? `<div class="pdh">${T('In your system')}</div>${on.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
@@ -7238,9 +7271,10 @@ function pracHtml() {
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
 function togglePractice(k, add) {
-  const c = E.CONVS.find(y => y.k === k); if (!c) return;
+  if (!pracKnown(k)) return;
+  const c = E.CONVS.find(y => y.k === k) || { k };
   let L = pracList().filter(x => x !== k);
-  if (add) { L.push(k); SET.conv[k] = true; if (c.x) { SET.conv[c.x] = false; L = L.filter(x => x !== c.x); } }
+  if (add) { L.push(k); if (c.n) SET.conv[k] = true; if (c.x) { SET.conv[c.x] = false; L = L.filter(x => x !== c.x); } }
   SET.practice = L.join(','); Store.saveSettings(SET); save();
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
