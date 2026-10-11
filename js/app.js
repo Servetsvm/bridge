@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 148;
+const APP_V = 149;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -230,20 +230,23 @@ function applyField(e, f) {
 }
 
 /* ================= game flow ================= */
-/* a never-seen deal; in practice mode, one where our side gets to use the chosen convention */
+/* the conventions being practised (SET.practice holds their keys, separated by commas; "" = off) */
+function pracList() { return String(SET.practice || '').split(',').filter(k => E.CONVS.some(c => c.k === k)); }
+function pracNames() { return pracList().map(k => E.CONVS.find(c => c.k === k).n).join(', '); }
+/* a never-seen deal; in practice mode, one where our side gets to use one of the chosen conventions */
 function freshDeal(dealer) {
-  const want = SET.practice, cards = sideCards(), t0 = performance.now();
+  const want = pracList(), cards = sideCards(), t0 = performance.now();
   let fallback = null;
   for (let i = 0; i < 20000; i++) {
     const d = E.shuffle([...Array(52).keys()]);
     const deal = [0, 1, 2, 3].map(k => d.slice(k * 13, k * 13 + 13));
     const key = E.dealKey(deal);
     if (SEEN.has(key)) continue;
-    if (want) {
+    if (want.length) {
       const auc = [];
       while (!auctionOver(auc) && auc.length < 60) { const t = (dealer + auc.length) % 4; const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); }
-      const mine = auc.some(e => e.seat === U() && e.m && e.m.cv === want);
-      const ours = auc.some(e => sideOf(e.seat) === sideOf(U()) && e.m && e.m.cv === want);
+      const mine = auc.some(e => e.seat === U() && e.m && want.includes(e.m.cv));
+      const ours = auc.some(e => sideOf(e.seat) === sideOf(U()) && e.m && want.includes(e.m.cv));
       if (!mine && !ours) { if (performance.now() - t0 < 4000) continue; }
       else if (!mine) { if (!fallback) fallback = { deal, key }; if (performance.now() - t0 < 2500) continue; }
       if (!mine && !ours && fallback) { SEEN.add(fallback.key); saveSeen(); return fallback.deal; }
@@ -347,7 +350,10 @@ function finishBoard() {
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
   // a practice board where the convention really came up counts for it (shown on its tile)
-  if (SET.practice && !online() && !G.tour && G.auction.some(a => sideOf(a.seat) === sideOf(U()) && a.m && a.m.cv === SET.practice)) { SET.pracN = SET.pracN || {}; SET.pracN[SET.practice] = (SET.pracN[SET.practice] || 0) + 1; Store.saveSettings(SET); }
+  if (pracList().length && !online() && !G.tour) {
+    const used = pracList().filter(k => G.auction.some(a => sideOf(a.seat) === sideOf(U()) && a.m && a.m.cv === k));
+    if (used.length) { SET.pracN = SET.pracN || {}; used.forEach(k => { SET.pracN[k] = (SET.pracN[k] || 0) + 1; }); Store.saveSettings(SET); }
+  }
   G.result = e; G.phase = 'done'; if (!e.passed) sfx(e.us >= 0 ? 'good' : 'bad');
   if (online() && !guest()) Net.boardDone(e);
   if (G.tprac) { const c = tourCompare(G.tprac.id, G.tprac.b, e); if (c) { e.tprac = c; flash('🏆 ' + T('Against the tournament ({0} players): {1} IMP · {2}%', c.n, fmtSigned(c.imp), c.mp), 4500); } }
@@ -559,8 +565,8 @@ function renderBar() {
   $('bar').innerHTML = `
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
    <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
-   ${SET.practice && !online() && !G.tour && E.CONVS.find(c => c.k === SET.practice)
-     ? `<button class="box prbox" id="bPrac" title="${T('Tap to stop practising')}"><small>📚 ${T('Practising')}</small><b>${esc(E.CONVS.find(c => c.k === SET.practice).n)}</b><span class="tr">${T('{0} hands', (SET.pracN || {})[SET.practice] || 0)} · ✕</span></button>`
+   ${pracList().length && !online() && !G.tour
+     ? `<button class="box prbox" id="bPrac" title="${T('Tap to stop practising')}"><small>📚 ${T('Practising')}</small><b>${esc(pracNames())}</b><span class="tr">${T('{0} hands', pracList().reduce((a, k) => a + ((SET.pracN || {})[k] || 0), 0))} · ✕</span></button>`
      : `<div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>`}
    <div class="spacer"></div>
    <div class="tools">
@@ -890,18 +896,30 @@ const PRAC_GROUPS = [
 ];
 // the same choice as in Settings, on the home page: the convention the next deals are dealt for
 function pracHtml() {
-  // two choices side by side: the base system, and the convention to practise (your system's conventions first)
+  // the title with its explanation; under it two drop-downs: the base system (one) and the conventions to practise
+  // (any number, your system's first); under each, what is chosen
+  const sel = pracList(), cur = E.sysOf(SET.sys);
+  const sysName = k => ({ twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' })[k] || (E.SYSTEMS.find(s => s.k === k) || {}).n || k;
   const on = E.CONVS.filter(c => SET.conv[c.k]), off = E.CONVS.filter(c => !SET.conv[c.k]);
-  const opt = c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`;
-  const sysName = s => esc(({ twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' })[s.k] || s.n);
-  return `<h2 class="prtitle">📚 ${T('Practise conventions')}</h2>
+  const item = (attr, k, label, checked) => `<label class="pdi${checked ? ' on' : ''}"><input type="checkbox" ${attr}="${k}" ${checked ? 'checked' : ''}><span>${label}</span></label>`;
+  const sysPanel = ui.pracDrop === 'sys' ? `<div class="pdpanel">${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), s.k === cur.k)).join('')}</div>` : '';
+  const convPanel = ui.pracDrop === 'conv' ? `<div class="pdpanel wide">${item('data-pdoff', '1', T('Off — normal random deals'), !sel.length)}
+      ${on.length ? `<div class="pdh">${T('In your system')}</div>${on.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
+      ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
+      <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
+  return `<div class="prtop"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p></div>
     <div class="prrow2">
-      <label class="prf"><span>${T('Base system')}</span><select id="hSys" class="prpicksel sys">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${sysName(s)}</option>`).join('')}</select></label>
-      <label class="prf"><span>${T('Practice a convention')}</span><select id="hPracSel" class="prpicksel${SET.practice ? ' on' : ''}"><option value="">${T('Off — normal random deals')}</option>
-        ${on.length ? `<optgroup label="${esc(T('In your system'))}">${on.map(opt).join('')}</optgroup>` : ''}${off.length ? `<optgroup label="${esc(T('Not in your system'))}">${off.map(opt).join('')}</optgroup>` : ''}</select></label>
+      <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
+      <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
-    <p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p>
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
+}
+// tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
+function togglePractice(k, add) {
+  const c = E.CONVS.find(y => y.k === k); if (!c) return;
+  let L = pracList().filter(x => x !== k);
+  if (add) { L.push(k); SET.conv[k] = true; if (c.x) { SET.conv[c.x] = false; L = L.filter(x => x !== c.x); } }
+  SET.practice = L.join(','); Store.saveSettings(SET); save();
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
 function setPractice(k) {
@@ -1571,7 +1589,7 @@ function showSettings() {
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
   openOv('set', `<h2>${T('Settings')}</h2>
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
-   <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${SET.practice === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
+   <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
    <div class="grp"><span>${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>
    <div class="grp"><span>${T('Card style')}</span>${seg("style", [["classic", T("Classic tiles")], ["modern", T("Modern fan")]], SET.style || "classic")}</div>
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
@@ -1878,7 +1896,7 @@ document.addEventListener('change', e => {
     const k = t.dataset.conv, c = E.CONVS.find(y => y.k === k);
     SET.conv[k] = t.checked;
     if (t.checked && c && c.x) SET.conv[c.x] = false;
-    if (!t.checked && SET.practice === k) SET.practice = "";
+    if (!t.checked && pracList().includes(k)) SET.practice = pracList().filter(x => x !== k).join(',');   // taken off the card: no longer practised
     Store.saveSettings(SET); save(); if (ui.overlay === "set") showSettings(); else render();
   }
   if (t.dataset.tinv != null && ui.tsel) { if (t.checked) ui.tsel.names.add(t.dataset.tinv); else ui.tsel.names.delete(t.dataset.tinv); return; }
@@ -1893,10 +1911,15 @@ document.addEventListener('change', e => {
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === 'dFile' && t.files && t.files[0]) { importDeals(t.files[0]); t.value = ''; return; }
   if (t.id === "hPracSel") { setPractice(t.value); render(); return; }
+  // the two drop-downs on the home page: a base system (one), conventions to practise (any number)
+  if (t.dataset.pdsys) { SET.sys = t.dataset.pdsys; SET.conv = { ...E.sysOf(SET.sys).conv }; SET.practice = ''; Store.saveSettings(SET); save(); ui.pracDrop = null; render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
+  if (t.dataset.pdconv) { togglePractice(t.dataset.pdconv, t.checked); render(); return; }
+  if (t.dataset.pdoff) { SET.practice = ''; Store.saveSettings(SET); save(); render(); return; }
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {
   // the ☰ menu closes after any tap outside its button (a menu item still does its job)
+  if (ui.pracDrop && !ev_.target.closest('.prf')) { ui.pracDrop = null; setTimeout(render, 0); }   // a home drop-down closes after a tap outside it
   if (ui.menu && !ev_.target.closest('#bMenu')) { ui.menu = false; setTimeout(() => { if (G && G.phase !== 'idle') renderBar(); }, 0); }
   if (G && G.phase === "play" && ev_.target.closest("#center") && !ev_.target.closest("[data-c].play,button")) {
     if (G.play.history.length) { ui.showLast = !ui.showLast; clearTimeout(ui.lastTimer); if (ui.showLast) ui.lastTimer = setTimeout(() => { ui.showLast = false; render(); }, 4000); render(); }
@@ -1951,12 +1974,13 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
-  if (t.id === 'hPracTog' || t.id === 'hPracSum') { ui.pracOpen = !ui.pracOpen; render(); return; }   // open / close the base system and conventions
+  if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
+  if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
-  if (t.id === "bPrac") { askYes(T("Stop practising {0}?", (E.CONVS.find(c => c.k === SET.practice) || {}).n || ""), () => { closeOv(); stopPractice(); }); return; }
+  if (t.id === "bPrac") { askYes(T("Stop practising {0}?", pracNames()), () => { closeOv(); stopPractice(); }); return; }
   const sol = ev_.target.closest("[data-solo]"); if (sol) { Net.st.soloPub = sol.dataset.solo === "pub"; closeOv(); resume(); return; }
   const dtb = ev_.target.closest("[data-dtab]"); if (dtb) { ui.dockTab = dtb.dataset.dtab; renderDock(); return; }
   const dq = ev_.target.closest("[data-dq]"); if (dq) { dockSend(dq.dataset.dq); return; }
