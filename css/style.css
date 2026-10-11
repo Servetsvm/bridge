@@ -1217,3 +1217,5 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .prac .prsys{background:#1d2a23;color:#e8efe9}
 :root[data-theme="dark"] .prac .prsys .grp > span{color:#f2c94c}
 :root[data-theme="dark"] .prac .prsys .muted{color:#b9c6bd}
+/* your name beside the title at the top */
+.hhead .hdrname{font-size:15px;font-weight:700;padding:5px 10px;border-radius:20px;margin-left:10px;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
