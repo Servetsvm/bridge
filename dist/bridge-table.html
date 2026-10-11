@@ -1350,6 +1350,27 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .prac .prhd .prplay,body.classic .prac .prhd .prplay{display:inline-block;width:auto;margin:0;padding:8px 14px;font-size:15px;white-space:nowrap;flex:0 0 auto}
 .prac .prtop .prdesc{margin:0}
 @media (max-width:380px){.prac .prhd .prtitle{font-size:16px}.prac .prhd .prplay{padding:7px 10px;font-size:14px}}
+/* practice: the review at the end of a board, and the progress per convention on the home page */
+.donebanner .prvsum{font-weight:700;color:#ffe9a8}
+.prv{border-left:4px solid #2e8b3a;background:rgba(46,139,58,.08);border-radius:8px;padding:7px 10px;margin:6px 0;font-size:14px;line-height:1.4}
+.prv.no{border-left-color:#d0453b;background:rgba(208,69,59,.08)}
+.prv b{display:block;margin-bottom:2px}
+.prv.ok b{color:#2e8b3a}.prv.no b{color:#c0392b}
+.prv .prvfix{margin-top:3px;font-weight:600}
+.prac .prprog{margin:12px 0 8px;padding:10px 12px;border-radius:12px;background:#f6f8fb;border:1px solid #e3e8ef}
+.prac .prph{font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:#1f5f8b;margin-bottom:6px}
+.prac .prpr{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(60px,1fr) 42px;align-items:center;gap:2px 10px;padding:4px 0}
+.prac .prpn{font-weight:700;font-size:14px;color:#1f2a22;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prac .prpbar{height:9px;border-radius:5px;background:#e3e8ef;overflow:hidden}
+.prac .prpbar i{display:block;height:100%;border-radius:5px}
+.prac .prpbar i.g{background:#2e8b3a}.prac .prpbar i.m{background:#e2a32b}.prac .prpbar i.b{background:#d0453b}
+.prac .prpv{font-weight:800;font-size:14px;text-align:right;color:#1f2a22}
+.prac .prpr small{grid-column:1/-1;font-size:12px;color:#6b6f66;margin-top:-2px}
+:root[data-theme="dark"] .prac .prprog{background:#18201c;border-color:#2c3a32}
+:root[data-theme="dark"] .prac .prpn,:root[data-theme="dark"] .prac .prpv{color:#e8efe9}
+:root[data-theme="dark"] .prac .prph{color:#8fc3ea}
+:root[data-theme="dark"] .prac .prpbar{background:#2c3a32}
+.prv.ok,.prv.no{color:inherit;font-weight:400}.prv .prvfix{font-weight:700}
 
 </style>
 
@@ -3904,6 +3925,11 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "{0} of {1} calls right": "{1} teklifte {0} doğru",
+    "You bid": "Senin teklifin",
+    "The system bids": "Sistemde doğrusu",
+    "Convention review": "Konvansiyon değerlendirmesi",
+    "Your progress": "İlerlemen",
     "Deal practice": "Çalışma eli dağıt",
     "Transfer": "Transfer",
     "Basics (every system)": "Temeller (her sistemde)",
@@ -4093,6 +4119,11 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "{0} of {1} calls right": "{0} av {1} meldinger riktige",
+    "You bid": "Du meldte",
+    "The system bids": "Systemet melder",
+    "Convention review": "Konvensjonsgjennomgang",
+    "Your progress": "Din fremgang",
     "Deal practice": "Del øvingshånd",
     "Transfer": "Overføring",
     "Basics (every system)": "Grunnleggende (alle systemer)",
@@ -4282,6 +4313,11 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "{0} of {1} calls right": "{0} de {1} voces correctas",
+    "You bid": "Tu voz",
+    "The system bids": "El sistema dice",
+    "Convention review": "Repaso de convenciones",
+    "Your progress": "Tu progreso",
     "Deal practice": "Repartir práctica",
     "Transfer": "Transferencia",
     "Basics (every system)": "Básicos (todos los sistemas)",
@@ -4499,6 +4535,11 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "{0} of {1} calls right": "{0} enchères justes sur {1}",
+    "You bid": "Votre enchère",
+    "The system bids": "Le système annonce",
+    "Convention review": "Bilan des conventions",
+    "Your progress": "Vos progrès",
     "Deal practice": "Donne d'entraînement",
     "Transfer": "Transfert",
     "Basics (every system)": "Bases (tous les systèmes)",
@@ -4716,6 +4757,11 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "{0} of {1} calls right": "{0} dichiarazioni giuste su {1}",
+    "You bid": "La tua dichiarazione",
+    "The system bids": "Il sistema dichiara",
+    "Convention review": "Revisione delle convenzioni",
+    "Your progress": "I tuoi progressi",
     "Deal practice": "Distribuisci",
     "Transfer": "Transfer",
     "Basics (every system)": "Basi (tutti i sistemi)",
@@ -4933,6 +4979,11 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "{0} of {1} calls right": "{0} von {1} Geboten richtig",
+    "You bid": "Dein Gebot",
+    "The system bids": "Das System bietet",
+    "Convention review": "Konventions-Auswertung",
+    "Your progress": "Dein Fortschritt",
     "Deal practice": "Übung austeilen",
     "Transfer": "Transfer",
     "Basics (every system)": "Grundlagen (jedes System)",
@@ -5150,6 +5201,11 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "{0} of {1} calls right": "{0} из {1} заявок верно",
+    "You bid": "Ваша заявка",
+    "The system bids": "По системе",
+    "Convention review": "Разбор конвенций",
+    "Your progress": "Ваш прогресс",
     "Deal practice": "Сдать тренировку",
     "Transfer": "Трансфер",
     "Basics (every system)": "Основы (в любой системе)",
@@ -5367,6 +5423,11 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "{0} of {1} calls right": "{0} z {1} odzywek dobrze",
+    "You bid": "Twoja odzywka",
+    "The system bids": "System licytuje",
+    "Convention review": "Przegląd konwencji",
+    "Your progress": "Twoje postępy",
     "Deal practice": "Rozdaj ćwiczenie",
     "Transfer": "Transfer",
     "Basics (every system)": "Podstawy (każdy system)",
@@ -5584,6 +5645,11 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "{0} of {1} calls right": "{1} 次叫牌中 {0} 次正确",
+    "You bid": "你的叫品",
+    "The system bids": "体系叫",
+    "Convention review": "约定叫回顾",
+    "Your progress": "你的进度",
     "Deal practice": "发练习牌",
     "Transfer": "转移叫",
     "Basics (every system)": "基础(所有体系)",
@@ -6397,7 +6463,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 158;
+const APP_V = 159;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6721,7 +6787,11 @@ function makeCall(seat, call, m, al) {
   if (G.phase !== "bid" || bidTurn() !== seat || !isLegal(G.auction, seat, call)) return;
   { const who = actor(seat); if (who !== "robot") pushUndo(who); }
   if (!m) m = E.explainCall(G.auction, seat, call, G.cards);
+  // while practising: what the system (the robot's own choice) bids here, to look back on when the board ends
+  let sg = null;
+  if (pracList().length && !online() && !G.tour && actor(seat) !== 'robot') { const r = E.aiBid(G.auction, seat, G.deal[seat], G.cards); sg = { c: r.call, cv: (r.m && r.m.cv) || '', t: (r.m && r.m.t) || '' }; }
   G.auction.push(al ? { seat, call, m, al: String(al).slice(0, 120) } : { seat, call, m });
+  if (sg) G.auction[G.auction.length - 1].sg = sg;
   ui.selLvl = 0; ui.hintBid = null;
   if (auctionOver(G.auction)) {
     const c = contractOf(G.auction);
@@ -6773,6 +6843,19 @@ function finishBoard() {
   if (pracList().length && !online() && !G.tour) {
     const used = pracList().filter(k => G.auction.some(a => sideOf(a.seat) === sideOf(U()) && a.m && a.m.cv === k));
     if (used.length) { SET.pracN = SET.pracN || {}; used.forEach(k => { SET.pracN[k] = (SET.pracN[k] || 0) + 1; }); Store.saveSettings(SET); }
+    // your calls where a practised convention came up (the system used it, or you did): right when you bid what
+    // the system bids there; each counts towards that convention's score
+    const want = pracList(), rv = [];
+    G.auction.forEach((a, i) => {
+      if (!a.sg) return;
+      const k = want.includes(a.sg.cv) ? a.sg.cv : a.m && want.includes(a.m.cv) ? a.m.cv : null;
+      if (k) rv.push({ i, k, call: a.call, sc: a.sg.c, ok: a.call === a.sg.c, st: a.sg.t, ut: (a.m && a.m.t) || '' });
+    });
+    if (rv.length) {
+      e.prv = rv; SET.pracS = SET.pracS || {};
+      rv.forEach(r => { const s = SET.pracS[r.k] || (SET.pracS[r.k] = { n: 0, ok: 0 }); s.n++; if (r.ok) s.ok++; });
+      Store.saveSettings(SET);
+    }
   }
   G.result = e; G.phase = 'done'; if (!e.passed) sfx(e.us >= 0 ? 'good' : 'bad');
   if (online() && !guest()) Net.boardDone(e);
@@ -7097,7 +7180,7 @@ function renderTable() {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
     { const first = ui.doneSeen !== G.id; if (first) setTimeout(() => { ui.doneSeen = G.id; }, 0); var doneCls = first ? (e && e.us > 0 ? " good" : e && e.us < 0 ? " bad" : "") : ""; }
-    C.innerHTML = e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
+    C.innerHTML = e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}${e.prv ? `<small class="prvsum">${prvSum(e.prv)}</small>` : ""}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans(); fitTable(); updateRcpt();
@@ -7331,6 +7414,7 @@ function pracHtml() {
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
+    ${pracProgHtml()}
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
@@ -7971,6 +8055,23 @@ document.addEventListener('click', e => {
   const pi = e.target.closest('[data-pzi]'); if (pi) { const i = +pi.dataset.pzi; ui.pzSel = ui.pzSel === i ? null : i; showPuzzle(); return; }
   if (e.target.closest('#hPuzzle')) { ui.pzSel = null; showPuzzle(); }
 });
+// the practice review of a board: per convention ✓ when every call where it came up was the system's, else ✗
+function prvSum(rv) {
+  const ks = [...new Set(rv.map(r => r.k))];
+  return '📚 ' + ks.map(k => esc(pracName(k)) + ' ' + (rv.every(r => r.k !== k || r.ok) ? '✓' : '✗')).join(' · ');
+}
+function prvHtml(rv) {
+  return rv.map(r => `<div class="prv ${r.ok ? 'ok' : 'no'}"><b>${r.ok ? '✓' : '✗'} ${esc(pracName(r.k))}</b>
+    <div>${T('You bid')} ${callHtml(r.call)}${r.ok ? ` — ${symText(bidTxt(r.st || r.ut))}` : `${r.ut ? ` (${symText(bidTxt(r.ut))})` : ''}`}</div>
+    ${r.ok ? '' : `<div class="prvfix">${T('The system bids')} ${callHtml(r.sc)} — ${symText(bidTxt(r.st))}</div>`}</div>`).join('');
+}
+// how you are doing with each convention you have practised: hands played, and how often your calls were right
+function pracProgHtml() {
+  const S = SET.pracS || {}, ks = Object.keys(S).filter(k => S[k] && S[k].n && pracKnown(k)).sort((a, b) => S[b].n - S[a].n);
+  if (!ks.length) return '';
+  return `<div class="prprog"><div class="prph">${T('Your progress')}</div>${ks.map(k => { const s = S[k], p = Math.round(100 * s.ok / s.n), h = (SET.pracN || {})[k] || 0;
+    return `<div class="prpr"><span class="prpn">${esc(pracName(k))}</span><span class="prpbar"><i style="width:${p}%" class="${p >= 80 ? 'g' : p >= 50 ? 'm' : 'b'}"></i></span><span class="prpv">${p}%</span><small>${T('{0} hands', h)} · ${T('{0} of {1} calls right', s.ok, s.n)}</small></div>`; }).join('')}</div>`;
+}
 function showEnd() {
   const e = G.result; if (!e) return;
   const f = G.field || { tables: [], done: false, dd: {} };
@@ -7985,6 +8086,7 @@ function showEnd() {
   const norm = f.normC;
   openOv('end', `<h2>${T('Board')} ${e.board}</h2><div class="big">${resultLine(e)}</div>${G.claimed ? `<div class="muted">${T('The remaining tricks were settled by claim.')}</div>` : ''}
    ${scoreTxt}
+   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}</div>` : ''}
    <div class="grp"><span>${T('Par check')}</span><div>${T('Normal contract (most common at the robot tables)')}: ${f.done ? (norm ? conKey(norm) + ' — ' + T('double dummy') + ' ' + ddTxt('norm', norm) : T('Pass')) : '…'}</div>
    ${e.c ? `<div>${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${ddTxt('you', e.c)}</div>` : ''}</div>
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
@@ -9654,7 +9756,7 @@ const Net = (() => {
 
   /* your results on every device: kept in the database under a key made from your name and PIN (only someone who
      knows both can find them). Boards from both sides are merged; your settings come along to a new device. */
-  const SYNC_KEYS = ['sys', 'conv', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN'];
+  const SYNC_KEYS = ['sys', 'conv', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN', 'pracS'];
   let syncing = null, syncT = null;
   async function cloudSync() {
     if (!Cloud.on || !SET.pinH || syncing) return syncing;

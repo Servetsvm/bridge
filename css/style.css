@@ -1335,3 +1335,24 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .prac .prhd .prplay,body.classic .prac .prhd .prplay{display:inline-block;width:auto;margin:0;padding:8px 14px;font-size:15px;white-space:nowrap;flex:0 0 auto}
 .prac .prtop .prdesc{margin:0}
 @media (max-width:380px){.prac .prhd .prtitle{font-size:16px}.prac .prhd .prplay{padding:7px 10px;font-size:14px}}
+/* practice: the review at the end of a board, and the progress per convention on the home page */
+.donebanner .prvsum{font-weight:700;color:#ffe9a8}
+.prv{border-left:4px solid #2e8b3a;background:rgba(46,139,58,.08);border-radius:8px;padding:7px 10px;margin:6px 0;font-size:14px;line-height:1.4}
+.prv.no{border-left-color:#d0453b;background:rgba(208,69,59,.08)}
+.prv b{display:block;margin-bottom:2px}
+.prv.ok b{color:#2e8b3a}.prv.no b{color:#c0392b}
+.prv .prvfix{margin-top:3px;font-weight:600}
+.prac .prprog{margin:12px 0 8px;padding:10px 12px;border-radius:12px;background:#f6f8fb;border:1px solid #e3e8ef}
+.prac .prph{font-size:11px;font-weight:800;letter-spacing:1.1px;text-transform:uppercase;color:#1f5f8b;margin-bottom:6px}
+.prac .prpr{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(60px,1fr) 42px;align-items:center;gap:2px 10px;padding:4px 0}
+.prac .prpn{font-weight:700;font-size:14px;color:#1f2a22;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prac .prpbar{height:9px;border-radius:5px;background:#e3e8ef;overflow:hidden}
+.prac .prpbar i{display:block;height:100%;border-radius:5px}
+.prac .prpbar i.g{background:#2e8b3a}.prac .prpbar i.m{background:#e2a32b}.prac .prpbar i.b{background:#d0453b}
+.prac .prpv{font-weight:800;font-size:14px;text-align:right;color:#1f2a22}
+.prac .prpr small{grid-column:1/-1;font-size:12px;color:#6b6f66;margin-top:-2px}
+:root[data-theme="dark"] .prac .prprog{background:#18201c;border-color:#2c3a32}
+:root[data-theme="dark"] .prac .prpn,:root[data-theme="dark"] .prac .prpv{color:#e8efe9}
+:root[data-theme="dark"] .prac .prph{color:#8fc3ea}
+:root[data-theme="dark"] .prac .prpbar{background:#2c3a32}
+.prv.ok,.prv.no{color:inherit;font-weight:400}.prv .prvfix{font-weight:700}

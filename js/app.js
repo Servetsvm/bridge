@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 158;
+const APP_V = 159;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -332,7 +332,11 @@ function makeCall(seat, call, m, al) {
   if (G.phase !== "bid" || bidTurn() !== seat || !isLegal(G.auction, seat, call)) return;
   { const who = actor(seat); if (who !== "robot") pushUndo(who); }
   if (!m) m = E.explainCall(G.auction, seat, call, G.cards);
+  // while practising: what the system (the robot's own choice) bids here, to look back on when the board ends
+  let sg = null;
+  if (pracList().length && !online() && !G.tour && actor(seat) !== 'robot') { const r = E.aiBid(G.auction, seat, G.deal[seat], G.cards); sg = { c: r.call, cv: (r.m && r.m.cv) || '', t: (r.m && r.m.t) || '' }; }
   G.auction.push(al ? { seat, call, m, al: String(al).slice(0, 120) } : { seat, call, m });
+  if (sg) G.auction[G.auction.length - 1].sg = sg;
   ui.selLvl = 0; ui.hintBid = null;
   if (auctionOver(G.auction)) {
     const c = contractOf(G.auction);
@@ -384,6 +388,19 @@ function finishBoard() {
   if (pracList().length && !online() && !G.tour) {
     const used = pracList().filter(k => G.auction.some(a => sideOf(a.seat) === sideOf(U()) && a.m && a.m.cv === k));
     if (used.length) { SET.pracN = SET.pracN || {}; used.forEach(k => { SET.pracN[k] = (SET.pracN[k] || 0) + 1; }); Store.saveSettings(SET); }
+    // your calls where a practised convention came up (the system used it, or you did): right when you bid what
+    // the system bids there; each counts towards that convention's score
+    const want = pracList(), rv = [];
+    G.auction.forEach((a, i) => {
+      if (!a.sg) return;
+      const k = want.includes(a.sg.cv) ? a.sg.cv : a.m && want.includes(a.m.cv) ? a.m.cv : null;
+      if (k) rv.push({ i, k, call: a.call, sc: a.sg.c, ok: a.call === a.sg.c, st: a.sg.t, ut: (a.m && a.m.t) || '' });
+    });
+    if (rv.length) {
+      e.prv = rv; SET.pracS = SET.pracS || {};
+      rv.forEach(r => { const s = SET.pracS[r.k] || (SET.pracS[r.k] = { n: 0, ok: 0 }); s.n++; if (r.ok) s.ok++; });
+      Store.saveSettings(SET);
+    }
   }
   G.result = e; G.phase = 'done'; if (!e.passed) sfx(e.us >= 0 ? 'good' : 'bad');
   if (online() && !guest()) Net.boardDone(e);
@@ -708,7 +725,7 @@ function renderTable() {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
     { const first = ui.doneSeen !== G.id; if (first) setTimeout(() => { ui.doneSeen = G.id; }, 0); var doneCls = first ? (e && e.us > 0 ? " good" : e && e.us < 0 ? " bad" : "") : ""; }
-    C.innerHTML = e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
+    C.innerHTML = e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}${e.prv ? `<small class="prvsum">${prvSum(e.prv)}</small>` : ""}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans(); fitTable(); updateRcpt();
@@ -942,6 +959,7 @@ function pracHtml() {
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
+    ${pracProgHtml()}
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
@@ -1582,6 +1600,23 @@ document.addEventListener('click', e => {
   const pi = e.target.closest('[data-pzi]'); if (pi) { const i = +pi.dataset.pzi; ui.pzSel = ui.pzSel === i ? null : i; showPuzzle(); return; }
   if (e.target.closest('#hPuzzle')) { ui.pzSel = null; showPuzzle(); }
 });
+// the practice review of a board: per convention ✓ when every call where it came up was the system's, else ✗
+function prvSum(rv) {
+  const ks = [...new Set(rv.map(r => r.k))];
+  return '📚 ' + ks.map(k => esc(pracName(k)) + ' ' + (rv.every(r => r.k !== k || r.ok) ? '✓' : '✗')).join(' · ');
+}
+function prvHtml(rv) {
+  return rv.map(r => `<div class="prv ${r.ok ? 'ok' : 'no'}"><b>${r.ok ? '✓' : '✗'} ${esc(pracName(r.k))}</b>
+    <div>${T('You bid')} ${callHtml(r.call)}${r.ok ? ` — ${symText(bidTxt(r.st || r.ut))}` : `${r.ut ? ` (${symText(bidTxt(r.ut))})` : ''}`}</div>
+    ${r.ok ? '' : `<div class="prvfix">${T('The system bids')} ${callHtml(r.sc)} — ${symText(bidTxt(r.st))}</div>`}</div>`).join('');
+}
+// how you are doing with each convention you have practised: hands played, and how often your calls were right
+function pracProgHtml() {
+  const S = SET.pracS || {}, ks = Object.keys(S).filter(k => S[k] && S[k].n && pracKnown(k)).sort((a, b) => S[b].n - S[a].n);
+  if (!ks.length) return '';
+  return `<div class="prprog"><div class="prph">${T('Your progress')}</div>${ks.map(k => { const s = S[k], p = Math.round(100 * s.ok / s.n), h = (SET.pracN || {})[k] || 0;
+    return `<div class="prpr"><span class="prpn">${esc(pracName(k))}</span><span class="prpbar"><i style="width:${p}%" class="${p >= 80 ? 'g' : p >= 50 ? 'm' : 'b'}"></i></span><span class="prpv">${p}%</span><small>${T('{0} hands', h)} · ${T('{0} of {1} calls right', s.ok, s.n)}</small></div>`; }).join('')}</div>`;
+}
 function showEnd() {
   const e = G.result; if (!e) return;
   const f = G.field || { tables: [], done: false, dd: {} };
@@ -1596,6 +1631,7 @@ function showEnd() {
   const norm = f.normC;
   openOv('end', `<h2>${T('Board')} ${e.board}</h2><div class="big">${resultLine(e)}</div>${G.claimed ? `<div class="muted">${T('The remaining tricks were settled by claim.')}</div>` : ''}
    ${scoreTxt}
+   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}</div>` : ''}
    <div class="grp"><span>${T('Par check')}</span><div>${T('Normal contract (most common at the robot tables)')}: ${f.done ? (norm ? conKey(norm) + ' — ' + T('double dummy') + ' ' + ddTxt('norm', norm) : T('Pass')) : '…'}</div>
    ${e.c ? `<div>${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${ddTxt('you', e.c)}</div>` : ''}</div>
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
