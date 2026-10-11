@@ -1122,3 +1122,42 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .auction th.turn.v{background:#ffd27a!important}
 .kickx{margin-left:4px;border:0;border-radius:50%;width:18px;height:18px;line-height:16px;padding:0;font-size:11px;background:rgba(255,255,255,.25);color:#fff;cursor:pointer}
 .kickx:hover{background:#c62828}
+
+/* ── Practise conventions: the heart of the home page ── */
+.hcard.prac{background:radial-gradient(ellipse at 20% 0%,#2f8a58 0%,#1f6440 55%,#174d31 100%);color:#f4efe0;border:1px solid #0f3b25;box-shadow:0 10px 30px rgba(15,59,37,.25);padding:18px 18px 14px}
+.prac .prhead{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px}
+.prac .ptitle{flex:1 1 280px;min-width:0}
+.prac h2{margin:0 0 4px;font-family:var(--f-title,Georgia,serif);font-size:clamp(22px,4.6vw,30px);color:#f2c94c;letter-spacing:.3px}
+.prac .ptitle p{margin:0;font-size:14.5px;line-height:1.45;color:#e3dcc5;max-width:640px}
+.prac .pcont{flex:0 0 auto;font-size:15px;padding:10px 14px;border-radius:10px;white-space:nowrap;box-shadow:0 0 0 3px rgba(242,201,76,.35)}
+.prac .pgroup{margin-top:12px}
+.prac .pgroup h4{margin:0 0 6px;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:#bcd9c4;font-weight:700}
+.prac .ptiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.prac .ptile{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:linear-gradient(170deg,#fbf6e6,#efe5c6);color:#2b2a22;font:inherit;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease;min-height:76px}
+.prac .ptile:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.prac .ptile:active{transform:translateY(0)}
+.prac .ptile b{font-size:15.5px;color:#1f4f33}
+.prac .ptile small{font-size:12.5px;line-height:1.35;color:#5b5a50;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prac .ptile em{font-style:normal;font-size:11.5px;font-weight:700;color:#2f7a4f;margin-top:auto}
+.prac .ptile.on{box-shadow:0 0 0 3px #f2c94c;background:linear-gradient(170deg,#fff7d6,#f2e2a8)}
+.prac .ptile .sym.red{color:#c0262d}
+@media (max-width:520px){.hcard.prac{padding:14px 12px 10px}.prac .ptiles{grid-template-columns:1fr 1fr;gap:6px}.prac .ptile{padding:8px 9px;min-height:68px}.prac .ptile b{font-size:14px}.prac .ptile small{font-size:11.5px}.prac .pcont{width:100%}}
+:root[data-theme="dark"] .prac .ptile{background:linear-gradient(170deg,#2b3a31,#22302a);color:#e8efe9;border-color:#3d5246}
+:root[data-theme="dark"] .prac .ptile b{color:#f2c94c}
+:root[data-theme="dark"] .prac .ptile small{color:#b9c6bd}
+:root[data-theme="dark"] .prac .ptile em{color:#8fd1a6}
+:root[data-theme="dark"] .prac .ptile.on{background:linear-gradient(170deg,#3b3a22,#2e2d1b)}
+/* the other ways to play: a quiet row of small buttons under it */
+.hero.hsmall{background:var(--card-bg,#fbf8ef);padding:12px 14px}
+.hsmall .hbtns{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0 4px}
+.hsmall .hbtns .btn,.hsmall .hbtns .hrow3 .btn{font-size:13.5px;padding:8px 6px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hsmall .hbtns .hopen,.hsmall .hbtns .hwatch{grid-column:auto}
+.hsmall .hbtns .hrow3{grid-column:auto/span 2;gap:6px}
+.hsmall .hname{font-size:13px}
+.hsmall > .muted{font-size:13px}
+@media (max-width:520px){.hsmall .hbtns{grid-template-columns:1fr 1fr}.hsmall .hbtns .hrow3{grid-column:1/-1}}
+:root[data-theme="dark"] .hero.hsmall{background:var(--panel2,#1f2a24)}
+/* the bar while practising: the convention, tap to stop */
+.box.prbox{border:2px solid #f2c94c;background:linear-gradient(170deg,#fff7d6,#f2e2a8);cursor:pointer;text-align:left;font:inherit;color:#2b2a22}
+.box.prbox b{color:#1f4f33}
+@media (min-width:901px){ .hgrid{grid-template-columns:minmax(0,1fr) min(var(--chatw),40%)} }   /* practising conventions keeps most of the width */

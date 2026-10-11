@@ -1138,6 +1138,45 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .kickx{margin-left:4px;border:0;border-radius:50%;width:18px;height:18px;line-height:16px;padding:0;font-size:11px;background:rgba(255,255,255,.25);color:#fff;cursor:pointer}
 .kickx:hover{background:#c62828}
 
+/* ── Practise conventions: the heart of the home page ── */
+.hcard.prac{background:radial-gradient(ellipse at 20% 0%,#2f8a58 0%,#1f6440 55%,#174d31 100%);color:#f4efe0;border:1px solid #0f3b25;box-shadow:0 10px 30px rgba(15,59,37,.25);padding:18px 18px 14px}
+.prac .prhead{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:6px}
+.prac .ptitle{flex:1 1 280px;min-width:0}
+.prac h2{margin:0 0 4px;font-family:var(--f-title,Georgia,serif);font-size:clamp(22px,4.6vw,30px);color:#f2c94c;letter-spacing:.3px}
+.prac .ptitle p{margin:0;font-size:14.5px;line-height:1.45;color:#e3dcc5;max-width:640px}
+.prac .pcont{flex:0 0 auto;font-size:15px;padding:10px 14px;border-radius:10px;white-space:nowrap;box-shadow:0 0 0 3px rgba(242,201,76,.35)}
+.prac .pgroup{margin-top:12px}
+.prac .pgroup h4{margin:0 0 6px;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:#bcd9c4;font-weight:700}
+.prac .ptiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}
+.prac .ptile{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:linear-gradient(170deg,#fbf6e6,#efe5c6);color:#2b2a22;font:inherit;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease;min-height:76px}
+.prac .ptile:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.25)}
+.prac .ptile:active{transform:translateY(0)}
+.prac .ptile b{font-size:15.5px;color:#1f4f33}
+.prac .ptile small{font-size:12.5px;line-height:1.35;color:#5b5a50;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.prac .ptile em{font-style:normal;font-size:11.5px;font-weight:700;color:#2f7a4f;margin-top:auto}
+.prac .ptile.on{box-shadow:0 0 0 3px #f2c94c;background:linear-gradient(170deg,#fff7d6,#f2e2a8)}
+.prac .ptile .sym.red{color:#c0262d}
+@media (max-width:520px){.hcard.prac{padding:14px 12px 10px}.prac .ptiles{grid-template-columns:1fr 1fr;gap:6px}.prac .ptile{padding:8px 9px;min-height:68px}.prac .ptile b{font-size:14px}.prac .ptile small{font-size:11.5px}.prac .pcont{width:100%}}
+:root[data-theme="dark"] .prac .ptile{background:linear-gradient(170deg,#2b3a31,#22302a);color:#e8efe9;border-color:#3d5246}
+:root[data-theme="dark"] .prac .ptile b{color:#f2c94c}
+:root[data-theme="dark"] .prac .ptile small{color:#b9c6bd}
+:root[data-theme="dark"] .prac .ptile em{color:#8fd1a6}
+:root[data-theme="dark"] .prac .ptile.on{background:linear-gradient(170deg,#3b3a22,#2e2d1b)}
+/* the other ways to play: a quiet row of small buttons under it */
+.hero.hsmall{background:var(--card-bg,#fbf8ef);padding:12px 14px}
+.hsmall .hbtns{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0 4px}
+.hsmall .hbtns .btn,.hsmall .hbtns .hrow3 .btn{font-size:13.5px;padding:8px 6px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hsmall .hbtns .hopen,.hsmall .hbtns .hwatch{grid-column:auto}
+.hsmall .hbtns .hrow3{grid-column:auto/span 2;gap:6px}
+.hsmall .hname{font-size:13px}
+.hsmall > .muted{font-size:13px}
+@media (max-width:520px){.hsmall .hbtns{grid-template-columns:1fr 1fr}.hsmall .hbtns .hrow3{grid-column:1/-1}}
+:root[data-theme="dark"] .hero.hsmall{background:var(--panel2,#1f2a24)}
+/* the bar while practising: the convention, tap to stop */
+.box.prbox{border:2px solid #f2c94c;background:linear-gradient(170deg,#fff7d6,#f2e2a8);cursor:pointer;text-align:left;font:inherit;color:#2b2a22}
+.box.prbox b{color:#1f4f33}
+@media (min-width:901px){ .hgrid{grid-template-columns:minmax(0,1fr) min(var(--chatw),40%)} }   /* practising conventions keeps most of the width */
+
 </style>
 
 <div id="app">
@@ -3691,6 +3730,23 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Practise conventions": "Konvansiyon çalış",
+    "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Bir konvansiyon seç; robotlar sana tam o konvansiyonun çıktığı elleri dağıtsın. Her teklife dokunup anlamını gör, oynarken öğren.",
+    "Continue: {0}": "Devam et: {0}",
+    "{0} hands practised": "{0} el çalışıldı",
+    "After 1NT": "1NT sonrası",
+    "Major openings": "Majör açılışlar",
+    "Slam bidding": "Slem",
+    "When they bid": "Rakip araya girince",
+    "Responses and more": "Cevaplar ve diğerleri",
+    "Practice deals are for playing with robots — close the online table first": "Çalışma elleri robotlarla oynamak içindir — önce online masayı kapat",
+    "{0}: looking for a hand where it comes up…": "{0}: bu konvansiyonun çıktığı bir el aranıyor…",
+    "Practice ended — normal random deals": "Çalışma bitti — normal rastgele eller",
+    "Stop practising {0}?": "{0} çalışması bitirilsin mi?",
+    "Tap to stop practising": "Çalışmayı bitirmek için dokun",
+    "Practising": "Çalışılıyor",
+    "{0} hands": "{0} el",
+    "Or play freely: with robots, at an online table or in a tournament.": "Ya da serbest oyna: robotlarla, online masada ya da turnuvada.",
     "Leave the table? {0} will host it and the others go on playing.": "Masadan ayrılmak istiyor musun? Masayı {0} devralır, diğerleri oynamaya devam eder.",
     "Nobody else is at the table — leaving closes it. Leave?": "Masada başka oyuncu yok — ayrılırsan masa kapanır. Ayrılmak istiyor musun?",
     "Close it for everyone": "Herkes için kapat",
@@ -3836,6 +3892,23 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Practise conventions": "Øv på konvensjoner",
+    "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Velg en konvensjon, så gir robotene deg hender der den dukker opp. Trykk på en melding for å se hva den betyr — og lær mens du spiller.",
+    "Continue: {0}": "Fortsett: {0}",
+    "{0} hands practised": "{0} hender øvd",
+    "After 1NT": "Etter 1NT",
+    "Major openings": "Åpning i major",
+    "Slam bidding": "Slemmelding",
+    "When they bid": "Når motparten melder",
+    "Responses and more": "Svar og mer",
+    "Practice deals are for playing with robots — close the online table first": "Øvingsspill er for spill med roboter — steng nettbordet først",
+    "{0}: looking for a hand where it comes up…": "{0}: leter etter en hånd der den dukker opp…",
+    "Practice ended — normal random deals": "Øvingen er slutt — vanlige tilfeldige spill",
+    "Stop practising {0}?": "Slutte å øve på {0}?",
+    "Tap to stop practising": "Trykk for å slutte å øve",
+    "Practising": "Øver",
+    "{0} hands": "{0} hender",
+    "Or play freely: with robots, at an online table or in a tournament.": "Eller spill fritt: med roboter, ved et nettbord eller i en turnering.",
     "Leave the table? {0} will host it and the others go on playing.": "Forlate bordet? {0} overtar det og de andre spiller videre.",
     "Nobody else is at the table — leaving closes it. Leave?": "Ingen andre ved bordet — går du, stenges det. Gå?",
     "Close it for everyone": "Steng det for alle",
@@ -3981,6 +4054,23 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Practise conventions": "Practica convenciones",
+    "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Elige una convención y los robots te reparten manos donde aparece. Toca cualquier voz para ver qué significa — y aprende jugando.",
+    "Continue: {0}": "Seguir: {0}",
+    "{0} hands practised": "{0} manos practicadas",
+    "After 1NT": "Tras 1SA",
+    "Major openings": "Aperturas de mayor",
+    "Slam bidding": "Subasta de slam",
+    "When they bid": "Cuando ellos intervienen",
+    "Responses and more": "Respuestas y más",
+    "Practice deals are for playing with robots — close the online table first": "Las manos de práctica son para jugar con robots — cierra antes la mesa online",
+    "{0}: looking for a hand where it comes up…": "{0}: buscando una mano donde aparezca…",
+    "Practice ended — normal random deals": "Práctica terminada — manos normales al azar",
+    "Stop practising {0}?": "¿Dejar de practicar {0}?",
+    "Tap to stop practising": "Toca para dejar de practicar",
+    "Practising": "Practicando",
+    "{0} hands": "{0} manos",
+    "Or play freely: with robots, at an online table or in a tournament.": "O juega libre: con robots, en una mesa online o en un torneo.",
     "Leave the table? {0} will host it and the others go on playing.": "¿Dejar la mesa? {0} la llevará y los demás seguirán jugando.",
     "Nobody else is at the table — leaving closes it. Leave?": "No hay nadie más en la mesa: si te vas, se cierra. ¿Salir?",
     "Close it for everyone": "Cerrarla para todos",
@@ -4154,6 +4244,23 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Practise conventions": "S'entraîner aux conventions",
+    "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Choisissez une convention : les robots vous distribuent des mains où elle apparaît. Touchez une enchère pour voir ce qu'elle signifie — et apprenez en jouant.",
+    "Continue: {0}": "Continuer : {0}",
+    "{0} hands practised": "{0} mains travaillées",
+    "After 1NT": "Après 1SA",
+    "Major openings": "Ouvertures en majeure",
+    "Slam bidding": "Enchères de chelem",
+    "When they bid": "Quand ils interviennent",
+    "Responses and more": "Réponses et plus",
+    "Practice deals are for playing with robots — close the online table first": "Les donnes d'entraînement se jouent avec les robots — fermez d'abord la table en ligne",
+    "{0}: looking for a hand where it comes up…": "{0} : recherche d'une main où elle apparaît…",
+    "Practice ended — normal random deals": "Entraînement terminé — donnes aléatoires normales",
+    "Stop practising {0}?": "Arrêter l'entraînement {0} ?",
+    "Tap to stop practising": "Touchez pour arrêter l'entraînement",
+    "Practising": "Entraînement",
+    "{0} hands": "{0} mains",
+    "Or play freely: with robots, at an online table or in a tournament.": "Ou jouez librement : avec les robots, à une table en ligne ou en tournoi.",
     "Leave the table? {0} will host it and the others go on playing.": "Quitter la table ? {0} la reprend et les autres continuent.",
     "Nobody else is at the table — leaving closes it. Leave?": "Personne d'autre à la table — partir la ferme. Partir ?",
     "Close it for everyone": "La fermer pour tous",
@@ -4327,6 +4434,23 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Practise conventions": "Allenati sulle convenzioni",
+    "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Scegli una convenzione e i robot ti danno mani in cui compare. Tocca una licita per vederne il significato — e impara giocando.",
+    "Continue: {0}": "Continua: {0}",
+    "{0} hands practised": "{0} mani giocate",
+    "After 1NT": "Dopo 1SA",
+    "Major openings": "Aperture nobili",
+    "Slam bidding": "Licita di slam",
+    "When they bid": "Quando intervengono",
+    "Responses and more": "Risposte e altro",
+    "Practice deals are for playing with robots — close the online table first": "Le mani di allenamento si giocano con i robot — chiudi prima il tavolo online",
+    "{0}: looking for a hand where it comes up…": "{0}: cerco una mano in cui compare…",
+    "Practice ended — normal random deals": "Allenamento finito — mani casuali normali",
+    "Stop practising {0}?": "Smettere l'allenamento {0}?",
+    "Tap to stop practising": "Tocca per smettere l'allenamento",
+    "Practising": "In allenamento",
+    "{0} hands": "{0} mani",
+    "Or play freely: with robots, at an online table or in a tournament.": "Oppure gioca liberamente: con i robot, a un tavolo online o in un torneo.",
     "Leave the table? {0} will host it and the others go on playing.": "Lasciare il tavolo? Lo prende {0} e gli altri continuano.",
     "Nobody else is at the table — leaving closes it. Leave?": "Al tavolo non c'è nessun altro — uscendo si chiude. Uscire?",
     "Close it for everyone": "Chiudilo per tutti",
@@ -4500,6 +4624,23 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Practise conventions": "Konventionen üben",
+    "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Wähle eine Konvention und die Roboter teilen dir Hände, in denen sie vorkommt. Tippe auf ein Gebot, um seine Bedeutung zu sehen — und lerne beim Spielen.",
+    "Continue: {0}": "Weiter: {0}",
+    "{0} hands practised": "{0} Hände geübt",
+    "After 1NT": "Nach 1SA",
+    "Major openings": "Oberfarb-Eröffnungen",
+    "Slam bidding": "Schlemmreizung",
+    "When they bid": "Wenn der Gegner reizt",
+    "Responses and more": "Antworten und mehr",
+    "Practice deals are for playing with robots — close the online table first": "Übungsverteilungen sind für das Spiel mit Robotern — schließe zuerst den Online-Tisch",
+    "{0}: looking for a hand where it comes up…": "{0}: suche eine Hand, in der sie vorkommt…",
+    "Practice ended — normal random deals": "Übung beendet — normale Zufallsverteilungen",
+    "Stop practising {0}?": "{0} nicht mehr üben?",
+    "Tap to stop practising": "Tippen, um das Üben zu beenden",
+    "Practising": "Übung",
+    "{0} hands": "{0} Hände",
+    "Or play freely: with robots, at an online table or in a tournament.": "Oder spiele frei: mit Robotern, an einem Online-Tisch oder im Turnier.",
     "Leave the table? {0} will host it and the others go on playing.": "Tisch verlassen? {0} übernimmt ihn und die anderen spielen weiter.",
     "Nobody else is at the table — leaving closes it. Leave?": "Sonst ist niemand am Tisch — wenn du gehst, wird er geschlossen. Gehen?",
     "Close it for everyone": "Für alle schließen",
@@ -4673,6 +4814,23 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Practise conventions": "Тренировка конвенций",
+    "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Выберите конвенцию, и роботы сдадут вам руки, где она встречается. Нажмите на любую заявку, чтобы увидеть её смысл, — учитесь во время игры.",
+    "Continue: {0}": "Продолжить: {0}",
+    "{0} hands practised": "Сыграно рук: {0}",
+    "After 1NT": "После 1БК",
+    "Major openings": "Открытия в мажор",
+    "Slam bidding": "Торговля на шлем",
+    "When they bid": "Когда соперники вмешиваются",
+    "Responses and more": "Ответы и другое",
+    "Practice deals are for playing with robots — close the online table first": "Тренировочные сдачи — для игры с роботами; сначала закройте онлайн-стол",
+    "{0}: looking for a hand where it comes up…": "{0}: ищем руку, где она встречается…",
+    "Practice ended — normal random deals": "Тренировка закончена — обычные случайные сдачи",
+    "Stop practising {0}?": "Закончить тренировку {0}?",
+    "Tap to stop practising": "Нажмите, чтобы закончить тренировку",
+    "Practising": "Тренировка",
+    "{0} hands": "Рук: {0}",
+    "Or play freely: with robots, at an online table or in a tournament.": "Или играйте свободно: с роботами, за онлайн-столом или в турнире.",
     "Leave the table? {0} will host it and the others go on playing.": "Покинуть стол? Его возьмёт {0}, остальные продолжат.",
     "Nobody else is at the table — leaving closes it. Leave?": "За столом больше никого — если уйти, он закроется. Уйти?",
     "Close it for everyone": "Закрыть для всех",
@@ -4846,6 +5004,23 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Practise conventions": "Ćwicz konwencje",
+    "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "Wybierz konwencję, a roboty rozdadzą ci ręce, w których się pojawia. Dotknij odzywki, aby zobaczyć jej znaczenie — i ucz się, grając.",
+    "Continue: {0}": "Kontynuuj: {0}",
+    "{0} hands practised": "Przećwiczone rozdania: {0}",
+    "After 1NT": "Po 1BA",
+    "Major openings": "Otwarcia w starszym",
+    "Slam bidding": "Licytacja szlemowa",
+    "When they bid": "Gdy przeciwnicy licytują",
+    "Responses and more": "Odpowiedzi i inne",
+    "Practice deals are for playing with robots — close the online table first": "Rozdania ćwiczeniowe są do gry z robotami — najpierw zamknij stół online",
+    "{0}: looking for a hand where it comes up…": "{0}: szukam rozdania, w którym się pojawia…",
+    "Practice ended — normal random deals": "Ćwiczenie zakończone — zwykłe losowe rozdania",
+    "Stop practising {0}?": "Zakończyć ćwiczenie {0}?",
+    "Tap to stop practising": "Dotknij, aby zakończyć ćwiczenie",
+    "Practising": "Ćwiczenie",
+    "{0} hands": "Rozdania: {0}",
+    "Or play freely: with robots, at an online table or in a tournament.": "Albo graj swobodnie: z robotami, przy stole online lub w turnieju.",
     "Leave the table? {0} will host it and the others go on playing.": "Opuścić stół? Przejmie go {0}, a pozostali grają dalej.",
     "Nobody else is at the table — leaving closes it. Leave?": "Przy stole nikogo więcej — wyjście go zamknie. Wyjść?",
     "Close it for everyone": "Zamknij dla wszystkich",
@@ -5019,6 +5194,23 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Practise conventions": "约定叫练习",
+    "Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.": "选择一个约定叫,机器人会发给你会用到它的牌。点击任意叫品查看含义——边打边学。",
+    "Continue: {0}": "继续:{0}",
+    "{0} hands practised": "已练习 {0} 副",
+    "After 1NT": "1NT 之后",
+    "Major openings": "高花开叫",
+    "Slam bidding": "满贯叫牌",
+    "When they bid": "对方争叫时",
+    "Responses and more": "应叫及其他",
+    "Practice deals are for playing with robots — close the online table first": "练习牌用于和机器人对打——请先关闭在线牌桌",
+    "{0}: looking for a hand where it comes up…": "{0}:正在寻找会用到它的牌…",
+    "Practice ended — normal random deals": "练习结束——恢复普通随机牌",
+    "Stop practising {0}?": "结束 {0} 的练习?",
+    "Tap to stop practising": "点击结束练习",
+    "Practising": "练习中",
+    "{0} hands": "{0} 副",
+    "Or play freely: with robots, at an online table or in a tournament.": "或者自由对打:和机器人、在在线牌桌或比赛中。",
     "Leave the table? {0} will host it and the others go on playing.": "离开牌桌?{0} 将接管,其他人继续打。",
     "Nobody else is at the table — leaving closes it. Leave?": "牌桌上没有其他人——离开会关闭牌桌。要离开吗?",
     "Close it for everyone": "为所有人关闭",
@@ -5788,7 +5980,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 137;
+const APP_V = 138;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6126,6 +6318,8 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
+  // a practice board where the convention really came up counts for it (shown on its tile)
+  if (SET.practice && !online() && !G.tour && G.auction.some(a => sideOf(a.seat) === sideOf(U()) && a.m && a.m.cv === SET.practice)) { SET.pracN = SET.pracN || {}; SET.pracN[SET.practice] = (SET.pracN[SET.practice] || 0) + 1; Store.saveSettings(SET); }
   G.result = e; G.phase = 'done'; if (!e.passed) sfx(e.us >= 0 ? 'good' : 'bad');
   if (online() && !guest()) Net.boardDone(e);
   if (G.tprac) { const c = tourCompare(G.tprac.id, G.tprac.b, e); if (c) { e.tprac = c; flash('🏆 ' + T('Against the tournament ({0} players): {1} IMP · {2}%', c.n, fmtSigned(c.imp), c.mp), 4500); } }
@@ -6337,7 +6531,9 @@ function renderBar() {
   $('bar').innerHTML = `
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
    <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
-   <div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>
+   ${SET.practice && !online() && !G.tour && E.CONVS.find(c => c.k === SET.practice)
+     ? `<button class="box prbox" id="bPrac" title="${T('Tap to stop practising')}"><small>📚 ${T('Practising')}</small><b>${esc(E.CONVS.find(c => c.k === SET.practice).n)}</b><span class="tr">${T('{0} hands', (SET.pracN || {})[SET.practice] || 0)} · ✕</span></button>`
+     : `<div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>`}
    <div class="spacer"></div>
    <div class="tools">
      <button class="btn" id="bHome" title="${T('Home')}">⌂</button>
@@ -6655,6 +6851,36 @@ function turnAlert() {
 
 /* ================= home page: start, open tables, our convention card and the lobby chat ================= */
 const myNm = () => { try { return localStorage.getItem('bridge-table-name') || ''; } catch (e) { return ''; } };
+/* ---- practise a convention: the heart of the home page. Pick one and the robots deal hands where our side uses
+   it (freshDeal looks for them); every call can be tapped to see what it means. ---- */
+const PRAC_GROUPS = [
+  ['After 1NT', ['stayman', 'fourWay', 'smolen', 'texas', 'texasInt', 'leb']],
+  ['Major openings', ['j2nt', 'bergen', 'splinter', 'drury']],
+  ['Slam bidding', ['rkc', 'gerber']],
+  ['When they bid', ['capp', 'dont', 'michaels', 'supx', 'respx']],
+  ['Responses and more', ['twoOverOne', 'invMin', 'wjs', 'sjs', 'nmf', 'fsf', 'ogust', 'gamb']],
+];
+function pracHtml() {
+  const cur = SET.practice, n = SET.pracN || {}, c0 = cur && E.CONVS.find(c => c.k === cur);
+  const short = d => { const s = String(d || '').split(/(?<=[.!?])\s/)[0]; return s.length > 96 ? s.slice(0, 94) + '…' : s; };
+  const tile = k => {
+    const c = E.CONVS.find(x => x.k === k); if (!c) return '';
+    return `<button class="ptile${k === cur ? ' on' : ''}" data-prac="${k}"><b>${esc(c.n)}</b><small>${symText(esc(short(c.d)))}</small>${n[k] ? `<em>✓ ${T('{0} hands practised', n[k])}</em>` : ''}</button>`;
+  };
+  return `<div class="prhead"><div class="ptitle"><h2>📚 ${T('Practise conventions')}</h2>
+      <p>${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p></div>
+      ${c0 ? `<button class="btn new pcont" data-prac="${cur}">▶ ${T('Continue: {0}', esc(c0.n))}</button>` : ''}</div>
+    ${PRAC_GROUPS.map(([g, ks]) => `<div class="pgroup"><h4>${T(g)}</h4><div class="ptiles">${ks.map(tile).join('')}</div></div>`).join('')}`;
+}
+function startPractice(k) {
+  const c = E.CONVS.find(y => y.k === k); if (!c) return;
+  SET.practice = k; SET.conv[k] = true; if (c.x) SET.conv[c.x] = false;   // the convention goes on our card (and the one it replaces off)
+  Store.saveSettings(SET); save();
+  if (online()) { flash(T('Practice deals are for playing with robots — close the online table first'), 3000); return; }
+  ui.saved = null; flash('📚 ' + T('{0}: looking for a hand where it comes up…', c.n), 2500);
+  setTimeout(() => { closeOv(); newBoard(); }, 60);   // let the message show before the search
+}
+function stopPractice() { SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(T('Practice ended — normal random deals'), 2000); }
 function homeShell() {
   const langs = LANGS;
   const sec = (k, label) => `<button class="hsec" data-hsec="${k}">${label}</button>`;
@@ -6664,14 +6890,12 @@ function homeShell() {
       <button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button></div></header>
   <div class="hgrid">
     <section class="hmain">
-      <div class="hcard hero">
+      <div class="hcard prac" id="hPrac"></div>
+      <div class="hcard hero hsmall">
         <div class="hname hrow"><label><span>${T('Name')}</span><button id="hNameBtn" class="tok hnamebtn" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button></label>
         <label><span>${T('System')}</span><select id="hSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label></div>
-        <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
+        <div class="muted">${T('Or play freely: with robots, at an online table or in a tournament.')}</div>
         <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="hWatch">👁 ${T('Watch a table')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
-        
-        <button class="hdaily" id="hDaily"></button>
-        <button class="hdaily hpuzzle" id="hPuzzle"></button>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div id="hSec"></div>
@@ -6704,6 +6928,7 @@ function renderHome() {
   const set = (id, html) => { const el = $(id); if (el && el.innerHTML !== html) { el.innerHTML = html; return true; } return false; };
   const cont = ui.saved && ui.saved.phase !== 'done';
   set('hGo', cont ? T('Continue') : '🤖 ' + T('Play with robots'));
+  set('hPrac', pracHtml());   // practise a convention (the heart of the page)
   { const b = $('hNameBtn'), h = (myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`) + ' ✏️'; if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name, after a change on your card
   { const hs = $('hSys'), v = SET.sys || 'twoone'; if (hs && hs.value !== v) hs.value = v; }   // also when it was changed on the convention card
 
@@ -7694,6 +7919,8 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.sit != null) { Net.sit(+t.dataset.sit); return; }
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
   if (t.id === "bGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
+  if (t.dataset.prac) { Net.st.soloPub = true; startPractice(t.dataset.prac); return; }   // a convention to practise
+  if (t.id === "bPrac") { askYes(T("Stop practising {0}?", (E.CONVS.find(c => c.k === SET.practice) || {}).n || ""), () => { closeOv(); stopPractice(); }); return; }
   const sol = ev_.target.closest("[data-solo]"); if (sol) { Net.st.soloPub = sol.dataset.solo === "pub"; closeOv(); resume(); return; }
   const dtb = ev_.target.closest("[data-dtab]"); if (dtb) { ui.dockTab = dtb.dataset.dtab; renderDock(); return; }
   const dq = ev_.target.closest("[data-dq]"); if (dq) { dockSend(dq.dataset.dq); return; }
@@ -8893,7 +9120,7 @@ const Net = (() => {
 
   /* your results on every device: kept in the database under a key made from your name and PIN (only someone who
      knows both can find them). Boards from both sides are merged; your settings come along to a new device. */
-  const SYNC_KEYS = ['sys', 'conv', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style'];
+  const SYNC_KEYS = ['sys', 'conv', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN'];
   let syncing = null, syncT = null;
   async function cloudSync() {
     if (!Cloud.on || !SET.pinH || syncing) return syncing;
