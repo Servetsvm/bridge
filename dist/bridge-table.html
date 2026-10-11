@@ -6397,7 +6397,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 156;
+const APP_V = 157;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -6465,12 +6465,26 @@ function save() {
   const slim = HIST.map((h, i) => (i < HIST.length - 60 ? { ...h, deal: undefined, fieldList: undefined, auc: undefined, pl: undefined } : h));
   Store.saveLocal({ SET, G: guest() ? Net.st.savedG : (G && G.phase === "idle" ? ui.saved || null : G), HIST: slim, BOARD });
 }
+// a first visit opens in the visitor's language: the first of the browser's languages we have, else the
+// language of the country the device's time zone is in, else English (nothing is sent anywhere to find it)
+function detectLang() {
+  const have = LANGS.map(([v]) => v);
+  const of = l => { l = String(l || '').toLowerCase(); const b = /^(nb|nn|no)\b/.test(l) ? 'no' : l.slice(0, 2); return have.includes(b) ? b : null; };
+  for (const l of (navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language])) { const v = of(l); if (v) return v; }
+  let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { }
+  const TZ = { 'Europe/Istanbul': 'tr', 'Asia/Istanbul': 'tr', 'Asia/Nicosia': 'tr', 'Asia/Famagusta': 'tr', 'Europe/Oslo': 'no', 'Arctic/Longyearbyen': 'no',
+    'Europe/Madrid': 'es', 'Atlantic/Canary': 'es', 'America/Mexico_City': 'es', 'America/Argentina/Buenos_Aires': 'es', 'America/Bogota': 'es', 'America/Lima': 'es', 'America/Santiago': 'es', 'America/Caracas': 'es', 'America/Montevideo': 'es',
+    'Europe/Paris': 'fr', 'Europe/Brussels': 'fr', 'Europe/Luxembourg': 'fr', 'Europe/Monaco': 'fr', 'Europe/Rome': 'it', 'Europe/San_Marino': 'it', 'Europe/Vatican': 'it',
+    'Europe/Berlin': 'de', 'Europe/Vienna': 'de', 'Europe/Zurich': 'de', 'Europe/Busingen': 'de', 'Europe/Moscow': 'ru', 'Europe/Minsk': 'ru', 'Asia/Almaty': 'ru', 'Europe/Kaliningrad': 'ru', 'Europe/Samara': 'ru', 'Europe/Volgograd': 'ru', 'Asia/Yekaterinburg': 'ru', 'Asia/Novosibirsk': 'ru', 'Asia/Vladivostok': 'ru',
+    'Europe/Warsaw': 'pl', 'Asia/Shanghai': 'zh', 'Asia/Chongqing': 'zh', 'Asia/Urumqi': 'zh', 'Asia/Hong_Kong': 'zh', 'Asia/Macau': 'zh', 'Asia/Taipei': 'zh' };
+  return TZ[tz] || 'en';
+}
 function load(d) {
   d = d || Store.loadLocal();
   if (d) { SET = Object.assign(SET, d.SET || {}); G = d.G || null; HIST = d.HIST || []; BOARD = d.BOARD || 0; }
   if (G && G.phase === "lobby") G = null; // an online waiting room is not restored after a restart
   SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) };
-  if (!SET.lang) { const l = (navigator.language || 'en').toLowerCase(); SET.lang = l.startsWith('tr') ? 'tr' : /^(nb|nn|no)/.test(l) ? 'no' : l.startsWith('es') ? 'es' : l.startsWith('fr') ? 'fr' : l.startsWith('it') ? 'it' : l.startsWith('de') ? 'de' : l.startsWith('ru') ? 'ru' : l.startsWith('pl') ? 'pl' : l.startsWith('zh') ? 'zh' : 'en'; }
+  if (!SET.lang) SET.lang = detectLang();
   applyLang();
   // the player card's "joined" date (the first day this device played; from the oldest board for old players) and logins
   if (!SET.joined) { const t0 = Math.min(Date.now(), ...HIST.map(h => h.ts || Date.now())); SET.joined = new Date(t0).toISOString().slice(0, 10); }
