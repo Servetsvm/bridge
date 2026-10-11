@@ -1171,3 +1171,5 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .prac .prinfo .sym.red{color:#ff8a8a}
 .prac .prnote{margin-top:8px;font-size:13px;color:#cfe3d5}
 :root[data-theme="dark"] .prac .prsel{background:#22302a;color:#f2c94c}
+.prac .prdesc{margin:4px 0 10px;font-size:14.5px;line-height:1.45;color:#e3dcc5;max-width:640px}
+.prac > .prsel{display:block;width:100%;max-width:420px}
