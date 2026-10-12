@@ -1410,3 +1410,14 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .hcard.cloudbad small{font-size:13px}
 :root[data-theme="dark"] .hcard.cloudbad{background:#3a2a14;color:#ffd38a;border-color:#7a5a20}
 .stdirect{font-size:11.5px;color:#b5651d;font-weight:700}
+/* install as an app: a slim card at the top of the home page */
+.hcard.hinst{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:#eaf3ff;color:#16324f;border:1px solid #b9d4f2}
+.hinsti{font-size:26px}
+.hinstt{flex:1 1 180px;min-width:0}
+.hinstt b{display:block;font-size:15px}
+.hinstt small{font-size:12.5px;opacity:.8}
+.hinst .btn.new{padding:8px 16px}
+.hinstx{background:none;border:0;font:inherit;font-size:13px;color:#4a6a8a;cursor:pointer;text-decoration:underline}
+:root[data-theme="dark"] .hcard.hinst{background:#16263a;color:#d8e8fb;border-color:#2c4a6e}
+:root[data-theme="dark"] .hinstx{color:#9fc0e3}
+.inststeps{line-height:1.7;padding-left:22px}

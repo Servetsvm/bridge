@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 169;
+const APP_V = 170;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1121,6 +1121,7 @@ function homeShell() {
       <button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button></div></header>
   <div class="hgrid">
     <section class="hmain">
+      <div id="hInst"></div>
       <div class="hcard prac" id="hPrac"></div>
       <div class="hpair">
       <div class="hcard hero hsmall">
@@ -1160,6 +1161,7 @@ function renderHome() {
   const cont = ui.saved && ui.saved.phase !== 'done';
   set('hGo', cont ? T('Continue') : '🤖 ' + T('Play with robots'));
   set('hPrac', pracHtml());   // practise a convention (the heart of the page)
+  set('hInst', instHtml());
   { const b = $('hNameBtn'), h = (myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`) + ' ✏️'; if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name, after a change on your card
   { const hs = $('hSys'), v = SET.sys || 'twoone'; if (hs && hs.value !== v) hs.value = v; }   // also when it was changed on the convention card
 
@@ -1805,7 +1807,7 @@ function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
   openOv('set', `<h2>${T('Settings')}</h2>
-   <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
+   <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>${!isStandalone() && (INST || isIOS()) ? `<button class="btn guide" id="instGo">📲 ${T('Install Bridge Table as an app')}</button>` : ''}
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
    <div class="grp"><span>${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>
    <div class="grp"><span>${T('Card style')}</span>${seg("style", [["classic", T("Classic tiles")], ["modern", T("Modern fan")]], SET.style || "classic")}</div>
@@ -2198,6 +2200,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
+  if (t.id === 'instGo') { instGo(); return; }
+  if (t.id === 'instNo') { ui.instNo = 1; render(); return; }   // only for this visit: it is offered again next time
   if (t.id === 'hSup') { showSup(); return; }
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.id === 'supSend') { sendSup(); return; }
@@ -2740,3 +2744,23 @@ document.addEventListener('keydown', e => {
   if (KB.rank != null && 'cdhs'.includes(k) && k.length === 1) { const c = 'cdhs'.indexOf(k) * 13 + KB.rank; KB.rank = null; if (L.includes(c)) { e.preventDefault(); playCard(G.play.turn, c); } else flash(T('You cannot play that card'), 1200); return; }
   if (k === '0' && KB.rank === 8) return;   // "10" typed as 1 then 0
 });
+/* ---- install as an app: Chrome and Edge (Android, PC) offer their own install window; Safari on iPhone and iPad
+   only through Share → Add to Home Screen, so there the steps are shown. Not shown inside the installed app, nor
+   once installed; "Not now" hides it for this visit only. ---- */
+var INST = null;   // var and function declarations: the home page can be drawn before this part of the file has run
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); INST = e; if (typeof render === 'function') render(); });
+window.addEventListener('appinstalled', () => { INST = null; SET.instNo = 1; Store.saveSettings(SET); render(); });
+function isStandalone() { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } }
+function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+function instHtml() {
+  if (SET.instNo || ui.instNo || isStandalone() || (!INST && !isIOS())) return '';
+  return `<div class="hcard hinst"><span class="hinsti">📲</span><div class="hinstt"><b>${T('Install Bridge Table as an app')}</b><small>${T('One tap from your home screen, full screen, works offline.')}</small></div>
+    <button class="btn new" id="instGo">${T('Install')}</button><button class="hinstx" id="instNo" title="${T('Not now')}">${T('Not now')}</button></div>`;
+}
+async function instGo() {
+  if (INST) { const p = INST; INST = null; p.prompt(); try { const r = await p.userChoice; if (r && r.outcome === 'accepted') { SET.instNo = 1; Store.saveSettings(SET); } } catch (e) {} render(); return; }
+  openOv('inst', `<h2>📲 ${T('Install Bridge Table as an app')}</h2>
+    <ol class="inststeps"><li>${T('Tap the Share button {0} at the bottom (on iPad at the top) of Safari.', '<b>⬆︎</b>')}</li><li>${T('Choose {0}.', `<b>${T('Add to Home Screen')}</b>`)}</li><li>${T('Tap {0}: Bridge Table appears on your home screen.', `<b>${T('Add')}</b>`)}</li></ol>
+    <div class="muted">${T('In another browser on iPhone, open this page in Safari first.')}</div>
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}

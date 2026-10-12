@@ -1425,6 +1425,17 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .hcard.cloudbad small{font-size:13px}
 :root[data-theme="dark"] .hcard.cloudbad{background:#3a2a14;color:#ffd38a;border-color:#7a5a20}
 .stdirect{font-size:11.5px;color:#b5651d;font-weight:700}
+/* install as an app: a slim card at the top of the home page */
+.hcard.hinst{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;background:#eaf3ff;color:#16324f;border:1px solid #b9d4f2}
+.hinsti{font-size:26px}
+.hinstt{flex:1 1 180px;min-width:0}
+.hinstt b{display:block;font-size:15px}
+.hinstt small{font-size:12.5px;opacity:.8}
+.hinst .btn.new{padding:8px 16px}
+.hinstx{background:none;border:0;font:inherit;font-size:13px;color:#4a6a8a;cursor:pointer;text-decoration:underline}
+:root[data-theme="dark"] .hcard.hinst{background:#16263a;color:#d8e8fb;border-color:#2c4a6e}
+:root[data-theme="dark"] .hinstx{color:#9fc0e3}
+.inststeps{line-height:1.7;padding-left:22px}
 
 </style>
 
@@ -3968,6 +3979,16 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Install Bridge Table as an app": "Briç Masası'nı uygulama olarak yükle",
+    "One tap from your home screen, full screen, works offline.": "Ana ekrandan tek dokunuşla açılır, tam ekran çalışır, internet olmadan da robotlarla oynanır.",
+    "Install": "Yükle",
+    "Not now": "Şimdi değil",
+    "Tap the Share button {0} at the bottom (on iPad at the top) of Safari.": "Safari'de alttaki (iPad'de üstteki) Paylaş düğmesine {0} dokun.",
+    "Choose {0}.": "{0} seçeneğini seç.",
+    "Add to Home Screen": "Ana Ekrana Ekle",
+    "Tap {0}: Bridge Table appears on your home screen.": "{0} düğmesine dokun: Briç Masası ana ekranında görünür.",
+    "Add": "Ekle",
+    "In another browser on iPhone, open this page in Safari first.": "iPhone'da başka bir tarayıcı kullanıyorsan önce bu sayfayı Safari'de aç.",
     "Cannot reach the server: your results, progress and messages are not saved.": "Sunucuya bağlanılamıyor: sonuçların, ilerlemen ve mesajların kaydedilmiyor.",
     "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Bu site için reklam ya da gizlilik engelleyicisini kapat, internet bağlantını kontrol et, sonra sayfayı yenile.",
     "not connected to the database": "veritabanına bağlı değil",
@@ -4194,6 +4215,16 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Install Bridge Table as an app": "Installer Bridgebord som app",
+    "One tap from your home screen, full screen, works offline.": "Ett trykk fra hjemskjermen, fullskjerm, virker uten nett.",
+    "Install": "Installer",
+    "Not now": "Ikke nå",
+    "Tap the Share button {0} at the bottom (on iPad at the top) of Safari.": "Trykk på Del-knappen {0} nederst i Safari (øverst på iPad).",
+    "Choose {0}.": "Velg {0}.",
+    "Add to Home Screen": "Legg til på Hjem-skjerm",
+    "Tap {0}: Bridge Table appears on your home screen.": "Trykk {0}: Bridgebord vises på hjemskjermen.",
+    "Add": "Legg til",
+    "In another browser on iPhone, open this page in Safari first.": "Bruker du en annen nettleser på iPhone, åpne siden i Safari først.",
     "Cannot reach the server: your results, progress and messages are not saved.": "Får ikke kontakt med serveren: resultater, fremgang og meldinger lagres ikke.",
     "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Slå av reklame- eller personvernblokkering for denne siden, sjekk internettforbindelsen og last inn siden på nytt.",
     "not connected to the database": "ikke koblet til databasen",
@@ -4420,6 +4451,16 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Install Bridge Table as an app": "Instalar Bridge Table como app",
+    "One tap from your home screen, full screen, works offline.": "Un toque desde la pantalla de inicio, pantalla completa, funciona sin conexión.",
+    "Install": "Instalar",
+    "Not now": "Ahora no",
+    "Tap the Share button {0} at the bottom (on iPad at the top) of Safari.": "Toca el botón Compartir {0} abajo en Safari (arriba en iPad).",
+    "Choose {0}.": "Elige {0}.",
+    "Add to Home Screen": "Añadir a pantalla de inicio",
+    "Tap {0}: Bridge Table appears on your home screen.": "Toca {0}: Bridge Table aparece en tu pantalla de inicio.",
+    "Add": "Añadir",
+    "In another browser on iPhone, open this page in Safari first.": "Si usas otro navegador en iPhone, abre primero esta página en Safari.",
     "Cannot reach the server: your results, progress and messages are not saved.": "No se puede conectar con el servidor: tus resultados, progreso y mensajes no se guardan.",
     "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Desactiva el bloqueador de anuncios o de privacidad para este sitio, revisa la conexión y recarga la página.",
     "not connected to the database": "sin conexión a la base de datos",
@@ -4674,6 +4715,16 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Install Bridge Table as an app": "Installer Bridge Table comme application",
+    "One tap from your home screen, full screen, works offline.": "Une touche depuis l’écran d’accueil, plein écran, fonctionne hors ligne.",
+    "Install": "Installer",
+    "Not now": "Pas maintenant",
+    "Tap the Share button {0} at the bottom (on iPad at the top) of Safari.": "Touchez le bouton Partager {0} en bas de Safari (en haut sur iPad).",
+    "Choose {0}.": "Choisissez {0}.",
+    "Add to Home Screen": "Sur l’écran d’accueil",
+    "Tap {0}: Bridge Table appears on your home screen.": "Touchez {0} : Bridge Table apparaît sur l’écran d’accueil.",
+    "Add": "Ajouter",
+    "In another browser on iPhone, open this page in Safari first.": "Avec un autre navigateur sur iPhone, ouvrez d’abord cette page dans Safari.",
     "Cannot reach the server: your results, progress and messages are not saved.": "Impossible de joindre le serveur : vos résultats, progrès et messages ne sont pas enregistrés.",
     "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Désactivez le bloqueur de publicité ou de confidentialité pour ce site, vérifiez la connexion, puis rechargez la page.",
     "not connected to the database": "non connecté à la base",
@@ -4928,6 +4979,16 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Install Bridge Table as an app": "Installa Bridge Table come app",
+    "One tap from your home screen, full screen, works offline.": "Un tocco dalla schermata Home, a schermo intero, funziona offline.",
+    "Install": "Installa",
+    "Not now": "Non ora",
+    "Tap the Share button {0} at the bottom (on iPad at the top) of Safari.": "Tocca il pulsante Condividi {0} in basso in Safari (in alto su iPad).",
+    "Choose {0}.": "Scegli {0}.",
+    "Add to Home Screen": "Aggiungi alla schermata Home",
+    "Tap {0}: Bridge Table appears on your home screen.": "Tocca {0}: Bridge Table compare nella schermata Home.",
+    "Add": "Aggiungi",
+    "In another browser on iPhone, open this page in Safari first.": "Con un altro browser su iPhone, apri prima questa pagina in Safari.",
     "Cannot reach the server: your results, progress and messages are not saved.": "Impossibile raggiungere il server: risultati, progressi e messaggi non vengono salvati.",
     "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Disattiva il blocco pubblicità o privacy per questo sito, controlla la connessione e ricarica la pagina.",
     "not connected to the database": "non connesso al database",
@@ -5182,6 +5243,16 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Install Bridge Table as an app": "Bridge Table als App installieren",
+    "One tap from your home screen, full screen, works offline.": "Ein Tipp vom Home-Bildschirm, Vollbild, funktioniert offline.",
+    "Install": "Installieren",
+    "Not now": "Nicht jetzt",
+    "Tap the Share button {0} at the bottom (on iPad at the top) of Safari.": "Tippe in Safari unten (auf dem iPad oben) auf Teilen {0}.",
+    "Choose {0}.": "Wähle {0}.",
+    "Add to Home Screen": "Zum Home-Bildschirm",
+    "Tap {0}: Bridge Table appears on your home screen.": "Tippe auf {0}: Bridge Table erscheint auf dem Home-Bildschirm.",
+    "Add": "Hinzufügen",
+    "In another browser on iPhone, open this page in Safari first.": "In einem anderen Browser auf dem iPhone öffne diese Seite zuerst in Safari.",
     "Cannot reach the server: your results, progress and messages are not saved.": "Server nicht erreichbar: Ergebnisse, Fortschritt und Nachrichten werden nicht gespeichert.",
     "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Schalte den Werbe- oder Datenschutzblocker für diese Seite aus, prüfe die Verbindung und lade die Seite neu.",
     "not connected to the database": "nicht mit der Datenbank verbunden",
@@ -5436,6 +5507,16 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Install Bridge Table as an app": "Установить Bridge Table как приложение",
+    "One tap from your home screen, full screen, works offline.": "Одно касание на главном экране, полный экран, работает без интернета.",
+    "Install": "Установить",
+    "Not now": "Не сейчас",
+    "Tap the Share button {0} at the bottom (on iPad at the top) of Safari.": "Нажмите кнопку «Поделиться» {0} внизу Safari (на iPad — вверху).",
+    "Choose {0}.": "Выберите {0}.",
+    "Add to Home Screen": "На экран «Домой»",
+    "Tap {0}: Bridge Table appears on your home screen.": "Нажмите {0}: Bridge Table появится на главном экране.",
+    "Add": "Добавить",
+    "In another browser on iPhone, open this page in Safari first.": "Если на iPhone другой браузер, сначала откройте эту страницу в Safari.",
     "Cannot reach the server: your results, progress and messages are not saved.": "Нет связи с сервером: результаты, прогресс и сообщения не сохраняются.",
     "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Отключите блокировщик рекламы или трекеров для этого сайта, проверьте соединение и перезагрузите страницу.",
     "not connected to the database": "нет связи с базой",
@@ -5690,6 +5771,16 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Install Bridge Table as an app": "Zainstaluj Bridge Table jako aplikację",
+    "One tap from your home screen, full screen, works offline.": "Jedno dotknięcie z ekranu głównego, pełny ekran, działa offline.",
+    "Install": "Zainstaluj",
+    "Not now": "Nie teraz",
+    "Tap the Share button {0} at the bottom (on iPad at the top) of Safari.": "Dotknij przycisku Udostępnij {0} na dole Safari (na iPadzie u góry).",
+    "Choose {0}.": "Wybierz {0}.",
+    "Add to Home Screen": "Do ekranu początkowego",
+    "Tap {0}: Bridge Table appears on your home screen.": "Dotknij {0}: Bridge Table pojawi się na ekranie głównym.",
+    "Add": "Dodaj",
+    "In another browser on iPhone, open this page in Safari first.": "Jeśli na iPhonie używasz innej przeglądarki, najpierw otwórz tę stronę w Safari.",
     "Cannot reach the server: your results, progress and messages are not saved.": "Brak połączenia z serwerem: wyniki, postępy i wiadomości nie są zapisywane.",
     "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Wyłącz blokadę reklam lub prywatności dla tej strony, sprawdź połączenie i odśwież stronę.",
     "not connected to the database": "brak połączenia z bazą",
@@ -5944,6 +6035,16 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Install Bridge Table as an app": "把 Bridge Table 安装为应用",
+    "One tap from your home screen, full screen, works offline.": "从主屏幕一点即开，全屏运行，离线也能用。",
+    "Install": "安装",
+    "Not now": "以后再说",
+    "Tap the Share button {0} at the bottom (on iPad at the top) of Safari.": "点 Safari 底部（iPad 在顶部）的分享按钮 {0}。",
+    "Choose {0}.": "选择 {0}。",
+    "Add to Home Screen": "添加到主屏幕",
+    "Tap {0}: Bridge Table appears on your home screen.": "点 {0}：Bridge Table 会出现在主屏幕上。",
+    "Add": "添加",
+    "In another browser on iPhone, open this page in Safari first.": "如果在 iPhone 上用其他浏览器，请先用 Safari 打开本页。",
     "Cannot reach the server: your results, progress and messages are not saved.": "无法连接服务器：你的结果、进度和消息不会被保存。",
     "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "请为本站关闭广告或隐私拦截插件，检查网络连接，然后刷新页面。",
     "not connected to the database": "未连接数据库",
@@ -6794,7 +6895,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 169;
+const APP_V = 170;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -7907,6 +8008,7 @@ function homeShell() {
       <button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button></div></header>
   <div class="hgrid">
     <section class="hmain">
+      <div id="hInst"></div>
       <div class="hcard prac" id="hPrac"></div>
       <div class="hpair">
       <div class="hcard hero hsmall">
@@ -7946,6 +8048,7 @@ function renderHome() {
   const cont = ui.saved && ui.saved.phase !== 'done';
   set('hGo', cont ? T('Continue') : '🤖 ' + T('Play with robots'));
   set('hPrac', pracHtml());   // practise a convention (the heart of the page)
+  set('hInst', instHtml());
   { const b = $('hNameBtn'), h = (myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`) + ' ✏️'; if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name, after a change on your card
   { const hs = $('hSys'), v = SET.sys || 'twoone'; if (hs && hs.value !== v) hs.value = v; }   // also when it was changed on the convention card
 
@@ -8591,7 +8694,7 @@ function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
   openOv('set', `<h2>${T('Settings')}</h2>
-   <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
+   <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>${!isStandalone() && (INST || isIOS()) ? `<button class="btn guide" id="instGo">📲 ${T('Install Bridge Table as an app')}</button>` : ''}
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
    <div class="grp"><span>${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>
    <div class="grp"><span>${T('Card style')}</span>${seg("style", [["classic", T("Classic tiles")], ["modern", T("Modern fan")]], SET.style || "classic")}</div>
@@ -8984,6 +9087,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
+  if (t.id === 'instGo') { instGo(); return; }
+  if (t.id === 'instNo') { ui.instNo = 1; render(); return; }   // only for this visit: it is offered again next time
   if (t.id === 'hSup') { showSup(); return; }
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.id === 'supSend') { sendSup(); return; }
@@ -9526,6 +9631,26 @@ document.addEventListener('keydown', e => {
   if (KB.rank != null && 'cdhs'.includes(k) && k.length === 1) { const c = 'cdhs'.indexOf(k) * 13 + KB.rank; KB.rank = null; if (L.includes(c)) { e.preventDefault(); playCard(G.play.turn, c); } else flash(T('You cannot play that card'), 1200); return; }
   if (k === '0' && KB.rank === 8) return;   // "10" typed as 1 then 0
 });
+/* ---- install as an app: Chrome and Edge (Android, PC) offer their own install window; Safari on iPhone and iPad
+   only through Share → Add to Home Screen, so there the steps are shown. Not shown inside the installed app, nor
+   once installed; "Not now" hides it for this visit only. ---- */
+var INST = null;   // var and function declarations: the home page can be drawn before this part of the file has run
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); INST = e; if (typeof render === 'function') render(); });
+window.addEventListener('appinstalled', () => { INST = null; SET.instNo = 1; Store.saveSettings(SET); render(); });
+function isStandalone() { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } }
+function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); }
+function instHtml() {
+  if (SET.instNo || ui.instNo || isStandalone() || (!INST && !isIOS())) return '';
+  return `<div class="hcard hinst"><span class="hinsti">📲</span><div class="hinstt"><b>${T('Install Bridge Table as an app')}</b><small>${T('One tap from your home screen, full screen, works offline.')}</small></div>
+    <button class="btn new" id="instGo">${T('Install')}</button><button class="hinstx" id="instNo" title="${T('Not now')}">${T('Not now')}</button></div>`;
+}
+async function instGo() {
+  if (INST) { const p = INST; INST = null; p.prompt(); try { const r = await p.userChoice; if (r && r.outcome === 'accepted') { SET.instNo = 1; Store.saveSettings(SET); } } catch (e) {} render(); return; }
+  openOv('inst', `<h2>📲 ${T('Install Bridge Table as an app')}</h2>
+    <ol class="inststeps"><li>${T('Tap the Share button {0} at the bottom (on iPad at the top) of Safari.', '<b>⬆︎</b>')}</li><li>${T('Choose {0}.', `<b>${T('Add to Home Screen')}</b>`)}</li><li>${T('Tap {0}: Bridge Table appears on your home screen.', `<b>${T('Add')}</b>`)}</li></ol>
+    <div class="muted">${T('In another browser on iPhone, open this page in Safari first.')}</div>
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
 
 </script>
 <script>
