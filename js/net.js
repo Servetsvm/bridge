@@ -642,7 +642,9 @@ const Net = (() => {
         }
         st.claimed = true;
         await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof() });
-        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()) }); st.loggedDay = today(); }
+        if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()), ...(SET.act && SET.act.d === today() ? { a: actOut() } : {}) }); st.loggedDay = today(); st.prSent = ''; }
+        // the conventions being practised now: kept with the day's login, which only the administrator can read
+        { const pr = w === 'robots' && typeof pracList === 'function' ? pracList().join(',') : ''; if (pr !== (st.prSent || '')) { await Cloud.put('logins/' + today() + '/' + fbKey(name) + '/pr', pr || null); st.prSent = pr; } }
         const [on, users, logins] = await Promise.all([Cloud.get('online'), isAdmin() ? Cloud.get('users?shallow=true').catch(() => null) : null, isAdmin() ? Cloud.get('logins/' + today()).catch(() => null) : null]);   // the number of players and the logins: the administrator only
         st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: users ? Object.keys(users).length : null, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
@@ -687,6 +689,30 @@ const Net = (() => {
   }
   const convDone = path => Cloud.put('istek/' + path, null);
   // the administrator's visitor statistics: every day's logins (once per internet address in each period), by country
+  /* what was played today (for the administrator's statistics, to see how the site is used): boards with robots, at
+     online tables and in tournaments, practice boards, the conventions that came up and how often the player's calls
+     were right. Kept on this device for the day and sent with the day's login (logins/<day>/<player>/a). */
+  function noteBoard(x) {
+    const d = today();
+    if (!SET.act || SET.act.d !== d) SET.act = { d, b: 0, r: 0, o: 0, t: 0, p: 0, ok: 0, n: 0, cv: {} };
+    const a = SET.act; a.b++; a[x.mode] = (a[x.mode] || 0) + 1;
+    if (x.cv && x.cv.length) { a.p++; x.cv.forEach(k => { a.cv[k] = (a.cv[k] || 0) + 1; }); }
+    a.ok += x.ok || 0; a.n += x.n || 0;
+    Store.saveSettings(SET);
+    clearTimeout(st.actT); st.actT = setTimeout(actPush, 4000);
+  }
+  const actOut = () => { const a = SET.act; return { b: a.b, r: a.r, o: a.o, t: a.t, p: a.p, ok: a.ok, n: a.n, cv: { ...a.cv } }; };
+  async function actPush() {
+    const name = myName(); if (!Cloud.on || !name || !SET.pinH || !SET.act || SET.act.d !== today()) return;
+    try { if (await Cloud.session(name, SET.pinH)) await Cloud.put('logins/' + today() + '/' + fbKey(name) + '/a', actOut()); } catch (e) {}
+  }
+  // who is on the site now and what they are doing (the online list, fresh in the last three minutes)
+  async function onlineNow() {
+    if (!Cloud.on || !isAdmin()) return [];
+    const [on, lg] = await Promise.all([Cloud.get('online'), Cloud.get('logins/' + today()).catch(() => null)]), now = Date.now();
+    return Object.entries(on || {}).filter(([, x]) => x && x.name && now - x.ts < 180e3)
+      .map(([k, x]) => ({ name: x.name, at: x.at || 'lobby', pr: x.at === 'robots' && lg && lg[k] && lg[k].pr || '', sys: x.p && x.p.sys || '' }));
+  }
   async function loginStats() {
     if (!Cloud.on || !isAdmin()) return null;
     const all = await Cloud.get('logins') || {}, now = Date.now(), out = {};
@@ -698,7 +724,16 @@ const Net = (() => {
         if (!seen.has(k) || (!seen.get(k) && x.c)) seen.set(k, x.c || seen.get(k) || '');
       }
       const by = {}; for (const c of seen.values()) by[c || '?'] = (by[c || '?'] || 0) + 1;
-      out[p] = { total: seen.size, by };
+      // what was played in the period: totals, the conventions practised and each player's share
+      const act = { b: 0, r: 0, o: 0, t: 0, p: 0, ok: 0, n: 0, cv: {}, pl: {} };
+      for (const day in all) if (day >= from) for (const x of Object.values(all[day] || {})) {
+        const a = x && x.a; if (!a) continue;
+        const q = act.pl[x.name] || (act.pl[x.name] = { b: 0, p: 0, ok: 0, n: 0, cv: {} });
+        for (const f of ['b', 'r', 'o', 't', 'p', 'ok', 'n']) act[f] += a[f] || 0;
+        q.b += a.b || 0; q.p += a.p || 0; q.ok += a.ok || 0; q.n += a.n || 0;
+        for (const [k, v] of Object.entries(a.cv || {})) { act.cv[k] = (act.cv[k] || 0) + v; q.cv[k] = (q.cv[k] || 0) + v; }
+      }
+      out[p] = { total: seen.size, by, act };
     }
     return out;
   }
@@ -1317,6 +1352,7 @@ const Net = (() => {
       if (!e) {
         const r = G.result; e = { ...r, seat: st.seat, us: sideOf(st.seat) === 0 ? r.ns : -r.ns, imp: null, mp: null, online: true };
         HIST.push(e); SEEN.add(E.dealKey(G.deal)); saveSeen();
+        noteBoard({ mode: G.tour ? 't' : 'o' });   // a board at a friend's table counts in your day's activity
       }
       if (e.imp == null && G.field && G.field.done) applyField(e, G.field);
       Store.saveRec(e); save();
@@ -1553,5 +1589,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

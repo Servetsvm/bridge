@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 166;
+const APP_V = 167;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -498,9 +498,11 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
+  const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
   // a practice board where the convention really came up counts for it (shown on its tile)
   if (pracList().length && !online() && !G.tour) {
     const used = pracList().filter(k => G.auction.some(a => sideOf(a.seat) === sideOf(U()) && a.m && a.m.cv === k));
+    act.cv = used;
     if (used.length) { SET.pracN = SET.pracN || {}; used.forEach(k => { SET.pracN[k] = (SET.pracN[k] || 0) + 1; }); Store.saveSettings(SET); }
     // your calls where a practised convention came up (the system used it, or you did): right when you bid what
     // the system bids there; each counts towards that convention's score
@@ -516,9 +518,11 @@ function finishBoard() {
     if (rv.length) {
       e.prv = rv; SET.pracS = SET.pracS || {};
       rv.filter(r => !r.pd).forEach(r => { const s = SET.pracS[r.k] || (SET.pracS[r.k] = { n: 0, ok: 0 }); s.n++; if (r.ok) s.ok++; });
+      rv.filter(r => !r.pd).forEach(r => { act.n++; if (r.ok) act.ok++; });
       Store.saveSettings(SET);
     }
   }
+  if (typeof Net !== 'undefined' && Net.noteBoard && !guest()) Net.noteBoard(act);
   G.result = e; G.phase = 'done'; if (!e.passed) sfx(e.us >= 0 ? 'good' : 'bad');
   if (online() && !guest()) Net.boardDone(e);
   if (G.tprac) { const c = tourCompare(G.tprac.id, G.tprac.b, e); if (c) { e.tprac = c; flash('🏆 ' + T('Against the tournament ({0} players): {1} IMP · {2}%', c.n, fmtSigned(c.imp), c.mp), 4500); } }
@@ -2534,10 +2538,30 @@ async function showConvRequests() {
       <button class="btn mini-btn" data-cvdone="${esc(r.path)}">✓ ${T('Done — remove')}</button></div>`).join('') : `<div class="muted">${T('No requests yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+// the administrator's statistics: who is on the site now and what they are doing
+const cvNames = s => String(s || '').split(',').filter(k => k && E.convInfo(k)).map(k => esc(pracName(k))).join(', ');
+function statOnlineHtml(on) {
+  const at = x => x.at === 'robots' ? '🤖 ' + T('With robots') + (x.pr ? ' · 📚 ' + cvNames(x.pr) : '') : x.at === 'table' ? '🌐 ' + T('At a table') : '🏠 ' + T('In the lobby');
+  return `<h3 class="sth">🟢 ${T('Online now')} (${on.length})</h3>` + (on.length
+    ? `<table class="res stats">${on.sort((a, b) => a.name.localeCompare(b.name)).map(x => `<tr><td><b>${esc(x.name)}</b></td><td>${at(x)}</td><td class="muted">${esc(Net.sysShort({ sys: x.sys }))}</td></tr>`).join('')}</table>`
+    : `<div class="muted">${T('Nobody yet.')}</div>`);
+}
+// what was played in the chosen period: boards by kind, practice, the conventions practised most, and each player
+function statActHtml(a) {
+  if (!a || !a.b) return `<h3 class="sth">🎯 ${T('Activity')}</h3><div class="muted">${T('No boards recorded yet.')}</div>`;
+  const pct = (ok, n) => n ? Math.round(100 * ok / n) + '%' : '–';
+  const cv = Object.entries(a.cv).filter(([k]) => E.convInfo(k)).sort((x, y) => y[1] - x[1]);
+  const pl = Object.entries(a.pl).sort((x, y) => y[1].b - x[1].b);
+  return `<h3 class="sth">🎯 ${T('Activity')}</h3>
+    <div class="stact"><span>🃏 <b>${a.b}</b> ${T('Boards')}</span><span>🤖 ${a.r}</span><span>🌐 ${a.o}</span><span>🏆 ${a.t}</span><span>📚 <b>${a.p}</b> ${T('Practice')} · ${T('Right')} ${pct(a.ok, a.n)}</span></div>
+    ${cv.length ? `<div class="stcv"><small>${T('Most practised')}:</small> ${cv.slice(0, 12).map(([k, n]) => `<span>${esc(pracName(k))} <b>${n}</b></span>`).join('')}</div>` : ''}
+    <table class="res stats"><thead><tr><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">📚</th><th class="n">${T('Right')}</th><th>${T('Most practised')}</th></tr></thead><tbody>
+    ${pl.map(([nm, q]) => `<tr><td><b>${esc(nm)}</b></td><td class="n">${q.b}</td><td class="n">${q.p}</td><td class="n">${pct(q.ok, q.n)}</td><td class="muted">${Object.entries(q.cv).filter(([k]) => E.convInfo(k)).sort((x, y) => y[1] - x[1]).slice(0, 3).map(([k]) => esc(pracName(k))).join(', ')}</td></tr>`).join('')}</tbody></table>`;
+}
 async function showStats() {
   if (!Net.isAdmin()) return;
   ui.statTab = ui.statTab || 'day';
-  if (!ui.statData) { openOv('stats', `<h2>📊 ${T('Visitor statistics')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`); try { ui.statData = await Net.loginStats(); } catch (e) { ui.statData = null; } }
+  if (!ui.statData) { openOv('stats', `<h2>📊 ${T('Visitor statistics')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`); try { [ui.statData, ui.statOn] = await Promise.all([Net.loginStats(), Net.onlineNow().catch(() => [])]); } catch (e) { ui.statData = null; } }
   const d = ui.statData;
   if (!d) { openOv('stats', `<h2>📊 ${T('Visitor statistics')}</h2><div class="muted">${T('The online database could not be reached.')}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`); return; }
   const P = d[ui.statTab], L = Object.entries(P.by).sort((a, b) => b[1] - a[1]), max = Math.max(1, ...L.map(x => x[1]));
@@ -2547,6 +2571,8 @@ async function showStats() {
     <div class="seg" data-seg="stattab">${tabs.map(([v, l]) => `<button data-v="${v}" class="${ui.statTab === v ? 'on' : ''}">${l} <small>(${d[v].total})</small></button>`).join('')}</div>
     <div class="big">${T('{0} visitors', P.total)}</div>
     ${L.length ? `<table class="res stats">${rows}</table>` : `<div class="muted">${T('Nobody yet.')}</div>`}
+    ${statOnlineHtml(ui.statOn || [])}
+    ${statActHtml(P.act)}
     <div class="muted">${T('Each internet address counts once in each period. Only you (the administrator) see this page.')}</div>
     <div class="row2"><button class="btn" id="sRefresh">🔄 ${T('Refresh')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }

@@ -1383,3 +1383,8 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 /* home page: the play buttons on the left, the open tables on the right (one above the other on a phone) */
 .hpair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:12px;align-items:start}
 .hpair > .hcard{min-width:0}
+/* administrator statistics: online now and activity */
+.sth{margin:16px 0 6px;font-size:15px}
+.stact{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;margin-bottom:6px}
+.stcv{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 8px;font-size:13px}
+.stcv span{background:rgba(31,95,139,.1);border-radius:999px;padding:2px 9px}
