@@ -716,7 +716,7 @@ const Net = (() => {
       .map(([k, x]) => ({ name: x.name, at: x.at || 'lobby', pr: x.at === 'robots' && lg && lg[k] && lg[k].pr || '', sys: x.p && x.p.sys || '' }));
     // and those the lobby sees directly (as in the players list): a player without a PIN, or on an older version
     const me = nameKey(myName());
-    for (const n of knownNames()) if (nameKey(n) !== me && !L.some(x => nameKey(x.name) === nameKey(n))) {
+    for (const n of [...knownNames(), ...(st.tables || []).filter(listed).flatMap(t => [t.host, ...Object.values(t.names || {})])]) if (n && nameKey(n) !== me && !['robot', 'player'].includes(nameKey(n)) && !L.some(x => nameKey(x.name) === nameKey(n))) {
       const w = whereIs(n), p = profOf(n);
       L.push({ name: n, at: !w || w.lobby ? 'lobby' : w.online ? 'table' : 'robots', pr: '', sys: p && p.sys || '', direct: 1 });
     }
@@ -855,6 +855,8 @@ const Net = (() => {
     const me = nameKey(myName()), here = new Map(knownNames().map(n => [nameKey(n), n]));
     const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
     if (cloudOn) for (const x of cloudOn) if (nameKey(x.name) !== me && !here.has(nameKey(x.name))) here.set(nameKey(x.name), x.name);
+    // a player whose table is listed under the open tables is here too (playing), even if nothing else has heard from them lately
+    for (const t of (st.tables || []).filter(listed)) for (const n of [t.host, ...Object.values(t.names || {})]) if (n && nameKey(n) !== me && !['robot', 'player'].includes(nameKey(n)) && !here.has(nameKey(n))) here.set(nameKey(n), n);
     const status = n => {
       const w = whereIs(n), c = cloudOn && cloudOn.find(x => nameKey(x.name) === nameKey(n));
       if (w && !w.lobby) return { s: 'play', at: w.online ? T("At {0}'s table", w.host) : T('playing with robots') };
