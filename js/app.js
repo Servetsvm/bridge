@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 175;
+const APP_V = 176;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1117,7 +1117,7 @@ function pracHtml() {
     <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Show me when a practised convention can be used")}</label>
     ${pracWarnHtml()}
     ${pracProgHtml()}
-    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ ${T('Write to the administrator')}</button>`}</div>`;
+    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ ${T('Write to the administrator')}</button>`}</div>`;
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
 function togglePractice(k, add) {
@@ -2133,8 +2133,9 @@ function showHist() {
 
 /* ================= events ================= */
 // what you type as an alert is kept while the bidding box is redrawn
-document.addEventListener('input', e => { if (e.target && e.target.id === 'alTxt') ui.alertTxt = e.target.value; });
+document.addEventListener('input', e => { if (e.target && e.target.id === 'alTxt') ui.alertTxt = e.target.value; if (e.target && e.target.id === 'plQ') { ui.plQ = e.target.value; ui.plFocus = 1; showPlayers(); } });
 document.addEventListener('change', e => {
+  if (e.target.dataset && e.target.dataset.plk) { const s = ui.plSel || (ui.plSel = new Set()), k = e.target.dataset.plk; if (e.target.checked) s.add(k); else s.delete(k); ui.plFocus = 0; showPlayers(); return; }
   const t = e.target;
   if (t.dataset.conv) {
     const k = t.dataset.conv, c = E.CONVS.find(y => y.k === k);
@@ -2227,6 +2228,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
+  if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
+  if (t.id === 'plDel') { playersDelete(); return; }
   if (t.id === 'hSup') { showSup(); return; }
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.id === 'supSend') { sendSup(); return; }
@@ -2662,6 +2665,33 @@ async function showConvRequests() {
       <div class="cvb">${symText(esc(r.acik))}</div>${r.ornek ? `<div class="cvx">${symText(esc(r.ornek))}</div>` : ''}
       <button class="btn mini-btn" data-cvdone="${esc(r.path)}">✓ ${T('Done — remove')}</button></div>`).join('') : `<div class="muted">${T('No requests yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+/* the administrator's list of players: every registered name, when it was made and last signed in; tick the ones
+   to remove (test names, for instance) and remove them with all their data */
+async function showPlayers() {
+  if (!Net.isAdmin()) return;
+  if (!ui.plList) { openOv('players', `<h2>👥 ${T('Players')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`); try { ui.plList = await Net.adminUsers(); } catch (e) { ui.plList = null; } }
+  if (ui.overlay !== 'players' && ui.overlay) return;
+  const L = ui.plList || [], q = (ui.plQ || '').toLowerCase(), sel = ui.plSel || (ui.plSel = new Set());
+  const day = ts => ts ? new Date(ts).toLocaleDateString() : '–';
+  const rows = L.filter(x => !q || x.name.toLowerCase().includes(q)).map(x => `<label class="plrow${sel.has(x.k) ? ' on' : ''}">
+      <input type="checkbox" data-plk="${esc(x.k)}" ${sel.has(x.k) ? 'checked' : ''} ${x.me ? 'disabled' : ''}>
+      <b>${esc(x.name)}</b><small>${T('Made')}: ${day(x.ts)} · ${T('Last seen')}: ${x.last ? new Date(x.last).toLocaleDateString() : '–'} · ${T('{0} days', x.days)}</small></label>`).join('');
+  openOv('players', `<h2>👥 ${T('All players')} <small>(${L.length})</small></h2>
+    <input id="plQ" class="tok wide" placeholder="🔍 ${T('Search a name…')}" value="${esc(ui.plQ || '')}">
+    <div class="pllist">${rows || `<div class="muted">${T('Nobody yet.')}</div>`}</div>
+    <div class="muted">${T('Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.')}</div>
+    <div class="row2"><button class="btn bad" id="plDel" ${sel.size ? '' : 'disabled'}>🗑 ${T('Remove the ticked ({0})', sel.size)}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  const i = $('plQ'); if (i && ui.plFocus) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+}
+function playersDelete() {
+  const sel = ui.plSel; if (!sel || !sel.size) return;
+  const names = (ui.plList || []).filter(x => sel.has(x.k)).map(x => x.name);
+  askYes(T('Remove {0} for good? Their results, settings, logins and messages are deleted.', names.join(', ')), async () => {
+    openOv('players', `<h2>👥 ${T('Players')}</h2><div class="muted">⏳ ${T('Removing…')}</div>`);
+    let ok = 0; for (const k of [...sel]) { try { if (await Net.adminDelete(k)) ok++; } catch (e) {} }
+    ui.plSel = new Set(); ui.plList = null; flash('🗑 ' + T('{0} removed', ok), 2500); showPlayers();
+  });
 }
 // the administrator's statistics: who is on the site now and what they are doing
 const cvNames = s => String(s || '').split(',').filter(k => k && E.convInfo(k)).map(k => esc(pracName(k))).join(', ');

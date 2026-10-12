@@ -5,7 +5,7 @@
     "users": {
       ".read": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
       "$name": {
-        ".write": "auth != null && (!data.exists() || root.child('sess').child(auth.uid).child('k').val() === $name)",
+        ".write": "auth != null && (!data.exists() || root.child('sess').child(auth.uid).child('k').val() === $name || root.child('sess').child(auth.uid).child('k').val() === 'servet')",
         "name": { ".read": true },
         "ts": { ".read": true }
       }
@@ -18,16 +18,16 @@
     },
     "online": {
       ".read": true,
-      "$name": { ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $name" }
+      "$name": { ".write": "auth != null && (root.child('sess').child(auth.uid).child('k').val() === $name || root.child('sess').child(auth.uid).child('k').val() === 'servet')" }
     },
     "logins": {
       ".read": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
-      "$day": { "$name": { ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $name" } }
+      "$day": { "$name": { ".write": "auth != null && (root.child('sess').child(auth.uid).child('k').val() === $name || root.child('sess').child(auth.uid).child('k').val() === 'servet')" } }
     },
     "data": {
       "$k": {
         ".read": "auth != null && root.child('sess').child(auth.uid).child('pin').val() === $k && root.child('users').child(root.child('sess').child(auth.uid).child('k').val()).child('pin').val() === $k",
-        ".write": "auth != null && root.child('sess').child(auth.uid).child('pin').val() === $k && root.child('users').child(root.child('sess').child(auth.uid).child('k').val()).child('pin').val() === $k"
+        ".write": "auth != null && root.child('sess').child(auth.uid).child('pin').val() === $k && root.child('users').child(root.child('sess').child(auth.uid).child('k').val()).child('pin').val() === $k || auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'"
       }
     },
     "istek": {
@@ -77,7 +77,7 @@
                     "users": {
           ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
           "$name": {
-            ".write": "auth != null && (!data.exists() || root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name)",
+            ".write": "auth != null && (!data.exists() || root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name || root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet')",
             "name": { ".read": true },
             "ts": { ".read": true }
           }
@@ -90,16 +90,16 @@
         },
         "online": {
           ".read": true,
-          "$name": { ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name" }
+          "$name": { ".write": "auth != null && (root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name || root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet')" }
         },
         "logins": {
           ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
-          "$day": { "$name": { ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name" } }
+          "$day": { "$name": { ".write": "auth != null && (root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name || root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet')" } }
         },
         "data": {
           "$k": {
             ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('pin').val() === $k && root.child('test').child($ns).child('users').child(root.child('test').child($ns).child('sess').child(auth.uid).child('k').val()).child('pin').val() === $k",
-            ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('pin').val() === $k && root.child('test').child($ns).child('users').child(root.child('test').child($ns).child('sess').child(auth.uid).child('k').val()).child('pin').val() === $k"
+            ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('pin').val() === $k && root.child('test').child($ns).child('users').child(root.child('test').child($ns).child('sess').child(auth.uid).child('k').val()).child('pin').val() === $k || auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'"
           }
         }
       }

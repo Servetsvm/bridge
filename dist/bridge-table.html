@@ -1458,6 +1458,15 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .welmain b{font-size:22px;margin-bottom:4px}
 .welmain small{font-size:15.5px;line-height:1.5;opacity:1}
 .welh{font-size:22px;text-align:center}
+/* the administrator's list of players */
+.pllist{max-height:min(55vh,460px);overflow-y:auto;margin:8px 0;display:flex;flex-direction:column;gap:4px}
+.plrow{display:grid;grid-template-columns:auto 1fr;gap:0 10px;align-items:center;padding:7px 10px;border-radius:8px;background:rgba(0,0,0,.03);cursor:pointer}
+.plrow.on{background:rgba(208,69,59,.1);outline:1px solid rgba(208,69,59,.4)}
+.plrow input{grid-row:1/3;width:18px;height:18px;margin:0}
+.plrow small{font-size:12px;opacity:.7}
+.btn.bad{background:#d0453b;color:#fff;border-color:#a8342c}
+.btn.bad:disabled{opacity:.45}
+body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342c}
 
 </style>
 
@@ -4001,6 +4010,17 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "All players": "Tüm oyuncular",
+    "Players": "Oyuncular",
+    "Made": "Açıldı",
+    "Last seen": "Son giriş",
+    "{0} days": "{0} gün",
+    "Search a name…": "İsim ara…",
+    "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Bir ismi silmek onu sonuçları, ayarları, giriş kayıtları ve mesajlarıyla birlikte kalıcı olarak siler; isim yeniden boşa çıkar.",
+    "Remove the ticked ({0})": "İşaretlileri sil ({0})",
+    "Remove {0} for good? Their results, settings, logins and messages are deleted.": "{0} kalıcı olarak silinsin mi? Sonuçları, ayarları, giriş kayıtları ve mesajları silinir.",
+    "Removing…": "Siliniyor…",
+    "{0} removed": "{0} silindi",
     "Welcome to Bridge Table": "Briç Masası'na hoş geldin",
     "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Öğrenmek istediğin konvansiyonları seç: robotlar o konvansiyonların çıktığı elleri dağıtır, her elin sonunda hangi tekliflerinin doğru olduğunu görürsün.",
     "Any time, at your own pace.": "İstediğin zaman, kendi hızında.",
@@ -4244,6 +4264,17 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "All players": "Alle spillere",
+    "Players": "Spillere",
+    "Made": "Opprettet",
+    "Last seen": "Sist sett",
+    "{0} days": "{0} dager",
+    "Search a name…": "Søk etter navn…",
+    "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Å fjerne et navn sletter det for godt med resultater, innstillinger, innlogginger og meldinger; navnet blir ledig igjen.",
+    "Remove the ticked ({0})": "Fjern de avkryssede ({0})",
+    "Remove {0} for good? Their results, settings, logins and messages are deleted.": "Fjerne {0} for godt? Resultater, innstillinger, innlogginger og meldinger slettes.",
+    "Removing…": "Fjerner…",
+    "{0} removed": "{0} fjernet",
     "Welcome to Bridge Table": "Velkommen til Bridgebord",
     "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Velg konvensjonene du vil lære: robotene deler hender der de dukker opp, og etter hvert spill ser du hvilke meldinger som var riktige.",
     "Any time, at your own pace.": "Når som helst, i ditt eget tempo.",
@@ -4487,6 +4518,17 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "All players": "Todos los jugadores",
+    "Players": "Jugadores",
+    "Made": "Creado",
+    "Last seen": "Última vez",
+    "{0} days": "{0} días",
+    "Search a name…": "Buscar un nombre…",
+    "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Eliminar un nombre lo borra para siempre con sus resultados, ajustes, accesos y mensajes; el nombre queda libre.",
+    "Remove the ticked ({0})": "Eliminar los marcados ({0})",
+    "Remove {0} for good? Their results, settings, logins and messages are deleted.": "¿Eliminar {0} para siempre? Se borran sus resultados, ajustes, accesos y mensajes.",
+    "Removing…": "Eliminando…",
+    "{0} removed": "{0} eliminados",
     "Welcome to Bridge Table": "Bienvenido a Bridge Table",
     "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Elige las convenciones que quieres aprender: los robots reparten manos donde aparecen y, tras cada mano, ves qué voces fueron correctas.",
     "Any time, at your own pace.": "Cuando quieras, a tu ritmo.",
@@ -4758,6 +4800,17 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "All players": "Tous les joueurs",
+    "Players": "Joueurs",
+    "Made": "Créé",
+    "Last seen": "Dernière visite",
+    "{0} days": "{0} jours",
+    "Search a name…": "Chercher un nom…",
+    "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Supprimer un nom l’efface définitivement avec ses résultats, réglages, connexions et messages ; le nom redevient libre.",
+    "Remove the ticked ({0})": "Supprimer la sélection ({0})",
+    "Remove {0} for good? Their results, settings, logins and messages are deleted.": "Supprimer {0} définitivement ? Résultats, réglages, connexions et messages seront effacés.",
+    "Removing…": "Suppression…",
+    "{0} removed": "{0} supprimés",
     "Welcome to Bridge Table": "Bienvenue sur Bridge Table",
     "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Choisissez les conventions à apprendre : les robots distribuent des mains où elles apparaissent, et après chaque donne vous voyez quelles enchères étaient justes.",
     "Any time, at your own pace.": "Quand vous voulez, à votre rythme.",
@@ -5029,6 +5082,17 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "All players": "Tutti i giocatori",
+    "Players": "Giocatori",
+    "Made": "Creato",
+    "Last seen": "Ultimo accesso",
+    "{0} days": "{0} giorni",
+    "Search a name…": "Cerca un nome…",
+    "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Eliminare un nome lo cancella per sempre con risultati, impostazioni, accessi e messaggi; il nome torna libero.",
+    "Remove the ticked ({0})": "Elimina i selezionati ({0})",
+    "Remove {0} for good? Their results, settings, logins and messages are deleted.": "Eliminare {0} per sempre? Risultati, impostazioni, accessi e messaggi verranno cancellati.",
+    "Removing…": "Eliminazione…",
+    "{0} removed": "{0} eliminati",
     "Welcome to Bridge Table": "Benvenuto su Bridge Table",
     "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Scegli le convenzioni da imparare: i robot distribuiscono mani in cui compaiono e dopo ogni smazzata vedi quali dichiarazioni erano giuste.",
     "Any time, at your own pace.": "Quando vuoi, con i tuoi tempi.",
@@ -5300,6 +5364,17 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "All players": "Alle Spieler",
+    "Players": "Spieler",
+    "Made": "Angelegt",
+    "Last seen": "Zuletzt gesehen",
+    "{0} days": "{0} Tage",
+    "Search a name…": "Namen suchen…",
+    "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Ein Name wird mit Ergebnissen, Einstellungen, Logins und Nachrichten endgültig gelöscht; der Name ist dann wieder frei.",
+    "Remove the ticked ({0})": "Markierte löschen ({0})",
+    "Remove {0} for good? Their results, settings, logins and messages are deleted.": "{0} endgültig löschen? Ergebnisse, Einstellungen, Logins und Nachrichten werden gelöscht.",
+    "Removing…": "Wird gelöscht…",
+    "{0} removed": "{0} gelöscht",
     "Welcome to Bridge Table": "Willkommen bei Bridge Table",
     "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Wähle die Konventionen, die du lernen willst: Die Roboter teilen Hände, in denen sie vorkommen, und nach jedem Board siehst du, welche Gebote richtig waren.",
     "Any time, at your own pace.": "Jederzeit, in deinem Tempo.",
@@ -5571,6 +5646,17 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "All players": "Все игроки",
+    "Players": "Игроки",
+    "Made": "Создан",
+    "Last seen": "Последний вход",
+    "{0} days": "дней: {0}",
+    "Search a name…": "Поиск имени…",
+    "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Удаление имени навсегда стирает его результаты, настройки, входы и сообщения; имя снова становится свободным.",
+    "Remove the ticked ({0})": "Удалить отмеченные ({0})",
+    "Remove {0} for good? Their results, settings, logins and messages are deleted.": "Удалить {0} навсегда? Результаты, настройки, входы и сообщения будут стёрты.",
+    "Removing…": "Удаление…",
+    "{0} removed": "Удалено: {0}",
     "Welcome to Bridge Table": "Добро пожаловать в Bridge Table",
     "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Выберите конвенции, которые хотите изучить: роботы сдают руки, где они встречаются, а после каждой сдачи вы видите, какие заявки были верными.",
     "Any time, at your own pace.": "Когда угодно, в своём темпе.",
@@ -5842,6 +5928,17 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "All players": "Wszyscy gracze",
+    "Players": "Gracze",
+    "Made": "Utworzono",
+    "Last seen": "Ostatnio",
+    "{0} days": "{0} dni",
+    "Search a name…": "Szukaj nazwy…",
+    "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Usunięcie nazwy kasuje ją na zawsze wraz z wynikami, ustawieniami, logowaniami i wiadomościami; nazwa znów jest wolna.",
+    "Remove the ticked ({0})": "Usuń zaznaczone ({0})",
+    "Remove {0} for good? Their results, settings, logins and messages are deleted.": "Usunąć {0} na zawsze? Wyniki, ustawienia, logowania i wiadomości zostaną skasowane.",
+    "Removing…": "Usuwanie…",
+    "{0} removed": "Usunięto: {0}",
     "Welcome to Bridge Table": "Witaj w Bridge Table",
     "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Wybierz konwencje, których chcesz się nauczyć: roboty rozdają ręce, w których się pojawiają, a po każdym rozdaniu widzisz, które odzywki były dobre.",
     "Any time, at your own pace.": "Kiedy chcesz, we własnym tempie.",
@@ -6113,6 +6210,17 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "All players": "所有玩家",
+    "Players": "玩家",
+    "Made": "创建",
+    "Last seen": "最近登录",
+    "{0} days": "{0} 天",
+    "Search a name…": "搜索名字…",
+    "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "删除一个名字会永久删除其成绩、设置、登录记录和消息；该名字可再次被使用。",
+    "Remove the ticked ({0})": "删除勾选的 ({0})",
+    "Remove {0} for good? Their results, settings, logins and messages are deleted.": "永久删除 {0}？其成绩、设置、登录记录和消息都会被删除。",
+    "Removing…": "正在删除…",
+    "{0} removed": "已删除 {0} 个",
     "Welcome to Bridge Table": "欢迎来到 Bridge Table",
     "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "选择你想学的约定叫：机器人会发出用到它们的牌，每副牌结束后你会看到哪些叫品是正确的。",
     "Any time, at your own pace.": "随时，按你自己的节奏。",
@@ -6980,7 +7088,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 175;
+const APP_V = 176;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -8089,7 +8197,7 @@ function pracHtml() {
     <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Show me when a practised convention can be used")}</label>
     ${pracWarnHtml()}
     ${pracProgHtml()}
-    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ ${T('Write to the administrator')}</button>`}</div>`;
+    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ ${T('Write to the administrator')}</button>`}</div>`;
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
 function togglePractice(k, add) {
@@ -9105,8 +9213,9 @@ function showHist() {
 
 /* ================= events ================= */
 // what you type as an alert is kept while the bidding box is redrawn
-document.addEventListener('input', e => { if (e.target && e.target.id === 'alTxt') ui.alertTxt = e.target.value; });
+document.addEventListener('input', e => { if (e.target && e.target.id === 'alTxt') ui.alertTxt = e.target.value; if (e.target && e.target.id === 'plQ') { ui.plQ = e.target.value; ui.plFocus = 1; showPlayers(); } });
 document.addEventListener('change', e => {
+  if (e.target.dataset && e.target.dataset.plk) { const s = ui.plSel || (ui.plSel = new Set()), k = e.target.dataset.plk; if (e.target.checked) s.add(k); else s.delete(k); ui.plFocus = 0; showPlayers(); return; }
   const t = e.target;
   if (t.dataset.conv) {
     const k = t.dataset.conv, c = E.CONVS.find(y => y.k === k);
@@ -9199,6 +9308,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
+  if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
+  if (t.id === 'plDel') { playersDelete(); return; }
   if (t.id === 'hSup') { showSup(); return; }
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.id === 'supSend') { sendSup(); return; }
@@ -9634,6 +9745,33 @@ async function showConvRequests() {
       <div class="cvb">${symText(esc(r.acik))}</div>${r.ornek ? `<div class="cvx">${symText(esc(r.ornek))}</div>` : ''}
       <button class="btn mini-btn" data-cvdone="${esc(r.path)}">✓ ${T('Done — remove')}</button></div>`).join('') : `<div class="muted">${T('No requests yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+/* the administrator's list of players: every registered name, when it was made and last signed in; tick the ones
+   to remove (test names, for instance) and remove them with all their data */
+async function showPlayers() {
+  if (!Net.isAdmin()) return;
+  if (!ui.plList) { openOv('players', `<h2>👥 ${T('Players')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`); try { ui.plList = await Net.adminUsers(); } catch (e) { ui.plList = null; } }
+  if (ui.overlay !== 'players' && ui.overlay) return;
+  const L = ui.plList || [], q = (ui.plQ || '').toLowerCase(), sel = ui.plSel || (ui.plSel = new Set());
+  const day = ts => ts ? new Date(ts).toLocaleDateString() : '–';
+  const rows = L.filter(x => !q || x.name.toLowerCase().includes(q)).map(x => `<label class="plrow${sel.has(x.k) ? ' on' : ''}">
+      <input type="checkbox" data-plk="${esc(x.k)}" ${sel.has(x.k) ? 'checked' : ''} ${x.me ? 'disabled' : ''}>
+      <b>${esc(x.name)}</b><small>${T('Made')}: ${day(x.ts)} · ${T('Last seen')}: ${x.last ? new Date(x.last).toLocaleDateString() : '–'} · ${T('{0} days', x.days)}</small></label>`).join('');
+  openOv('players', `<h2>👥 ${T('All players')} <small>(${L.length})</small></h2>
+    <input id="plQ" class="tok wide" placeholder="🔍 ${T('Search a name…')}" value="${esc(ui.plQ || '')}">
+    <div class="pllist">${rows || `<div class="muted">${T('Nobody yet.')}</div>`}</div>
+    <div class="muted">${T('Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.')}</div>
+    <div class="row2"><button class="btn bad" id="plDel" ${sel.size ? '' : 'disabled'}>🗑 ${T('Remove the ticked ({0})', sel.size)}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  const i = $('plQ'); if (i && ui.plFocus) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+}
+function playersDelete() {
+  const sel = ui.plSel; if (!sel || !sel.size) return;
+  const names = (ui.plList || []).filter(x => sel.has(x.k)).map(x => x.name);
+  askYes(T('Remove {0} for good? Their results, settings, logins and messages are deleted.', names.join(', ')), async () => {
+    openOv('players', `<h2>👥 ${T('Players')}</h2><div class="muted">⏳ ${T('Removing…')}</div>`);
+    let ok = 0; for (const k of [...sel]) { try { if (await Net.adminDelete(k)) ok++; } catch (e) {} }
+    ui.plSel = new Set(); ui.plList = null; flash('🗑 ' + T('{0} removed', ok), 2500); showPlayers();
+  });
 }
 // the administrator's statistics: who is on the site now and what they are doing
 const cvNames = s => String(s || '').split(',').filter(k => k && E.convInfo(k)).map(k => esc(pracName(k))).join(', ');
@@ -10576,6 +10714,28 @@ const Net = (() => {
       if (n !== (st.supNew || 0)) { st.supNew = n; if (typeof render === 'function') render(); }
     } catch (e) {}
   }
+  /* the administrator's list of every registered name (when it was made, when it last signed in, on how many days),
+     and removing a name with everything kept for it: the name and PIN, the saved results and settings, the online
+     line, the logins, the messages and the convention requests. The name is then free again. */
+  const seg = k => encodeURIComponent(k);   // a key as stored, made safe for the address
+  async function adminUsers() {
+    if (!Cloud.on || !isAdmin()) return [];
+    const [users, logins] = await Promise.all([Cloud.get('users'), Cloud.get('logins').catch(() => null)]);
+    const last = {}, days = {};
+    for (const [day, L] of Object.entries(logins || {})) for (const k of Object.keys(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; }
+    return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, me: k === ruleKey(myName()) }))
+      .sort((a, b) => (b.last || '').localeCompare(a.last || '') || b.ts - a.ts);
+  }
+  async function adminDelete(k) {
+    if (!isAdmin() || k === ruleKey(myName())) return false;
+    const u = await Cloud.get('users/' + seg(k)).catch(() => null), logins = await Cloud.get('logins?shallow=true').catch(() => null) || {};
+    const jobs = ['online/', 'destek/', 'istek/'].map(p => Cloud.put(p + seg(k), null).catch(() => {}));
+    if (u && u.pin) jobs.push(Cloud.put('data/' + seg(u.pin), null).catch(() => {}));
+    for (const day of Object.keys(logins)) jobs.push(Cloud.put('logins/' + day + '/' + seg(k), null).catch(() => {}));
+    await Promise.all(jobs);
+    await Cloud.put('users/' + seg(k), null);   // the name last: if anything above failed, it can be tried again
+    return true;
+  }
   async function loginStats() {
     if (!Cloud.on || !isAdmin()) return null;
     const all = await Cloud.get('logins') || {}, now = Date.now(), out = {};
@@ -11452,7 +11612,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

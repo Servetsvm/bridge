@@ -782,6 +782,28 @@ const Net = (() => {
       if (n !== (st.supNew || 0)) { st.supNew = n; if (typeof render === 'function') render(); }
     } catch (e) {}
   }
+  /* the administrator's list of every registered name (when it was made, when it last signed in, on how many days),
+     and removing a name with everything kept for it: the name and PIN, the saved results and settings, the online
+     line, the logins, the messages and the convention requests. The name is then free again. */
+  const seg = k => encodeURIComponent(k);   // a key as stored, made safe for the address
+  async function adminUsers() {
+    if (!Cloud.on || !isAdmin()) return [];
+    const [users, logins] = await Promise.all([Cloud.get('users'), Cloud.get('logins').catch(() => null)]);
+    const last = {}, days = {};
+    for (const [day, L] of Object.entries(logins || {})) for (const k of Object.keys(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; }
+    return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, me: k === ruleKey(myName()) }))
+      .sort((a, b) => (b.last || '').localeCompare(a.last || '') || b.ts - a.ts);
+  }
+  async function adminDelete(k) {
+    if (!isAdmin() || k === ruleKey(myName())) return false;
+    const u = await Cloud.get('users/' + seg(k)).catch(() => null), logins = await Cloud.get('logins?shallow=true').catch(() => null) || {};
+    const jobs = ['online/', 'destek/', 'istek/'].map(p => Cloud.put(p + seg(k), null).catch(() => {}));
+    if (u && u.pin) jobs.push(Cloud.put('data/' + seg(u.pin), null).catch(() => {}));
+    for (const day of Object.keys(logins)) jobs.push(Cloud.put('logins/' + day + '/' + seg(k), null).catch(() => {}));
+    await Promise.all(jobs);
+    await Cloud.put('users/' + seg(k), null);   // the name last: if anything above failed, it can be tried again
+    return true;
+  }
   async function loginStats() {
     if (!Cloud.on || !isAdmin()) return null;
     const all = await Cloud.get('logins') || {}, now = Date.now(), out = {};
@@ -1658,5 +1680,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
