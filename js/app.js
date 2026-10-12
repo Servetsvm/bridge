@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 172;
+const APP_V = 173;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2363,8 +2363,6 @@ function welcome() {
   ui.welDone = 1; SET.welN = (SET.welN || 0) + 1; Store.saveSettings(SET);
   openOv('welcome', `<h2 class="welh">♠<i>♥</i><i>♦</i>♣ ${T('Welcome to Bridge Table')}</h2>
     <div class="welmain"><span>📚</span><div><b>${T('Practise conventions')}</b><small>${T('Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.')}</small></div></div>
-    <div class="welrow"><span>🤖</span><div><b>${T('Play with robots')}</b><small>${T('Any time, at your own pace.')}</small></div></div>
-    <div class="welrow"><span>🌐</span><div><b>${T('Online tables and tournaments')}</b><small>${T('Play with friends and other players.')}</small></div></div>
     <label class="welno"><input type="checkbox" id="welNo"> ${T('Do not show this again')}</label>
     <div class="row2"><button class="btn new" id="welGo">📚 ${T('Choose conventions')}</button><button class="btn" id="welClose">${T('Close')}</button></div>`);
 }

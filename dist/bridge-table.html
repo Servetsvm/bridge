@@ -1452,6 +1452,12 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .welno{display:flex;align-items:center;gap:8px;margin:12px 2px 4px;font-size:13.5px;cursor:pointer}
 .welno input{width:17px;height:17px;margin:0}
 :root[data-theme="dark"] .welmain{background:linear-gradient(135deg,#3b3216,#2e2710);color:#ffe9a8;border-color:#b8891c}
+/* the welcome: only the practising card, larger */
+.welmain{padding:16px 16px;gap:14px;box-shadow:0 6px 18px rgba(184,137,28,.25)}
+.welmain span{font-size:40px}
+.welmain b{font-size:22px;margin-bottom:4px}
+.welmain small{font-size:15.5px;line-height:1.5;opacity:1}
+.welh{font-size:22px;text-align:center}
 
 </style>
 
@@ -6974,7 +6980,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 172;
+const APP_V = 173;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9329,8 +9335,6 @@ function welcome() {
   ui.welDone = 1; SET.welN = (SET.welN || 0) + 1; Store.saveSettings(SET);
   openOv('welcome', `<h2 class="welh">♠<i>♥</i><i>♦</i>♣ ${T('Welcome to Bridge Table')}</h2>
     <div class="welmain"><span>📚</span><div><b>${T('Practise conventions')}</b><small>${T('Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.')}</small></div></div>
-    <div class="welrow"><span>🤖</span><div><b>${T('Play with robots')}</b><small>${T('Any time, at your own pace.')}</small></div></div>
-    <div class="welrow"><span>🌐</span><div><b>${T('Online tables and tournaments')}</b><small>${T('Play with friends and other players.')}</small></div></div>
     <label class="welno"><input type="checkbox" id="welNo"> ${T('Do not show this again')}</label>
     <div class="row2"><button class="btn new" id="welGo">📚 ${T('Choose conventions')}</button><button class="btn" id="welClose">${T('Close')}</button></div>`);
 }
