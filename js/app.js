@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 171;
+const APP_V = 172;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2200,6 +2200,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
   if (t.id === 'instGo') { instGo(); return; }
+  if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
   if (t.id === 'hSup') { showSup(); return; }
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.id === 'supSend') { sendSup(); return; }
@@ -2355,8 +2356,25 @@ function shareDeal(deal, board) {
   (navigator.clipboard ? navigator.clipboard.writeText(text + ' ' + url) : Promise.reject()).then(() => flash(T('Link copied'), 1500)).catch(() => prompt(T('Copy link'), url));
 }
 // the app was opened from a shared deal: offer to play it (the link is taken out of the address)
+/* the welcome: what the site is for, in a few lines. Shown on a player's first three visits (once per visit, after
+   the name and PIN) unless they tick "do not show again"; not over a shared deal, an invitation or a board in play. */
+function welcome() {
+  if (SET.welNo || (SET.welN || 0) >= 3 || ui.welDone || ui.overlay || (G && G.phase !== 'idle')) return;
+  ui.welDone = 1; SET.welN = (SET.welN || 0) + 1; Store.saveSettings(SET);
+  openOv('welcome', `<h2 class="welh">♠<i>♥</i><i>♦</i>♣ ${T('Welcome to Bridge Table')}</h2>
+    <div class="welmain"><span>📚</span><div><b>${T('Practise conventions')}</b><small>${T('Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.')}</small></div></div>
+    <div class="welrow"><span>🤖</span><div><b>${T('Play with robots')}</b><small>${T('Any time, at your own pace.')}</small></div></div>
+    <div class="welrow"><span>🌐</span><div><b>${T('Online tables and tournaments')}</b><small>${T('Play with friends and other players.')}</small></div></div>
+    <label class="welno"><input type="checkbox" id="welNo"> ${T('Do not show this again')}</label>
+    <div class="row2"><button class="btn new" id="welGo">📚 ${T('Choose conventions')}</button><button class="btn" id="welClose">${T('Close')}</button></div>`);
+}
+function welcomeClose(go) {
+  if ($('welNo') && $('welNo').checked) { SET.welNo = 1; Store.saveSettings(SET); }
+  closeOv();
+  if (go) { ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+}
 function checkSharedDeal() {
-  const m = location.hash.match(/[#&]d=([\w-]{18})(?:&b=(\d+))?/); if (!m) return;
+  const m = location.hash.match(/[#&]d=([\w-]{18})(?:&b=(\d+))?/); if (!m) { welcome(); return; }
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   const hands = dealFromCode(m[1]); if (!hands) return;
   ui.sharedDeal = { hands, b: Math.min(16, Math.max(1, +m[2] || 1)) };

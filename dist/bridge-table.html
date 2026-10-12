@@ -1439,6 +1439,19 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 /* install as an app: a small button in the top bar */
 .hinstb{border:0;border-radius:999px;padding:6px 12px;font:inherit;font-size:13.5px;font-weight:800;color:#fff;background:linear-gradient(170deg,#3a7bd5,#1f5f8b);cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:prpulse 2.4s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.hinstb{animation:none}}
+/* the welcome window: practising first and large, the other ways to play under it */
+.welh{font-size:20px}
+.welh i{font-style:normal;color:#c0262d}
+.welmain,.welrow{display:flex;gap:12px;align-items:flex-start;border-radius:12px;padding:10px 12px;margin:8px 0}
+.welmain{background:linear-gradient(135deg,#fff7d6,#ffe9a8);border:2px solid #f2c94c;color:#3b2600}
+.welrow{background:rgba(31,95,139,.07);color:inherit}
+.welmain span,.welrow span{font-size:26px;line-height:1}
+.welmain b{font-size:17px}
+.welmain b,.welrow b{display:block}
+.welmain small,.welrow small{display:block;font-size:13.5px;line-height:1.4;opacity:.85;margin-top:2px}
+.welno{display:flex;align-items:center;gap:8px;margin:12px 2px 4px;font-size:13.5px;cursor:pointer}
+.welno input{width:17px;height:17px;margin:0}
+:root[data-theme="dark"] .welmain{background:linear-gradient(135deg,#3b3216,#2e2710);color:#ffe9a8;border-color:#b8891c}
 
 </style>
 
@@ -3982,6 +3995,13 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Welcome to Bridge Table": "Briç Masası'na hoş geldin",
+    "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Öğrenmek istediğin konvansiyonları seç: robotlar o konvansiyonların çıktığı elleri dağıtır, her elin sonunda hangi tekliflerinin doğru olduğunu görürsün.",
+    "Any time, at your own pace.": "İstediğin zaman, kendi hızında.",
+    "Online tables and tournaments": "Online masalar ve turnuvalar",
+    "Play with friends and other players.": "Arkadaşlarınla ve diğer oyuncularla oyna.",
+    "Do not show this again": "Bir daha gösterme",
+    "Choose conventions": "Konvansiyon seç",
     "Install Bridge Table as an app": "Briç Masası'nı uygulama olarak yükle",
     "One tap from your home screen, full screen, works offline.": "Ana ekrandan tek dokunuşla açılır, tam ekran çalışır, internet olmadan da robotlarla oynanır.",
     "Install": "Yükle",
@@ -4218,6 +4238,13 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Welcome to Bridge Table": "Velkommen til Bridgebord",
+    "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Velg konvensjonene du vil lære: robotene deler hender der de dukker opp, og etter hvert spill ser du hvilke meldinger som var riktige.",
+    "Any time, at your own pace.": "Når som helst, i ditt eget tempo.",
+    "Online tables and tournaments": "Nettbord og turneringer",
+    "Play with friends and other players.": "Spill med venner og andre spillere.",
+    "Do not show this again": "Ikke vis dette igjen",
+    "Choose conventions": "Velg konvensjoner",
     "Install Bridge Table as an app": "Installer Bridgebord som app",
     "One tap from your home screen, full screen, works offline.": "Ett trykk fra hjemskjermen, fullskjerm, virker uten nett.",
     "Install": "Installer",
@@ -4454,6 +4481,13 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Welcome to Bridge Table": "Bienvenido a Bridge Table",
+    "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Elige las convenciones que quieres aprender: los robots reparten manos donde aparecen y, tras cada mano, ves qué voces fueron correctas.",
+    "Any time, at your own pace.": "Cuando quieras, a tu ritmo.",
+    "Online tables and tournaments": "Mesas online y torneos",
+    "Play with friends and other players.": "Juega con amigos y otros jugadores.",
+    "Do not show this again": "No volver a mostrar",
+    "Choose conventions": "Elegir convenciones",
     "Install Bridge Table as an app": "Instalar Bridge Table como app",
     "One tap from your home screen, full screen, works offline.": "Un toque desde la pantalla de inicio, pantalla completa, funciona sin conexión.",
     "Install": "Instalar",
@@ -4718,6 +4752,13 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Welcome to Bridge Table": "Bienvenue sur Bridge Table",
+    "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Choisissez les conventions à apprendre : les robots distribuent des mains où elles apparaissent, et après chaque donne vous voyez quelles enchères étaient justes.",
+    "Any time, at your own pace.": "Quand vous voulez, à votre rythme.",
+    "Online tables and tournaments": "Tables en ligne et tournois",
+    "Play with friends and other players.": "Jouez avec des amis et d’autres joueurs.",
+    "Do not show this again": "Ne plus afficher",
+    "Choose conventions": "Choisir les conventions",
     "Install Bridge Table as an app": "Installer Bridge Table comme application",
     "One tap from your home screen, full screen, works offline.": "Une touche depuis l’écran d’accueil, plein écran, fonctionne hors ligne.",
     "Install": "Installer",
@@ -4982,6 +5023,13 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Welcome to Bridge Table": "Benvenuto su Bridge Table",
+    "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Scegli le convenzioni da imparare: i robot distribuiscono mani in cui compaiono e dopo ogni smazzata vedi quali dichiarazioni erano giuste.",
+    "Any time, at your own pace.": "Quando vuoi, con i tuoi tempi.",
+    "Online tables and tournaments": "Tavoli online e tornei",
+    "Play with friends and other players.": "Gioca con amici e altri giocatori.",
+    "Do not show this again": "Non mostrare più",
+    "Choose conventions": "Scegli le convenzioni",
     "Install Bridge Table as an app": "Installa Bridge Table come app",
     "One tap from your home screen, full screen, works offline.": "Un tocco dalla schermata Home, a schermo intero, funziona offline.",
     "Install": "Installa",
@@ -5246,6 +5294,13 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Welcome to Bridge Table": "Willkommen bei Bridge Table",
+    "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Wähle die Konventionen, die du lernen willst: Die Roboter teilen Hände, in denen sie vorkommen, und nach jedem Board siehst du, welche Gebote richtig waren.",
+    "Any time, at your own pace.": "Jederzeit, in deinem Tempo.",
+    "Online tables and tournaments": "Online-Tische und Turniere",
+    "Play with friends and other players.": "Spiel mit Freunden und anderen Spielern.",
+    "Do not show this again": "Nicht mehr anzeigen",
+    "Choose conventions": "Konventionen wählen",
     "Install Bridge Table as an app": "Bridge Table als App installieren",
     "One tap from your home screen, full screen, works offline.": "Ein Tipp vom Home-Bildschirm, Vollbild, funktioniert offline.",
     "Install": "Installieren",
@@ -5510,6 +5565,13 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Welcome to Bridge Table": "Добро пожаловать в Bridge Table",
+    "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Выберите конвенции, которые хотите изучить: роботы сдают руки, где они встречаются, а после каждой сдачи вы видите, какие заявки были верными.",
+    "Any time, at your own pace.": "Когда угодно, в своём темпе.",
+    "Online tables and tournaments": "Онлайн-столы и турниры",
+    "Play with friends and other players.": "Играйте с друзьями и другими игроками.",
+    "Do not show this again": "Больше не показывать",
+    "Choose conventions": "Выбрать конвенции",
     "Install Bridge Table as an app": "Установить Bridge Table как приложение",
     "One tap from your home screen, full screen, works offline.": "Одно касание на главном экране, полный экран, работает без интернета.",
     "Install": "Установить",
@@ -5774,6 +5836,13 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Welcome to Bridge Table": "Witaj w Bridge Table",
+    "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "Wybierz konwencje, których chcesz się nauczyć: roboty rozdają ręce, w których się pojawiają, a po każdym rozdaniu widzisz, które odzywki były dobre.",
+    "Any time, at your own pace.": "Kiedy chcesz, we własnym tempie.",
+    "Online tables and tournaments": "Stoły online i turnieje",
+    "Play with friends and other players.": "Graj z przyjaciółmi i innymi graczami.",
+    "Do not show this again": "Nie pokazuj ponownie",
+    "Choose conventions": "Wybierz konwencje",
     "Install Bridge Table as an app": "Zainstaluj Bridge Table jako aplikację",
     "One tap from your home screen, full screen, works offline.": "Jedno dotknięcie z ekranu głównego, pełny ekran, działa offline.",
     "Install": "Zainstaluj",
@@ -6038,6 +6107,13 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Welcome to Bridge Table": "欢迎来到 Bridge Table",
+    "Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.": "选择你想学的约定叫：机器人会发出用到它们的牌，每副牌结束后你会看到哪些叫品是正确的。",
+    "Any time, at your own pace.": "随时，按你自己的节奏。",
+    "Online tables and tournaments": "在线牌桌和比赛",
+    "Play with friends and other players.": "和朋友及其他玩家一起打。",
+    "Do not show this again": "不再显示",
+    "Choose conventions": "选择约定叫",
     "Install Bridge Table as an app": "把 Bridge Table 安装为应用",
     "One tap from your home screen, full screen, works offline.": "从主屏幕一点即开，全屏运行，离线也能用。",
     "Install": "安装",
@@ -6898,7 +6974,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 171;
+const APP_V = 172;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9090,6 +9166,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
   if (t.id === 'instGo') { instGo(); return; }
+  if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
   if (t.id === 'hSup') { showSup(); return; }
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.id === 'supSend') { sendSup(); return; }
@@ -9245,8 +9322,25 @@ function shareDeal(deal, board) {
   (navigator.clipboard ? navigator.clipboard.writeText(text + ' ' + url) : Promise.reject()).then(() => flash(T('Link copied'), 1500)).catch(() => prompt(T('Copy link'), url));
 }
 // the app was opened from a shared deal: offer to play it (the link is taken out of the address)
+/* the welcome: what the site is for, in a few lines. Shown on a player's first three visits (once per visit, after
+   the name and PIN) unless they tick "do not show again"; not over a shared deal, an invitation or a board in play. */
+function welcome() {
+  if (SET.welNo || (SET.welN || 0) >= 3 || ui.welDone || ui.overlay || (G && G.phase !== 'idle')) return;
+  ui.welDone = 1; SET.welN = (SET.welN || 0) + 1; Store.saveSettings(SET);
+  openOv('welcome', `<h2 class="welh">♠<i>♥</i><i>♦</i>♣ ${T('Welcome to Bridge Table')}</h2>
+    <div class="welmain"><span>📚</span><div><b>${T('Practise conventions')}</b><small>${T('Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.')}</small></div></div>
+    <div class="welrow"><span>🤖</span><div><b>${T('Play with robots')}</b><small>${T('Any time, at your own pace.')}</small></div></div>
+    <div class="welrow"><span>🌐</span><div><b>${T('Online tables and tournaments')}</b><small>${T('Play with friends and other players.')}</small></div></div>
+    <label class="welno"><input type="checkbox" id="welNo"> ${T('Do not show this again')}</label>
+    <div class="row2"><button class="btn new" id="welGo">📚 ${T('Choose conventions')}</button><button class="btn" id="welClose">${T('Close')}</button></div>`);
+}
+function welcomeClose(go) {
+  if ($('welNo') && $('welNo').checked) { SET.welNo = 1; Store.saveSettings(SET); }
+  closeOv();
+  if (go) { ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+}
 function checkSharedDeal() {
-  const m = location.hash.match(/[#&]d=([\w-]{18})(?:&b=(\d+))?/); if (!m) return;
+  const m = location.hash.match(/[#&]d=([\w-]{18})(?:&b=(\d+))?/); if (!m) { welcome(); return; }
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   const hands = dealFromCode(m[1]); if (!hands) return;
   ui.sharedDeal = { hands, b: Math.min(16, Math.max(1, +m[2] || 1)) };

@@ -1424,3 +1424,16 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 /* install as an app: a small button in the top bar */
 .hinstb{border:0;border-radius:999px;padding:6px 12px;font:inherit;font-size:13.5px;font-weight:800;color:#fff;background:linear-gradient(170deg,#3a7bd5,#1f5f8b);cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:prpulse 2.4s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.hinstb{animation:none}}
+/* the welcome window: practising first and large, the other ways to play under it */
+.welh{font-size:20px}
+.welh i{font-style:normal;color:#c0262d}
+.welmain,.welrow{display:flex;gap:12px;align-items:flex-start;border-radius:12px;padding:10px 12px;margin:8px 0}
+.welmain{background:linear-gradient(135deg,#fff7d6,#ffe9a8);border:2px solid #f2c94c;color:#3b2600}
+.welrow{background:rgba(31,95,139,.07);color:inherit}
+.welmain span,.welrow span{font-size:26px;line-height:1}
+.welmain b{font-size:17px}
+.welmain b,.welrow b{display:block}
+.welmain small,.welrow small{display:block;font-size:13.5px;line-height:1.4;opacity:.85;margin-top:2px}
+.welno{display:flex;align-items:center;gap:8px;margin:12px 2px 4px;font-size:13.5px;cursor:pointer}
+.welno input{width:17px;height:17px;margin:0}
+:root[data-theme="dark"] .welmain{background:linear-gradient(135deg,#3b3216,#2e2710);color:#ffe9a8;border-color:#b8891c}
