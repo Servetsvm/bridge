@@ -1421,3 +1421,6 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .hcard.hinst{background:#16263a;color:#d8e8fb;border-color:#2c4a6e}
 :root[data-theme="dark"] .hinstx{color:#9fc0e3}
 .inststeps{line-height:1.7;padding-left:22px}
+/* install as an app: a small button in the top bar */
+.hinstb{border:0;border-radius:999px;padding:6px 12px;font:inherit;font-size:13.5px;font-weight:800;color:#fff;background:linear-gradient(170deg,#3a7bd5,#1f5f8b);cursor:pointer;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.25);animation:prpulse 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.hinstb{animation:none}}
