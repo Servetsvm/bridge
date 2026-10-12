@@ -6980,7 +6980,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 174;
+const APP_V = 175;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -8037,7 +8037,7 @@ const myNm = () => { try { return localStorage.getItem('bridge-table-name') || '
    name used here before brings that player's things back. The look of the app (language, theme, cards, speed,
    sounds) belongs to the device and stays. ---- */
 const ACCT_LS = ['bridge-friends', 'bridge-dms', 'bridge-dm-out', 'bridge-dm-seen', 'bridge-rated', 'bridge-req-mute', 'bridge-tour-seats'];
-const DEVICE_SET = ['lang', 'langAuto', 'theme', 'style', 'big', 'speed', 'sfx', 'felt', 'back', 'four', 'expl', 'auto', 'instNo', 'welNo', 'welN'];
+const DEVICE_SET = ['lang', 'langAuto', 'theme', 'style', 'big', 'speed', 'sfx', 'felt', 'back', 'four', 'expl', 'auto', 'instNo'];   // the welcome counts per player
 const acctKey = k => 'bridge-acct:' + k;
 function acctStash(k) {
   if (!k) return;
@@ -9485,6 +9485,12 @@ async function gateGo() {
   let back = false;
   if (!ui.gateRename) { try { back = !!localStorage.getItem(acctKey(Net.nameKey(name))); } catch (e) {} }
   if (back) { acctLoad(Net.nameKey(name)); try { localStorage.removeItem(acctKey(Net.nameKey(name))); } catch (e) {} }
+  // a name new to this device always starts with a clean page: whatever is still here from someone else (left by an
+  // older version's log-out) is put aside on the device, not lost, and not added to this account
+  else if (!ui.gateRename && HIST.length) { acctStash('_kept' + Date.now()); acctLoad(null); back = true; }
+  gateDone(name, h, back);
+}
+function gateDone(name, h, back) {
   try { localStorage.setItem('bridge-table-name', name); } catch (e) {}
   SET.pinH = h; SET.pinFor = Net.nameKey(name); Store.saveSettings(SET); save();
   if (back) { location.reload(); return; }
