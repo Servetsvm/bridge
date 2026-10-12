@@ -159,9 +159,11 @@ const Net = (() => {
       cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
+  // a board being played (bidding or card play): a finished board left on the screen does not count, nor the home page
+  const inPlay = t => t.phase === 'bid' || t.phase === 'play';
   function whereIs(name) {
     const k = nameKey(name);
-    for (const t of (st.tables || [])) if ((t.online || (t.phase && t.phase !== 'idle')) && (nameKey(t.host) === k || Object.values(t.names || {}).some(n => nameKey(n) === k))) return { host: t.host, online: t.online, phase: t.phase, own: nameKey(t.host) === k };   // someone on the home page is just in the lobby
+    for (const t of (st.tables || [])) if ((t.online || inPlay(t)) && (nameKey(t.host) === k || Object.values(t.names || {}).some(n => nameKey(n) === k))) return { host: t.host, online: t.online, phase: t.phase, own: nameKey(t.host) === k };   // someone on the home page is just in the lobby
     return (st.roomOf || {})[k] != null ? { lobby: true } : null;
   }
   // the profile of a player seen in the lobby (from the table information)
@@ -508,7 +510,7 @@ const Net = (() => {
   // a private table is never listed (only invited players come)
   // listed: public online tables, and players at a board with robots who chose "open to others" (never someone on
   // the home page, a private table, or a player who chose to play alone)
-  const listed = t => (t.online || ((t.pub || t.tplay || t.solo) && t.phase && t.phase !== 'idle'));   // every table in play shows (alone with robots: no joining)
+  const listed = t => (t.online || ((t.pub || t.tplay || t.solo) && inPlay(t)));   // every table in play shows (alone with robots: no joining)
   function tablesHtml() {
     // tables in play are listed: online tables, and players at a board with robots (not someone on the home page)
     const L = st.tables && st.tables.filter(listed);
@@ -631,7 +633,7 @@ const Net = (() => {
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
       const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
-      const w = G && G.phase !== 'idle' ? (st.on ? 'table' : 'robots') : 'lobby';
+      const w = st.on ? 'table' : G && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // a finished board left on the screen counts as the lobby
       try {
         // a name chosen before the database existed is registered now; if someone else holds it with another PIN,
         // this player chooses again
