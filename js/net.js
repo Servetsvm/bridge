@@ -649,6 +649,7 @@ const Net = (() => {
         // the conventions being practised now: kept with the day's login, which only the administrator can read
         { const pr = w === 'robots' && typeof pracList === 'function' ? pracList().join(',') : ''; if (pr !== (st.prSent || '')) { await Cloud.put('logins/' + today() + '/' + fbKey(name) + '/pr', pr || null); st.prSent = pr; } }
         supCheck();   // a new message for you (the administrator: from a player)
+        pruneKnown();
         const [on, users, logins] = await Promise.all([Cloud.get('online'), isAdmin() ? Cloud.get('users?shallow=true').catch(() => null) : null, isAdmin() ? Cloud.get('logins/' + today()).catch(() => null) : null]);   // the number of players and the logins: the administrator only
         st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: users ? Object.keys(users).length : null, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
@@ -804,6 +805,7 @@ const Net = (() => {
     for (const day of Object.keys(logins)) jobs.push(Cloud.put('logins/' + day + '/' + seg(k), null).catch(() => {}));
     await Promise.all(jobs);
     await Cloud.put('users/' + seg(k), null);   // the name last: if anything above failed, it can be tried again
+    if (u && u.name) { delete st.known[nameKey(u.name)]; try { localStorage.setItem('bridge-known', JSON.stringify(st.known)); } catch (e) {} }
     return true;
   }
   async function loginStats() {
@@ -850,6 +852,18 @@ const Net = (() => {
     st.known[k] = { name: String(name).slice(0, 20), ts: Date.now(), day: today(), p: p || (cur && cur.p) || undefined };
     for (const x in st.known) if (Date.now() - st.known[x].ts > 7 * 864e5) delete st.known[x];
     try { localStorage.setItem('bridge-known', JSON.stringify(st.known)); } catch (e) {}
+  }
+  // names no longer registered (removed by the administrator) leave this device's list of players seen this week:
+  // checked a few at a time, every ten minutes; those in the lobby right now are left alone
+  async function pruneKnown() {
+    if (!Cloud.on || Date.now() - (st.pruneAt || 0) < 600e3) return;
+    st.pruneAt = Date.now();
+    const here = new Set(knownNames().map(nameKey)); let changed = false, n = 0;
+    for (const k of Object.keys(st.known)) {
+      if (here.has(k) || n >= 25) continue; n++;
+      try { if (!(await Cloud.exists(st.known[k].name))) { delete st.known[k]; changed = true; } } catch (e) { return; }
+    }
+    if (changed) { try { localStorage.setItem('bridge-known', JSON.stringify(st.known)); } catch (e) {} renderL(); }
   }
   /* the players beside the lobby chat: friends first, then those playing, those waiting in the lobby, and last the
      ones seen this week who are offline. Tap a name to write to that player privately in the chat. */
@@ -1684,5 +1698,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
