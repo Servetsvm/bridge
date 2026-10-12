@@ -1403,6 +1403,22 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .stact{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;margin-bottom:6px}
 .stcv{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 8px;font-size:13px}
 .stcv span{background:rgba(31,95,139,.1);border-radius:999px;padding:2px 9px}
+/* writing to the administrator: the thread, the inbox and the notice on the home page */
+.supmsgs{display:flex;flex-direction:column;gap:8px;max-height:min(50vh,420px);overflow-y:auto;padding:4px 2px;margin:10px 0}
+.supm{max-width:85%;align-self:flex-start;background:#eef2f7;color:#1f2a22;border-radius:12px 12px 12px 3px;padding:8px 11px;font-size:14px;line-height:1.4}
+.supm.own{align-self:flex-end;background:#dff3e4;border-radius:12px 12px 3px 12px}
+.supm.auto{background:#fff6d8;font-style:italic}
+.supm small{display:block;margin-top:3px;font-size:11px;opacity:.6}
+.supth{display:grid;grid-template-columns:1fr auto;gap:2px 10px;width:100%;text-align:left;background:#fff;border:1px solid #e3e8ef;border-radius:10px;padding:9px 12px;margin:6px 0;font:inherit;cursor:pointer;color:#1f2a22}
+.supth span{grid-column:1/-1;font-size:13px;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.supth small{grid-row:1;grid-column:2;font-size:11.5px;opacity:.6}
+.supth.new{border-color:#1f5f8b;box-shadow:0 0 0 2px rgba(31,95,139,.2)}
+.hcard.supnew{display:block;width:100%;text-align:center;font:inherit;font-size:16px;font-weight:800;color:#fff;background:linear-gradient(170deg,#3a7bd5,#1f5f8b);border:0;cursor:pointer;animation:prpulse 2.2s ease-in-out infinite}
+.supc{display:inline-block;min-width:18px;padding:0 5px;border-radius:9px;background:#d0453b;color:#fff;font-size:11.5px;text-align:center}
+:root[data-theme="dark"] .supm{background:#26323b;color:#e8efe9}
+:root[data-theme="dark"] .supm.own{background:#1f3a2a}
+:root[data-theme="dark"] .supm.auto{background:#3a3420}
+:root[data-theme="dark"] .supth{background:#1d2a23;border-color:#2c3a32;color:#e8efe9}
 
 </style>
 
@@ -3946,6 +3962,15 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Write to the administrator": "Yöneticiye yaz",
+    "No messages yet.": "Henüz mesaj yok.",
+    "Thank you! Your message will be answered as soon as possible.": "Teşekkürler! Mesajınız en kısa zamanda cevaplanacak.",
+    "A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.": "Bir sorun, isteğin ya da sorunun mu var? Bunu sadece yönetici okur. Cevap burada ve ana sayfada görünür.",
+    "Write your message…": "Mesajını yaz…",
+    "Messages": "Mesajlar",
+    "Your answer…": "Cevabın…",
+    "{0} new messages from players": "Oyunculardan {0} yeni mesaj",
+    "The administrator answered you": "Yönetici sana cevap verdi",
     "Online now": "Şu an çevrimiçi",
     "With robots": "Robotlarla oynuyor",
     "At a table": "Online masada",
@@ -4159,6 +4184,15 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Write to the administrator": "Skriv til administratoren",
+    "No messages yet.": "Ingen meldinger ennå.",
+    "Thank you! Your message will be answered as soon as possible.": "Takk! Meldingen din blir besvart så snart som mulig.",
+    "A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.": "Et spørsmål, et ønske eller et problem? Bare administratoren leser dette. Svaret vises her og på startsiden.",
+    "Write your message…": "Skriv meldingen din…",
+    "Messages": "Meldinger",
+    "Your answer…": "Svaret ditt…",
+    "{0} new messages from players": "{0} nye meldinger fra spillere",
+    "The administrator answered you": "Administratoren har svart deg",
     "Online now": "På nett nå",
     "With robots": "Spiller med roboter",
     "At a table": "Ved et bord",
@@ -4372,6 +4406,15 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Write to the administrator": "Escribir al administrador",
+    "No messages yet.": "Aún no hay mensajes.",
+    "Thank you! Your message will be answered as soon as possible.": "¡Gracias! Tu mensaje se responderá lo antes posible.",
+    "A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.": "¿Una pregunta, un deseo o un problema? Solo el administrador lo lee. La respuesta aparece aquí y en la página de inicio.",
+    "Write your message…": "Escribe tu mensaje…",
+    "Messages": "Mensajes",
+    "Your answer…": "Tu respuesta…",
+    "{0} new messages from players": "{0} mensajes nuevos de jugadores",
+    "The administrator answered you": "El administrador te ha respondido",
     "Online now": "En línea ahora",
     "With robots": "Con robots",
     "At a table": "En una mesa",
@@ -4613,6 +4656,15 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Write to the administrator": "Écrire à l’administrateur",
+    "No messages yet.": "Pas encore de messages.",
+    "Thank you! Your message will be answered as soon as possible.": "Merci ! Nous répondrons à votre message dès que possible.",
+    "A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.": "Une question, un souhait ou un problème ? Seul l’administrateur le lit. La réponse apparaît ici et sur la page d’accueil.",
+    "Write your message…": "Écrivez votre message…",
+    "Messages": "Messages",
+    "Your answer…": "Votre réponse…",
+    "{0} new messages from players": "{0} nouveaux messages de joueurs",
+    "The administrator answered you": "L’administrateur vous a répondu",
     "Online now": "En ligne",
     "With robots": "Avec les robots",
     "At a table": "À une table",
@@ -4854,6 +4906,15 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Write to the administrator": "Scrivi all’amministratore",
+    "No messages yet.": "Ancora nessun messaggio.",
+    "Thank you! Your message will be answered as soon as possible.": "Grazie! Risponderemo al tuo messaggio il prima possibile.",
+    "A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.": "Una domanda, un desiderio o un problema? Lo legge solo l’amministratore. La risposta appare qui e nella pagina iniziale.",
+    "Write your message…": "Scrivi il tuo messaggio…",
+    "Messages": "Messaggi",
+    "Your answer…": "La tua risposta…",
+    "{0} new messages from players": "{0} nuovi messaggi dai giocatori",
+    "The administrator answered you": "L’amministratore ti ha risposto",
     "Online now": "Online ora",
     "With robots": "Con i robot",
     "At a table": "A un tavolo",
@@ -5095,6 +5156,15 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Write to the administrator": "Dem Administrator schreiben",
+    "No messages yet.": "Noch keine Nachrichten.",
+    "Thank you! Your message will be answered as soon as possible.": "Danke! Deine Nachricht wird so bald wie möglich beantwortet.",
+    "A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.": "Eine Frage, ein Wunsch oder ein Problem? Nur der Administrator liest das. Die Antwort erscheint hier und auf der Startseite.",
+    "Write your message…": "Schreib deine Nachricht…",
+    "Messages": "Nachrichten",
+    "Your answer…": "Deine Antwort…",
+    "{0} new messages from players": "{0} neue Nachrichten von Spielern",
+    "The administrator answered you": "Der Administrator hat dir geantwortet",
     "Online now": "Jetzt online",
     "With robots": "Mit Robotern",
     "At a table": "An einem Tisch",
@@ -5336,6 +5406,15 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Write to the administrator": "Написать администратору",
+    "No messages yet.": "Сообщений пока нет.",
+    "Thank you! Your message will be answered as soon as possible.": "Спасибо! Мы ответим на ваше сообщение как можно скорее.",
+    "A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.": "Вопрос, пожелание или проблема? Это читает только администратор. Ответ появится здесь и на главной странице.",
+    "Write your message…": "Напишите сообщение…",
+    "Messages": "Сообщения",
+    "Your answer…": "Ваш ответ…",
+    "{0} new messages from players": "Новых сообщений от игроков: {0}",
+    "The administrator answered you": "Администратор ответил вам",
     "Online now": "Сейчас онлайн",
     "With robots": "С роботами",
     "At a table": "За столом",
@@ -5577,6 +5656,15 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Write to the administrator": "Napisz do administratora",
+    "No messages yet.": "Brak wiadomości.",
+    "Thank you! Your message will be answered as soon as possible.": "Dziękujemy! Odpowiemy na Twoją wiadomość jak najszybciej.",
+    "A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.": "Pytanie, życzenie lub problem? Czyta to tylko administrator. Odpowiedź pojawi się tutaj i na stronie startowej.",
+    "Write your message…": "Napisz wiadomość…",
+    "Messages": "Wiadomości",
+    "Your answer…": "Twoja odpowiedź…",
+    "{0} new messages from players": "Nowe wiadomości od graczy: {0}",
+    "The administrator answered you": "Administrator Ci odpowiedział",
     "Online now": "Teraz online",
     "With robots": "Z robotami",
     "At a table": "Przy stole",
@@ -5818,6 +5906,15 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Write to the administrator": "给管理员写信",
+    "No messages yet.": "还没有消息。",
+    "Thank you! Your message will be answered as soon as possible.": "谢谢！我们会尽快回复你的消息。",
+    "A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.": "有问题、愿望或困难？只有管理员会看到。回复会显示在这里和首页。",
+    "Write your message…": "写下你的消息…",
+    "Messages": "消息",
+    "Your answer…": "你的回复…",
+    "{0} new messages from players": "来自玩家的 {0} 条新消息",
+    "The administrator answered you": "管理员已回复你",
     "Online now": "当前在线",
     "With robots": "与机器人对打",
     "At a table": "在牌桌上",
@@ -6655,7 +6752,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 167;
+const APP_V = 168;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -7738,7 +7835,7 @@ function pracHtml() {
     <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Show me when a practised convention can be used")}</label>
     ${pracWarnHtml()}
     ${pracProgHtml()}
-    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
+    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ ${T('Write to the administrator')}</button>`}</div>`;
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
 function togglePractice(k, add) {
@@ -7832,7 +7929,9 @@ function renderHome() {
   if (sh && sh.dataset.sec !== bot) { sh.dataset.sec = bot; sh.innerHTML = bot ? homeSection('chat') : ''; }
   document.querySelectorAll('[data-hsec]').forEach(b => b.classList.toggle('on', !!want && b.dataset.hsec === want));
   if (N) {
-    set('hPend', N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : '');
+    // a new message: for the administrator from a player, for a player the administrator's answer
+    const sup = N.supNew ? (N.isAdmin() ? `<button class="hcard supnew" id="hSupIn">✉️ ${T('{0} new messages from players', N.supNew)}</button>` : `<button class="hcard supnew" id="hSup">✉️ ${T('The administrator answered you')}</button>`) : '';
+    set('hPend', sup + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
     set('hTables', N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
@@ -8841,6 +8940,11 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
+  if (t.id === 'hSup') { showSup(); return; }
+  if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
+  if (t.id === 'supSend') { sendSup(); return; }
+  if (t.id === 'supReply') { sendSupReply(); return; }
+  if (t.dataset.supk) { showSupThread(t.dataset.supk); return; }
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
@@ -9158,6 +9262,65 @@ document.addEventListener('pointerdown', e => {
 /* ---- the administrator's visitor statistics: today, the last 7, 30 and 365 days, by country (once per internet address) ---- */
 /* "Add a convention": a player describes a convention the robots do not know; the request goes to the administrator,
    and it is then added to the robots' bidding (and to the list above) */
+/* ---- writing to the administrator: the player's thread, and the administrator's inbox ---- */
+function supMsgsHtml(m, mine) {
+  if (!m.length) return `<div class="muted">${T('No messages yet.')}</div>`;
+  return `<div class="supmsgs" id="supMsgs">${m.map(x => {
+    const own = mine ? x.by === 'p' : x.by === 'a', who = x.by === 'p' ? '' : x.by === 'auto' ? '🤖 ' : '👑 ';
+    const txt = x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
+    return `<div class="supm ${own ? 'own' : ''} ${x.by}"><div>${who}${txt.replace(/\n/g, '<br>')}</div><small>${new Date(x.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></div>`;
+  }).join('')}</div>`;
+}
+const supBox = (id, ph) => `<textarea id="${id}" class="tok wide" rows="3" maxlength="1000" placeholder="${ph}"></textarea>`;
+// the player: their messages to the administrator and the answers
+async function showSup() {
+  openOv('sup', `<h2>✉️ ${T('Write to the administrator')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let th = null, err = '';
+  try { th = await Net.supThread(); } catch (e) { err = e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.'); }
+  if (ui.overlay !== 'sup') return;
+  openOv('sup', `<h2>✉️ ${T('Write to the administrator')}</h2>
+    <div class="muted">${T('A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.')}</div>
+    ${err ? `<div class="err">${err}</div>` : supMsgsHtml(th.m, true)}
+    ${err ? '' : supBox('supTxt', T('Write your message…'))}
+    <div class="row2">${err ? '' : `<button class="btn new" id="supSend">📨 ${T('Send')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+  const b = $('supMsgs'); if (b) b.scrollTop = b.scrollHeight;
+  if (th) Net.supRead();
+}
+async function sendSup() {
+  const t = ($('supTxt') && $('supTxt').value || '').trim();
+  if (t.length < 2) { flash(T('Write your message…'), 1800); return; }
+  try { await Net.supSend(t); await showSup(); }
+  catch (e) { flash(e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.'), 3000); }
+}
+// the administrator: every player who wrote, the newest first; unread ones marked
+async function showSupInbox() {
+  if (!Net.isAdmin()) return;
+  openOv('supin', `<h2>📨 ${T('Messages')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let L = []; try { L = await Net.supInbox(); } catch (e) {}
+  if (ui.overlay !== 'supin') return;
+  openOv('supin', `<h2>📨 ${T('Messages')}</h2>
+    ${L.length ? L.map(x => `<button class="supth${x.unread ? ' new' : ''}" data-supk="${esc(x.k)}"><b>${x.unread ? '🔵 ' : ''}${esc(x.n)}</b>
+      <span>${x.last.by === 'auto' ? '🤖 ' : x.last.by === 'a' ? '👑 ' : ''}${esc(x.last.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : x.last.t).slice(0, 90)}</span>
+      <small>${new Date(x.last.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></button>`).join('') : `<div class="muted">${T('No messages yet.')}</div>`}
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+async function showSupThread(k) {
+  if (!Net.isAdmin()) return;
+  ui.supK = k;
+  openOv('supth', `<h2>📨 ${T('Messages')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let th = null; try { th = await Net.supThread(k); } catch (e) {}
+  if (ui.overlay !== 'supth') return;
+  openOv('supth', `<h2>📨 ${esc(th && th.n || '')}</h2>
+    ${th ? supMsgsHtml(th.m, false) : `<div class="err">${T('The online database could not be reached.')}</div>`}
+    ${th ? supBox('supRe', T('Your answer…')) : ''}
+    <div class="row2">${th ? `<button class="btn new" id="supReply">📨 ${T('Send')}</button>` : ''}<button class="btn" id="supBack">← ${T('Messages')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  const b = $('supMsgs'); if (b) b.scrollTop = b.scrollHeight;
+  if (th) Net.supRead(k);
+}
+async function sendSupReply() {
+  const t = ($('supRe') && $('supRe').value || '').trim(); if (t.length < 1 || !ui.supK) return;
+  try { await Net.supReply(ui.supK, t); await showSupThread(ui.supK); } catch (e) { flash(T('The online database could not be reached.'), 2500); }
+}
 function showConvAsk(err) {
   openOv('convask', `<h2>➕ ${T('Add a convention')}</h2>
     <div class="muted">${T('Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.')}</div>
@@ -9968,6 +10131,7 @@ const Net = (() => {
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()), ...(SET.act && SET.act.d === today() ? { a: actOut() } : {}) }); st.loggedDay = today(); st.prSent = ''; }
         // the conventions being practised now: kept with the day's login, which only the administrator can read
         { const pr = w === 'robots' && typeof pracList === 'function' ? pracList().join(',') : ''; if (pr !== (st.prSent || '')) { await Cloud.put('logins/' + today() + '/' + fbKey(name) + '/pr', pr || null); st.prSent = pr; } }
+        supCheck();   // a new message for you (the administrator: from a player)
         const [on, users, logins] = await Promise.all([Cloud.get('online'), isAdmin() ? Cloud.get('users?shallow=true').catch(() => null) : null, isAdmin() ? Cloud.get('logins/' + today()).catch(() => null) : null]);   // the number of players and the logins: the administrator only
         st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: users ? Object.keys(users).length : null, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
@@ -10033,8 +10197,75 @@ const Net = (() => {
   async function onlineNow() {
     if (!Cloud.on || !isAdmin()) return [];
     const [on, lg] = await Promise.all([Cloud.get('online'), Cloud.get('logins/' + today()).catch(() => null)]), now = Date.now();
-    return Object.entries(on || {}).filter(([, x]) => x && x.name && now - x.ts < 180e3)
+    const L = Object.entries(on || {}).filter(([, x]) => x && x.name && now - x.ts < 180e3)
       .map(([k, x]) => ({ name: x.name, at: x.at || 'lobby', pr: x.at === 'robots' && lg && lg[k] && lg[k].pr || '', sys: x.p && x.p.sys || '' }));
+    // and those the lobby sees directly (as in the players list): a player without a PIN, or on an older version
+    const me = nameKey(myName());
+    for (const n of knownNames()) if (nameKey(n) !== me && !L.some(x => nameKey(x.name) === nameKey(n))) {
+      const w = whereIs(n), p = profOf(n);
+      L.push({ name: n, at: !w || w.lobby ? 'lobby' : w.online ? 'table' : 'robots', pr: '', sys: p && p.sys || '', direct: 1 });
+    }
+    return L;
+  }
+  /* writing to the administrator: one private thread per player, destek/<player> = { n: name, m: { id: { by, t, ts } },
+     pr: when the player last read it, ar: when the administrator last read it }. by: 'p' the player, 'a' the
+     administrator, 'auto' the automatic thank-you. Only the player and the administrator can read the thread. */
+  const supId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  async function supMine() {
+    const name = myName(); if (!Cloud.on || !name || !SET.pinH) throw new Error('offline');
+    if (!(await Cloud.session(name, SET.pinH))) throw new Error('signin');
+    return fbKey(name);
+  }
+  async function supSend(txt) {
+    const k = await supMine(), name = myName(), now = Date.now();
+    const th = await Cloud.get('destek/' + k).catch(() => null) || {};
+    const last = Object.values(th.m || {}).sort((a, b) => a.ts - b.ts).pop();
+    await Cloud.put('destek/' + k + '/n', String(name).slice(0, 20));
+    await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'p', t: String(txt).slice(0, 1000), ts: now });
+    // the automatic thank-you, once for each new question (not after every line of a message sent in parts)
+    if (!last || last.by !== 'p') await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', t: '', ts: now + 1 });
+    await Cloud.put('destek/' + k + '/pr', now + 1);
+    st.supNew = 0;
+  }
+  // a thread: the player's own, or (the administrator) any player's
+  async function supThread(k) {
+    if (k && !isAdmin()) return null;
+    const key = k || await supMine(), th = await Cloud.get('destek/' + key) || {};
+    return { k: key, n: th.n || '', pr: th.pr || 0, ar: th.ar || 0, m: Object.values(th.m || {}).filter(x => x && x.ts).sort((a, b) => a.ts - b.ts) };
+  }
+  // marks the thread read: the player's own, or (the administrator) a player's
+  async function supRead(k) {
+    try {
+      if (k && isAdmin()) await Cloud.put('destek/' + k + '/ar', Date.now());
+      else if (!k) await Cloud.put('destek/' + await supMine() + '/pr', Date.now());
+    } catch (e) {}
+    st.supChk = 0; supCheck();
+  }
+  async function supReply(k, txt) {
+    if (!isAdmin()) return;
+    await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'a', t: String(txt).slice(0, 1000), ts: Date.now() });
+    await Cloud.put('destek/' + k + '/ar', Date.now());
+  }
+  // the administrator's inbox: every thread, the newest first, with whether the player wrote since it was last read
+  async function supInbox() {
+    if (!Cloud.on || !isAdmin()) return [];
+    const all = await Cloud.get('destek') || {};
+    return Object.entries(all).map(([k, th]) => {
+      const m = Object.values(th.m || {}).filter(x => x && x.ts).sort((a, b) => a.ts - b.ts), last = m[m.length - 1];
+      return { k, n: th.n || decodeURIComponent(k), last, unread: m.some(x => x.by === 'p' && x.ts > (th.ar || 0)) };
+    }).filter(x => x.last).sort((a, b) => b.last.ts - a.last.ts);
+  }
+  /* new messages (looked at on arrival and every two minutes): for the administrator the threads with a player's
+     message not read yet, for a player the administrator's answers not read yet. The home page shows a notice. */
+  async function supCheck() {
+    if (!Cloud.on || !myName() || !SET.pinH || Date.now() - (st.supChk || 0) < 110e3) return;
+    st.supChk = Date.now();
+    try {
+      let n = 0;
+      if (isAdmin()) n = (await supInbox()).filter(x => x.unread).length;
+      else { const th = await supThread(); n = th.m.filter(x => x.by === 'a' && x.ts > th.pr).length; }
+      if (n !== (st.supNew || 0)) { st.supNew = n; if (typeof render === 'function') render(); }
+    } catch (e) {}
   }
   async function loginStats() {
     if (!Cloud.on || !isAdmin()) return null;
@@ -10912,7 +11143,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, get supNew() { return st.supNew || 0; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

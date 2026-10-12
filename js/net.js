@@ -645,6 +645,7 @@ const Net = (() => {
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()), ...(SET.act && SET.act.d === today() ? { a: actOut() } : {}) }); st.loggedDay = today(); st.prSent = ''; }
         // the conventions being practised now: kept with the day's login, which only the administrator can read
         { const pr = w === 'robots' && typeof pracList === 'function' ? pracList().join(',') : ''; if (pr !== (st.prSent || '')) { await Cloud.put('logins/' + today() + '/' + fbKey(name) + '/pr', pr || null); st.prSent = pr; } }
+        supCheck();   // a new message for you (the administrator: from a player)
         const [on, users, logins] = await Promise.all([Cloud.get('online'), isAdmin() ? Cloud.get('users?shallow=true').catch(() => null) : null, isAdmin() ? Cloud.get('logins/' + today()).catch(() => null) : null]);   // the number of players and the logins: the administrator only
         st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: users ? Object.keys(users).length : null, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
@@ -710,8 +711,75 @@ const Net = (() => {
   async function onlineNow() {
     if (!Cloud.on || !isAdmin()) return [];
     const [on, lg] = await Promise.all([Cloud.get('online'), Cloud.get('logins/' + today()).catch(() => null)]), now = Date.now();
-    return Object.entries(on || {}).filter(([, x]) => x && x.name && now - x.ts < 180e3)
+    const L = Object.entries(on || {}).filter(([, x]) => x && x.name && now - x.ts < 180e3)
       .map(([k, x]) => ({ name: x.name, at: x.at || 'lobby', pr: x.at === 'robots' && lg && lg[k] && lg[k].pr || '', sys: x.p && x.p.sys || '' }));
+    // and those the lobby sees directly (as in the players list): a player without a PIN, or on an older version
+    const me = nameKey(myName());
+    for (const n of knownNames()) if (nameKey(n) !== me && !L.some(x => nameKey(x.name) === nameKey(n))) {
+      const w = whereIs(n), p = profOf(n);
+      L.push({ name: n, at: !w || w.lobby ? 'lobby' : w.online ? 'table' : 'robots', pr: '', sys: p && p.sys || '', direct: 1 });
+    }
+    return L;
+  }
+  /* writing to the administrator: one private thread per player, destek/<player> = { n: name, m: { id: { by, t, ts } },
+     pr: when the player last read it, ar: when the administrator last read it }. by: 'p' the player, 'a' the
+     administrator, 'auto' the automatic thank-you. Only the player and the administrator can read the thread. */
+  const supId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  async function supMine() {
+    const name = myName(); if (!Cloud.on || !name || !SET.pinH) throw new Error('offline');
+    if (!(await Cloud.session(name, SET.pinH))) throw new Error('signin');
+    return fbKey(name);
+  }
+  async function supSend(txt) {
+    const k = await supMine(), name = myName(), now = Date.now();
+    const th = await Cloud.get('destek/' + k).catch(() => null) || {};
+    const last = Object.values(th.m || {}).sort((a, b) => a.ts - b.ts).pop();
+    await Cloud.put('destek/' + k + '/n', String(name).slice(0, 20));
+    await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'p', t: String(txt).slice(0, 1000), ts: now });
+    // the automatic thank-you, once for each new question (not after every line of a message sent in parts)
+    if (!last || last.by !== 'p') await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', t: '', ts: now + 1 });
+    await Cloud.put('destek/' + k + '/pr', now + 1);
+    st.supNew = 0;
+  }
+  // a thread: the player's own, or (the administrator) any player's
+  async function supThread(k) {
+    if (k && !isAdmin()) return null;
+    const key = k || await supMine(), th = await Cloud.get('destek/' + key) || {};
+    return { k: key, n: th.n || '', pr: th.pr || 0, ar: th.ar || 0, m: Object.values(th.m || {}).filter(x => x && x.ts).sort((a, b) => a.ts - b.ts) };
+  }
+  // marks the thread read: the player's own, or (the administrator) a player's
+  async function supRead(k) {
+    try {
+      if (k && isAdmin()) await Cloud.put('destek/' + k + '/ar', Date.now());
+      else if (!k) await Cloud.put('destek/' + await supMine() + '/pr', Date.now());
+    } catch (e) {}
+    st.supChk = 0; supCheck();
+  }
+  async function supReply(k, txt) {
+    if (!isAdmin()) return;
+    await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'a', t: String(txt).slice(0, 1000), ts: Date.now() });
+    await Cloud.put('destek/' + k + '/ar', Date.now());
+  }
+  // the administrator's inbox: every thread, the newest first, with whether the player wrote since it was last read
+  async function supInbox() {
+    if (!Cloud.on || !isAdmin()) return [];
+    const all = await Cloud.get('destek') || {};
+    return Object.entries(all).map(([k, th]) => {
+      const m = Object.values(th.m || {}).filter(x => x && x.ts).sort((a, b) => a.ts - b.ts), last = m[m.length - 1];
+      return { k, n: th.n || decodeURIComponent(k), last, unread: m.some(x => x.by === 'p' && x.ts > (th.ar || 0)) };
+    }).filter(x => x.last).sort((a, b) => b.last.ts - a.last.ts);
+  }
+  /* new messages (looked at on arrival and every two minutes): for the administrator the threads with a player's
+     message not read yet, for a player the administrator's answers not read yet. The home page shows a notice. */
+  async function supCheck() {
+    if (!Cloud.on || !myName() || !SET.pinH || Date.now() - (st.supChk || 0) < 110e3) return;
+    st.supChk = Date.now();
+    try {
+      let n = 0;
+      if (isAdmin()) n = (await supInbox()).filter(x => x.unread).length;
+      else { const th = await supThread(); n = th.m.filter(x => x.by === 'a' && x.ts > th.pr).length; }
+      if (n !== (st.supNew || 0)) { st.supNew = n; if (typeof render === 'function') render(); }
+    } catch (e) {}
   }
   async function loginStats() {
     if (!Cloud.on || !isAdmin()) return null;
@@ -1589,5 +1657,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, get supNew() { return st.supNew || 0; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

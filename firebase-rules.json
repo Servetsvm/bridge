@@ -40,10 +40,30 @@
         }
       }
     },
+    "destek": {
+      ".read": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
+      ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
+      "$name": {
+        ".read": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $name",
+        "n": { ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $name", ".validate": "newData.isString() && newData.val().length <= 20" },
+        "pr": { ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $name", ".validate": "newData.isNumber()" },
+        "m": { "$id": { ".write": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === $name && !data.exists() && (newData.child('by').val() === 'p' || newData.child('by').val() === 'auto')) || (auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet')", ".validate": "newData.hasChildren(['by', 't', 'ts']) && newData.child('t').isString() && newData.child('t').val().length <= 1000 && newData.child('ts').isNumber()" } }
+      }
+    },
     "test": {
       "$ns": {
         ".read": false,
         ".write": false,
+        "destek": {
+          ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
+          ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
+          "$name": {
+            ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name",
+            "n": { ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name", ".validate": "newData.isString() && newData.val().length <= 20" },
+            "pr": { ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name", ".validate": "newData.isNumber()" },
+            "m": { "$id": { ".write": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name && !data.exists() && (newData.child('by').val() === 'p' || newData.child('by').val() === 'auto')) || (auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet')", ".validate": "newData.hasChildren(['by', 't', 'ts']) && newData.child('t').isString() && newData.child('t').val().length <= 1000 && newData.child('ts').isNumber()" } }
+          }
+        },
         "istek": {
               ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
               ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 167;
+const APP_V = 168;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1091,7 +1091,7 @@ function pracHtml() {
     <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Show me when a practised convention can be used")}</label>
     ${pracWarnHtml()}
     ${pracProgHtml()}
-    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button>` : ''}</div>`;
+    <div class="praskrow"><button class="prask" id="hConvAsk">➕ ${T('Add a convention')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ ${T('Write to the administrator')}</button>`}</div>`;
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
 function togglePractice(k, add) {
@@ -1185,7 +1185,9 @@ function renderHome() {
   if (sh && sh.dataset.sec !== bot) { sh.dataset.sec = bot; sh.innerHTML = bot ? homeSection('chat') : ''; }
   document.querySelectorAll('[data-hsec]').forEach(b => b.classList.toggle('on', !!want && b.dataset.hsec === want));
   if (N) {
-    set('hPend', N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : '');
+    // a new message: for the administrator from a player, for a player the administrator's answer
+    const sup = N.supNew ? (N.isAdmin() ? `<button class="hcard supnew" id="hSupIn">✉️ ${T('{0} new messages from players', N.supNew)}</button>` : `<button class="hcard supnew" id="hSup">✉️ ${T('The administrator answered you')}</button>`) : '';
+    set('hPend', sup + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
     set('hTables', N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
@@ -2194,6 +2196,11 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
+  if (t.id === 'hSup') { showSup(); return; }
+  if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
+  if (t.id === 'supSend') { sendSup(); return; }
+  if (t.id === 'supReply') { sendSupReply(); return; }
+  if (t.dataset.supk) { showSupThread(t.dataset.supk); return; }
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
@@ -2511,6 +2518,65 @@ document.addEventListener('pointerdown', e => {
 /* ---- the administrator's visitor statistics: today, the last 7, 30 and 365 days, by country (once per internet address) ---- */
 /* "Add a convention": a player describes a convention the robots do not know; the request goes to the administrator,
    and it is then added to the robots' bidding (and to the list above) */
+/* ---- writing to the administrator: the player's thread, and the administrator's inbox ---- */
+function supMsgsHtml(m, mine) {
+  if (!m.length) return `<div class="muted">${T('No messages yet.')}</div>`;
+  return `<div class="supmsgs" id="supMsgs">${m.map(x => {
+    const own = mine ? x.by === 'p' : x.by === 'a', who = x.by === 'p' ? '' : x.by === 'auto' ? '🤖 ' : '👑 ';
+    const txt = x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
+    return `<div class="supm ${own ? 'own' : ''} ${x.by}"><div>${who}${txt.replace(/\n/g, '<br>')}</div><small>${new Date(x.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></div>`;
+  }).join('')}</div>`;
+}
+const supBox = (id, ph) => `<textarea id="${id}" class="tok wide" rows="3" maxlength="1000" placeholder="${ph}"></textarea>`;
+// the player: their messages to the administrator and the answers
+async function showSup() {
+  openOv('sup', `<h2>✉️ ${T('Write to the administrator')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let th = null, err = '';
+  try { th = await Net.supThread(); } catch (e) { err = e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.'); }
+  if (ui.overlay !== 'sup') return;
+  openOv('sup', `<h2>✉️ ${T('Write to the administrator')}</h2>
+    <div class="muted">${T('A question, a wish or a problem? Only the administrator reads this. The answer appears here and on the home page.')}</div>
+    ${err ? `<div class="err">${err}</div>` : supMsgsHtml(th.m, true)}
+    ${err ? '' : supBox('supTxt', T('Write your message…'))}
+    <div class="row2">${err ? '' : `<button class="btn new" id="supSend">📨 ${T('Send')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+  const b = $('supMsgs'); if (b) b.scrollTop = b.scrollHeight;
+  if (th) Net.supRead();
+}
+async function sendSup() {
+  const t = ($('supTxt') && $('supTxt').value || '').trim();
+  if (t.length < 2) { flash(T('Write your message…'), 1800); return; }
+  try { await Net.supSend(t); await showSup(); }
+  catch (e) { flash(e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.'), 3000); }
+}
+// the administrator: every player who wrote, the newest first; unread ones marked
+async function showSupInbox() {
+  if (!Net.isAdmin()) return;
+  openOv('supin', `<h2>📨 ${T('Messages')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let L = []; try { L = await Net.supInbox(); } catch (e) {}
+  if (ui.overlay !== 'supin') return;
+  openOv('supin', `<h2>📨 ${T('Messages')}</h2>
+    ${L.length ? L.map(x => `<button class="supth${x.unread ? ' new' : ''}" data-supk="${esc(x.k)}"><b>${x.unread ? '🔵 ' : ''}${esc(x.n)}</b>
+      <span>${x.last.by === 'auto' ? '🤖 ' : x.last.by === 'a' ? '👑 ' : ''}${esc(x.last.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : x.last.t).slice(0, 90)}</span>
+      <small>${new Date(x.last.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></button>`).join('') : `<div class="muted">${T('No messages yet.')}</div>`}
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+async function showSupThread(k) {
+  if (!Net.isAdmin()) return;
+  ui.supK = k;
+  openOv('supth', `<h2>📨 ${T('Messages')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let th = null; try { th = await Net.supThread(k); } catch (e) {}
+  if (ui.overlay !== 'supth') return;
+  openOv('supth', `<h2>📨 ${esc(th && th.n || '')}</h2>
+    ${th ? supMsgsHtml(th.m, false) : `<div class="err">${T('The online database could not be reached.')}</div>`}
+    ${th ? supBox('supRe', T('Your answer…')) : ''}
+    <div class="row2">${th ? `<button class="btn new" id="supReply">📨 ${T('Send')}</button>` : ''}<button class="btn" id="supBack">← ${T('Messages')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  const b = $('supMsgs'); if (b) b.scrollTop = b.scrollHeight;
+  if (th) Net.supRead(k);
+}
+async function sendSupReply() {
+  const t = ($('supRe') && $('supRe').value || '').trim(); if (t.length < 1 || !ui.supK) return;
+  try { await Net.supReply(ui.supK, t); await showSupThread(ui.supK); } catch (e) { flash(T('The online database could not be reached.'), 2500); }
+}
 function showConvAsk(err) {
   openOv('convask', `<h2>➕ ${T('Add a convention')}</h2>
     <div class="muted">${T('Describe a convention the robots do not play yet. Your request goes to the administrator, and it is added to the robots and to the list.')}</div>
