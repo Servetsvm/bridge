@@ -3,6 +3,10 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Cannot reach the server: your results, progress and messages are not saved.": "Sunucuya bağlanılamıyor: sonuçların, ilerlemen ve mesajların kaydedilmiyor.",
+    "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Bu site için reklam ya da gizlilik engelleyicisini kapat, internet bağlantını kontrol et, sonra sayfayı yenile.",
+    "not connected to the database": "veritabanına bağlı değil",
+    "Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.": "Sadece lobide görünüyor: cihazı veritabanına ulaşamıyor (reklam ya da gizlilik engelleyicisi veya eski sürüm), bu yüzden elleri ve mesajları kaydedilmiyor. Oyuncu bununla ilgili bir uyarı görüyor.",
     "Write to the administrator": "Yöneticiye yaz",
     "No messages yet.": "Henüz mesaj yok.",
     "Thank you! Your message will be answered as soon as possible.": "Teşekkürler! Mesajınız en kısa zamanda cevaplanacak.",
@@ -225,6 +229,10 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Cannot reach the server: your results, progress and messages are not saved.": "Får ikke kontakt med serveren: resultater, fremgang og meldinger lagres ikke.",
+    "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Slå av reklame- eller personvernblokkering for denne siden, sjekk internettforbindelsen og last inn siden på nytt.",
+    "not connected to the database": "ikke koblet til databasen",
+    "Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.": "Ses bare i lobbyen: enheten når ikke databasen (reklame- eller personvernblokkering, eller en gammel versjon), så spill og meldinger lagres ikke. Spilleren ser et varsel om det.",
     "Write to the administrator": "Skriv til administratoren",
     "No messages yet.": "Ingen meldinger ennå.",
     "Thank you! Your message will be answered as soon as possible.": "Takk! Meldingen din blir besvart så snart som mulig.",
@@ -447,6 +455,10 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Cannot reach the server: your results, progress and messages are not saved.": "No se puede conectar con el servidor: tus resultados, progreso y mensajes no se guardan.",
+    "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Desactiva el bloqueador de anuncios o de privacidad para este sitio, revisa la conexión y recarga la página.",
+    "not connected to the database": "sin conexión a la base de datos",
+    "Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.": "Visto solo en el vestíbulo: el dispositivo no llega a la base de datos (bloqueador o versión antigua), así que sus manos y mensajes no se registran. El jugador ve un aviso.",
     "Write to the administrator": "Escribir al administrador",
     "No messages yet.": "Aún no hay mensajes.",
     "Thank you! Your message will be answered as soon as possible.": "¡Gracias! Tu mensaje se responderá lo antes posible.",
@@ -697,6 +709,10 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Cannot reach the server: your results, progress and messages are not saved.": "Impossible de joindre le serveur : vos résultats, progrès et messages ne sont pas enregistrés.",
+    "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Désactivez le bloqueur de publicité ou de confidentialité pour ce site, vérifiez la connexion, puis rechargez la page.",
+    "not connected to the database": "non connecté à la base",
+    "Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.": "Vu seulement dans le salon : l’appareil n’atteint pas la base (bloqueur ou ancienne version), ses donnes et messages ne sont pas enregistrés. Le joueur voit un avertissement.",
     "Write to the administrator": "Écrire à l’administrateur",
     "No messages yet.": "Pas encore de messages.",
     "Thank you! Your message will be answered as soon as possible.": "Merci ! Nous répondrons à votre message dès que possible.",
@@ -947,6 +963,10 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Cannot reach the server: your results, progress and messages are not saved.": "Impossibile raggiungere il server: risultati, progressi e messaggi non vengono salvati.",
+    "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Disattiva il blocco pubblicità o privacy per questo sito, controlla la connessione e ricarica la pagina.",
+    "not connected to the database": "non connesso al database",
+    "Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.": "Visto solo nella lobby: il dispositivo non raggiunge il database (blocco o versione vecchia), quindi mani e messaggi non vengono registrati. Il giocatore vede un avviso.",
     "Write to the administrator": "Scrivi all’amministratore",
     "No messages yet.": "Ancora nessun messaggio.",
     "Thank you! Your message will be answered as soon as possible.": "Grazie! Risponderemo al tuo messaggio il prima possibile.",
@@ -1197,6 +1217,10 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Cannot reach the server: your results, progress and messages are not saved.": "Server nicht erreichbar: Ergebnisse, Fortschritt und Nachrichten werden nicht gespeichert.",
+    "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Schalte den Werbe- oder Datenschutzblocker für diese Seite aus, prüfe die Verbindung und lade die Seite neu.",
+    "not connected to the database": "nicht mit der Datenbank verbunden",
+    "Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.": "Nur in der Lobby zu sehen: Das Gerät erreicht die Datenbank nicht (Blocker oder alte Version), daher werden Boards und Nachrichten nicht erfasst. Der Spieler sieht einen Hinweis.",
     "Write to the administrator": "Dem Administrator schreiben",
     "No messages yet.": "Noch keine Nachrichten.",
     "Thank you! Your message will be answered as soon as possible.": "Danke! Deine Nachricht wird so bald wie möglich beantwortet.",
@@ -1447,6 +1471,10 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Cannot reach the server: your results, progress and messages are not saved.": "Нет связи с сервером: результаты, прогресс и сообщения не сохраняются.",
+    "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Отключите блокировщик рекламы или трекеров для этого сайта, проверьте соединение и перезагрузите страницу.",
+    "not connected to the database": "нет связи с базой",
+    "Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.": "Виден только в лобби: устройство не может связаться с базой (блокировщик или старая версия), поэтому его сдачи и сообщения не записываются. Игрок видит предупреждение.",
     "Write to the administrator": "Написать администратору",
     "No messages yet.": "Сообщений пока нет.",
     "Thank you! Your message will be answered as soon as possible.": "Спасибо! Мы ответим на ваше сообщение как можно скорее.",
@@ -1697,6 +1725,10 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Cannot reach the server: your results, progress and messages are not saved.": "Brak połączenia z serwerem: wyniki, postępy i wiadomości nie są zapisywane.",
+    "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "Wyłącz blokadę reklam lub prywatności dla tej strony, sprawdź połączenie i odśwież stronę.",
+    "not connected to the database": "brak połączenia z bazą",
+    "Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.": "Widoczny tylko w lobby: urządzenie nie łączy się z bazą (blokada lub stara wersja), więc rozdania i wiadomości nie są zapisywane. Gracz widzi ostrzeżenie.",
     "Write to the administrator": "Napisz do administratora",
     "No messages yet.": "Brak wiadomości.",
     "Thank you! Your message will be answered as soon as possible.": "Dziękujemy! Odpowiemy na Twoją wiadomość jak najszybciej.",
@@ -1947,6 +1979,10 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Cannot reach the server: your results, progress and messages are not saved.": "无法连接服务器：你的结果、进度和消息不会被保存。",
+    "Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.": "请为本站关闭广告或隐私拦截插件，检查网络连接，然后刷新页面。",
+    "not connected to the database": "未连接数据库",
+    "Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.": "只在大厅中可见：该设备无法连接数据库（拦截插件或旧版本），因此其牌局和消息不会被记录。玩家会看到提示。",
     "Write to the administrator": "给管理员写信",
     "No messages yet.": "还没有消息。",
     "Thank you! Your message will be answered as soon as possible.": "谢谢！我们会尽快回复你的消息。",

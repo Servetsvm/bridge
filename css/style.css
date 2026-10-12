@@ -1404,3 +1404,9 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 :root[data-theme="dark"] .supm.own{background:#1f3a2a}
 :root[data-theme="dark"] .supm.auto{background:#3a3420}
 :root[data-theme="dark"] .supth{background:#1d2a23;border-color:#2c3a32;color:#e8efe9}
+/* the database cannot be reached: a notice on the home page; in the statistics, players seen only in the lobby */
+.hcard.cloudbad{background:#fff1e0;color:#6a3c00;border:1px solid #f0b46a}
+.hcard.cloudbad b{display:block;margin-bottom:4px}
+.hcard.cloudbad small{font-size:13px}
+:root[data-theme="dark"] .hcard.cloudbad{background:#3a2a14;color:#ffd38a;border-color:#7a5a20}
+.stdirect{font-size:11.5px;color:#b5651d;font-weight:700}

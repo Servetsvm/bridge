@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 168;
+const APP_V = 169;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1187,7 +1187,9 @@ function renderHome() {
   if (N) {
     // a new message: for the administrator from a player, for a player the administrator's answer
     const sup = N.supNew ? (N.isAdmin() ? `<button class="hcard supnew" id="hSupIn">✉️ ${T('{0} new messages from players', N.supNew)}</button>` : `<button class="hcard supnew" id="hSup">✉️ ${T('The administrator answered you')}</button>`) : '';
-    set('hPend', sup + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
+    // the database cannot be reached: results, progress and messages are not saved; say why and what to do
+    const bad = N.cloudBad && myNm() ? `<div class="hcard cloudbad"><b>⚠ ${T('Cannot reach the server: your results, progress and messages are not saved.')}</b><small>${T('Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.')}</small></div>` : '';
+    set('hPend', bad + sup + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
     set('hTables', N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
@@ -2609,8 +2611,9 @@ const cvNames = s => String(s || '').split(',').filter(k => k && E.convInfo(k)).
 function statOnlineHtml(on) {
   const at = x => x.at === 'robots' ? '🤖 ' + T('With robots') + (x.pr ? ' · 📚 ' + cvNames(x.pr) : '') : x.at === 'table' ? '🌐 ' + T('At a table') : '🏠 ' + T('In the lobby');
   return `<h3 class="sth">🟢 ${T('Online now')} (${on.length})</h3>` + (on.length
-    ? `<table class="res stats">${on.sort((a, b) => a.name.localeCompare(b.name)).map(x => `<tr><td><b>${esc(x.name)}</b></td><td>${at(x)}</td><td class="muted">${esc(Net.sysShort({ sys: x.sys }))}</td></tr>`).join('')}</table>`
-    : `<div class="muted">${T('Nobody yet.')}</div>`);
+    ? `<table class="res stats">${on.sort((a, b) => a.name.localeCompare(b.name)).map(x => `<tr><td><b>${esc(x.name)}</b>${x.direct ? ` <span class="stdirect">⚠ ${T('not connected to the database')}</span>` : ''}</td><td>${at(x)}</td><td class="muted">${esc(Net.sysShort({ sys: x.sys }))}</td></tr>`).join('')}</table>`
+    : `<div class="muted">${T('Nobody yet.')}</div>`)
+    + (on.some(x => x.direct) ? `<div class="muted">⚠ ${T('Seen only in the lobby: the device cannot reach the database (an ad or privacy blocker, or an old version), so its boards and messages are not recorded. The player sees a notice about it.')}</div>` : '');
 }
 // what was played in the chosen period: boards by kind, practice, the conventions practised most, and each player
 function statActHtml(a) {
