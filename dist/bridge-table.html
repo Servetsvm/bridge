@@ -6980,7 +6980,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 173;
+const APP_V = 174;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -8032,6 +8032,32 @@ function turnAlert() {
 
 /* ================= home page: start, open tables, our convention card and the lobby chat ================= */
 const myNm = () => { try { return localStorage.getItem('bridge-table-name') || ''; } catch (e) { return ''; } };
+/* ---- several people on one device: each name keeps its own results, settings, progress, friends and messages.
+   Logging out puts them away under the name (bridge-acct:<name>) and the device starts fresh; signing in with a
+   name used here before brings that player's things back. The look of the app (language, theme, cards, speed,
+   sounds) belongs to the device and stays. ---- */
+const ACCT_LS = ['bridge-friends', 'bridge-dms', 'bridge-dm-out', 'bridge-dm-seen', 'bridge-rated', 'bridge-req-mute', 'bridge-tour-seats'];
+const DEVICE_SET = ['lang', 'langAuto', 'theme', 'style', 'big', 'speed', 'sfx', 'felt', 'back', 'four', 'expl', 'auto', 'instNo', 'welNo', 'welN'];
+const acctKey = k => 'bridge-acct:' + k;
+function acctStash(k) {
+  if (!k) return;
+  const ls = {}; for (const x of ACCT_LS) { try { const v = localStorage.getItem(x); if (v != null) ls[x] = v; } catch (e) {} }
+  const saved = G && G.phase !== 'idle' && !online() ? G : ui.saved || null;
+  try { localStorage.setItem(acctKey(k), JSON.stringify({ set: SET, hist: HIST, board: BOARD, saved, ls, ts: Date.now() })); } catch (e) {
+    // too big for the browser's storage: keep it without the older boards' cards
+    try { localStorage.setItem(acctKey(k), JSON.stringify({ set: SET, hist: HIST.map((h, i) => i < HIST.length - 30 ? { ...h, deal: undefined, auc: undefined, pl: undefined, fieldList: undefined } : h), board: BOARD, saved, ls, ts: Date.now() })); } catch (x) {}
+  }
+}
+// the device as for a new player (keeping its own look); with a stash, that player's things instead
+function acctLoad(k) {
+  let a = null; try { a = k && JSON.parse(localStorage.getItem(acctKey(k)) || 'null'); } catch (e) {}
+  const dev = {}; for (const x of DEVICE_SET) if (SET[x] !== undefined) dev[x] = SET[x];
+  SET = Object.assign({ style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } }, a ? a.set : {}, dev);
+  HIST = a ? a.hist || [] : []; BOARD = a ? a.board || 0 : 0; G = idleG(); ui.saved = a ? a.saved || null : null;
+  for (const x of ACCT_LS) { try { if (a && a.ls && a.ls[x] != null) localStorage.setItem(x, a.ls[x]); else localStorage.removeItem(x); } catch (e) {} }
+  SET.cloudSet = 0;
+  return !!a;
+}
 /* ---- practise a convention: the heart of the home page. Pick one and the robots deal hands where our side uses
    it (freshDeal looks for them); every call can be tapped to see what it means. ---- */
 const PRAC_GROUPS = [
@@ -9292,9 +9318,11 @@ document.addEventListener('click', ev_ => {
     case "sRefresh": ui.statData = null; showStats(); break;
     case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), () => {
       if (online()) { flash(T('Close the online table first'), 2000); return; }
+      // this player's things are put away under the name; the device starts fresh for the next one
+      acctStash(SET.pinFor || Net.nameKey(myNm()));
       try { localStorage.removeItem('bridge-table-name'); } catch (e) {}
-      SET.pinH = null; SET.pinFor = null; Store.saveSettings(SET); save(); Net.st.claimed = false; ui.pmTo = null;
-      G = idleG(); ui.saved = null; render(); ui.gateErr = null; showGate();
+      acctLoad(null); SET.pinH = null; SET.pinFor = null; Store.saveSettings(SET); save();
+      location.reload();   // the lobby, friends and messages are read again for nobody
     }); break;
     case "pRename": showGate(true); break;
     case "oShared": { const d = ui.sharedDeal; ui.sharedDeal = null; closeOv(); if (d) { ui.saved = null; newBoard(d.hands, d.b); } break; }
@@ -9453,8 +9481,13 @@ async function gateGo() {
     if (r === 'pin') return err(T('Wrong PIN for {0}.', name));
     if (r === 'offline') return err(T('The online database could not be reached.'));
   }
+  // a name used on this device before: that player's results, settings, friends and messages come back
+  let back = false;
+  if (!ui.gateRename) { try { back = !!localStorage.getItem(acctKey(Net.nameKey(name))); } catch (e) {} }
+  if (back) { acctLoad(Net.nameKey(name)); try { localStorage.removeItem(acctKey(Net.nameKey(name))); } catch (e) {} }
   try { localStorage.setItem('bridge-table-name', name); } catch (e) {}
   SET.pinH = h; SET.pinFor = Net.nameKey(name); Store.saveSettings(SET); save();
+  if (back) { location.reload(); return; }
   ui.gateErr = null; ui.gateSug = null; ui.overlay = null; $('ov').hidden = true;
   Net.st.claimed = true; Net.shareInfo(); Net.Cloud.beat(); render();
   SET.cloudSet = 0; Net.cloudSync();   // your results and settings from your other devices
