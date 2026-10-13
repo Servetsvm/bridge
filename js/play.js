@@ -7,6 +7,7 @@ const { S, R, pd, sideOf, isNum, ST, rnd, shuffle, popc } = E;
 function newPlayState(hands, contract, auction, cards) {
   return {
     lav: cards ? [0, 1].map(i => !(cards[i] && cards[i].conv && cards[i].conv.lav === false)) : [true, true],
+    roman: cards ? [0, 1].map(i => !!(cards[i] && cards[i].conv && cards[i].conv.roman)) : [false, false],
     hands: hands.map(h => h.slice()), auction: auction || [], contract, trump: contract.strain < 4 ? contract.strain : -1,
     dummy: pd(contract.decl), dummyShown: false, leader: (contract.decl + 1) % 4, turn: (contract.decl + 1) % 4,
     trick: [], history: [], tricks: [0, 0], voids: [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
@@ -98,7 +99,8 @@ function heurPlay(g, seat) {
     const safe = pdWin && (pos === 3 || isMaster(g, wc, seat));
     if (!safe) { const win = trumps.filter(c => beats(c, wc, tr)); if (win.length) return win[0]; }
   }
-  if (sideOf(seat) !== sideOf(g.contract.decl) && lavOn(g, seat)) { const c = lavDiscard(g, seat, leg, ls); if (c != null) return c; }
+  if (sideOf(seat) !== sideOf(g.contract.decl) && romanOn(g, seat)) { const c = romanDiscard(g, seat, leg, ls); if (c != null) return c; }
+  else if (sideOf(seat) !== sideOf(g.contract.decl) && lavOn(g, seat)) { const c = lavDiscard(g, seat, leg, ls); if (c != null) return c; }
   return discard(g, seat, leg);
 }
 function discard(g, seat, leg) {
@@ -116,7 +118,8 @@ function discard(g, seat, leg) {
    Lavinthal discards: the suit discarded is not wanted; a high card asks for the higher of the two
    remaining suits (trumps and the suit led left out), a low card for the lower one. */
 const DEFF = { lav: true, att: true, sig: true, dd: true };
-const lavOn = (g, seat) => DEFF.lav && (!g.lav || g.lav[sideOf(seat)] !== false);
+const romanOn = (g, seat) => DEFF.lav && !!(g.roman && g.roman[sideOf(seat)]);
+const lavOn = (g, seat) => DEFF.lav && !romanOn(g, seat) && (!g.lav || g.lav[sideOf(seat)] !== false);
 const HON = r => (r === 12 ? 4 : r === 11 ? 3 : r === 10 ? 2 : r === 9 ? 1 : 0);
 /* the suit this defender would like partner to lead (needs real strength there) */
 function wantSuit(g, seat, exclude) {
@@ -153,6 +156,45 @@ function lavDiscard(g, seat, leg, ls) {
   }
   return pool[0];
 }
+/* Roman discards (odd-even): an odd spot card (3, 5, 7, 9) asks for the suit discarded; an even one (2, 4, 6, 8, 10)
+   does not want it, and its size asks for one of the other two suits: a low even card (2, 4) the lower, a high one
+   (6, 8, 10) the higher. Ranks here are 0 = the 2 … 8 = the 10, so an odd card has an odd rank. */
+const isOdd = c => R(c) % 2 === 1 && R(c) <= 7, isEven = c => R(c) % 2 === 0 && R(c) <= 8;
+function romanDiscard(g, seat, leg, ls) {
+  const want = wantSuit(g, seat, [ls]);
+  // the suit wanted: an odd card in it, if one can be spared (not a winner)
+  if (want >= 0) { const odd = asc(inSuit(leg, want)).filter(c => isOdd(c) && !isMaster(g, c, seat)); if (odd.length && inSuit(leg, want).length >= 2) return odd[0]; }
+  // otherwise an even card in a suit we do not want, its size pointing at the suit we want
+  let best = -1, bs = 1e9;
+  for (let s = 0; s < 4; s++) {
+    if (s === g.trump || s === want) continue; const cs = inSuit(leg, s); if (!cs.length) continue;
+    const masters = cs.filter(c => isMaster(g, c, seat)).length;
+    const dl = g.dummyShown && sideOf(g.dummy) !== sideOf(seat) ? inSuit(g.hands[g.dummy], s).length : 0;
+    const sc = masters * 10 + R(desc(cs)[0]) - cs.length * 0.6 + (dl >= cs.length && dl >= 3 ? 6 : 0) - (cs.some(isEven) ? 2 : 0);
+    if (sc < bs) { bs = sc; best = s; }
+  }
+  if (best < 0) return null;
+  const pool = asc(inSuit(leg, best)).filter(c => !isMaster(g, c, seat)), all = pool.length ? pool : asc(inSuit(leg, best));
+  const ev = all.filter(isEven), cand = lavCandidates(g, best, ls);
+  if (ev.length) {
+    if (want >= 0 && cand.length === 2 && cand.includes(want)) {
+      const high = want === Math.max(...cand), hi = ev.filter(c => R(c) >= 4), lo = ev.filter(c => R(c) <= 2);
+      return high ? (hi[0] ?? ev[ev.length - 1]) : (lo[0] ?? ev[0]);
+    }
+    return ev[0];
+  }
+  return all[0];
+}
+// what partner's Roman discard says: { suit } wanted, or null
+function romanRead(g, c, ls) {
+  const s = S(c);
+  if (isOdd(c)) return { suit: s, odd: true };
+  if (!isEven(c)) return null;
+  const cand = lavCandidates(g, s, ls);
+  if (cand.length === 1) return { suit: cand[0] };
+  if (cand.length === 2) return { suit: R(c) <= 2 ? Math.min(...cand) : Math.max(...cand) };
+  return null;
+}
 /* attitude card when partner led the suit and we are not trying to win the trick */
 function attitudeCard(g, seat, follow) {
   const ls = S(g.trick[0].c), mine = asc(follow);
@@ -169,6 +211,7 @@ function readSignals(g, seat) {
   const p = pd(seat), tr = g.trump;
   for (let i = g.history.length - 1; i >= 0; i--) {
     const t = g.history[i], ls = S(t.cards[0].c), pc = t.cards.find(x => x.s === p); if (!pc) continue;
+    if (S(pc.c) !== ls && S(pc.c) !== tr && romanOn(g, p)) { const r = romanRead(g, pc.c, ls); if (r) return { suit: r.suit, why: 'roman' }; }
     if (S(pc.c) !== ls && S(pc.c) !== tr && lavOn(g, p)) {
       const cand = lavCandidates(g, S(pc.c), ls), r = R(pc.c);
       if (cand.length === 1) return { suit: cand[0], why: 'lav' };
@@ -178,17 +221,24 @@ function readSignals(g, seat) {
   }
   return null;
 }
-/* text for the screen: what a partner's card means */
+// what a partner's card means, as [text, …values] for the screen (the text is translated there)
 function signalText(g, seat, c) {
   if (!g.trick.length) return null;
-  const ls = S(g.trick[0].c), s = S(c), r = R(c), SU = ['♣', '♦', '♥', '♠'], RT = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
+  const ls = S(g.trick[0].c), s = S(c), r = R(c), SU = ['♣', '♦', '♥', '♠'], RT = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'], card = RT[r] + SU[s];
+  if (s !== ls && s !== g.trump && romanOn(g, seat)) {
+    const rr = romanRead(g, c, ls);
+    if (rr && rr.odd) return ['Partner discards {0} (Roman): odd — asks for {1}', card, SU[s]];
+    if (rr) return ['Partner discards {0} (Roman): even — does not want {1}, asks for {2}', card, SU[s], SU[rr.suit]];
+    return ['Partner discards {0}: not interested in {1}', card, SU[s]];
+  }
   if (s !== ls && s !== g.trump && lavOn(g, seat)) {
     const cand = lavCandidates(g, s, ls);
-    if (cand.length === 2 && (r >= 5 || r <= 3)) return `Partner discards ${RT[r]}${SU[s]} (Lavinthal): ${r >= 5 ? 'high — asks for the higher suit ' + SU[Math.max(...cand)] : 'low — asks for the lower suit ' + SU[Math.min(...cand)]}`;
-    if (cand.length === 1) return `Partner discards ${RT[r]}${SU[s]} (Lavinthal): asks for ${SU[cand[0]]}`;
-    return `Partner discards ${RT[r]}${SU[s]}: not interested in ${SU[s]}`;
+    if (cand.length === 2 && r >= 5) return ['Partner discards {0} (Lavinthal): high — asks for the higher suit {1}', card, SU[Math.max(...cand)]];
+    if (cand.length === 2 && r <= 3) return ['Partner discards {0} (Lavinthal): low — asks for the lower suit {1}', card, SU[Math.min(...cand)]];
+    if (cand.length === 1) return ['Partner discards {0} (Lavinthal): asks for {1}', card, SU[cand[0]]];
+    return ['Partner discards {0}: not interested in {1}', card, SU[s]];
   }
-  if (s === ls && g.trick[0].s === pd(seat) && r <= 8) return `Partner plays ${RT[r]}${SU[s]} on your lead: ${r >= 5 ? 'high — encourages, continue the suit' : 'low — discourages'}`;
+  if (s === ls && g.trick[0].s === pd(seat) && r <= 8) return [r >= 5 ? 'Partner plays {0} on your lead: high — encourages, continue the suit' : 'Partner plays {0} on your lead: low — discourages', card];
   return null;
 }
 const bidSuitsOf = (g, seat) => g.auction.filter(e => e.seat === seat && isNum(e.call) && ST(e.call) < 4 && !(e.m && e.m.cv && e.m.cv !== 'twoOverOne')).map(e => ST(e.call));

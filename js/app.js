@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 179;
+const APP_V = 180;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -260,8 +260,8 @@ function applyField(e, f) {
 /* the conventions being practised (SET.practice holds their keys, separated by commas; "" = off) */
 // the basics every system plays (no switch on the card) can be practised too
 const PRAC_BASICS = ['jtr', 'strong2c', 'weak2', 'nego', 'takeout', 'bw', 'cue', 'pre', 'runout'];
-// Lavinthal is a way of discarding: it never comes up in the bidding, so it cannot be practised here
-const pracKnown = k => k !== 'lav' && (E.CONVS.some(c => c.k === k) || PRAC_BASICS.includes(k));
+// Lavinthal and Roman are ways of discarding: they never come up in the bidding, so they cannot be practised here
+const pracKnown = k => k !== 'lav' && k !== 'roman' && (E.CONVS.some(c => c.k === k) || PRAC_BASICS.includes(k));
 function pracList() { return String(SET.practice || '').split(',').filter(pracKnown); }
 const pracName = k => k === 'jtr' ? T('Transfer') : E.convInfo(k).n;   // plain "Transfer" in the practice list
 function pracNames() { return pracList().map(pracName).join(', '); }
@@ -473,7 +473,7 @@ function playCard(seat, c) {
   if (G.phase !== "play" || g.turn !== seat || g.trick.length >= 4 || !E.legalFor(g, seat).includes(c)) return;
   { const who = actor(seat); if (who !== "robot") pushUndo(who); }
   // explain the signal when your robot partner (on defence) discards or encourages
-  if (!userControls(seat) && g.history.length < 3 && sideOf(seat) === sideOf(U()) && sideOf(g.contract.decl) !== sideOf(U())) { const t = E.signalText(g, seat, c); if (t) ui.signal = t; }
+  if (!userControls(seat) && g.history.length < 3 && sideOf(seat) === sideOf(U()) && sideOf(g.contract.decl) !== sideOf(U())) { const t = E.signalText(g, seat, c); if (t) ui.signal = T(...t); }
   else if (userControls(seat) && !g.trick.length) ui.signal = null;
   E.applyCard(g, seat, c); ui.hintCard = null; ui.showLast = false; sfx("card");
   save(); render(); tick();
@@ -1551,7 +1551,7 @@ function loginsTxt(n) { for (const s of [10000, 5000, 1000, 500, 100, 50]) if (n
 // a title from the boards played
 function titleOf(n) { return n >= 5000 ? 'Grandmaster' : n >= 2000 ? 'Master' : n >= 500 ? 'Strategist' : n >= 100 ? 'Player' : 'Newcomer'; }
 // the convention card in one line: system, notrump range and the conventions switched on (short names)
-const CONV_SHORT = { rkc: 'RKCB 1430', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
+const CONV_SHORT = { rkc: 'RKCB 1430', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
 function convLine(p) {
   if (p.cline && p.cline.trim()) return esc(p.cline.trim());   // the player wrote it themselves
   const y = p.sys ? E.sysOf(p.sys) : null;
