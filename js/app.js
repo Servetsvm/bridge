@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 180;
+const APP_V = 181;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -260,15 +260,28 @@ function applyField(e, f) {
 /* the conventions being practised (SET.practice holds their keys, separated by commas; "" = off) */
 // the basics every system plays (no switch on the card) can be practised too
 const PRAC_BASICS = ['jtr', 'strong2c', 'weak2', 'nego', 'takeout', 'bw', 'cue', 'pre', 'runout'];
-// Lavinthal and Roman are ways of discarding: they never come up in the bidding, so they cannot be practised here
-const pracKnown = k => k !== 'lav' && k !== 'roman' && (E.CONVS.some(c => c.k === k) || PRAC_BASICS.includes(k));
+// Lavinthal and Roman are ways of discarding: practising them deals hands where you defend and will have to discard
+const CARD_KEYS = ['lav', 'roman'];
+const pracKnown = k => E.CONVS.some(c => c.k === k) || PRAC_BASICS.includes(k);
+// a deal where our side defends and one of us will likely run out of a suit and have to discard: in a suit contract a
+// short side suit with few trumps, in notrump declarer's long suit against our short holding
+function discardLikely(deal, c) {
+  const me = U(), pa = (me + 2) % 4, L = h => [0, 1, 2, 3].map(s => h.filter(x => E.S(x) === s).length);
+  const dl = [0, 1, 2, 3].map(s => L(deal[c.decl])[s] + L(deal[(c.decl + 2) % 4])[s]);
+  for (const who of [me, pa]) {
+    const l = L(deal[who]);
+    if (c.strain === 4) { if ([0, 1, 2, 3].some(s => dl[s] >= 8 && l[s] <= 2)) return true; }
+    else if (l[c.strain] <= 2 && [0, 1, 2, 3].some(s => s !== c.strain && l[s] <= 1 && dl[s] >= 6)) return true;
+  }
+  return false;
+}
 function pracList() { return String(SET.practice || '').split(',').filter(pracKnown); }
 const pracName = k => k === 'jtr' ? T('Transfer') : E.convInfo(k).n;   // plain "Transfer" in the practice list
 function pracNames() { return pracList().map(pracName).join(', '); }
 // does a practised convention ever come up in the base system? a short search in the background, one convention at a
 // time; the answer is kept per system and convention, and a "no" shows a warning under the choice. Rare conventions
 // (about one deal in a thousand or fewer) are not checked: a short search would miss them even where they belong.
-const PRAC_CHK = {}, PRAC_RARE = new Set(['gerber', 'smolen', 'texasInt', 'fsf', 'respx', 'gamb', 'sjs']), PRAC_Q = [];
+const PRAC_CHK = {}, PRAC_RARE = new Set(['gerber', 'smolen', 'texasInt', 'fsf', 'respx', 'gamb', 'sjs', 'lav', 'roman']), PRAC_Q = [];
 function pracCheck(k) {
   if (PRAC_RARE.has(k)) return true;
   const key = (SET.sys || 'twoone') + ':' + k;
@@ -390,7 +403,9 @@ function freshDeal(dealer) {
     if (want.length) {
       const auc = [];
       while (!auctionOver(auc) && auc.length < 60) { const t = (dealer + auc.length) % 4; const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); }
-      const mine = auc.some(e => e.seat === U() && e.m && want.includes(e.m.cv));
+      let mine = auc.some(e => e.seat === U() && e.m && want.includes(e.m.cv));
+      // practising discards: we defend and will likely have to discard
+      if (!mine && want.some(k => CARD_KEYS.includes(k))) { const c = contractOf(auc); if (c && sideOf(c.decl) !== sideOf(U()) && discardLikely(deal, c)) mine = true; }
       const ours = auc.some(e => sideOf(e.seat) === sideOf(U()) && e.m && want.includes(e.m.cv));
       if (!mine && !ours) { if (performance.now() - t0 < 4000) continue; }
       else if (!mine) { if (!fallback) fallback = { deal, key }; if (deal.act !== false && performance.now() - t0 < 2500) continue; }
@@ -473,8 +488,17 @@ function playCard(seat, c) {
   if (G.phase !== "play" || g.turn !== seat || g.trick.length >= 4 || !E.legalFor(g, seat).includes(c)) return;
   { const who = actor(seat); if (who !== "robot") pushUndo(who); }
   // explain the signal when your robot partner (on defence) discards or encourages
-  if (!userControls(seat) && g.history.length < 3 && sideOf(seat) === sideOf(U()) && sideOf(g.contract.decl) !== sideOf(U())) { const t = E.signalText(g, seat, c); if (t) ui.signal = T(...t); }
+  const cardPrac = pracList().some(k => CARD_KEYS.includes(k)) && !online() && !G.tour;
+  if (!userControls(seat) && (g.history.length < 3 || cardPrac) && sideOf(seat) === sideOf(U()) && sideOf(g.contract.decl) !== sideOf(U())) { const t = E.signalText(g, seat, c); if (t) ui.signal = T(...t); }
   else if (userControls(seat) && !g.trick.length) ui.signal = null;
+  // practising discards: your first discard on defence is compared with what the agreement says (the suit it asks for)
+  if (cardPrac && actor(seat) !== 'robot' && g.trick.length && sideOf(seat) !== sideOf(g.contract.decl) && !(G.dsg || []).some(x => x.s === seat)) {
+    const k = E.cardMethod(g, seat), sug = E.discardFor(g, seat);
+    if (k && pracList().includes(k) && sug != null && E.S(c) !== E.S(g.trick[0].c) && E.S(c) !== g.trump) {
+      const a = E.signalOf(g, seat, c), b = E.signalOf(g, seat, sug);
+      (G.dsg || (G.dsg = [])).push({ s: seat, k, c, sc: sug, a, b, ok: c === sug || a === b });
+    }
+  }
   E.applyCard(g, seat, c); ui.hintCard = null; ui.showLast = false; sfx("card");
   save(); render(); tick();
 }
@@ -501,7 +525,7 @@ function finishBoard() {
   const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
   // a practice board where the convention really came up counts for it (shown on its tile)
   if (pracList().length && !online() && !G.tour) {
-    const used = pracList().filter(k => G.auction.some(a => sideOf(a.seat) === sideOf(U()) && a.m && a.m.cv === k));
+    const used = pracList().filter(k => G.auction.some(a => sideOf(a.seat) === sideOf(U()) && a.m && a.m.cv === k) || (G.dsg || []).some(d => d.k === k));
     act.cv = used;
     if (used.length) { SET.pracN = SET.pracN || {}; used.forEach(k => { SET.pracN[k] = (SET.pracN[k] || 0) + 1; }); Store.saveSettings(SET); }
     // your calls where a practised convention came up (the system used it, or you did): right when you bid what
@@ -512,6 +536,8 @@ function finishBoard() {
       const k = want.includes(a.sg.cv) ? a.sg.cv : a.m && want.includes(a.m.cv) ? a.m.cv : null;
       if (k) rv.push({ i, k, call: a.call, sc: a.sg.c, ok: a.call === a.sg.c, st: a.sg.t, ut: (a.m && a.m.t) || '' });
     });
+    // your first discard on defence, when practising discards
+    (G.dsg || []).forEach((d, j) => rv.push({ i: 1000 + j, k: d.k, cd: 1, card: d.c, sc: d.sc, ok: d.ok, a: d.a, b: d.b }));
     // partner's calls with a practised convention: shown with what they mean (not scored)
     G.auction.forEach((a, i) => { if (a.seat === (U() + 2) % 4 && a.m && want.includes(a.m.cv)) rv.push({ i, k: a.m.cv, call: a.call, pd: 1, ut: a.m.t || '' }); });
     rv.sort((a, b) => a.i - b.i);
@@ -1101,13 +1127,14 @@ function pracHtml() {
   // (any number, your system's first); under each, what is chosen
   const sel = pracList(), cur = E.sysOf(SET.sys);
   const sysName = k => ({ twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' })[k] || (E.SYSTEMS.find(s => s.k === k) || {}).n || k;
-  const on = E.CONVS.filter(c => SET.conv[c.k] && pracKnown(c.k)), off = E.CONVS.filter(c => !SET.conv[c.k] && pracKnown(c.k));
+  const bid = c => pracKnown(c.k) && !CARD_KEYS.includes(c.k), on = E.CONVS.filter(c => SET.conv[c.k] && bid(c)), off = E.CONVS.filter(c => !SET.conv[c.k] && bid(c));
   const item = (attr, k, label, checked) => `<label class="pdi${checked ? ' on' : ''}"><input type="checkbox" ${attr}="${k}" ${checked ? 'checked' : ''}><span>${label}</span></label>`;
   const sysPanel = ui.pracDrop === 'sys' ? `<div class="pdpanel">${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), s.k === cur.k)).join('')}</div>` : '';
   const convPanel = ui.pracDrop === 'conv' ? `<div class="pdpanel wide">${item('data-pdoff', '1', T('Off — normal random deals'), !sel.length)}
       <div class="pdh">${T('Basics (every system)')}</div>${PRAC_BASICS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       ${on.length ? `<div class="pdh">${T('In your system')}</div>${on.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
+      <div class="pdh">${T('On defence: discards')}</div>${CARD_KEYS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
   return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Deal practice')}</button></div><p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p></div>
     <div class="prrow2">
@@ -1770,7 +1797,12 @@ function prvSum(rv) {
   return '📚 ' + ks.map(k => { const mine = rv.filter(r => r.k === k && !r.pd); return esc(pracName(k)) + ' ' + (!mine.length ? '🤝' : mine.every(r => r.ok) ? '✓' : '✗'); }).join(' · ');
 }
 function prvHtml(rv) {
+  const ask = s => s >= 0 ? T('asks for {0}', symHtml(s)) : T('asks for no suit');
   return rv.map(r => {
+    // a discard on defence (Lavinthal or Roman)
+    if (r.cd) return `<div class="prv ${r.ok ? 'ok' : 'no'}"><b>${r.ok ? '✓' : '✗'} ${esc(pracName(r.k))}</b>
+      <div>${T('You discarded')} ${cardH(r.card)} — ${ask(r.a)}</div>
+      ${r.ok ? '' : `<div class="prvfix">${T('By the agreement')} ${cardH(r.sc)} — ${ask(r.b)}</div>`}</div>`;
     if (r.pd) { const ci = E.convInfo(r.k); return `<div class="prv pd"><b>🤝 ${esc(pracName(r.k))}</b>
       <div>${T("Partner's call")} ${callHtml(r.call)} — ${symText(bidTxt(r.ut))}</div>${ci && ci.d ? `<div class="prvd">${symText(ci.d)}</div>` : ''}</div>`; }
     return `<div class="prv ${r.ok ? 'ok' : 'no'}"><b>${r.ok ? '✓' : '✗'} ${esc(pracName(r.k))}</b>

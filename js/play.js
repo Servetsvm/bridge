@@ -836,5 +836,23 @@ function analysePlay(deal, c, pl, seats, limit) {
   return out;
 }
 
-Object.assign(E, { DD, DDF, analysePlay, leadValues, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
+/* for practising discards: what the card agreement says a defender who cannot follow should discard, and which suit
+   a discarded card asks for (−1: none) under the side's agreement (Roman or Lavinthal) */
+function discardFor(g, seat) {
+  if (!g.trick.length || sideOf(seat) === sideOf(g.contract.decl)) return null;
+  const ls = S(g.trick[0].c), leg = legalFor(g, seat);
+  if (leg.some(c => S(c) === ls)) return null;
+  const side = leg.filter(c => S(c) !== g.trump); if (!side.length) return null;
+  return romanOn(g, seat) ? romanDiscard(g, seat, side, ls) : lavOn(g, seat) ? lavDiscard(g, seat, side, ls) : null;
+}
+function signalOf(g, seat, c) {
+  if (!g.trick.length || c == null) return -1;
+  const ls = S(g.trick[0].c), s = S(c), r = R(c);
+  if (s === ls || s === g.trump) return -1;
+  if (romanOn(g, seat)) { const rr = romanRead(g, c, ls); return rr ? rr.suit : -1; }
+  if (lavOn(g, seat)) { const cand = lavCandidates(g, s, ls); return cand.length === 1 ? cand[0] : cand.length === 2 && r >= 5 ? Math.max(...cand) : cand.length === 2 && r <= 3 ? Math.min(...cand) : -1; }
+  return -1;
+}
+const cardMethod = (g, seat) => romanOn(g, seat) ? 'roman' : lavOn(g, seat) ? 'lav' : '';
+Object.assign(E, { DD, DDF, discardFor, signalOf, cardMethod, analysePlay, leadValues, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
 });
