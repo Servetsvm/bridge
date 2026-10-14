@@ -758,11 +758,15 @@ function ddChoose(g, seat, leg, opt) {
   if (leg.length === 1) return leg[0];
   const tot = new Map(leg.map(c => [c, 0])); let n = 0; const t0 = performance.now();
   try {
-    while (n < opt.maxSamples && (n < 2 || performance.now() - t0 < opt.budget)) {
+    // at least minSamples (2 unless set); past opt.cap milliseconds a sample still being worked out is dropped (with none
+    // finished by twice that, the robot plays by its rules)
+    const minN = opt.minSamples ?? 2;
+    while (n < opt.maxSamples && (n < minN || performance.now() - t0 < opt.budget)) {
       const hands = sampleHands(g, seat);
       // each value is the first guess for the next card; a sample counts only when every card was solved
-      const vs = []; let gs = null;
-      for (const c of leg) { gs = ddEval(hands, g.trick, seat, c, 250000, gs); vs.push(gs); }
+      const vs = []; let gs = null, late = false;
+      for (const c of leg) { if (opt.cap && performance.now() - t0 > (n ? opt.cap : 2 * opt.cap)) { late = true; break; } gs = ddEval(hands, g.trick, seat, c, opt.evLim || 250000, gs); vs.push(gs); }
+      if (late) break;
       leg.forEach((c, i) => tot.set(c, tot.get(c) + vs[i]));
       n++;
     }
@@ -775,8 +779,13 @@ const PLAY_OPT = { budget: 900, maxSamples: 40, ddTricks: 9 };
 function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;
   const leg = legalFor(g, seat); if (leg.length === 1) return leg[0];
-  const ddLim = opt.ddTricks + (DEFF.dd && sideOf(seat) !== sideOf(g.contract.decl) ? 1 : 0);
+  // declarer (and dummy) may look ahead from earlier on (ddDecl); the defence keeps its signals and rules longer: double
+  // dummy samples assume partner sees every card, which misleads a defender early in the play
+  const def = sideOf(seat) !== sideOf(g.contract.decl), ddLim = def ? opt.ddTricks + (DEFF.dd ? 1 : 0) : (opt.ddDecl || opt.ddTricks);
   if (g.hands[seat].length <= ddLim) { const r = ddChoose(g, seat, leg, opt); if (r != null) return r; }
+  // the opening lead (opt.lead: its own samples and time): every lead tried against hands that fit the auction, as the
+  // strong bridge programs choose it
+  if (opt.lead && !g.history.length && !g.trick.length) { const r = ddChoose(g, seat, leg, opt.lead); if (r != null) return r; }
   return heurPlay(g, seat);
 }
 

@@ -6,7 +6,9 @@ const { dealerOf, auctionOver, contractOf, sideOf, vulOf, scoreOf } = E;
 const FIELD_AGG = [0, 1, -1, 0, 1, 0, -1, 0, 1, -1];
 // quick settings for the fallback without workers; the workers play at expert strength
 const FIELD_OPT = { budget: 90, maxSamples: 10, ddTricks: 6 };
-const EXPERT_OPT = { budget: 350, maxSamples: 16, ddTricks: 9 };
+// the robot tables play like the robots at your table (declarer looking ahead, opening leads by simulation), a little lighter
+const EXPERT_OPT = { budget: 350, maxSamples: 16, ddTricks: 9, ddDecl: 12, evLim: 800000, minSamples: 1, cap: 1200,
+  lead: { budget: 1200, maxSamples: 12, evLim: 2000000, minSamples: 1, cap: 2000 } };
 
 function simulateTable(deal, board, cards, agg, opt) {
   const dealer = dealerOf(board), auc = [];
@@ -43,6 +45,9 @@ function workerMain(E) {
         self.postMessage({ type: 'leads', id: m.id, v: E.leadValues(m.deal, m.c, m.limit, (x, v) => self.postMessage({ type: 'lead1', id: m.id, x, v })) });
       } else if (m.type === 'ana') {
         self.postMessage({ type: 'ana', id: m.id, list: E.analysePlay(m.deal, m.c, m.pl, m.seats, m.limit) });
+      } else if (m.type === 'card') {
+        // a robot's card, worked out here so the page stays smooth while it thinks
+        self.postMessage({ type: 'card', id: m.id, c: E.aiPlay(m.g, m.seat, m.opt) });
       } else if (m.type === 'dd') {
         self.postMessage({ type: 'dd', id: m.id, key: m.key, t: E.ddContract(m.deal, m.c, m.limit || 1.5e8) });
       }

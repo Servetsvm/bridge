@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 183;
+const APP_V = 184;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -592,7 +592,13 @@ function tick() {
       const t = g.turn, left = g.hands[t].length;
       // a robot side about to lead may claim the rest (asked once per trick, near the end of the board)
       const mayClaim = !g.trick.length && g.rcl !== g.history.length && robot(pd(t)) && left >= 2 && left <= 8;
-      timer = setTimeout(async () => { if (mayClaim && await robotClaim(g, t)) return; if (G && G.play === g && g.turn === t) playCard(t, robotCard(g, t)); }, delay());
+      // the robot starts thinking at once (in the background); its card goes down after the usual pause, or when it is ready
+      const think = mayClaim ? null : robotCardAsync(g, t);
+      timer = setTimeout(async () => {
+        if (mayClaim && await robotClaim(g, t)) return;
+        const c = await (think || robotCardAsync(g, t));
+        if (G && G.play === g && g.turn === t && !g.trick.some(x => x.s === t)) playCard(t, c);
+      }, delay());
     }
     else if (!userControls(g.turn)) { /* a friend is to play */ }
     else { const leg = E.legalFor(g, g.turn); if (leg.length === 1 && g.trick.length > 0 && SET.auto) timer = setTimeout(() => playCard(g.turn, leg[0]), 450); }
@@ -1879,6 +1885,35 @@ function robotCard(g, t) {
   if (lv === 'mid') return E.aiPlay(g, t, { budget: 250, maxSamples: 12, ddTricks: 6 });
   const leg = E.legalFor(g, t);
   return Math.random() < 0.25 ? leg[Math.floor(Math.random() * leg.length)] : E.aiPlay(g, t, { budget: 40, maxSamples: 3, ddTricks: 2 });
+}
+/* robots' cards: an expert robot looks at every card with double-dummy samples from the first trick on, which takes up
+   to a second or two, so it is worked out in a background worker (the page stays smooth); without a worker, at once */
+const BOT_OPT = { budget: 1200, maxSamples: 40, ddTricks: 9, ddDecl: 13, evLim: 1500000, minSamples: 1, cap: 2500,
+  lead: { budget: 2500, maxSamples: 24, evLim: 3000000, minSamples: 2, cap: 4000 } };   // declarer looks ahead from the first trick; the opening lead by simulation
+const Bot = {
+  w: null, n: 0, wait: null,
+  ask(g, seat, opt) {
+    if (!this.w) { this.w = Field.mk(); if (this.w) { this.w.onmessage = e => { const d = e.data || {}; if (this.wait && d.id === this.wait.id) { const f = this.wait.f; this.wait = null; f(d.type === 'card' ? d.c : null); } }; this.w.onerror = () => { this.w = null; if (this.wait) { const f = this.wait.f; this.wait = null; f(null); } }; } }
+    if (!this.w) return Promise.resolve(E.aiPlay(g, seat, opt));
+    const id = ++this.n;
+    return new Promise(res => {
+      this.wait = { id, f: res };
+      this.w.postMessage({ type: 'card', id, g, seat, opt });   // the play state is plain data: it goes to the worker as is
+      // a worker that does not answer in time: the robot plays by its rules here
+      setTimeout(() => { if (this.wait && this.wait.id === id) { this.wait = null; res(null); } }, (opt.budget || 1000) * 6 + 4000);
+    }).then(c => c != null && E.legalFor(g, seat).includes(c) ? c : E.heurPlay(g, seat));
+  },
+};
+function robotCardAsync(g, t) {
+  // one answer per position (the robot's turn can be looked at more than once while it thinks)
+  const key = G.id + ':' + g.history.length + ':' + g.trick.length + ':' + t;
+  if (Bot.key === key) return Bot.p;
+  Bot.key = key; return Bot.p = robotCardFor(g, t);
+}
+async function robotCardFor(g, t) {
+  const lv = SET.robotLvl || 'expert';
+  if (lv === 'expert' || online() || G.tour || G.tprac || sideOf(t) === sideOf(U())) return Bot.ask(g, t, BOT_OPT);
+  return robotCard(g, t);
 }
 function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
