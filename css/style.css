@@ -1470,3 +1470,5 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 :root[data-theme="dark"] .sbb.me{background:#24452f}
 :root[data-theme="dark"] .sbtab tr.me td{background:#3a3520}
 :root[data-theme="dark"] .sbprev{background:#26302a}
+.sbwait{padding:10px 12px;border-radius:8px;background:#fff6d6;color:#6b5200;font-weight:600}
+:root[data-theme="dark"] .sbwait{background:#3a3520;color:#f0d98a}

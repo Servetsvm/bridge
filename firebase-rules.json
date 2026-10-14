@@ -168,8 +168,8 @@
             "r": {
               "$b": {
                 "$t": {
-                  ".write": "auth != null && newData.parent().parent().parent().child('m').exists() && newData.parent().parent().parent().child('m').child('st').val() !== 'done'",
-                  ".validate": "newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 7 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 4 && newData.child('x').isNumber() && newData.child('x').val() >= 0 && newData.child('x').val() <= 2 && newData.child('d').isNumber() && newData.child('d').val() >= 0 && newData.child('d').val() <= 3 && newData.child('k').isNumber() && newData.child('k').val() >= 0 && newData.child('k').val() <= 13 && newData.child('sc').isNumber()"
+                  ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && newData.parent().parent().parent().child('m').exists() && newData.parent().parent().parent().child('m').child('st').val() !== 'done' && (!data.exists() || !data.child('ok').exists()))",
+                  ".validate": "newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 7 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 4 && newData.child('x').isNumber() && newData.child('x').val() >= 0 && newData.child('x').val() <= 2 && newData.child('d').isNumber() && newData.child('d').val() >= 0 && newData.child('d').val() <= 3 && newData.child('k').isNumber() && newData.child('k').val() >= 0 && newData.child('k').val() <= 13 && newData.child('sc').isNumber() && (!newData.child('ok').exists() || newData.child('ok').isBoolean())"
                 }
               }
             }
@@ -201,8 +201,8 @@
         "r": {
           "$b": {
             "$t": {
-              ".write": "auth != null && newData.parent().parent().parent().child('m').exists() && newData.parent().parent().parent().child('m').child('st').val() !== 'done'",
-              ".validate": "newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 7 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 4 && newData.child('x').isNumber() && newData.child('x').val() >= 0 && newData.child('x').val() <= 2 && newData.child('d').isNumber() && newData.child('d').val() >= 0 && newData.child('d').val() <= 3 && newData.child('k').isNumber() && newData.child('k').val() >= 0 && newData.child('k').val() <= 13 && newData.child('sc').isNumber()"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && newData.parent().parent().parent().child('m').exists() && newData.parent().parent().parent().child('m').child('st').val() !== 'done' && (!data.exists() || !data.child('ok').exists()))",
+              ".validate": "newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 7 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 4 && newData.child('x').isNumber() && newData.child('x').val() >= 0 && newData.child('x').val() <= 2 && newData.child('d').isNumber() && newData.child('d').val() >= 0 && newData.child('d').val() <= 3 && newData.child('k').isNumber() && newData.child('k').val() >= 0 && newData.child('k').val() <= 13 && newData.child('sc').isNumber() && (!newData.child('ok').exists() || newData.child('ok').isBoolean())"
             }
           }
         }

@@ -25,9 +25,10 @@ const SB = (() => {
     const sc = E.scoreOf(r.l, r.s, r.x || 0, E.vulOf(b, r.d), r.k);
     return E.sideOf(r.d) === 0 ? sc : -sc;
   }
-  // per board, each table's result compared with the other tables' (matchpoints % and cross-IMPs, North-South view)
+  // per board, each table's result compared with the other tables' (matchpoints % and cross-IMPs, North-South view);
+  // only scores the other pair has confirmed count
   function boardCmp(b) {
-    const R = (sb.g.r || {})[b] || {}, ts = Object.keys(R), out = {};
+    const R = (sb.g.r || {})[b] || {}, ts = Object.keys(R).filter(t => R[t].ok), out = {};
     for (const t of ts) {
       const me = nsScore(b, R[t]), field = ts.filter(x => x !== t).map(x => nsScore(b, R[x]));
       out[t] = { ns: me, cmp: field.length ? E.compare(me, field) : null };
@@ -152,7 +153,7 @@ const SB = (() => {
     const g = sb.g, mt = myTable();
     const cells = [...Array(g.m.bd).keys()].map(i => {
       const b = i + 1, R = (g.r || {})[b] || {}, n = Object.keys(R).length, me = mt && R[mt];
-      return `<button class="sbb${me ? ' me' : ''}${n ? ' some' : ''}" data-sbboard="${b}"><b>${b}</b><small>${me ? '✓ ' : ''}${n ? T('{0} tables', n) : '—'}</small></button>`;
+      return `<button class="sbb${me ? ' me' : ''}${n ? ' some' : ''}" data-sbboard="${b}"><b>${b}</b><small>${me ? (me.ok ? '✓ ' : '⏳ ') : ''}${n ? T('{0} tables', n) : '—'}</small></button>`;
     }).join('');
     return `<div class="muted">${done() ? T('Tap a board to see what was played.') : mt ? T('Tap a board your table played to enter its score.') : T('First choose your table above.')}</div><div class="sbgrid">${cells}</div>`;
   }
@@ -160,19 +161,24 @@ const SB = (() => {
     const g = sb.g, mt = myTable(), R = (g.r || {})[b] || {}, ts = Object.keys(R).sort((x, y) => x - y);
     const vul = [E.vulOf(b, 0), E.vulOf(b, 1)], vt = vul[0] && vul[1] ? T('All vulnerable') : vul[0] ? T('{0} vulnerable', SEAT_AB[0] + SEAT_AB[2]) : vul[1] ? T('{0} vulnerable', SEAT_AB[1] + SEAT_AB[3]) : T('None vulnerable');
     const head = `<h3>${T('Board {0}', b)} <small class="muted">${T('Dealer')}: ${SEAT[E.dealerOf(b)]} · ${vt}</small></h3>`;
-    const canSee = done() || (mt && R[mt]);
-    if (sb.form || (!canSee && mt && !done())) return head + formHtml(b) + (ts.length ? `<div class="muted">${T('{0} tables have played this board. You will see their results after entering yours.', ts.length)}</div>` : '');
-    if (!canSee) return head + `<div class="muted">${T('First choose your table above.')}</div>`;
-    const c = boardCmp(b);
-    const rows = ts.map(t => { const r = R[t], x = c[t]; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
+    const mine = mt && R[mt], others = ts.filter(t => +t !== mt).length;
+    if (sb.form || (!done() && mt && !mine)) return head + formHtml(b) + (others && !sb.formT ? `<div class="muted">${T('{0} tables have played this board. You will see their results after entering yours.', others)}</div>` : '');
+    if (!done() && !mt) return head + `<div class="muted">${T('First choose your table above.')}</div>`;
+    if (!done() && !mine.ok) return head + `<div class="sbform"><div class="muted">${T('Table {0}', mt)}: ${esc(pairName(mt, 'ns'))} — ${esc(pairName(mt, 'ew'))}</div>
+      <div class="sbprev"><b>${conTxt(mine)} ${resTxt(mine)} · ${scoreTxt(b, mine)}</b></div>
+      <div class="sbwait">⏳ ${T('The other pair checks the score and confirms it.')}</div>
+      <div class="row2"><button class="btn new" id="sbOk">✓ ${T('We confirm')}</button><button class="btn" id="sbFix">✎ ${T('Correct')}</button></div>
+      ${others ? `<div class="muted">${T('Results of the other tables appear after the confirmation.')}</div>` : ''}</div>`;
+    const c = boardCmp(b), wait = ts.filter(t => !R[t].ok).length;
+    const rows = ts.map(t => { const r = R[t], x = c[t] || { ns: nsScore(b, r), cmp: null }; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
       <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
-      <td data-l="MP %" class="n">${x.cmp ? x.cmp.mp : '—'}</td><td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td></tr>`; }).join('');
-    return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th><th class="n">MP %</th><th class="n">IMP</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="muted">${T('MP % and IMP from North-South’s side, against the other tables.')}</div>
-      ${mt && R[mt] && !done() ? `<div class="row2"><button class="btn" id="sbFix">✎ ${T('Correct our score')}</button></div>` : ''}`;
+      <td data-l="MP %" class="n">${!r.ok ? '⏳' : x.cmp ? x.cmp.mp : '—'}</td><td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td>${isAdm() ? `<td class="tact"><button class="btn mini-btn" data-sbadm="${t}" title="${T('Correct')}">✎</button></td>` : ''}</tr>`; }).join('');
+    return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th><th class="n">MP %</th><th class="n">IMP</th>${isAdm() ? '<th></th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="muted">${T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the administrator can change a confirmed score.')}</div>`;
   }
+  const scoreTxt = (b, r) => { const ns = nsScore(b, r), ew = r.l && E.sideOf(r.d) === 1; return `${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; };
   function formHtml(b) {
-    const mt = myTable(), R = (sb.g.r || {})[b] || {};
+    const mt = sb.formT || myTable(), R = (sb.g.r || {})[b] || {};
     const f = sb.form || (sb.form = R[mt] ? { ...R[mt] } : { l: null, s: null, x: 0, d: null, k: null });
     const need = f.l ? f.l + 6 : 0;
     const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
@@ -227,10 +233,20 @@ const SB = (() => {
   }
   async function save() {
     const b = sb.board, mt = myTable(), f = sb.form; if (!b || !mt || !f || sb.busy) return;
+    const t = sb.formT || mt;
     const r = f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
     r.sc = nsScore(b, r); r.ts = Date.now();
+    if (sb.formT) r.ok = true;   // the administrator's correction needs no confirmation
     sb.busy = true; show();
-    try { await C().put('sb/' + sb.id + '/r/' + b + '/' + mt, r); ((sb.g.r = sb.g.r || {})[b] = sb.g.r[b] || {})[mt] = r; sb.form = null; sb.err = ''; }
+    try { await C().put('sb/' + sb.id + '/r/' + b + '/' + t, r); ((sb.g.r = sb.g.r || {})[b] = sb.g.r[b] || {})[t] = r; sb.form = null; sb.formT = 0; sb.err = ''; }
+    catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
+    sb.busy = false; try { await loadGame(sb.id); } catch (e) {} show();
+  }
+  // the other pair has checked the score at the table
+  async function confirmScore() {
+    const b = sb.board, mt = myTable(); if (!b || !mt || sb.busy) return;
+    sb.busy = true;
+    try { await C().put('sb/' + sb.id + '/r/' + b + '/' + mt + '/ok', true); sb.g.r[b][mt].ok = true; sb.err = ''; }
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
     sb.busy = false; try { await loadGame(sb.id); } catch (e) {} show();
   }
@@ -288,11 +304,13 @@ const SB = (() => {
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
     if (id === 'sbList') { setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
     if (d.sbview) { sb.view = d.sbview; sb.editT = 0; return show(); }
-    if (d.sbboard) { sb.board = +d.sbboard; sb.form = null; return show(); }
-    if (id === 'sbBoards') { sb.board = 0; sb.form = null; return show(); }
+    if (d.sbboard) { sb.board = +d.sbboard; sb.form = null; sb.formT = 0; return show(); }
+    if (id === 'sbBoards') { sb.board = 0; sb.form = null; sb.formT = 0; return show(); }
     if (id === 'sbSave') return save();
-    if (id === 'sbFix') { const R = sb.g.r[sb.board][myTable()]; sb.form = { ...R }; if (!R.l) sb.form.l = 0; return show(); }
-    if (id === 'sbCancel') { sb.form = null; return show(); }
+    if (id === 'sbFix') { const R = sb.g.r[sb.board][myTable()]; sb.form = { ...R }; delete sb.form.ok; if (!R.l) sb.form.l = 0; return show(); }
+    if (d.sbadm) { const R = sb.g.r[sb.board][d.sbadm]; sb.formT = +d.sbadm; sb.form = { ...R }; if (!R.l) sb.form.l = 0; return show(); }
+    if (id === 'sbCancel') { sb.form = null; sb.formT = 0; return show(); }
+    if (id === 'sbOk') return confirmScore();
     if (id === 'sbEnd') { askYes(T('Finish the game? Scores can no longer be entered.'), () => { openOv('sb', gameHtml()); finish(); }); return; }
     if (d.sbedit) { sb.editT = +d.sbedit; return show(); }
     if (id === 'sbTSave') return saveTable();
