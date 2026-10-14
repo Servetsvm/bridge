@@ -706,7 +706,7 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 /* the tournament list: tabs and a table (on phones each tournament becomes a small card) */
 .ttabs{flex-wrap:wrap;margin-bottom:6px}
 .ttabs button small{opacity:.7;font-weight:600}
-.ttwrap{overflow-x:auto}
+.ttwrap{overflow-x:auto;flex-shrink:0}
 .ttab{width:100%;border-collapse:collapse;font-size:14px}
 .ttab th{background:#1b2a4e;color:#fff;text-align:left;padding:6px 8px;font-weight:700;white-space:nowrap}
 .ttab th:first-child{border-radius:8px 0 0 0}.ttab th:last-child{border-radius:0 8px 0 0}

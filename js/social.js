@@ -88,9 +88,12 @@ const SB = (() => {
     show(); await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
   }
   function show() {
-    if (sb.setup) return openOv('sb', setupHtml());
-    if (!sb.id) return openOv('sb', listHtml());
-    openOv('sb', gameHtml());
+    // a redraw of the same screen (a button tapped, a score saved) keeps the page where it was; a new screen starts at the top
+    const key = sb.setup ? 'setup' : !sb.id ? 'list' : sb.id + ':' + sb.board + ':' + sb.view, old = document.querySelector('#ov .sheet');
+    const top = ui.overlay === 'sb' && sb.key === key && old ? old.scrollTop : 0;
+    sb.key = key;
+    openOv('sb', sb.setup ? setupHtml() : !sb.id ? listHtml() : gameHtml());
+    const s = document.querySelector('#ov .sheet'); if (s && top) s.scrollTop = top;
   }
   function listHtml() {
     const rows = (sb.list || []).map(g => `<tr><td><b>🃏 ${esc(g.n)}</b><small>${fmtDate(g.ts)}${g.byn ? ' · ' + esc(g.byn) : ''}</small></td>

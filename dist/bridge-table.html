@@ -721,7 +721,7 @@ body.classic .card.tc{border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
 /* the tournament list: tabs and a table (on phones each tournament becomes a small card) */
 .ttabs{flex-wrap:wrap;margin-bottom:6px}
 .ttabs button small{opacity:.7;font-weight:600}
-.ttwrap{overflow-x:auto}
+.ttwrap{overflow-x:auto;flex-shrink:0}
 .ttab{width:100%;border-collapse:collapse;font-size:14px}
 .ttab th{background:#1b2a4e;color:#fff;text-align:left;padding:6px 8px;font-weight:700;white-space:nowrap}
 .ttab th:first-child{border-radius:8px 0 0 0}.ttab th:last-child{border-radius:0 8px 0 0}
@@ -7730,7 +7730,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 188;
+const APP_V = 189;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12458,9 +12458,12 @@ const SB = (() => {
     show(); await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
   }
   function show() {
-    if (sb.setup) return openOv('sb', setupHtml());
-    if (!sb.id) return openOv('sb', listHtml());
-    openOv('sb', gameHtml());
+    // a redraw of the same screen (a button tapped, a score saved) keeps the page where it was; a new screen starts at the top
+    const key = sb.setup ? 'setup' : !sb.id ? 'list' : sb.id + ':' + sb.board + ':' + sb.view, old = document.querySelector('#ov .sheet');
+    const top = ui.overlay === 'sb' && sb.key === key && old ? old.scrollTop : 0;
+    sb.key = key;
+    openOv('sb', sb.setup ? setupHtml() : !sb.id ? listHtml() : gameHtml());
+    const s = document.querySelector('#ov .sheet'); if (s && top) s.scrollTop = top;
   }
   function listHtml() {
     const rows = (sb.list || []).map(g => `<tr><td><b>🃏 ${esc(g.n)}</b><small>${fmtDate(g.ts)}${g.byn ? ' · ' + esc(g.byn) : ''}</small></td>
