@@ -83,8 +83,14 @@ const SB = (() => {
   }
 
   /* ---- screens ---- */
+  const LAST = 'bridge-sb-last';
+  const lastGame = () => { try { return localStorage.getItem(LAST) || ''; } catch (e) { return ''; } };
+  const setLast = id => { try { if (id) localStorage.setItem(LAST, id); else localStorage.removeItem(LAST); } catch (e) {} };
+  // the game this device was last entering scores in opens again at once (ready for the next board) while it is running
   async function open() {
     sb.id = null; sb.g = null; sb.setup = null; sb.err = '';
+    const last = lastGame();
+    if (last) { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); try { if (await loadGame(last) && !done()) return openGame(last); } catch (e) {} sb.id = null; sb.g = null; setLast(''); }
     show(); await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
   }
   function show() {
@@ -137,10 +143,10 @@ const SB = (() => {
       <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}</div>
       ${done() ? '' : tsel}${sb.board ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
-      <div class="row2">${sb.board ? `<button class="btn" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
+      <div class="row2">${sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
         ${!sb.board && !done() && (mine || isAdm()) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
         ${!sb.board && isAdm() ? `<button class="btn tdel" data-sbdel="${sb.id}">✕ ${T('Delete')}</button>` : ''}
-        <button class="btn gold" id="oClose">${T('Close')}</button></div>`;
+        ${sb.board ? '' : `<button class="btn gold" id="oClose">${T('Close')}</button>`}</div>`;
   }
   function boardsHtml() {
     const g = sb.g, mt = myTable();
@@ -217,7 +223,7 @@ const SB = (() => {
     sb.err = '';
     try { if (!(await loadGame(id))) { sb.err = T('No game with this code.'); return show(); } }
     catch (e) { sb.err = T('Could not reach the server. Check the internet connection.'); return show(); }
-    sb.view = 'boards'; sb.board = 0; sb.form = null; sb.editT = 0; show(); poll();
+    sb.view = 'boards'; sb.board = 0; sb.form = null; sb.editT = 0; setLast(done() ? '' : id); show(); poll();
   }
   async function save() {
     const b = sb.board, mt = myTable(), f = sb.form; if (!b || !mt || !f || sb.busy) return;
@@ -246,8 +252,23 @@ const SB = (() => {
     show();
   }
 
+  /* running games are listed with the open tables on the home page (the list is fetched at most once a minute) */
+  const lob = { L: null, ts: 0, busy: false, html: '' };
+  function lobbyHtml() {
+    if (!lob.busy && Date.now() - lob.ts > 60e3 && C() && C().on) {
+      lob.busy = true;
+      C().get('sbi').then(L => {
+        lob.L = Object.entries(L || {}).map(([id, v]) => ({ id, ...v })).filter(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3).sort((a, b) => b.ts - a.ts);
+        const h = rowsHtml(); if (h !== lob.html) { lob.html = h; if (typeof render === 'function') render(); }
+      }).catch(() => {}).finally(() => { lob.busy = false; lob.ts = Date.now(); });
+    }
+    return lob.html = rowsHtml();
+  }
+  const rowsHtml = () => (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-sbgo="${g.id}">${T('Open')}</button></div></div>`).join('');
+
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
+    const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }
     if (ui.overlay !== 'sb') return;
     const el = e.target.closest('button'); if (!el) return;
     const d = el.dataset, id = el.id;
@@ -265,7 +286,7 @@ const SB = (() => {
     if (id === 'sbCreate') return create();
     if (d.sbopen) return openGame(d.sbopen);
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
-    if (id === 'sbList') { sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
+    if (id === 'sbList') { setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
     if (d.sbview) { sb.view = d.sbview; sb.editT = 0; return show(); }
     if (d.sbboard) { sb.board = +d.sbboard; sb.form = null; return show(); }
     if (id === 'sbBoards') { sb.board = 0; sb.form = null; return show(); }
@@ -277,5 +298,5 @@ const SB = (() => {
     if (id === 'sbTSave') return saveTable();
   });
 
-  return { open };
+  return { open, lobbyHtml };
 })();

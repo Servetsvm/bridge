@@ -537,8 +537,10 @@ const Net = (() => {
         : `<button class="btn new" data-tplay="${t.id}">${t.joined[me] ? T('Play') : T('Join and play')}</button>`;
       return `<div class="otour"><div><b>🏆 ${esc(t.name)}</b><small>${k} · ${T('{0} boards', t.n)} · ${T('{0} players', players)} · ${t.state === 'setup' ? T('Registering') : T('Running')}</small></div><div class="otb">${btn}${isAdmin() || isMine(t) ? `<button class="btn tdel" data-tdel="${t.id}" title="${T("Close")}">✕</button>` : ""}</div></div>`;
     }).join('');
-    const empty = !rows && !tours ? `<div class="muted">${T('No other tables are open right now.')}</div>` : '';
-    return `<div class="tables">${tours ? `<div class="otours">${tours}</div>` : ''}${rows}${empty}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
+    // social bridge games running (real cards at real tables, scores kept in the app)
+    const soc = typeof SB !== 'undefined' ? SB.lobbyHtml() : '';
+    const empty = !rows && !tours && !soc ? `<div class="muted">${T('No other tables are open right now.')}</div>` : '';
+    return `<div class="tables">${tours || soc ? `<div class="otours">${soc}${tours}</div>` : ''}${rows}${empty}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
   }
   /* ---- lobby chat: everyone with the app open can talk; each message goes along every lobby line ---- */
   const lclearTs = () => { try { return +localStorage.getItem('bridge-lobby-cleared') || 0; } catch (e) { return 0; } };
