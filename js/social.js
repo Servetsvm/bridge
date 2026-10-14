@@ -94,7 +94,11 @@ const SB = (() => {
     if (last) { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); try { if (await loadGame(last) && !done()) return openGame(last); } catch (e) {} sb.id = null; sb.g = null; setLast(''); }
     show(); await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
   }
+  // a score this table entered that the other pair has not confirmed yet: the screen stays on that board until it is
+  const pending = () => { if (!sb.g || done() || sb.formT) return 0; const mt = myTable(); if (!mt) return 0; for (const b in (sb.g.r || {})) { const r = sb.g.r[b][mt]; if (r && !r.ok) return +b; } return 0; };
+  const locked = () => ui.overlay === 'sb' && !!sb.id && !sb.setup && !!pending();
   function show() {
+    if (sb.id && !sb.setup) { const p = pending(); if (p) sb.board = p; }
     // a redraw of the same screen (a button tapped, a score saved) keeps the page where it was; a new screen starts at the top
     const key = sb.setup ? 'setup' : !sb.id ? 'list' : sb.id + ':' + sb.board + ':' + sb.view, old = document.querySelector('#ov .sheet');
     const top = ui.overlay === 'sb' && sb.key === key && old ? old.scrollTop : 0;
@@ -142,9 +146,9 @@ const SB = (() => {
     else body = boardsHtml();
     return `<h2>🃏 ${esc(m.n)}</h2>
       <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}</div>
-      ${done() ? '' : tsel}${sb.board ? '' : tabs}${body}
+      ${done() || pending() ? '' : tsel}${sb.board ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
-      <div class="row2">${sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
+      <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
         ${!sb.board && !done() && (mine || isAdm()) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
         ${!sb.board && isAdm() ? `<button class="btn tdel" data-sbdel="${sb.id}">✕ ${T('Delete')}</button>` : ''}
         ${sb.board ? '' : `<button class="btn gold" id="oClose">${T('Close')}</button>`}</div>`;
@@ -316,5 +320,5 @@ const SB = (() => {
     if (id === 'sbTSave') return saveTable();
   });
 
-  return { open, lobbyHtml };
+  return { open, lobbyHtml, locked };
 })();

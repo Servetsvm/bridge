@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 191;
+const APP_V = 192;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1711,6 +1711,7 @@ function openOv(name, html) {
   if (fl && ui.fpos) { const s = ov.firstChild; s.style.left = ui.fpos.x + "px"; s.style.top = ui.fpos.y + "px"; s.style.right = "auto"; }
 }
 function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no way past the name and PIN
+  if (typeof SB !== "undefined" && SB.locked()) return;   // social bridge: a score waits for the other pair's confirmation
   if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; $('ov').classList.remove('float'); }
 /* ---- the problem of the day: the same deal and question for everyone each day (from the date), in turn
    "what do you open?", "partner opened: what do you answer?" and "what do you lead?". The answer is the robot's call
