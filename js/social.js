@@ -16,6 +16,12 @@ const SB = (() => {
   const signed = v => (v > 0 ? '+' : '') + v;
   const sym = s => s === 4 ? 'NT' : `<span class="${s === 1 || s === 2 ? 'red' : ''}">${SUITS[s]}</span>`;
   const isAdm = () => Net.isAdmin && Net.isAdmin();
+  // the player signed in on this device (name and PIN), as the database rules know it
+  const myName = () => { try { return SET.pinH ? localStorage.getItem('bridge-table-name') || '' : ''; } catch (e) { return ''; } };
+  const myKey = () => { const n = myName(); return n && Net.ruleKey ? Net.ruleKey(n) : ''; };
+  // the organiser: the player who opened the game, recognised by the name they are signed in with (on any device),
+  // or the device it was opened on
+  const isOrganiser = m => !!m && ((m.bk && m.bk === myKey()) || (C().uidNow && C().uidNow() === m.by));
   const done = () => sb.g && sb.g.m && sb.g.m.st === 'done';
 
   /* ---- scores ---- */
@@ -136,7 +142,7 @@ const SB = (() => {
     document.querySelectorAll('[data-sbname]').forEach(i => { const [t, k] = i.dataset.sbname.split(':'); (s.names[t] = s.names[t] || {})[k] = i.value.trim().slice(0, 20); });
   }
   function gameHtml() {
-    const g = sb.g, m = g.m, mt = myTable(), mine = C().uidNow && C().uidNow() === m.by;
+    const g = sb.g, m = g.m, mt = myTable(), mine = isOrganiser(m);
     const tabs = `<div class="seg ttabs">${[['boards', T('Board list')], ['rank', T('Standings')], ['tables', T('Tables')]].map(([v, l]) => `<button data-sbview="${v}" class="${sb.view === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
     const tsel = `<div class="grp sbme"><span>${T('My table')}</span>${seg('me', [...Array(m.tb).keys()].map(i => [i + 1, i + 1]), mt)}</div>`;
     let body = '';
@@ -145,12 +151,12 @@ const SB = (() => {
     else if (sb.view === 'tables') body = tablesHtml();
     else body = boardsHtml();
     return `<h2>🃏 ${esc(m.n)}</h2>
-      <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}</div>
+      <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>
       ${done() || pending() ? '' : tsel}${sb.board ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
         ${!sb.board && !done() && (mine || isAdm()) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
-        ${!sb.board && done() && mine ? `<button class="btn new" id="sbReopen">↺ ${T('Open the game again')}</button>` : ''}
+        ${!sb.board && done() && (mine || isAdm()) ? `<button class="btn new" id="sbReopen">↺ ${T('Open the game again')}</button>` : ''}
         ${!sb.board && isAdm() ? `<button class="btn tdel" data-sbdel="${sb.id}">✕ ${T('Delete')}</button>` : ''}
         ${sb.board ? '' : `<button class="btn gold" id="oClose">${T('Close')}</button>`}</div>`;
   }
@@ -223,8 +229,8 @@ const SB = (() => {
     sb.busy = true; sb.err = ''; show();
     try {
       const uid = await C().uid(), id = newCode(), ts = Date.now();
-      const m = { n: s.n || T('Social bridge'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: (Net.st && localStorage.getItem('bridge-table-name')) || '' };
-      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn } };
+      const m = { n: s.n || T('Social bridge'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey() };
+      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk } };
       for (let t = 1; t <= s.tb; t++) { const p = s.names[t] || {}; up['sb/' + id + '/t/' + t] = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }
       await C().patch('', up);
       sb.setup = null; sb.busy = false; await loadGame(id); sb.view = 'boards'; sb.board = 0; show(); poll();
@@ -256,12 +262,16 @@ const SB = (() => {
     sb.busy = false; try { await loadGame(sb.id); } catch (e) {} show();
   }
   // the organiser (only) opens a finished game again, e.g. after finishing it by mistake
+  // the database knows the organiser by the name signed in on this device
+  async function signIn() { const n = myName(); if (n) try { await C().session(n, SET.pinH); } catch (e) {} }
   async function reopen() {
+    await signIn();
     try { await C().put('sb/' + sb.id + '/m/st', 'open'); await C().put('sbi/' + sb.id + '/st', 'open'); sb.g.m.st = 'open'; setLast(sb.id); sb.err = ''; }
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
     show();
   }
   async function finish() {
+    await signIn();
     try { await C().put('sb/' + sb.id + '/m/st', 'done'); await C().put('sbi/' + sb.id + '/st', 'done'); sb.g.m.st = 'done'; }
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
     show();
