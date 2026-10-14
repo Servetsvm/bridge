@@ -7804,7 +7804,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 194;
+const APP_V = 195;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -7833,7 +7833,7 @@ function applyLang() {
   const S = SYS_T[L] || {};
   for (const s of E.SYSTEMS) { if (s._d == null) s._d = s.d; s.d = S[s.k] || s._d; }
 }
-const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, confirmNew: 0, overlay: null, resTab: 'stats' };
+const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, confirmNew: 0, overlay: null, resTab: 'list' };
 const online = () => typeof Net !== "undefined" && Net.on;
 const guest = () => typeof Net !== "undefined" && Net.guest;
 // your seat (a tournament is always played from South); a spectator has no seat of their own (meSeat -1)
@@ -8993,7 +8993,7 @@ function homeShell() {
   <header class="hhead"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
     <button id="hNameBtn" class="tok hnamebtn hdrname" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button>
     <div class="hhr"><label class="hlang" title="${T('Language')}">🌐 <select id="hLang" class="sel" aria-label="${T('Language')}">${langs.map(([v, l]) => `<option value="${v}" ${SET.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-      <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button></div></header>
+      <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button></div></header>
   <div class="hgrid">
     <section class="hmain">
       <div class="hcard prac" id="hPrac"></div>
@@ -9935,7 +9935,7 @@ function showResults() {
     const rows = HIST.slice(-100).reverse().map(e => `<tr class="rev" data-rev="${e.id}"><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.passed ? T('Pass') : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
     body = `<div class="muted">${T('Tap a board to see the auction and how it was played.')}</div><div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th>${T('Tr')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   }
-  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Boards')}</button></div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Board list')}</button><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button></div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 
 /* replay of a finished board, one card at a time: ui.revStep cards have been played.
@@ -9976,6 +9976,25 @@ function stopRev() { clearInterval(ui.revTimer); ui.revTimer = null; }
 function revDraw() { const e = HIST.find(h => h.id === ui.revId), el = $('revPlay'); if (e && el) el.innerHTML = revPlayHtml(e); }
 
 /* a finished board from Results: the four hands, the auction (tap a call for its meaning) and every trick */
+/* a finished board looked at again: the contract double dummy (worked out now in a worker when the board was left
+   before it was ready) */
+function revDdHtml(e) {
+  if (!e.c || !e.deal) return '';
+  const v = e.dd && e.dd.you;
+  if (v == null && !(e.dd && e.dd.you === null)) {
+    if (ui.revDd !== e.id) {
+      ui.revDd = e.id;
+      const got = t => { e.dd = { ...(e.dd || {}), you: t }; Store.saveRec(e); if (ui.overlay === 'rev' && ui.revId === e.id) showReview(e.id); };
+      const w = Field.mk();
+      if (w) { w.onmessage = m => { const d = m.data || {}; if (d.type === 'dd' || d.type === 'error') { w.terminate(); got(d.type === 'dd' ? d.t : null); } }; w.onerror = () => { w.terminate(); got(null); }; w.postMessage({ type: 'dd', id: e.id, key: 'you', deal: e.deal, c: e.c, limit: 1.2e8 }); }
+      else setTimeout(() => got(E.ddContract(e.deal, e.c, 1.5e6)), 50);
+    }
+    return `<div class="muted">${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${T('calculating…')}</div>`;
+  }
+  if (v == null) return '';
+  const d = v - (e.c.level + 6);
+  return `<div class="muted">${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${T('{0} tricks', v)} (${d >= 0 ? T('makes') : T('down {0}', -d)})</div>`;
+}
 function showReview(id, sel) {
   const e = HIST.find(h => h.id === id); if (!e) return;
   ui.revId = id; const hi = HIST.findIndex(h => h.id === id);
@@ -9991,6 +10010,7 @@ function showReview(id, sel) {
   const playHtml = canPlay ? `<div class="grp"><span>${T("The play — tap ▶ (or the table) to play the next card")}</span><div id="revPlay">${revPlayHtml(e)}</div></div>`
     : (e.passed ? '' : `<div class="muted">${T('The play was not saved for this board (played before this feature was added).')}</div>`);
   openOv('rev', `<h2>${T('Board')} ${e.board}</h2><div class="big">${resultLine(e)}</div>
+    ${revDdHtml(e)}
     ${canPlay ? '' : e.deal ? dealHtml(e.deal, e.seat) : ''}
     ${playHtml}
     ${anaHtml(e)}
@@ -10203,7 +10223,7 @@ document.addEventListener('click', ev_ => {
     // the turn sound on and off from the top bar
     case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; SET.sfxOn = SET.sfx; SET.sfx = false; } else { SET.alert = SET.alertOn || "online"; SET.sfx = SET.sfxOn !== false; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }
     case "bSet": showSettings(); break;
-    case 'bRes': showResults(); break;
+    case 'bRes': ui.resTab = 'list'; ui.menu = false; showResults(); break;
     case 'bHome': goHome(); break;
     case 'hQuick': Net.quickJoin(); break;
     case 'hWatch': Net.quickWatch(); break;
