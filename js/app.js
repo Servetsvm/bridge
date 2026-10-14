@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 184;
+const APP_V = 185;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1888,7 +1888,7 @@ function robotCard(g, t) {
 }
 /* robots' cards: an expert robot looks at every card with double-dummy samples from the first trick on, which takes up
    to a second or two, so it is worked out in a background worker (the page stays smooth); without a worker, at once */
-const BOT_OPT = { budget: 1200, maxSamples: 40, ddTricks: 9, ddDecl: 13, evLim: 1500000, minSamples: 1, cap: 2500,
+const BOT_OPT = { budget: 1200, maxSamples: 40, ddTricks: 11, ddDecl: 13, evLim: 1500000, minSamples: 1, cap: 2500,
   lead: { budget: 2500, maxSamples: 24, evLim: 3000000, minSamples: 2, cap: 4000 } };   // declarer looks ahead from the first trick; the opening lead by simulation
 const Bot = {
   w: null, n: 0, wait: null,

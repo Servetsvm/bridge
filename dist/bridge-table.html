@@ -2820,7 +2820,7 @@ function discard(g, seat, leg) {
    Attitude: on partner's lead a high spot card encourages, the lowest discourages.
    Lavinthal discards: the suit discarded is not wanted; a high card asks for the higher of the two
    remaining suits (trumps and the suit led left out), a low card for the lower one. */
-const DEFF = { lav: true, att: true, sig: true, dd: true };
+const DEFF = { lav: true, att: true, sig: true, dd: true, hint: true };
 const romanOn = (g, seat) => DEFF.lav && !!(g.roman && g.roman[sideOf(seat)]);
 const lavOn = (g, seat) => DEFF.lav && !romanOn(g, seat) && (!g.lav || g.lav[sideOf(seat)] !== false);
 const HON = r => (r === 12 ? 4 : r === 11 ? 3 : r === 10 ? 2 : r === 9 ? 1 : 0);
@@ -3400,6 +3400,35 @@ function ddFull(hands, leader, side, trump, limit, guess) {
 }
 function ddContract(deal, c, limit, guess) { return ddFull(deal, (c.decl + 1) % 4, sideOf(c.decl), c.strain < 4 ? c.strain : -1, limit || 4e6, guess); }
 
+/* suits partner (a defender) showed strength in by a signal: the first discard asking for a suit, or an encouraging card
+   on our lead */
+function shownStrength(g, seat) {
+  const p = pd(seat), tr = g.trump, out = new Set();
+  const tricks = g.history.map(t => t.cards).concat(g.trick.length ? [g.trick] : []);
+  let discarded = false;
+  for (let i = 0; i < tricks.length; i++) {
+    const cs = tricks[i], pc = cs.find(x => x.s === p); if (!pc) continue;
+    const ls = S(cs[0].c), s = S(pc.c), r = R(pc.c);
+    if (s !== ls && s !== tr) {
+      if (discarded) continue; discarded = true;
+      if (romanOn(g, p)) { const rr = romanRead(g, pc.c, ls); if (rr) out.add(rr.suit); }
+      else if (lavOn(g, p)) {
+        const cand = lavCandidates(g, s, ls);
+        if (cand.length === 1) out.add(cand[0]); else if (cand.length === 2 && (r >= 5 || r <= 3)) out.add(r >= 5 ? Math.max(...cand) : Math.min(...cand));
+      }
+    } else if (DEFF.att && cs[0].s === seat && cs[2] === pc && s === ls && r >= 5 && r <= 8 && i < g.history.length && g.history[i].w !== p) out.add(ls);
+  }
+  out.delete(tr);
+  return [...out];
+}
+/* partner's opening lead of a king, queen or jack is the top of touching honours (K Q, Q J, J 10) or of an inner
+   sequence (A J 10, K J 10): partner holds the card below it or two above it — the cards that could be, as a list */
+function leadShows(g, seat) {
+  const p = pd(seat), t = g.history.length ? g.history[0].cards : g.trick;
+  if (!t.length || t[0].s !== p) return null;
+  const c = t[0].c, r = R(c); if (r < 9 || r > 11) return null;
+  return [c - 1, r + 2 <= 12 ? c + 2 : -1].filter(k => k >= 0);
+}
 function sampleHands(g, seat) {
   const known = new Set([seat]); const decl = g.contract.decl, dm = g.dummy;
   if (g.dummyShown) known.add(dm);
@@ -3418,13 +3447,23 @@ function sampleHands(g, seat) {
       if (e.m.max != null) max = Math.min(max, e.m.max);
       if (e.m.len) for (const k in e.m.len) len[k] = Math.max(len[k], e.m.len[k]);
     }
-    cons[s] = { min: min - 1, max: max + 1, len };
+    cons[s] = { min: min - 1, max: max + 1, len, str: [] };
+  }
+  // a defender also reads partner's signals: a suit partner asked for or encouraged holds some strength (an honour)
+  if (DEFF.hint && sideOf(seat) !== sideOf(decl) && cons[pd(seat)]) {
+    cons[pd(seat)].str = shownStrength(g, seat);
+    // the honour partner's lead promises, while it may still be in partner's hand
+    const ls = leadShows(g, seat), inPool = new Set(pool), pp = new Set(played[pd(seat)]);
+    if (ls) { const can = ls.filter(k => inPool.has(k) || pp.has(k)); if (can.length) cons[pd(seat)].any = can; }
   }
   const fits = out => hidden.every(s => {
     const c = cons[s], full = out[s].concat(played[s]);
     let hcp = 0; const ln = [0, 0, 0, 0];
     for (const k of full) { ln[S(k)]++; if (R(k) >= 9) hcp += R(k) - 8; }
-    return hcp >= c.min && hcp <= c.max && ln.every((l, i) => l >= c.len[i]);
+    if (!(hcp >= c.min && hcp <= c.max && ln.every((l, i) => l >= c.len[i]))) return false;
+    if (c.any && !c.any.some(k => full.includes(k))) return false;
+    for (const su of c.str) { let h = 0; for (const k of full) if (S(k) === su && R(k) >= 9) h += R(k) - 8; if (h < 2) return false; }
+    return true;
   });
   let fallback = null;
   for (let tries = 0; tries < 160; tries++) {
@@ -3482,8 +3521,8 @@ const PLAY_OPT = { budget: 900, maxSamples: 40, ddTricks: 9 };
 function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;
   const leg = legalFor(g, seat); if (leg.length === 1) return leg[0];
-  // declarer (and dummy) may look ahead from earlier on (ddDecl); the defence keeps its signals and rules longer: double
-  // dummy samples assume partner sees every card, which misleads a defender early in the play
+  // declarer (and dummy) may look ahead from the first trick (ddDecl); the defence from ddTricks + 1 cards left (the
+  // robots: from the second trick, measured best), its samples fitting partner's signals
   const def = sideOf(seat) !== sideOf(g.contract.decl), ddLim = def ? opt.ddTricks + (DEFF.dd ? 1 : 0) : (opt.ddDecl || opt.ddTricks);
   if (g.hands[seat].length <= ddLim) { const r = ddChoose(g, seat, leg, opt); if (r != null) return r; }
   // the opening lead (opt.lead: its own samples and time): every lead tried against hands that fit the auction, as the
@@ -3580,7 +3619,7 @@ const FIELD_AGG = [0, 1, -1, 0, 1, 0, -1, 0, 1, -1];
 // quick settings for the fallback without workers; the workers play at expert strength
 const FIELD_OPT = { budget: 90, maxSamples: 10, ddTricks: 6 };
 // the robot tables play like the robots at your table (declarer looking ahead, opening leads by simulation), a little lighter
-const EXPERT_OPT = { budget: 350, maxSamples: 16, ddTricks: 9, ddDecl: 12, evLim: 800000, minSamples: 1, cap: 1200,
+const EXPERT_OPT = { budget: 350, maxSamples: 16, ddTricks: 11, ddDecl: 12, evLim: 800000, minSamples: 1, cap: 1200,
   lead: { budget: 1200, maxSamples: 12, evLim: 2000000, minSamples: 1, cap: 2000 } };
 
 function simulateTable(deal, board, cards, agg, opt) {
@@ -7297,7 +7336,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 184;
+const APP_V = 185;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9177,7 +9216,7 @@ function robotCard(g, t) {
 }
 /* robots' cards: an expert robot looks at every card with double-dummy samples from the first trick on, which takes up
    to a second or two, so it is worked out in a background worker (the page stays smooth); without a worker, at once */
-const BOT_OPT = { budget: 1200, maxSamples: 40, ddTricks: 9, ddDecl: 13, evLim: 1500000, minSamples: 1, cap: 2500,
+const BOT_OPT = { budget: 1200, maxSamples: 40, ddTricks: 11, ddDecl: 13, evLim: 1500000, minSamples: 1, cap: 2500,
   lead: { budget: 2500, maxSamples: 24, evLim: 3000000, minSamples: 2, cap: 4000 } };   // declarer looks ahead from the first trick; the opening lead by simulation
 const Bot = {
   w: null, n: 0, wait: null,
