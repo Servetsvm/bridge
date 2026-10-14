@@ -1467,6 +1467,24 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .btn.bad{background:#d0453b;color:#fff;border-color:#a8342c}
 .btn.bad:disabled{opacity:.45}
 body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342c}
+/* social bridge */
+.sbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;margin:8px 0}
+.sbb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid #c7c9bd;border-radius:8px;background:#fff;color:#222;cursor:pointer}
+.sbb b{font-size:18px}.sbb small{font-size:11px;color:#777}
+.sbb.some{border-color:#1e5c3b}
+.sbb.me{background:#e3f1e8;border-color:#1e5c3b}
+.sbb.me small{color:#1e5c3b;font-weight:700}
+.sbtab tr.me td{background:#fff6d6}
+.sbtab .red,.sbform .red,.sbprev .red,h3 .red{color:#c0282d}
+.sbtrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e3dfcd}
+.sbtrow span{flex:1}.sbtrow small{color:#777}
+.sbprev{margin:8px 0;padding:8px 10px;border-radius:8px;background:#eef3ee;font-size:16px}
+.sbcode{letter-spacing:2px}
+.sbme .seg button{flex:0 0 auto;min-width:38px}
+:root[data-theme="dark"] .sbb{background:#323b36;color:#e8ece4;border-color:#4a554f}
+:root[data-theme="dark"] .sbb.me{background:#24452f}
+:root[data-theme="dark"] .sbtab tr.me td{background:#3a3520}
+:root[data-theme="dark"] .sbprev{background:#26302a}
 
 </style>
 
@@ -4139,6 +4157,46 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Board list": "Bordlar",
+    "Social bridge": "Sosyal briç",
+    "Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.": "Gerçek masalarda gerçek kartlarla oynanır; uygulama skorları tutar. Masadaki herhangi biri, masanın oynadığı bordları istediği sırayla girer.",
+    "New game": "Yeni oyun",
+    "Game code": "Oyun kodu",
+    "Game": "Oyun",
+    "Code": "Kod",
+    "Finished": "Bitti",
+    "No games yet.": "Henüz oyun yok.",
+    "All games": "Tüm oyunlar",
+    "Back": "Geri",
+    "Save": "Kaydet",
+    "Delete": "Sil",
+    "Start the game": "Oyunu başlat",
+    "The players at each table (they stay at their table).": "Her masadaki oyuncular (masalarını değiştirmezler).",
+    "My table": "Masam",
+    "Board {0}": "Bord {0}",
+    "All vulnerable": "Herkes zonlu",
+    "None vulnerable": "Kimse zonlu değil",
+    "{0} vulnerable": "{0} zonlu",
+    "Declarer": "Oynayan",
+    "Doubled": "Kontr",
+    "Suit": "Renk",
+    "Result": "Sonuç",
+    "Pairs": "Çiftler",
+    "Correct our score": "Skorumuzu düzelt",
+    "Finish the game": "Oyunu bitir",
+    "Finish the game? Scores can no longer be entered.": "Oyun bitirilsin mi? Artık skor girilemez.",
+    "Delete the game “{0}” and all its scores?": "“{0}” oyunu ve tüm skorları silinsin mi?",
+    "First choose your table above.": "Önce yukarıdan masanı seç.",
+    "Tap a board to see what was played.": "Ne oynandığını görmek için bir borda bas.",
+    "Tap a board your table played to enter its score.": "Skorunu girmek için masanın oynadığı borda bas.",
+    "{0} tables have played this board. You will see their results after entering yours.": "Bu bordu {0} masa oynadı. Sonuçlarını kendi skorunu girdikten sonra göreceksin.",
+    "MP % and IMP from North-South’s side, against the other tables.": "MP % ve IMP Kuzey-Güney açısından, diğer masalara göre.",
+    "MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.": "MP %: oynanan bordların ortalaması; IMP: toplam, her bord diğer masalara göre (cross-IMP ortalaması). Sadece bir masada oynanmış bord henüz sayılmaz.",
+    "No scores yet.": "Henüz skor yok.",
+    "No game with this code.": "Bu kodla bir oyun yok.",
+    "Could not reach the server. Check the internet connection.": "Sunucuya ulaşılamadı. İnternet bağlantısını kontrol et.",
+    "Could not save. Check the internet connection and try again.": "Kaydedilemedi. İnternet bağlantısını kontrol edip tekrar dene.",
+    "Could not delete.": "Silinemedi.",
     "On defence: discards": "Savunmada kart atma",
     "You discarded": "Attığın kart",
     "By the agreement": "Kurala göre doğrusu",
@@ -4406,6 +4464,46 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Board list": "Spillene",
+    "Social bridge": "Sosial bridge",
+    "Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.": "Spilles med ekte kort ved ekte bord; appen holder poengene. Hvem som helst ved et bord legger inn spillene bordet har spilt, i hvilken som helst rekkefølge.",
+    "New game": "Nytt spill",
+    "Game code": "Spillkode",
+    "Game": "Spill",
+    "Code": "Kode",
+    "Finished": "Ferdig",
+    "No games yet.": "Ingen spill ennå.",
+    "All games": "Alle spill",
+    "Back": "Tilbake",
+    "Save": "Lagre",
+    "Delete": "Slett",
+    "Start the game": "Start spillet",
+    "The players at each table (they stay at their table).": "Spillerne ved hvert bord (de blir ved bordet sitt).",
+    "My table": "Mitt bord",
+    "Board {0}": "Spill {0}",
+    "All vulnerable": "Alle i faresonen",
+    "None vulnerable": "Ingen i faresonen",
+    "{0} vulnerable": "{0} i faresonen",
+    "Declarer": "Spillefører",
+    "Doubled": "Doblet",
+    "Suit": "Farge",
+    "Result": "Resultat",
+    "Pairs": "Par",
+    "Correct our score": "Rett resultatet vårt",
+    "Finish the game": "Avslutt spillet",
+    "Finish the game? Scores can no longer be entered.": "Avslutte spillet? Resultater kan ikke lenger legges inn.",
+    "Delete the game “{0}” and all its scores?": "Slette spillet «{0}» og alle resultatene?",
+    "First choose your table above.": "Velg først bordet ditt ovenfor.",
+    "Tap a board to see what was played.": "Trykk på et spill for å se hva som ble spilt.",
+    "Tap a board your table played to enter its score.": "Trykk på et spill bordet ditt har spilt for å legge inn resultatet.",
+    "{0} tables have played this board. You will see their results after entering yours.": "{0} bord har spilt dette spillet. Du ser resultatene deres etter at du har lagt inn ditt.",
+    "MP % and IMP from North-South’s side, against the other tables.": "MP % og IMP fra Nord-Syds side, mot de andre bordene.",
+    "MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.": "MP %: gjennomsnittet over spilte spill; IMP: totalen, hvert spill mot de andre bordene (kryss-IMP, gjennomsnitt). Et spill spilt ved bare ett bord teller ikke ennå.",
+    "No scores yet.": "Ingen resultater ennå.",
+    "No game with this code.": "Ingen spill med denne koden.",
+    "Could not reach the server. Check the internet connection.": "Fikk ikke kontakt med serveren. Sjekk internettforbindelsen.",
+    "Could not save. Check the internet connection and try again.": "Kunne ikke lagre. Sjekk internettforbindelsen og prøv igjen.",
+    "Could not delete.": "Kunne ikke slette.",
     "On defence: discards": "I forsvar: avkast",
     "You discarded": "Du kastet",
     "By the agreement": "Etter avtalen",
@@ -4673,6 +4771,46 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Board list": "Tableros",
+    "Social bridge": "Bridge social",
+    "Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.": "Se juega con cartas reales en mesas reales; la app lleva los resultados. Cualquiera en una mesa anota los tableros que jugó esa mesa, en cualquier orden.",
+    "New game": "Nueva partida",
+    "Game code": "Código de la partida",
+    "Game": "Partida",
+    "Code": "Código",
+    "Finished": "Terminada",
+    "No games yet.": "Todavía no hay partidas.",
+    "All games": "Todas las partidas",
+    "Back": "Atrás",
+    "Save": "Guardar",
+    "Delete": "Borrar",
+    "Start the game": "Empezar la partida",
+    "The players at each table (they stay at their table).": "Los jugadores de cada mesa (no cambian de mesa).",
+    "My table": "Mi mesa",
+    "Board {0}": "Tablero {0}",
+    "All vulnerable": "Todos vulnerables",
+    "None vulnerable": "Nadie vulnerable",
+    "{0} vulnerable": "{0} vulnerable",
+    "Declarer": "Declarante",
+    "Doubled": "Doblado",
+    "Suit": "Palo",
+    "Result": "Resultado",
+    "Pairs": "Parejas",
+    "Correct our score": "Corregir nuestro resultado",
+    "Finish the game": "Terminar la partida",
+    "Finish the game? Scores can no longer be entered.": "¿Terminar la partida? Ya no se podrán anotar resultados.",
+    "Delete the game “{0}” and all its scores?": "¿Borrar la partida «{0}» y todos sus resultados?",
+    "First choose your table above.": "Primero elige tu mesa arriba.",
+    "Tap a board to see what was played.": "Toca un tablero para ver qué se jugó.",
+    "Tap a board your table played to enter its score.": "Toca un tablero que jugó tu mesa para anotar su resultado.",
+    "{0} tables have played this board. You will see their results after entering yours.": "{0} mesas han jugado este tablero. Verás sus resultados después de anotar el tuyo.",
+    "MP % and IMP from North-South’s side, against the other tables.": "MP % e IMP desde el lado de Norte-Sur, frente a las otras mesas.",
+    "MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.": "MP %: la media de los tableros jugados; IMP: el total, cada tablero frente a las otras mesas (cross-IMPs, promediados). Un tablero jugado en una sola mesa aún no cuenta.",
+    "No scores yet.": "Todavía no hay resultados.",
+    "No game with this code.": "No hay ninguna partida con este código.",
+    "Could not reach the server. Check the internet connection.": "No se pudo conectar con el servidor. Comprueba la conexión a internet.",
+    "Could not save. Check the internet connection and try again.": "No se pudo guardar. Comprueba la conexión a internet y vuelve a intentarlo.",
+    "Could not delete.": "No se pudo borrar.",
     "On defence: discards": "En defensa: descartes",
     "You discarded": "Descartaste",
     "By the agreement": "Según el acuerdo",
@@ -4968,6 +5106,46 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Board list": "Donnes",
+    "Social bridge": "Bridge social",
+    "Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.": "Joué avec de vraies cartes à de vraies tables : l’app tient les scores. N’importe qui à une table saisit les donnes jouées par cette table, dans n’importe quel ordre.",
+    "New game": "Nouvelle partie",
+    "Game code": "Code de la partie",
+    "Game": "Partie",
+    "Code": "Code",
+    "Finished": "Terminée",
+    "No games yet.": "Pas encore de partie.",
+    "All games": "Toutes les parties",
+    "Back": "Retour",
+    "Save": "Enregistrer",
+    "Delete": "Supprimer",
+    "Start the game": "Commencer la partie",
+    "The players at each table (they stay at their table).": "Les joueurs de chaque table (ils restent à leur table).",
+    "My table": "Ma table",
+    "Board {0}": "Donne {0}",
+    "All vulnerable": "Tous vulnérables",
+    "None vulnerable": "Personne vulnérable",
+    "{0} vulnerable": "{0} vulnérable",
+    "Declarer": "Déclarant",
+    "Doubled": "Contré",
+    "Suit": "Couleur",
+    "Result": "Résultat",
+    "Pairs": "Paires",
+    "Correct our score": "Corriger notre score",
+    "Finish the game": "Terminer la partie",
+    "Finish the game? Scores can no longer be entered.": "Terminer la partie ? Les scores ne pourront plus être saisis.",
+    "Delete the game “{0}” and all its scores?": "Supprimer la partie « {0} » et tous ses scores ?",
+    "First choose your table above.": "Choisissez d’abord votre table ci-dessus.",
+    "Tap a board to see what was played.": "Touchez une donne pour voir ce qui a été joué.",
+    "Tap a board your table played to enter its score.": "Touchez une donne jouée par votre table pour saisir son score.",
+    "{0} tables have played this board. You will see their results after entering yours.": "{0} tables ont joué cette donne. Vous verrez leurs résultats après avoir saisi le vôtre.",
+    "MP % and IMP from North-South’s side, against the other tables.": "MP % et IMP du côté Nord-Sud, par rapport aux autres tables.",
+    "MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.": "MP % : la moyenne des donnes jouées ; IMP : le total, chaque donne par rapport aux autres tables (cross-IMP, en moyenne). Une donne jouée à une seule table ne compte pas encore.",
+    "No scores yet.": "Pas encore de scores.",
+    "No game with this code.": "Aucune partie avec ce code.",
+    "Could not reach the server. Check the internet connection.": "Impossible de joindre le serveur. Vérifiez la connexion internet.",
+    "Could not save. Check the internet connection and try again.": "Enregistrement impossible. Vérifiez la connexion internet et réessayez.",
+    "Could not delete.": "Suppression impossible.",
     "On defence: discards": "En défense : défausses",
     "You discarded": "Vous avez défaussé",
     "By the agreement": "Selon la convention",
@@ -5263,6 +5441,46 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Board list": "Smazzate",
+    "Social bridge": "Bridge sociale",
+    "Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.": "Si gioca con carte vere a tavoli veri: l’app tiene i punteggi. Chiunque a un tavolo inserisce le smazzate giocate da quel tavolo, in qualsiasi ordine.",
+    "New game": "Nuova partita",
+    "Game code": "Codice della partita",
+    "Game": "Partita",
+    "Code": "Codice",
+    "Finished": "Finita",
+    "No games yet.": "Ancora nessuna partita.",
+    "All games": "Tutte le partite",
+    "Back": "Indietro",
+    "Save": "Salva",
+    "Delete": "Elimina",
+    "Start the game": "Inizia la partita",
+    "The players at each table (they stay at their table).": "I giocatori di ogni tavolo (restano al loro tavolo).",
+    "My table": "Il mio tavolo",
+    "Board {0}": "Smazzata {0}",
+    "All vulnerable": "Tutti in zona",
+    "None vulnerable": "Nessuno in zona",
+    "{0} vulnerable": "{0} in zona",
+    "Declarer": "Dichiarante",
+    "Doubled": "Contrato",
+    "Suit": "Colore",
+    "Result": "Risultato",
+    "Pairs": "Coppie",
+    "Correct our score": "Correggi il nostro punteggio",
+    "Finish the game": "Termina la partita",
+    "Finish the game? Scores can no longer be entered.": "Terminare la partita? Non si potranno più inserire punteggi.",
+    "Delete the game “{0}” and all its scores?": "Eliminare la partita «{0}» e tutti i suoi punteggi?",
+    "First choose your table above.": "Prima scegli il tuo tavolo qui sopra.",
+    "Tap a board to see what was played.": "Tocca una smazzata per vedere cosa è stato giocato.",
+    "Tap a board your table played to enter its score.": "Tocca una smazzata giocata dal tuo tavolo per inserirne il punteggio.",
+    "{0} tables have played this board. You will see their results after entering yours.": "{0} tavoli hanno giocato questa smazzata. Vedrai i loro risultati dopo aver inserito il tuo.",
+    "MP % and IMP from North-South’s side, against the other tables.": "MP % e IMP dal lato di Nord-Sud, rispetto agli altri tavoli.",
+    "MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.": "MP %: la media delle smazzate giocate; IMP: il totale, ogni smazzata rispetto agli altri tavoli (cross-IMP, in media). Una smazzata giocata a un solo tavolo non conta ancora.",
+    "No scores yet.": "Ancora nessun punteggio.",
+    "No game with this code.": "Nessuna partita con questo codice.",
+    "Could not reach the server. Check the internet connection.": "Impossibile raggiungere il server. Controlla la connessione internet.",
+    "Could not save. Check the internet connection and try again.": "Salvataggio non riuscito. Controlla la connessione internet e riprova.",
+    "Could not delete.": "Eliminazione non riuscita.",
     "On defence: discards": "In difesa: scarti",
     "You discarded": "Hai scartato",
     "By the agreement": "Secondo l’accordo",
@@ -5558,6 +5776,46 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Board list": "Boards",
+    "Social bridge": "Geselliges Bridge",
+    "Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.": "Gespielt wird mit echten Karten an echten Tischen; die App führt die Ergebnisse. Jeder an einem Tisch trägt die Boards ein, die dieser Tisch gespielt hat, in beliebiger Reihenfolge.",
+    "New game": "Neues Spiel",
+    "Game code": "Spielcode",
+    "Game": "Spiel",
+    "Code": "Code",
+    "Finished": "Beendet",
+    "No games yet.": "Noch keine Spiele.",
+    "All games": "Alle Spiele",
+    "Back": "Zurück",
+    "Save": "Speichern",
+    "Delete": "Löschen",
+    "Start the game": "Spiel starten",
+    "The players at each table (they stay at their table).": "Die Spieler an jedem Tisch (sie bleiben an ihrem Tisch).",
+    "My table": "Mein Tisch",
+    "Board {0}": "Board {0}",
+    "All vulnerable": "Alle in Gefahr",
+    "None vulnerable": "Niemand in Gefahr",
+    "{0} vulnerable": "{0} in Gefahr",
+    "Declarer": "Alleinspieler",
+    "Doubled": "Kontriert",
+    "Suit": "Farbe",
+    "Result": "Ergebnis",
+    "Pairs": "Paare",
+    "Correct our score": "Unser Ergebnis korrigieren",
+    "Finish the game": "Spiel beenden",
+    "Finish the game? Scores can no longer be entered.": "Spiel beenden? Danach können keine Ergebnisse mehr eingetragen werden.",
+    "Delete the game “{0}” and all its scores?": "Das Spiel „{0}“ und alle Ergebnisse löschen?",
+    "First choose your table above.": "Wähle zuerst oben deinen Tisch.",
+    "Tap a board to see what was played.": "Tippe auf ein Board, um zu sehen, was gespielt wurde.",
+    "Tap a board your table played to enter its score.": "Tippe auf ein Board, das dein Tisch gespielt hat, um das Ergebnis einzutragen.",
+    "{0} tables have played this board. You will see their results after entering yours.": "{0} Tische haben dieses Board gespielt. Ihre Ergebnisse siehst du, nachdem du deins eingetragen hast.",
+    "MP % and IMP from North-South’s side, against the other tables.": "MP % und IMP aus Sicht von Nord-Süd, gegen die anderen Tische.",
+    "MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.": "MP %: der Durchschnitt über die gespielten Boards; IMP: die Summe, jedes Board gegen die anderen Tische (Cross-IMPs, gemittelt). Ein nur an einem Tisch gespieltes Board zählt noch nicht.",
+    "No scores yet.": "Noch keine Ergebnisse.",
+    "No game with this code.": "Kein Spiel mit diesem Code.",
+    "Could not reach the server. Check the internet connection.": "Server nicht erreichbar. Prüfe die Internetverbindung.",
+    "Could not save. Check the internet connection and try again.": "Speichern fehlgeschlagen. Prüfe die Internetverbindung und versuche es erneut.",
+    "Could not delete.": "Löschen fehlgeschlagen.",
     "On defence: discards": "In der Verteidigung: Abwürfe",
     "You discarded": "Du hast abgeworfen",
     "By the agreement": "Nach der Absprache",
@@ -5853,6 +6111,46 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Board list": "Сдачи",
+    "Social bridge": "Клубный бридж",
+    "Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.": "Игра настоящими картами за настоящими столами; приложение ведёт счёт. Любой игрок за столом вносит сдачи, сыгранные этим столом, в любом порядке.",
+    "New game": "Новая игра",
+    "Game code": "Код игры",
+    "Game": "Игра",
+    "Code": "Код",
+    "Finished": "Завершена",
+    "No games yet.": "Игр пока нет.",
+    "All games": "Все игры",
+    "Back": "Назад",
+    "Save": "Сохранить",
+    "Delete": "Удалить",
+    "Start the game": "Начать игру",
+    "The players at each table (they stay at their table).": "Игроки за каждым столом (они не меняют стол).",
+    "My table": "Мой стол",
+    "Board {0}": "Сдача {0}",
+    "All vulnerable": "Все в зоне",
+    "None vulnerable": "Никто не в зоне",
+    "{0} vulnerable": "{0} в зоне",
+    "Declarer": "Разыгрывающий",
+    "Doubled": "Контра",
+    "Suit": "Масть",
+    "Result": "Результат",
+    "Pairs": "Пары",
+    "Correct our score": "Исправить наш результат",
+    "Finish the game": "Завершить игру",
+    "Finish the game? Scores can no longer be entered.": "Завершить игру? Вносить результаты больше будет нельзя.",
+    "Delete the game “{0}” and all its scores?": "Удалить игру «{0}» и все её результаты?",
+    "First choose your table above.": "Сначала выберите свой стол выше.",
+    "Tap a board to see what was played.": "Нажмите на сдачу, чтобы увидеть, что было сыграно.",
+    "Tap a board your table played to enter its score.": "Нажмите на сдачу, сыгранную вашим столом, чтобы внести результат.",
+    "{0} tables have played this board. You will see their results after entering yours.": "Эту сдачу сыграли столов: {0}. Их результаты вы увидите после того, как внесёте свой.",
+    "MP % and IMP from North-South’s side, against the other tables.": "MP % и IMP со стороны Север-Юг, против других столов.",
+    "MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.": "MP %: среднее по сыгранным сдачам; IMP: сумма, каждая сдача против других столов (кросс-IMP, в среднем). Сдача, сыгранная только за одним столом, пока не считается.",
+    "No scores yet.": "Результатов пока нет.",
+    "No game with this code.": "Игры с таким кодом нет.",
+    "Could not reach the server. Check the internet connection.": "Не удалось связаться с сервером. Проверьте подключение к интернету.",
+    "Could not save. Check the internet connection and try again.": "Не удалось сохранить. Проверьте подключение к интернету и попробуйте снова.",
+    "Could not delete.": "Не удалось удалить.",
     "On defence: discards": "В защите: сносы",
     "You discarded": "Вы снесли",
     "By the agreement": "По соглашению",
@@ -6148,6 +6446,46 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Board list": "Rozdania",
+    "Social bridge": "Brydż towarzyski",
+    "Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.": "Gra prawdziwymi kartami przy prawdziwych stołach; aplikacja prowadzi zapis. Każdy przy stole wpisuje rozdania rozegrane przy tym stole, w dowolnej kolejności.",
+    "New game": "Nowa gra",
+    "Game code": "Kod gry",
+    "Game": "Gra",
+    "Code": "Kod",
+    "Finished": "Zakończona",
+    "No games yet.": "Jeszcze nie ma gier.",
+    "All games": "Wszystkie gry",
+    "Back": "Wstecz",
+    "Save": "Zapisz",
+    "Delete": "Usuń",
+    "Start the game": "Rozpocznij grę",
+    "The players at each table (they stay at their table).": "Gracze przy każdym stole (nie zmieniają stołu).",
+    "My table": "Mój stół",
+    "Board {0}": "Rozdanie {0}",
+    "All vulnerable": "Wszyscy po partii",
+    "None vulnerable": "Nikt po partii",
+    "{0} vulnerable": "{0} po partii",
+    "Declarer": "Rozgrywający",
+    "Doubled": "Kontra",
+    "Suit": "Kolor",
+    "Result": "Wynik",
+    "Pairs": "Pary",
+    "Correct our score": "Popraw nasz wynik",
+    "Finish the game": "Zakończ grę",
+    "Finish the game? Scores can no longer be entered.": "Zakończyć grę? Nie będzie już można wpisywać wyników.",
+    "Delete the game “{0}” and all its scores?": "Usunąć grę „{0}” i wszystkie jej wyniki?",
+    "First choose your table above.": "Najpierw wybierz swój stół powyżej.",
+    "Tap a board to see what was played.": "Dotknij rozdania, aby zobaczyć, co zagrano.",
+    "Tap a board your table played to enter its score.": "Dotknij rozdania rozegranego przy twoim stole, aby wpisać wynik.",
+    "{0} tables have played this board. You will see their results after entering yours.": "To rozdanie rozegrało stołów: {0}. Ich wyniki zobaczysz po wpisaniu swojego.",
+    "MP % and IMP from North-South’s side, against the other tables.": "MP % i IMP od strony NS, względem innych stołów.",
+    "MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.": "MP %: średnia z rozegranych rozdań; IMP: suma, każde rozdanie względem innych stołów (cross-IMP, średnio). Rozdanie rozegrane tylko przy jednym stole jeszcze się nie liczy.",
+    "No scores yet.": "Jeszcze nie ma wyników.",
+    "No game with this code.": "Nie ma gry o tym kodzie.",
+    "Could not reach the server. Check the internet connection.": "Nie można połączyć się z serwerem. Sprawdź połączenie z internetem.",
+    "Could not save. Check the internet connection and try again.": "Nie udało się zapisać. Sprawdź połączenie z internetem i spróbuj ponownie.",
+    "Could not delete.": "Nie udało się usunąć.",
     "On defence: discards": "W obronie: zrzutki",
     "You discarded": "Zrzuciłeś",
     "By the agreement": "Według umowy",
@@ -6443,6 +6781,46 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Board list": "牌副",
+    "Social bridge": "社交桥牌",
+    "Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.": "在真实牌桌上用真牌打，应用只记分。每桌任何人都可以按任意顺序录入本桌打过的牌。",
+    "New game": "新比赛",
+    "Game code": "比赛代码",
+    "Game": "比赛",
+    "Code": "代码",
+    "Finished": "已结束",
+    "No games yet.": "还没有比赛。",
+    "All games": "所有比赛",
+    "Back": "返回",
+    "Save": "保存",
+    "Delete": "删除",
+    "Start the game": "开始比赛",
+    "The players at each table (they stay at their table).": "每桌的牌手（不换桌）。",
+    "My table": "我的桌",
+    "Board {0}": "第 {0} 副",
+    "All vulnerable": "双方有局",
+    "None vulnerable": "双方无局",
+    "{0} vulnerable": "{0} 有局",
+    "Declarer": "庄家",
+    "Doubled": "加倍",
+    "Suit": "花色",
+    "Result": "结果",
+    "Pairs": "对",
+    "Correct our score": "更正我们的成绩",
+    "Finish the game": "结束比赛",
+    "Finish the game? Scores can no longer be entered.": "结束比赛？之后将不能再录入成绩。",
+    "Delete the game “{0}” and all its scores?": "删除比赛“{0}”及其所有成绩？",
+    "First choose your table above.": "请先在上方选择你的桌号。",
+    "Tap a board to see what was played.": "点一副牌查看打了什么。",
+    "Tap a board your table played to enter its score.": "点本桌打过的一副牌录入成绩。",
+    "{0} tables have played this board. You will see their results after entering yours.": "已有 {0} 桌打过这副牌。录入你的成绩后才能看到他们的结果。",
+    "MP % and IMP from North-South’s side, against the other tables.": "MP % 和 IMP 以南北方计算，与其他桌比较。",
+    "MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.": "MP %：已打牌副的平均；IMP：总计，每副与其他桌比较（交叉 IMP 平均）。只有一桌打过的牌暂不计算。",
+    "No scores yet.": "还没有成绩。",
+    "No game with this code.": "没有这个代码的比赛。",
+    "Could not reach the server. Check the internet connection.": "无法连接服务器。请检查网络连接。",
+    "Could not save. Check the internet connection and try again.": "保存失败。请检查网络连接后重试。",
+    "Could not delete.": "删除失败。",
     "On defence: discards": "防守：垫牌",
     "You discarded": "你垫了",
     "By the agreement": "按约定应垫",
@@ -7352,7 +7730,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 186;
+const APP_V = 187;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -8840,7 +9218,7 @@ function toursHtml() {
   }).join('');
   const table = rows ? `<div class="ttwrap"><table class="ttab"><thead><tr><th>${T('Tournament')}</th><th>${T('Format')}</th><th class="n">${T('Boards')}</th><th>${T('Ranking')}</th><th class="n">${T('Players')}</th><th>${T('Status')}</th><th>${T('Ends in')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `<div class="muted">${L.length ? T('No tournaments here.') : T('No tournaments yet. Create one and invite the players you want.')}</div>`;
-  return `${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button></div>`;
+  return `${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button><button class="btn new" id="sbOpen">🃏 ${T('Social bridge')}</button></div>`;
 }
 // the action buttons of one tournament row (and a short note: an invitation, your table, how far you are)
 function tourRowBtns(t, me) {
@@ -9049,7 +9427,7 @@ function openOv(name, html) {
   const fl = ["player", "dm", "net", "lead"].includes(name) && G && G.phase !== "idle" && innerWidth >= 700, ov = $("ov");
   ui.overlay = name; ov.classList.toggle("float", fl);
   const bar = fl || (name !== "gate" && innerWidth >= 900 && matchMedia("(pointer:fine)").matches);   // on a computer every window can be dragged by its top bar
-  ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}${["end", "res", "rev", "set", "hist", "tour", "tsetup", "deal", "help", "auc"].includes(name) ? " wide" : ""}" data-ov="${name}">${bar ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
+  ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}${["end", "res", "rev", "set", "hist", "tour", "tsetup", "deal", "help", "auc", "sb"].includes(name) ? " wide" : ""}" data-ov="${name}">${bar ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
   ov.hidden = false;
   if (fl && typeof SIZES !== "undefined" && SIZES.fw2) { const s = ov.firstChild; s.style.width = SIZES.fw2 + "px"; s.style.height = SIZES.fh2 + "px"; }
   if (fl && ui.fpos) { const s = ov.firstChild; s.style.left = ui.fpos.x + "px"; s.style.top = ui.fpos.y + "px"; s.style.right = "auto"; }
@@ -9682,7 +10060,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
   if (t.dataset.call != null && G.phase === 'bid' && bidTurn() === U()) { const v = t.dataset.call; const c = (v === 'P' || v === 'X' || v === 'XX') ? v : +v; if (c !== -1) { const al = ui.alertOn ? (ui.alertTxt || '').trim() || T('Alert') : null; ui.alertOn = false; ui.alertTxt = ''; makeCall(U(), c, undefined, al); } return; }
   if (t.dataset.c != null && t.classList.contains('play')) { const c = +t.dataset.c; const seat = G.play.turn; if (G.play.hands[seat].includes(c)) playCard(seat, c); return; }
-  if (t.closest('.seg')) {
+  if (t.closest('.seg') && ui.overlay !== 'sb') {   // social bridge handles its own (social.js)
     const seg = t.closest('.seg').dataset.seg, v = t.dataset.v;
     if (seg === 'lang') { SET.lang = v; SET.langAuto = false; applyLang(); Store.saveSettings(SET); save(); render(); return; }
     if (seg === 'sys') { SET.sys = v; SET.conv = { ...E.sysOf(v).conv }; SET.practice = ''; Store.saveSettings(SET); save(); if (ui.overlay === 'set') showSettings(); else render(); flash(E.sysOf(v).n + ' — ' + T('from the next deal'), 2200); return; }
@@ -10897,6 +11275,10 @@ const Net = (() => {
     get on() { return !!DB_URL && navigator.onLine; },
     get: path => dbReq(path),
     put: (path, v) => dbReq(path, { method: 'PUT', body: JSON.stringify(v) }),
+    patch: (path, v) => dbReq(path, { method: 'PATCH', body: JSON.stringify(v) }),
+    // this device's database account (the hidden guest sign-in)
+    async uid() { try { await Auth.token(); } catch (e) {} return Auth.uid; },
+    uidNow: () => Auth.uid,
     // is the name registered? (only the name can be read, never the PIN)
     async exists(name) { return (await Cloud.get('users/' + fbKey(name) + '/name')) != null; },
     claim: (name, pin) => Cloud.put('users/' + fbKey(name), { name: String(name).slice(0, 20), pin, ts: Date.now() }),
@@ -11982,6 +12364,290 @@ const Net = (() => {
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
   return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+})();
+
+</script>
+<script>
+/* Bridge Table — social bridge: a game played with real cards at real tables (up to 12); the app only keeps the
+   scores. Anyone at a table enters the result of a board that table played (contract, declarer, tricks); the boards
+   are played in any order and need not all be played. A table sees what the other tables did on a board only after
+   entering its own result there. Rankings by matchpoints and IMPs. Games are kept in the online database (sb/<code>,
+   with a list in sbi/<code>) and can be opened later; the administrator can delete them. */
+const SB = (() => {
+  'use strict';
+  const sb = { list: null, id: null, g: null, view: 'boards', board: 0, form: null, err: '', busy: false, timer: 0, setup: null, rank: 'mp' };
+  const C = () => Net.Cloud;
+  const myTableKey = id => 'bridge-sb-table-' + id;
+  const myTable = () => { try { return +localStorage.getItem(myTableKey(sb.id)) || 0; } catch (e) { return 0; } };
+  const setMyTable = t => { try { localStorage.setItem(myTableKey(sb.id), String(t)); } catch (e) {} };
+  const SUITS = ['♣', '♦', '♥', '♠', 'NT'];
+  const newCode = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 6; i++) s += A[Math.floor(Math.random() * A.length)]; return s; };
+  const fmtDate = ts => new Date(ts).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const signed = v => (v > 0 ? '+' : '') + v;
+  const sym = s => s === 4 ? 'NT' : `<span class="${s === 1 || s === 2 ? 'red' : ''}">${SUITS[s]}</span>`;
+  const isAdm = () => Net.isAdmin && Net.isAdmin();
+  const done = () => sb.g && sb.g.m && sb.g.m.st === 'done';
+
+  /* ---- scores ---- */
+  // the North-South score of one result
+  function nsScore(b, r) {
+    if (!r || !r.l) return 0;
+    const sc = E.scoreOf(r.l, r.s, r.x || 0, E.vulOf(b, r.d), r.k);
+    return E.sideOf(r.d) === 0 ? sc : -sc;
+  }
+  // per board, each table's result compared with the other tables' (matchpoints % and cross-IMPs, North-South view)
+  function boardCmp(b) {
+    const R = (sb.g.r || {})[b] || {}, ts = Object.keys(R), out = {};
+    for (const t of ts) {
+      const me = nsScore(b, R[t]), field = ts.filter(x => x !== t).map(x => nsScore(b, R[x]));
+      out[t] = { ns: me, cmp: field.length ? E.compare(me, field) : null };
+    }
+    return out;
+  }
+  // every pair (the North-South and East-West pair of each table; nobody changes tables)
+  function standings() {
+    const g = sb.g, rows = {};
+    for (let t = 1; t <= g.m.tb; t++) for (const dir of ['ns', 'ew']) rows[t + dir] = { t, dir, name: pairName(t, dir), n: 0, mp: 0, mpN: 0, imp: 0 };
+    for (const b in (g.r || {})) {
+      const c = boardCmp(b);
+      for (const t in c) {
+        if (!rows[t + 'ns']) continue;
+        for (const dir of ['ns', 'ew']) {
+          const r = rows[t + dir]; r.n++;
+          if (c[t].cmp) { r.mp += dir === 'ns' ? c[t].cmp.mp : 100 - c[t].cmp.mp; r.mpN++; r.imp += dir === 'ns' ? c[t].cmp.imp : -c[t].cmp.imp; }
+        }
+      }
+    }
+    const L = Object.values(rows).filter(r => r.n);
+    L.forEach(r => { r.pct = r.mpN ? Math.round(r.mp / r.mpN * 10) / 10 : null; r.imp = Math.round(r.imp * 10) / 10; });
+    return L.sort((a, b) => sb.rank === 'imp' ? b.imp - a.imp || (b.pct ?? -1) - (a.pct ?? -1) : (b.pct ?? -1) - (a.pct ?? -1) || b.imp - a.imp);
+  }
+  function pairName(t, dir) {
+    const p = ((sb.g.t || {})[t]) || {}, a = dir === 'ns' ? [p.n, p.s] : [p.e, p.w];
+    const s = a.filter(Boolean).join(' – ');
+    return s || T('Table {0}', t) + ' ' + (dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]);
+  }
+  const conTxt = r => !r.l ? T('Passed out') : `${r.l}${sym(r.s)}${r.x === 1 ? 'X' : r.x === 2 ? 'XX' : ''} ${SEAT_AB[r.d]}`;
+  const resTxt = r => { if (!r.l) return ''; const d = r.k - (r.l + 6); return d === 0 ? '=' : signed(d); };
+
+  /* ---- loading ---- */
+  async function loadList() {
+    try { const L = await C().get('sbi'); sb.list = Object.entries(L || {}).map(([id, v]) => ({ id, ...v })).sort((a, b) => b.ts - a.ts); sb.err = ''; }
+    catch (e) { sb.list = sb.list || []; sb.err = T('Could not reach the server. Check the internet connection.'); }
+  }
+  async function loadGame(id) {
+    const g = await C().get('sb/' + id);
+    if (!g || !g.m) return false;
+    // the database gives keys 1, 2, 3… back as an array (with an empty first place): turn them into plain objects again
+    const obj = a => { const o = {}; if (a) for (const k of Object.keys(a)) if (a[k] != null) o[k] = a[k]; return o; };
+    g.t = obj(g.t); g.r = obj(g.r); for (const b in g.r) g.r[b] = obj(g.r[b]);
+    sb.g = g; sb.id = id; return true;
+  }
+  function poll() {
+    clearInterval(sb.timer);
+    sb.timer = setInterval(async () => {
+      if (ui.overlay !== 'sb' || !sb.id) { clearInterval(sb.timer); return; }
+      const a = document.activeElement; if (a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) return;   // not while typing
+      try { const old = JSON.stringify(sb.g); if (await loadGame(sb.id) && JSON.stringify(sb.g) !== old) show(); } catch (e) {}
+    }, 8000);
+  }
+
+  /* ---- screens ---- */
+  async function open() {
+    sb.id = null; sb.g = null; sb.setup = null; sb.err = '';
+    show(); await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
+  }
+  function show() {
+    if (sb.setup) return openOv('sb', setupHtml());
+    if (!sb.id) return openOv('sb', listHtml());
+    openOv('sb', gameHtml());
+  }
+  function listHtml() {
+    const rows = (sb.list || []).map(g => `<tr><td><b>🃏 ${esc(g.n)}</b><small>${fmtDate(g.ts)}${g.byn ? ' · ' + esc(g.byn) : ''}</small></td>
+      <td data-l="${T('Tables')}" class="n">${g.tb}</td><td data-l="${T('Boards')}" class="n">${g.bd}</td>
+      <td data-l="${T('Status')}">${g.st === 'done' ? `<span class="tst">${T('Finished')}</span>` : `<span class="tst run">${T('Running')}</span>`}</td>
+      <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${isAdm() ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
+    return `<h2>🃏 ${T('Social bridge')}</h2>
+      <div class="muted">${T('Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.')}</div>
+      <div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button></div>
+      <div class="row2"><input class="tok" id="sbCode" maxlength="6" placeholder="${T('Game code')}" autocapitalize="characters"><button class="btn" id="sbJoin">${T('Join')}</button></div>
+      ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
+      ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
+      <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
+  }
+  const seg = (name, opts, cur) => `<div class="seg" data-sbseg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  function setupHtml() {
+    const s = sb.setup;
+    const grid = [...Array(s.tb).keys()].map(i => `<div class="tsetrow sbrow"><b>${T('Table {0}', i + 1)}</b>${['n', 's', 'e', 'w'].map((k, j) => `<label><small>${SEAT[[0, 2, 1, 3][j]]}</small><input class="tok" maxlength="20" data-sbname="${i + 1}:${k}" value="${esc((s.names[i + 1] || {})[k] || '')}"></label>`).join('')}</div>`).join('');
+    return `<h2>🃏 ${T('New game')}</h2>
+      <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
+      <div class="grp"><span>${T('Tables')}</span>${seg('tb', [...Array(12).keys()].map(i => [i + 1, i + 1]), s.tb)}</div>
+      <div class="grp"><span>${T('Boards')}</span>${seg('bd', [8, 12, 16, 20, 24, 28, 32, 36].map(n => [n, n]), s.bd)}</div>
+      <div class="grp"><span>${T('Players')}</span><div class="muted">${T('The players at each table (they stay at their table).')}</div>${grid}</div>
+      ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
+      <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`;
+  }
+  function readSetup() {
+    const s = sb.setup; if (!s) return;
+    const n = $('sbName'); if (n) s.n = n.value.trim().slice(0, 40);
+    document.querySelectorAll('[data-sbname]').forEach(i => { const [t, k] = i.dataset.sbname.split(':'); (s.names[t] = s.names[t] || {})[k] = i.value.trim().slice(0, 20); });
+  }
+  function gameHtml() {
+    const g = sb.g, m = g.m, mt = myTable(), mine = C().uidNow && C().uidNow() === m.by;
+    const tabs = `<div class="seg ttabs">${[['boards', T('Board list')], ['rank', T('Standings')], ['tables', T('Tables')]].map(([v, l]) => `<button data-sbview="${v}" class="${sb.view === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+    const tsel = `<div class="grp sbme"><span>${T('My table')}</span>${seg('me', [...Array(m.tb).keys()].map(i => [i + 1, i + 1]), mt)}</div>`;
+    let body = '';
+    if (sb.board) body = boardHtml(sb.board);
+    else if (sb.view === 'rank') body = rankHtml();
+    else if (sb.view === 'tables') body = tablesHtml();
+    else body = boardsHtml();
+    return `<h2>🃏 ${esc(m.n)}</h2>
+      <div class="muted">${T('Code')}: <b class="sbcode">${esc(sb.id)}</b> · ${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}</div>
+      ${done() ? '' : tsel}${sb.board ? '' : tabs}${body}
+      ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
+      <div class="row2">${sb.board ? `<button class="btn" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
+        ${!sb.board && !done() && (mine || isAdm()) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
+        ${!sb.board && isAdm() ? `<button class="btn tdel" data-sbdel="${sb.id}">✕ ${T('Delete')}</button>` : ''}
+        <button class="btn gold" id="oClose">${T('Close')}</button></div>`;
+  }
+  function boardsHtml() {
+    const g = sb.g, mt = myTable();
+    const cells = [...Array(g.m.bd).keys()].map(i => {
+      const b = i + 1, R = (g.r || {})[b] || {}, n = Object.keys(R).length, me = mt && R[mt];
+      return `<button class="sbb${me ? ' me' : ''}${n ? ' some' : ''}" data-sbboard="${b}"><b>${b}</b><small>${me ? '✓ ' : ''}${n ? T('{0} tables', n) : '—'}</small></button>`;
+    }).join('');
+    return `<div class="muted">${done() ? T('Tap a board to see what was played.') : mt ? T('Tap a board your table played to enter its score.') : T('First choose your table above.')}</div><div class="sbgrid">${cells}</div>`;
+  }
+  function boardHtml(b) {
+    const g = sb.g, mt = myTable(), R = (g.r || {})[b] || {}, ts = Object.keys(R).sort((x, y) => x - y);
+    const vul = [E.vulOf(b, 0), E.vulOf(b, 1)], vt = vul[0] && vul[1] ? T('All vulnerable') : vul[0] ? T('{0} vulnerable', SEAT_AB[0] + SEAT_AB[2]) : vul[1] ? T('{0} vulnerable', SEAT_AB[1] + SEAT_AB[3]) : T('None vulnerable');
+    const head = `<h3>${T('Board {0}', b)} <small class="muted">${T('Dealer')}: ${SEAT[E.dealerOf(b)]} · ${vt}</small></h3>`;
+    const canSee = done() || (mt && R[mt]);
+    if (sb.form || (!canSee && mt && !done())) return head + formHtml(b) + (ts.length ? `<div class="muted">${T('{0} tables have played this board. You will see their results after entering yours.', ts.length)}</div>` : '');
+    if (!canSee) return head + `<div class="muted">${T('First choose your table above.')}</div>`;
+    const c = boardCmp(b);
+    const rows = ts.map(t => { const r = R[t], x = c[t]; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
+      <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
+      <td data-l="MP %" class="n">${x.cmp ? x.cmp.mp : '—'}</td><td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td></tr>`; }).join('');
+    return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th><th class="n">MP %</th><th class="n">IMP</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="muted">${T('MP % and IMP from North-South’s side, against the other tables.')}</div>
+      ${mt && R[mt] && !done() ? `<div class="row2"><button class="btn" id="sbFix">✎ ${T('Correct our score')}</button></div>` : ''}`;
+  }
+  function formHtml(b) {
+    const mt = myTable(), R = (sb.g.r || {})[b] || {};
+    const f = sb.form || (sb.form = R[mt] ? { ...R[mt] } : { l: null, s: null, x: 0, d: null, k: null });
+    const need = f.l ? f.l + 6 : 0;
+    const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
+    let preview = '';
+    if (f.l === 0) preview = T('Passed out') + ' · 0';
+    else if (f.l && f.s != null && f.d != null && f.k != null) { const ns = nsScore(b, f), ew = E.sideOf(f.d) === 1; preview = `${conTxt(f)} ${resTxt(f)} · ${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; }
+    const ok = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null);
+    return `<div class="sbform"><div class="muted">${T('Table {0}', mt)}: ${esc(pairName(mt, 'ns'))} — ${esc(pairName(mt, 'ew'))}</div>
+      <div class="grp"><span>${T('Contract')}</span>${seg('l', [[0, T('Pass')], ...[1, 2, 3, 4, 5, 6, 7].map(n => [n, n])], f.l)}</div>
+      ${f.l ? `<div class="grp"><span>${T('Suit')}</span>${seg('s', SUITS.map((x, i) => [i, sym(i)]), f.s)}</div>
+      <div class="grp"><span>${T('Doubled')}</span>${seg('x', [[0, '—'], [1, 'X'], [2, 'XX']], f.x)}</div>
+      <div class="grp"><span>${T('Declarer')}</span>${seg('d', [0, 1, 2, 3].map(s => [s, SEAT[s]]), f.d)}</div>
+      <div class="grp"><span>${T('Result')}</span>${seg('k', res, f.k)}</div>` : ''}
+      ${preview ? `<div class="sbprev"><b>${preview}</b></div>` : ''}
+      <div class="row2"><button class="btn new" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>${T('Save')}</button>${R[mt] ? `<button class="btn" id="sbCancel">${T('Cancel')}</button>` : ''}</div></div>`;
+  }
+  function rankHtml() {
+    const L = standings();
+    if (!L.length) return `<div class="muted">${T('No scores yet.')}</div>`;
+    const rows = L.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b><small>${T('Table {0}', r.t)} · ${r.dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]}</small></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="MP %" class="n">${r.pct ?? '—'}</td><td data-l="IMP" class="n">${signed(r.imp)}</td></tr>`).join('');
+    return `${seg('rank', [['mp', 'MP %'], ['imp', 'IMP']], sb.rank)}<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${T('Pair')}</th><th class="n">${T('Boards')}</th><th class="n">MP %</th><th class="n">IMP</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="muted">${T('MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.')}</div>`;
+  }
+  function tablesHtml() {
+    const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || isAdm() || (C().uidNow && C().uidNow() === g.m.by));
+    return [...Array(g.m.tb).keys()].map(i => {
+      const t = i + 1, p = (g.t || {})[t] || {}, played = Object.values(g.r || {}).filter(R => R[t]).length;
+      if (sb.editT === t) return `<div class="tsetrow sbrow"><b>${T('Table {0}', t)}</b>${['n', 's', 'e', 'w'].map((k, j) => `<label><small>${SEAT[[0, 2, 1, 3][j]]}</small><input class="tok" maxlength="20" data-sbtn="${k}" value="${esc(p[k] || '')}"></label>`).join('')}<button class="btn new" id="sbTSave">${T('Save')}</button></div>`;
+      return `<div class="sbtrow"><b>${T('Table {0}', t)}</b><span>${SEAT_AB[0] + SEAT_AB[2]}: ${esc(pairName(t, 'ns'))}<br>${SEAT_AB[1] + SEAT_AB[3]}: ${esc(pairName(t, 'ew'))}</span><small>${T('{0} boards', played)}</small>${canEdit(t) ? `<button class="btn mini-btn" data-sbedit="${t}">✎</button>` : ''}</div>`;
+    }).join('');
+  }
+
+  /* ---- actions ---- */
+  async function create() {
+    readSetup(); const s = sb.setup; if (sb.busy) return;
+    if (!C().on) { sb.err = T('Could not reach the server. Check the internet connection.'); return show(); }
+    sb.busy = true; sb.err = ''; show();
+    try {
+      const uid = await C().uid(), id = newCode(), ts = Date.now();
+      const m = { n: s.n || T('Social bridge'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: (Net.st && localStorage.getItem('bridge-table-name')) || '' };
+      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn } };
+      for (let t = 1; t <= s.tb; t++) { const p = s.names[t] || {}; up['sb/' + id + '/t/' + t] = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }
+      await C().patch('', up);
+      sb.setup = null; sb.busy = false; await loadGame(id); sb.view = 'boards'; sb.board = 0; show(); poll();
+    } catch (e) { sb.busy = false; sb.err = T('Could not save. Check the internet connection and try again.'); show(); }
+  }
+  async function openGame(id) {
+    sb.err = '';
+    try { if (!(await loadGame(id))) { sb.err = T('No game with this code.'); return show(); } }
+    catch (e) { sb.err = T('Could not reach the server. Check the internet connection.'); return show(); }
+    sb.view = 'boards'; sb.board = 0; sb.form = null; sb.editT = 0; show(); poll();
+  }
+  async function save() {
+    const b = sb.board, mt = myTable(), f = sb.form; if (!b || !mt || !f || sb.busy) return;
+    const r = f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
+    r.sc = nsScore(b, r); r.ts = Date.now();
+    sb.busy = true; show();
+    try { await C().put('sb/' + sb.id + '/r/' + b + '/' + mt, r); ((sb.g.r = sb.g.r || {})[b] = sb.g.r[b] || {})[mt] = r; sb.form = null; sb.err = ''; }
+    catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
+    sb.busy = false; try { await loadGame(sb.id); } catch (e) {} show();
+  }
+  async function finish() {
+    try { await C().put('sb/' + sb.id + '/m/st', 'done'); await C().put('sbi/' + sb.id + '/st', 'done'); sb.g.m.st = 'done'; }
+    catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
+    show();
+  }
+  async function del(id) {
+    try { await C().patch('', { ['sb/' + id]: null, ['sbi/' + id]: null }); }
+    catch (e) { sb.err = T('Could not delete.'); }
+    if (sb.id === id) { sb.id = null; sb.g = null; }
+    await loadList(); openOv('sb', listHtml());
+  }
+  async function saveTable() {
+    const t = sb.editT, p = {}; document.querySelectorAll('[data-sbtn]').forEach(i => { p[i.dataset.sbtn] = i.value.trim().slice(0, 20); });
+    try { await C().put('sb/' + sb.id + '/t/' + t, { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }); (sb.g.t = sb.g.t || {})[t] = p; sb.editT = 0; }
+    catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
+    show();
+  }
+
+  document.addEventListener('click', e => {
+    if (e.target.closest('#sbOpen')) return open();
+    if (ui.overlay !== 'sb') return;
+    const el = e.target.closest('button'); if (!el) return;
+    const d = el.dataset, id = el.id;
+    const sg = el.closest('[data-sbseg]');
+    if (sg) {
+      const k = sg.dataset.sbseg, v = el.dataset.v;
+      if (k === 'tb' || k === 'bd') { readSetup(); sb.setup[k] = +v; }
+      else if (k === 'me') { setMyTable(+v); sb.form = null; }
+      else if (k === 'rank') sb.rank = v;
+      else if (sb.form) { sb.form[k] = +v; if (k === 'l') { if (+v === 0) { sb.form.s = sb.form.d = sb.form.k = null; } else if (sb.form.k == null || sb.form.k < 0) sb.form.k = null; } }
+      return show();
+    }
+    if (id === 'sbNew') { sb.setup = { n: T('Social bridge') + ' ' + new Date().toLocaleDateString(), tb: 4, bd: 24, names: {} }; sb.err = ''; return show(); }
+    if (id === 'sbBack') { sb.setup = null; return show(); }
+    if (id === 'sbCreate') return create();
+    if (id === 'sbJoin') { const c = ($('sbCode').value || '').trim().toUpperCase(); if (c) openGame(c); return; }
+    if (d.sbopen) return openGame(d.sbopen);
+    if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
+    if (id === 'sbList') { sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
+    if (d.sbview) { sb.view = d.sbview; sb.editT = 0; return show(); }
+    if (d.sbboard) { sb.board = +d.sbboard; sb.form = null; return show(); }
+    if (id === 'sbBoards') { sb.board = 0; sb.form = null; return show(); }
+    if (id === 'sbSave') return save();
+    if (id === 'sbFix') { const R = sb.g.r[sb.board][myTable()]; sb.form = { ...R }; if (!R.l) sb.form.l = 0; return show(); }
+    if (id === 'sbCancel') { sb.form = null; return show(); }
+    if (id === 'sbEnd') { askYes(T('Finish the game? Scores can no longer be entered.'), () => { openOv('sb', gameHtml()); finish(); }); return; }
+    if (d.sbedit) { sb.editT = +d.sbedit; return show(); }
+    if (id === 'sbTSave') return saveTable();
+  });
+  document.addEventListener('keydown', e => { if (ui.overlay === 'sb' && e.key === 'Enter' && e.target.id === 'sbCode') $('sbJoin').click(); });
+
+  return { open };
 })();
 
 </script>

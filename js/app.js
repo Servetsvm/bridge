@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 186;
+const APP_V = 187;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1496,7 +1496,7 @@ function toursHtml() {
   }).join('');
   const table = rows ? `<div class="ttwrap"><table class="ttab"><thead><tr><th>${T('Tournament')}</th><th>${T('Format')}</th><th class="n">${T('Boards')}</th><th>${T('Ranking')}</th><th class="n">${T('Players')}</th><th>${T('Status')}</th><th>${T('Ends in')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `<div class="muted">${L.length ? T('No tournaments here.') : T('No tournaments yet. Create one and invite the players you want.')}</div>`;
-  return `${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button></div>`;
+  return `${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button><button class="btn new" id="sbOpen">🃏 ${T('Social bridge')}</button></div>`;
 }
 // the action buttons of one tournament row (and a short note: an invitation, your table, how far you are)
 function tourRowBtns(t, me) {
@@ -1705,7 +1705,7 @@ function openOv(name, html) {
   const fl = ["player", "dm", "net", "lead"].includes(name) && G && G.phase !== "idle" && innerWidth >= 700, ov = $("ov");
   ui.overlay = name; ov.classList.toggle("float", fl);
   const bar = fl || (name !== "gate" && innerWidth >= 900 && matchMedia("(pointer:fine)").matches);   // on a computer every window can be dragged by its top bar
-  ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}${["end", "res", "rev", "set", "hist", "tour", "tsetup", "deal", "help", "auc"].includes(name) ? " wide" : ""}" data-ov="${name}">${bar ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
+  ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}${["end", "res", "rev", "set", "hist", "tour", "tsetup", "deal", "help", "auc", "sb"].includes(name) ? " wide" : ""}" data-ov="${name}">${bar ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
   ov.hidden = false;
   if (fl && typeof SIZES !== "undefined" && SIZES.fw2) { const s = ov.firstChild; s.style.width = SIZES.fw2 + "px"; s.style.height = SIZES.fh2 + "px"; }
   if (fl && ui.fpos) { const s = ov.firstChild; s.style.left = ui.fpos.x + "px"; s.style.top = ui.fpos.y + "px"; s.style.right = "auto"; }
@@ -2338,7 +2338,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
   if (t.dataset.call != null && G.phase === 'bid' && bidTurn() === U()) { const v = t.dataset.call; const c = (v === 'P' || v === 'X' || v === 'XX') ? v : +v; if (c !== -1) { const al = ui.alertOn ? (ui.alertTxt || '').trim() || T('Alert') : null; ui.alertOn = false; ui.alertTxt = ''; makeCall(U(), c, undefined, al); } return; }
   if (t.dataset.c != null && t.classList.contains('play')) { const c = +t.dataset.c; const seat = G.play.turn; if (G.play.hands[seat].includes(c)) playCard(seat, c); return; }
-  if (t.closest('.seg')) {
+  if (t.closest('.seg') && ui.overlay !== 'sb') {   // social bridge handles its own (social.js)
     const seg = t.closest('.seg').dataset.seg, v = t.dataset.v;
     if (seg === 'lang') { SET.lang = v; SET.langAuto = false; applyLang(); Store.saveSettings(SET); save(); render(); return; }
     if (seg === 'sys') { SET.sys = v; SET.conv = { ...E.sysOf(v).conv }; SET.practice = ''; Store.saveSettings(SET); save(); if (ui.overlay === 'set') showSettings(); else render(); flash(E.sysOf(v).n + ' — ' + T('from the next deal'), 2200); return; }

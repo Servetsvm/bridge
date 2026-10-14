@@ -1452,3 +1452,21 @@ body.four .pzcards button.s0{color:#16803c}body.four .pzcards button.s1{color:#e
 .btn.bad{background:#d0453b;color:#fff;border-color:#a8342c}
 .btn.bad:disabled{opacity:.45}
 body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342c}
+/* social bridge */
+.sbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;margin:8px 0}
+.sbb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid #c7c9bd;border-radius:8px;background:#fff;color:#222;cursor:pointer}
+.sbb b{font-size:18px}.sbb small{font-size:11px;color:#777}
+.sbb.some{border-color:#1e5c3b}
+.sbb.me{background:#e3f1e8;border-color:#1e5c3b}
+.sbb.me small{color:#1e5c3b;font-weight:700}
+.sbtab tr.me td{background:#fff6d6}
+.sbtab .red,.sbform .red,.sbprev .red,h3 .red{color:#c0282d}
+.sbtrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e3dfcd}
+.sbtrow span{flex:1}.sbtrow small{color:#777}
+.sbprev{margin:8px 0;padding:8px 10px;border-radius:8px;background:#eef3ee;font-size:16px}
+.sbcode{letter-spacing:2px}
+.sbme .seg button{flex:0 0 auto;min-width:38px}
+:root[data-theme="dark"] .sbb{background:#323b36;color:#e8ece4;border-color:#4a554f}
+:root[data-theme="dark"] .sbb.me{background:#24452f}
+:root[data-theme="dark"] .sbtab tr.me td{background:#3a3520}
+:root[data-theme="dark"] .sbprev{background:#26302a}

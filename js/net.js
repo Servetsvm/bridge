@@ -614,6 +614,10 @@ const Net = (() => {
     get on() { return !!DB_URL && navigator.onLine; },
     get: path => dbReq(path),
     put: (path, v) => dbReq(path, { method: 'PUT', body: JSON.stringify(v) }),
+    patch: (path, v) => dbReq(path, { method: 'PATCH', body: JSON.stringify(v) }),
+    // this device's database account (the hidden guest sign-in)
+    async uid() { try { await Auth.token(); } catch (e) {} return Auth.uid; },
+    uidNow: () => Auth.uid,
     // is the name registered? (only the name can be read, never the PIN)
     async exists(name) { return (await Cloud.get('users/' + fbKey(name) + '/name')) != null; },
     claim: (name, pin) => Cloud.put('users/' + fbKey(name), { name: String(name).slice(0, 20), pin, ts: Date.now() }),
