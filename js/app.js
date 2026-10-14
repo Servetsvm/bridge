@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 195;
+const APP_V = 196;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1869,7 +1869,7 @@ function showEnd() {
    ${scoreTxt}
    ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}${e.prv.some(r => !r.ok && !r.pd) && !G.tour ? `<button class="btn gold prretry" id="oReplayP">🔁 ${T('Play this hand again and find the right call')}</button>` : ''}</div>` : ''}
    <div class="grp"><span>${T('Par check')}</span><div>${T('Normal contract (most common at the robot tables)')}: ${f.done ? (norm ? conKey(norm) + ' — ' + T('double dummy') + ' ' + ddTxt('norm', norm) : T('Pass')) : '…'}</div>
-   ${e.c ? `<div>${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${ddTxt('you', e.c)}</div>` : ''}</div>
+   </div>${e.c ? ddBox(e.c, f.dd.you) : ''}
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
    ${dealHtml(G.deal, U())}
    ${anaHtml(HIST.find(h => h.id === e.id) || e)}
@@ -2182,6 +2182,13 @@ function revDraw() { const e = HIST.find(h => h.id === ui.revId), el = $('revPla
 /* a finished board from Results: the four hands, the auction (tap a call for its meaning) and every trick */
 /* a finished board looked at again: the contract double dummy (worked out now in a worker when the board was left
    before it was ready) */
+// the contract double dummy, shown large: how many tricks it takes with every hand open, and whether it makes
+function ddBox(c, v) {
+  const d = v == null ? null : v - (c.level + 6);
+  const res = v === undefined ? `<span class="ddres">${T('calculating…')}</span>` : v === null ? `<span class="ddres">${T('not available')}</span>`
+    : `<b class="ddn">${v}</b><span class="ddres">${T('{0} tricks', v).replace(String(v), '').trim()}</span><span class="ddchip ${d >= 0 ? 'ok' : 'no'}">${d >= 0 ? T('makes') + (d ? ' +' + d : '') : T('down {0}', -d)}</span>`;
+  return `<div class="ddbox"><div class="ddhd">🎯 ${T('Your contract')} · ${T('double dummy')}</div><div class="ddrow"><span class="ddc">${conKey(c)}</span>${res}</div></div>`;
+}
 function revDdHtml(e) {
   if (!e.c || !e.deal) return '';
   const v = e.dd && e.dd.you;
@@ -2193,11 +2200,9 @@ function revDdHtml(e) {
       if (w) { w.onmessage = m => { const d = m.data || {}; if (d.type === 'dd' || d.type === 'error') { w.terminate(); got(d.type === 'dd' ? d.t : null); } }; w.onerror = () => { w.terminate(); got(null); }; w.postMessage({ type: 'dd', id: e.id, key: 'you', deal: e.deal, c: e.c, limit: 1.2e8 }); }
       else setTimeout(() => got(E.ddContract(e.deal, e.c, 1.5e6)), 50);
     }
-    return `<div class="muted">${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${T('calculating…')}</div>`;
+    return ddBox(e.c, undefined);
   }
-  if (v == null) return '';
-  const d = v - (e.c.level + 6);
-  return `<div class="muted">${T('Your contract')} ${conKey(e.c)} — ${T('double dummy')} ${T('{0} tricks', v)} (${d >= 0 ? T('makes') : T('down {0}', -d)})</div>`;
+  return v == null ? '' : ddBox(e.c, v);
 }
 function showReview(id, sel) {
   const e = HIST.find(h => h.id === id); if (!e) return;

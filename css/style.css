@@ -1472,3 +1472,14 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 :root[data-theme="dark"] .sbprev{background:#26302a}
 .sbwait{padding:10px 12px;border-radius:8px;background:#fff6d6;color:#6b5200;font-weight:600}
 :root[data-theme="dark"] .sbwait{background:#3a3520;color:#f0d98a}
+/* the contract double dummy, shown large */
+.ddbox{border:2px solid #2f6db5;border-radius:12px;padding:10px 14px;background:#eaf2fc;color:#13284a}
+.ddhd{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#2f6db5;margin-bottom:4px}
+.ddrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:18px}
+.ddc{font-weight:800;font-size:20px}
+.ddn{font-size:30px;line-height:1;font-weight:900}
+.ddres{font-weight:600}
+.ddchip{padding:3px 10px;border-radius:999px;font-weight:800;font-size:15px;color:#fff}
+.ddchip.ok{background:#1e8a4c}.ddchip.no{background:#c0392b}
+:root[data-theme="dark"] .ddbox{background:#1d2b3d;color:#e3ecf8;border-color:#5b8fd0}
+:root[data-theme="dark"] .ddhd{color:#8fb6e6}
