@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 182;
+const APP_V = 183;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -312,7 +312,6 @@ function pracWarnHtml() {
   const bad = pracList().filter(k => pracCheck(k) === false);
   return bad.length ? `<div class="prwarn">⚠ ${T('{0}: no hand with it came up in your base system — it may not be part of it.', esc(bad.map(pracName).join(', ')))}</div>` : '';
 }
-/* a never-seen deal; in practice mode, one where our side gets to use one of the chosen conventions */
 /* rare conventions (Gambling 3NT, Gerber, Smolen, ...) come up about once in a thousand deals or less, too seldom for
    random deals: for them the hands that make the convention possible are built first (the rest of the pack is dealt
    at random) and the auction then checks, as for any practice deal, that the convention really comes up. The roles
@@ -390,29 +389,50 @@ function genDeal(k, dealer) {
   out.act = seat[k === 'gamb' ? 'open' : k === 'respx' ? 'y' : 'resp'] === me;
   return out;
 }
+/* the balance between declaring and defending: over your last twelve boards with robots, if your side declared two or
+   more boards more often than the opponents (or the other way round), the next deal is one where the other side
+   declares. Practising conventions would otherwise give your side most of the contracts. */
+function declTarget() {
+  let us = 0, them = 0;
+  for (const e of HIST.filter(h => h.c && !h.online && !h.tour && !h.passed).slice(-12)) { if (sideOf(e.c.decl) === sideOf(e.seat)) us++; else them++; }
+  return us - them >= 2 ? 'them' : them - us >= 2 ? 'us' : null;
+}
+/* a never-seen deal; in practice mode, one where our side gets to use one of the chosen conventions */
 function freshDeal(dealer) {
-  const want = pracList(), cards = sideCards(), t0 = performance.now();
-  let fallback = null;
+  const want = pracList(), cards = sideCards(), t0 = performance.now(), tgt = declTarget();
+  let fbMine = null, fbOurs = null, other = null;
   // rare conventions among the chosen: every other deal (every deal if all are rare) is built for one of them
   const gens = want.filter(k => PRAC_GEN[k]), allRare = gens.length && gens.length === want.length;
+  const take = d => { SEEN.add(d.key); saveSeen(); return d.deal; };
   for (let i = 0; i < 20000; i++) {
     let deal = gens.length && (allRare || i % 2 === 0) ? genDeal(gens[i % gens.length], dealer) : null;
     if (!deal) { const d = E.shuffle([...Array(52).keys()]); deal = [0, 1, 2, 3].map(k => d.slice(k * 13, k * 13 + 13)); }
     const key = E.dealKey(deal);
     if (SEEN.has(key)) continue;
-    if (want.length) {
-      const auc = [];
-      while (!auctionOver(auc) && auc.length < 60) { const t = (dealer + auc.length) % 4; const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); }
-      let mine = auc.some(e => e.seat === U() && e.m && want.includes(e.m.cv));
-      // practising discards: we defend and will likely have to discard
-      if (!mine && want.some(k => CARD_KEYS.includes(k))) { const c = contractOf(auc); if (c && sideOf(c.decl) !== sideOf(U()) && discardLikely(deal, c)) mine = true; }
-      const ours = auc.some(e => sideOf(e.seat) === sideOf(U()) && e.m && want.includes(e.m.cv));
-      if (!mine && !ours) { if (performance.now() - t0 < 4000) continue; }
-      else if (!mine) { if (!fallback) fallback = { deal, key }; if (deal.act !== false && performance.now() - t0 < 2500) continue; }
-      if (!mine && !ours && fallback) { SEEN.add(fallback.key); saveSeen(); return fallback.deal; }
-      if (!mine && !ours) flash('📚 ' + T('No hand with {0} came up quickly — here is a normal deal', pracNames()), 3000);
-    }
-    SEEN.add(key); saveSeen(); return deal;
+    if (!want.length && !tgt) return take({ deal, key });
+    const auc = [];
+    while (!auctionOver(auc) && auc.length < 60) { const t = (dealer + auc.length) % 4; const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); }
+    const c = contractOf(auc), side = c ? (sideOf(c.decl) === sideOf(U()) ? 'us' : 'them') : null, okSide = !tgt || side === tgt;
+    // normal deals: only the balance matters (a few hundred tries at most)
+    if (!want.length) { if (okSide || i > 300) return take({ deal, key }); continue; }
+    let mine = auc.some(e => e.seat === U() && e.m && want.includes(e.m.cv));
+    // practising discards: we defend and will likely have to discard
+    if (!mine && want.some(k => CARD_KEYS.includes(k))) { if (c && side === 'them' && discardLikely(deal, c)) mine = true; }
+    const ours = auc.some(e => sideOf(e.seat) === sideOf(U()) && e.m && want.includes(e.m.cv));
+    // the opponents using the convention: a board to see it from the other side, when they should declare
+    const theirs = auc.some(e => sideOf(e.seat) !== sideOf(U()) && e.m && want.includes(e.m.cv));
+    if (okSide && (mine || (ours && deal.act === false) || (tgt === 'them' && theirs))) return take({ deal, key });
+    if (okSide && ours && !fbOurs) fbOurs = { deal, key };
+    if (mine && !fbMine) fbMine = { deal, key };
+    if (tgt && side === tgt && !other) other = { deal, key };
+    const t = performance.now() - t0;
+    if (t < 2500) continue;
+    // time is up: keep the balance first (a board the other side declares), then the convention
+    const pick = (tgt && (fbOurs || other)) || fbMine || fbOurs;
+    if (pick) return take(pick);
+    if (t < 4000) continue;
+    flash('📚 ' + T('No hand with {0} came up quickly — here is a normal deal', pracNames()), 3000);
+    return take({ deal, key });
   }
   throw new Error('could not find an unseen deal');
 }
@@ -480,11 +500,7 @@ function makeCall(seat, call, m, al) {
 function userControls(seat) {
   if (online()) return Net.owner(seat) === Net.me;
   if (!G.play) return seat === U();
-  // as at a real table: you play both hands when you declare; when partner declares the robot plays and your hand is
-  // dummy (unless you chose to play partner's contracts too); on defence you play your own hand
-  const decl = G.play.contract.decl;
-  if (sideOf(decl) !== sideOf(U())) return seat === U();
-  return decl === U() || SET.playAll ? sideOf(seat) === sideOf(U()) : false;
+  return seat === U() || (sideOf(G.play.contract.decl) === sideOf(U()) && sideOf(seat) === sideOf(U()));
 }
 function playCard(seat, c) {
   const g = G.play;
@@ -588,7 +604,6 @@ const tricksLeft = () => G.play.hands[G.play.leader].length;
 // the claimer picks the number of tricks (all of them first)
 function claim(seat) {
   const g = G.play; if (!g || G.phase !== "play" || g.trick.length) return;
-  if (!online() && sideOf(g.contract.decl) === sideOf(U()) && !userControls(g.contract.decl)) { flash(T('Partner is playing this contract'), 2000); return; }   // you are dummy
   const left = tricksLeft();
   openOv('claim', `<h2>${T('Claim')}</h2><div class="muted">${T('How many of the remaining {0} tricks do you take?', left)}</div>
     <div class="claimn">${Array.from({ length: left + 1 }, (_, i) => left - i).map(n => `<button class="btn ${n === left ? 'new' : ''}" data-claimn="${n}">${n === left ? T('All {0}', n) : n}</button>`).join('')}</div>
@@ -1876,7 +1891,6 @@ function showSettings() {
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
    <div class="grp"><span>${T('Scoring')}</span>${seg('mode', [['IMP', 'IMP'], ['MP', T('Matchpoints (%)')]], SET.mode)}</div>
    <div class="grp"><span>${T("Opponents' system")}</span>${seg('opp', [['same', T('Same as ours')], ['sayc', T('Standard (SAYC)')]], SET.opp)}</div>
-   <div class="grp"><span>${T("Partner's contracts")}</span>${seg('playall', [['0', T('Partner plays them (you are dummy)')], ['1', T('I play them')]], SET.playAll ? '1' : '0')}</div>
    <div class="grp"><span>${T('Opponent robots')}</span>${seg('rlvl', [['easy', '🙂 ' + T('Beginner')], ['mid', '😐 ' + T('Medium')], ['expert', '😈 ' + T('Expert')]], SET.robotLvl || 'expert')}<div class="muted">${T('Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.')}</div></div>
    <div class="grp"><span>${T('Robot speed')}</span>${seg('speed', [[0, T('Slow')], [1, T('Normal')], [2, T('Fast')]], SET.speed)}</div>
    <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
@@ -2309,7 +2323,7 @@ document.addEventListener('click', ev_ => {
     if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
-    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'rlvl') SET.robotLvl = v; if (seg === 'playall') SET.playAll = v === '1'; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
+    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'rlvl') SET.robotLvl = v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
     if (seg === 'alert') { SET.alert = v; if (v !== 'off') beep(); }
     if (seg === 'notify') { setNotify(v === '1'); return; }
     if (seg === 'four') SET.four = v === '1'; if (seg === 'felt') SET.felt = v; if (seg === 'back') SET.back = v;

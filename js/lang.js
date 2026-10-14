@@ -3,10 +3,6 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
-    "Partner's contracts": "Ortağın kontratları",
-    "Partner plays them (you are dummy)": "Ortağım oynar (ben yalancıyım)",
-    "I play them": "Ben oynarım",
-    "Partner is playing this contract": "Bu kontratı ortağın oynuyor",
     "On defence: discards": "Savunmada kart atma",
     "You discarded": "Attığın kart",
     "By the agreement": "Kurala göre doğrusu",
@@ -274,10 +270,6 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
-    "Partner's contracts": "Makkers kontrakter",
-    "Partner plays them (you are dummy)": "Makker spiller dem (du er blindemann)",
-    "I play them": "Jeg spiller dem",
-    "Partner is playing this contract": "Makker spiller denne kontrakten",
     "On defence: discards": "I forsvar: avkast",
     "You discarded": "Du kastet",
     "By the agreement": "Etter avtalen",
@@ -545,10 +537,6 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
-    "Partner's contracts": "Contratos del compañero",
-    "Partner plays them (you are dummy)": "Los juega el compañero (tú eres el muerto)",
-    "I play them": "Los juego yo",
-    "Partner is playing this contract": "Este contrato lo juega tu compañero",
     "On defence: discards": "En defensa: descartes",
     "You discarded": "Descartaste",
     "By the agreement": "Según el acuerdo",
@@ -844,10 +832,6 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
-    "Partner's contracts": "Contrats du partenaire",
-    "Partner plays them (you are dummy)": "Le partenaire les joue (vous êtes le mort)",
-    "I play them": "Je les joue",
-    "Partner is playing this contract": "Votre partenaire joue ce contrat",
     "On defence: discards": "En défense : défausses",
     "You discarded": "Vous avez défaussé",
     "By the agreement": "Selon la convention",
@@ -1143,10 +1127,6 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
-    "Partner's contracts": "Contratti del compagno",
-    "Partner plays them (you are dummy)": "Li gioca il compagno (tu sei il morto)",
-    "I play them": "Li gioco io",
-    "Partner is playing this contract": "Questo contratto lo gioca il compagno",
     "On defence: discards": "In difesa: scarti",
     "You discarded": "Hai scartato",
     "By the agreement": "Secondo l’accordo",
@@ -1442,10 +1422,6 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
-    "Partner's contracts": "Kontrakte des Partners",
-    "Partner plays them (you are dummy)": "Partner spielt sie (du bist Dummy)",
-    "I play them": "Ich spiele sie",
-    "Partner is playing this contract": "Dein Partner spielt diesen Kontrakt",
     "On defence: discards": "In der Verteidigung: Abwürfe",
     "You discarded": "Du hast abgeworfen",
     "By the agreement": "Nach der Absprache",
@@ -1741,10 +1717,6 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
-    "Partner's contracts": "Контракты партнёра",
-    "Partner plays them (you are dummy)": "Играет партнёр (вы — болван)",
-    "I play them": "Играю я",
-    "Partner is playing this contract": "Этот контракт играет партнёр",
     "On defence: discards": "В защите: сносы",
     "You discarded": "Вы снесли",
     "By the agreement": "По соглашению",
@@ -2040,10 +2012,6 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
-    "Partner's contracts": "Kontrakty partnera",
-    "Partner plays them (you are dummy)": "Rozgrywa partner (ty jesteś dziadkiem)",
-    "I play them": "Rozgrywam ja",
-    "Partner is playing this contract": "Ten kontrakt rozgrywa partner",
     "On defence: discards": "W obronie: zrzutki",
     "You discarded": "Zrzuciłeś",
     "By the agreement": "Według umowy",
@@ -2339,10 +2307,6 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
-    "Partner's contracts": "同伴的定约",
-    "Partner plays them (you are dummy)": "同伴打（你是明手）",
-    "I play them": "我来打",
-    "Partner is playing this contract": "这个定约由同伴打",
     "On defence: discards": "防守：垫牌",
     "You discarded": "你垫了",
     "By the agreement": "按约定应垫",
