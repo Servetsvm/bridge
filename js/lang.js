@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Open the game again": "Oyunu tekrar aç",
+    "Open the game again? Scores can be entered again.": "Oyun tekrar açılsın mı? Yeniden skor girilebilecek.",
     "The other pair checks the score and confirms it.": "Karşı çift skoru kontrol edip onaylasın.",
     "We confirm": "Onaylıyoruz",
     "Correct": "Düzelt",
@@ -316,6 +318,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Open the game again": "Åpne spillet igjen",
+    "Open the game again? Scores can be entered again.": "Åpne spillet igjen? Resultater kan legges inn igjen.",
     "The other pair checks the score and confirms it.": "Motparet kontrollerer resultatet og bekrefter det.",
     "We confirm": "Vi bekrefter",
     "Correct": "Rett",
@@ -629,6 +633,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Open the game again": "Reabrir la partida",
+    "Open the game again? Scores can be entered again.": "¿Reabrir la partida? Se podrán volver a anotar resultados.",
     "The other pair checks the score and confirms it.": "La otra pareja comprueba el resultado y lo confirma.",
     "We confirm": "Confirmamos",
     "Correct": "Corregir",
@@ -970,6 +976,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Open the game again": "Rouvrir la partie",
+    "Open the game again? Scores can be entered again.": "Rouvrir la partie ? Les scores pourront de nouveau être saisis.",
     "The other pair checks the score and confirms it.": "L’autre paire vérifie le score et le confirme.",
     "We confirm": "Nous confirmons",
     "Correct": "Corriger",
@@ -1311,6 +1319,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Open the game again": "Riapri la partita",
+    "Open the game again? Scores can be entered again.": "Riaprire la partita? Si potranno di nuovo inserire punteggi.",
     "The other pair checks the score and confirms it.": "L’altra coppia controlla il punteggio e lo conferma.",
     "We confirm": "Confermiamo",
     "Correct": "Correggi",
@@ -1652,6 +1662,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Open the game again": "Spiel wieder öffnen",
+    "Open the game again? Scores can be entered again.": "Spiel wieder öffnen? Ergebnisse können wieder eingetragen werden.",
     "The other pair checks the score and confirms it.": "Das andere Paar prüft das Ergebnis und bestätigt es.",
     "We confirm": "Wir bestätigen",
     "Correct": "Korrigieren",
@@ -1993,6 +2005,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Open the game again": "Открыть игру снова",
+    "Open the game again? Scores can be entered again.": "Открыть игру снова? Можно будет снова вносить результаты.",
     "The other pair checks the score and confirms it.": "Другая пара проверяет результат и подтверждает его.",
     "We confirm": "Подтверждаем",
     "Correct": "Исправить",
@@ -2334,6 +2348,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Open the game again": "Otwórz grę ponownie",
+    "Open the game again? Scores can be entered again.": "Otworzyć grę ponownie? Znów będzie można wpisywać wyniki.",
     "The other pair checks the score and confirms it.": "Druga para sprawdza wynik i go potwierdza.",
     "We confirm": "Potwierdzamy",
     "Correct": "Popraw",
@@ -2675,6 +2691,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Open the game again": "重新打开比赛",
+    "Open the game again? Scores can be entered again.": "重新打开比赛？将可以再次录入成绩。",
     "The other pair checks the score and confirms it.": "请对方核对成绩并确认。",
     "We confirm": "我们确认",
     "Correct": "更正",

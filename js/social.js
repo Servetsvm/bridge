@@ -150,6 +150,7 @@ const SB = (() => {
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
         ${!sb.board && !done() && (mine || isAdm()) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
+        ${!sb.board && done() && mine ? `<button class="btn new" id="sbReopen">↺ ${T('Open the game again')}</button>` : ''}
         ${!sb.board && isAdm() ? `<button class="btn tdel" data-sbdel="${sb.id}">✕ ${T('Delete')}</button>` : ''}
         ${sb.board ? '' : `<button class="btn gold" id="oClose">${T('Close')}</button>`}</div>`;
   }
@@ -254,6 +255,12 @@ const SB = (() => {
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
     sb.busy = false; try { await loadGame(sb.id); } catch (e) {} show();
   }
+  // the organiser (only) opens a finished game again, e.g. after finishing it by mistake
+  async function reopen() {
+    try { await C().put('sb/' + sb.id + '/m/st', 'open'); await C().put('sbi/' + sb.id + '/st', 'open'); sb.g.m.st = 'open'; setLast(sb.id); sb.err = ''; }
+    catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
+    show();
+  }
   async function finish() {
     try { await C().put('sb/' + sb.id + '/m/st', 'done'); await C().put('sbi/' + sb.id + '/st', 'done'); sb.g.m.st = 'done'; }
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
@@ -315,6 +322,7 @@ const SB = (() => {
     if (d.sbadm) { const R = sb.g.r[sb.board][d.sbadm]; sb.formT = +d.sbadm; sb.form = { ...R }; if (!R.l) sb.form.l = 0; return show(); }
     if (id === 'sbCancel') { sb.form = null; sb.formT = 0; return show(); }
     if (id === 'sbOk') return confirmScore();
+    if (id === 'sbReopen') { askYes(T('Open the game again? Scores can be entered again.'), () => { openOv('sb', gameHtml()); reopen(); }); return; }
     if (id === 'sbEnd') { askYes(T('Finish the game? Scores can no longer be entered.'), () => { openOv('sb', gameHtml()); finish(); }); return; }
     if (d.sbedit) { sb.editT = +d.sbedit; return show(); }
     if (id === 'sbTSave') return saveTable();
