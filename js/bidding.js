@@ -64,7 +64,13 @@ function cands(x) {
 
   if (pJust && pm.tag === 'bw') {
     const t = pm.trump;
-    if (pm.rkc) {
+    if (pm.rkc === 2) {
+      // 0314: the two lowest answers the other way round
+      add(B(5, 0), h => h.kc(t) === 0 || h.kc(t) === 3, { tag: 'bwr', kc: 0, cv: 'rkc0314', t: 'RKCB reply: 0 or 3 key cards' });
+      add(B(5, 1), h => h.kc(t) === 1 || h.kc(t) === 4, { tag: 'bwr', kc: 1, cv: 'rkc0314', t: 'RKCB reply: 1 or 4 key cards' });
+      add(B(5, 2), h => h.kc(t) === 2 && !h.has(t, 10), { tag: 'bwr', kc: 2, cv: 'rkc0314', t: 'RKCB reply: 2 key cards, no trump queen' });
+      add(B(5, 3), h => h.kc(t) === 2 || h.kc(t) === 5, { tag: 'bwr', kc: 2, q: 1, cv: 'rkc0314', t: 'RKCB reply: 2 key cards + trump queen' });
+    } else if (pm.rkc) {
       add(B(5, 0), h => h.kc(t) === 1 || h.kc(t) === 4, { tag: 'bwr', kc: 1, cv: 'rkc', t: 'RKCB reply: 1 or 4 key cards' });
       add(B(5, 1), h => h.kc(t) === 0 || h.kc(t) === 3, { tag: 'bwr', kc: 0, cv: 'rkc', t: 'RKCB reply: 0 or 3 key cards' });
       add(B(5, 2), h => h.kc(t) === 2 && !h.has(t, 10), { tag: 'bwr', kc: 2, cv: 'rkc', t: 'RKCB reply: 2 key cards, no trump queen' });
@@ -978,7 +984,7 @@ function generic(x, h) {
   // partner chose 3NT: respect it unless we have slam values or a known 8-card major fit
   if (last === B(3, 4) && st.lastSeat === x.p && st.dbl === 0 && goal < 6 && !(t >= 2 && t < 4 && fitLen >= 8) && !(t < 4 && h.len[t] >= 7)) return { call: 'P', m: { t: 'Accepting partner\'s 3NT' } };
   if (goal >= 6) {
-    if (!bwUsed && last < B(4, 4) && t < 4 && (t !== 0 || h.aces >= 2)) { call = B(4, 4); m = { tag: 'bw', trump: t, rkc: x.C.rkc ? 1 : 0, cv: x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc ? 'RKCB 1430: asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?', ...range }; }
+    if (!bwUsed && last < B(4, 4) && t < 4 && (t !== 0 || h.aces >= 2)) { call = B(4, 4); m = { tag: 'bw', trump: t, rkc: x.C.rkc0314 ? 2 : x.C.rkc ? 1 : 0, cv: x.C.rkc0314 ? 'rkc0314' : x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc0314 || x.C.rkc ? (x.C.rkc0314 ? 'RKCB 0314' : 'RKCB 1430') + ': asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?', ...range }; }
     else if (B(goal, t) > last) { call = B(goal, t); m = { t: (goal === 7 ? 'Grand' : 'Small') + ' slam', ...range, len: lenm }; }
   }
   if (call === null && goal >= 3 && goal < 6 && cl <= goal) { call = B(goal, t); m = { t: 'Game contract', ...range, len: lenm }; }
@@ -1025,7 +1031,7 @@ function explainCall(auc, seat, call, cards) {
       if (t < 0 && ours.some(e => ST(e.call) === 4 && e.m && (e.m.tag === 'nt1' || e.m.tag === 'nt2'))) return { tag: 'q', cv: 'q', min: 16, t: 'Quantitative 4NT: slam invitation' };
       if (t < 0) for (let s = 0; s < 4; s++) if (P.len[s] >= 4 && (t < 0 || P.len[s] > P.len[t])) t = s;
       if (t < 0) t = ST(lastOur.call);
-      return { tag: 'bw', trump: t, rkc: x.C.rkc ? 1 : 0, cv: x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc ? 'RKCB 1430: asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?' };
+      return { tag: 'bw', trump: t, rkc: x.C.rkc0314 ? 2 : x.C.rkc ? 1 : 0, cv: x.C.rkc0314 ? 'rkc0314' : x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc0314 || x.C.rkc ? (x.C.rkc0314 ? 'RKCB 0314' : 'RKCB 1430') + ': asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?' };
     }
   }
   if (call === 'X') return { t: 'Double' };
