@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 181;
+const APP_V = 182;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -480,7 +480,11 @@ function makeCall(seat, call, m, al) {
 function userControls(seat) {
   if (online()) return Net.owner(seat) === Net.me;
   if (!G.play) return seat === U();
-  return seat === U() || (sideOf(G.play.contract.decl) === sideOf(U()) && sideOf(seat) === sideOf(U()));
+  // as at a real table: you play both hands when you declare; when partner declares the robot plays and your hand is
+  // dummy (unless you chose to play partner's contracts too); on defence you play your own hand
+  const decl = G.play.contract.decl;
+  if (sideOf(decl) !== sideOf(U())) return seat === U();
+  return decl === U() || SET.playAll ? sideOf(seat) === sideOf(U()) : false;
 }
 function playCard(seat, c) {
   const g = G.play;
@@ -584,6 +588,7 @@ const tricksLeft = () => G.play.hands[G.play.leader].length;
 // the claimer picks the number of tricks (all of them first)
 function claim(seat) {
   const g = G.play; if (!g || G.phase !== "play" || g.trick.length) return;
+  if (!online() && sideOf(g.contract.decl) === sideOf(U()) && !userControls(g.contract.decl)) { flash(T('Partner is playing this contract'), 2000); return; }   // you are dummy
   const left = tricksLeft();
   openOv('claim', `<h2>${T('Claim')}</h2><div class="muted">${T('How many of the remaining {0} tricks do you take?', left)}</div>
     <div class="claimn">${Array.from({ length: left + 1 }, (_, i) => left - i).map(n => `<button class="btn ${n === left ? 'new' : ''}" data-claimn="${n}">${n === left ? T('All {0}', n) : n}</button>`).join('')}</div>
@@ -1871,6 +1876,7 @@ function showSettings() {
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
    <div class="grp"><span>${T('Scoring')}</span>${seg('mode', [['IMP', 'IMP'], ['MP', T('Matchpoints (%)')]], SET.mode)}</div>
    <div class="grp"><span>${T("Opponents' system")}</span>${seg('opp', [['same', T('Same as ours')], ['sayc', T('Standard (SAYC)')]], SET.opp)}</div>
+   <div class="grp"><span>${T("Partner's contracts")}</span>${seg('playall', [['0', T('Partner plays them (you are dummy)')], ['1', T('I play them')]], SET.playAll ? '1' : '0')}</div>
    <div class="grp"><span>${T('Opponent robots')}</span>${seg('rlvl', [['easy', '🙂 ' + T('Beginner')], ['mid', '😐 ' + T('Medium')], ['expert', '😈 ' + T('Expert')]], SET.robotLvl || 'expert')}<div class="muted">${T('Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.')}</div></div>
    <div class="grp"><span>${T('Robot speed')}</span>${seg('speed', [[0, T('Slow')], [1, T('Normal')], [2, T('Fast')]], SET.speed)}</div>
    <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
@@ -2303,7 +2309,7 @@ document.addEventListener('click', ev_ => {
     if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
-    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'rlvl') SET.robotLvl = v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
+    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'rlvl') SET.robotLvl = v; if (seg === 'playall') SET.playAll = v === '1'; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
     if (seg === 'alert') { SET.alert = v; if (v !== 'off') beep(); }
     if (seg === 'notify') { setNotify(v === '1'); return; }
     if (seg === 'four') SET.four = v === '1'; if (seg === 'felt') SET.felt = v; if (seg === 'back') SET.back = v;
