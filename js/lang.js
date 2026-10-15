@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Send the app": "Uygulamayı gönder",
+    "Whoever opens the link can install Bridge Table as an app.": "Linki açan kişi Bridge Table’ı uygulama olarak kurabilir.",
     "Play bridge with me: {0}": "Benimle briç oyna: {0}",
     "Send the app on WhatsApp": "Uygulamayı WhatsApp ile gönder",
     "Install Bridge Table on your phone as an app?": "Bridge Table telefonuna uygulama olarak kurulsun mu?",
@@ -336,6 +338,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Send the app": "Send appen",
+    "Whoever opens the link can install Bridge Table as an app.": "Den som åpner lenken, kan installere Bridge Table som app.",
     "Play bridge with me: {0}": "Spill bridge med meg: {0}",
     "Send the app on WhatsApp": "Send appen på WhatsApp",
     "Install Bridge Table on your phone as an app?": "Installere Bridge Table som app på telefonen?",
@@ -669,6 +673,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Send the app": "Enviar la app",
+    "Whoever opens the link can install Bridge Table as an app.": "Quien abra el enlace puede instalar Bridge Table como app.",
     "Play bridge with me: {0}": "Juega al bridge conmigo: {0}",
     "Send the app on WhatsApp": "Enviar la app por WhatsApp",
     "Install Bridge Table on your phone as an app?": "¿Instalar Bridge Table en tu teléfono como app?",
@@ -1030,6 +1036,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Send the app": "Envoyer l’app",
+    "Whoever opens the link can install Bridge Table as an app.": "Qui ouvre le lien peut installer Bridge Table comme une app.",
     "Play bridge with me: {0}": "Joue au bridge avec moi : {0}",
     "Send the app on WhatsApp": "Envoyer l’app sur WhatsApp",
     "Install Bridge Table on your phone as an app?": "Installer Bridge Table sur votre téléphone comme une app ?",
@@ -1391,6 +1399,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Send the app": "Invia l’app",
+    "Whoever opens the link can install Bridge Table as an app.": "Chi apre il link può installare Bridge Table come app.",
     "Play bridge with me: {0}": "Gioca a bridge con me: {0}",
     "Send the app on WhatsApp": "Invia l’app su WhatsApp",
     "Install Bridge Table on your phone as an app?": "Installare Bridge Table sul telefono come app?",
@@ -1752,6 +1762,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Send the app": "App senden",
+    "Whoever opens the link can install Bridge Table as an app.": "Wer den Link öffnet, kann Bridge Table als App installieren.",
     "Play bridge with me: {0}": "Spiel Bridge mit mir: {0}",
     "Send the app on WhatsApp": "App per WhatsApp senden",
     "Install Bridge Table on your phone as an app?": "Bridge Table als App auf dem Handy installieren?",
@@ -2113,6 +2125,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Send the app": "Отправить приложение",
+    "Whoever opens the link can install Bridge Table as an app.": "Кто откроет ссылку, сможет установить Bridge Table как приложение.",
     "Play bridge with me: {0}": "Сыграй со мной в бридж: {0}",
     "Send the app on WhatsApp": "Отправить приложение в WhatsApp",
     "Install Bridge Table on your phone as an app?": "Установить Bridge Table на телефон как приложение?",
@@ -2474,6 +2488,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Send the app": "Wyślij aplikację",
+    "Whoever opens the link can install Bridge Table as an app.": "Kto otworzy link, może zainstalować Bridge Table jako aplikację.",
     "Play bridge with me: {0}": "Zagraj ze mną w brydża: {0}",
     "Send the app on WhatsApp": "Wyślij aplikację przez WhatsApp",
     "Install Bridge Table on your phone as an app?": "Zainstalować Bridge Table na telefonie jako aplikację?",
@@ -2835,6 +2851,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Send the app": "发送应用",
+    "Whoever opens the link can install Bridge Table as an app.": "打开链接的人可以把 Bridge Table 安装为应用。",
     "Play bridge with me: {0}": "来和我打桥牌:{0}",
     "Send the app on WhatsApp": "通过 WhatsApp 发送应用",
     "Install Bridge Table on your phone as an app?": "要把 Bridge Table 作为应用安装到手机上吗?",

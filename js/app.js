@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 207;
+const APP_V = 208;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1201,7 +1201,7 @@ function homeShell() {
   <header class="hhead"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
     <button id="hNameBtn" class="tok hnamebtn hdrname" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button>
     <div class="hhr"><label class="hlang" title="${T('Language')}">🌐 <select id="hLang" class="sel" aria-label="${T('Language')}">${langs.map(([v, l]) => `<option value="${v}" ${SET.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-      <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico hwa" id="bShareApp" title="${T('Send the app on WhatsApp')}" aria-label="${T('Send the app on WhatsApp')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
+      <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico hwa" id="bShareApp" title="${T('Send the app')}" aria-label="${T('Send the app')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
   <div class="hgrid">
     <section class="hmain">
       <div class="hcard prac" id="hPrac"></div>
@@ -1238,6 +1238,8 @@ function convCardHtml() {
     <div class="row2"><button class="btn new" id="convWa">📲 ${T('Send on WhatsApp')}</button></div>`;
 }
 // the convention card as a message: the system and the names of the conventions switched on (no descriptions)
+// the message that sends the app to someone
+const appInvite = () => T('Play bridge with me: {0}', 'https://servetsvm.github.io/bridge/?install=1');
 function convCardText() {
   const cur = E.sysOf(SET.sys), on = E.CONVS.filter(c => SET.conv[c.k]);
   return [`📋 ${T('Our convention card (with partner)')}${myNm() ? ' — ' + myNm() : ''}`, `${T('Base system')}: ${cur.n}`, '',
@@ -2451,7 +2453,12 @@ document.addEventListener('click', ev_ => {
     // the turn sound on and off from the top bar
     case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; SET.sfxOn = SET.sfx; SET.sfx = false; } else { SET.alert = SET.alertOn || "online"; SET.sfx = SET.sfxOn !== false; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }
     case "bSet": showSettings(); break;
-    case 'bShareApp': window.open('https://wa.me/?text=' + encodeURIComponent(T('Play bridge with me: {0}', 'https://servetsvm.github.io/bridge/?install=1')), '_blank', 'noopener'); break;
+    case 'bShareApp': openOv('share', `<h2>📲 ${T('Send the app')}</h2><div class="muted">${T('Whoever opens the link can install Bridge Table as an app.')}</div>
+      <div class="row2"><button class="btn new" id="shareWa">💬 WhatsApp</button><button class="btn" id="shareSms">✉️ SMS</button></div>
+      <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`); break;
+    case 'shareWa': closeOv(); window.open('https://wa.me/?text=' + encodeURIComponent(appInvite()), '_blank', 'noopener'); break;
+    // an SMS with the text filled in (iPhone and Android both read "sms:?&body=")
+    case 'shareSms': closeOv(); location.href = 'sms:?&body=' + encodeURIComponent(appInvite()); break;
     case 'bRes': ui.resTab = 'list'; ui.menu = false; showResults(); break;
     case 'bHome': goHome(); break;
     case 'hQuick': Net.quickJoin(); break;
