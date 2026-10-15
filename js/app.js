@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 204;
+const APP_V = 205;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1234,7 +1234,14 @@ function convCardHtml() {
   const cur = E.sysOf(SET.sys);
   return `<div class="grp"><span>${T('Base system')}</span><div class="seg sysseg" data-seg="sys">${E.SYSTEMS.map(s => `<button data-v="${s.k}" class="${cur.k === s.k ? 'on' : ''}">${esc(s.n.replace(/ \(.*\)/, ''))}</button>`).join('')}</div>
     <div class="muted">${symText(cur.d)}</div></div>
-    <div class="grp"><span>${T('Conventions')}</span><div class="convs">${E.CONVS.map(c => `<label class="cvchip${SET.conv[c.k] ? ' on' : ''}" title="${esc(c.d)}"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}>${esc(c.n)}</label>`).join('')}</div></div>`;
+    <div class="grp"><span>${T('Conventions')}</span><div class="convs">${E.CONVS.map(c => `<label class="cvchip${SET.conv[c.k] ? ' on' : ''}" title="${esc(c.d)}"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}>${esc(c.n)}</label>`).join('')}</div></div>
+    <div class="row2"><button class="btn new" id="convWa">📲 ${T('Send on WhatsApp')}</button></div>`;
+}
+// the convention card as a message (system and the conventions switched on, each with its short description)
+function convCardText() {
+  const cur = E.sysOf(SET.sys), on = E.CONVS.filter(c => SET.conv[c.k]);
+  return [`📋 ${T('Our convention card (with partner)')}${myNm() ? ' — ' + myNm() : ''}`, `${T('Base system')}: ${cur.n}`, cur.d, '',
+    `${T('Conventions')}:`, ...on.map(c => `• ${c.n} — ${c.d}`)].join('\n');
 }
 function renderHome() {
   const h = $('home'), N = typeof Net !== 'undefined' ? Net : null;
@@ -2303,6 +2310,7 @@ document.addEventListener('click', ev_ => {
   const tpr = ev_.target.closest('[data-tprac]'); if (tpr) { practiceTour(tpr.dataset.tprac, 1); return; }
   // the administrator takes a player out of the lobby (they can come back); the player comes back
   { const ak = ev_.target.closest('[data-akick]'); if (ak) { const n = ak.dataset.akick; askYes(T('Take {0} out of the lobby? They can come back in.', n), () => { Net.adminKick(n); flash(T('{0} is out of the lobby.', n), 2500); }); return; } }
+  if (ev_.target.closest('#convWa')) { window.open('https://wa.me/?text=' + encodeURIComponent(convCardText()), '_blank', 'noopener'); return; }
   if (ev_.target.closest('#lobbyBack')) { closeOv(); Net.lobbyBack(); return; }
   if (ev_.target.closest('#yesOk')) { const f = ui.yesFn; ui.yesFn = null; closeOv(); if (f) f(); return; }
   const tsit = ev_.target.closest('[data-tsit]'); if (tsit) { const S = tourSeats(); S[tsit.dataset.tid] = +tsit.dataset.tsit; try { localStorage.setItem('bridge-tour-seats', JSON.stringify(S)); } catch (e) {} closeOv(); playTour(tsit.dataset.tid); return; }
