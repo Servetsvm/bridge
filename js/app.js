@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 196;
+const APP_V = 197;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -145,20 +145,22 @@ function syncNow(quiet) {
 function scheduleSync() { clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(true), 2500); if (typeof Net !== "undefined" && Net.cloudSyncSoon) Net.cloudSyncSoon(); }
 
 /* ================= virtual field (background worker) ================= */
-/* the virtual field: 10 expert robot tables play the same deal in two background workers;
+/* the virtual field: 4 expert robot tables play the same deal in a background worker;
    double-dummy checks run in a third worker that is restarted for every new board, so nothing waits behind an old job */
-const FIELD_N = 10, FIELD_PARTS = 2;
+const FIELD_N = 4, FIELD_PARTS = 1;
 const Field = {
   live: {}, fw: [], dw: null, ddBoard: null, src: null,
   mk() {
     try {
-      if (!this.src) this.src = URL.createObjectURL(new Blob(['const E={};\n' + window.BRIDGE.map(f => '(' + f.toString() + ')(E);').join('\n') + '\n(' + E.workerMain.toString() + ')(E);'], { type: 'text/javascript' }));
+      // the fast solver (js/dds.js) goes in too when the page has it
+      if (!this.src) this.src = URL.createObjectURL(new Blob([(typeof ddsFactory === 'function' ? ddsFactory.toString() + '\n' : '') + 'const E={};\n' + window.BRIDGE.map(f => '(' + f.toString() + ')(E);').join('\n') + '\n(' + E.workerMain.toString() + ')(E);'], { type: 'text/javascript' }));
       const w = new Worker(this.src);
       w.onmessage = e => this.onmsg(e.data);
       return w;
     } catch (e) { return null; }
   },
-  init() {},
+  // the fast solver on the page too (claims and quick checks); the robots use it in their workers
+  init() { if (typeof ddsFactory === 'function') ddsFactory().then(m => E.ddsUse(m)).catch(() => {}); },
   start(g) {
     const f = { tables: [], n: FIELD_N, done: false, dd: {}, normC: null, parts: 0, t0: Date.now() };
     g.field = f; this.live[g.id] = { f, deal: g.deal, board: g.board };
@@ -1395,7 +1397,7 @@ function showStandings(id) {
   for (const e of HIST) if (e.tour && e.tour.id === id && e.tour.table == null && e.imp != null && !(mine && mine.f && mine.f[e.tour.b] && mine.c && mine.c[e.tour.b])) tourSend(e);
   const done = t.format === 'tables' ? 0 : Object.keys(myTour(id)).length;
   openOv('tour', `<h2>🏆 ${esc(t.name)}</h2><div class="muted">${T('{0} boards', t.n)} · ${t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')} · ${T('ranked by {0}', t.scoring === 'imp' ? 'IMP' : 'MP %')}${t.byKey === "daily" ? "" : " · " + T("started by {0}", esc(t.by))}</div>
-    ${t.kind === 'teams' ? teamsHtml(t) : ''}${standingsHtml(id)}<div class="muted">🤖 ${T('= your score against 10 robot tables that played the same boards; it ranks the players until others have played.')}</div>
+    ${t.kind === 'teams' ? teamsHtml(t) : ''}${standingsHtml(id)}<div class="muted">🤖 ${T('= your score against 4 robot tables that played the same boards; it ranks the players until others have played.')}</div>
     ${otherTablesHtml(id)}
     <div class="row2">${t.format !== 'tables' && t.state === 'live' && done < t.n ? `<button class="btn new" data-tplay="${t.id}">${done ? T('Continue') : T('Play')}</button>` : ''}${t.format === 'tables' || done >= t.n ? `<button class="btn" data-tprac="${t.id}">🔁 ${T('Practice these boards')}</button>` : ''}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
@@ -1889,20 +1891,20 @@ function robotCard(g, t) {
 }
 /* robots' cards: an expert robot looks at every card with double-dummy samples from the first trick on, which takes up
    to a second or two, so it is worked out in a background worker (the page stays smooth); without a worker, at once */
-const BOT_OPT = { budget: 1200, maxSamples: 40, ddTricks: 11, ddDecl: 13, evLim: 1500000, minSamples: 1, cap: 2500,
-  lead: { budget: 2500, maxSamples: 24, evLim: 3000000, minSamples: 2, cap: 4000 } };   // declarer looks ahead from the first trick; the opening lead by simulation
+const BOT_OPT = { budget: 1200, maxSamples: 100, ddTricks: 12, ddDecl: 13, evLim: 1500000, minSamples: 1, cap: 2500,
+  lead: { budget: 2500, maxSamples: 60, evLim: 3000000, minSamples: 2, cap: 4000 } };   // both sides look ahead from the first trick (the defence after the opening lead, which is chosen by simulation)
 const Bot = {
   w: null, n: 0, wait: null,
   ask(g, seat, opt) {
-    if (!this.w) { this.w = Field.mk(); if (this.w) { this.w.onmessage = e => { const d = e.data || {}; if (this.wait && d.id === this.wait.id) { const f = this.wait.f; this.wait = null; f(d.type === 'card' ? d.c : null); } }; this.w.onerror = () => { this.w = null; if (this.wait) { const f = this.wait.f; this.wait = null; f(null); } }; } }
+    if (!this.w) { this.w = Field.mk(); if (this.w) { this.w.onmessage = e => { const d = e.data || {}; if (d.type === 'engine') Bot.dds = d.dds; if (this.wait && d.id === this.wait.id) { const f = this.wait.f; this.wait = null; f(d.type === 'card' ? d.c : null); } }; this.w.onerror = () => { this.w = null; if (this.wait) { const f = this.wait.f; this.wait = null; f(null); } }; } }
     if (!this.w) return Promise.resolve(E.aiPlay(g, seat, opt));
     const id = ++this.n;
     return new Promise(res => {
       this.wait = { id, f: res };
       this.w.postMessage({ type: 'card', id, g, seat, opt });   // the play state is plain data: it goes to the worker as is
-      // a worker that does not answer in time: the robot plays by its rules here
-      setTimeout(() => { if (this.wait && this.wait.id === id) { this.wait = null; res(null); } }, (opt.budget || 1000) * 6 + 4000);
-    }).then(c => c != null && E.legalFor(g, seat).includes(c) ? c : E.heurPlay(g, seat));
+      // no time limit: the robot thinks as long as it needs (never its plain rules); only if the worker fails does the
+      // same thinking run here instead
+    }).then(c => c != null && E.legalFor(g, seat).includes(c) ? c : E.aiPlay(g, seat, opt));
   },
 };
 function robotCardAsync(g, t) {
@@ -1945,7 +1947,7 @@ function showSettings() {
    <div class="muted">${T('Changes apply from the next deal.')} ${Store.online ? T('Settings and scores are saved to your account.') : T('Scores are saved on this device.')} ${T('Every deal you get is new — a deal is never dealt to you twice.')}</div>
    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button><button class="btn" id="sReset">${T('Delete score history')}</button></div>
    <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>
-   <div class="muted ver">v${APP_V} · ${innerWidth}×${innerHeight} · ×${Math.round(devicePixelRatio * 100) / 100}</div>`);
+   <div class="muted ver">v${APP_V} · ${innerWidth}×${innerHeight} · ×${Math.round(devicePixelRatio * 100) / 100} · 🤖 ${Bot.dds ? 'DDS' : Bot.dds === false || typeof ddsFactory !== 'function' ? 'JS' : 'DDS…'}</div>`);
 }
 /* ---- user guide in three languages: open it, or download it to read offline ---- */
 function showHelp() {
@@ -2134,7 +2136,7 @@ function showResults() {
   let body;
   if (tab === 'stats') {
     body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Period')}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th><th class="n">${T('Points')}</th></tr></thead><tbody>${per.map(p => `<tr><td>${T(p.name)}</td><td class="n">${p.n}</td><td class="n">${p.scored ? fmtSigned(p.impSum) : "—"}</td><td class="n">${p.impAvg != null ? fmtSigned(p.impAvg) : "—"}</td><td class="n">${p.mpAvg != null ? p.mpAvg : "—"}</td><td class="n">${fmtSigned(p.pts)}</td></tr>`).join("")}</tbody></table></div>
-     <div class="muted">${T('Every board is also played at 10 expert robot tables. IMP: your result against each table, averaged (cross-IMPs). MP: the percentage of the field you beat.')}</div>`;
+     <div class="muted">${T('Every board is also played at 4 expert robot tables. IMP: your result against each table, averaged (cross-IMPs). MP: the percentage of the field you beat.')}</div>`;
   } else {
     const rows = HIST.slice(-100).reverse().map(e => `<tr class="rev" data-rev="${e.id}"><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.passed ? T('Pass') : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
     body = `<div class="muted">${T('Tap a board to see the auction and how it was played.')}</div><div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th>${T('Tr')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;

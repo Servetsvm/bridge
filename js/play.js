@@ -117,7 +117,7 @@ function discard(g, seat, leg) {
    Attitude: on partner's lead a high spot card encourages, the lowest discourages.
    Lavinthal discards: the suit discarded is not wanted; a high card asks for the higher of the two
    remaining suits (trumps and the suit led left out), a low card for the lower one. */
-const DEFF = { lav: true, att: true, sig: true, dd: true, hint: true };
+const DEFF = { lav: true, att: true, sig: true, dd: true, hint: true, declHint: true, ntLen: true, passInf: true };
 const romanOn = (g, seat) => DEFF.lav && !!(g.roman && g.roman[sideOf(seat)]);
 const lavOn = (g, seat) => DEFF.lav && !romanOn(g, seat) && (!g.lav || g.lav[sideOf(seat)] !== false);
 const HON = r => (r === 12 ? 4 : r === 11 ? 3 : r === 10 ? 2 : r === 9 ? 1 : 0);
@@ -691,11 +691,17 @@ function ddAtLeast(hands, trickSoFar, seat, c, limit, t) {
 }
 /* exact tricks for `side` with `leader` on lead at a trick boundary; null when the node limit is reached */
 function ddFull(hands, leader, side, trump, limit, guess) {
+  // DDS when there: the leader's best card gives the leader's side its tricks
+  if (DDSM && hands[leader].length) { const v = ddsValues(hands, [], leader, trump); if (v && v.size) { const b = Math.max(...v.values()); return (leader & 1) === side ? b : hands[leader].length - b; } }
   ddLoad(hands, -1, -1, limit); DD.trump = trump; DD.side = side; DD.limit = limit; DD.nodes = 0;
   DD.ply = 0; DD.tn = 0; DD.leader = leader; DD.left = hands[leader].length;
   try { return ddSolve(0, DD.left, guess); } catch (e) { if (e === DDX) return null; throw e; }
 }
-function ddContract(deal, c, limit, guess) { return ddFull(deal, (c.decl + 1) % 4, sideOf(c.decl), c.strain < 4 ? c.strain : -1, limit || 4e6, guess); }
+// declarer's tricks double dummy (DDS when there: the defence's best lead)
+function ddContract(deal, c, limit, guess) {
+  if (DDSM) { const v = ddsValues(deal, [], (c.decl + 1) % 4, c.strain < 4 ? c.strain : -1); if (v && v.size) return 13 - Math.max(...v.values()); }
+  return ddFull(deal, (c.decl + 1) % 4, sideOf(c.decl), c.strain < 4 ? c.strain : -1, limit || 4e6, guess);
+}
 
 /* suits partner (a defender) showed strength in by a signal: the first discard asking for a suit, or an encouraging card
    on our lead */
@@ -739,6 +745,11 @@ function sampleHands(g, seat) {
   const cons = {};
   for (const s of hidden) {
     let min = 0, max = 37; const len = [0, 0, 0, 0];
+    // a pass of partner's one-level opening (the next player passed too, nothing bid by this hand before): under 6 points (under 8 over 1NT)
+    if (DEFF.passInf) {
+      const A = g.auction, oi = A.findIndex(e => isNum(e.call));
+      if (oi >= 0 && A[oi].seat === pd(s) && A[oi].call < 5 && A[oi + 1] && A[oi + 1].call === 'P' && A[oi + 2] && A[oi + 2].seat === s && A[oi + 2].call === 'P' && !A.slice(0, oi).some(e => e.seat === s && e.call !== 'P')) max = Math.min(max, A[oi].call === 4 ? 7 : 5);
+    }
     for (const e of g.auction) if (e.seat === s && e.m) {
       if (e.m.min != null) min = Math.max(min, e.m.min);
       if (e.m.max != null) max = Math.min(max, e.m.max);
@@ -747,11 +758,21 @@ function sampleHands(g, seat) {
     cons[s] = { min: min - 1, max: max + 1, len, str: [] };
   }
   // a defender also reads partner's signals: a suit partner asked for or encouraged holds some strength (an honour)
-  if (DEFF.hint && sideOf(seat) !== sideOf(decl) && cons[pd(seat)]) {
-    cons[pd(seat)].str = shownStrength(g, seat);
-    // the honour partner's lead promises, while it may still be in partner's hand
-    const ls = leadShows(g, seat), inPool = new Set(pool), pp = new Set(played[pd(seat)]);
-    if (ls) { const can = ls.filter(k => inPool.has(k) || pp.has(k)); if (can.length) cons[pd(seat)].any = can; }
+  // and declarer reads the defenders the same way: each hidden defender's signals and opening lead
+  if (DEFF.hint) {
+    const inPool = new Set(pool);
+    for (const X of hidden) {
+      if (sideOf(X) === sideOf(decl) || X === seat) continue;
+      if (sideOf(seat) !== sideOf(decl) || DEFF.declHint) {
+        cons[X].str = shownStrength(g, pd(X));
+        // the honour the lead promises, while it may still be in that hand
+        const ls = leadShows(g, pd(X)), pp = new Set(played[X]);
+        if (ls) { const can = ls.filter(k => inPool.has(k) || pp.has(k)); if (can.length) cons[X].any = can; }
+        // a low card led against notrump is fourth best: four or more cards in the suit
+        const t0 = g.history.length ? g.history[0].cards : g.trick;
+        if (DEFF.ntLen && g.trump < 0 && t0.length && t0[0].s === X && R(t0[0].c) <= 5) cons[X].len[S(t0[0].c)] = Math.max(cons[X].len[S(t0[0].c)], 4);
+      }
+    }
   }
   const fits = out => hidden.every(s => {
     const c = cons[s], full = out[s].concat(played[s]);
@@ -781,6 +802,36 @@ function sampleHands(g, seat) {
   }
   return fallback || g.hands.map(h => h.slice());
 }
+/* ---- DDS, the fast double-dummy solver (WebAssembly, js/dds.js), when this worker has it: one call values every card
+   of the hand to play, many times faster than ddEval card by card ---- */
+let DDSM = null, DDS_DEAL = 0, DDS_FUT = 0;
+function ddsUse(m) {
+  m.ccall('SetMaxThreads', null, ['number'], [0]);
+  DDS_DEAL = m._malloc(4 + 4 + 12 + 12 + 80); DDS_FUT = m._malloc(8 + 4 * 52); DDSM = m;
+}
+const PBN_R = '23456789TJQKA';
+const pbnHand = h => [3, 2, 1, 0].map(s => h.filter(c => S(c) === s).sort((a, b) => b - a).map(c => PBN_R[R(c)]).join('')).join('.');
+/* the tricks the side of `seat` takes from here (current trick included) after each card `seat` could play; null when
+   DDS is not there or fails */
+function ddsValues(hands, trick, seat, trump) {
+  const m = DDSM; if (!m) return null;
+  const first = trick.length ? trick[0].s : seat;
+  m.setValue(DDS_DEAL, trump < 0 ? 4 : 3 - trump, 'i32'); m.setValue(DDS_DEAL + 4, first, 'i32');
+  for (let i = 0; i < 3; i++) {
+    const x = trick[i];
+    m.setValue(DDS_DEAL + 8 + 4 * i, x ? 3 - S(x.c) : 0, 'i32'); m.setValue(DDS_DEAL + 20 + 4 * i, x ? R(x.c) + 2 : 0, 'i32');
+  }
+  m.stringToUTF8('N:' + [0, 1, 2, 3].map(s => pbnHand(hands[s])).join(' '), DDS_DEAL + 32, 80);
+  const res = m.ccall('SolveBoardPBN', 'number', ['number', 'number', 'number', 'number', 'number', 'number'], [DDS_DEAL, -1, 3, 1, DDS_FUT, 0]);
+  if (res !== 1) return null;
+  const n = m.getValue(DDS_FUT + 4, 'i32'), out = new Map();
+  for (let i = 0; i < n; i++) {
+    const su = 3 - m.getValue(DDS_FUT + 8 + 4 * i, 'i32'), rk = m.getValue(DDS_FUT + 60 + 4 * i, 'i32'), eq = m.getValue(DDS_FUT + 112 + 4 * i, 'i32'), sc = m.getValue(DDS_FUT + 164 + 4 * i, 'i32');
+    out.set(su * 13 + rk - 2, sc);
+    for (let r = 2; r <= 14; r++) if (eq & (1 << r)) out.set(su * 13 + r - 2, sc);
+  }
+  return out;
+}
 function ddChoose(g, seat, leg, opt) {
   DD.trump = g.trump;
   // equal cards (no unplayed outside card between them) are equivalent: evaluate one per group
@@ -796,20 +847,25 @@ function ddChoose(g, seat, leg, opt) {
   }
   if (leg.length === 1) return leg[0];
   const tot = new Map(leg.map(c => [c, 0])); let n = 0; const t0 = performance.now();
-  try {
-    // at least minSamples (2 unless set); past opt.cap milliseconds a sample still being worked out is dropped (with none
-    // finished by twice that, the robot plays by its rules)
-    const minN = opt.minSamples ?? 2;
-    while (n < opt.maxSamples && (n < minN || performance.now() - t0 < opt.budget)) {
-      const hands = sampleHands(g, seat);
-      // each value is the first guess for the next card; a sample counts only when every card was solved
-      const vs = []; let gs = null, late = false;
-      for (const c of leg) { if (opt.cap && performance.now() - t0 > (n ? opt.cap : 2 * opt.cap)) { late = true; break; } gs = ddEval(hands, g.trick, seat, c, opt.evLim || 250000, gs); vs.push(gs); }
-      if (late) break;
-      leg.forEach((c, i) => tot.set(c, tot.get(c) + vs[i]));
-      n++;
-    }
-  } catch (e) { if (e !== DDX) throw e; }
+  // at least minSamples (2 unless set); past opt.cap milliseconds a further sample still being worked out is dropped.
+  // The first sample is always worked out to the end (a much higher node limit, no time cap), so the robot never
+  // falls back to its rules: it thinks as long as that takes
+  const minN = opt.minSamples ?? 2, lim = opt.evLim || 250000;
+  let tries = 0;
+  while (n < opt.maxSamples && (n < minN || performance.now() - t0 < opt.budget)) {
+    const hands = sampleHands(g, seat);
+    // each value is the first guess for the next card; a sample counts only when every card was solved
+    const vs = []; let gs = null, late = false;
+    // DDS values every card at once (a sample is never cut short then)
+    const dv = DDSM ? ddsValues(hands, g.trick, seat, g.trump) : null;
+    if (dv && leg.every(c => dv.has(c))) { leg.forEach(c => tot.set(c, tot.get(c) + dv.get(c))); n++; continue; }
+    try {
+      for (const c of leg) { if (n && opt.cap && performance.now() - t0 > opt.cap) { late = true; break; } gs = ddEval(hands, g.trick, seat, c, n ? lim : lim * 10, gs); vs.push(gs); }
+    } catch (e) { if (e !== DDX) throw e; if (n || ++tries >= 4) break; continue; }
+    if (late) break;
+    leg.forEach((c, i) => tot.set(c, tot.get(c) + vs[i]));
+    n++;
+  }
   if (n === 0) return null;
   let best = null, bv = -1; for (const c of asc(leg)) { const v = tot.get(c); if (v > bv + 1e-9) { bv = v; best = c; } }
   return best;
@@ -819,12 +875,12 @@ function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;
   const leg = legalFor(g, seat); if (leg.length === 1) return leg[0];
   // declarer (and dummy) may look ahead from the first trick (ddDecl); the defence from ddTricks + 1 cards left (the
-  // robots: from the second trick, measured best), its samples fitting partner's signals
+  // robots: from the first trick after the opening lead, measured best with DDS), its samples fitting the signals
   const def = sideOf(seat) !== sideOf(g.contract.decl), ddLim = def ? opt.ddTricks + (DEFF.dd ? 1 : 0) : (opt.ddDecl || opt.ddTricks);
-  if (g.hands[seat].length <= ddLim) { const r = ddChoose(g, seat, leg, opt); if (r != null) return r; }
   // the opening lead (opt.lead: its own samples and time): every lead tried against hands that fit the auction, as the
   // strong bridge programs choose it
   if (opt.lead && !g.history.length && !g.trick.length) { const r = ddChoose(g, seat, leg, opt.lead); if (r != null) return r; }
+  if (g.hands[seat].length <= ddLim) { const r = ddChoose(g, seat, leg, opt); if (r != null) return r; }
   return heurPlay(g, seat);
 }
 
@@ -833,6 +889,8 @@ function aiPlay(g, seat, opt) {
    each(card, value) is told every result as it comes. */
 function leadValues(deal, c, limit, each) {
   const L = (c.decl + 1) % 4, hands = deal.map(h => h.slice()), out = {}, trump = c.strain < 4 ? c.strain : -1;
+  const dv = DDSM ? ddsValues(hands, [], L, trump) : null;
+  if (dv && hands[L].every(x => dv.has(x))) { for (const x of hands[L].slice().sort((a, b) => S(b) - S(a) || R(b) - R(a))) { out[x] = dv.get(x); if (each) each(x, out[x]); } return out; }
   let best = ddFull(hands, L, sideOf(L), trump, limit || 2e7, null);
   DD.trump = trump;
   const mine = hands[L].slice().sort((a, b) => S(b) - S(a) || R(b) - R(a));
@@ -902,5 +960,5 @@ function signalOf(g, seat, c) {
   return -1;
 }
 const cardMethod = (g, seat) => romanOn(g, seat) ? 'roman' : lavOn(g, seat) ? 'lav' : '';
-Object.assign(E, { DD, DDF, discardFor, signalOf, cardMethod, analysePlay, leadValues, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
+Object.assign(E, { ddsUse, ddsValues, DD, DDF, discardFor, signalOf, cardMethod, analysePlay, leadValues, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
 });
