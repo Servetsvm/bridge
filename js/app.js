@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 197;
+const APP_V = 198;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -492,7 +492,9 @@ function makeCall(seat, call, m, al) {
   if (auctionOver(G.auction)) {
     const c = contractOf(G.auction);
     if (!c) { finishBoard(); return; }
-    G.play = E.newPlayState(G.deal, c, G.auction, G.cards); G.phase = 'play';
+    G.play = E.newPlayState(G.deal, c, G.auction, G.cards);
+    G.play.rb = [0, 1, 2, 3].filter(s => actor(s) === 'robot');   // the seats whose calls the robots made (their hands are checked against them)
+    G.phase = 'play';
     Field.dd(G.id, 'you', G.deal, c);
     const us = sideOf(c.decl) === sideOf(U());
     flash(T(us ? (c.decl === U() ? "You are declarer" : "Partner is declarer — you play both hands") : "You are defending"), 1800);

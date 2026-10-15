@@ -11,6 +11,7 @@ function newPlayState(hands, contract, auction, cards) {
     hands: hands.map(h => h.slice()), auction: auction || [], contract, trump: contract.strain < 4 ? contract.strain : -1,
     dummy: pd(contract.decl), dummyShown: false, leader: (contract.decl + 1) % 4, turn: (contract.decl + 1) % 4,
     trick: [], history: [], tricks: [0, 0], voids: [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
+    cards: cards || null,
   };
 }
 function trickWinner(tr, trump) {
@@ -117,7 +118,7 @@ function discard(g, seat, leg) {
    Attitude: on partner's lead a high spot card encourages, the lowest discourages.
    Lavinthal discards: the suit discarded is not wanted; a high card asks for the higher of the two
    remaining suits (trumps and the suit led left out), a low card for the lower one. */
-const DEFF = { lav: true, att: true, sig: true, dd: true, hint: true, declHint: true, ntLen: true, passInf: true };
+const DEFF = { lav: true, att: true, sig: true, dd: true, hint: true, declHint: true, ntLen: true, passInf: true, bidSim: false };
 const romanOn = (g, seat) => DEFF.lav && !!(g.roman && g.roman[sideOf(seat)]);
 const lavOn = (g, seat) => DEFF.lav && !romanOn(g, seat) && (!g.lav || g.lav[sideOf(seat)] !== false);
 const HON = r => (r === 12 ? 4 : r === 11 ? 3 : r === 10 ? 2 : r === 9 ? 1 : 0);
@@ -783,8 +784,21 @@ function sampleHands(g, seat) {
     for (const su of c.str) { let h = 0; for (const k of full) if (S(k) === su && R(k) >= 9) h += R(k) - 8; if (h < 2) return false; }
     return true;
   });
-  let fallback = null;
-  for (let tries = 0; tries < 160; tries++) {
+  /* the strongest test, as the expert programs do it: would that hand have made the same calls? Each hidden hand whose
+     calls came from a robot (g.rb: those seats; all when not given) is bid again with the robots' own bidding, call by
+     call; a deal where one call differs is not used (while a fitting one can be found) */
+  const bidSeats = DEFF.bidSim && E.aiBid && g.cards ? hidden.filter(s => (!g.rb || g.rb.includes(s)) && g.auction.some(e => e.seat === s)) : [];
+  const bidsFit = out => bidSeats.every(s => {
+    const full = out[s].concat(played[s]);
+    for (let j = 0; j < g.auction.length; j++) {
+      const e = g.auction[j]; if (e.seat !== s) continue;
+      let r; try { r = E.aiBid(g.auction.slice(0, j), s, full, g.cards); } catch (x) { return true; }
+      if (!r || r.call !== e.call) return false;
+    }
+    return true;
+  });
+  let fallback = null, fitOnly = null;
+  for (let tries = 0; tries < (bidSeats.length ? 1500 : 160); tries++) {
     shuffle(pool); const out = g.hands.map(h => h.slice()); const room = {};
     for (const s of hidden) { out[s] = []; room[s] = g.hands[s].length; }
     let ok = true;
@@ -797,9 +811,10 @@ function sampleHands(g, seat) {
       out[pick].push(c); room[pick]--;
     }
     if (!ok) continue;
-    if (fits(out)) return out;
-    if (!fallback) fallback = out;
+    if (fits(out)) { if (!bidSeats.length || bidsFit(out)) return out; if (!fitOnly) fitOnly = out; }
+    else if (!fallback) fallback = out;
   }
+  if (fitOnly) return fitOnly;
   return fallback || g.hands.map(h => h.slice());
 }
 /* ---- DDS, the fast double-dummy solver (WebAssembly, js/dds.js), when this worker has it: one call values every card
@@ -823,7 +838,7 @@ function ddsValues(hands, trick, seat, trump) {
   }
   m.stringToUTF8('N:' + [0, 1, 2, 3].map(s => pbnHand(hands[s])).join(' '), DDS_DEAL + 32, 80);
   const res = m.ccall('SolveBoardPBN', 'number', ['number', 'number', 'number', 'number', 'number', 'number'], [DDS_DEAL, -1, 3, 1, DDS_FUT, 0]);
-  if (res !== 1) return null;
+  if (res !== 1) { ddsValues.fail = (ddsValues.fail || 0) + 1; ddsValues.code = res; return null; }
   const n = m.getValue(DDS_FUT + 4, 'i32'), out = new Map();
   for (let i = 0; i < n; i++) {
     const su = 3 - m.getValue(DDS_FUT + 8 + 4 * i, 'i32'), rk = m.getValue(DDS_FUT + 60 + 4 * i, 'i32'), eq = m.getValue(DDS_FUT + 112 + 4 * i, 'i32'), sc = m.getValue(DDS_FUT + 164 + 4 * i, 'i32');
@@ -847,6 +862,10 @@ function ddChoose(g, seat, leg, opt) {
   }
   if (leg.length === 1) return leg[0];
   const tot = new Map(leg.map(c => [c, 0])); let n = 0; const t0 = performance.now();
+  // what a result is worth: the tricks, plus opt.util for making the contract (declarer) or beating it (defence), so
+  // the robot plays for the contract like an expert (safety plays) rather than for the most tricks on average
+  const side = sideOf(seat), need = side === sideOf(g.contract.decl) ? g.contract.level + 6 : 14 - (g.contract.level + 6);
+  const UK = opt.util || 0, have = g.tricks[side], U = v => v + (UK && v + have >= need ? UK : 0);
   // at least minSamples (2 unless set); past opt.cap milliseconds a further sample still being worked out is dropped.
   // The first sample is always worked out to the end (a much higher node limit, no time cap), so the robot never
   // falls back to its rules: it thinks as long as that takes
@@ -858,12 +877,12 @@ function ddChoose(g, seat, leg, opt) {
     const vs = []; let gs = null, late = false;
     // DDS values every card at once (a sample is never cut short then)
     const dv = DDSM ? ddsValues(hands, g.trick, seat, g.trump) : null;
-    if (dv && leg.every(c => dv.has(c))) { leg.forEach(c => tot.set(c, tot.get(c) + dv.get(c))); n++; continue; }
+    if (dv && leg.every(c => dv.has(c))) { leg.forEach(c => tot.set(c, tot.get(c) + U(dv.get(c)))); n++; continue; }
     try {
       for (const c of leg) { if (n && opt.cap && performance.now() - t0 > opt.cap) { late = true; break; } gs = ddEval(hands, g.trick, seat, c, n ? lim : lim * 10, gs); vs.push(gs); }
     } catch (e) { if (e !== DDX) throw e; if (n || ++tries >= 4) break; continue; }
     if (late) break;
-    leg.forEach((c, i) => tot.set(c, tot.get(c) + vs[i]));
+    leg.forEach((c, i) => tot.set(c, tot.get(c) + U(vs[i])));
     n++;
   }
   if (n === 0) return null;
