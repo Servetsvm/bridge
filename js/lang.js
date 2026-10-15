@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Send on WhatsApp": "WhatsApp’ta gönder",
     "Only the organiser or the administrator can change a confirmed score.": "Onaylanmış skoru sadece oyunu kuran kişi ya da yönetici değiştirebilir.",
     "Copy for analysis": "Analiz için kopyala",
     "Copied — paste it into your message": "Kopyalandı — mesajına yapıştır",
@@ -329,6 +330,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Send on WhatsApp": "Send på WhatsApp",
     "Only the organiser or the administrator can change a confirmed score.": "Bare den som startet spillet eller administratoren kan endre et bekreftet resultat.",
     "Copy for analysis": "Kopier for analyse",
     "Copied — paste it into your message": "Kopiert — lim det inn i meldingen din",
@@ -655,6 +657,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Send on WhatsApp": "Enviar por WhatsApp",
     "Only the organiser or the administrator can change a confirmed score.": "Solo quien abrió la partida o el administrador puede cambiar un resultado confirmado.",
     "Copy for analysis": "Copiar para análisis",
     "Copied — paste it into your message": "Copiado: pégalo en tu mensaje",
@@ -1009,6 +1012,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Send on WhatsApp": "Envoyer sur WhatsApp",
     "Only the organiser or the administrator can change a confirmed score.": "Seul l’organisateur de la partie ou l’administrateur peut modifier un score confirmé.",
     "Copy for analysis": "Copier pour analyse",
     "Copied — paste it into your message": "Copié — collez-le dans votre message",
@@ -1363,6 +1367,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Send on WhatsApp": "Invia su WhatsApp",
     "Only the organiser or the administrator can change a confirmed score.": "Solo chi ha aperto la partita o l’amministratore può cambiare un punteggio confermato.",
     "Copy for analysis": "Copia per l’analisi",
     "Copied — paste it into your message": "Copiato — incollalo nel tuo messaggio",
@@ -1717,6 +1722,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Send on WhatsApp": "Per WhatsApp senden",
     "Only the organiser or the administrator can change a confirmed score.": "Nur wer das Spiel eröffnet hat oder der Administrator kann ein bestätigtes Ergebnis ändern.",
     "Copy for analysis": "Für die Analyse kopieren",
     "Copied — paste it into your message": "Kopiert — füge es in deine Nachricht ein",
@@ -2071,6 +2077,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Send on WhatsApp": "Отправить в WhatsApp",
     "Only the organiser or the administrator can change a confirmed score.": "Подтверждённый результат может изменить только организатор игры или администратор.",
     "Copy for analysis": "Скопировать для анализа",
     "Copied — paste it into your message": "Скопировано — вставьте в сообщение",
@@ -2425,6 +2432,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Send on WhatsApp": "Wyślij przez WhatsApp",
     "Only the organiser or the administrator can change a confirmed score.": "Tylko organizator gry lub administrator może zmienić potwierdzony wynik.",
     "Copy for analysis": "Kopiuj do analizy",
     "Copied — paste it into your message": "Skopiowano — wklej do wiadomości",
@@ -2779,6 +2787,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Send on WhatsApp": "通过 WhatsApp 发送",
     "Only the organiser or the administrator can change a confirmed score.": "已确认的成绩只能由比赛发起人或管理员修改。",
     "Copy for analysis": "复制以供分析",
     "Copied — paste it into your message": "已复制——粘贴到你的消息中",

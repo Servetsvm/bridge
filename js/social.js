@@ -213,7 +213,15 @@ const SB = (() => {
     if (!L.length) return `<div class="muted">${T('No scores yet.')}</div>`;
     const rows = L.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b><small>${T('Table {0}', r.t)} · ${r.dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]}</small></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="MP %" class="n">${r.pct ?? '—'}</td><td data-l="IMP" class="n">${signed(r.imp)}</td></tr>`).join('');
     return `${seg('rank', [['mp', 'MP %'], ['imp', 'IMP']], sb.rank)}<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${T('Pair')}</th><th class="n">${T('Boards')}</th><th class="n">MP %</th><th class="n">IMP</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="row2"><button class="btn new sbwa" id="sbWa">📲 ${T('Send on WhatsApp')}</button></div>
       <div class="muted">${T('MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.')}</div>`;
+  }
+  // the standings as a plain message (ranked as on the screen: MP % or IMP)
+  function standingsText() {
+    const m = sb.g.m, L = standings(), dir = r => r.dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3];
+    const head = `🃏 ${m.n} — ${new Date(m.ts).toLocaleDateString()}\n${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}\n${T('Standings')} (${sb.rank === 'imp' ? 'IMP' : 'MP %'}):`;
+    const rows = L.map((r, i) => `${i + 1}. ${r.name} (${T('Table {0}', r.t)} ${dir(r)}) — ${r.pct != null ? r.pct + '%' : '—'} · ${r.imp > 0 ? '+' : ''}${r.imp} IMP · ${T('{0} boards', r.n)}`);
+    return [head, ...rows].join('\n');
   }
   function tablesHtml() {
     const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || canManage(g.m));
@@ -341,6 +349,7 @@ const SB = (() => {
     if (id === 'sbEnd') { askYes(T('Finish the game? Scores can no longer be entered.'), () => { openOv('sb', gameHtml()); finish(); }); return; }
     if (d.sbedit) { sb.editT = +d.sbedit; return show(); }
     if (id === 'sbTSave') return saveTable();
+    if (id === 'sbWa') { window.open('https://wa.me/?text=' + encodeURIComponent(standingsText()), '_blank', 'noopener'); return; }
   });
 
   return { open, lobbyHtml, locked };
