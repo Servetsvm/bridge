@@ -22,6 +22,8 @@ const SB = (() => {
   // the organiser: the player who opened the game, recognised by the name they are signed in with (on any device),
   // or the device it was opened on
   const isOrganiser = m => !!m && ((m.bk && m.bk === myKey()) || (C().uidNow && C().uidNow() === m.by));
+  // the administrator, or the player who opened the game: they finish, open again, correct scores and delete it
+  const canManage = m => isAdm() || isOrganiser(m);
   const done = () => sb.g && sb.g.m && sb.g.m.st === 'done';
 
   /* ---- scores ---- */
@@ -116,7 +118,7 @@ const SB = (() => {
     const rows = (sb.list || []).map(g => `<tr><td><b>🃏 ${esc(g.n)}</b><small>${fmtDate(g.ts)}${g.byn ? ' · ' + esc(g.byn) : ''}</small></td>
       <td data-l="${T('Tables')}" class="n">${g.tb}</td><td data-l="${T('Boards')}" class="n">${g.bd}</td>
       <td data-l="${T('Status')}">${g.st === 'done' ? `<span class="tst">${T('Finished')}</span>` : `<span class="tst run">${T('Running')}</span>`}</td>
-      <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${isAdm() ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
+      <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${canManage(g) ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
     return `<h2>🃏 ${T('Social bridge')}</h2>
       <div class="muted">${T('Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.')}</div>
       <div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button></div>
@@ -155,9 +157,9 @@ const SB = (() => {
       ${done() || pending() ? '' : tsel}${sb.board ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
-        ${!sb.board && !done() && (mine || isAdm()) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
-        ${!sb.board && done() && (mine || isAdm()) ? `<button class="btn new" id="sbReopen">↺ ${T('Open the game again')}</button>` : ''}
-        ${!sb.board && isAdm() ? `<button class="btn tdel" data-sbdel="${sb.id}">✕ ${T('Delete')}</button>` : ''}
+        ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
+        ${!sb.board && done() && canManage(m) ? `<button class="btn new" id="sbReopen">↺ ${T('Open the game again')}</button>` : ''}
+        ${!sb.board && canManage(m) ? `<button class="btn tdel" data-sbdel="${sb.id}">✕ ${T('Delete')}</button>` : ''}
         ${sb.board ? '' : `<button class="btn gold" id="oClose">${T('Close')}</button>`}</div>`;
   }
   function boardsHtml() {
@@ -183,9 +185,9 @@ const SB = (() => {
     const c = boardCmp(b), wait = ts.filter(t => !R[t].ok).length;
     const rows = ts.map(t => { const r = R[t], x = c[t] || { ns: nsScore(b, r), cmp: null }; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
       <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
-      <td data-l="MP %" class="n">${!r.ok ? '⏳' : x.cmp ? x.cmp.mp : '—'}</td><td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td>${isAdm() ? `<td class="tact"><button class="btn mini-btn" data-sbadm="${t}" title="${T('Correct')}">✎</button></td>` : ''}</tr>`; }).join('');
-    return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th><th class="n">MP %</th><th class="n">IMP</th>${isAdm() ? '<th></th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="muted">${T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the administrator can change a confirmed score.')}</div>`;
+      <td data-l="MP %" class="n">${!r.ok ? '⏳' : x.cmp ? x.cmp.mp : '—'}</td><td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td>${canManage(g.m) ? `<td class="tact"><button class="btn mini-btn" data-sbadm="${t}" title="${T('Correct')}">✎</button></td>` : ''}</tr>`; }).join('');
+    return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th><th class="n">MP %</th><th class="n">IMP</th>${canManage(g.m) ? '<th></th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="muted">${T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the organiser or the administrator can change a confirmed score.')}</div>`;
   }
   const scoreTxt = (b, r) => { const ns = nsScore(b, r), ew = r.l && E.sideOf(r.d) === 1; return `${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; };
   function formHtml(b) {
@@ -214,7 +216,7 @@ const SB = (() => {
       <div class="muted">${T('MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.')}</div>`;
   }
   function tablesHtml() {
-    const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || isAdm() || (C().uidNow && C().uidNow() === g.m.by));
+    const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || canManage(g.m));
     return [...Array(g.m.tb).keys()].map(i => {
       const t = i + 1, p = (g.t || {})[t] || {}, played = Object.values(g.r || {}).filter(R => R[t]).length;
       if (sb.editT === t) return `<div class="tsetrow sbrow"><b>${T('Table {0}', t)}</b>${['n', 's', 'e', 'w'].map((k, j) => `<label><small>${SEAT[[0, 2, 1, 3][j]]}</small><input class="tok" maxlength="20" data-sbtn="${k}" value="${esc(p[k] || '')}"></label>`).join('')}<button class="btn new" id="sbTSave">${T('Save')}</button></div>`;
@@ -249,6 +251,7 @@ const SB = (() => {
     r.sc = nsScore(b, r); r.ts = Date.now();
     if (sb.formT) r.ok = true;   // the administrator's correction needs no confirmation
     sb.busy = true; show();
+    if (sb.formT) await signIn();   // a correction: the organiser is known by name
     try { await C().put('sb/' + sb.id + '/r/' + b + '/' + t, r); ((sb.g.r = sb.g.r || {})[b] = sb.g.r[b] || {})[t] = r; sb.form = null; sb.formT = 0; sb.err = ''; }
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
     sb.busy = false; try { await loadGame(sb.id); } catch (e) {} show();
@@ -277,12 +280,14 @@ const SB = (() => {
     show();
   }
   async function del(id) {
+    await signIn();
     try { await C().patch('', { ['sb/' + id]: null, ['sbi/' + id]: null }); }
     catch (e) { sb.err = T('Could not delete.'); }
     if (sb.id === id) { sb.id = null; sb.g = null; }
     await loadList(); openOv('sb', listHtml());
   }
   async function saveTable() {
+    await signIn();
     const t = sb.editT, p = {}; document.querySelectorAll('[data-sbtn]').forEach(i => { p[i.dataset.sbtn] = i.value.trim().slice(0, 20); });
     try { await C().put('sb/' + sb.id + '/t/' + t, { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }); (sb.g.t = sb.g.t || {})[t] = p; sb.editT = 0; }
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }

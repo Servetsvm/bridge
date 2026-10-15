@@ -154,21 +154,21 @@
         "sb": {
           "$id": {
             ".read": "auth != null",
-            ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
+            ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && (root.child('test').child($ns).child('sb').child($id).child('m').child('by').val() === auth.uid || (root.child('test').child($ns).child('sb').child($id).child('m').child('bk').exists() && root.child('test').child($ns).child('sb').child($id).child('m').child('bk').val() !== '' && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === root.child('test').child($ns).child('sb').child($id).child('m').child('bk').val())))",
             "m": {
               ".write": "auth != null && (!data.exists() || data.child('by').val() === auth.uid || (data.child('bk').exists() && data.child('bk').val() !== '' && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === data.child('bk').val())) || auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
               ".validate": "newData.hasChildren(['n', 'ts', 'tb', 'bd', 'st', 'by']) && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('tb').isNumber() && newData.child('tb').val() >= 1 && newData.child('tb').val() <= 12 && newData.child('bd').isNumber() && newData.child('bd').val() >= 1 && newData.child('bd').val() <= 36"
             },
             "t": {
               "$t": {
-                ".write": "auth != null && newData.parent().parent().child('m').exists() && newData.parent().parent().child('m').child('st').val() !== 'done'",
+                ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && (root.child('test').child($ns).child('sb').child($id).child('m').child('by').val() === auth.uid || (root.child('test').child($ns).child('sb').child($id).child('m').child('bk').exists() && root.child('test').child($ns).child('sb').child($id).child('m').child('bk').val() !== '' && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === root.child('test').child($ns).child('sb').child($id).child('m').child('bk').val()))) || (auth != null && newData.parent().parent().child('m').exists() && newData.parent().parent().child('m').child('st').val() !== 'done')",
                 ".validate": "newData.child('n').isString() && newData.child('n').val().length <= 20 && newData.child('s').isString() && newData.child('s').val().length <= 20 && newData.child('e').isString() && newData.child('e').val().length <= 20 && newData.child('w').isString() && newData.child('w').val().length <= 20"
               }
             },
             "r": {
               "$b": {
                 "$t": {
-                  ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && newData.parent().parent().parent().child('m').exists() && newData.parent().parent().parent().child('m').child('st').val() !== 'done' && (!data.exists() || !data.child('ok').exists()))",
+                  ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && (root.child('test').child($ns).child('sb').child($id).child('m').child('by').val() === auth.uid || (root.child('test').child($ns).child('sb').child($id).child('m').child('bk').exists() && root.child('test').child($ns).child('sb').child($id).child('m').child('bk').val() !== '' && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === root.child('test').child($ns).child('sb').child($id).child('m').child('bk').val()))) || (auth != null && newData.parent().parent().parent().child('m').exists() && newData.parent().parent().parent().child('m').child('st').val() !== 'done' && (!data.exists() || !data.child('ok').exists()))",
                   ".validate": "newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 7 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 4 && newData.child('x').isNumber() && newData.child('x').val() >= 0 && newData.child('x').val() <= 2 && newData.child('d').isNumber() && newData.child('d').val() >= 0 && newData.child('d').val() <= 3 && newData.child('k').isNumber() && newData.child('k').val() >= 0 && newData.child('k').val() <= 13 && newData.child('sc').isNumber() && (!newData.child('ok').exists() || newData.child('ok').isBoolean())"
                 }
               }
@@ -187,21 +187,21 @@
     "sb": {
       "$id": {
         ".read": "auth != null",
-        ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
+        ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && (root.child('sb').child($id).child('m').child('by').val() === auth.uid || (root.child('sb').child($id).child('m').child('bk').exists() && root.child('sb').child($id).child('m').child('bk').val() !== '' && root.child('sess').child(auth.uid).child('k').val() === root.child('sb').child($id).child('m').child('bk').val())))",
         "m": {
           ".write": "auth != null && (!data.exists() || data.child('by').val() === auth.uid || (data.child('bk').exists() && data.child('bk').val() !== '' && root.child('sess').child(auth.uid).child('k').val() === data.child('bk').val())) || auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
           ".validate": "newData.hasChildren(['n', 'ts', 'tb', 'bd', 'st', 'by']) && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('tb').isNumber() && newData.child('tb').val() >= 1 && newData.child('tb').val() <= 12 && newData.child('bd').isNumber() && newData.child('bd').val() >= 1 && newData.child('bd').val() <= 36"
         },
         "t": {
           "$t": {
-            ".write": "auth != null && newData.parent().parent().child('m').exists() && newData.parent().parent().child('m').child('st').val() !== 'done'",
+            ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && (root.child('sb').child($id).child('m').child('by').val() === auth.uid || (root.child('sb').child($id).child('m').child('bk').exists() && root.child('sb').child($id).child('m').child('bk').val() !== '' && root.child('sess').child(auth.uid).child('k').val() === root.child('sb').child($id).child('m').child('bk').val()))) || (auth != null && newData.parent().parent().child('m').exists() && newData.parent().parent().child('m').child('st').val() !== 'done')",
             ".validate": "newData.child('n').isString() && newData.child('n').val().length <= 20 && newData.child('s').isString() && newData.child('s').val().length <= 20 && newData.child('e').isString() && newData.child('e').val().length <= 20 && newData.child('w').isString() && newData.child('w').val().length <= 20"
           }
         },
         "r": {
           "$b": {
             "$t": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && newData.parent().parent().parent().child('m').exists() && newData.parent().parent().parent().child('m').child('st').val() !== 'done' && (!data.exists() || !data.child('ok').exists()))",
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' || (auth != null && (root.child('sb').child($id).child('m').child('by').val() === auth.uid || (root.child('sb').child($id).child('m').child('bk').exists() && root.child('sb').child($id).child('m').child('bk').val() !== '' && root.child('sess').child(auth.uid).child('k').val() === root.child('sb').child($id).child('m').child('bk').val()))) || (auth != null && newData.parent().parent().parent().child('m').exists() && newData.parent().parent().parent().child('m').child('st').val() !== 'done' && (!data.exists() || !data.child('ok').exists()))",
               ".validate": "newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 7 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 4 && newData.child('x').isNumber() && newData.child('x').val() >= 0 && newData.child('x').val() <= 2 && newData.child('d').isNumber() && newData.child('d').val() >= 0 && newData.child('d').val() <= 3 && newData.child('k').isNumber() && newData.child('k').val() >= 0 && newData.child('k').val() <= 13 && newData.child('sc').isNumber() && (!newData.child('ok').exists() || newData.child('ok').isBoolean())"
             }
           }
