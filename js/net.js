@@ -444,6 +444,7 @@ const Net = (() => {
     if (d.t === 'lhist') { (d.list || []).forEach(m => addL(m, true)); renderL(); return true; }
     if (d.t === 'tblinv') { gotTableInvite(d); return true; }
     if (d.t === 'dm') { gotDm(d); return true; }
+    if (d.t === 'akick') { if (nameKey(d.by) === 'servet' && nameKey(d.n) === nameKey(myName()) && !isAdmin()) kickedOut(); return true; }
     if (d.t === 'tadmin') { if (nameKey(d.by) === 'servet') closeTourLocal(d.id); return true; }
     if (d.t === 'dmack') { dmAcked(d); return true; }
     if (onTourData(d)) return true;
@@ -481,7 +482,7 @@ const Net = (() => {
   }
   // the tables in the lobby: ask every room who is there (rooms nobody holds simply do not answer)
   async function findTables() {
-    if (st.finding) return; st.finding = true; render(); panelRefresh();
+    if (st.out || st.finding) return; st.finding = true; render(); panelRefresh();
     const out = st.collect = [];
     try {
       await loadLib();
@@ -638,7 +639,7 @@ const Net = (() => {
     },
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
-      const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
+      const name = myName(); if (st.out || !Cloud.on || !name || !SET.pinH) return;
       const w = st.on ? 'table' : G && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // a finished board left on the screen counts as the lobby
       try {
         // a name chosen before the database existed is registered now; if someone else holds it with another PIN,
@@ -649,7 +650,10 @@ const Net = (() => {
           { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
         }
         st.claimed = true;
-        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof() });
+        // taken out of the lobby by the administrator (online/<name>/kick): stay out until the player comes back
+        try { const kk = await Cloud.get('online/' + fbKey(name) + '/kick'); if (kk && kk > kickSeen()) { setKickSeen(kk); kickedOut(); return; } } catch (e) {}
+        const pc = w === 'robots' && typeof pracList === 'function' && pracList().length ? 1 : 0;   // practising conventions
+        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof(), pc });
         if (st.cloudFail) { st.cloudFail = 0; render(); }
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()), ...(SET.act && SET.act.d === today() ? { a: actOut() } : {}) }); st.loggedDay = today(); st.prSent = ''; }
         // the conventions being practised now: kept with the day's login, which only the administrator can read
@@ -846,6 +850,37 @@ const Net = (() => {
     for (const c of (st.mesh || new Map()).values()) { try { if (c.open) c.send(msg); } catch (e) {} }
     if (Cloud.on && SET.pinH) { try { fetch(DB_URL + '/online/' + fbKey(name) + '.json' + (Auth.tok ? '?auth=' + Auth.tok : ''), { method: 'DELETE', keepalive: true }); } catch (e) {} }
   });
+  /* the administrator takes a player out of the lobby: the player's app closes its lobby lines and leaves the online
+     list, and stays out until the player taps "Back to the lobby" (or opens the app again) */
+  const kickSeen = () => { try { return +localStorage.getItem('bridge-kick-seen') || 0; } catch (e) { return 0; } };
+  const setKickSeen = v => { try { localStorage.setItem('bridge-kick-seen', String(v)); } catch (e) {} };
+  function kickedOut() {
+    if (st.out) return;
+    st.out = true;
+    const name = myName(), msg = { t: 'gone', k: st.slot ? st.slot.k : 0, host: name };
+    for (const c of (st.mesh || new Map()).values()) { try { if (c.open) c.send(msg); c.close(); } catch (e) {} }
+    st.mesh = new Map(); st.present = {}; st.tables = [];
+    try { if (st.slot && st.slot.peer) st.slot.peer.destroy(); } catch (e) {}
+    st.slot = null;
+    if (Cloud.on && name) Cloud.put('online/' + fbKey(name), null).catch(() => {});
+    renderL(); render();
+    openOv('out', `<h2>${T('Out of the lobby')}</h2><div class="big">${T('The administrator took you out of the lobby.')}</div>
+      <div class="muted">${T('You can go on playing with robots. To come back to the lobby, tap below.')}</div>
+      <div class="row2"><button class="btn new" id="lobbyBack">${T('Back to the lobby')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  }
+  async function lobbyBack() {
+    const name = myName();
+    try { const kk = await Cloud.get('online/' + fbKey(name) + '/kick'); if (kk) setKickSeen(kk); } catch (e) {}
+    st.out = false; keepSlot(); findTables(); Cloud.beat(); renderL();
+  }
+  function adminKick(name) {
+    if (!isAdmin() || !name) return;
+    meshSend({ t: 'akick', n: name, by: myName() });
+    if (Cloud.on) Cloud.put('online/' + fbKey(name) + '/kick', Date.now()).catch(() => {});
+    const k = nameKey(name); if (st.present) delete st.present[k];
+    if (st.cloud && st.cloud.on) st.cloud.on = st.cloud.on.filter(x => nameKey(x.name) !== k);
+    renderL();
+  }
   // the real administrator: Servet, with the PIN checked
   const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
   const loginsToday = () => st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1;
@@ -873,18 +908,21 @@ const Net = (() => {
   }
   /* the players beside the lobby chat: friends first, then those playing, those waiting in the lobby, and last the
      ones seen this week who are offline. Tap a name to write to that player privately in the chat. */
+  // what a player in the lobby is doing: at a table, practising conventions, playing with robots, or waiting
+  function statusOf(n) {
+    const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
+    const w = whereIs(n), c = cloudOn && cloudOn.find(x => nameKey(x.name) === nameKey(n)), prac = c && c.pc;
+    if (w && !w.lobby) return { s: 'play', at: w.online ? T("At {0}'s table", w.host) : prac ? T('practising conventions') : T('playing with robots') };
+    if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : prac ? T('practising conventions') : T('playing with robots') };
+    return { s: 'lobby', at: T('waiting in the lobby') };
+  }
   function lobbyGroups() {
     const me = nameKey(myName()), here = new Map(knownNames().map(n => [nameKey(n), n]));
     const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
     if (cloudOn) for (const x of cloudOn) if (nameKey(x.name) !== me && !here.has(nameKey(x.name))) here.set(nameKey(x.name), x.name);
     // a player whose table is listed under the open tables is here too (playing), even if nothing else has heard from them lately
     for (const t of (st.tables || []).filter(listed)) for (const n of [t.host, ...Object.values(t.names || {})]) if (n && nameKey(n) !== me && !['robot', 'player'].includes(nameKey(n)) && !here.has(nameKey(n))) here.set(nameKey(n), n);
-    const status = n => {
-      const w = whereIs(n), c = cloudOn && cloudOn.find(x => nameKey(x.name) === nameKey(n));
-      if (w && !w.lobby) return { s: 'play', at: w.online ? T("At {0}'s table", w.host) : T('playing with robots') };
-      if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : T('playing with robots') };
-      return { s: 'lobby' };
-    };
+    const status = statusOf;
     const fr = (typeof friends === 'function' ? friends() : []);
     const off = new Map();
     for (const k in st.known) if (k !== me && !here.has(k)) off.set(k, st.known[k].name);
@@ -1682,7 +1720,7 @@ const Net = (() => {
   window.addEventListener('online', () => claimSlot());
   // keep this table listed (take an address again if it was lost) and keep the lobby list fresh
   function keepSlot() {
-    if (!navigator.onLine) return;
+    if (st.out || !navigator.onLine) return;
     if (!st.slot) claimSlot();
     else if (st.slot.peer.disconnected && !st.slot.peer.destroyed) { try { st.slot.peer.reconnect(); } catch (e) {} }
   }
@@ -1704,5 +1742,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

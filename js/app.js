@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 198;
+const APP_V = 199;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1569,7 +1569,7 @@ function showPlayer(name) {
   const p = me ? Net.prof() : Net.profOf(name);
   const shown = me ? (myNm() || T('You')) : name, lvl = p && p.lvl, ctry = p && p.ctry;
   const w = me ? null : Net.whereIs(name);
-  const where = me ? '' : !w ? '' : w.lobby ? T('In the lobby') : w.online ? T("At {0}'s table", w.host) : T('playing with robots');
+  const where = me ? '' : Net.statusOf ? (Net.statusOf(name) || {}).at || '' : !w ? '' : w.lobby ? T('In the lobby') : w.online ? T("At {0}'s table", w.host) : T('playing with robots');
   // all-time results only: boards, IMPs per board, MP %
   const tot = p && p.per ? p.per[4] : p ? [p.n, p.imp, p.mp] : null;
   const boards = tot ? tot[0] || 0 : 0;
@@ -1601,7 +1601,7 @@ function showPlayer(name) {
     ${tot ? `<table class="res ptot"><thead><tr><th></th><th class="n">${T('boards')}</th><th class="n">${T('IMP / board')}</th><th class="n">MP %</th></tr></thead><tbody><tr><td>${T('Total')}</td><td class="n">${boards}</td><td class="n">${tot[1] == null ? '—' : fmtSigned(tot[1])}</td><td class="n">${tot[2] == null ? '—' : tot[2] + '%'}</td></tr></tbody></table>`
       : `<div class="muted">${T('No rating yet — it shows once this player has played (with the new version).')}</div>`}
     </div>
-    <div class="row2">${me ? '' : `<button class="btn gold" data-dm="${esc(name)}">💬 ${T('Message')}</button><button class="btn new" data-pairwith="${esc(name)}">🤝 ${T('Play as partners')}</button><button class="btn" data-friend="${esc(name)}">${isFriend(name) ? '★ ' + T('Friend') : '☆ ' + T('Add as friend')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+    <div class="row2">${me ? '' : `<button class="btn gold" data-dm="${esc(name)}">💬 ${T('Message')}</button><button class="btn new" data-pairwith="${esc(name)}">🤝 ${T('Play as partners')}</button><button class="btn" data-friend="${esc(name)}">${isFriend(name) ? '★ ' + T('Friend') : '☆ ' + T('Add as friend')}</button>${Net.isAdmin && Net.isAdmin() ? `<button class="btn" data-akick="${esc(name)}">⛔ ${T('Out of the lobby')}</button>` : ''}`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 // how many times the app was opened, rounded the way profiles show it (5000+, 1000+, 500+ …)
 function loginsTxt(n) { for (const s of [10000, 5000, 1000, 500, 100, 50]) if (n >= s) return s + '+'; return String(n); }
@@ -2298,6 +2298,9 @@ document.addEventListener('click', ev_ => {
   const tp = ev_.target.closest('[data-tplay]'); if (tp) { playTour(tp.dataset.tplay); return; }
   const tbd = ev_.target.closest('[data-tbd]'); if (tbd) { ui.tbd = { id: tbd.dataset.tid, b: +tbd.dataset.tbd }; showStandings(tbd.dataset.tid); return; }
   const tpr = ev_.target.closest('[data-tprac]'); if (tpr) { practiceTour(tpr.dataset.tprac, 1); return; }
+  // the administrator takes a player out of the lobby (they can come back); the player comes back
+  { const ak = ev_.target.closest('[data-akick]'); if (ak) { const n = ak.dataset.akick; askYes(T('Take {0} out of the lobby? They can come back in.', n), () => { Net.adminKick(n); flash(T('{0} is out of the lobby.', n), 2500); }); return; } }
+  if (ev_.target.closest('#lobbyBack')) { closeOv(); Net.lobbyBack(); return; }
   if (ev_.target.closest('#yesOk')) { const f = ui.yesFn; ui.yesFn = null; closeOv(); if (f) f(); return; }
   const tsit = ev_.target.closest('[data-tsit]'); if (tsit) { const S = tourSeats(); S[tsit.dataset.tid] = +tsit.dataset.tsit; try { localStorage.setItem('bridge-tour-seats', JSON.stringify(S)); } catch (e) {} closeOv(); playTour(tsit.dataset.tid); return; }
   const tl = ev_.target.closest('[data-tlist]'); if (tl) { ui.ttab = tl.dataset.tlist; render(); return; }   // the tournament list's tabs

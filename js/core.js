@@ -124,6 +124,7 @@ const CONVS = [
 CONVS.forEach(c => { if (c.x) { const o = CONVS.find(y => y.k === c.x); if (o) o.x = c.k; } });
 const XINFO = {
   jtr: { n: 'Jacoby Transfer', d: 'Over 1NT, 2♦ asks opener to bid hearts and 2♥ asks for spades, so the strong hand declares. With four-card support and a maximum (17) opener super-accepts at the three level. After the transfer, a new suit at the three level is natural and game forcing.' },
+  sys: { n: 'System call', d: 'An artificial call of the chosen system (Precision, Polish Club, Multi 2♦): what it shows is written above. The system is chosen on the home page (Your system) or in Settings.' },
   bw: { n: 'Blackwood', d: '4NT asks for aces: 5♣ = 0 or 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.' },
   q: { n: 'Quantitative 4NT', d: 'After a notrump bid, 4NT does not ask for aces; it invites slam. Partner bids 6NT with a maximum.' },
   nego: { n: 'Negative Double', d: 'After partner opens and the opponent overcalls, double is not for penalty: it shows four cards in the unbid major and enough values to bid.' },

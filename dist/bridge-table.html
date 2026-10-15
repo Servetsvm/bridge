@@ -1665,6 +1665,7 @@ const CONVS = [
 CONVS.forEach(c => { if (c.x) { const o = CONVS.find(y => y.k === c.x); if (o) o.x = c.k; } });
 const XINFO = {
   jtr: { n: 'Jacoby Transfer', d: 'Over 1NT, 2♦ asks opener to bid hearts and 2♥ asks for spades, so the strong hand declares. With four-card support and a maximum (17) opener super-accepts at the three level. After the transfer, a new suit at the three level is natural and game forcing.' },
+  sys: { n: 'System call', d: 'An artificial call of the chosen system (Precision, Polish Club, Multi 2♦): what it shows is written above. The system is chosen on the home page (Your system) or in Settings.' },
   bw: { n: 'Blackwood', d: '4NT asks for aces: 5♣ = 0 or 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.' },
   q: { n: 'Quantitative 4NT', d: 'After a notrump bid, 4NT does not ask for aces; it invites slam. Partner bids 6NT with a maximum.' },
   nego: { n: 'Negative Double', d: 'After partner opens and the opponent overcalls, double is not for penalty: it shows four cards in the unbid major and enough values to bid.' },
@@ -4270,6 +4271,14 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Out of the lobby": "Lobiden çıkar",
+    "The administrator took you out of the lobby.": "Yönetici seni lobiden çıkardı.",
+    "You can go on playing with robots. To come back to the lobby, tap below.": "Robotlarla oynamaya devam edebilirsin. Lobiye dönmek için aşağıya dokun.",
+    "Back to the lobby": "Lobiye dön",
+    "practising conventions": "konvansiyon çalışıyor",
+    "waiting in the lobby": "lobide bekliyor",
+    "Take {0} out of the lobby? They can come back in.": "{0} lobiden çıkarılsın mı? İsterse tekrar girebilir.",
+    "{0} is out of the lobby.": "{0} lobiden çıkarıldı.",
     "Open the game again": "Oyunu tekrar aç",
     "Open the game again? Scores can be entered again.": "Oyun tekrar açılsın mı? Yeniden skor girilebilecek.",
     "The other pair checks the score and confirms it.": "Karşı çift skoru kontrol edip onaylasın.",
@@ -4585,6 +4594,14 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Out of the lobby": "Ut av lobbyen",
+    "The administrator took you out of the lobby.": "Administratoren tok deg ut av lobbyen.",
+    "You can go on playing with robots. To come back to the lobby, tap below.": "Du kan fortsette å spille med roboter. Trykk nedenfor for å komme tilbake til lobbyen.",
+    "Back to the lobby": "Tilbake til lobbyen",
+    "practising conventions": "øver på konvensjoner",
+    "waiting in the lobby": "venter i lobbyen",
+    "Take {0} out of the lobby? They can come back in.": "Ta {0} ut av lobbyen? Vedkommende kan komme inn igjen.",
+    "{0} is out of the lobby.": "{0} er ute av lobbyen.",
     "Open the game again": "Åpne spillet igjen",
     "Open the game again? Scores can be entered again.": "Åpne spillet igjen? Resultater kan legges inn igjen.",
     "The other pair checks the score and confirms it.": "Motparet kontrollerer resultatet og bekrefter det.",
@@ -4900,6 +4917,14 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Out of the lobby": "Sacar del vestíbulo",
+    "The administrator took you out of the lobby.": "El administrador te ha sacado del vestíbulo.",
+    "You can go on playing with robots. To come back to the lobby, tap below.": "Puedes seguir jugando con robots. Para volver al vestíbulo, toca abajo.",
+    "Back to the lobby": "Volver al vestíbulo",
+    "practising conventions": "practicando convenciones",
+    "waiting in the lobby": "esperando en el vestíbulo",
+    "Take {0} out of the lobby? They can come back in.": "¿Sacar a {0} del vestíbulo? Puede volver a entrar.",
+    "{0} is out of the lobby.": "{0} ya no está en el vestíbulo.",
     "Open the game again": "Reabrir la partida",
     "Open the game again? Scores can be entered again.": "¿Reabrir la partida? Se podrán volver a anotar resultados.",
     "The other pair checks the score and confirms it.": "La otra pareja comprueba el resultado y lo confirma.",
@@ -5243,6 +5268,14 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Out of the lobby": "Sortir du salon",
+    "The administrator took you out of the lobby.": "L’administrateur vous a sorti du salon.",
+    "You can go on playing with robots. To come back to the lobby, tap below.": "Vous pouvez continuer à jouer avec les robots. Pour revenir au salon, touchez ci-dessous.",
+    "Back to the lobby": "Revenir au salon",
+    "practising conventions": "travaille des conventions",
+    "waiting in the lobby": "attend dans le salon",
+    "Take {0} out of the lobby? They can come back in.": "Sortir {0} du salon ? Cette personne pourra revenir.",
+    "{0} is out of the lobby.": "{0} est sorti du salon.",
     "Open the game again": "Rouvrir la partie",
     "Open the game again? Scores can be entered again.": "Rouvrir la partie ? Les scores pourront de nouveau être saisis.",
     "The other pair checks the score and confirms it.": "L’autre paire vérifie le score et le confirme.",
@@ -5586,6 +5619,14 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Out of the lobby": "Fuori dalla sala",
+    "The administrator took you out of the lobby.": "L’amministratore ti ha tolto dalla sala.",
+    "You can go on playing with robots. To come back to the lobby, tap below.": "Puoi continuare a giocare con i robot. Per tornare nella sala, tocca qui sotto.",
+    "Back to the lobby": "Torna nella sala",
+    "practising conventions": "si esercita sulle convenzioni",
+    "waiting in the lobby": "aspetta nella sala",
+    "Take {0} out of the lobby? They can come back in.": "Togliere {0} dalla sala? Potrà rientrare.",
+    "{0} is out of the lobby.": "{0} è fuori dalla sala.",
     "Open the game again": "Riapri la partita",
     "Open the game again? Scores can be entered again.": "Riaprire la partita? Si potranno di nuovo inserire punteggi.",
     "The other pair checks the score and confirms it.": "L’altra coppia controlla il punteggio e lo conferma.",
@@ -5929,6 +5970,14 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Out of the lobby": "Aus der Lobby nehmen",
+    "The administrator took you out of the lobby.": "Der Administrator hat dich aus der Lobby genommen.",
+    "You can go on playing with robots. To come back to the lobby, tap below.": "Du kannst weiter mit Robotern spielen. Um in die Lobby zurückzukehren, tippe unten.",
+    "Back to the lobby": "Zurück in die Lobby",
+    "practising conventions": "übt Konventionen",
+    "waiting in the lobby": "wartet in der Lobby",
+    "Take {0} out of the lobby? They can come back in.": "{0} aus der Lobby nehmen? Die Person kann wieder hereinkommen.",
+    "{0} is out of the lobby.": "{0} ist aus der Lobby genommen.",
     "Open the game again": "Spiel wieder öffnen",
     "Open the game again? Scores can be entered again.": "Spiel wieder öffnen? Ergebnisse können wieder eingetragen werden.",
     "The other pair checks the score and confirms it.": "Das andere Paar prüft das Ergebnis und bestätigt es.",
@@ -6272,6 +6321,14 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Out of the lobby": "Убрать из лобби",
+    "The administrator took you out of the lobby.": "Администратор убрал вас из лобби.",
+    "You can go on playing with robots. To come back to the lobby, tap below.": "Вы можете продолжать играть с роботами. Чтобы вернуться в лобби, нажмите ниже.",
+    "Back to the lobby": "Вернуться в лобби",
+    "practising conventions": "тренирует конвенции",
+    "waiting in the lobby": "ждёт в лобби",
+    "Take {0} out of the lobby? They can come back in.": "Убрать {0} из лобби? Игрок сможет вернуться.",
+    "{0} is out of the lobby.": "{0} убран из лобби.",
     "Open the game again": "Открыть игру снова",
     "Open the game again? Scores can be entered again.": "Открыть игру снова? Можно будет снова вносить результаты.",
     "The other pair checks the score and confirms it.": "Другая пара проверяет результат и подтверждает его.",
@@ -6615,6 +6672,14 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Out of the lobby": "Usuń z poczekalni",
+    "The administrator took you out of the lobby.": "Administrator usunął cię z poczekalni.",
+    "You can go on playing with robots. To come back to the lobby, tap below.": "Możesz dalej grać z robotami. Aby wrócić do poczekalni, dotknij poniżej.",
+    "Back to the lobby": "Wróć do poczekalni",
+    "practising conventions": "ćwiczy konwencje",
+    "waiting in the lobby": "czeka w poczekalni",
+    "Take {0} out of the lobby? They can come back in.": "Usunąć {0} z poczekalni? Może wrócić.",
+    "{0} is out of the lobby.": "{0} nie jest już w poczekalni.",
     "Open the game again": "Otwórz grę ponownie",
     "Open the game again? Scores can be entered again.": "Otworzyć grę ponownie? Znów będzie można wpisywać wyniki.",
     "The other pair checks the score and confirms it.": "Druga para sprawdza wynik i go potwierdza.",
@@ -6958,6 +7023,14 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Out of the lobby": "移出大厅",
+    "The administrator took you out of the lobby.": "管理员已将你移出大厅。",
+    "You can go on playing with robots. To come back to the lobby, tap below.": "你可以继续和机器人打牌。要回到大厅,请点下方按钮。",
+    "Back to the lobby": "回到大厅",
+    "practising conventions": "正在练习约定",
+    "waiting in the lobby": "在大厅等待",
+    "Take {0} out of the lobby? They can come back in.": "将 {0} 移出大厅?对方可以再进来。",
+    "{0} is out of the lobby.": "{0} 已移出大厅。",
     "Open the game again": "重新打开比赛",
     "Open the game again? Scores can be entered again.": "重新打开比赛？将可以再次录入成绩。",
     "The other pair checks the score and confirms it.": "请对方核对成绩并确认。",
@@ -7338,6 +7411,7 @@ const CONV_T = {
     sjs: ['Güçlü atlamalı renk değişimi', 'Cevaplayanın yeni renkte tek atlaması güçlü el (19+ puan), iyi renk ve şilem ilgisi gösterir. Zayıf atlamalı renk değişiminin yerini alır.'],
     dont: ['DONT', 'Disturb Opponents’ Notrump (Marty Bergen). Rakibin 1NT’sine: X = tek renkli el (6+), partner sormak için 2♣ der; 2♣ = sinek ve daha yüksek bir renk; 2♦ = karo ve bir majör; 2♥ = iki majör; 2♠ = sadece pik (doğal). Partner tahammülle pas geçer ya da sonraki rengi söyler (pas ya da düzelt). Cappelletti’nin yerini alır.'],
     jtr: ['Jacoby transferi', '1NT üzerine 2♦ açandan kupa, 2♥ pik söylemesini ister; böylece güçlü el oynar. Dört kartlı destek ve maksimumla (17) açan üç seviyesinde süper kabul yapar. Transferden sonra üç seviyesinde yeni renk doğal ve oyun forsingdir.'],
+    sys: ['Sistem teklifi', 'Seçilen sistemin yapay teklifi (Precision, Polonya sineği, Multi 2♦): ne gösterdiği yukarıda yazıyor. Sistem ana sayfadan (Sistemin) ya da Ayarlar’dan seçilir.'],
     bw: ['Blackwood', '4NT asları sorar: 5♣ = 0 ya da 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.'],
     q: ['Kantitatif 4NT', 'Bir sanzatu teklifinden sonra 4NT as sormaz; şileme davet eder. Partner maksimumla 6NT der.'],
     nego: ['Negatif kontr', 'Partner açıp rakip araya girince kontr ceza değildir: söylenmemiş majörde dört kart ve teklif verecek kadar değer gösterir.'],
@@ -7378,6 +7452,7 @@ const CONV_T = {
     sjs: ['Sterke hoppskift', 'Et enkelt hopp i ny farge av svarer viser sterk hånd (19+ poeng) med god farge og slaminteresse. Erstatter svake hoppskift.'],
     dont: ['DONT', 'Disturb Opponents’ Notrump (Marty Bergen). Over deres 1NT: X = enfarget (6+), makker melder 2♣ for å spørre; 2♣ = kløver og en høyere farge; 2♦ = ruter og en major; 2♥ = begge majorer; 2♠ = bare spar (naturlig). Makker passer med toleranse eller melder neste farge (pass eller rett). Erstatter Cappelletti.'],
     jtr: ['Jacoby-overføring', 'Over 1NT ber 2♦ åpner melde hjerter og 2♥ spar, slik at den sterke hånden spiller. Med firekorts støtte og maksimum (17) superaksepterer åpner på tretrinnet. Etter overføringen er ny farge på tretrinnet naturlig og krav til utgang.'],
+    sys: ['Systemmelding', 'En kunstig melding i det valgte systemet (Presisjon, Polsk kløver, Multi 2♦): hva den viser står ovenfor. Systemet velges på forsiden (Systemet ditt) eller i Innstillinger.'],
     bw: ['Blackwood', '4NT spør etter ess: 5♣ = 0 eller 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.'],
     q: ['Kvantitativ 4NT', 'Etter en grandmelding spør ikke 4NT etter ess; den inviterer til slem. Makker melder 6NT med maksimum.'],
     nego: ['Negativ dobling', 'Når makker har åpnet og motparten melder inn, er dobling ikke straff: den viser fire kort i den umeldte majoren og nok verdier til å melde.'],
@@ -7418,6 +7493,7 @@ const CONV_T = {
     sjs: ['Saltos fuertes en palo nuevo', 'Un salto simple en palo nuevo del respondedor muestra una mano fuerte (19+ puntos) con buen palo e interés de slam. Sustituye a los saltos débiles.'],
     dont: ['DONT', 'Disturb Opponents’ Notrump (Marty Bergen). Sobre su 1SA: X = monocolor (6+), el compañero dice 2♣ para preguntar; 2♣ = tréboles y un palo superior; 2♦ = diamantes y un mayor; 2♥ = ambos mayores; 2♠ = solo picas (natural). El compañero pasa con tolerancia o dice el palo siguiente (pasa o corrige). Sustituye a Cappelletti.'],
     jtr: ['Transferencia Jacoby', 'Sobre 1SA, 2♦ pide al abridor que diga corazones y 2♥ que diga picas, para que juegue la mano fuerte. Con apoyo de cuatro y máximo (17) el abridor superacepta a nivel de tres. Tras la transferencia, un palo nuevo a nivel de tres es natural y forcing a manga.'],
+    sys: ['Voz del sistema', 'Una voz artificial del sistema elegido (Precision, Trébol polaco, Multi 2♦): lo que muestra está escrito arriba. El sistema se elige en la página principal (Tu sistema) o en Ajustes.'],
     bw: ['Blackwood', '4SA pregunta por ases: 5♣ = 0 o 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.'],
     q: ['4SA cuantitativo', 'Tras una voz de sin triunfo, 4SA no pregunta ases; invita a slam. El compañero dice 6SA con máximo.'],
     nego: ['Doblo negativo', 'Cuando el compañero abre y el rival interviene, el doblo no es de castigo: muestra cuatro cartas en el mayor no nombrado y valores para hablar.'],
@@ -7458,6 +7534,7 @@ const CONV_T = {
     sjs: ['Sauts forts', 'Un saut simple du répondant dans une couleur nouvelle montre une main forte (19+ points) avec une belle couleur et un intérêt de chelem. Remplace les sauts faibles.'],
     dont: ['DONT', 'Disturb Opponents’ Notrump (Marty Bergen). Sur leur 1SA : X = unicolore (6+), le partenaire dit 2♣ pour demander ; 2♣ = trèfles et une couleur plus haute ; 2♦ = carreaux et une majeure ; 2♥ = les deux majeures ; 2♠ = piques seulement (naturel). Le partenaire passe avec une tolérance ou dit la couleur suivante (passe ou corrige). Remplace Cappelletti.'],
     jtr: ['Transfert Jacoby', 'Sur 1SA, 2♦ demande à l’ouvreur de dire cœur et 2♥ pique, pour que la main forte joue. Avec quatre cartes de soutien et un maximum (17), l’ouvreur super-accepte au palier de trois. Après le transfert, une couleur nouvelle au palier de trois est naturelle et forcing de manche.'],
+    sys: ['Enchère du système', 'Une enchère artificielle du système choisi (Precision, Trèfle polonais, Multi 2♦) : ce qu’elle montre est écrit au-dessus. Le système se choisit sur la page d’accueil (Votre système) ou dans les Réglages.'],
     bw: ['Blackwood', '4SA demande les as : 5♣ = 0 ou 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.'],
     q: ['4SA quantitatif', 'Après une enchère à sans-atout, 4SA ne demande pas les as ; il invite au chelem. Le partenaire dit 6SA avec un maximum.'],
     nego: ['Contre négatif', 'Quand le partenaire ouvre et que l’adversaire intervient, le contre n’est pas punitif : il montre quatre cartes dans la majeure non nommée et assez de valeurs pour parler.'],
@@ -7498,6 +7575,7 @@ const CONV_T = {
     sjs: ['Salti forti', 'Un salto semplice del rispondente in un colore nuovo mostra una mano forte (19+ punti) con un buon colore e interesse di slam. Sostituisce i salti deboli.'],
     dont: ['DONT', 'Disturb Opponents’ Notrump (Marty Bergen). Sul loro 1SA: X = monocolore (6+), il compagno dice 2♣ per chiedere; 2♣ = fiori e un colore più alto; 2♦ = quadri e una maggiore; 2♥ = entrambe le maggiori; 2♠ = solo picche (naturale). Il compagno passa con tolleranza o dice il colore successivo (passo o correzione). Sostituisce Cappelletti.'],
     jtr: ['Transfer Jacoby', 'Su 1SA, 2♦ chiede all’apritore di dire cuori e 2♥ picche, così gioca la mano forte. Con quattro carte di appoggio e un massimo (17) l’apritore super-accetta a livello di tre. Dopo il transfer, un colore nuovo a livello di tre è naturale e forzante manche.'],
+    sys: ['Dichiarazione di sistema', 'Una dichiarazione artificiale del sistema scelto (Precision, Fiori polacco, Multi 2♦): ciò che mostra è scritto sopra. Il sistema si sceglie nella pagina iniziale (Il tuo sistema) o nelle Impostazioni.'],
     bw: ['Blackwood', '4SA chiede gli assi: 5♣ = 0 o 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.'],
     q: ['4SA quantitativo', 'Dopo una dichiarazione a senza atout, 4SA non chiede gli assi; invita allo slam. Il compagno dice 6SA con un massimo.'],
     nego: ['Contro negativo', 'Quando il compagno apre e l’avversario interviene, il contro non è punitivo: mostra quattro carte nella maggiore non dichiarata e valori sufficienti per parlare.'],
@@ -7538,6 +7616,7 @@ const CONV_T = {
     sjs: ['Starke Sprungwechsel', 'Ein einfacher Sprung des Antwortenden in neuer Farbe zeigt eine starke Hand (19+ Punkte) mit guter Farbe und Schleminteresse. Ersetzt die schwachen Sprungwechsel.'],
     dont: ['DONT', 'Disturb Opponents’ Notrump (Marty Bergen). Über ihr 1SA: X = Einfärber (6+), Partner fragt mit 2♣; 2♣ = Treff und eine höhere Farbe; 2♦ = Karo und eine Oberfarbe; 2♥ = beide Oberfarben; 2♠ = nur Pik (natürlich). Partner passt mit Toleranz oder reizt die nächste Farbe (pass or correct). Ersetzt Cappelletti.'],
     jtr: ['Jacoby-Transfer', 'Über 1SA bittet 2♦ den Eröffner, Coeur zu reizen, und 2♥, Pik zu reizen, damit die starke Hand spielt. Mit vier Karten Unterstützung und Maximum (17) superakzeptiert der Eröffner auf Dreierstufe. Nach dem Transfer ist eine neue Farbe auf Dreierstufe natürlich und partieforcierend.'],
+    sys: ['Systemgebot', 'Ein künstliches Gebot des gewählten Systems (Precision, Polnisch Treff, Multi 2♦): was es zeigt, steht oben. Das System wählst du auf der Startseite (Dein System) oder in den Einstellungen.'],
     bw: ['Blackwood', '4SA fragt nach Assen: 5♣ = 0 oder 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.'],
     q: ['Quantitatives 4SA', 'Nach einem Sans-Atout-Gebot fragt 4SA nicht nach Assen; es lädt zum Schlemm ein. Partner reizt mit Maximum 6SA.'],
     nego: ['Negatives Kontra', 'Hat Partner eröffnet und der Gegner gegengereizt, ist Kontra kein Strafkontra: es zeigt vier Karten in der ungereizten Oberfarbe und genug Werte zum Reizen.'],
@@ -7578,6 +7657,7 @@ const CONV_T = {
     sjs: ['Сильные прыжки', 'Одинарный прыжок отвечающего в новой масти показывает сильную руку (19+ очков) с хорошей мастью и интересом к шлему. Заменяет слабые прыжки.'],
     dont: ['DONT', 'Disturb Opponents’ Notrump (Марти Берген). Против их 1БК: X = одномастка (6+), партнёр спрашивает 2♣; 2♣ = трефы и старшая масть; 2♦ = бубны и мажор; 2♥ = обе старшие; 2♠ = только пики (натурально). Партнёр пасует с терпимостью или называет следующую масть (пас или поправка). Заменяет Каппеллетти.'],
     jtr: ['Трансфер Якоби', 'После 1БК 2♦ просит открывшего назвать червы, а 2♥ — пики, чтобы играла сильная рука. С четырёхкартной поддержкой и максимумом (17) открывший делает суперакцепт на уровне трёх. После трансфера новая масть на уровне трёх натуральна и форсирует до гейма.'],
+    sys: ['Заявка системы', 'Искусственная заявка выбранной системы (Precision, Польская трефа, Мульти 2♦): что она показывает, написано выше. Система выбирается на главной странице (Ваша система) или в Настройках.'],
     bw: ['Блэквуд', '4БК спрашивает тузы: 5♣ = 0 или 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.'],
     q: ['Количественные 4БК', 'После заявки в бескозырной 4БК не спрашивает тузы, а приглашает в шлем. С максимумом партнёр говорит 6БК.'],
     nego: ['Негативная контра', 'Когда партнёр открыл, а соперник вмешался, контра не штрафная: она показывает четыре карты в незаявленном мажоре и силу для заявки.'],
@@ -7618,6 +7698,7 @@ const CONV_T = {
     sjs: ['Silne skoki', 'Pojedynczy skok odpowiadającego w nowym kolorze pokazuje silną rękę (19+ punktów) z dobrym kolorem i zainteresowaniem szlemem. Zastępuje słabe skoki.'],
     dont: ['DONT', 'Disturb Opponents’ Notrump (Marty Bergen). Na ich 1BA: X = jednokolorówka (6+), partner pyta 2♣; 2♣ = trefle i wyższy kolor; 2♦ = kara i starszy; 2♥ = oba starsze; 2♠ = tylko piki (naturalnie). Partner pasuje z tolerancją lub mówi następny kolor (pas lub popraw). Zastępuje Cappelletti.'],
     jtr: ['Transfer Jacoby', 'Po 1BA 2♦ prosi otwierającego o kiery, a 2♥ o piki, aby rozgrywała silna ręka. Z czterokartowym poparciem i maksimum (17) otwierający superakceptuje na poziomie trzech. Po transferze nowy kolor na poziomie trzech jest naturalny i forsuje do końcówki.'],
+    sys: ['Odzywka systemowa', 'Sztuczna odzywka wybranego systemu (Precision, Wspólny Język, Multi 2♦): co pokazuje, napisano powyżej. System wybiera się na stronie głównej (Twój system) lub w Ustawieniach.'],
     bw: ['Blackwood', '4BA pyta o asy: 5♣ = 0 lub 4, 5♦ = 1, 5♥ = 2, 5♠ = 3.'],
     q: ['Ilościowe 4BA', 'Po odzywce bez atu 4BA nie pyta o asy, tylko zaprasza do szlema. Partner z maksimum mówi 6BA.'],
     nego: ['Kontra negatywna', 'Gdy partner otworzył, a przeciwnik wszedł, kontra nie jest karna: pokazuje cztery karty w niezalicytowanym starszym i siłę do licytacji.'],
@@ -7658,6 +7739,7 @@ const CONV_T = {
     sjs: ['强跳新花', '应叫人在新花色上的单跳表示强牌(19+ 点),好套且有满贯兴趣。取代弱跳新花。'],
     dont: ['DONT', 'Disturb Opponents’ Notrump(马蒂·伯根)。对方 1NT 后:X = 单套(6+),同伴叫 2♣ 询问;2♣ = 梅花加一门更高花色;2♦ = 方块加一门高花;2♥ = 两高花;2♠ = 只有黑桃(自然)。同伴有容忍就不叫,否则叫下一门花色(不叫或改正)。取代卡佩莱蒂。'],
     jtr: ['雅可比转移', '1NT 后 2♦ 要求开叫人叫红心,2♥ 要求叫黑桃,使强牌做庄。有四张支持且高限(17)时开叫人在三阶超接受。转移之后三阶新花色为自然且逼局。'],
+    sys: ['体系叫品', '所选体系的人为叫品(精确、波兰梅花、多义 2♦):它表示的内容写在上方。体系在首页(你的体系)或设置中选择。'],
     bw: ['黑木', '4NT 问 A:5♣ = 0 或 4,5♦ = 1,5♥ = 2,5♠ = 3。'],
     q: ['定量 4NT', '在无将叫品之后,4NT 不问 A,而是邀请满贯。同伴高限叫 6NT。'],
     nego: ['否定性加倍', '同伴开叫、对方争叫后,加倍不是惩罚性的:表示未叫高花有四张且有足够叫牌实力。'],
@@ -7915,7 +7997,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 198;
+const APP_V = 199;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9476,7 +9558,7 @@ function showPlayer(name) {
   const p = me ? Net.prof() : Net.profOf(name);
   const shown = me ? (myNm() || T('You')) : name, lvl = p && p.lvl, ctry = p && p.ctry;
   const w = me ? null : Net.whereIs(name);
-  const where = me ? '' : !w ? '' : w.lobby ? T('In the lobby') : w.online ? T("At {0}'s table", w.host) : T('playing with robots');
+  const where = me ? '' : Net.statusOf ? (Net.statusOf(name) || {}).at || '' : !w ? '' : w.lobby ? T('In the lobby') : w.online ? T("At {0}'s table", w.host) : T('playing with robots');
   // all-time results only: boards, IMPs per board, MP %
   const tot = p && p.per ? p.per[4] : p ? [p.n, p.imp, p.mp] : null;
   const boards = tot ? tot[0] || 0 : 0;
@@ -9508,7 +9590,7 @@ function showPlayer(name) {
     ${tot ? `<table class="res ptot"><thead><tr><th></th><th class="n">${T('boards')}</th><th class="n">${T('IMP / board')}</th><th class="n">MP %</th></tr></thead><tbody><tr><td>${T('Total')}</td><td class="n">${boards}</td><td class="n">${tot[1] == null ? '—' : fmtSigned(tot[1])}</td><td class="n">${tot[2] == null ? '—' : tot[2] + '%'}</td></tr></tbody></table>`
       : `<div class="muted">${T('No rating yet — it shows once this player has played (with the new version).')}</div>`}
     </div>
-    <div class="row2">${me ? '' : `<button class="btn gold" data-dm="${esc(name)}">💬 ${T('Message')}</button><button class="btn new" data-pairwith="${esc(name)}">🤝 ${T('Play as partners')}</button><button class="btn" data-friend="${esc(name)}">${isFriend(name) ? '★ ' + T('Friend') : '☆ ' + T('Add as friend')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+    <div class="row2">${me ? '' : `<button class="btn gold" data-dm="${esc(name)}">💬 ${T('Message')}</button><button class="btn new" data-pairwith="${esc(name)}">🤝 ${T('Play as partners')}</button><button class="btn" data-friend="${esc(name)}">${isFriend(name) ? '★ ' + T('Friend') : '☆ ' + T('Add as friend')}</button>${Net.isAdmin && Net.isAdmin() ? `<button class="btn" data-akick="${esc(name)}">⛔ ${T('Out of the lobby')}</button>` : ''}`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 // how many times the app was opened, rounded the way profiles show it (5000+, 1000+, 500+ …)
 function loginsTxt(n) { for (const s of [10000, 5000, 1000, 500, 100, 50]) if (n >= s) return s + '+'; return String(n); }
@@ -10205,6 +10287,9 @@ document.addEventListener('click', ev_ => {
   const tp = ev_.target.closest('[data-tplay]'); if (tp) { playTour(tp.dataset.tplay); return; }
   const tbd = ev_.target.closest('[data-tbd]'); if (tbd) { ui.tbd = { id: tbd.dataset.tid, b: +tbd.dataset.tbd }; showStandings(tbd.dataset.tid); return; }
   const tpr = ev_.target.closest('[data-tprac]'); if (tpr) { practiceTour(tpr.dataset.tprac, 1); return; }
+  // the administrator takes a player out of the lobby (they can come back); the player comes back
+  { const ak = ev_.target.closest('[data-akick]'); if (ak) { const n = ak.dataset.akick; askYes(T('Take {0} out of the lobby? They can come back in.', n), () => { Net.adminKick(n); flash(T('{0} is out of the lobby.', n), 2500); }); return; } }
+  if (ev_.target.closest('#lobbyBack')) { closeOv(); Net.lobbyBack(); return; }
   if (ev_.target.closest('#yesOk')) { const f = ui.yesFn; ui.yesFn = null; closeOv(); if (f) f(); return; }
   const tsit = ev_.target.closest('[data-tsit]'); if (tsit) { const S = tourSeats(); S[tsit.dataset.tid] = +tsit.dataset.tsit; try { localStorage.setItem('bridge-tour-seats', JSON.stringify(S)); } catch (e) {} closeOv(); playTour(tsit.dataset.tid); return; }
   const tl = ev_.target.closest('[data-tlist]'); if (tl) { ui.ttab = tl.dataset.tlist; render(); return; }   // the tournament list's tabs
@@ -11320,6 +11405,7 @@ const Net = (() => {
     if (d.t === 'lhist') { (d.list || []).forEach(m => addL(m, true)); renderL(); return true; }
     if (d.t === 'tblinv') { gotTableInvite(d); return true; }
     if (d.t === 'dm') { gotDm(d); return true; }
+    if (d.t === 'akick') { if (nameKey(d.by) === 'servet' && nameKey(d.n) === nameKey(myName()) && !isAdmin()) kickedOut(); return true; }
     if (d.t === 'tadmin') { if (nameKey(d.by) === 'servet') closeTourLocal(d.id); return true; }
     if (d.t === 'dmack') { dmAcked(d); return true; }
     if (onTourData(d)) return true;
@@ -11357,7 +11443,7 @@ const Net = (() => {
   }
   // the tables in the lobby: ask every room who is there (rooms nobody holds simply do not answer)
   async function findTables() {
-    if (st.finding) return; st.finding = true; render(); panelRefresh();
+    if (st.out || st.finding) return; st.finding = true; render(); panelRefresh();
     const out = st.collect = [];
     try {
       await loadLib();
@@ -11514,7 +11600,7 @@ const Net = (() => {
     },
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
-      const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
+      const name = myName(); if (st.out || !Cloud.on || !name || !SET.pinH) return;
       const w = st.on ? 'table' : G && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // a finished board left on the screen counts as the lobby
       try {
         // a name chosen before the database existed is registered now; if someone else holds it with another PIN,
@@ -11525,7 +11611,10 @@ const Net = (() => {
           { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
         }
         st.claimed = true;
-        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof() });
+        // taken out of the lobby by the administrator (online/<name>/kick): stay out until the player comes back
+        try { const kk = await Cloud.get('online/' + fbKey(name) + '/kick'); if (kk && kk > kickSeen()) { setKickSeen(kk); kickedOut(); return; } } catch (e) {}
+        const pc = w === 'robots' && typeof pracList === 'function' && pracList().length ? 1 : 0;   // practising conventions
+        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof(), pc });
         if (st.cloudFail) { st.cloudFail = 0; render(); }
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()), ...(SET.act && SET.act.d === today() ? { a: actOut() } : {}) }); st.loggedDay = today(); st.prSent = ''; }
         // the conventions being practised now: kept with the day's login, which only the administrator can read
@@ -11722,6 +11811,37 @@ const Net = (() => {
     for (const c of (st.mesh || new Map()).values()) { try { if (c.open) c.send(msg); } catch (e) {} }
     if (Cloud.on && SET.pinH) { try { fetch(DB_URL + '/online/' + fbKey(name) + '.json' + (Auth.tok ? '?auth=' + Auth.tok : ''), { method: 'DELETE', keepalive: true }); } catch (e) {} }
   });
+  /* the administrator takes a player out of the lobby: the player's app closes its lobby lines and leaves the online
+     list, and stays out until the player taps "Back to the lobby" (or opens the app again) */
+  const kickSeen = () => { try { return +localStorage.getItem('bridge-kick-seen') || 0; } catch (e) { return 0; } };
+  const setKickSeen = v => { try { localStorage.setItem('bridge-kick-seen', String(v)); } catch (e) {} };
+  function kickedOut() {
+    if (st.out) return;
+    st.out = true;
+    const name = myName(), msg = { t: 'gone', k: st.slot ? st.slot.k : 0, host: name };
+    for (const c of (st.mesh || new Map()).values()) { try { if (c.open) c.send(msg); c.close(); } catch (e) {} }
+    st.mesh = new Map(); st.present = {}; st.tables = [];
+    try { if (st.slot && st.slot.peer) st.slot.peer.destroy(); } catch (e) {}
+    st.slot = null;
+    if (Cloud.on && name) Cloud.put('online/' + fbKey(name), null).catch(() => {});
+    renderL(); render();
+    openOv('out', `<h2>${T('Out of the lobby')}</h2><div class="big">${T('The administrator took you out of the lobby.')}</div>
+      <div class="muted">${T('You can go on playing with robots. To come back to the lobby, tap below.')}</div>
+      <div class="row2"><button class="btn new" id="lobbyBack">${T('Back to the lobby')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  }
+  async function lobbyBack() {
+    const name = myName();
+    try { const kk = await Cloud.get('online/' + fbKey(name) + '/kick'); if (kk) setKickSeen(kk); } catch (e) {}
+    st.out = false; keepSlot(); findTables(); Cloud.beat(); renderL();
+  }
+  function adminKick(name) {
+    if (!isAdmin() || !name) return;
+    meshSend({ t: 'akick', n: name, by: myName() });
+    if (Cloud.on) Cloud.put('online/' + fbKey(name) + '/kick', Date.now()).catch(() => {});
+    const k = nameKey(name); if (st.present) delete st.present[k];
+    if (st.cloud && st.cloud.on) st.cloud.on = st.cloud.on.filter(x => nameKey(x.name) !== k);
+    renderL();
+  }
   // the real administrator: Servet, with the PIN checked
   const isAdmin = () => nameKey(myName()) === 'servet' && !!SET.pinH;
   const loginsToday = () => st.cloud && st.cloud.logins != null ? st.cloud.logins : Object.values(st.known).filter(x => x.day === today()).length + 1;
@@ -11749,18 +11869,21 @@ const Net = (() => {
   }
   /* the players beside the lobby chat: friends first, then those playing, those waiting in the lobby, and last the
      ones seen this week who are offline. Tap a name to write to that player privately in the chat. */
+  // what a player in the lobby is doing: at a table, practising conventions, playing with robots, or waiting
+  function statusOf(n) {
+    const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
+    const w = whereIs(n), c = cloudOn && cloudOn.find(x => nameKey(x.name) === nameKey(n)), prac = c && c.pc;
+    if (w && !w.lobby) return { s: 'play', at: w.online ? T("At {0}'s table", w.host) : prac ? T('practising conventions') : T('playing with robots') };
+    if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : prac ? T('practising conventions') : T('playing with robots') };
+    return { s: 'lobby', at: T('waiting in the lobby') };
+  }
   function lobbyGroups() {
     const me = nameKey(myName()), here = new Map(knownNames().map(n => [nameKey(n), n]));
     const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
     if (cloudOn) for (const x of cloudOn) if (nameKey(x.name) !== me && !here.has(nameKey(x.name))) here.set(nameKey(x.name), x.name);
     // a player whose table is listed under the open tables is here too (playing), even if nothing else has heard from them lately
     for (const t of (st.tables || []).filter(listed)) for (const n of [t.host, ...Object.values(t.names || {})]) if (n && nameKey(n) !== me && !['robot', 'player'].includes(nameKey(n)) && !here.has(nameKey(n))) here.set(nameKey(n), n);
-    const status = n => {
-      const w = whereIs(n), c = cloudOn && cloudOn.find(x => nameKey(x.name) === nameKey(n));
-      if (w && !w.lobby) return { s: 'play', at: w.online ? T("At {0}'s table", w.host) : T('playing with robots') };
-      if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : T('playing with robots') };
-      return { s: 'lobby' };
-    };
+    const status = statusOf;
     const fr = (typeof friends === 'function' ? friends() : []);
     const off = new Map();
     for (const k in st.known) if (k !== me && !here.has(k)) off.set(k, st.known[k].name);
@@ -12558,7 +12681,7 @@ const Net = (() => {
   window.addEventListener('online', () => claimSlot());
   // keep this table listed (take an address again if it was lost) and keep the lobby list fresh
   function keepSlot() {
-    if (!navigator.onLine) return;
+    if (st.out || !navigator.onLine) return;
     if (!st.slot) claimSlot();
     else if (st.slot.peer.disconnected && !st.slot.peer.destroyed) { try { st.slot.peer.reconnect(); } catch (e) {} }
   }
@@ -12580,7 +12703,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>
