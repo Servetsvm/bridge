@@ -1483,3 +1483,5 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .ddchip.ok{background:#1e8a4c}.ddchip.no{background:#c0392b}
 :root[data-theme="dark"] .ddbox{background:#1d2b3d;color:#e3ecf8;border-color:#5b8fd0}
 :root[data-theme="dark"] .ddhd{color:#8fb6e6}
+.hico.hwa{color:#fff;background:#25d366;border-color:#1ea952}
+.hico.hwa:hover{background:#1ebe5a}

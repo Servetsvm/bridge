@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 206;
+const APP_V = 207;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1201,7 +1201,7 @@ function homeShell() {
   <header class="hhead"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
     <button id="hNameBtn" class="tok hnamebtn hdrname" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button>
     <div class="hhr"><label class="hlang" title="${T('Language')}">🌐 <select id="hLang" class="sel" aria-label="${T('Language')}">${langs.map(([v, l]) => `<option value="${v}" ${SET.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-      <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button></div></header>
+      <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico hwa" id="bShareApp" title="${T('Send the app on WhatsApp')}" aria-label="${T('Send the app on WhatsApp')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
   <div class="hgrid">
     <section class="hmain">
       <div class="hcard prac" id="hPrac"></div>
@@ -2451,6 +2451,7 @@ document.addEventListener('click', ev_ => {
     // the turn sound on and off from the top bar
     case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; SET.sfxOn = SET.sfx; SET.sfx = false; } else { SET.alert = SET.alertOn || "online"; SET.sfx = SET.sfxOn !== false; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }
     case "bSet": showSettings(); break;
+    case 'bShareApp': window.open('https://wa.me/?text=' + encodeURIComponent(T('Play bridge with me: {0}', 'https://servetsvm.github.io/bridge/?install=1')), '_blank', 'noopener'); break;
     case 'bRes': ui.resTab = 'list'; ui.menu = false; showResults(); break;
     case 'bHome': goHome(); break;
     case 'hQuick': Net.quickJoin(); break;
@@ -2677,6 +2678,7 @@ function gateDone(name, h, back) {
   SET.cloudSet = 0; Net.cloudSync();   // your results and settings from your other devices
   flash(T('Welcome, {0}!', name), 2000);
   checkSharedDeal();
+  setTimeout(installAsk, 800);   // a new player who came through a shared link: install the app now?
 }
 // drag the small window by its top bar
 document.addEventListener('pointerdown', e => {
@@ -2987,7 +2989,25 @@ function instHtml() {
   if (SET.instNo || isStandalone() || (!INST && !isIOS())) return '';
   return `<button class="hinstb" id="instGo" title="${T('Install Bridge Table as an app')}">📲 ${T('Install')}</button>`;
 }
+/* the app sent to someone (the WhatsApp button): their link carries ?install=1, and the app asks at once whether to
+   install it (after the name and PIN for a new player). The phone itself confirms the install: no page can install on
+   its own */
+var INST_ASKED = false;
+function installAsk() {
+  if (INST_ASKED || !/[?&]install=1/.test(location.search) || isStandalone() || needGate()) return;
+  INST_ASKED = true;
+  openOv('instask', `<h2>📲 Bridge Table</h2><div class="big">${T('Install Bridge Table on your phone as an app?')}</div>
+    <div class="muted">${T('Then it opens like any app, from your home screen.')}</div>
+    <div class="row2"><button class="btn new" id="instGo">📲 ${T('Install')}</button><button class="btn" id="oClose">${T('Not now')}</button></div>`);
+}
+setTimeout(installAsk, 1500);
 async function instGo() {
+  if (!INST && !isIOS()) {
+    // Chrome has not offered its install window (yet): the browser menu does it
+    openOv('inst', `<h2>📲 ${T('Install Bridge Table as an app')}</h2><div class="big">${T('Open the browser menu {0} and choose {1}.', '<b>⋮</b>', `<b>${T('Install app')}</b> / <b>${T('Add to Home Screen')}</b>`)}</div>
+      <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+    return;
+  }
   if (INST) { const p = INST; INST = null; p.prompt(); try { const r = await p.userChoice; if (r && r.outcome === 'accepted') { SET.instNo = 1; Store.saveSettings(SET); } } catch (e) {} render(); return; }
   openOv('inst', `<h2>📲 ${T('Install Bridge Table as an app')}</h2>
     <ol class="inststeps"><li>${T('Tap the Share button {0} at the bottom (on iPad at the top) of Safari.', '<b>⬆︎</b>')}</li><li>${T('Choose {0}.', `<b>${T('Add to Home Screen')}</b>`)}</li><li>${T('Tap {0}: Bridge Table appears on your home screen.', `<b>${T('Add')}</b>`)}</li></ol>
