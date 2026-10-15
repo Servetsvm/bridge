@@ -8047,7 +8047,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 205;
+const APP_V = 206;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9276,11 +9276,11 @@ function convCardHtml() {
     <div class="grp"><span>${T('Conventions')}</span><div class="convs">${E.CONVS.map(c => `<label class="cvchip${SET.conv[c.k] ? ' on' : ''}" title="${esc(c.d)}"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}>${esc(c.n)}</label>`).join('')}</div></div>
     <div class="row2"><button class="btn new" id="convWa">📲 ${T('Send on WhatsApp')}</button></div>`;
 }
-// the convention card as a message (system and the conventions switched on, each with its short description)
+// the convention card as a message: the system and the names of the conventions switched on (no descriptions)
 function convCardText() {
   const cur = E.sysOf(SET.sys), on = E.CONVS.filter(c => SET.conv[c.k]);
-  return [`📋 ${T('Our convention card (with partner)')}${myNm() ? ' — ' + myNm() : ''}`, `${T('Base system')}: ${cur.n}`, cur.d, '',
-    `${T('Conventions')}:`, ...on.map(c => `• ${c.n} — ${c.d}`)].join('\n');
+  return [`📋 ${T('Our convention card (with partner)')}${myNm() ? ' — ' + myNm() : ''}`, `${T('Base system')}: ${cur.n}`, '',
+    `${T('Conventions')}:`, ...on.map(c => `• ${c.n}`)].join('\n');
 }
 function renderHome() {
   const h = $('home'), N = typeof Net !== 'undefined' ? Net : null;
