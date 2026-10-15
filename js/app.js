@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 208;
+const APP_V = 209;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1239,7 +1239,7 @@ function convCardHtml() {
 }
 // the convention card as a message: the system and the names of the conventions switched on (no descriptions)
 // the message that sends the app to someone
-const appInvite = () => T('Play bridge with me: {0}', 'https://servetsvm.github.io/bridge/?install=1');
+const appInvite = () => 'Bridge https://servetsvm.github.io/bridge/?install=1';
 function convCardText() {
   const cur = E.sysOf(SET.sys), on = E.CONVS.filter(c => SET.conv[c.k]);
   return [`📋 ${T('Our convention card (with partner)')}${myNm() ? ' — ' + myNm() : ''}`, `${T('Base system')}: ${cur.n}`, '',
