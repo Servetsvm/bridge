@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 200;
+const APP_V = 201;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1893,8 +1893,10 @@ function robotCard(g, t) {
 }
 /* robots' cards: an expert robot looks at every card with double-dummy samples from the first trick on, which takes up
    to a second or two, so it is worked out in a background worker (the page stays smooth); without a worker, at once */
-const BOT_OPT = { budget: 1200, maxSamples: 100, ddTricks: 12, ddDecl: 13, evLim: 1500000, minSamples: 1, cap: 2500,
-  lead: { budget: 2500, maxSamples: 60, evLim: 3000000, minSamples: 2, cap: 4000 } };   // both sides look ahead from the first trick (the defence after the opening lead, which is chosen by simulation)
+// at least 40 deals for every card: fewer leave close choices to chance (seen on real boards: 20 deals swung the defence
+// between the right and the wrong suit)
+const BOT_OPT = { budget: 2500, maxSamples: 150, ddTricks: 12, ddDecl: 13, evLim: 1500000, minSamples: 40, cap: 6000,
+  lead: { budget: 4000, maxSamples: 100, evLim: 3000000, minSamples: 40, cap: 8000 } };   // both sides look ahead from the first trick (the defence after the opening lead, which is chosen by simulation)
 const Bot = {
   w: null, n: 0, wait: null,
   ask(g, seat, opt) {

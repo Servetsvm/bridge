@@ -7,8 +7,8 @@ const FIELD_AGG = [0, 1, -1, 0, 1, 0, -1, 0, 1, -1];
 // quick settings for the fallback without workers; the workers play at expert strength
 const FIELD_OPT = { budget: 90, maxSamples: 10, ddTricks: 6 };
 // the robot tables play like the robots at your table (declarer looking ahead, opening leads by simulation), a little lighter
-const EXPERT_OPT = { budget: 350, maxSamples: 40, ddTricks: 12, ddDecl: 13, evLim: 800000, minSamples: 1, cap: 1200,
-  lead: { budget: 1200, maxSamples: 30, evLim: 2000000, minSamples: 1, cap: 2000 } };
+const EXPERT_OPT = { budget: 600, maxSamples: 60, ddTricks: 12, ddDecl: 13, evLim: 800000, minSamples: 20, cap: 2000,
+  lead: { budget: 2000, maxSamples: 60, evLim: 2000000, minSamples: 30, cap: 3000 } };
 
 function simulateTable(deal, board, cards, agg, opt) {
   const dealer = dealerOf(board), auc = [];

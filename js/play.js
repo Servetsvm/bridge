@@ -292,7 +292,7 @@ function defLead(g, seat) {
   let best = null, bs = -1e9;
   for (let s = 0; s < 4; s++) {
     if (s === tr) continue; const cs = desc(inSuit(H, s)); if (!cs.length) continue; const r = cs.map(R);
-    let sc = nt ? cs.length * 2 : cs.length;
+    let sc = nt ? cs.length * 2 + Math.max(0, cs.length - 4) * 3 : cs.length;   // against notrump a long suit (5+) is the classic lead
     if (r.length >= 2 && r[0] >= 9 && r[1] === r[0] - 1) sc += 8 + r[0] / 4;
     if (r.length >= 3 && r[1] >= 8 && r[2] === r[1] - 1 && r[0] >= r[1] + 2) sc += 4;
     if (r[0] === 12 && r[1] === 11) sc += 6;
@@ -886,6 +886,7 @@ function ddChoose(g, seat, leg, opt) {
     n++;
   }
   if (n === 0) return null;
+  if (opt.dbg) { opt.dbg.n = n; opt.dbg.avg = [...tot].map(([c, v]) => [c, v / n]); }   // for tests: what the robot thought
   let best = null, bv = -1; for (const c of asc(leg)) { const v = tot.get(c); if (v > bv + 1e-9) { bv = v; best = c; } }
   return best;
 }
@@ -898,7 +899,20 @@ function aiPlay(g, seat, opt) {
   const def = sideOf(seat) !== sideOf(g.contract.decl), ddLim = def ? opt.ddTricks + (DEFF.dd ? 1 : 0) : (opt.ddDecl || opt.ddTricks);
   // the opening lead (opt.lead: its own samples and time): every lead tried against hands that fit the auction, as the
   // strong bridge programs choose it
-  if (opt.lead && !g.history.length && !g.trick.length) { const r = ddChoose(g, seat, leg, opt.lead); if (r != null) return r; }
+  if (opt.lead && !g.history.length && !g.trick.length) {
+    const dbg = opt.lead.dbg || {}, r = ddChoose(g, seat, leg, { ...opt.lead, dbg });
+    if (r != null) {
+      // when the simulation finds the leads about equal, the lead an expert would choose by the rules (the long suit
+      // against notrump, partner's suit, a sequence) decides: double-dummy samples undervalue setting up a long suit
+      const h = heurPlay(g, seat), av = new Map(dbg.avg || []);
+      // (off unless opt.lead.near is given: on 200 deals it cost more tricks than the simulation alone, 0.32 against 0.28)
+      const near = opt.lead.near != null ? opt.lead.near : -99;
+      if (av.has(r) && av.has(h) && av.get(h) >= av.get(r) - near) return h;
+      // a card the samples did not value separately (one of touching cards): its suit's value decides
+      if (!av.has(h) && av.has(r)) { const same = [...av].filter(([k]) => S(k) === S(h)).map(([, v]) => v); if (same.length && Math.max(...same) >= av.get(r) - near) return h; }
+      return r;
+    }
+  }
   if (g.hands[seat].length <= ddLim) { const r = ddChoose(g, seat, leg, opt); if (r != null) return r; }
   return heurPlay(g, seat);
 }
