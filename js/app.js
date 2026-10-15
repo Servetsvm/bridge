@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 199;
+const APP_V = 200;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2230,6 +2230,7 @@ function showReview(id, sel) {
     <div class="grp"><span>${T('Auction')}</span>${aucHtml}</div>
     <div class="row2"><button class="btn" data-revgo="-1" ${hi > 0 ? '' : 'disabled'}>◀ ${T('Previous deal')}</button><button class="btn" data-revgo="1" ${hi >= 0 && hi < HIST.length - 1 ? '' : 'disabled'}>${T('Next deal')} ▶</button></div>
     ${e.deal && !e.tour ? `<div class="row2"><button class="btn" id="oRevShare">🔗 ${T("Share this deal")}</button><button class="btn" id="oRevPbn">💾 PBN</button><button class="btn" id="oRevLin">💾 LIN</button></div>` : ""}
+    <div class="row2"><button class="btn" id="oRevCopy">📋 ${T('Copy for analysis')}</button></div>
     <div class="row2"><button class="btn" id="oRevBack">${T('Back to the list')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 /* the boards played today, from the table: contract, result, score, IMPs and MP against the
@@ -2333,6 +2334,7 @@ document.addEventListener('click', ev_ => {
   const rg = ev_.target.closest('[data-revgo]'); if (rg) { const i = HIST.findIndex(h => h.id === ui.revId) + +rg.dataset.revgo; if (HIST[i]) { ui.revSel = null; ui.revStep = 0; stopRev(); showReview(HIST[i].id); } return; }
   const rs = ev_.target.closest('[data-rs]'); if (rs) { if (!rs.disabled) revStep(rs.dataset.rs); return; }
   const ri = ev_.target.closest('[data-ri]'); if (ri) { const i = +ri.dataset.ri; showReview(ui.revId, ui.revSel === i ? null : i); ui.revSel = ui.revSel === i ? null : i; return; }
+  if (ev_.target.closest('#oRevCopy')) { const e = HIST.find(h => h.id === ui.revId); if (e) { const txt = boardText(e); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2500)).catch(() => { ui.copyTxt = txt; openOv('copy', `<h2>${T('Copy for analysis')}</h2><textarea class="tok copytxt" rows="12" readonly>${esc(txt)}</textarea><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`); }); } return; }
   if (ev_.target.closest('#oRevBack')) { stopRev(); if (ui.revFrom === 'hist') showHist(); else { ui.resTab = 'list'; showResults(); } return; }
   const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;
   if (t.id === 'dExpl') { ui.lastExpl = null; ui.hintBid = null; render(); return; }
@@ -2488,6 +2490,21 @@ document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target &&
 window.addEventListener('resize', () => { layoutFans(); clearTimeout(ui.rsz); ui.rsz = setTimeout(() => { if (G && G.phase !== 'idle') render(); }, 150); });   // the dummy's card size follows the window height
 
 /* ---- a deal as a link: 2 bits a card (who holds it) make 13 bytes, 18 letters in the address after #d= ---- */
+/* a played board as plain text (hands, auction, every trick, the double-dummy result), to paste into a message about
+   the robots' play */
+function boardText(e) {
+  const SL = ['C', 'D', 'H', 'S'], RK = '23456789TJQKA', N = ['N', 'E', 'S', 'W'];
+  const cd = c => SL[S(c)] + RK[R(c)];
+  const hand = h => [3, 2, 1, 0].map(s => SL[s] + ':' + h.filter(c => S(c) === s).sort((a, b) => b - a).map(c => RK[R(c)]).join('')).join(' ');
+  const dealer = e.dealer != null ? e.dealer : dealerOf(e.board), v = [vulOf(e.board, 0), vulOf(e.board, 1)];
+  const out = [`Bridge Table v${APP_V} · Board ${e.board} · Dealer ${N[dealer]} · Vul ${v[0] && v[1] ? 'All' : v[0] ? 'NS' : v[1] ? 'EW' : 'None'} · Me: ${N[e.seat]}`];
+  if (e.c) { const won = e.pl ? e.pl.filter(t => t.length === 4).filter(t => sideOf(E.trickWinner(t.map(([s, c]) => ({ s, c })), e.c.strain < 4 ? e.c.strain : -1)) === sideOf(e.c.decl)).length : null;
+    out.push(`Contract ${e.c.level}${'CDHSN'[e.c.strain]}${e.c.dbl === 1 ? 'X' : e.c.dbl === 2 ? 'XX' : ''} by ${N[e.c.decl]}` + (won != null ? ` · ${won} tricks` : '') + (e.dd && e.dd.you != null ? ` · double dummy ${e.dd.you}` : '')); }
+  if (e.deal) e.deal.forEach((h, s) => out.push(`${N[s]}  ${hand(h)}`));
+  if (e.auc) out.push('Auction: ' + e.auc.map(([s, call]) => `${N[s]}:${call === 'P' ? 'P' : call === 'X' ? 'X' : call === 'XX' ? 'XX' : LV(call) + 'CDHSN'[ST(call)]}`).join(' '));
+  if (e.pl) e.pl.forEach((t, i) => out.push(`Trick ${i + 1}: ` + t.map(([s, c]) => `${N[s]}:${cd(c)}`).join(' ')));
+  return out.join('\n');
+}
 function dealCode(deal) {
   const a = new Uint8Array(13);
   deal.forEach((h, s) => h.forEach(c => { a[c >> 2] |= s << ((c & 3) * 2); }));

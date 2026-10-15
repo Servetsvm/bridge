@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Copy for analysis": "Analiz için kopyala",
+    "Copied — paste it into your message": "Kopyalandı — mesajına yapıştır",
     "Out of the lobby": "Lobiden çıkar",
     "The administrator took you out of the lobby.": "Yönetici seni lobiden çıkardı.",
     "You can go on playing with robots. To come back to the lobby, tap below.": "Robotlarla oynamaya devam edebilirsin. Lobiye dönmek için aşağıya dokun.",
@@ -326,6 +328,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Copy for analysis": "Kopier for analyse",
+    "Copied — paste it into your message": "Kopiert — lim det inn i meldingen din",
     "Out of the lobby": "Ut av lobbyen",
     "The administrator took you out of the lobby.": "Administratoren tok deg ut av lobbyen.",
     "You can go on playing with robots. To come back to the lobby, tap below.": "Du kan fortsette å spille med roboter. Trykk nedenfor for å komme tilbake til lobbyen.",
@@ -649,6 +653,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Copy for analysis": "Copiar para análisis",
+    "Copied — paste it into your message": "Copiado: pégalo en tu mensaje",
     "Out of the lobby": "Sacar del vestíbulo",
     "The administrator took you out of the lobby.": "El administrador te ha sacado del vestíbulo.",
     "You can go on playing with robots. To come back to the lobby, tap below.": "Puedes seguir jugando con robots. Para volver al vestíbulo, toca abajo.",
@@ -1000,6 +1006,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Copy for analysis": "Copier pour analyse",
+    "Copied — paste it into your message": "Copié — collez-le dans votre message",
     "Out of the lobby": "Sortir du salon",
     "The administrator took you out of the lobby.": "L’administrateur vous a sorti du salon.",
     "You can go on playing with robots. To come back to the lobby, tap below.": "Vous pouvez continuer à jouer avec les robots. Pour revenir au salon, touchez ci-dessous.",
@@ -1351,6 +1359,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Copy for analysis": "Copia per l’analisi",
+    "Copied — paste it into your message": "Copiato — incollalo nel tuo messaggio",
     "Out of the lobby": "Fuori dalla sala",
     "The administrator took you out of the lobby.": "L’amministratore ti ha tolto dalla sala.",
     "You can go on playing with robots. To come back to the lobby, tap below.": "Puoi continuare a giocare con i robot. Per tornare nella sala, tocca qui sotto.",
@@ -1702,6 +1712,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Copy for analysis": "Für die Analyse kopieren",
+    "Copied — paste it into your message": "Kopiert — füge es in deine Nachricht ein",
     "Out of the lobby": "Aus der Lobby nehmen",
     "The administrator took you out of the lobby.": "Der Administrator hat dich aus der Lobby genommen.",
     "You can go on playing with robots. To come back to the lobby, tap below.": "Du kannst weiter mit Robotern spielen. Um in die Lobby zurückzukehren, tippe unten.",
@@ -2053,6 +2065,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Copy for analysis": "Скопировать для анализа",
+    "Copied — paste it into your message": "Скопировано — вставьте в сообщение",
     "Out of the lobby": "Убрать из лобби",
     "The administrator took you out of the lobby.": "Администратор убрал вас из лобби.",
     "You can go on playing with robots. To come back to the lobby, tap below.": "Вы можете продолжать играть с роботами. Чтобы вернуться в лобби, нажмите ниже.",
@@ -2404,6 +2418,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Copy for analysis": "Kopiuj do analizy",
+    "Copied — paste it into your message": "Skopiowano — wklej do wiadomości",
     "Out of the lobby": "Usuń z poczekalni",
     "The administrator took you out of the lobby.": "Administrator usunął cię z poczekalni.",
     "You can go on playing with robots. To come back to the lobby, tap below.": "Możesz dalej grać z robotami. Aby wrócić do poczekalni, dotknij poniżej.",
@@ -2755,6 +2771,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Copy for analysis": "复制以供分析",
+    "Copied — paste it into your message": "已复制——粘贴到你的消息中",
     "Out of the lobby": "移出大厅",
     "The administrator took you out of the lobby.": "管理员已将你移出大厅。",
     "You can go on playing with robots. To come back to the lobby, tap below.": "你可以继续和机器人打牌。要回到大厅,请点下方按钮。",
