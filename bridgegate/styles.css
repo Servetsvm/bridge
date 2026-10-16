@@ -447,23 +447,18 @@ body.bg-device .btn-primary{background:#2a7de1;color:#fff}
 }
 /* ── a table's screen as a Bridgemate III ── */
 .bm3t{display:flex;flex-direction:column;gap:12px;color:#1b1b1b}
-.bm3t-round{text-align:center;padding:4px 0}
-.bm3t-round .r{font-size:.95rem;font-weight:700;color:#55606b}
-.bm3t-round .p{font-size:2rem;font-weight:800;letter-spacing:.5px;line-height:1.2}
-.bm3t-round .b{font-size:.95rem;font-weight:700;color:#1f5d36}
-.bm3t-table{display:grid;grid-template-columns:1fr 70px 1fr;grid-template-areas:'. n .' 'w m e' '. s .';gap:6px;align-items:center;justify-items:center}
-.bm3t-seat{min-width:110px;padding:8px 10px;border:1px solid #d9dee3;border-radius:10px;background:#fff;text-align:center;line-height:1.25}
-.bm3t-seat small{display:block;font-size:.72rem;font-weight:700;color:#1f5d36}.bm3t-seat b{font-size:.9rem;font-weight:600}
-.bm3t-seat.n{grid-area:n}.bm3t-seat.s{grid-area:s}.bm3t-seat.w{grid-area:w}.bm3t-seat.e{grid-area:e}
-.bm3t-mid{grid-area:m;width:56px;height:56px;border:2px solid #c9d1d8;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;color:#55606b;font-size:.8rem;line-height:1}
-.bm3t-mid span{font-size:.7rem;color:#1f5d36}
-.bm3t-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.bm3t-tile{min-height:84px;border:1px solid #d9dee3;border-radius:12px;background:#fff;color:#1b1b1b;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px}
-.bm3t-tile b{font-size:1.6rem;font-weight:800;line-height:1}.bm3t-tile small{font-size:.78rem;color:#55606b;font-weight:700}.bm3t-tile i{font-style:normal;font-size:.68rem;color:#1f5d36;font-weight:700;text-align:center}
-.bm3t-tile.next{background:#2a7de1;border-color:#2a7de1;color:#fff}.bm3t-tile.next small{color:#fff}
-.bm3t-tile.done{background:#e8efe9;border-color:#b9d3c0}.bm3t-tile.done b{color:#1f5d36}
-.bm3t-tile.pend{background:#fff3d6;border-color:#f0c96a}
-.bm3t-tile:disabled{cursor:default}
 .bm3t-note{text-align:center;font-size:.85rem;color:#7a4fb5}
 .bm3t-pendrow .board-item{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid #f0c96a;border-radius:10px;background:#fff3d6}
-.bm3t-chg{background:#eef1f4;color:#3c4650;border:1px solid #d9dee3;font-weight:700;min-height:48px}
+/* the same look as Social bridge's table screen: the green strip, the small board boxes */
+.bm3t .sbchg{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:#1f5d36;color:#fff}
+.bm3t .sbchg .sbtno{font-size:22px;font-weight:800}
+.bm3t .sbchg .btn{font-size:16px;font-weight:700;padding:10px 14px;background:#f2c94c;color:#1b1b1b;border:1px solid #d9a92a;border-radius:10px}
+.bm3t-info{font-size:.85rem;color:#55606b;font-weight:600;text-align:center}
+.bm3t-names{display:flex;flex-direction:column;gap:2px;font-size:.85rem;text-align:center}.bm3t-names b{color:#1f5d36}
+.bm3t .sbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:6px;margin:4px 0}
+.bm3t .sbb{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid #c7c9bd;border-radius:8px;background:#fff;color:#222;cursor:pointer;font-family:inherit}
+.bm3t .sbb b{font-size:18px}.bm3t .sbb small{font-size:11px;color:#777}.bm3t .sbb i{font-style:normal;font-size:10px;color:#1e5c3b;font-weight:700;text-align:center;line-height:1.2}
+.bm3t .sbb.some{border-color:#1e5c3b;border-width:2px}
+.bm3t .sbb.me{background:#e3f1e8;border-color:#1e5c3b}.bm3t .sbb.me small{color:#1e5c3b;font-weight:700}
+.bm3t .sbb.pend{background:#fff3d6;border-color:#f0c96a}
+.bm3t .sbb:disabled{cursor:default}

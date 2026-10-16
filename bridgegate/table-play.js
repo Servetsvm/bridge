@@ -246,25 +246,24 @@ function renderTableDetail(tableNo){
 
   // the four players round the table (North at the top), as on a Bridgemate III
   const [pN,pS]=splitPairName(nsPair.isPhantom?'':nsPair.name), [pE,pW]=splitPairName(ewPair.isPhantom?'':ewPair.name);
-  const seat=(cls,l,n)=>`<div class="bm3t-seat ${cls}"><small>${l}</small><b>${n||'—'}</b></div>`;
   // the boards of this round as large tiles: a played one with its score, the next one to tap
   const tiles=boardList.map(bl=>{
     const done=bl.data&&bl.data.status==='done', pend=approvalPending&&approvalPending.boardNo===bl.boardNo;
     const isNext=!done&&!pend&&!approvalPending&&nextBoard&&nextBoard.boardNo===bl.boardNo;
     const score=done&&typeof bl.data.nsScore==='number'?(bl.data.nsScore>0?'+':'')+bl.data.nsScore+' NS':done?'✓':'';
     const cmp=cmpOf(bl);
-    return `<button class="bm3t-tile${done?' done':''}${isNext?' next':''}${pend?' pend':''}" ${!done&&!pend&&!approvalPending?`onclick="bmEnterBoard(${bl.boardNo})"`:'disabled'}><b>${bl.boardNo}</b><small>${done?score:pend?'⏳':isNext?'▶':'—'}</small>${cmp?`<i>${cmp}</i>`:''}</button>`;
+    return `<button class="sbb${done?' me':''}${isNext?' some':''}${pend?' pend':''}" ${!done&&!pend&&!approvalPending?`onclick="bmEnterBoard(${bl.boardNo})"`:'disabled'}><b>${bl.boardNo}</b><small>${done?'✓ '+score:pend?'⏳':isNext?'▶':'—'}</small>${cmp?`<i>${cmp}</i>`:''}</button>`;
   }).join('');
   document.getElementById('panelContent').innerHTML=`
     <div class="bm3t">
-      <div class="bm3t-round"><div class="r">Round ${s.currentRound}</div><div class="p">NS ${nsNum} – EW ${ewNum}</div><div class="b">Boards ${m.boardStart||'?'} – ${m.boardEnd||'?'}</div></div>
-      <div class="bm3t-table">${seat('n','North',pN)}${seat('w','West',pW)}<div class="bm3t-mid">N<span>▲</span></div>${seat('e','East',pE)}${seat('s','South',pS)}</div>
+      <div class="sbchg"><span class="sbtno">Table ${tableNo}</span><button class="btn gold" onclick="bgChangeTable()">🔄 Change table</button></div>
+      <div class="bm3t-info">Round ${s.currentRound} · NS ${nsNum} – EW ${ewNum} · Boards ${m.boardStart||'?'} – ${m.boardEnd||'?'}</div>
+      <div class="bm3t-names">${pN||pS?`<span><b>NS</b> ${[pN,pS].filter(Boolean).join(' – ')}</span>`:''}${pE||pW?`<span><b>EW</b> ${[pE,pW].filter(Boolean).join(' – ')}</span>`:''}</div>
       ${isPhantom?`<div class="bm3t-note">👻 Phantom pair — sit out</div>`:''}
-      <div class="bm3-step">${allDone?'All Boards Complete ✓':'Boards'}</div>
-      <div class="bm3t-tiles">${tiles}</div>
+      ${allDone?`<div class="bm3-step">All Boards Complete ✓</div>`:''}
+      <div class="sbgrid">${tiles}</div>
       ${approvalPending?`<div class="bm3t-pendrow">${boardsHTML}</div>`:''}
       <div id="boardsSection">${actionHTML}</div>
-      <button class="btn btn-full bm3t-chg" onclick="bgChangeTable()">🔄 Change table</button>
     </div>`;
 
   // Other tables — same boards (all rounds, all tournament types)
