@@ -1524,3 +1524,21 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .bm3-ok:disabled{opacity:.45;cursor:default}
 .ov .bm3{margin:4px auto 8px;box-sizing:border-box;width:100%;padding-left:6px;padding-right:6px}
 .ov .bm3-key{min-width:0;padding:0 2px}.ov .bm3-keys{padding:0 8px;gap:5px}.ov .bm3-bar .ev{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* the WhatsApp logo / SMS bubble inside a button */
+.ico{width:1.2em;height:1.2em;vertical-align:-0.25em;display:inline-block;flex:none}
+.btn.wa{background:#25d366;color:#fff;border-color:#25d366}
+/* Social bridge: the players' seats drawn as the table */
+.sbc-table{display:grid;grid-template-columns:1fr 1.1fr 1fr;grid-template-areas:'. n .' 'w m e' '. s .';gap:8px;align-items:center;max-width:380px;margin:6px auto}
+.sbc-pos{min-height:70px;padding:8px 6px;border:1px solid #d9d4c3;border-radius:12px;background:#fff;color:inherit;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.sbc-pos small{font-size:12px;color:#1f5d36;font-weight:700;text-transform:uppercase;letter-spacing:.5px}.sbc-pos b{font-size:15px;line-height:1.2;word-break:break-word}
+.sbc-n{grid-area:n}.sbc-s{grid-area:s}.sbc-w{grid-area:w}.sbc-e{grid-area:e}
+.sbc-mid{grid-area:m;aspect-ratio:1;border-radius:14px;background:#1f5d36;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;text-align:center}
+.sbc-edit{max-width:380px;margin:6px auto}.sbc-head{text-align:center;margin-bottom:10px}
+.sbc-input{width:100%;box-sizing:border-box;padding:12px;font-size:18px;text-align:center;border:2px solid #d9d4c3;border-radius:10px;font-family:inherit}
+.sbc-found{min-height:1.4em;margin-top:8px;font-weight:700;text-align:center}.sbc-found.ok{color:#1f7a3d}.sbc-found.no{color:#c0282d}
+:root[data-theme="dark"] .sbc-pos{background:#26302a;border-color:#3a4a40}:root[data-theme="dark"] .sbc-pos small{color:#8fd19e}:root[data-theme="dark"] .sbc-input{background:#26302a;color:inherit;border-color:#3a4a40}
+.ico{width:1.35em;height:1.35em}
+.sbsend .btn.sbwa,.btn.sbwa,.btn.wa{background:#25d366!important;color:#fff!important;border-color:#25d366!important}
+.sbsend .btn.sbsms,.btn.sms{background:#1e88e5!important;color:#fff!important;border-color:#1e88e5!important}
+.sbsend .btn{min-width:46px;min-height:36px;padding:4px 10px}

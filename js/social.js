@@ -165,7 +165,7 @@ const SB = (() => {
     const tn = (g.t || {})[mt] || {}, needNames = mt && !done() && !pending() && !sb.board && !['n', 's', 'e', 'w'].some(k => tn[k]);
     const pickTable = !mt && !done() && !canManage(m);
     if (pickTable) body = `<div class="grp"><span>${T('My table')}</span><div class="bm3-keys k4 sbpick" data-sbseg="me">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key">${i + 1}</button>`).join('')}</div></div>`;
-    else if (needNames) { sb.editT = mt; body = `<div class="grp"><span>${T('Players')}</span>${namesForm(mt)}</div>`; }
+    else if (needNames) body = compassHtml(mt);
     else if (sb.board) body = boardHtml(sb.board);
     else if (sb.view === 'rank') body = rankHtml();
     else if (sb.view === 'tables') body = tablesHtml();
@@ -252,7 +252,7 @@ const SB = (() => {
     if (!L.length) return `<div class="muted">${T('No scores yet.')}</div>`;
     const rows = L.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b><small>${T('Table {0}', r.t)} · ${r.dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]}</small></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="MP %" class="n">${r.pct ?? '—'}</td><td data-l="IMP" class="n">${signed(r.imp)}</td></tr>`).join('');
     return `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${T('Pair')}</th><th class="n">${T('Boards')}</th><th class="n">MP %</th><th class="n">IMP</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="row2"><button class="btn new sbwa" id="sbWa">📲 ${T('Send on WhatsApp')}</button></div>
+      <div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
       <div class="muted">${T('MP %: the average over the boards played; IMP: the total, each board against the other tables (cross-IMPs, averaged). A board played at only one table does not count yet.')}</div>`;
   }
   // the standings as a plain message (as on the screen: MP % and IMP)
@@ -265,8 +265,48 @@ const SB = (() => {
   // a table's link (as BridgeGate's table codes): it opens this game with that table chosen, ready to enter scores
   const gameLink = t => location.origin + location.pathname + '#sb=' + sb.id + (t ? '&t=' + t : '');
   const linkText = t => `🃏 ${sb.g.m.n}${t ? '\n' + T('Table {0}', t) : ''}\n${gameLink(t)}`;
-  const sendBtns = t => `<span class="sbsend"><button class="btn mini-btn sbwa" data-sbsend="wa:${t}" title="WhatsApp">💬</button><button class="btn mini-btn" data-sbsend="sms:${t}" title="SMS">✉️</button></span>`;
+  const sendBtns = t => `<span class="sbsend"><button class="btn mini-btn sbwa" data-sbsend="wa:${t}" title="WhatsApp">${ICON_WA}</button><button class="btn mini-btn sbsms" data-sbsend="sms:${t}" title="SMS">${ICON_SMS}</button></span>`;
   // a table's players: a member number typed into a box becomes the member's name
+  // the players at the table, drawn as the table; or the box for one seat
+  const SEATK = { n: 0, e: 1, s: 2, w: 3 };
+  function compassHtml(t) {
+    if (!sb.seats || sb.seats.t !== t) sb.seats = { t, n: '', s: '', e: '', w: '' };
+    const st = sb.seats;
+    if (sb.seatK) return `<div class="sbc-edit"><div class="sbc-head">${T('Table {0}', t)} · <b>${SEAT[SEATK[sb.seatK]]}</b></div>
+      <input id="sbSeatIn" class="sbc-input" maxlength="40" autocomplete="off" placeholder="${T('Member number or name')}" value="${esc(st[sb.seatK] || '')}">
+      <div id="sbSeatFound" class="sbc-found"></div>
+      <div class="row2"><button class="btn" id="sbSeatCancel">✕ ${T('Cancel')}</button><button class="btn new" id="sbSeatOk">✓ OK</button></div></div>`;
+    const seat = k => `<button class="sbc-pos sbc-${k}" data-sbseat="${k}"><small>${SEAT[SEATK[k]]}</small><b>${st[k] ? esc(st[k]) : '＋'}</b></button>`;
+    return `<div class="grp"><span>${T('Players')}</span><div class="sbc-table">${seat('n')}${seat('w')}<div class="sbc-mid">${T('Table {0}', t)}</div>${seat('e')}${seat('s')}</div>
+      <div class="row2"><button class="btn new" id="sbSeatsGo">${T('Continue')} →</button></div></div>`;
+  }
+  // a member number in the seat's box: the name under it at once, or ❓ (then a name is typed)
+  let seatLookT = 0;
+  document.addEventListener('input', e => {
+    if (!e.target || e.target.id !== 'sbSeatIn') return;
+    clearTimeout(seatLookT);
+    seatLookT = setTimeout(async () => {
+      const inp = $('sbSeatIn'), out = $('sbSeatFound'); if (!inp || !out) return;
+      const v = inp.value.trim(); if (!/^\d{1,8}$/.test(v)) { out.textContent = ''; return; }
+      const n = await memberName(v); if (inp.value.trim() !== v) return;
+      out.textContent = n ? '👤 ' + n : '❓ ' + v; out.className = 'sbc-found ' + (n ? 'ok' : 'no');
+    }, 250);
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'sbSeatIn') $('sbSeatOk')?.click(); });
+  async function seatOk() {
+    const inp = $('sbSeatIn'); if (!inp || !sb.seats || !sb.seatK) return;
+    let v = inp.value.trim();
+    if (/^\d{1,8}$/.test(v)) { const n = await memberName(v); if (!n) { const out = $('sbSeatFound'); if (out) { out.textContent = '❓ ' + v; out.className = 'sbc-found no'; } return; } v = n; }
+    sb.seats[sb.seatK] = v.slice(0, 20); sb.seatK = null; show();
+  }
+  async function seatsGo() {
+    const st = sb.seats; if (!st) return;
+    await signIn();
+    const p = { n: st.n || '', s: st.s || '', e: st.e || '', w: st.w || '' };
+    try { await C().put('sb/' + sb.id + '/t/' + st.t, p); (sb.g.t = sb.g.t || {})[st.t] = p; sb.seats = null; sb.err = ''; }
+    catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
+    show();
+  }
   function namesForm(t) {
     const p = (sb.g.t || {})[t] || {};
     return `<div class="tsetrow sbrow"><b>${T('Table {0}', t)}</b>${['n', 's', 'e', 'w'].map((k, j) => `<label><small>${SEAT[[0, 2, 1, 3][j]]}</small><input class="tok" maxlength="20" data-sbtn="${k}" data-member value="${esc(p[k] || '')}"></label>`).join('')}<button class="btn new" id="sbTSave">${T('Save')}</button></div>`;
@@ -398,6 +438,10 @@ const SB = (() => {
     if (id === 'sbEnd') { askYes(T('Finish the game? Scores can no longer be entered.'), () => { openOv('sb', gameHtml()); finish(); }); return; }
     if (d.sbedit) { sb.editT = +d.sbedit; return show(); }
     if (id === 'sbTSave') return saveTable();
+    if (d.sbseat) { sb.seatK = d.sbseat; show(); setTimeout(() => $('sbSeatIn')?.focus(), 80); return; }
+    if (id === 'sbSeatOk') return seatOk();
+    if (id === 'sbSeatCancel') { sb.seatK = null; return show(); }
+    if (id === 'sbSeatsGo') return seatsGo();
     if (id === 'sbWa') { window.open('https://wa.me/?text=' + encodeURIComponent(standingsText()), '_blank', 'noopener'); return; }
   });
 

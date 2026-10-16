@@ -307,7 +307,7 @@ window.showTableLinkModal=async function(){
   openModal('Send the players the link', `
     <div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">The players open Bridge Table with this link, tap Table No, type their member numbers (or names) and choose their table.</div>
     <input readonly value="${link}" onclick="this.select()" style="width:100%;font-size:0.76rem;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);box-sizing:border-box;">
-    <div style="display:flex;gap:8px;margin-top:10px;"><a class="btn btn-full" style="background:#25d366;color:#fff;text-decoration:none;text-align:center;" href="https://wa.me/?text=${window._playersMsg}" target="_blank" rel="noopener">💬 WhatsApp</a><a class="btn btn-ghost btn-full" style="text-decoration:none;text-align:center;" href="sms:?&body=${window._playersMsg}">✉️ SMS</a></div>
+    <div style="display:flex;gap:8px;margin-top:10px;"><a class="btn btn-full" style="background:#25d366;color:#fff;text-decoration:none;text-align:center;" href="https://wa.me/?text=${window._playersMsg}" target="_blank" rel="noopener">${ICON_WA} WhatsApp</a><a class="btn btn-ghost btn-full" style="text-decoration:none;text-align:center;" href="sms:?&body=${window._playersMsg}">${ICON_SMS} SMS</a></div>
   `, `<button class="btn btn-ghost" onclick="closeModal()">Close</button>`);
 };
 window.adminNextRound=function(){
