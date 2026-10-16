@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Notify me": "Bana haber ver",
     "Convention": "Konvansiyon",
     "Admin": "Yönetici",
     "Change table": "Masa değiştir",
@@ -355,6 +356,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Notify me": "Varsle meg",
     "Convention": "Konvensjon",
     "Admin": "Administrator",
     "Change table": "Bytt bord",
@@ -707,6 +709,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Notify me": "Avísame",
     "Convention": "Convención",
     "Admin": "Administración",
     "Change table": "Cambiar de mesa",
@@ -1087,6 +1090,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Notify me": "Préviens-moi",
     "Convention": "Convention",
     "Admin": "Administration",
     "Change table": "Changer de table",
@@ -1467,6 +1471,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Notify me": "Avvisami",
     "Convention": "Convenzione",
     "Admin": "Amministrazione",
     "Change table": "Cambia tavolo",
@@ -1847,6 +1852,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Notify me": "Sag mir Bescheid",
     "Convention": "Konvention",
     "Admin": "Verwaltung",
     "Change table": "Tisch wechseln",
@@ -2227,6 +2233,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Notify me": "Сообщать мне",
     "Convention": "Конвенция",
     "Admin": "Управление",
     "Change table": "Сменить стол",
@@ -2607,6 +2614,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Notify me": "Powiadom mnie",
     "Convention": "Konwencja",
     "Admin": "Administracja",
     "Change table": "Zmień stół",
@@ -2987,6 +2995,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Notify me": "提醒我",
     "Convention": "约定",
     "Admin": "管理",
     "Change table": "换桌",

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 248;
+const APP_V = 249;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1166,12 +1166,12 @@ function pracHtml() {
       ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       <div class="pdh">${T('On defence: discards')}</div>${CARD_KEYS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
-  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Deal practice')}</button></div><p class="prdesc">${T('Pick a convention and the robots deal you hands where it comes up. Tap any call to see what it means — and learn as you play.')}</p></div>
+  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Deal practice')}</button></div></div>
     <div class="prrow2">
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
-    <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Show me when a practised convention can be used")}</label>
+    <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Notify me")}</label>
     ${pracWarnHtml()}
     ${pracProgHtml()}
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ <span class="lg">${T('Add a convention')}</span><span class="sh">${T('Convention')}</span></button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ <span class="lg">${T('Write to the administrator')}</span><span class="sh">${T('Admin')}</span></button>`}</div>`;
