@@ -5,7 +5,7 @@
 (function(){
   'use strict';
 
-  const STORAGE_KEY='bg_language';
+  const STORAGE_KEY='bricskor_language';   // its own (the separate BridgeGate site on this address keeps bg_language)
   const SUPPORTED=['en','tr'];
 
   const TR={
