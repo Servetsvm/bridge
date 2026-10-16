@@ -78,33 +78,30 @@ function renderTablePanel(){
    first the four players (member number or name), then the table number; the table signs in with prefix + number
    and its names go to the pairs sitting there, so the admin's Players list fills itself. */
 const BG_PENDING='bg-pending-names';
+// the tournament now running: its table numbers; a tap asks for the four players at that table
 window.bgPlayerEntry=async function(prefix){
   const box=document.querySelector('#loginScreen .login-box'); if(!box) return;
   ['clubGate','loginForm'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
   let pe=document.getElementById('playerEntry');
   if(!pe){ pe=document.createElement('div'); pe.id='playerEntry'; box.appendChild(pe); }
+  const s=await DB.get('state')||{};
+  if(s.status!=='running'){ pe.innerHTML=`<div class="empty-state"><div class="empty-icon">⏳</div><div style="font-weight:600;margin-bottom:4px;">Tournament not started</div><div style="font-size:0.82rem;">Ask the director to start the tournament</div></div><button class="btn-primary" onclick="bgPlayerEntry('${prefix}')">↻</button>`; return; }
+  pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">${s.name||'BridgeGate'}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">Select your table number</div></div>
+    <div class="bm3-keys k4" style="padding:0;">${Array.from({length:s.tableCount||0},(_,i)=>`<button class="bm3-key" onclick="bgPlayerNames('${prefix}',${i+1})">${i+1}</button>`).join('')}</div>`;
+};
+// the four players at the chosen table: a member number brings the name, or the name is typed
+window.bgPlayerNames=function(prefix,n){
+  const pe=document.getElementById('playerEntry'); if(!pe) return;
   const seat=(k,l)=>`<label class="pe-seat"><small>${l}</small><input id="pe${k}" data-member maxlength="40" autocomplete="off" placeholder="Member number or name"></label>`;
-  pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">Players</div></div>
+  pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">Table ${n}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">Players</div></div>
     <div class="pe-grid">${seat('N','North')}${seat('S','South')}${seat('E','East')}${seat('W','West')}</div>
-    <button class="btn-primary" style="margin-top:12px;" onclick="bgPlayerTables('${prefix}')">Continue →</button>`;
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px;"><button class="btn btn-ghost" onclick="bgPlayerEntry('${prefix}')">← Back</button><button class="btn-primary" style="margin:0;" onclick="bgPlayerSit('${prefix}',${n})">Continue →</button></div>`;
   setTimeout(()=>document.getElementById('peN')?.focus(),80);
 };
-// the table numbers of the tournament now running; a tap signs this phone in at that table
-window.bgPlayerTables=async function(prefix){
-  const v=k=>(document.getElementById('pe'+k)?.value||'').trim();
-  const names={N:v('N'),S:v('S'),E:v('E'),W:v('W')};
-  // a number still being looked up: wait for its name
-  for(const k in names) if(/^\d{1,8}$/.test(names[k])) names[k]=(await memberName(names[k]))||names[k];
-  const s=await DB.get('state')||{}, pe=document.getElementById('playerEntry');
-  if(!pe) return;
-  if(s.status!=='running'){ pe.innerHTML=`<div class="empty-state"><div class="empty-icon">⏳</div><div style="font-weight:600;margin-bottom:4px;">Tournament not started</div><div style="font-size:0.82rem;">Ask the director to start the tournament</div></div><button class="btn-primary" onclick="bgPlayerTables('${prefix}')">↻</button>`; window._bgNames=names; return; }
-  window._bgNames=names;
-  pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">${s.name||'BridgeGate'}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">Select your table number</div></div>
-    <div class="bm3-keys k4" style="padding:0;">${Array.from({length:s.tableCount||0},(_,i)=>`<button class="bm3-key" onclick="bgPlayerSit('${prefix}',${i+1})">${i+1}</button>`).join('')}</div>
-    <div class="login-err" id="peErr"></div>`;
-};
+// sign this phone in at that table (prefix + number); its names go to the pairs sitting there
 window.bgPlayerSit=async function(prefix,n){
-  const names=window._bgNames||{};
+  const names={};
+  for(const k of ['N','S','E','W']){ let v=(document.getElementById('pe'+k)?.value||'').trim(); if(/^\d{1,8}$/.test(v)) v=(await memberName(v))||v; names[k]=v; }
   try{ sessionStorage.setItem(BG_PENDING,JSON.stringify({t:n,...names})); }catch(e){}
   document.getElementById('playerEntry')?.remove();
   document.getElementById('loginForm').style.display='block';
@@ -611,20 +608,6 @@ function renderBoardForm(boardNo,vuln,existing){
           <div class="bm3-score"><small>NS</small><b id="spVal">—</b></div>
         </div>
 
-        <div class="bm3-step">Opening lead</div>
-        <div class="bm3-keys k4">
-          <button class="bm3-key suit" id="ld♣" onclick="setLeadSuit('♣')">♣</button>
-          <button class="bm3-key suit red" id="ld♦" onclick="setLeadSuit('♦')">♦</button>
-          <button class="bm3-key suit red" id="ld♥" onclick="setLeadSuit('♥')">♥</button>
-          <button class="bm3-key suit" id="ld♠" onclick="setLeadSuit('♠')">♠</button>
-        </div>
-        <div class="bm3-keys k7 small">
-          ${['A','K','Q','J','10','9','8','7','6','5','4','3','2'].map(r=>`<button class="bm3-key" id="lr${r}" onclick="setLeadRank('${r}')">${r}</button>`).join('')}
-        </div>
-        <div class="bm3-keys k3"><button class="bm3-key pass" id="ldPass" onclick="setPass();bm3ShowScore()">PASS</button></div>
-
-        <!-- the scoring comes once the opening lead is chosen (or the board was passed out) -->
-        <div id="bm3Score" style="display:none">
         <div class="bm3-step">Contract</div>
         <div class="bm3-keys k4">
           ${[1,2,3,4,5,6,7].map(l=>`<button class="bm3-key" id="lv${l}" onclick="setLvl(${l})">${l}</button>`).join('')}
@@ -651,9 +634,22 @@ function renderBoardForm(boardNo,vuln,existing){
           <button class="bm3-key ew" id="dW" onclick="setDecl('W')">W</button>
         </div>
 
+        <!-- the opening lead once the contract and declarer are in, the result once the lead is -->
+        <div id="bm3Lead" style="display:none">
+        <div class="bm3-step">Opening lead</div>
+        <div class="bm3-keys k4">
+          <button class="bm3-key suit" id="ld♣" onclick="setLeadSuit('♣')">♣</button>
+          <button class="bm3-key suit red" id="ld♦" onclick="setLeadSuit('♦')">♦</button>
+          <button class="bm3-key suit red" id="ld♥" onclick="setLeadSuit('♥')">♥</button>
+          <button class="bm3-key suit" id="ld♠" onclick="setLeadSuit('♠')">♠</button>
+        </div>
+        <div class="bm3-keys k7 small">
+          ${['A','K','Q','J','10','9','8','7','6','5','4','3','2'].map(r=>`<button class="bm3-key" id="lr${r}" onclick="setLeadRank('${r}')">${r}</button>`).join('')}
+        </div>
+        </div>
+        <div id="bm3Res" style="display:none">
         <div class="bm3-step">Result <small id="resLabel"></small></div>
         <div class="bm3-keys k7" id="resTiles"></div>
-
         </div>
 
         <div class="bm3-actions">
@@ -663,7 +659,6 @@ function renderBoardForm(boardNo,vuln,existing){
       </div>
     </div>`;
   renderResTiles();
-  if(existing){ const sc=document.getElementById('bm3Score'); if(sc) sc.style.display=''; }   // a result being corrected: everything at once
   if(existing&&!existing.adjusted&&existing.level){
     setLvl(existing.level);setSuit(existing.suit);setDecl(existing.declarer);
     setDbl(existing.doubled||'');
@@ -702,9 +697,9 @@ function setLeadSuit(s){ boardForm.leadSuit=s; bm3Mark('ld','ld'+s); updateLCD()
 function setLeadRank(r){ boardForm.leadRank=r; bm3Mark('lr','lr'+r); updateLCD(); bm3ShowScore(); }
 // the scoring part of the Bridgemate screen, once the opening lead is complete (or PASS)
 function bm3ShowScore(){
-  const sc=document.getElementById('bm3Score'); if(!sc||sc.style.display!=='none') return;
-  if(!(boardForm.isPass||(boardForm.leadSuit&&boardForm.leadRank))) return;
-  sc.style.display=''; sc.scrollIntoView({behavior:'smooth',block:'start'});
+  const f=boardForm, show=(id,on)=>{ const el=document.getElementById(id); if(!el) return; const was=el.style.display!=='none'; el.style.display=on?'':'none'; if(on&&!was) el.scrollIntoView({behavior:'smooth',block:'start'}); };
+  const contract=!f.isPass&&f.level&&f.suit&&f.declarer, lead=contract&&f.leadSuit&&f.leadRank;
+  show('bm3Lead',contract); show('bm3Res',lead);
 }
 window.setRes=function(n){ boardForm.result=n; renderResTiles(); updateLCD(); updateScore(); };
 window.adjRes=function(n){ setRes(boardForm.result+n); };
@@ -722,6 +717,7 @@ function renderResTiles(){
 }
 function updateResDisp(){ renderResTiles(); }
 function updateScore(){
+  bm3ShowScore();   // the next step (lead, result) as soon as this one is complete
   const el=document.getElementById('spVal');if(!el)return;
   if(boardForm.isPass){ el.textContent='0'; el.className=''; return; }
   if(!boardForm.level||!boardForm.suit||!boardForm.declarer){el.textContent='—';el.className='';return;}

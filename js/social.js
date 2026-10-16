@@ -157,22 +157,22 @@ const SB = (() => {
     const n = $('sbName'); if (n) s.n = n.value.trim().slice(0, 40);
   }
   function gameHtml() {
-    const g = sb.g, m = g.m, mt = myTable(), mine = isOrganiser(m);
+    const g = sb.g, m = g.m, mt = myTable();
     const tabs = `<div class="seg ttabs">${[['boards', T('Board list')], ['rank', T('Standings')], ['tables', T('Tables')]].map(([v, l]) => `<button data-sbview="${v}" class="${sb.view === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
-    // the organiser sends each table its link; a player picks a table only when no link chose one on this device
-    const tsel = mine || canManage(m) || mt ? '' : `<div class="grp sbme"><span>${T('My table')}</span>${seg('me', [...Array(m.tb).keys()].map(i => [i + 1, i + 1]), mt)}</div>`;
-    const links = done() || !canManage(m) ? '' : `<div class="grp sblinks"><div class="muted">📲 ${T('Send each table its link: tapping it opens this game with that table chosen.')}</div>
-      <div class="sblk">${[...Array(m.tb).keys()].map(i => `<span class="sblt"><b>${T('Table {0}', i + 1)}</b>${sendBtns(i + 1)}</span>`).join('')}<span class="sblt all"><b>${T('The game’s link, for everyone')}</b>${sendBtns(0)}</span></div></div>`;
+    // the organiser sends the players one link; a player chooses the table on a screen of its own
+    const links = done() || !canManage(m) ? '' : `<div class="grp sblinks"><div class="muted">📲 ${T('Send the players the link: they open Bridge Table, tap Table No and choose their table.')}</div><div class="sblk"><span class="sblt all"><b>${T('The game’s link, for everyone')}</b>${sendBtns(0)}</span></div></div>`;
     let body = '';
     const tn = (g.t || {})[mt] || {}, needNames = mt && !done() && !pending() && !sb.board && !['n', 's', 'e', 'w'].some(k => tn[k]);
-    if (needNames) { sb.editT = mt; body = `<div class="grp"><span>${T('Players')}</span>${namesForm(mt)}</div>`; }
+    const pickTable = !mt && !done() && !canManage(m);
+    if (pickTable) body = `<div class="grp"><span>${T('My table')}</span><div class="bm3-keys k4 sbpick" data-sbseg="me">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key">${i + 1}</button>`).join('')}</div></div>`;
+    else if (needNames) { sb.editT = mt; body = `<div class="grp"><span>${T('Players')}</span>${namesForm(mt)}</div>`; }
     else if (sb.board) body = boardHtml(sb.board);
     else if (sb.view === 'rank') body = rankHtml();
     else if (sb.view === 'tables') body = tablesHtml();
     else body = boardsHtml();
     return `<h2>🃏 ${esc(m.n)}</h2>
       <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>
-      ${sb.board ? '' : links}${done() || pending() ? '' : tsel}${sb.board ? '' : tabs}${body}
+      ${sb.board ? '' : links}${sb.board || pickTable || needNames ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
@@ -212,8 +212,6 @@ const SB = (() => {
     const mt = sb.formT || myTable(), R = (sb.g.r || {})[b] || {};
     const f = sb.form || (sb.form = R[mt] ? { ...R[mt], ls: R[mt].ld ? SUITS.indexOf(R[mt].ld[0]) : null, lr: R[mt].ld ? RANKS.indexOf(R[mt].ld.slice(1)) : null } : { l: null, s: null, x: 0, d: null, k: null, ls: null, lr: null });
     const lead = f.ls != null && f.ls >= 0 && f.lr != null && f.lr >= 0;
-    // the scoring comes once the opening lead is chosen (or PASS); a result being corrected shows everything
-    const scoring = f.l === 0 || lead || !!R[mt];
     const need = f.l ? f.l + 6 : 0;
     const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
     const ok = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null && lead);
@@ -235,18 +233,17 @@ const SB = (() => {
         <div class="bm3-sub"><span>${T('Opening lead')}: ${lead ? leadHtml(SUITS[f.ls] + RANKS[f.lr]) : '—'}</span><span>${T('Result')}: ${f.l && f.k != null ? resTxt(f) : '—'}</span></div>
         <div class="bm3-score"><small>${SEAT_AB[0] + SEAT_AB[2]}</small><b class="${ns > 0 ? 'pos' : ns < 0 ? 'neg' : ''}">${ns == null ? '—' : signed(ns)}</b></div>
       </div>
-      <div class="bm3-step">${T('Opening lead')}</div>
-      ${keys('ls', 'k4', [0, 1, 2, 3].map(i => [i, SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.ls)}
-      ${keys('lr', 'k7 small', RANKS.map((r, i) => [i, r]), f.lr)}
-      ${scoring ? '' : keys('l', 'k3', [[0, T('Pass'), 'pass']], f.l)}
-      ${scoring ? `<div class="bm3-step">${T('Contract')}</div>
+      <div class="bm3-step">${T('Contract')}</div>
       ${keys('l', 'k4', [...[1, 2, 3, 4, 5, 6, 7].map(n => [n, n]), [0, T('Pass'), 'pass']], f.l)}
       ${f.l ? `${keys('s', 'k5', [0, 1, 2, 3, 4].map(i => [i, i === 4 ? 'NT' : SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.s)}
       ${keys('x', 'k3', [[0, '—'], [1, 'X', 'dbl'], [2, 'XX', 'dbl']], f.x)}
       <div class="bm3-step">${T('Declarer')}</div>
-      ${keys('d', 'k4', [0, 1, 2, 3].map(s => [s, SEAT_AB[s]]), f.d)}
-      <div class="bm3-step">${T('Result')}</div>
-      ${keys('k', 'k7', res.map(([k, l]) => [k, l, 'res ' + (k - need === 0 ? 'made' : k > need ? 'over' : 'down')]), f.k)}` : ''}` : ''}
+      ${keys('d', 'k4', [0, 1, 2, 3].map(s => [s, SEAT_AB[s]]), f.d)}` : ''}
+      ${f.l && f.s != null && f.d != null ? `<div class="bm3-step">${T('Opening lead')}</div>
+      ${keys('ls', 'k4', [0, 1, 2, 3].map(i => [i, SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.ls)}
+      ${keys('lr', 'k7 small', RANKS.map((r, i) => [i, r]), f.lr)}` : ''}
+      ${f.l && f.s != null && f.d != null && lead ? `<div class="bm3-step">${T('Result')}</div>
+      ${keys('k', 'k7', res.map(([k, l]) => [k, l, 'res ' + (k - need === 0 ? 'made' : k > need ? 'over' : 'down')]), f.k)}` : ''}
       <div class="bm3-actions"${R[mt] ? '' : ' style="grid-template-columns:1fr"'}>${R[mt] ? `<button class="bm3-cancel" id="sbCancel">✕ ${T('Cancel')}</button>` : ''}<button class="bm3-ok" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>✓ ${T('Save')}</button></div>
     </div></div>`;
   }
@@ -294,14 +291,14 @@ const SB = (() => {
       const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk } };
       for (let t = 1; t <= s.tb; t++) { const p = s.names[t] || {}; up['sb/' + id + '/t/' + t] = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }
       await C().patch('', up);
-      sb.setup = null; sb.busy = false; await loadGame(id); sb.view = 'boards'; sb.board = 0; show(); poll();
+      sb.setup = null; sb.busy = false; await loadGame(id); sb.view = 'tables'; sb.board = 0; show(); poll();
     } catch (e) { sb.busy = false; sb.err = T('Could not save. Check the internet connection and try again.'); show(); }
   }
   async function openGame(id) {
     sb.err = '';
     try { if (!(await loadGame(id))) { sb.err = T('No game with this code.'); return show(); } }
     catch (e) { sb.err = T('Could not reach the server. Check the internet connection.'); return show(); }
-    sb.view = 'boards'; sb.board = 0; sb.form = null; sb.editT = 0; setLast(done() ? '' : id); show(); poll();
+    sb.view = canManage(sb.g.m) && !done() ? 'tables' : 'boards'; sb.board = 0; sb.form = null; sb.editT = 0; setLast(done() ? '' : id); show(); poll();
   }
   async function save() {
     const b = sb.board, mt = myTable(), f = sb.form; if (!b || !mt || !f || sb.busy) return;

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 226;
+const APP_V = 227;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2566,18 +2566,19 @@ function welcomeClose(go) {
 const BG_LINK = 'bridge-bg';
 function tableNo() {
   let L = null; try { L = JSON.parse(localStorage.getItem(BG_LINK) || 'null'); } catch (e) {}
+  if (L && L.sb && typeof SB !== 'undefined') { SB.openLink(L.sb, 0); return; }   // a Social bridge game: the table number first
   if (!L || !L.c) { flash(T('Open the link the organiser sent you.'), 3000); return; }
   location.href = 'bridgegate/?club=' + encodeURIComponent(L.c) + '&role=table&p=' + L.p;
 }
 function checkSharedDeal() {
-  // the organiser's link to a club tournament: kept for Table No
-  const g = location.hash.match(/[#&]bg=([\w%-]+)\.(\d{2})/);
-  if (g) {
-    try { localStorage.setItem(BG_LINK, JSON.stringify({ c: decodeURIComponent(g[1]), p: g[2], ts: Date.now() })); history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  // the organiser's link (a club tournament #bg=club.prefix, or a Social bridge game #sb=CODE): kept for Table No
+  const g = location.hash.match(/[#&]bg=([\w%-]+)\.(\d{2})/), sg = location.hash.match(/[#&]sb=([A-Z0-9]{4,12})(?:&t=(\d{1,2}))?/);
+  if (g || (sg && !sg[2])) {
+    try { localStorage.setItem(BG_LINK, JSON.stringify(g ? { c: decodeURIComponent(g[1]), p: g[2], ts: Date.now() } : { sb: sg[1], ts: Date.now() })); history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     flash('🃏 ' + T('Table No'), 2500); return;
   }
-  // a Social bridge table's link: that game opens with the table chosen
-  const s = location.hash.match(/[#&]sb=([A-Z0-9]{4,12})(?:&t=(\d{1,2}))?/);
+  // a Social bridge table's own link: that game opens with the table chosen
+  const s = sg;
   if (s && typeof SB !== 'undefined') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} SB.openLink(s[1], +s[2] || 0); return; }
   const m = location.hash.match(/[#&]d=([\w-]{18})(?:&b=(\d+))?/); if (!m) { welcome(); return; }
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
