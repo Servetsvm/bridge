@@ -403,7 +403,8 @@ const SB = (() => {
     }
     return lob.html = rowsHtml();
   }
-  const rowsHtml = () => (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-sbgo="${g.id}">${T('Open')}</button></div></div>`).join('');
+  // under Open tables a running game is only shown (the players join it with Table No); Table No's own list opens it
+  const rowsHtml = open => (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div>${open ? `<div class="otb"><button class="btn new" data-sbgo="${g.id}">${T('Open')}</button></div>` : `<div class="otb"><small>🃏 ${T('Table No')}</small></div>`}</div>`).join('');
 
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
@@ -459,7 +460,7 @@ const SB = (() => {
     if (L.length === 1) return openLink(L[0].id, 0);
     if (!L.length) { closeOv(); flash(T('Open the link the organiser sent you.'), 3000); return; }
     lob.L = L;
-    openOv('sb', `<h2>🃏 ${T('Table No')}</h2>${rowsHtml()}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+    openOv('sb', `<h2>🃏 ${T('Table No')}</h2>${rowsHtml(true)}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
   }
   return { open, openLink, pick, lobbyHtml, locked };
 })();
