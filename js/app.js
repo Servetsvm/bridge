@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 239;
+const APP_V = 240;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1208,7 +1208,7 @@ function homeShell() {
       <div class="hpair">
       <div class="hcard hero hsmall">
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
-        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><a class="btn htour" href="bridgegate/">🏆 ${T('Tournaments')}</a><div class="hrow3"><button class="btn hwatch" id="sbOpen">🃏 ${T('Social bridge')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button><button class="btn gold hotab" id="sbTables">🃏 ${T('Open tables')}</button></div></div>
+        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><a class="btn htour" href="bridgegate/">🏆 ${T('Tournaments')}</a><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button><div class="hrow3"><button class="btn hwatch" id="sbOpen">🃏 ${T('Social bridge')}</button></div></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>

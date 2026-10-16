@@ -415,21 +415,12 @@ const SB = (() => {
     }
     return lob.html = rowsHtml();
   }
-  // the home's Open tables button: the games running now in a window, each with its Table No
-  async function openTables() {
-    openOv('otab', `<h2>🃏 ${T('Open tables')}</h2><div class="muted">${T('Loading…')}</div>`);
-    try { await loadLobby(); lob.ts = Date.now(); } catch (e) {}
-    if (ui.overlay !== 'otab') return;
-    const rows = rowsHtml();
-    openOv('otab', `<h2>🃏 ${T('Open tables')}</h2><div class="otours">${rows || `<div class="muted">${T('No game is running now.')}</div>`}</div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
-  }
   // each game with its Table No button: the table number, then the players, then the boards
   const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn gold" data-bgtno="${i}">🃏 ${T('Table No')}</button></div></div>`).join('')
     + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn gold" data-sbtno="${g.id}">🃏 ${T('Table No')}</button></div></div>`).join('');
 
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
-    if (e.target.closest('#sbTables')) return openTables();
     const tno = e.target.closest('[data-sbtno]'); if (tno) return openLink(tno.dataset.sbtno, 0);
     const bno = e.target.closest('[data-bgtno]'); if (bno && lob.G && lob.G[+bno.dataset.bgtno]) return gateGo(lob.G[+bno.dataset.bgtno]);
     const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }
