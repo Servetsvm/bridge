@@ -174,6 +174,41 @@
               }
             }
           }
+        },
+        "gate": {
+          ".read": false,
+          "clubs": {
+            ".read": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet')",
+            "$club": {
+              ".write": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('test').child($ns).child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('test').child($ns).child('sess').child(auth.uid).child('k').val())",
+              "info": {
+                ".read": "auth != null",
+                ".write": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('test').child($ns).child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('test').child($ns).child('sess').child(auth.uid).child('k').val()) || (auth != null && !data.exists() && newData.child('owner').val() === root.child('test').child($ns).child('sess').child(auth.uid).child('k').val())",
+                ".validate": "newData.hasChildren(['name', 'owner']) && newData.child('name').isString() && newData.child('name').val().length <= 40"
+              },
+              "secret": {
+                ".read": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('test').child($ns).child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('test').child($ns).child('sess').child(auth.uid).child('k').val())",
+                ".write": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('test').child($ns).child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('test').child($ns).child('sess').child(auth.uid).child('k').val()) || (auth != null && !data.exists() && newData.parent().child('info').child('owner').val() === root.child('test').child($ns).child('sess').child(auth.uid).child('k').val())",
+                ".validate": "newData.child('tprefix').isString() && newData.child('tprefix').val().matches(/^[0-9][0-9]$/)"
+              },
+              "bm": {
+                ".read": "auth != null",
+                ".write": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('test').child($ns).child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('test').child($ns).child('sess').child(auth.uid).child('k').val()) || (auth != null && root.child('test').child($ns).child('gate').child('tsess').child(auth.uid).child('club').val() === $club && root.child('test').child($ns).child('gate').child('tsess').child(auth.uid).child('code').isString() && root.child('test').child($ns).child('gate').child('clubs').child($club).child('secret').child('tprefix').isString() && root.child('test').child($ns).child('gate').child('tsess').child(auth.uid).child('code').val().beginsWith(root.child('test').child($ns).child('gate').child('clubs').child($club).child('secret').child('tprefix').val()))"
+              }
+            }
+          },
+          "owners": {
+            "$k": {
+              ".read": "auth != null && (root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $k || root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet')",
+              ".write": "auth != null && (root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $k || root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet')"
+            }
+          },
+          "tsess": {
+            "$uid": {
+              ".read": "auth != null && auth.uid === $uid",
+              ".write": "auth != null && auth.uid === $uid && (!newData.exists() || (newData.child('club').isString() && newData.child('code').isString() && newData.child('code').val().matches(/^[0-9]{4}$/) && root.child('test').child($ns).child('gate').child('clubs').child(newData.child('club').val()).child('info').child('active').val() !== false && newData.child('code').val().beginsWith(root.child('test').child($ns).child('gate').child('clubs').child(newData.child('club').val()).child('secret').child('tprefix').val())))"
+            }
+          }
         }
       }
     },
@@ -205,6 +240,41 @@
               ".validate": "newData.child('l').isNumber() && newData.child('l').val() >= 0 && newData.child('l').val() <= 7 && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 4 && newData.child('x').isNumber() && newData.child('x').val() >= 0 && newData.child('x').val() <= 2 && newData.child('d').isNumber() && newData.child('d').val() >= 0 && newData.child('d').val() <= 3 && newData.child('k').isNumber() && newData.child('k').val() >= 0 && newData.child('k').val() <= 13 && newData.child('sc').isNumber() && (!newData.child('ok').exists() || newData.child('ok').isBoolean())"
             }
           }
+        }
+      }
+    },
+    "gate": {
+      ".read": false,
+      "clubs": {
+        ".read": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet')",
+        "$club": {
+          ".write": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val())",
+          "info": {
+            ".read": "auth != null",
+            ".write": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val()) || (auth != null && !data.exists() && newData.child('owner').val() === root.child('sess').child(auth.uid).child('k').val())",
+            ".validate": "newData.hasChildren(['name', 'owner']) && newData.child('name').isString() && newData.child('name').val().length <= 40"
+          },
+          "secret": {
+            ".read": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val())",
+            ".write": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val()) || (auth != null && !data.exists() && newData.parent().child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val())",
+            ".validate": "newData.child('tprefix').isString() && newData.child('tprefix').val().matches(/^[0-9][0-9]$/)"
+          },
+          "bm": {
+            ".read": "auth != null",
+            ".write": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet') || (auth != null && root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val()) || (auth != null && root.child('gate').child('tsess').child(auth.uid).child('club').val() === $club && root.child('gate').child('tsess').child(auth.uid).child('code').isString() && root.child('gate').child('clubs').child($club).child('secret').child('tprefix').isString() && root.child('gate').child('tsess').child(auth.uid).child('code').val().beginsWith(root.child('gate').child('clubs').child($club).child('secret').child('tprefix').val()))"
+          }
+        }
+      },
+      "owners": {
+        "$k": {
+          ".read": "auth != null && (root.child('sess').child(auth.uid).child('k').val() === $k || root.child('sess').child(auth.uid).child('k').val() === 'servet')",
+          ".write": "auth != null && (root.child('sess').child(auth.uid).child('k').val() === $k || root.child('sess').child(auth.uid).child('k').val() === 'servet')"
+        }
+      },
+      "tsess": {
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "auth != null && auth.uid === $uid && (!newData.exists() || (newData.child('club').isString() && newData.child('code').isString() && newData.child('code').val().matches(/^[0-9]{4}$/) && root.child('gate').child('clubs').child(newData.child('club').val()).child('info').child('active').val() !== false && newData.child('code').val().beginsWith(root.child('gate').child('clubs').child(newData.child('club').val()).child('secret').child('tprefix').val())))"
         }
       }
     }
