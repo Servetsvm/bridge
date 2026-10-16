@@ -11,6 +11,8 @@
   const TR={
     'BricSkor · Tournament System':'BricSkor · Turnuva Sistemi',
     'Tournament Control System':'Turnuva Kontrol Sistemi',
+    'Code':'Kod',
+    'under a table: its link and its code in one message.':'bir masanın altında: o masanın linki ve kodu tek mesajda.',
     'Enter ↵':'Gir ↵',
     'Sign in to Bridge Table first (name and PIN), then come back here.':'Önce Bridge Table’a isim ve PIN ile giriş yap, sonra buraya dön.',
     'Bridge Table':'Bridge Table',

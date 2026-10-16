@@ -786,14 +786,28 @@ function renderSecurity(){
     <div id="secCodes" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;margin:10px 0 16px;"></div>
     <div class="field"><label>Link for the table devices</label><input type="text" readonly value="${link}" onclick="this.select()"></div>
     <div style="font-size:0.75rem;color:var(--text3);">Open this link on each table's phone or tablet and type that table's code.</div>
+    <div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-full" style="background:#25d366;color:#fff;" onclick="secSend('wa',0)">💬 WhatsApp</button><button class="btn btn-ghost btn-full" onclick="secSend('sms',0)">✉️ SMS</button></div>
+    <div style="font-size:0.75rem;color:var(--text3);margin-top:6px;">💬 / ✉️ under a table: its link and its code in one message.</div>
   </div>`;
 }
 // the codes of every table, from the prefix being typed
+// the address a table opens (the club and the table role filled in)
+const secLink=()=>location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=table';
+// the message for one table (its code), or for every table (the link only)
+const secMsg=(n,code)=>n?`BricSkor · ${CLUB_NAME||''}\n${i18nText?i18nText('Table')+' '+n:'Table '+n} · ${i18nText?i18nText('Code'):'Code'}: ${code}\n${secLink()}`:`BricSkor · ${CLUB_NAME||''}\n${secLink()}`;
+window.secSend=function(how,n){
+  const p=(document.getElementById('secPrefix')?.value||'').replace(/\D/g,'');
+  const code=n?p+String(n).padStart(2,'0'):'';
+  // a table's link carries its code: tapping it signs that table in at once
+  const text=secMsg(n, code).replace(secLink(), code?secLink()+'&t='+code:secLink());
+  if(how==='wa') window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener');
+  else location.href='sms:?&body='+encodeURIComponent(text);
+};
 window.secShowCodes=function(){
   const p=(document.getElementById('secPrefix')?.value||'').replace(/\D/g,'');
   const box=document.getElementById('secCodes'); if(!box) return;
   const n=Math.max(getState().tableCount||0, 1);
-  box.innerHTML=p.length===2?Array.from({length:Math.min(n,99)},(_,i)=>`<div style="padding:8px;border:1px solid var(--border);border-radius:8px;text-align:center;"><div style="font-size:0.7rem;color:var(--text3);">Table ${i+1}</div><div style="font-size:1.3rem;font-weight:700;letter-spacing:2px;color:var(--gold);">${p}${String(i+1).padStart(2,'0')}</div></div>`).join(''):'';
+  box.innerHTML=p.length===2?Array.from({length:Math.min(n,99)},(_,i)=>`<div style="padding:8px;border:1px solid var(--border);border-radius:8px;text-align:center;"><div style="font-size:0.7rem;color:var(--text3);">Table ${i+1}</div><div style="font-size:1.3rem;font-weight:700;letter-spacing:2px;color:var(--gold);">${p}${String(i+1).padStart(2,'0')}</div><div style="display:flex;gap:4px;justify-content:center;margin-top:6px;"><button class="btn btn-sm" style="background:#25d366;color:#fff;" title="WhatsApp" onclick="secSend('wa',${i+1})">💬</button><button class="btn btn-ghost btn-sm" title="SMS" onclick="secSend('sms',${i+1})">✉️</button></div></div>`).join(''):'';
 };
 window.secSavePrefix=async function(){
   const p=(document.getElementById('secPrefix')?.value||'').trim();

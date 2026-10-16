@@ -109,6 +109,8 @@ async function initClubGate(){
     if(info&&(info.active!==false||isSuper())){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
       if(roleParam&&['table','screen'].includes(roleParam)) selRole(roleParam);
+      // a table's own link carries its code (&t=0003): it signs in at once
+      const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(()=>doLogin(),50); }
       return;
     }
     try{ localStorage.removeItem('bg_clubId'); }catch(e){}
