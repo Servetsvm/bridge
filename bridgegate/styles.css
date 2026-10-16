@@ -423,3 +423,25 @@ body.bg-device #panelContent > .bm3 .bm3-bar{display:none}
   body.bg-device #panelContent{border:12px solid #111;border-top:0;border-radius:0 0 30px 30px;height:calc(100vh - 140px);overflow:auto;flex:none}
 }
 body.bg-device #panelContent .bm-device > div:first-child{flex-wrap:wrap}body.bg-device #panelContent .bm-device > div:first-child span{white-space:nowrap}
+/* the entry screen and the players' screen as the same Bridgemate III (before the table signs in) */
+body.bg-device #loginScreen{background:#fff;padding:0;align-items:stretch}
+body.bg-device .login-box{max-width:none;min-height:100vh;min-height:100dvh;border:0;border-radius:0;box-shadow:none;padding:0 14px 16px;background:#fff;color:#1b1b1b;
+  --bg:#fff;--surface:#fff;--surface2:#eef3f7;--surface3:#e3e9ee;--border:#d9dee3;--border2:#c9d1d8;--text:#1b1b1b;--text2:#3c4650;--text3:#6d6d6d;--gold:#1f5d36;--golddim:#e8efe9}
+body.bg-device .login-logo{background:#1f5d36;color:#fff;font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:800;letter-spacing:.3px;padding:14px 12px;margin:0 -14px 8px}
+body.bg-device .language-toggle-login,body.bg-device .theme-toggle-login{top:8px;background:#2e7a4b;color:#fff;border-color:#2e7a4b}
+body.bg-device .login-sub{color:#1f5d36;font-weight:700}
+body.bg-device .bg-entry{background:#fff;border-color:#d9dee3}
+body.bg-device .bg-entry-lbl{color:#1f5d36}
+body.bg-device .bm3-key,body.bg-device #playerEntry .bm3-key,body.bg-device .bg-entry .bm3-key{background:#fff;color:#1b1b1b;border:1px solid #d9dee3}
+body.bg-device .pe-pos{background:#fff;border-color:#d9dee3;color:#1b1b1b}
+body.bg-device .pe-pos small{color:#1f5d36}
+body.bg-device .pe-mid{background:#1f5d36}
+body.bg-device .bm-lcd{background:#eef3f7;border-color:#d9dee3}
+body.bg-device .bm-lcd-row.inv{background:#1f5d36;color:#fff}
+body.bg-device .pe-input{background:#fff;color:#1b1b1b;border-color:#c9d1d8}
+body.bg-device .btn-primary{background:#2a7de1;color:#fff}
+@media (min-width:700px){
+  body.bg-device #loginScreen{background:#0c1a14;padding:20px;align-items:center}
+  body.bg-device .login-box{width:440px;max-width:440px;min-height:0;height:calc(100vh - 40px);border:12px solid #111;border-radius:30px;overflow:auto;box-sizing:border-box}
+  body.bg-device .login-logo{border-radius:0}
+}

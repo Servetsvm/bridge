@@ -91,6 +91,8 @@ async function initClubGate(){
   const params=new URLSearchParams(location.search);
   let id=params.get('club');
   const roleParam=params.get('role');
+  // a table (or the entry screen of a running tournament) is shown as a Bridgemate III from the first moment
+  if(params.get('admin')!=='1'&&(roleParam==='table'||!params.get('club'))) document.body.classList.add('bg-device');
   const fromLink=!!id;
   if(!id){ try{ id=localStorage.getItem('bg_clubId'); }catch(e){} }
   const u=me();
@@ -112,6 +114,7 @@ async function initClubGate(){
     }
     if(info&&(info.active!==false||isSuper())&&(fromLink||ownClub)){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
+      if(roleParam!=='table') document.body.classList.remove('bg-device');   // the admin's sign-in keeps the usual look
       if(roleParam&&['table','screen'].includes(roleParam)) selRole(roleParam);
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(()=>doLogin(),50); }
@@ -137,6 +140,7 @@ async function initClubGate(){
 }
 // the entry screen of the tournaments running now: each with its table number keys, and Admin for its club's admin
 async function renderEntry(live){
+  document.body.classList.add('bg-device');   // the Bridgemate III look from the entry screen on
   const g=document.getElementById('clubGate'); g.style.display='block';
   const box=document.getElementById('myClubsBox'); if(!box) return;
   const u=me(), go=(t,q)=>location.pathname+'?club='+encodeURIComponent(t.club)+q;
@@ -155,6 +159,7 @@ async function liveTournaments(){
   }catch(e){ return []; }
 }
 async function renderClubGate(live){
+  if(!live) document.body.classList.remove('bg-device');
   const g=document.getElementById('clubGate'); g.style.display='block';
   const u=me(), box=document.getElementById('myClubsBox');
   document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');

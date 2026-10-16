@@ -80,6 +80,7 @@ function renderTablePanel(){
 const BG_PENDING='bg-pending-names';
 // the tournament now running: its table numbers; a tap asks for the four players at that table
 window.bgPlayerEntry=async function(prefix){
+  document.body.classList.add('bg-device');
   const box=document.querySelector('#loginScreen .login-box'); if(!box) return;
   ['clubGate','loginForm'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
   let pe=document.getElementById('playerEntry');
@@ -92,6 +93,7 @@ window.bgPlayerEntry=async function(prefix){
 // the four players at the chosen table, drawn as the table: North at the top, South at the bottom, West and East at the sides
 const BG_SEATS={N:'North',S:'South',E:'East',W:'West'};
 window.bgPlayerNames=function(prefix,n){
+  document.body.classList.add('bg-device');
   let pe=document.getElementById('playerEntry');
   if(!pe){ const box=document.querySelector('#loginScreen .login-box'); if(!box) return; ['clubGate','loginForm'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';}); pe=document.createElement('div'); pe.id='playerEntry'; box.appendChild(pe); }
   if(!window._bgEntry||window._bgEntry.n!==n) window._bgEntry={prefix,n,seats:{N:'',S:'',E:'',W:''}};

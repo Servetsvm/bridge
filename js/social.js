@@ -188,11 +188,11 @@ const SB = (() => {
       <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
       ${sb.board ? '' : links}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
-      <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
+      <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : canManage(m) ? `<button class="btn" id="sbList">← ${T('All games')}</button>` : ''}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
         ${!sb.board && done() && canManage(m) ? `<button class="btn new" id="sbReopen">↺ ${T('Open the game again')}</button>` : ''}
         ${!sb.board && canManage(m) ? `<button class="btn tdel" data-sbdel="${sb.id}">✕ ${T('Delete')}</button>` : ''}
-        ${sb.board ? '' : `<button class="btn gold" id="oClose">${T('Close')}</button>`}</div>`;
+        ${sb.board || !canManage(m) ? '' : `<button class="btn gold" id="oClose">${T('Close')}</button>`}</div>`;   // a player stays in the game that was set up
   }
   function boardsHtml() {
     const g = sb.g, mt = myTable();
