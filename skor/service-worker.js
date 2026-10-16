@@ -1,10 +1,10 @@
-// BricSkor service worker — app-shell offline caching + installability.
+// BridgeGate service worker — app-shell offline caching + installability.
 //
 // IMPORTANT: bump CACHE_NAME every time you deploy new files (index.html,
 // any .js/.css file). Otherwise returning users may keep loading a stale
 // cached version instead of your update. Suggested pattern:
 // 'bridgegate-v' + YYYYMMDD, e.g. 'bridgegate-v20260709'.
-const CACHE_NAME = 'bric-skor-v4';
+const CACHE_NAME = 'bric-skor-v5';
 
 const APP_SHELL = [
   './',

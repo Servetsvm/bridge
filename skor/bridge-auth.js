@@ -1,4 +1,4 @@
-/* Club tournaments (BricSkor inside Bridge Table): the sign-in is Bridge Table's own. The same hidden database
+/* Club tournaments (BridgeGate inside Bridge Table): the sign-in is Bridge Table's own. The same hidden database
    account as the app on this device (its refresh token is shared through this address's storage), and the player's
    Bridge name and PIN: the database session sess/<account> = { k: name, pin } is what the rules check.
    Servet is the super admin; the player who opens a club is its admin; a table signs in with its 4-digit code. */
@@ -14,7 +14,7 @@
   const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1] || (/^(localhost|127.0.0.1)$/.test(location.hostname) ? 'dev' : undefined);
   const ROOT = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');
   const API_KEY = 'AIzaSyDNugZ1tf4rXu7lDYzyZg9v1V3is7xz_Mc';
-  // the language: the one chosen here last time (English or Turkish: BricSkor keeps it); the first time, the one used
+  // the language: the one chosen here last time (English or Turkish: BridgeGate keeps it); the first time, the one used
   // in Bridge Table, or the phone's own
   try { if (!localStorage.getItem('bricskor_language')) { const st = JSON.parse(localStorage.getItem('bric-masasi-v2') || 'null'), L = st && st.SET && st.SET.lang; localStorage.setItem('bricskor_language', (L ? L === 'tr' : /^tr/i.test(navigator.language || '')) ? 'tr' : 'en'); } } catch (e) {}
   window.GATE_ROOT = ROOT;                 // the Bridge Table database (its test part on a test server)

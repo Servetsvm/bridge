@@ -1,6 +1,6 @@
 {
-  "name": "BricSkor Turnuva Yöneticisi",
-  "short_name": "BricSkor",
+  "name": "BridgeGate Turnuva Yöneticisi",
+  "short_name": "BridgeGate",
   "description": "Canlı briç turnuva yönetimi — skorlama, hareketler ve sıralama.",
   "lang": "tr",
   "start_url": "./index.html",

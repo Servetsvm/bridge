@@ -390,7 +390,7 @@ function buildPBNText(boards, movements, pairs, hands, tournamentName){
   });
   const boardNos=Object.keys(byBoardNo).sort((a,b)=>Number(a)-Number(b));
   if(!boardNos.length)return null;
-  let out=`% PBN 2.1\n% Exported from BricSkor — ${(tournamentName||'Tournament')}\n% ${new Date().toISOString()}\n\n`;
+  let out=`% PBN 2.1\n% Exported from BridgeGate — ${(tournamentName||'Tournament')}\n% ${new Date().toISOString()}\n\n`;
   boardNos.forEach(bn=>{
     const instances=byBoardNo[bn].sort((a,b)=>Number(a.round)-Number(b.round)||Number(a.table)-Number(b.table));
     const hand=handsByBoard[bn];
@@ -794,7 +794,7 @@ function renderSecurity(){
 // the address a table opens (the club and the table role filled in)
 const secLink=()=>location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=table';
 // the message for one table (its code), or for every table (the link only)
-const secMsg=(n,code)=>n?`BricSkor · ${CLUB_NAME||''}\n${i18nText?i18nText('Table')+' '+n:'Table '+n} · ${i18nText?i18nText('Code'):'Code'}: ${code}\n${secLink()}`:`BricSkor · ${CLUB_NAME||''}\n${secLink()}`;
+const secMsg=(n,code)=>n?`BridgeGate · ${CLUB_NAME||''}\n${i18nText?i18nText('Table')+' '+n:'Table '+n} · ${i18nText?i18nText('Code'):'Code'}: ${code}\n${secLink()}`:`BridgeGate · ${CLUB_NAME||''}\n${secLink()}`;
 window.secSend=function(how,n){
   const p=(document.getElementById('secPrefix')?.value||'').replace(/\D/g,'');
   const code=n?p+String(n).padStart(2,'0'):'';

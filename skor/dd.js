@@ -1,4 +1,4 @@
-/* BricSkor — double-dummy analysis of the boards: how many tricks each player can take as declarer in each
+/* BridgeGate — double-dummy analysis of the boards: how many tricks each player can take as declarer in each
    strain with all four hands open and best play on both sides, and the par result of the board.
    The solver (partition search with a transposition table) comes from Bridge Table
    (https://servetsvm.github.io/bridge). This file runs both in the page (BGDD.*) and as a background worker. */
@@ -344,7 +344,7 @@ function ddFull(hands, leader, side, trump, limit, guess) {
 }
 function ddContract(deal, c, limit, guess) { return ddFull(deal, (c.decl + 1) % 4, sideOf(c.decl), c.strain < 4 ? c.strain : -1, limit || 4e6, guess); }
 
-/* ---- BricSkor API ---- */
+/* ---- BridgeGate API ---- */
 const SEATS = 'NESW', RANKS = '23456789TJQKA';
 // a PBN deal "N:AKQ2.K73.J5.T942 …" (also "E:", "S:", "W:"; "-" or an empty hand is filled with the cards left over)
 function parseDeal(str) {
