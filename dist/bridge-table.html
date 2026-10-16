@@ -8341,7 +8341,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 246;
+const APP_V = 247;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -13550,12 +13550,14 @@ const SB = (() => {
     }
     return lob.html = rowsHtml();
   }
-  // the games running now (shown only: Social bridge and Tournaments on the home page open them)
-  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div></div>`).join('')
-    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div></div>`).join('');
+  // the games running now, each with Join
+  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-bgjoin="${i}">${T('Join')}</button></div></div>`).join('')
+    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-sbjoin="${g.id}">${T('Join')}</button></div></div>`).join('');
 
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
+    const sj = e.target.closest('[data-sbjoin]'); if (sj) { sb.entry = false; return openLink(sj.dataset.sbjoin, 0); }
+    const bj = e.target.closest('[data-bgjoin]'); if (bj && lob.G && lob.G[+bj.dataset.bgjoin]) { const g = lob.G[+bj.dataset.bgjoin]; location.href = 'bridgegate/?club=' + encodeURIComponent(g.club) + '&role=table&p=' + g.p; return; }
     const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }
     if (ui.overlay !== 'sb') return;
     const el = e.target.closest('button'); if (!el) return;
