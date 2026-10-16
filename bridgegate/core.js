@@ -86,6 +86,25 @@ function cleanData(v){
   if(v&&typeof v==='object'){const o={};for(const k in v)o[k]=cleanData(v[k]);return o;}
   return v;
 }
+// The member list (number → "First Last", loaded by the super admin from the federation's .mcd file): a player
+// types their member number and their name comes from there; a name can also be typed as it is.
+const _members={};
+async function memberName(num){
+  num=String(num||'').trim();
+  if(!/^\d{1,8}$/.test(num)) return null;
+  if(num in _members) return _members[num];
+  try{ const r=await fetch(await fbRootUrl('/members/'+num+'.json')); const v=r.ok?await r.json():null; _members[num]=typeof v==='string'?cleanData(v):null; }
+  catch(e){ return null; }
+  return _members[num];
+}
+// a name box marked data-member: a number typed into it becomes the member's name (the number stays when unknown)
+document.addEventListener('change',async e=>{
+  const el=e.target; if(!el||!el.matches||!el.matches('input[data-member]')) return;
+  const v=el.value.trim(); if(!/^\d{1,8}$/.test(v)) return;
+  const n=await memberName(v);
+  if(n&&el.value.trim()===v){ el.value=n; el.dispatchEvent(new Event('input',{bubbles:true})); }
+  else if(!n) toast('❓ '+v);
+});
 const DB={
   async get(k){
     try{const url=await fbUrl('/'+k+'.json');const r=await fetch(url,{cache:'no-store'});

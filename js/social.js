@@ -11,6 +11,9 @@ const SB = (() => {
   const myTable = () => { try { return +localStorage.getItem(myTableKey(sb.id)) || 0; } catch (e) { return 0; } };
   const setMyTable = t => { try { localStorage.setItem(myTableKey(sb.id), String(t)); } catch (e) {} };
   const SUITS = ['♣', '♦', '♥', '♠', 'NT'];
+  const RANKS = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+  // the opening lead as saved ("♠K") and as shown (red for ♦ ♥)
+  const leadHtml = ld => ld ? `<span class="${/^[♦♥]/.test(ld) ? 'red' : ''}">${ld[0]}</span>${ld.slice(1)}` : '';
   const newCode = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 6; i++) s += A[Math.floor(Math.random() * A.length)]; return s; };
   const fmtDate = ts => new Date(ts).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   const signed = v => (v > 0 ? '+' : '') + v;
@@ -25,6 +28,19 @@ const SB = (() => {
   // the administrator, or the player who opened the game: they finish, open again, correct scores and delete it
   const canManage = m => isAdm() || isOrganiser(m);
   const done = () => sb.g && sb.g.m && sb.g.m.st === 'done';
+
+  // a member number → the member's name, from the member list the federation file filled
+  const members = {};
+  async function memberName(num) {
+    if (num in members) return members[num];
+    try { const v = await C().get('gate/members/' + num); members[num] = typeof v === 'string' ? v : null; } catch (e) { return null; }
+    return members[num];
+  }
+  document.addEventListener('change', async e => {
+    const el = e.target; if (!el || !el.matches || !el.matches('#ov input[data-member]')) return;
+    const v = el.value.trim(); if (!/^\d{1,8}$/.test(v)) return;
+    const n = await memberName(v); if (n && el.value.trim() === v) el.value = n.slice(0, 20);
+  });
 
   /* ---- scores ---- */
   // the North-South score of one result
@@ -129,32 +145,34 @@ const SB = (() => {
   const seg = (name, opts, cur) => `<div class="seg" data-sbseg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   function setupHtml() {
     const s = sb.setup;
-    const grid = [...Array(s.tb).keys()].map(i => `<div class="tsetrow sbrow"><b>${T('Table {0}', i + 1)}</b>${['n', 's', 'e', 'w'].map((k, j) => `<label><small>${SEAT[[0, 2, 1, 3][j]]}</small><input class="tok" maxlength="20" data-sbname="${i + 1}:${k}" value="${esc((s.names[i + 1] || {})[k] || '')}"></label>`).join('')}</div>`).join('');
     return `<h2>🃏 ${T('New game')}</h2>
       <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
       <div class="grp"><span>${T('Tables')}</span>${seg('tb', [...Array(12).keys()].map(i => [i + 1, i + 1]), s.tb)}</div>
       <div class="grp"><span>${T('Boards')}</span>${seg('bd', [8, 12, 16, 20, 24, 28, 32, 36].map(n => [n, n]), s.bd)}</div>
-      <div class="grp"><span>${T('Players')}</span><div class="muted">${T('The players at each table (they stay at their table).')}</div>${grid}</div>
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`;
   }
   function readSetup() {
     const s = sb.setup; if (!s) return;
     const n = $('sbName'); if (n) s.n = n.value.trim().slice(0, 40);
-    document.querySelectorAll('[data-sbname]').forEach(i => { const [t, k] = i.dataset.sbname.split(':'); (s.names[t] = s.names[t] || {})[k] = i.value.trim().slice(0, 20); });
   }
   function gameHtml() {
     const g = sb.g, m = g.m, mt = myTable(), mine = isOrganiser(m);
     const tabs = `<div class="seg ttabs">${[['boards', T('Board list')], ['rank', T('Standings')], ['tables', T('Tables')]].map(([v, l]) => `<button data-sbview="${v}" class="${sb.view === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
-    const tsel = `<div class="grp sbme"><span>${T('My table')}</span>${seg('me', [...Array(m.tb).keys()].map(i => [i + 1, i + 1]), mt)}</div>`;
+    // the organiser sends each table its link; a player picks a table only when no link chose one on this device
+    const tsel = mine || canManage(m) || mt ? '' : `<div class="grp sbme"><span>${T('My table')}</span>${seg('me', [...Array(m.tb).keys()].map(i => [i + 1, i + 1]), mt)}</div>`;
+    const links = done() || !canManage(m) ? '' : `<div class="grp sblinks"><div class="muted">📲 ${T('Send each table its link: tapping it opens this game with that table chosen.')}</div>
+      <div class="sblk">${[...Array(m.tb).keys()].map(i => `<span class="sblt"><b>${T('Table {0}', i + 1)}</b>${sendBtns(i + 1)}</span>`).join('')}<span class="sblt all"><b>${T('The game’s link, for everyone')}</b>${sendBtns(0)}</span></div></div>`;
     let body = '';
-    if (sb.board) body = boardHtml(sb.board);
+    const tn = (g.t || {})[mt] || {}, needNames = mt && !done() && !pending() && !sb.board && !['n', 's', 'e', 'w'].some(k => tn[k]);
+    if (needNames) { sb.editT = mt; body = `<div class="grp"><span>${T('Players')}</span>${namesForm(mt)}</div>`; }
+    else if (sb.board) body = boardHtml(sb.board);
     else if (sb.view === 'rank') body = rankHtml();
     else if (sb.view === 'tables') body = tablesHtml();
     else body = boardsHtml();
     return `<h2>🃏 ${esc(m.n)}</h2>
       <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>
-      ${done() || pending() ? '' : tsel}${sb.board ? '' : tabs}${body}
+      ${sb.board ? '' : links}${done() || pending() ? '' : tsel}${sb.board ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
@@ -168,7 +186,7 @@ const SB = (() => {
       const b = i + 1, R = (g.r || {})[b] || {}, n = Object.keys(R).length, me = mt && R[mt];
       return `<button class="sbb${me ? ' me' : ''}${n ? ' some' : ''}" data-sbboard="${b}"><b>${b}</b><small>${me ? (me.ok ? '✓ ' : '⏳ ') : ''}${n ? T('{0} tables', n) : '—'}</small></button>`;
     }).join('');
-    return `<div class="muted">${done() ? T('Tap a board to see what was played.') : mt ? T('Tap a board your table played to enter its score.') : T('First choose your table above.')}</div><div class="sbgrid">${cells}</div>`;
+    return `<div class="muted">${done() ? T('Tap a board to see what was played.') : mt ? T('Tap a board your table played to enter its score.') : canManage(g.m) ? T('Tap a board to see what was played.') : T('First choose your table above.')}</div><div class="sbgrid">${cells}</div>`;
   }
   function boardHtml(b) {
     const g = sb.g, mt = myTable(), R = (g.r || {})[b] || {}, ts = Object.keys(R).sort((x, y) => x - y);
@@ -176,15 +194,15 @@ const SB = (() => {
     const head = `<h3>${T('Board {0}', b)} <small class="muted">${T('Dealer')}: ${SEAT[E.dealerOf(b)]} · ${vt}</small></h3>`;
     const mine = mt && R[mt], others = ts.filter(t => +t !== mt).length;
     if (sb.form || (!done() && mt && !mine)) return formHtml(b) + (others && !sb.formT ? `<div class="muted">${T('{0} tables have played this board. You will see their results after entering yours.', others)}</div>` : '');
-    if (!done() && !mt) return head + `<div class="muted">${T('First choose your table above.')}</div>`;
-    if (!done() && !mine.ok) return head + `<div class="sbform"><div class="muted">${T('Table {0}', mt)}: ${esc(pairName(mt, 'ns'))} — ${esc(pairName(mt, 'ew'))}</div>
+    if (!done() && !mt && !canManage(g.m)) return head + `<div class="muted">${T('First choose your table above.')}</div>`;
+    if (!done() && mine && !mine.ok) return head + `<div class="sbform"><div class="muted">${T('Table {0}', mt)}: ${esc(pairName(mt, 'ns'))} — ${esc(pairName(mt, 'ew'))}</div>
       <div class="sbprev"><b>${conTxt(mine)} ${resTxt(mine)} · ${scoreTxt(b, mine)}</b></div>
       <div class="sbwait">⏳ ${T('The other pair checks the score and confirms it.')}</div>
       <div class="row2"><button class="btn new" id="sbOk">✓ ${T('We confirm')}</button><button class="btn" id="sbFix">✎ ${T('Correct')}</button></div>
       ${others ? `<div class="muted">${T('Results of the other tables appear after the confirmation.')}</div>` : ''}</div>`;
     const c = boardCmp(b), wait = ts.filter(t => !R[t].ok).length;
     const rows = ts.map(t => { const r = R[t], x = c[t] || { ns: nsScore(b, r), cmp: null }; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
-      <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
+      <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}${r.ld ? ` <small>· ${leadHtml(r.ld)}</small>` : ''}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
       <td data-l="MP %" class="n">${!r.ok ? '⏳' : x.cmp ? x.cmp.mp : '—'}</td><td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td>${canManage(g.m) ? `<td class="tact"><button class="btn mini-btn" data-sbadm="${t}" title="${T('Correct')}">✎</button></td>` : ''}</tr>`; }).join('');
     return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th><th class="n">MP %</th><th class="n">IMP</th>${canManage(g.m) ? '<th></th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
       <div class="muted">${T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the organiser or the administrator can change a confirmed score.')}</div>`;
@@ -192,10 +210,13 @@ const SB = (() => {
   const scoreTxt = (b, r) => { const ns = nsScore(b, r), ew = r.l && E.sideOf(r.d) === 1; return `${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; };
   function formHtml(b) {
     const mt = sb.formT || myTable(), R = (sb.g.r || {})[b] || {};
-    const f = sb.form || (sb.form = R[mt] ? { ...R[mt] } : { l: null, s: null, x: 0, d: null, k: null });
+    const f = sb.form || (sb.form = R[mt] ? { ...R[mt], ls: R[mt].ld ? SUITS.indexOf(R[mt].ld[0]) : null, lr: R[mt].ld ? RANKS.indexOf(R[mt].ld.slice(1)) : null } : { l: null, s: null, x: 0, d: null, k: null, ls: null, lr: null });
+    const lead = f.ls != null && f.ls >= 0 && f.lr != null && f.lr >= 0;
+    // the scoring comes once the opening lead is chosen (or PASS); a result being corrected shows everything
+    const scoring = f.l === 0 || lead || !!R[mt];
     const need = f.l ? f.l + 6 : 0;
     const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
-    const ok = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null);
+    const ok = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null && lead);
     // the screen of a Bridgemate III: the contract and the N-S score on the display, then one row of large keys per step
     const ns = ok ? (f.l ? nsScore(b, f) : 0) : null;
     const contract = f.l === 0 ? T('Pass') : f.l ? `${f.l}${f.s != null ? sym(f.s) : ''}${f.x === 1 ? ' X' : f.x === 2 ? ' XX' : ''}${f.d != null ? ' ' + SEAT_AB[f.d] : ''}` : '—';
@@ -211,17 +232,21 @@ const SB = (() => {
       </div>
       <div class="bm3-display">
         <div class="bm3-contract">${contract}</div>
-        <div class="bm3-sub"><span>${T('Result')}: ${f.l && f.k != null ? resTxt(f) : '—'}</span></div>
+        <div class="bm3-sub"><span>${T('Opening lead')}: ${lead ? leadHtml(SUITS[f.ls] + RANKS[f.lr]) : '—'}</span><span>${T('Result')}: ${f.l && f.k != null ? resTxt(f) : '—'}</span></div>
         <div class="bm3-score"><small>${SEAT_AB[0] + SEAT_AB[2]}</small><b class="${ns > 0 ? 'pos' : ns < 0 ? 'neg' : ''}">${ns == null ? '—' : signed(ns)}</b></div>
       </div>
-      <div class="bm3-step">${T('Contract')}</div>
+      <div class="bm3-step">${T('Opening lead')}</div>
+      ${keys('ls', 'k4', [0, 1, 2, 3].map(i => [i, SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.ls)}
+      ${keys('lr', 'k7 small', RANKS.map((r, i) => [i, r]), f.lr)}
+      ${scoring ? '' : keys('l', 'k3', [[0, T('Pass'), 'pass']], f.l)}
+      ${scoring ? `<div class="bm3-step">${T('Contract')}</div>
       ${keys('l', 'k4', [...[1, 2, 3, 4, 5, 6, 7].map(n => [n, n]), [0, T('Pass'), 'pass']], f.l)}
       ${f.l ? `${keys('s', 'k5', [0, 1, 2, 3, 4].map(i => [i, i === 4 ? 'NT' : SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.s)}
       ${keys('x', 'k3', [[0, '—'], [1, 'X', 'dbl'], [2, 'XX', 'dbl']], f.x)}
       <div class="bm3-step">${T('Declarer')}</div>
       ${keys('d', 'k4', [0, 1, 2, 3].map(s => [s, SEAT_AB[s]]), f.d)}
       <div class="bm3-step">${T('Result')}</div>
-      ${keys('k', 'k7', res.map(([k, l]) => [k, l, 'res ' + (k - need === 0 ? 'made' : k > need ? 'over' : 'down')]), f.k)}` : ''}
+      ${keys('k', 'k7', res.map(([k, l]) => [k, l, 'res ' + (k - need === 0 ? 'made' : k > need ? 'over' : 'down')]), f.k)}` : ''}` : ''}
       <div class="bm3-actions"${R[mt] ? '' : ' style="grid-template-columns:1fr"'}>${R[mt] ? `<button class="bm3-cancel" id="sbCancel">✕ ${T('Cancel')}</button>` : ''}<button class="bm3-ok" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>✓ ${T('Save')}</button></div>
     </div></div>`;
   }
@@ -244,13 +269,17 @@ const SB = (() => {
   const gameLink = t => location.origin + location.pathname + '#sb=' + sb.id + (t ? '&t=' + t : '');
   const linkText = t => `🃏 ${sb.g.m.n}${t ? '\n' + T('Table {0}', t) : ''}\n${gameLink(t)}`;
   const sendBtns = t => `<span class="sbsend"><button class="btn mini-btn sbwa" data-sbsend="wa:${t}" title="WhatsApp">💬</button><button class="btn mini-btn" data-sbsend="sms:${t}" title="SMS">✉️</button></span>`;
+  // a table's players: a member number typed into a box becomes the member's name
+  function namesForm(t) {
+    const p = (sb.g.t || {})[t] || {};
+    return `<div class="tsetrow sbrow"><b>${T('Table {0}', t)}</b>${['n', 's', 'e', 'w'].map((k, j) => `<label><small>${SEAT[[0, 2, 1, 3][j]]}</small><input class="tok" maxlength="20" data-sbtn="${k}" data-member value="${esc(p[k] || '')}"></label>`).join('')}<button class="btn new" id="sbTSave">${T('Save')}</button></div>`;
+  }
   function tablesHtml() {
-    const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || canManage(g.m)), send = !done() && canManage(g.m);
-    return (send ? `<div class="muted">${T('Send each table its link: tapping it opens this game with that table chosen.')}</div>
-      <div class="sbtrow"><b>${T('The game’s link, for everyone')}</b><span></span><small></small>${sendBtns(0)}</div>` : '') + [...Array(g.m.tb).keys()].map(i => {
+    const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || canManage(g.m));
+    return [...Array(g.m.tb).keys()].map(i => {
       const t = i + 1, p = (g.t || {})[t] || {}, played = Object.values(g.r || {}).filter(R => R[t]).length;
-      if (sb.editT === t) return `<div class="tsetrow sbrow"><b>${T('Table {0}', t)}</b>${['n', 's', 'e', 'w'].map((k, j) => `<label><small>${SEAT[[0, 2, 1, 3][j]]}</small><input class="tok" maxlength="20" data-sbtn="${k}" value="${esc(p[k] || '')}"></label>`).join('')}<button class="btn new" id="sbTSave">${T('Save')}</button></div>`;
-      return `<div class="sbtrow"><b>${T('Table {0}', t)}</b><span>${SEAT_AB[0] + SEAT_AB[2]}: ${esc(pairName(t, 'ns'))}<br>${SEAT_AB[1] + SEAT_AB[3]}: ${esc(pairName(t, 'ew'))}</span><small>${T('{0} boards', played)}</small>${canEdit(t) ? `<button class="btn mini-btn" data-sbedit="${t}">✎</button>` : ''}${send ? sendBtns(t) : ''}</div>`;
+      if (sb.editT === t) return namesForm(t);
+      return `<div class="sbtrow"><b>${T('Table {0}', t)}</b><span>${SEAT_AB[0] + SEAT_AB[2]}: ${esc(pairName(t, 'ns'))}<br>${SEAT_AB[1] + SEAT_AB[3]}: ${esc(pairName(t, 'ew'))}</span><small>${T('{0} boards', played)}</small>${canEdit(t) ? `<button class="btn mini-btn" data-sbedit="${t}">✎</button>` : ''}</div>`;
     }).join('');
   }
 
@@ -277,7 +306,7 @@ const SB = (() => {
   async function save() {
     const b = sb.board, mt = myTable(), f = sb.form; if (!b || !mt || !f || sb.busy) return;
     const t = sb.formT || mt;
-    const r = f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
+    const r = f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k, ld: SUITS[f.ls] + RANKS[f.lr] } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
     r.sc = nsScore(b, r); r.ts = Date.now();
     if (sb.formT) r.ok = true;   // the administrator's correction needs no confirmation
     sb.busy = true; show();
@@ -318,7 +347,8 @@ const SB = (() => {
   }
   async function saveTable() {
     await signIn();
-    const t = sb.editT, p = {}; document.querySelectorAll('[data-sbtn]').forEach(i => { p[i.dataset.sbtn] = i.value.trim().slice(0, 20); });
+    const t = sb.editT, p = {};
+    for (const i of document.querySelectorAll('[data-sbtn]')) { let v = i.value.trim(); if (/^\d{1,8}$/.test(v)) v = (await memberName(v)) || v; p[i.dataset.sbtn] = v.slice(0, 20); }
     try { await C().put('sb/' + sb.id + '/t/' + t, { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }); (sb.g.t = sb.g.t || {})[t] = p; sb.editT = 0; }
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
     show();

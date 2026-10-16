@@ -1464,6 +1464,8 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .sbtrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e3dfcd}
 .sbtrow span{flex:1}.sbtrow small{color:#777}
 .sbsend{display:inline-flex;gap:4px}.sbsend .sbwa{background:#25d366;color:#fff;border-color:#25d366}
+.sblk{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}.sblt{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:5px 8px;border:1px solid #e3dfcd;border-radius:8px}.sblt.all{grid-column:1/-1}.sblt b{font-size:14px}
+:root[data-theme="dark"] .sblt{border-color:#3a4a40}
 .sbprev{margin:8px 0;padding:8px 10px;border-radius:8px;background:#eef3ee;font-size:16px}
 .sbcode{letter-spacing:2px}
 .sbme .seg button{flex:0 0 auto;min-width:38px}

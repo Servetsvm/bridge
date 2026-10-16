@@ -194,7 +194,7 @@ function renderSetup(){
       ${s.status==='running'&&s.currentRound<s.roundCount?`<button class="btn btn-gold" onclick="adminNextRound()">⏭ Next Round (${s.currentRound+1})</button>`:''}
       ${s.status==='running'&&s.currentRound>=s.roundCount?`<button class="btn btn-blue" onclick="adminFinish()">🏁 Finish Tournament</button>`:''}
     </div>
-    ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">📱 Table Link</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Send this to whoever is opening a table — it skips straight to the Table password screen for this club.</div><div style="display:flex;gap:6px;"><input id="tableLinkBox" readonly value="${location.origin}${location.pathname}?club=${CLUB_ID}&role=table" style="flex:1;font-size:0.72rem;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);"><button class="btn btn-gold btn-sm" onclick="copyTableLink()">📋 Copy</button></div></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
+    ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><button class="btn btn-green btn-full" onclick="showTableLinkModal()">📲 Send the players the link</button></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
   </div>
   <div class="card"><div class="card-title"><span>💾</span> Data</div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-blue" onclick="adminExport()">⬇ Export</button><button class="btn btn-purple" onclick="adminImportOpen()">⬆ Import</button><button class="btn btn-red" onclick="adminReset()">🗑 Reset</button></div></div>`;
 }
@@ -269,8 +269,8 @@ window.adminSetup=function(){
   }else{delete s.teams;delete s._teamPairs;delete s._teamAName;delete s._teamBName;}
   setState(s);
   addLog('ok','Tournament created',`${players} players, ${tables} tables, ${result.rounds} rounds, ${mov}, ${scoringName(s)}`);
-  toast(mov==='team'?`✅ Team Match created: ${s.teams.A.name} vs ${s.teams.B.name}`:'✅ Tournament created! Enter player names in the Players tab.');
-  adminTab='players';refreshTopbar();renderAdminPanel();
+  toast(mov==='team'?`✅ Team Match created: ${s.teams.A.name} vs ${s.teams.B.name}`:'✅ Tournament created');
+  adminTab='setup';refreshTopbar();renderAdminPanel();   // the names come from the tables after the start
 };
 
 window.adminForceUnlock=function(tableNo){
@@ -284,11 +284,7 @@ window.adminForceUnlock=function(tableNo){
 window.adminStart=async function(){
   const s=getState();if(s.status!=='setup'){toast('Already started');return;}
   s._startedAt=new Date().toISOString();
-  const pairs=getPairs();
-  const unnamed=Object.values(pairs).filter(p=>!p.isPhantom&&(!p.name||!p.name.trim()||/^(NS|EW|Pair)\s*\d+$/.test(p.name.trim())));
-  if(unnamed.length>0){
-    if(!await confirmDialog(`${unnamed.length} pair(s) don't have names entered yet.\n\nDo you still want to start Round 1?`,{title:'Missing Names',confirmLabel:'Start Anyway'}))return;
-  }
+  // the names come from the tables (each table enters its players), so the tournament starts without them
   s.currentRound=1;s.status='running';s._roundStartedAt=new Date().toISOString();setState(s);
   addLog('ok','Round 1 started','Tournament begins');
   toast('▶ Round 1 started!');refreshTopbar();renderAdminTab();
@@ -301,24 +297,17 @@ window.saveStallMinutes=function(){
   const s=getState();s.stallAlertMinutes=v;setState(s);
   toast('✅ Alert threshold set to '+v+' min');
 };
-window.copyTableLink=function(){
-  const box=document.getElementById('tableLinkBox');
-  if(!box)return;
-  box.select();box.setSelectionRange(0,99999);
-  try{
-    navigator.clipboard.writeText(box.value).then(()=>toast('📋 Link copied!')).catch(()=>document.execCommand('copy')&&toast('📋 Link copied!'));
-  }catch(e){
-    document.execCommand('copy');toast('📋 Link copied!');
-  }
-};
-window.showTableLinkModal=function(){
-  const link=`${location.origin}${location.pathname}?club=${CLUB_ID}&role=table`;
-  openModal('Share Table Link', `
-    <div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">Send this link to whoever is opening a table. It skips straight to the Table password screen.</div>
-    <div style="display:flex;gap:6px;">
-      <input id="tableLinkModalBox" readonly value="${link}" style="flex:1;font-size:0.76rem;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);">
-      <button class="btn btn-gold btn-sm" onclick="(function(){const b=document.getElementById('tableLinkModalBox');b.select();b.setSelectionRange(0,99999);try{navigator.clipboard.writeText(b.value).then(()=>toast('📋 Link copied!'));}catch(e){document.execCommand('copy');toast('📋 Link copied!');}})()">📋 Copy</button>
-    </div>
+/* after the start: the players get Bridge Table's link (with this club and its table code prefix); there they tap
+   Table No, type their member numbers or names and choose their table */
+const playersLink=async()=>location.origin+location.pathname.replace(/bridgegate\/[^/]*$/,'')+'#bg='+encodeURIComponent(CLUB_ID||'')+'.'+(await getTablePrefix());
+window.showTableLinkModal=async function(){
+  const s=getState(), link=await playersLink();
+  const text=`🃏 ${CLUB_NAME||'BridgeGate'}${s.name?' — '+s.name:''}\n${link}`;
+  window._playersMsg=encodeURIComponent(text);
+  openModal('Send the players the link', `
+    <div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">The players open Bridge Table with this link, tap Table No, type their member numbers (or names) and choose their table.</div>
+    <input readonly value="${link}" onclick="this.select()" style="width:100%;font-size:0.76rem;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);box-sizing:border-box;">
+    <div style="display:flex;gap:8px;margin-top:10px;"><a class="btn btn-full" style="background:#25d366;color:#fff;text-decoration:none;text-align:center;" href="https://wa.me/?text=${window._playersMsg}" target="_blank" rel="noopener">💬 WhatsApp</a><a class="btn btn-ghost btn-full" style="text-decoration:none;text-align:center;" href="sms:?&body=${window._playersMsg}">✉️ SMS</a></div>
   `, `<button class="btn btn-ghost" onclick="closeModal()">Close</button>`);
 };
 window.adminNextRound=function(){
@@ -671,45 +660,17 @@ function renderPlayersAdmin(){
   const dirLabel=k=>{const p=pairs[k];if(p?.team)return `${p.team==='A'?'Team A':'Team B'} · Pair ${p.teamPair||k.slice(1)}`;return k.startsWith('ns_')?`NS ${k.split('_')[1]}`:k.startsWith('ew_')?`EW ${k.split('_')[1]}`:`Pair ${k.slice(1)}`;};
   const dirColor=k=>pairs[k]?.team==='A'?'var(--blue)':pairs[k]?.team==='B'?'var(--gold)':k.startsWith('ns_')?'var(--blue)':k.startsWith('ew_')?'var(--gold)':'var(--text3)';
 
+  // the names come from the tables: the players enter them (member number or name) when they sit down
   const mkRow=k=>{
-    const p=pairs[k];
-    const [p1,p2]=splitPairName(p.name);
-    return`<div class="card" style="margin-bottom:8px;padding:12px 14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <span style="font-size:0.72rem;font-weight:700;color:${dirColor(k)};">${dirLabel(k)}</span>
-        <button onclick="removePair('${k}')" style="background:var(--reddim);border:1px solid rgba(224,90,78,0.3);color:var(--red);border-radius:5px;padding:3px 8px;cursor:pointer;font-size:0.72rem;">✕ Remove</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-        <div>
-          <div style="font-size:0.65rem;color:var(--text3);margin-bottom:3px;">Player 1</div>
-          <div style="position:relative;">
-            <input value="${p1}" placeholder="Full Name" data-pair="${k}" data-slot="1"
-              oninput="updatePairSlot('${k}',1,this.value)" onfocus="showPlayerSearch(this,'${k}',1)"
-              style="width:100%;padding:7px 9px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.82rem;outline:none;font-family:inherit;box-sizing:border-box;">
-          </div>
-        </div>
-        <div>
-          <div style="font-size:0.65rem;color:var(--text3);margin-bottom:3px;">Player 2</div>
-          <div style="position:relative;">
-            <input value="${p2}" placeholder="Full Name" data-pair="${k}" data-slot="2"
-              oninput="updatePairSlot('${k}',2,this.value)" onfocus="showPlayerSearch(this,'${k}',2)"
-              style="width:100%;padding:7px 9px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.82rem;outline:none;font-family:inherit;box-sizing:border-box;">
-          </div>
-        </div>
-      </div>
+    const [p1,p2]=splitPairName(pairs[k].name);
+    return`<div class="card" style="margin-bottom:6px;padding:10px 14px;display:flex;gap:12px;align-items:center;">
+      <span style="font-size:0.72rem;font-weight:700;color:${dirColor(k)};min-width:70px;">${dirLabel(k)}</span>
+      <span style="font-size:0.88rem;">${p1||p2?[p1,p2].filter(Boolean).join(' & '):'<span style="color:var(--text3);">—</span>'}</span>
     </div>`;};
 
   return`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:6px;">
-      <div style="font-size:0.82rem;color:var(--text2);">${allKeys.length} pairs · ${allKeys.length*2} players</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="btn btn-green btn-sm" onclick="addPair()">+ Add Pair</button>
-        <button class="btn btn-blue btn-sm" onclick="openPlayerRegistry()">👤 Player Registry</button>
-        <button class="btn btn-red btn-sm" onclick="clearAllPairNames()">🗑 Clear All Names</button>
-      </div>
-    </div>
-
-    <div id="playerSearchDrop" style="display:none;position:fixed;z-index:8000;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,0.4);min-width:220px;max-height:200px;overflow-y:auto;"></div>
+    <div style="font-size:0.82rem;color:var(--text2);margin-bottom:4px;">${allKeys.length} pairs · ${allKeys.length*2} players</div>
+    <div style="font-size:0.75rem;color:var(--text3);margin-bottom:12px;">The names come from the tables: the players enter them when they sit down.</div>
 
     ${allKeys.map(mkRow).join('')}
 

@@ -103,6 +103,8 @@ async function initClubGate(){
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(()=>doLogin(),50); }
       // a screen's link (from the admin panel) opens the results screen at once
       if(roleParam==='screen') setTimeout(()=>doLogin(),50);
+      // a player from Bridge Table's "Table No" (the club's table code prefix in the link): the players' names, then the table
+      const pp=params.get('p'); if(roleParam==='table'&&!tc&&/^\d{2}$/.test(pp||'')) bgPlayerEntry(pp);
       return;
     }
     try{ localStorage.removeItem('bg_clubId'); }catch(e){}

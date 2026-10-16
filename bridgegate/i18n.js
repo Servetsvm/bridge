@@ -480,7 +480,21 @@
     'barometer':'Barometre',
     'swiss':'İsviçre',
     'team':'Takım maçı',
-    'Team Match: 2-12 pairs per team':'Takım Maçı: takım başına 2-12 çift'
+    'Team Match: 2-12 pairs per team':'Takım Maçı: takım başına 2-12 çift',
+    'Choose the opening lead':'İlk çıkış kartını seç',
+    'Member number or name':'Üye numarası ya da isim',
+    'North':'Kuzey',
+    'South':'Güney',
+    'East':'Doğu',
+    'West':'Batı',
+    'Continue →':'Devam →',
+    'Member list':'Üye listesi',
+    'The federation\'s player file (Magic Contest .mcd, from Ruter): only the member number, first name and last name are kept. At the tables a player types their number and their name comes from here.':'Federasyonun oyuncu dosyası (Magic Contest .mcd, Ruter’den): sadece üye numarası, ad ve soyad saklanır. Masalarda oyuncu numarasını yazar, ismi buradan gelir.',
+    'Load member list (.mcd)':'Üye listesini yükle (.mcd)',
+    'No member list yet':'Henüz üye listesi yok',
+    'Send the players the link':'Oyunculara linki gönder',
+    'The players open Bridge Table with this link, tap Table No, type their member numbers (or names) and choose their table.':'Oyuncular Bridge Table’ı bu linkle açar, Masa No’ya basar, üye numaralarını (ya da isimlerini) yazar ve masalarını seçer.',
+    'The names come from the tables: the players enter them when they sit down.':'İsimler masalardan gelir: oyuncular oturunca kendileri girer.'
   };
 
   const PATTERNS=[
@@ -597,7 +611,10 @@
     [/^ADJ Score: Table (\d+) Board (\d+)$/,(_,g1,g2)=>`Ayarlanmış skor: Masa ${g1} Board ${g2}`],
     [/^Swiss: max (\d+) rounds for (\d+) pairs$/,(_,g1,g2)=>`İsviçre: ${g2} çift için en fazla ${g1} tur`],
     [/^Board edited: (.+)$/,(_,g1)=>`Board düzenlendi: ${g1}`],
-    [/^Board deleted: (.+)$/,(_,g1)=>`Board silindi: ${g1}`]
+    [/^Board deleted: (.+)$/,(_,g1)=>`Board silindi: ${g1}`],
+    [/^(\d+) members$/,(_,g1)=>`${g1} üye`],
+    [/^(\d+) members…$/,(_,g1)=>`${g1} üye…`],
+    [/^(\d+) members loaded$/,(_,g1)=>`${g1} üye yüklendi`]
   ];
 
   let currentLanguage=readSavedLanguage()||'en';

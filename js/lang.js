@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Table No": "Masa No", "Open the link the organiser sent you.": "Turnuvayı düzenleyenin gönderdiği linki aç.",
     "Send each table its link: tapping it opens this game with that table chosen.": "Her masaya kendi linkini gönder: linke dokununca bu oyun o masa seçili olarak açılır.", "The game’s link, for everyone": "Oyunun linki, herkes için",
     "Daylong": "Gün boyu",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Robotlarla bireysel, 4 board, 3 saat: hızlı bir turnuva.",
@@ -347,6 +348,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Table No": "Bordnr.", "Open the link the organiser sent you.": "Åpne lenken arrangøren sendte deg.",
     "Send each table its link: tapping it opens this game with that table chosen.": "Send hvert bord sin lenke: et trykk åpner dette spillet med det bordet valgt.", "The game’s link, for everyone": "Spillets lenke, for alle",
     "Daylong": "Hele dagen",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individuell med roboter, 4 spill, 3 timer: en rask turnering.",
@@ -691,6 +693,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Table No": "Mesa n.º", "Open the link the organiser sent you.": "Abre el enlace que te envió el organizador.",
     "Send each table its link: tapping it opens this game with that table chosen.": "Envía a cada mesa su enlace: al tocarlo se abre esta partida con esa mesa elegida.", "The game’s link, for everyone": "El enlace de la partida, para todos",
     "Daylong": "Todo el día",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individual con robots, 4 manos, 3 horas: un torneo rápido.",
@@ -1063,6 +1066,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Table No": "Table n°", "Open the link the organiser sent you.": "Ouvre le lien que l’organisateur t’a envoyé.",
     "Send each table its link: tapping it opens this game with that table chosen.": "Envoie à chaque table son lien : en le touchant, cette partie s’ouvre avec cette table choisie.", "The game’s link, for everyone": "Le lien de la partie, pour tous",
     "Daylong": "Toute la journée",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individuel avec robots, 4 donnes, 3 heures : un tournoi rapide.",
@@ -1435,6 +1439,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Table No": "Tavolo n.", "Open the link the organiser sent you.": "Apri il link che ti ha mandato l’organizzatore.",
     "Send each table its link: tapping it opens this game with that table chosen.": "Manda a ogni tavolo il suo link: toccandolo si apre questa partita con quel tavolo scelto.", "The game’s link, for everyone": "Il link della partita, per tutti",
     "Daylong": "Tutto il giorno",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individuale con robot, 4 smazzate, 3 ore: un torneo veloce.",
@@ -1807,6 +1812,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Table No": "Tisch-Nr.", "Open the link the organiser sent you.": "Öffne den Link, den dir der Veranstalter geschickt hat.",
     "Send each table its link: tapping it opens this game with that table chosen.": "Schick jedem Tisch seinen Link: ein Tipp öffnet dieses Spiel mit diesem Tisch gewählt.", "The game’s link, for everyone": "Der Link des Spiels, für alle",
     "Daylong": "Ganztägig",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Einzel mit Robotern, 4 Boards, 3 Stunden: ein schnelles Turnier.",
@@ -2179,6 +2185,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Table No": "Стол №", "Open the link the organiser sent you.": "Откройте ссылку, которую прислал организатор.",
     "Send each table its link: tapping it opens this game with that table chosen.": "Отправьте каждому столу его ссылку: она открывает эту игру с уже выбранным столом.", "The game’s link, for everyone": "Ссылка на игру, для всех",
     "Daylong": "Весь день",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Личный с роботами, 4 сдачи, 3 часа: быстрый турнир.",
@@ -2551,6 +2558,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Table No": "Stół nr", "Open the link the organiser sent you.": "Otwórz link, który wysłał organizator.",
     "Send each table its link: tapping it opens this game with that table chosen.": "Wyślij każdemu stołowi jego link: dotknięcie otwiera tę grę z wybranym stołem.", "The game’s link, for everyone": "Link do gry, dla wszystkich",
     "Daylong": "Cały dzień",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Indywidualny z robotami, 4 rozdania, 3 godziny: szybki turniej.",
@@ -2923,6 +2931,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Table No": "桌号", "Open the link the organiser sent you.": "请打开组织者发给你的链接。",
     "Send each table its link: tapping it opens this game with that table chosen.": "把各桌的链接发给各桌：点开即打开本场比赛并选好该桌。", "The game’s link, for everyone": "比赛链接，发给所有人",
     "Daylong": "全天赛",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "与机器人的个人赛，4 副，3 小时：快速比赛。",

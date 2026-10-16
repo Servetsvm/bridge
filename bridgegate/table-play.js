@@ -74,6 +74,45 @@ function renderTablePanel(){
   setTimeout(()=>document.getElementById('tableInput')?.focus(),80);
 }
 
+/* A player's phone, from Bridge Table's "Table No" (the organiser's link brings the club and the table code prefix):
+   first the four players (member number or name), then the table number; the table signs in with prefix + number
+   and its names go to the pairs sitting there, so the admin's Players list fills itself. */
+const BG_PENDING='bg-pending-names';
+window.bgPlayerEntry=async function(prefix){
+  const box=document.querySelector('#loginScreen .login-box'); if(!box) return;
+  ['clubGate','loginForm'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
+  let pe=document.getElementById('playerEntry');
+  if(!pe){ pe=document.createElement('div'); pe.id='playerEntry'; box.appendChild(pe); }
+  const seat=(k,l)=>`<label class="pe-seat"><small>${l}</small><input id="pe${k}" data-member maxlength="40" autocomplete="off" placeholder="Member number or name"></label>`;
+  pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">Players</div></div>
+    <div class="pe-grid">${seat('N','North')}${seat('S','South')}${seat('E','East')}${seat('W','West')}</div>
+    <button class="btn-primary" style="margin-top:12px;" onclick="bgPlayerTables('${prefix}')">Continue →</button>`;
+  setTimeout(()=>document.getElementById('peN')?.focus(),80);
+};
+// the table numbers of the tournament now running; a tap signs this phone in at that table
+window.bgPlayerTables=async function(prefix){
+  const v=k=>(document.getElementById('pe'+k)?.value||'').trim();
+  const names={N:v('N'),S:v('S'),E:v('E'),W:v('W')};
+  // a number still being looked up: wait for its name
+  for(const k in names) if(/^\d{1,8}$/.test(names[k])) names[k]=(await memberName(names[k]))||names[k];
+  const s=await DB.get('state')||{}, pe=document.getElementById('playerEntry');
+  if(!pe) return;
+  if(s.status!=='running'){ pe.innerHTML=`<div class="empty-state"><div class="empty-icon">⏳</div><div style="font-weight:600;margin-bottom:4px;">Tournament not started</div><div style="font-size:0.82rem;">Ask the director to start the tournament</div></div><button class="btn-primary" onclick="bgPlayerTables('${prefix}')">↻</button>`; window._bgNames=names; return; }
+  window._bgNames=names;
+  pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">${s.name||'BridgeGate'}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">Select your table number</div></div>
+    <div class="bm3-keys k4" style="padding:0;">${Array.from({length:s.tableCount||0},(_,i)=>`<button class="bm3-key" onclick="bgPlayerSit('${prefix}',${i+1})">${i+1}</button>`).join('')}</div>
+    <div class="login-err" id="peErr"></div>`;
+};
+window.bgPlayerSit=async function(prefix,n){
+  const names=window._bgNames||{};
+  try{ sessionStorage.setItem(BG_PENDING,JSON.stringify({t:n,...names})); }catch(e){}
+  document.getElementById('playerEntry')?.remove();
+  document.getElementById('loginForm').style.display='block';
+  selRole('table');
+  document.getElementById('pwInput').value=prefix+String(n).padStart(2,'0');
+  doLogin();
+};
+
 window.bmSetSide=function(side){bmSide=side;};
 window.bmSelectTable=async function(){
   const s=getState();
@@ -410,6 +449,16 @@ window.bmShowNewPlayers=function(tableNo,roundNo){
   bmTableNo=tableNo; // ensure set before subscribe fires
   const movements=getMovements();const pairs=getPairs();const s=getState();
   const m=movements[roundNo+'_'+tableNo]||{};
+  // the players came in through "Table No" and gave their names first: they sit down at once
+  let pend=null; try{ pend=JSON.parse(sessionStorage.getItem(BG_PENDING)||'null'); sessionStorage.removeItem(BG_PENDING); }catch(e){}
+  if(pend&&pend.t===tableNo){
+    const p=getPairs();
+    if(m.ns&&p[m.ns]&&(pend.N||pend.S)) p[m.ns].name=joinPairName(pend.N||'',pend.S||'');
+    if(m.ew&&p[m.ew]&&(pend.E||pend.W)) p[m.ew].name=joinPairName(pend.E||'',pend.W||'');
+    setPairs(p);
+    if(pend.N||pend.S||pend.E||pend.W) addLog('ok','Player names entered',`T${tableNo} R${roundNo}: ${joinPairName(pend.N||'',pend.S||'')} vs ${joinPairName(pend.E||'',pend.W||'')}`);
+    lockTable(tableNo); bmStartNewRound(tableNo,roundNo); return;
+  }
   const nsPair=pairs[m.ns]||{name:'',isPhantom:false};
   const ewPair=pairs[m.ew]||{name:'',isPhantom:false};
   const [ns1,ns2]=splitPairName(nsPair.name);
@@ -427,9 +476,9 @@ window.bmShowNewPlayers=function(tableNo,roundNo){
         <div style="background:var(--bluedim);border:1px solid rgba(91,155,213,0.25);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;">
           <div style="font-size:0.68rem;font-weight:700;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">🔵 North-South</div>
           <div style="display:flex;flex-direction:column;gap:6px;">
-            <input id="ns1inp" value="${ns1}" placeholder="Player 1 — Full Name"
+            <input id="ns1inp" value="${ns1}" data-member placeholder="Member number or name"
               style="padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.88rem;outline:none;font-family:inherit;width:100%;">
-            <input id="ns2inp" value="${ns2}" placeholder="Player 2 — Full Name"
+            <input id="ns2inp" value="${ns2}" data-member placeholder="Member number or name"
               style="padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.88rem;outline:none;font-family:inherit;width:100%;">
           </div>
         </div>
@@ -437,9 +486,9 @@ window.bmShowNewPlayers=function(tableNo,roundNo){
         <div style="background:var(--golddim);border:1px solid rgba(201,168,76,0.25);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px;">
           <div style="font-size:0.68rem;font-weight:700;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">🟡 East-West</div>
           <div style="display:flex;flex-direction:column;gap:6px;">
-            <input id="ew1inp" value="${ew1}" placeholder="Player 1 — Full Name"
+            <input id="ew1inp" value="${ew1}" data-member placeholder="Member number or name"
               style="padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.88rem;outline:none;font-family:inherit;width:100%;">
-            <input id="ew2inp" value="${ew2}" placeholder="Player 2 — Full Name"
+            <input id="ew2inp" value="${ew2}" data-member placeholder="Member number or name"
               style="padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.88rem;outline:none;font-family:inherit;width:100%;">
           </div>
         </div>
@@ -472,11 +521,10 @@ window.bmShowNewPlayers=function(tableNo,roundNo){
   },80);
 };
 
-window.bmConfirmPlayersAndStart=function(tableNo,roundNo,nsId,ewId){
-  const ns1=(document.getElementById('ns1inp')?.value||'').trim();
-  const ns2=(document.getElementById('ns2inp')?.value||'').trim();
-  const ew1=(document.getElementById('ew1inp')?.value||'').trim();
-  const ew2=(document.getElementById('ew2inp')?.value||'').trim();
+window.bmConfirmPlayersAndStart=async function(tableNo,roundNo,nsId,ewId){
+  // a member number not yet turned into a name: look it up now
+  const val=async id=>{ let v=(document.getElementById(id)?.value||'').trim(); if(/^[0-9]{1,8}$/.test(v)) v=(await memberName(v))||v; return v; };
+  const ns1=await val('ns1inp'), ns2=await val('ns2inp'), ew1=await val('ew1inp'), ew2=await val('ew2inp');
   const p=getPairs();
   if(nsId&&p[nsId]){p[nsId].name=joinPairName(ns1,ns2);}
   if(ewId&&p[ewId]){p[ewId].name=joinPairName(ew1,ew2);}
@@ -563,6 +611,20 @@ function renderBoardForm(boardNo,vuln,existing){
           <div class="bm3-score"><small>NS</small><b id="spVal">—</b></div>
         </div>
 
+        <div class="bm3-step">Opening lead</div>
+        <div class="bm3-keys k4">
+          <button class="bm3-key suit" id="ld♣" onclick="setLeadSuit('♣')">♣</button>
+          <button class="bm3-key suit red" id="ld♦" onclick="setLeadSuit('♦')">♦</button>
+          <button class="bm3-key suit red" id="ld♥" onclick="setLeadSuit('♥')">♥</button>
+          <button class="bm3-key suit" id="ld♠" onclick="setLeadSuit('♠')">♠</button>
+        </div>
+        <div class="bm3-keys k7 small">
+          ${['A','K','Q','J','10','9','8','7','6','5','4','3','2'].map(r=>`<button class="bm3-key" id="lr${r}" onclick="setLeadRank('${r}')">${r}</button>`).join('')}
+        </div>
+        <div class="bm3-keys k3"><button class="bm3-key pass" id="ldPass" onclick="setPass();bm3ShowScore()">PASS</button></div>
+
+        <!-- the scoring comes once the opening lead is chosen (or the board was passed out) -->
+        <div id="bm3Score" style="display:none">
         <div class="bm3-step">Contract</div>
         <div class="bm3-keys k4">
           ${[1,2,3,4,5,6,7].map(l=>`<button class="bm3-key" id="lv${l}" onclick="setLvl(${l})">${l}</button>`).join('')}
@@ -589,19 +651,10 @@ function renderBoardForm(boardNo,vuln,existing){
           <button class="bm3-key ew" id="dW" onclick="setDecl('W')">W</button>
         </div>
 
-        <div class="bm3-step">Opening lead <small>(optional)</small></div>
-        <div class="bm3-keys k4">
-          <button class="bm3-key suit" id="ld♣" onclick="setLeadSuit('♣')">♣</button>
-          <button class="bm3-key suit red" id="ld♦" onclick="setLeadSuit('♦')">♦</button>
-          <button class="bm3-key suit red" id="ld♥" onclick="setLeadSuit('♥')">♥</button>
-          <button class="bm3-key suit" id="ld♠" onclick="setLeadSuit('♠')">♠</button>
-        </div>
-        <div class="bm3-keys k7 small">
-          ${['A','K','Q','J','10','9','8','7','6','5','4','3','2'].map(r=>`<button class="bm3-key" id="lr${r}" onclick="setLeadRank('${r}')">${r}</button>`).join('')}
-        </div>
-
         <div class="bm3-step">Result <small id="resLabel"></small></div>
         <div class="bm3-keys k7" id="resTiles"></div>
+
+        </div>
 
         <div class="bm3-actions">
           <button class="bm3-cancel" onclick="renderTableDetail(${bmTableNo})">✕ Cancel</button>
@@ -610,6 +663,7 @@ function renderBoardForm(boardNo,vuln,existing){
       </div>
     </div>`;
   renderResTiles();
+  if(existing){ const sc=document.getElementById('bm3Score'); if(sc) sc.style.display=''; }   // a result being corrected: everything at once
   if(existing&&!existing.adjusted&&existing.level){
     setLvl(existing.level);setSuit(existing.suit);setDecl(existing.declarer);
     setDbl(existing.doubled||'');
@@ -644,8 +698,14 @@ window.setDbl=function(d){
 };
 function setSuit(s){ boardForm.suit=s; bm3Mark('s','s'+s); updateLCD();updateScore(); }
 function setDecl(d){ boardForm.declarer=d; ['dN','dE','dS','dW'].forEach(i=>document.getElementById(i)?.classList.remove('active')); document.getElementById('d'+d)?.classList.add('active'); updateLCD();updateScore(); }
-function setLeadSuit(s){ boardForm.leadSuit=s; bm3Mark('ld','ld'+s); updateLCD(); }
-function setLeadRank(r){ boardForm.leadRank=r; bm3Mark('lr','lr'+r); updateLCD(); }
+function setLeadSuit(s){ boardForm.leadSuit=s; bm3Mark('ld','ld'+s); updateLCD(); bm3ShowScore(); }
+function setLeadRank(r){ boardForm.leadRank=r; bm3Mark('lr','lr'+r); updateLCD(); bm3ShowScore(); }
+// the scoring part of the Bridgemate screen, once the opening lead is complete (or PASS)
+function bm3ShowScore(){
+  const sc=document.getElementById('bm3Score'); if(!sc||sc.style.display!=='none') return;
+  if(!(boardForm.isPass||(boardForm.leadSuit&&boardForm.leadRank))) return;
+  sc.style.display=''; sc.scrollIntoView({behavior:'smooth',block:'start'});
+}
 window.setRes=function(n){ boardForm.result=n; renderResTiles(); updateLCD(); updateScore(); };
 window.adjRes=function(n){ setRes(boardForm.result+n); };
 // the result keys: every possible number of tricks for this contract (= made exactly, +1 … overtricks, -1 … down)
@@ -696,6 +756,7 @@ window.saveBoardAndSendApproval=function(boardNo){
     boardData={contract:'PASS',nsScore:0,ewScore:0,level:null,suit:null,declarer:null,result:0,doubled:'',lead:'',vuln:boardForm.vuln,adjusted:false};
   } else {
     if(!boardForm.level||!boardForm.suit||!boardForm.declarer){toast('❌ Select level, suit and declarer');return;}
+    if(!boardForm.leadSuit||!boardForm.leadRank){toast('❌ Choose the opening lead');return;}   // every result is entered with its opening lead
     const nsScore=calcScore(boardForm.level,boardForm.suit,boardForm.declarer,boardForm.result,boardForm.vuln,boardForm.doubled);
     const contract=boardForm.level+boardForm.suit+(boardForm.doubled||'')+' '+boardForm.declarer+(boardForm.result>=0?' +'+(boardForm.result||'='):(boardForm.result));
     const lead=boardForm.leadSuit&&boardForm.leadRank?boardForm.leadSuit+boardForm.leadRank:'';

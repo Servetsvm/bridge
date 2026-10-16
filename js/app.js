@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 225;
+const APP_V = 226;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1208,7 +1208,7 @@ function homeShell() {
       <div class="hpair">
       <div class="hcard hero hsmall">
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
-        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><a class="btn htour" href="bridgegate/">🏆 ${T('Tournaments')}</a><div class="hrow3"><button class="btn hwatch" id="sbOpen">🃏 ${T('Social bridge')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
+        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hTableNo">🃏 ${T('Table No')}</button><a class="btn htour" href="bridgegate/">🏆 ${T('Tournaments')}</a><div class="hrow3"><button class="btn hwatch" id="sbOpen">🃏 ${T('Social bridge')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
@@ -2465,7 +2465,7 @@ document.addEventListener('click', ev_ => {
     case 'shareSms': closeOv(); location.href = 'sms:?&body=' + encodeURIComponent(appInvite()); break;
     case 'bRes': ui.resTab = 'list'; ui.menu = false; showResults(); break;
     case 'bHome': goHome(); break;
-    case 'hQuick': Net.quickJoin(); break;
+    case 'hTableNo': tableNo(); break;
     case 'hWatch': Net.quickWatch(); break;
     case 'hOpen': showOpenChoice(); break;
     case 'lSend': { const i = $('lMsg'); if (i && i.value.trim()) { lobbySend(i.value); i.value = ""; } break; }
@@ -2561,7 +2561,21 @@ function welcomeClose(go) {
   closeOv();
   if (go) { ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
+// Table No: the club tournament the organiser's link brought (#bg=club.prefix) opens in BridgeGate, where the players
+// give their member numbers or names and choose their table
+const BG_LINK = 'bridge-bg';
+function tableNo() {
+  let L = null; try { L = JSON.parse(localStorage.getItem(BG_LINK) || 'null'); } catch (e) {}
+  if (!L || !L.c) { flash(T('Open the link the organiser sent you.'), 3000); return; }
+  location.href = 'bridgegate/?club=' + encodeURIComponent(L.c) + '&role=table&p=' + L.p;
+}
 function checkSharedDeal() {
+  // the organiser's link to a club tournament: kept for Table No
+  const g = location.hash.match(/[#&]bg=([\w%-]+)\.(\d{2})/);
+  if (g) {
+    try { localStorage.setItem(BG_LINK, JSON.stringify({ c: decodeURIComponent(g[1]), p: g[2], ts: Date.now() })); history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    flash('🃏 ' + T('Table No'), 2500); return;
+  }
   // a Social bridge table's link: that game opens with the table chosen
   const s = location.hash.match(/[#&]sb=([A-Z0-9]{4,12})(?:&t=(\d{1,2}))?/);
   if (s && typeof SB !== 'undefined') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} SB.openLink(s[1], +s[2] || 0); return; }
