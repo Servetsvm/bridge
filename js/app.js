@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 218;
+const APP_V = 219;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1392,8 +1392,8 @@ function tourRank(id) {
   const field = (a, b) => byImp ? (b.fImp ?? -99) - (a.fImp ?? -99) : (b.fMp ?? -1) - (a.fMp ?? -1);
   return rows.sort((a, b) => (vsOthers ? (byImp ? b.imp - a.imp : (b.pct ?? -1) - (a.pct ?? -1)) || (byImp ? (b.pct ?? -1) - (a.pct ?? -1) : b.imp - a.imp) : 0) || field(a, b) || b.pts - a.pts);
 }
-// the order of the standings: MP % or IMP, as the viewer chooses (at first the one the tournament was set up with)
-function tourSort(t) { return ui.tsort && ui.tsort.id === t.id ? ui.tsort.by : t.scoring === 'imp' ? 'imp' : 'mp'; }
+// the order of the standings (MP % and IMP are both shown): MP %, or IMP for a tournament set up in IMPs before
+function tourSort(t) { return t.scoring === 'imp' ? 'imp' : 'mp'; }
 function standingsHtml(id) {
   const t = Net.st.tours[id], me = Net.devId(), rows = tourRank(id);
   if (!rows.length) return `<div class="muted">${T('Nobody has played yet.')}</div>`;
@@ -1410,7 +1410,7 @@ function showStandings(id) {
   for (const e of HIST) if (e.tour && e.tour.id === id && e.tour.table == null && e.imp != null && !(mine && mine.f && mine.f[e.tour.b] && mine.c && mine.c[e.tour.b])) tourSend(e);
   const done = t.format === 'tables' ? 0 : Object.keys(myTour(id)).length;
   openOv('tour', `<h2>🏆 ${esc(t.name)}</h2><div class="muted">${T('{0} boards', t.n)} · ${t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')} · ${T('ranked by {0}', tourSort(t) === 'imp' ? 'IMP' : 'MP %')}${t.byKey === "daily" ? "" : " · " + T("started by {0}", esc(t.by))}</div>
-    ${t.kind === 'teams' ? teamsHtml(t) : ''}<div class="grp"><span>${T('Rank by')}</span><div class="seg">${[['mp', 'MP %'], ['imp', 'IMP']].map(([v, l]) => `<button data-tsort="${v}" data-tid="${t.id}" class="${tourSort(t) === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>${standingsHtml(id)}<div class="muted">🤖 ${T('= your score against 4 robot tables that played the same boards; it ranks the players until others have played.')}</div>
+    ${t.kind === 'teams' ? teamsHtml(t) : ''}${standingsHtml(id)}<div class="muted">🤖 ${T('= your score against 4 robot tables that played the same boards; it ranks the players until others have played.')}</div>
     ${otherTablesHtml(id)}
     <div class="row2">${t.format !== 'tables' && t.state === 'live' && done < t.n ? `<button class="btn new" data-tplay="${t.id}">${done ? T('Continue') : T('Play')}</button>` : ''}${t.format === 'tables' || done >= t.n ? `<button class="btn" data-tprac="${t.id}">🔁 ${T('Practice these boards')}</button>` : ''}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
@@ -1466,7 +1466,7 @@ function tourResume() {
   }
 }
 /* tournament types, as on the big bridge sites: each fills in the options (custom keeps them as they are) */
-// every tournament is scored in both MP % and IMP (the standings can be ordered by either); IMP pairs is only kept for old tournaments
+// every tournament is scored in both MP % and IMP, shown together; IMP pairs is only kept for old tournaments
 const TOUR_KINDS = {
   speed: { icon: '⚡', n: 'Speedball', d: 'Individual with robots, 4 boards, 3 hours: a quick tournament.', set: { format: 'ind', n: 4, scoring: 'mp', hours: 3 } },
   robot: { icon: '🤖', n: 'Robot individual', d: 'Everyone plays the same 8 boards with robots, kept for a day.', set: { format: 'ind', n: 8, scoring: 'mp', hours: 24 } },
@@ -2320,7 +2320,6 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest('#lobbyBack')) { closeOv(); Net.lobbyBack(); return; }
   if (ev_.target.closest('#yesOk')) { const f = ui.yesFn; ui.yesFn = null; closeOv(); if (f) f(); return; }
   const tsit = ev_.target.closest('[data-tsit]'); if (tsit) { const S = tourSeats(); S[tsit.dataset.tid] = +tsit.dataset.tsit; try { localStorage.setItem('bridge-tour-seats', JSON.stringify(S)); } catch (e) {} closeOv(); playTour(tsit.dataset.tid); return; }
-  const tso = ev_.target.closest('[data-tsort]'); if (tso) { ui.tsort = { id: tso.dataset.tid, by: tso.dataset.tsort }; showStandings(tso.dataset.tid); return; }   // order the standings by MP % or IMP
   const tl = ev_.target.closest('[data-tlist]'); if (tl) { ui.ttab = tl.dataset.tlist; render(); return; }   // the tournament list's tabs
   const tt = ev_.target.closest('[data-ttab],[data-tjtab]'); if (tt) { if (tt.dataset.ttab) Net.openTourTable(tt.dataset.ttab); else Net.joinTourTable(tt.dataset.tjtab); return; }
   // a name in the players list (or a private message): write to that player privately

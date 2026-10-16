@@ -181,7 +181,7 @@ function renderTableDetail(tableNo){
         <div class="bm-lcd-row inv">Round ${s.currentRound}  ·  Table ${tableNo}  ·  Boards ${m.boardStart||'?'}–${m.boardEnd||'?'}</div>
         <div class="bm-lcd-row">🔵 NS: ${nsPair.name.slice(0,30)}</div>
         <div class="bm-lcd-row">🟡 EW: ${ewPair.name.slice(0,30)}</div>
-        <div class="bm-lcd-row" style="color:var(--gold);font-size:0.72rem;">${s.scoring==='IMP'?'IMP Scoring':s.scoring==='BOTH'?'MP + IMP Scoring':'Matchpoint Scoring'}</div>
+        <div class="bm-lcd-row" style="color:var(--gold);font-size:0.72rem;">${scoringName(s)==='IMP'?'IMP Scoring':'MP + IMP Scoring'}</div>
       </div>
       <div style="padding:4px 0 8px;">
         <div style="font-size:0.7rem;color:var(--text3);font-weight:600;margin-bottom:4px;letter-spacing:0.05em;">BOARDS THIS ROUND</div>
@@ -225,6 +225,14 @@ function renderTableDetail(tableNo){
       });
       if(!results.length)return;
       html+='<div style="margin-top:6px;margin-bottom:2px;font-size:0.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">Board '+boardNo+' — Other tables ('+results.length+')</div>';
+      // this table's result against them, in MP and IMP together (N-S; E-W is the other side of it)
+      if(typeof myBoard.nsScore==='number'){
+        let mp=0,imp=0;
+        results.forEach(function(o){mp+=myBoard.nsScore>o.nsScore?2:myBoard.nsScore===o.nsScore?1:0;imp+=scoreToIMP(myBoard.nsScore-o.nsScore);});
+        const pct=Math.round(mp/(2*results.length)*1000)/10,im=imp/results.length;
+        const side=(d,p,v)=>'<span><b>'+d+'</b> MP '+p+'% · IMP '+fmtImp(v)+'</span>';
+        html+='<div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;background:var(--golddim);border:1px solid var(--gold);border-radius:6px;padding:5px 10px;margin-bottom:4px;font-size:0.77rem;">'+side('NS',pct,im)+side('EW',Math.round((100-pct)*10)/10,-im)+'</div>';
+      }
       results.forEach(function(o){
         const sc=o.nsScore>0?'var(--green)':o.nsScore<0?'var(--red)':'var(--gold)';
         html+='<div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border-radius:6px;padding:5px 10px;margin-bottom:3px;font-size:0.77rem;">'

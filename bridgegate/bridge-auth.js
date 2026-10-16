@@ -14,9 +14,13 @@
   const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1] || (/^(localhost|127.0.0.1)$/.test(location.hostname) ? 'dev' : undefined);
   const ROOT = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');
   const API_KEY = 'AIzaSyDNugZ1tf4rXu7lDYzyZg9v1V3is7xz_Mc';
-  // the language: the one chosen here last time (any of Bridge Table's languages: BridgeGate keeps it); the first time, the one used
-  // in Bridge Table, or the phone's own
-  try { if (!localStorage.getItem('bricskor_language')) { const st = JSON.parse(localStorage.getItem('bric-masasi-v2') || 'null'), L = st && st.SET && st.SET.lang; const ok = ['en', 'tr', 'no', 'es', 'fr', 'it', 'de', 'ru', 'pl', 'zh'], nav = String(navigator.language || '').slice(0, 2).toLowerCase().replace(/^n[bn]$/, 'no'); localStorage.setItem('bricskor_language', ok.includes(L) ? L : ok.includes(nav) ? nav : 'en'); } } catch (e) {}
+  // the language: Bridge Table's, whenever it changed there (bricskor_bridge_lang is the one last seen); a language chosen
+  // here stays until Bridge Table's changes. A table's phone that never opened Bridge Table: its last choice, or the phone's.
+  try {
+    const ok = ['en', 'tr', 'no', 'es', 'fr', 'it', 'de', 'ru', 'pl', 'zh'], st = JSON.parse(localStorage.getItem('bric-masasi-v2') || 'null'), L = st && st.SET && st.SET.lang;
+    if (ok.includes(L) && localStorage.getItem('bricskor_bridge_lang') !== L) { localStorage.setItem('bricskor_language', L); localStorage.setItem('bricskor_bridge_lang', L); }
+    if (!localStorage.getItem('bricskor_language')) { const nav = String(navigator.language || '').slice(0, 2).toLowerCase().replace(/^n[bn]$/, 'no'); localStorage.setItem('bricskor_language', ok.includes(nav) ? nav : 'en'); }
+  } catch (e) {}
   window.GATE_ROOT = ROOT;                 // the Bridge Table database (its test part on a test server)
   window.GATE_BASE = ROOT + '/gate';       // where the club tournaments live
   let tok = null, exp = 0, uid = null, p = null;

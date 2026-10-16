@@ -451,7 +451,7 @@ function renderMovement(){
       <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
         <div>
           <div style="font-weight:700;font-size:0.95rem;">${s.name}</div>
-          <div style="font-size:0.78rem;color:var(--text2);">${s.tableCount} tables · ${s.roundCount} rounds · ${s.boardsPerRound} boards/round · ${s.scoring||'MP'} · ${s.movement}</div>
+          <div style="font-size:0.78rem;color:var(--text2);">${s.tableCount} tables · ${s.roundCount} rounds · ${s.boardsPerRound} boards/round · ${scoringName(s)} · ${s.movement}</div>
         </div>
         <button class="btn btn-gold btn-sm" onclick="adminPrintMovement()">🖨 Print PDF</button>
       </div>
@@ -498,7 +498,7 @@ window.adminPrintMovement=function(){
   win.document.write(`<!DOCTYPE html><html><head><title>${s.name} — Movement</title>
   <style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px;}h1{font-size:16px;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:5px 8px;text-align:left;}th{background:#f5f5f5;font-weight:bold;}tr:nth-child(even)td{background:#fafafa;}</style>
   </head><body><h1>${s.name} — Movement Chart</h1>
-  <p>${s.tableCount} tables · ${s.roundCount} rounds · ${s.boardsPerRound} boards/round · ${s.scoring} · ${s.movement}</p>
+  <p>${s.tableCount} tables · ${s.roundCount} rounds · ${s.boardsPerRound} boards/round · ${scoringName(s)} · ${s.movement}</p>
   <table><thead><tr><th>Table</th><th>NS Pair</th><th>EW Pair</th><th>Boards</th></tr></thead><tbody>${rows}</tbody></table>
   </body></html>`);
   win.document.close();
@@ -739,7 +739,7 @@ window.archivePDF=function(i){
   <style>body{font-family:Arial,sans-serif;font-size:11px;margin:16px;color:#222;}h1{font-size:17px;color:#1a237e;margin-bottom:3px;}h2{font-size:12px;color:#1a237e;border-bottom:1px solid #1a237e;padding-bottom:2px;margin:14px 0 5px;}.meta{font-size:10px;color:#666;margin-bottom:12px;}table{width:100%;border-collapse:collapse;margin-bottom:10px;}th{background:#1a237e;color:#fff;padding:4px 7px;text-align:left;font-size:9px;text-transform:uppercase;}td{padding:4px 7px;border-bottom:1px solid #e0e0e0;}</style>
   </head><body>
   <h1>♠ ${st.name||'Tournament'}</h1>
-  <div class="meta">${st.tableCount||'?'} tables · ${st.roundCount||'?'} rounds · ${st.scoring||'MP'} · Finished: ${a.finished?new Date(a.finished).toLocaleString(window.getLanguage?.()||'en'):''}</div>
+  <div class="meta">${st.tableCount||'?'} tables · ${st.roundCount||'?'} rounds · ${scoringName(st)} · Finished: ${a.finished?new Date(a.finished).toLocaleString(window.getLanguage?.()||'en'):''}</div>
   <h2>Overall Rankings</h2>
   <table><thead><tr><th>#</th><th>Full Name</th><th>Dir</th><th>MP</th><th>%</th></tr></thead><tbody>${rankRows}</tbody></table>
   <h2>Board Results (${bkeys.length} boards)</h2>

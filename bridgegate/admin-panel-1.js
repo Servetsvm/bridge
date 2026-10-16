@@ -142,16 +142,6 @@ function renderSetup(){
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="bprHint"></div>
       </div>
     </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Scoring</label>
-        <select id="aScoring">
-          <option value="MP" ${!isTeam&&s.scoring!=='IMP'?'selected':''}>Matchpoints (MP)</option>
-          <option value="IMP" ${isTeam||s.scoring==='IMP'?'selected':''}>IMPs</option>
-          <option value="BOTH" ${!isTeam&&s.scoring==='BOTH'?'selected':''}>MP + IMP</option>
-        </select>
-      </div>
-    </div>
     <div class="field">
       <label>Movement</label>
       <select id="aMovement" onchange="adminUpdateCalc()">
@@ -197,7 +187,7 @@ function renderSetup(){
       if(allDone&&s.currentRound>=s.roundCount)return`<div style="background:rgba(201,168,76,0.15);border:2px solid var(--gold);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;"><span style="font-size:1.5rem;">🏁</span><div><div style="font-weight:700;color:var(--gold);font-size:0.88rem;">Tournament finished!</div><div style="font-size:0.76rem;color:var(--text2);margin-top:2px;">All rounds are complete. You can finish the tournament.</div></div></div>`;
       return`<div style="font-size:0.78rem;color:var(--text2);margin-bottom:8px;">Round ${s.currentRound}: ${doneBoards}/${totalBoards} boards completed</div>`;
     })()}
-    <div class="round-card"><div class="rc-head"><span class="rc-num">Round ${s.currentRound||0} / ${s.roundCount||0}</span><span class="rc-stat">${s.status==='running'?'🟢 Running':s.status==='setup'?'⏳ Setup':'🏁 Finished'} &nbsp;|&nbsp; ${s.scoring||'MP'}</span></div><div class="round-progress"><div class="round-bar" style="width:${s.roundCount?(s.currentRound/s.roundCount*100):0}%"></div></div></div>
+    <div class="round-card"><div class="rc-head"><span class="rc-num">Round ${s.currentRound||0} / ${s.roundCount||0}</span><span class="rc-stat">${s.status==='running'?'🟢 Running':s.status==='setup'?'⏳ Setup':'🏁 Finished'} &nbsp;|&nbsp; ${scoringName(s)}</span></div><div class="round-progress"><div class="round-bar" style="width:${s.roundCount?(s.currentRound/s.roundCount*100):0}%"></div></div></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
       ${s.status==='setup'&&s.roundCount>0?`<button class="btn btn-green btn-full" onclick="adminStart()">▶ Start Round 1</button>`:''}
       ${s.status==='running'&&s.currentRound<s.roundCount?`<button class="btn btn-gold" onclick="adminNextRound()">⏭ Next Round (${s.currentRound+1})</button>`:''}
@@ -272,12 +262,12 @@ window.adminSetup=function(){
   setMovements(result.movements);setPairs(result.pairs);setBoards({});setApprovals({});
   const s=getState();
   s.name=name;s.tableCount=tables;s.boardsPerRound=bpr;s.totalBoards=totalBoards;s.roundCount=rounds;s.phantom=phantom;s.status='setup';s.currentRound=0;
-  s.movement=mov;s.scoring=mov==='team'?'IMP':document.getElementById('aScoring').value;s._setupPlayers=players;s._setupSwissRounds=swissRounds||s._setupSwissRounds;
+  s.movement=mov;s.scoring=mov==='team'?'IMP':'BOTH';s._setupPlayers=players;s._setupSwissRounds=swissRounds||s._setupSwissRounds;
   if(mov==='team'){
     const tm=teamMatchSettingsFromUI();s.teams=teams;s._teamPairs=tm.pairsPerTeam;s._teamAName=tm.teamA;s._teamBName=tm.teamB;s._teamScoring='IMP';
   }else{delete s.teams;delete s._teamPairs;delete s._teamAName;delete s._teamBName;}
   setState(s);
-  addLog('ok','Tournament created',`${players} players, ${tables} tables, ${result.rounds} rounds, ${mov}, ${s.scoring}`);
+  addLog('ok','Tournament created',`${players} players, ${tables} tables, ${result.rounds} rounds, ${mov}, ${scoringName(s)}`);
   toast(mov==='team'?`✅ Team Match created: ${s.teams.A.name} vs ${s.teams.B.name}`:'✅ Tournament created! Enter player names in the Players tab.');
   adminTab='players';refreshTopbar();renderAdminPanel();
 };

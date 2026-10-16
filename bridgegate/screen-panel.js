@@ -99,7 +99,7 @@ window.screenPrintPDF=function(){
   </style>
   </head><body>
   <h1>♠ ${s.name}</h1>
-  <div class="meta">${s.tableCount} tables · ${s.roundCount} rounds · ${s.boardsPerRound} board/rounds · ${s.scoring||'MP'} · ${s.movement||''} · Printed: ${new Date().toLocaleString(window.getLanguage?.()||'en')}</div>
+  <div class="meta">${s.tableCount} tables · ${s.roundCount} rounds · ${s.boardsPerRound} board/rounds · ${scoringName(s)} · ${s.movement||''} · Printed: ${new Date().toLocaleString(window.getLanguage?.()||'en')}</div>
   <h2>🏆 Overall Rankings</h2>
   <table><thead><tr><th>#</th><th>Player</th><th>Dir</th><th>MP</th><th>%</th></tr></thead><tbody>${rankRows}</tbody></table>
   <h2>📊 All Completed Board Results</h2>

@@ -4,7 +4,7 @@
 // any .js/.css file). Otherwise returning users may keep loading a stale
 // cached version instead of your update. Suggested pattern:
 // 'bridgegate-v' + YYYYMMDD, e.g. 'bridgegate-v20260709'.
-const CACHE_NAME = 'bgate-v2';
+const CACHE_NAME = 'bgate-v3';
 
 const APP_SHELL = [
   './',
@@ -63,7 +63,7 @@ self.addEventListener('fetch', (event) => {
   // to the cached shell only when there's no network.
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req)
+      fetch(req, { cache: 'no-cache' })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', copy));

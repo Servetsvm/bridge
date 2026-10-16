@@ -720,6 +720,7 @@
   };
 
   function init(){
+    document.getElementById('languageGate')?.remove();   // the old first-visit language screen of a page still in the cache: the language now comes from Bridge Table
     setLanguage(readSavedLanguage()||'en',{remember:false});
 
     const observer=new MutationObserver(mutations=>{

@@ -3,7 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
-    "Daylong": "Gün boyu", "Rank by": "Sıralama",
+    "Daylong": "Gün boyu",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Robotlarla bireysel, 4 board, 3 saat: hızlı bir turnuva.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Herkes aynı 8 boardu robotlarla oynar, bir gün açık kalır.",
     "12 boards with robots, play them any time during the day.": "Robotlarla 12 board, gün içinde istediğin zaman oyna.",
@@ -346,7 +346,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
-    "Daylong": "Hele dagen", "Rank by": "Ranger etter",
+    "Daylong": "Hele dagen",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individuell med roboter, 4 spill, 3 timer: en rask turnering.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Alle spiller de samme 8 spillene med roboter, åpen i ett døgn.",
     "12 boards with robots, play them any time during the day.": "12 spill med roboter, spill dem når du vil i løpet av dagen.",
@@ -689,7 +689,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
-    "Daylong": "Todo el día", "Rank by": "Ordenar por",
+    "Daylong": "Todo el día",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individual con robots, 4 manos, 3 horas: un torneo rápido.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Todos juegan las mismas 8 manos con robots, abierto un día.",
     "12 boards with robots, play them any time during the day.": "12 manos con robots, júgalas cuando quieras durante el día.",
@@ -1060,7 +1060,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
-    "Daylong": "Toute la journée", "Rank by": "Classer par",
+    "Daylong": "Toute la journée",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individuel avec robots, 4 donnes, 3 heures : un tournoi rapide.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Tout le monde joue les mêmes 8 donnes avec des robots, ouvert une journée.",
     "12 boards with robots, play them any time during the day.": "12 donnes avec robots, à jouer quand tu veux dans la journée.",
@@ -1431,7 +1431,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
-    "Daylong": "Tutto il giorno", "Rank by": "Ordina per",
+    "Daylong": "Tutto il giorno",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individuale con robot, 4 smazzate, 3 ore: un torneo veloce.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Tutti giocano le stesse 8 smazzate con i robot, aperto per un giorno.",
     "12 boards with robots, play them any time during the day.": "12 smazzate con i robot, giocale quando vuoi durante il giorno.",
@@ -1802,7 +1802,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
-    "Daylong": "Ganztägig", "Rank by": "Sortieren nach",
+    "Daylong": "Ganztägig",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Einzel mit Robotern, 4 Boards, 3 Stunden: ein schnelles Turnier.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Alle spielen dieselben 8 Boards mit Robotern, einen Tag lang offen.",
     "12 boards with robots, play them any time during the day.": "12 Boards mit Robotern, spiel sie, wann du willst, im Lauf des Tages.",
@@ -2173,7 +2173,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
-    "Daylong": "Весь день", "Rank by": "Сортировать по",
+    "Daylong": "Весь день",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Личный с роботами, 4 сдачи, 3 часа: быстрый турнир.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Все играют одни и те же 8 сдач с роботами, открыт сутки.",
     "12 boards with robots, play them any time during the day.": "12 сдач с роботами, играйте их когда угодно в течение дня.",
@@ -2544,7 +2544,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
-    "Daylong": "Cały dzień", "Rank by": "Sortuj według",
+    "Daylong": "Cały dzień",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Indywidualny z robotami, 4 rozdania, 3 godziny: szybki turniej.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Wszyscy grają te same 8 rozdań z robotami, otwarty przez dobę.",
     "12 boards with robots, play them any time during the day.": "12 rozdań z robotami, graj je, kiedy chcesz w ciągu dnia.",
@@ -2915,7 +2915,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
-    "Daylong": "全天赛", "Rank by": "排序依据",
+    "Daylong": "全天赛",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "与机器人的个人赛，4 副，3 小时：快速比赛。",
     "Everyone plays the same 8 boards with robots, kept for a day.": "所有人与机器人打相同的 8 副牌，开放一天。",
     "12 boards with robots, play them any time during the day.": "与机器人打 12 副牌，当天任何时间都可以打。",
