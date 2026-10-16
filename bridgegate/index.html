@@ -18,43 +18,19 @@
 <body>
 <div id="toast"></div>
 
-<!-- FIRST-VISIT LANGUAGE CHOICE -->
-<div id="languageGate" class="language-gate" data-i18n-ignore role="dialog" aria-modal="true" aria-labelledby="languageGateTitle">
-  <div class="language-card">
-    <div class="language-mark">♠</div>
-    <div class="language-brand">BridgeGate</div>
-    <h1 id="languageGateTitle">Choose your language · Dilinizi seçin</h1>
-    <p>Language preference is saved on this device.<br>Dil tercihiniz bu cihazda kaydedilir.</p>
-    <div class="language-options">
-      <button type="button" class="language-option" onclick="setLanguage('en')">
-        <span class="language-code">EN</span>
-        <span><strong>English</strong><small>Continue in English</small></span>
-      </button>
-      <button type="button" class="language-option" onclick="setLanguage('tr')">
-        <span class="language-code">TR</span>
-        <span><strong>Türkçe</strong><small>Türkçe devam et</small></span>
-      </button>
-    </div>
-  </div>
-</div>
-
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
-    <button class="language-toggle-login" data-language-toggle data-i18n-ignore onclick="toggleLanguage()" aria-label="Switch language to Turkish" title="Türkçe">TR</button>
+    <button class="language-toggle-login" data-language-toggle data-i18n-ignore onclick="toggleLanguage(event)" aria-label="Language" title="Language">🌐 EN</button>
     <button class="theme-toggle-login" onclick="toggleTheme()">🌓</button>
     <div class="login-logo">♠ BridgeGate</div>
     <a href="../" style="display:inline-block;margin-bottom:8px;font-size:0.75rem;color:var(--text3);text-decoration:none;">← Bridge Table</a>
     <div class="login-sub" id="loginSub">Tournament Control System</div>
 
-    <!-- CLUB GATE: shown until a valid club is resolved from ?club=CLUBID or localStorage -->
+    <!-- CLUB GATE: the player's clubs and opening a club (tables and screens come with the club's link, ?club=CLUBID) -->
     <div id="clubGate" style="display:none;">
       <div id="myClubsBox"></div>
-      <div class="pw-wrap">
-        <input type="text" id="clubIdInput" placeholder="Club ID" autocapitalize="off" autocomplete="off" onkeydown="if(event.key==='Enter')resolveClubFromInput()">
-      </div>
       <div class="login-err" id="clubErr"></div>
-      <button class="btn-primary" id="clubContinueBtn" onclick="resolveClubFromInput()">Continue</button>
       <div style="margin-top:14px;">
         <a href="#" class="superLink" onclick="event.preventDefault();enterSuperAdminLogin();" style="font-size:0.72rem;color:var(--text3);text-decoration:none;display:none;">🛡️ Super Admin Login</a>
       </div>
@@ -95,7 +71,7 @@
     </div>
     <div class="topbar-right">
       <span id="connBadge" style="font-size:0.65rem;padding:2px 8px;border-radius:10px;background:var(--greendim);color:var(--green);border:1px solid rgba(76,175,125,0.3);">🟢 Online</span>
-      <button class="tbtn language-tbtn" data-language-toggle data-i18n-ignore onclick="toggleLanguage()" aria-label="Switch language to Turkish" title="Türkçe">TR</button>
+      <button class="tbtn language-tbtn" data-language-toggle data-i18n-ignore onclick="toggleLanguage(event)" aria-label="Language" title="Language">🌐 EN</button>
       <button class="tbtn" onclick="toggleTheme()">🌓</button>
       <button class="tbtn" onclick="doLogout()">Logout</button>
     </div>

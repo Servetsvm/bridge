@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 217;
+const APP_V = 218;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1388,10 +1388,12 @@ function tourRank(id) {
     r.fn = F.length; r.fImp = F.length ? Math.round(F.reduce((a, x) => a + x[0], 0) / F.length * 100) / 100 : null;
     r.fMp = F.length ? Math.round(F.reduce((a, x) => a + x[1], 0) / F.length * 10) / 10 : null;
   });
-  const byImp = t.scoring === 'imp', vsOthers = rows.some(r => r.mpMax);
+  const byImp = tourSort(t) === 'imp', vsOthers = rows.some(r => r.mpMax);
   const field = (a, b) => byImp ? (b.fImp ?? -99) - (a.fImp ?? -99) : (b.fMp ?? -1) - (a.fMp ?? -1);
   return rows.sort((a, b) => (vsOthers ? (byImp ? b.imp - a.imp : (b.pct ?? -1) - (a.pct ?? -1)) || (byImp ? (b.pct ?? -1) - (a.pct ?? -1) : b.imp - a.imp) : 0) || field(a, b) || b.pts - a.pts);
 }
+// the order of the standings: MP % or IMP, as the viewer chooses (at first the one the tournament was set up with)
+function tourSort(t) { return ui.tsort && ui.tsort.id === t.id ? ui.tsort.by : t.scoring === 'imp' ? 'imp' : 'mp'; }
 function standingsHtml(id) {
   const t = Net.st.tours[id], me = Net.devId(), rows = tourRank(id);
   if (!rows.length) return `<div class="muted">${T('Nobody has played yet.')}</div>`;
@@ -1407,8 +1409,8 @@ function showStandings(id) {
   const mine = (Net.st.tres[id] || {})[Net.devId()];
   for (const e of HIST) if (e.tour && e.tour.id === id && e.tour.table == null && e.imp != null && !(mine && mine.f && mine.f[e.tour.b] && mine.c && mine.c[e.tour.b])) tourSend(e);
   const done = t.format === 'tables' ? 0 : Object.keys(myTour(id)).length;
-  openOv('tour', `<h2>🏆 ${esc(t.name)}</h2><div class="muted">${T('{0} boards', t.n)} · ${t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')} · ${T('ranked by {0}', t.scoring === 'imp' ? 'IMP' : 'MP %')}${t.byKey === "daily" ? "" : " · " + T("started by {0}", esc(t.by))}</div>
-    ${t.kind === 'teams' ? teamsHtml(t) : ''}${standingsHtml(id)}<div class="muted">🤖 ${T('= your score against 4 robot tables that played the same boards; it ranks the players until others have played.')}</div>
+  openOv('tour', `<h2>🏆 ${esc(t.name)}</h2><div class="muted">${T('{0} boards', t.n)} · ${t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')} · ${T('ranked by {0}', tourSort(t) === 'imp' ? 'IMP' : 'MP %')}${t.byKey === "daily" ? "" : " · " + T("started by {0}", esc(t.by))}</div>
+    ${t.kind === 'teams' ? teamsHtml(t) : ''}<div class="grp"><span>${T('Rank by')}</span><div class="seg">${[['mp', 'MP %'], ['imp', 'IMP']].map(([v, l]) => `<button data-tsort="${v}" data-tid="${t.id}" class="${tourSort(t) === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>${standingsHtml(id)}<div class="muted">🤖 ${T('= your score against 4 robot tables that played the same boards; it ranks the players until others have played.')}</div>
     ${otherTablesHtml(id)}
     <div class="row2">${t.format !== 'tables' && t.state === 'live' && done < t.n ? `<button class="btn new" data-tplay="${t.id}">${done ? T('Continue') : T('Play')}</button>` : ''}${t.format === 'tables' || done >= t.n ? `<button class="btn" data-tprac="${t.id}">🔁 ${T('Practice these boards')}</button>` : ''}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
@@ -1464,12 +1466,13 @@ function tourResume() {
   }
 }
 /* tournament types, as on the big bridge sites: each fills in the options (custom keeps them as they are) */
+// every tournament is scored in both MP % and IMP (the standings can be ordered by either); IMP pairs is only kept for old tournaments
 const TOUR_KINDS = {
-  speed: { icon: '⚡', n: 'Speedball', d: 'Individual with robots, 4 boards, matchpoints, 3 hours: a quick tournament.', set: { format: 'ind', n: 4, scoring: 'mp', hours: 3 } },
-  robot: { icon: '🤖', n: 'Robot individual', d: 'Everyone plays the same 8 boards with robots, matchpoints, kept for a day.', set: { format: 'ind', n: 8, scoring: 'mp', hours: 24 } },
-  daylong: { icon: '🌙', n: 'Daylong (IMP)', d: '12 boards with robots, scored in IMPs, play them any time during the day.', set: { format: 'ind', n: 12, scoring: 'imp', hours: 24 } },
-  pairs: { icon: '👥', n: 'Pairs (MP)', d: 'Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs ranked by matchpoints.', set: { format: 'tables', n: 8, scoring: 'mp', hours: 72, tables: 2 } },
-  imppairs: { icon: '💼', n: 'IMP pairs', d: 'Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).', set: { format: 'tables', n: 8, scoring: 'imp', hours: 72, tables: 2 } },
+  speed: { icon: '⚡', n: 'Speedball', d: 'Individual with robots, 4 boards, 3 hours: a quick tournament.', set: { format: 'ind', n: 4, scoring: 'mp', hours: 3 } },
+  robot: { icon: '🤖', n: 'Robot individual', d: 'Everyone plays the same 8 boards with robots, kept for a day.', set: { format: 'ind', n: 8, scoring: 'mp', hours: 24 } },
+  daylong: { icon: '🌙', n: 'Daylong', d: '12 boards with robots, play them any time during the day.', set: { format: 'ind', n: 12, scoring: 'imp', hours: 24 } },
+  pairs: { icon: '👥', n: 'Pairs', d: 'Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs are scored in both matchpoints and IMPs.', set: { format: 'tables', n: 8, scoring: 'mp', hours: 72, tables: 2 } },
+  imppairs: { old: 1, icon: '💼', n: 'IMP pairs', d: 'Pairs at tables, the same 8 boards, ranked by IMPs (cross-IMPs).', set: { format: 'tables', n: 8, scoring: 'imp', hours: 72, tables: 2 } },
   teams: { icon: '🏅', n: 'Team match', d: 'Two teams of four: team A sits N–S at table 1 and E–W at table 2; the same boards are compared table against table in IMPs.', set: { format: 'tables', n: 8, scoring: 'imp', hours: 72, tables: 2 } },
   custom: { icon: '⚙', n: 'Custom', d: 'Choose every option yourself.' },
 };
@@ -1503,7 +1506,7 @@ function toursHtml() {
     const status = t.state === 'setup' ? `<span class="tst reg">${T('Registering')}</span>` : `<span class="tst run">${T('Running')}</span>`;
     const r = tourRowBtns(t, me);
     return `<tr><td data-l=""><b>🏆 ${esc(t.name)}</b>${t.club ? ` <span class="tclub">🏛 ${esc(t.club)}</span>` : ""}<small>${T('started by {0}', esc(t.by))}</small>${r.note ? `<small class="tnote">${r.note}</small>` : ''}</td>
-      <td data-l="${T('Format')}">${TOUR_KINDS[t.kind] && t.kind !== 'custom' ? `${TOUR_KINDS[t.kind].icon} ${T(TOUR_KINDS[t.kind].n)}` : t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')}</td><td data-l="${T('Boards')}" class="n">${t.n}</td><td data-l="${T('Ranking')}">${t.scoring === 'imp' ? 'IMP' : 'MP %'}</td>
+      <td data-l="${T('Format')}">${TOUR_KINDS[t.kind] && t.kind !== 'custom' ? `${TOUR_KINDS[t.kind].icon} ${T(TOUR_KINDS[t.kind].n)}` : t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')}</td><td data-l="${T('Boards')}" class="n">${t.n}</td><td data-l="${T('Ranking')}">${t.kind === 'teams' ? 'IMP' : 'MP % · IMP'}</td>
       <td data-l="${T('Players')}" class="n">${players}</td><td data-l="${T('Status')}">${status}</td><td data-l="${T('Ends in')}">${left(t)}</td>
       <td data-l="" class="tact">${r.btns}${Net.isMine(t) || Net.isAdmin() ? `<button class="btn tdel" data-tdel="${t.id}" title="${T('Cancel the tournament')}">✕</button>` : ''}</td></tr>`;
   }).join('');
@@ -1550,7 +1553,7 @@ function showTourSetup(id) {
   const accepted = Object.keys(t.joined).length - 1;
   const kind = TOUR_KINDS[t.kind] ? t.kind : 'custom';
   openOv('tsetup', `<h2>🏆 ${T('New tournament')}</h2>
-    <div class="grp"><span>${T('Type')}</span><div class="seg tkinds" data-seg="tkind">${Object.keys(TOUR_KINDS).map(k => `<button data-v="${k}" class="${kind === k ? 'on' : ''}">${TOUR_KINDS[k].icon} ${T(TOUR_KINDS[k].n)}</button>`).join('')}</div>
+    <div class="grp"><span>${T('Type')}</span><div class="seg tkinds" data-seg="tkind">${Object.keys(TOUR_KINDS).filter(k => !TOUR_KINDS[k].old || k === kind).map(k => `<button data-v="${k}" class="${kind === k ? 'on' : ''}">${TOUR_KINDS[k].icon} ${T(TOUR_KINDS[k].n)}</button>`).join('')}</div>
       <div class="muted">${T(TOUR_KINDS[kind].d)}</div></div>
     <div class="grp"><span>${T('Tournament name')}</span><input class="tok wide" id="tName" maxlength="40" value="${esc(t.name)}"></div>
     <div class="grp"><span>${T('Boards')}</span>${opt('tn', [4, 6, 8, 10, 12, 16, 20, 24].map(n => [n, n]), t.n)}</div>
@@ -1561,7 +1564,6 @@ function showTourSetup(id) {
       <div class="invlist">${known.length ? known.map(n => `<label class="invrow"><input type="checkbox" data-tinv="${esc(n)}" ${sel.names.has(n) ? 'checked' : ''}><b>${esc(n)}</b>${st(n)}</label>`).join('') : `<div class="muted">${T('Nobody else is in the lobby right now — type a name below.')}</div>`}</div>
       <div class="row2"><input class="tok" id="tAdd" maxlength="20" placeholder="${T('Add a player by name')}"><button class="btn" id="tAddBtn">${T('Add')}</button></div></div>`}
     ${SET.club && t.format !== 'tables' ? `<div class="grp"><span>${T('Who can play')}</span>${opt('tclub', [['', '🌍 ' + T('Everyone')], ['club', '🏛 ' + esc(SET.club)]], t.club ? 'club' : '')}<div class="muted">${T('A club tournament is shown only to the players who wrote the same club on their card.')}</div></div>` : ''}
-    <div class="grp"><span>${T('Ranking')}</span>${opt('tscoring', [['mp', 'MP %'], ['imp', 'IMP']], t.scoring)}</div>
     <div class="grp"><span>${T('Keep the tournament for')}</span>${opt('thours', [[3, T('{0} hours', 3)], [24, T('1 day')], [72, T('3 days')]], t.hours)}</div>
     <div class="grp"><span>${T('Answers')}</span><div>${esc(t.by)} <span class="ok">✓ ${T('organiser')}</span>${Object.values(t.joined).filter(n => n !== t.by).map(n => ` · ${esc(n)} <span class="ok">✓</span>`).join('')}${Object.values(t.declined).map(n => ` · ${esc(n)} <span class="no">✗</span>`).join('')}</div></div>
     <div class="row2"><button class="btn gold" id="tSend">${T('Send the invitations')}</button><button class="btn new" id="tGo">${T('Start the tournament')}</button></div>
@@ -2318,6 +2320,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest('#lobbyBack')) { closeOv(); Net.lobbyBack(); return; }
   if (ev_.target.closest('#yesOk')) { const f = ui.yesFn; ui.yesFn = null; closeOv(); if (f) f(); return; }
   const tsit = ev_.target.closest('[data-tsit]'); if (tsit) { const S = tourSeats(); S[tsit.dataset.tid] = +tsit.dataset.tsit; try { localStorage.setItem('bridge-tour-seats', JSON.stringify(S)); } catch (e) {} closeOv(); playTour(tsit.dataset.tid); return; }
+  const tso = ev_.target.closest('[data-tsort]'); if (tso) { ui.tsort = { id: tso.dataset.tid, by: tso.dataset.tsort }; showStandings(tso.dataset.tid); return; }   // order the standings by MP % or IMP
   const tl = ev_.target.closest('[data-tlist]'); if (tl) { ui.ttab = tl.dataset.tlist; render(); return; }   // the tournament list's tabs
   const tt = ev_.target.closest('[data-ttab],[data-tjtab]'); if (tt) { if (tt.dataset.ttab) Net.openTourTable(tt.dataset.ttab); else Net.joinTourTable(tt.dataset.tjtab); return; }
   // a name in the players list (or a private message): write to that player privately

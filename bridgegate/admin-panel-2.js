@@ -739,7 +739,7 @@ window.archivePDF=function(i){
   <style>body{font-family:Arial,sans-serif;font-size:11px;margin:16px;color:#222;}h1{font-size:17px;color:#1a237e;margin-bottom:3px;}h2{font-size:12px;color:#1a237e;border-bottom:1px solid #1a237e;padding-bottom:2px;margin:14px 0 5px;}.meta{font-size:10px;color:#666;margin-bottom:12px;}table{width:100%;border-collapse:collapse;margin-bottom:10px;}th{background:#1a237e;color:#fff;padding:4px 7px;text-align:left;font-size:9px;text-transform:uppercase;}td{padding:4px 7px;border-bottom:1px solid #e0e0e0;}</style>
   </head><body>
   <h1>♠ ${st.name||'Tournament'}</h1>
-  <div class="meta">${st.tableCount||'?'} tables · ${st.roundCount||'?'} rounds · ${st.scoring||'MP'} · Finished: ${a.finished?new Date(a.finished).toLocaleString(window.isTurkish?.()?'tr-TR':'en-US'):''}</div>
+  <div class="meta">${st.tableCount||'?'} tables · ${st.roundCount||'?'} rounds · ${st.scoring||'MP'} · Finished: ${a.finished?new Date(a.finished).toLocaleString(window.getLanguage?.()||'en'):''}</div>
   <h2>Overall Rankings</h2>
   <table><thead><tr><th>#</th><th>Full Name</th><th>Dir</th><th>MP</th><th>%</th></tr></thead><tbody>${rankRows}</tbody></table>
   <h2>Board Results (${bkeys.length} boards)</h2>

@@ -1,4 +1,4 @@
-// BridgeGate bilingual interface (English / Turkish)
+// BridgeGate interface in Bridge Table's languages: English (the source), Turkish (below), and the others from lang/<code>.js
 // Keeps the original English UI as the source of truth and translates only
 // visible interface text. Tournament data, player names and bridge codes remain
 // untouched.
@@ -6,7 +6,8 @@
   'use strict';
 
   const STORAGE_KEY='bricskor_language';   // its own (the separate BridgeGate site on this address keeps bg_language)
-  const SUPPORTED=['en','tr'];
+  const LANGS=[['en','English'],['tr','Türkçe'],['no','Norsk'],['es','Español'],['fr','Français'],['it','Italiano'],['de','Deutsch'],['ru','Русский'],['pl','Polski'],['zh','中文']];   // as in Bridge Table
+  const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
     'BridgeGate · Tournament System':'BridgeGate · Turnuva Sistemi',
@@ -534,12 +535,32 @@
     }catch(e){return null;}
   }
 
+  // the other languages: lang/<code>.js gives d (English → text) and p (one template per PATTERNS entry, {1} {2} … the matched parts)
+  const pack=()=>(window.BG_LANG||{})[currentLanguage];
+  function fromTemplate(L,i,m){
+    const t=L.p[i];
+    if(t==null)return null;
+    const fill=s=>s.replace(/\{(\d)\}/g,(_,n)=>m[n]==='PASS'?(L.d.PASS||'PASS'):(m[n]||''));
+    if(!Array.isArray(t))return fill(t);
+    if(i===0)return fill(t[0])+(m[2]?fill(m[2].includes('phantom')?t[1]:t[2]):'')+(m[3]?fill(t[3]):'');   // tables (+ phantom | + a pair sits out) (· same boards)
+    return fill(t[0])+(m[2]?fill(t[1]):'');                                                              // boards loaded (— damaged skipped)
+  }
   function translateCore(value){
-    if(Object.prototype.hasOwnProperty.call(TR,value))return TR[value];
-    for(const [pattern,replacer] of PATTERNS){
-      if(pattern.test(value)){
-        pattern.lastIndex=0;
-        return value.replace(pattern,replacer);
+    if(currentLanguage==='tr'){
+      if(Object.prototype.hasOwnProperty.call(TR,value))return TR[value];
+      for(const [pattern,replacer] of PATTERNS){
+        if(pattern.test(value)){
+          pattern.lastIndex=0;
+          return value.replace(pattern,replacer);
+        }
+      }
+    }else{
+      const L=pack();
+      if(!L)return value;
+      if(Object.prototype.hasOwnProperty.call(L.d,value))return L.d[value];
+      for(let i=0;i<PATTERNS.length;i++){
+        const m=PATTERNS[i][0].exec(value);
+        if(m){const r=fromTemplate(L,i,m);if(r!=null)return r;}
       }
     }
     if(value.includes(' · ')){
@@ -578,11 +599,11 @@
     const previousOriginal=originalText.get(node);
     const expected=previousOriginal===undefined
       ?undefined
-      :(currentLanguage==='tr'?translateEnglish(previousOriginal):previousOriginal);
+      :(currentLanguage!=='en'?translateEnglish(previousOriginal):previousOriginal);
 
     if(previousOriginal===undefined||(!languageSwitching&&current!==expected))originalText.set(node,current);
     const original=originalText.get(node);
-    const next=currentLanguage==='tr'?translateEnglish(original):original;
+    const next=currentLanguage!=='en'?translateEnglish(original):original;
     if(node.nodeValue!==next)node.nodeValue=next;
   }
 
@@ -595,9 +616,9 @@
       if(!el.hasAttribute(name))continue;
       const current=el.getAttribute(name);
       const old=originals[name];
-      const expected=old===undefined?undefined:(currentLanguage==='tr'?translateEnglish(old):old);
+      const expected=old===undefined?undefined:(currentLanguage!=='en'?translateEnglish(old):old);
       if(old===undefined||(!languageSwitching&&current!==expected))originals[name]=current;
-      const next=currentLanguage==='tr'?translateEnglish(originals[name]):originals[name];
+      const next=currentLanguage!=='en'?translateEnglish(originals[name]):originals[name];
       if(current!==next)el.setAttribute(name,next);
     }
   }
@@ -629,27 +650,55 @@
     }
   }
 
+  const langName=c=>(LANGS.find(l=>l[0]===c)||LANGS[0])[1];
   function updateLanguageControls(){
     document.documentElement.lang=currentLanguage;
     document.documentElement.dataset.language=currentLanguage;
     const manifest=document.querySelector('link[rel="manifest"]');
     if(manifest)manifest.setAttribute('href',currentLanguage==='tr'?'manifest-tr.json':'manifest.json');
+    // the button shows the language in use; tapping it opens the list of languages
     document.querySelectorAll('[data-language-toggle]').forEach(btn=>{
-      btn.textContent=currentLanguage==='tr'?'EN':'TR';
-      btn.setAttribute('aria-label',currentLanguage==='tr'?'Dili İngilizce yap':'Switch language to Turkish');
-      btn.setAttribute('title',currentLanguage==='tr'?'English':'Türkçe');
+      btn.textContent='🌐 '+currentLanguage.toUpperCase();
+      btn.setAttribute('aria-label',langName(currentLanguage));
+      btn.setAttribute('title',langName(currentLanguage));
     });
   }
+  // the list of languages under the language button
+  function openLanguageMenu(btn){
+    let menu=document.getElementById('languageMenu');
+    if(menu){menu.remove();return;}
+    menu=document.createElement('div');
+    menu.id='languageMenu';menu.className='language-menu';menu.setAttribute('data-i18n-ignore','');
+    menu.innerHTML=LANGS.map(([c,n])=>`<button type="button" data-lang="${c}" class="${c===currentLanguage?'on':''}"><b>${c.toUpperCase()}</b> ${n}</button>`).join('');
+    document.body.appendChild(menu);
+    const r=btn?btn.getBoundingClientRect():{left:12,bottom:48};
+    menu.style.top=(r.bottom+6)+'px';
+    menu.style.left=Math.max(8,Math.min(r.left,window.innerWidth-menu.offsetWidth-8))+'px';
+    menu.addEventListener('click',e=>{const b=e.target.closest('[data-lang]');if(b){menu.remove();setLanguage(b.dataset.lang);}});
+    setTimeout(()=>document.addEventListener('click',function off(e){if(!menu.contains(e.target)){menu.remove();document.removeEventListener('click',off,true);}},true),0);
+  }
+  // a language's texts come from lang/<code>.js the first time it is used
+  const loading={};
+  function loadPack(language){
+    if(language==='en'||language==='tr'||(window.BG_LANG||{})[language])return Promise.resolve();
+    return loading[language]||(loading[language]=new Promise(res=>{
+      const s=document.createElement('script');
+      s.src='lang/'+language+'.js';
+      s.onload=s.onerror=()=>{delete loading[language];res();};
+      document.head.appendChild(s);
+    }));
+  }
 
-  function setLanguage(language,{remember=true,closeGate=true}={}){
+  function setLanguage(language,{remember=true}={}){
     if(!SUPPORTED.includes(language))language='en';
+    if(!['en','tr'].includes(language)&&!(window.BG_LANG||{})[language]){
+      if(remember){try{localStorage.setItem(STORAGE_KEY,language);}catch(e){}}
+      loadPack(language).then(()=>setLanguage(language,{remember:false}));
+      return;
+    }
     currentLanguage=language;
     if(remember){
       try{localStorage.setItem(STORAGE_KEY,language);}catch(e){}
-    }
-    if(closeGate){
-      const gate=document.getElementById('languageGate');
-      if(gate)gate.classList.add('language-gate-hidden');
     }
     updateLanguageControls();
     languageSwitching=true;
@@ -659,10 +708,10 @@
   }
 
   window.setLanguage=language=>setLanguage(language);
-  window.toggleLanguage=()=>setLanguage(currentLanguage==='tr'?'en':'tr');
+  window.toggleLanguage=e=>openLanguageMenu((e&&e.currentTarget)||document.activeElement);
   window.getLanguage=()=>currentLanguage;
   window.isTurkish=()=>currentLanguage==='tr';
-  window.i18nText=value=>currentLanguage==='tr'?translateEnglish(String(value)):String(value);
+  window.i18nText=value=>currentLanguage!=='en'?translateEnglish(String(value)):String(value);
   window.applyTranslationsTo=applyTranslationsTo;
   window.localizePrintWindow=(printWindow)=>{
     if(!printWindow||!printWindow.document)return;
@@ -671,10 +720,7 @@
   };
 
   function init(){
-    const saved=readSavedLanguage();
-    const gate=document.getElementById('languageGate');
-    if(saved&&gate)gate.classList.add('language-gate-hidden');
-    setLanguage(saved||'en',{remember:false,closeGate:!!saved});
+    setLanguage(readSavedLanguage()||'en',{remember:false});
 
     const observer=new MutationObserver(mutations=>{
       for(const mutation of mutations){

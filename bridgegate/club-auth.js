@@ -54,17 +54,8 @@ function showLoginForm(clubName){
   selRole(isClubAdmin()?'admin':'table');
 }
 
-window.resolveClubFromInput=async function(){
-  const err=document.getElementById('clubErr');err.textContent='';
-  const id=(document.getElementById('clubIdInput').value||'').trim();
-  if(!id){err.textContent='❌ Enter a Club ID';return;}
-  await openClub(id, err);
-};
 async function openClub(id, err){
-  const btn=document.getElementById('clubContinueBtn');
-  if(btn){btn.disabled=true;btn.textContent='Checking...';}
   const info=await checkClubExists(id);
-  if(btn){btn.disabled=false;btn.textContent='Continue';}
   if(!info){ if(err) err.textContent='❌ Club not found'; return false; }
   if(info.active===false&&!isSuper()){ if(err) err.textContent='❌ This club is switched off'; return false; }
   CLUB_INFO=info; setClub(id); showLoginForm(info.name);
@@ -130,8 +121,7 @@ async function renderClubGate(){
     ${ids.length?`<div style="font-size:0.72rem;color:var(--text3);margin:6px 0 4px;">My clubs</div>`+ids.map(i=>`<button class="btn-primary" style="margin-bottom:6px;" onclick="openMyClub('${i}')">🏛 ${mine[i]}</button>`).join(''):''}
     <div style="font-size:0.72rem;color:var(--text3);margin:10px 0 4px;">${ids.length?'Open another club':'Open your club'}</div>
     <div class="pw-wrap"><input type="text" id="newClubName" maxlength="40" placeholder="Club name" onkeydown="if(event.key==='Enter')createMyClub()"></div>
-    <button class="btn-primary" onclick="createMyClub()">➕ Create club</button>
-    <div style="font-size:0.72rem;color:var(--text3);margin:14px 0 4px;">Join a club's tournament (table or screen)</div>`;
+    <button class="btn-primary" onclick="createMyClub()">➕ Create club</button>`;
 }
 initClubGate();
 
@@ -254,7 +244,6 @@ window.changeClub=function(){
   try{ const u=new URL(location.href); u.searchParams.delete('club'); u.searchParams.delete('role'); history.replaceState(null,'',u); }catch(e){}
   const badge=document.getElementById('topbarClub'); if(badge) badge.style.display='none';
   backToClubGate();
-  const inp=document.getElementById('clubIdInput'); if(inp){ inp.value=''; }
   const err=document.getElementById('clubErr'); if(err) err.textContent='';
 };
 
