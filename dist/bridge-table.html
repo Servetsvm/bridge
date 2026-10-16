@@ -1564,6 +1564,18 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .sbchg{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:#1f5d36;color:#fff}
 .sbchg .sbtno{font-size:22px;font-weight:800}
 .sbchg .btn{font-size:16px;font-weight:700;padding:10px 14px}
+/* Social bridge for a player: a Bridgemate III — green bar, white screen; a device on a computer */
+.sheet.sbfull{background:#fff;color:#1b1b1b;padding:0 12px 12px}
+.sbbar{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;background:#1f5d36;color:#fff;padding:10px 12px;margin:0 -12px;font-size:13px;position:sticky;top:0;z-index:2}
+.sbbar .td{background:#2e7a4b;border-radius:6px;padding:4px 8px}.sbbar .ev{text-align:center;line-height:1.3}.sbbar .ev b{display:block;font-size:14px}
+.sheet.sbfull .bm3{background:none;box-shadow:none;padding:0;border-radius:0;max-width:none}
+.sheet.sbfull .bm3::before{display:none}
+.sheet.sbfull .bm3 .bm3-bar{display:none}
+@media (min-width:700px){
+  #ov:has(.sheet.sbfull){padding:20px;background:rgba(12,26,20,.92)}
+  .sheet.sbfull{width:440px;height:min(880px,calc(100vh - 40px));border:12px solid #111;border-radius:30px;position:relative;padding-top:0}
+}
+.sbentry{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid #d9d4c3;border-radius:12px}.sbentry>b{font-size:17px}.sbentry>small{color:#777;margin-top:-6px}:root[data-theme="dark"] .sbentry{border-color:#3a4a40}
 
 </style>
 
@@ -4351,6 +4363,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Admin": "Yönetici",
     "Change table": "Masa değiştir",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Şu anda açık bir oyun var: Masa No ile katıl. Başka bir oyunu sadece yönetici açabilir.",
     "No game is running now.": "Şu anda açık bir oyun yok.",
@@ -4701,6 +4714,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Admin": "Administrator",
     "Change table": "Bytt bord",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Et spill pågår nå: bli med via Bordnr. Bare administratoren kan åpne et nytt spill.",
     "No game is running now.": "Ingen spill pågår nå.",
@@ -5051,6 +5065,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Admin": "Administración",
     "Change table": "Cambiar de mesa",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Hay una partida en curso: únete con Mesa n.º. Solo el administrador puede abrir otra partida.",
     "No game is running now.": "Ahora no hay ninguna partida en curso.",
@@ -5429,6 +5444,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Admin": "Administration",
     "Change table": "Changer de table",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Une partie est en cours : rejoins-la avec Table n°. Seul l’administrateur peut ouvrir une autre partie.",
     "No game is running now.": "Aucune partie n’est en cours.",
@@ -5807,6 +5823,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Admin": "Amministrazione",
     "Change table": "Cambia tavolo",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "C’è una partita in corso: entra con Tavolo n. Solo l’amministratore può aprirne un’altra.",
     "No game is running now.": "Al momento non c’è nessuna partita in corso.",
@@ -6185,6 +6202,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Admin": "Verwaltung",
     "Change table": "Tisch wechseln",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Gerade läuft ein Spiel: tritt mit Tisch-Nr. bei. Nur der Administrator kann ein weiteres Spiel öffnen.",
     "No game is running now.": "Gerade läuft kein Spiel.",
@@ -6563,6 +6581,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Admin": "Управление",
     "Change table": "Сменить стол",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Сейчас идёт игра: присоединяйтесь через «Стол №». Открыть другую игру может только администратор.",
     "No game is running now.": "Сейчас нет идущих игр.",
@@ -6941,6 +6960,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Admin": "Administracja",
     "Change table": "Zmień stół",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Trwa teraz gra: dołącz przez Stół nr. Tylko administrator może otworzyć kolejną grę.",
     "No game is running now.": "Teraz nie trwa żadna gra.",
@@ -7319,6 +7339,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Admin": "管理",
     "Change table": "换桌",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "现在有比赛进行中：请通过“桌号”加入。只有管理员可以再开一场比赛。",
     "No game is running now.": "现在没有进行中的比赛。",
@@ -8320,7 +8341,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 240;
+const APP_V = 241;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -13216,14 +13237,22 @@ const SB = (() => {
 
   /* ---- screens ---- */
   const LAST = 'bridge-sb-last';
-  const lastGame = () => { try { return localStorage.getItem(LAST) || ''; } catch (e) { return ''; } };
   const setLast = id => { try { if (id) localStorage.setItem(LAST, id); else localStorage.removeItem(LAST); } catch (e) {} };
   // the game this device was last entering scores in opens again at once (ready for the next board) while it is running
+  // the Social bridge button: a game running now opens on its entry screen (table number, or Admin for its organiser);
+  // without one, the list of games
   async function open() {
-    sb.id = null; sb.g = null; sb.setup = null; sb.err = '';
-    const last = lastGame();
-    if (last) { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); try { if (await loadGame(last) && !done()) return openGame(last); } catch (e) {} sb.id = null; sb.g = null; setLast(''); }
-    show(); await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
+    sb.id = null; sb.g = null; sb.setup = null; sb.err = ''; sb.entry = true;
+    openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
+    await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
+  }
+  const runningGames = () => (sb.list || []).filter(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
+  function entryHtml() {
+    const R = runningGames();
+    return `<h2>🃏 ${T('Social bridge')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
+      <div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>
+      ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
+      + `<div class="row2"><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   // a score this table entered that the other pair has not confirmed yet: the screen stays on that board until it is
   const pending = () => { if (!sb.g || done() || sb.formT) return 0; const mt = myTable(); if (!mt) return 0; for (const b in (sb.g.r || {})) { const r = sb.g.r[b][mt]; if (r && !r.ok) return +b; } return 0; };
@@ -13234,7 +13263,7 @@ const SB = (() => {
     const key = sb.setup ? 'setup' : !sb.id ? 'list' : sb.id + ':' + sb.board + ':' + sb.view, old = document.querySelector('#ov .sheet');
     const top = ui.overlay === 'sb' && sb.key === key && old ? old.scrollTop : 0;
     sb.key = key;
-    openOv('sb', sb.setup ? setupHtml() : !sb.id ? listHtml() : gameHtml());
+    openOv('sb', sb.setup ? setupHtml() : !sb.id ? (sb.entry && runningGames().length ? entryHtml() : listHtml()) : gameHtml());
     const s = document.querySelector('#ov .sheet'); if (s && top) s.scrollTop = top;
     // a player's game fills the screen (table number, players, boards, the scoring)
     if (s) s.classList.toggle('sbfull', !!(sb.id && !sb.setup && sb.g && sb.g.m && !canManage(sb.g.m)));
@@ -13282,7 +13311,7 @@ const SB = (() => {
     else if (sb.view === 'tables') body = tablesHtml();
     else body = boardsHtml();
     // a player sees only the game (full screen, no title lines); the organiser keeps the game's details
-    return `${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
+    return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) : T('Social bridge')}</div></div>`}${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
       <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
       ${sb.board ? '' : links}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
@@ -13521,14 +13550,12 @@ const SB = (() => {
     }
     return lob.html = rowsHtml();
   }
-  // each game with its Table No button: the table number, then the players, then the boards
-  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn gold" data-bgtno="${i}">🃏 ${T('Table No')}</button></div></div>`).join('')
-    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn gold" data-sbtno="${g.id}">🃏 ${T('Table No')}</button></div></div>`).join('');
+  // the games running now (shown only: Social bridge and Tournaments on the home page open them)
+  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div></div>`).join('')
+    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div></div>`).join('');
 
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
-    const tno = e.target.closest('[data-sbtno]'); if (tno) return openLink(tno.dataset.sbtno, 0);
-    const bno = e.target.closest('[data-bgtno]'); if (bno && lob.G && lob.G[+bno.dataset.bgtno]) return gateGo(lob.G[+bno.dataset.bgtno]);
     const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }
     if (ui.overlay !== 'sb') return;
     const el = e.target.closest('button'); if (!el) return;
@@ -13548,7 +13575,9 @@ const SB = (() => {
     if (d.sbopen) return openGame(d.sbopen);
     if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText()); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
-    if (id === 'sbList') { setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
+    if (d.sbent) { const [gid, t] = d.sbent.split(':'); sb.entry = false; return openLink(gid, +t); }   // this player sits at that table
+    if (d.sbmng) { sb.entry = false; return openGame(d.sbmng); }
+    if (id === 'sbList') { sb.entry = false; setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
     if (d.sbview) { sb.view = d.sbview; sb.editT = 0; return show(); }
     if (d.sbboard) { sb.board = +d.sbboard; sb.form = null; sb.formT = 0; return show(); }
     if (id === 'sbBoards') { sb.board = 0; sb.form = null; sb.formT = 0; return show(); }
@@ -13575,8 +13604,6 @@ const SB = (() => {
     sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
     return openGame(id);
   }
-  // a club tournament: BridgeGate asks the table number, then the players, then the boards
-  const gateGo = g => { location.href = 'bridgegate/?club=' + encodeURIComponent(g.club) + '&role=table&p=' + g.p; };
   return { open, openLink, lobbyHtml, locked };
 })();
 

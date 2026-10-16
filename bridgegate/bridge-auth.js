@@ -4,12 +4,10 @@
    Servet is the super admin; the player who opens a club is its admin; a table signs in with its 4-digit code. */
 (function () {
   'use strict';
-  // Ctrl+Shift+R (a reload that bypasses this page's offline worker) goes back to Bridge Table's home page; a plain
-  // reload (a table's phone refreshed in the middle of a tournament) stays here
+  // any reload (refresh) goes back to Bridge Table's home page: the tournament is entered again from there
   try {
     const nav = performance.getEntriesByType('navigation')[0];
-    if (nav && nav.type === 'reload' && 'serviceWorker' in navigator && !navigator.serviceWorker.controller && localStorage.getItem('bric-skor-sw')) { location.replace('../'); return; }
-    if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(() => { try { localStorage.setItem('bric-skor-sw', '1'); } catch (e) {} });
+    if (nav && nav.type === 'reload') { location.replace('../'); return; }
   } catch (e) {}
   const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1] || (/^(localhost|127.0.0.1)$/.test(location.hostname) ? 'dev' : undefined);
   const ROOT = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');

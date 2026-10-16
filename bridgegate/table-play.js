@@ -92,7 +92,8 @@ window.bgPlayerEntry=async function(prefix){
 // the four players at the chosen table, drawn as the table: North at the top, South at the bottom, West and East at the sides
 const BG_SEATS={N:'North',S:'South',E:'East',W:'West'};
 window.bgPlayerNames=function(prefix,n){
-  const pe=document.getElementById('playerEntry'); if(!pe) return;
+  let pe=document.getElementById('playerEntry');
+  if(!pe){ const box=document.querySelector('#loginScreen .login-box'); if(!box) return; ['clubGate','loginForm'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';}); pe=document.createElement('div'); pe.id='playerEntry'; box.appendChild(pe); }
   if(!window._bgEntry||window._bgEntry.n!==n) window._bgEntry={prefix,n,seats:{N:'',S:'',E:'',W:''}};
   const st=window._bgEntry.seats;
   const seat=k=>`<button class="pe-pos pe-${k}" onclick="bgSeatEdit('${k}')"><small>${BG_SEATS[k]}</small><b>${st[k]?cleanData(st[k]):'＋'}</b></button>`;
@@ -164,6 +165,7 @@ window.bmSelectTable=async function(){
 };
 
 function renderTableDetail(tableNo){
+  refreshTopbar();
   const s=getState();
   const movements=getMovements();const pairs=getPairs();const boards=getBoards();
   const mk=s.currentRound+'_'+tableNo;

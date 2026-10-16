@@ -495,7 +495,8 @@
     'Send the players the link':'Oyunculara linki gönder',
     'The players open Bridge Table with this link, tap Table No, type their member numbers (or names) and choose their table.':'Oyuncular Bridge Table’ı bu linkle açar, Masa No’ya basar, üye numaralarını (ya da isimlerini) yazar ve masalarını seçer.',
     'The names come from the tables: the players enter them when they sit down.':'İsimler masalardan gelir: oyuncular oturunca kendileri girer.',
-    'Change table':'Masa değiştir'
+    'Change table':'Masa değiştir',
+    'Table No':'Masa No'
   };
 
   const PATTERNS=[

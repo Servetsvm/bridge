@@ -110,14 +110,22 @@ const SB = (() => {
 
   /* ---- screens ---- */
   const LAST = 'bridge-sb-last';
-  const lastGame = () => { try { return localStorage.getItem(LAST) || ''; } catch (e) { return ''; } };
   const setLast = id => { try { if (id) localStorage.setItem(LAST, id); else localStorage.removeItem(LAST); } catch (e) {} };
   // the game this device was last entering scores in opens again at once (ready for the next board) while it is running
+  // the Social bridge button: a game running now opens on its entry screen (table number, or Admin for its organiser);
+  // without one, the list of games
   async function open() {
-    sb.id = null; sb.g = null; sb.setup = null; sb.err = '';
-    const last = lastGame();
-    if (last) { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); try { if (await loadGame(last) && !done()) return openGame(last); } catch (e) {} sb.id = null; sb.g = null; setLast(''); }
-    show(); await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
+    sb.id = null; sb.g = null; sb.setup = null; sb.err = ''; sb.entry = true;
+    openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
+    await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
+  }
+  const runningGames = () => (sb.list || []).filter(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
+  function entryHtml() {
+    const R = runningGames();
+    return `<h2>🃏 ${T('Social bridge')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
+      <div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>
+      ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
+      + `<div class="row2"><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   // a score this table entered that the other pair has not confirmed yet: the screen stays on that board until it is
   const pending = () => { if (!sb.g || done() || sb.formT) return 0; const mt = myTable(); if (!mt) return 0; for (const b in (sb.g.r || {})) { const r = sb.g.r[b][mt]; if (r && !r.ok) return +b; } return 0; };
@@ -128,7 +136,7 @@ const SB = (() => {
     const key = sb.setup ? 'setup' : !sb.id ? 'list' : sb.id + ':' + sb.board + ':' + sb.view, old = document.querySelector('#ov .sheet');
     const top = ui.overlay === 'sb' && sb.key === key && old ? old.scrollTop : 0;
     sb.key = key;
-    openOv('sb', sb.setup ? setupHtml() : !sb.id ? listHtml() : gameHtml());
+    openOv('sb', sb.setup ? setupHtml() : !sb.id ? (sb.entry && runningGames().length ? entryHtml() : listHtml()) : gameHtml());
     const s = document.querySelector('#ov .sheet'); if (s && top) s.scrollTop = top;
     // a player's game fills the screen (table number, players, boards, the scoring)
     if (s) s.classList.toggle('sbfull', !!(sb.id && !sb.setup && sb.g && sb.g.m && !canManage(sb.g.m)));
@@ -176,7 +184,7 @@ const SB = (() => {
     else if (sb.view === 'tables') body = tablesHtml();
     else body = boardsHtml();
     // a player sees only the game (full screen, no title lines); the organiser keeps the game's details
-    return `${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
+    return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) : T('Social bridge')}</div></div>`}${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
       <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
       ${sb.board ? '' : links}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
@@ -415,14 +423,12 @@ const SB = (() => {
     }
     return lob.html = rowsHtml();
   }
-  // each game with its Table No button: the table number, then the players, then the boards
-  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn gold" data-bgtno="${i}">🃏 ${T('Table No')}</button></div></div>`).join('')
-    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn gold" data-sbtno="${g.id}">🃏 ${T('Table No')}</button></div></div>`).join('');
+  // the games running now (shown only: Social bridge and Tournaments on the home page open them)
+  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div></div>`).join('')
+    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div></div>`).join('');
 
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
-    const tno = e.target.closest('[data-sbtno]'); if (tno) return openLink(tno.dataset.sbtno, 0);
-    const bno = e.target.closest('[data-bgtno]'); if (bno && lob.G && lob.G[+bno.dataset.bgtno]) return gateGo(lob.G[+bno.dataset.bgtno]);
     const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }
     if (ui.overlay !== 'sb') return;
     const el = e.target.closest('button'); if (!el) return;
@@ -442,7 +448,9 @@ const SB = (() => {
     if (d.sbopen) return openGame(d.sbopen);
     if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText()); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
-    if (id === 'sbList') { setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
+    if (d.sbent) { const [gid, t] = d.sbent.split(':'); sb.entry = false; return openLink(gid, +t); }   // this player sits at that table
+    if (d.sbmng) { sb.entry = false; return openGame(d.sbmng); }
+    if (id === 'sbList') { sb.entry = false; setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
     if (d.sbview) { sb.view = d.sbview; sb.editT = 0; return show(); }
     if (d.sbboard) { sb.board = +d.sbboard; sb.form = null; sb.formT = 0; return show(); }
     if (id === 'sbBoards') { sb.board = 0; sb.form = null; sb.formT = 0; return show(); }
@@ -469,7 +477,5 @@ const SB = (() => {
     sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
     return openGame(id);
   }
-  // a club tournament: BridgeGate asks the table number, then the players, then the boards
-  const gateGo = g => { location.href = 'bridgegate/?club=' + encodeURIComponent(g.club) + '&role=table&p=' + g.p; };
   return { open, openLink, lobbyHtml, locked };
 })();

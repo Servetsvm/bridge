@@ -95,6 +95,11 @@ async function initClubGate(){
   if(!id){ try{ id=localStorage.getItem('bg_clubId'); }catch(e){} }
   const u=me();
   if(u) await window.bridgeSession();
+  // the tournaments running now: their entry screen (table number, or Admin); ?admin=1 goes past it to the club's sign-in
+  if(u&&!roleParam&&params.get('admin')!=='1'){
+    const live=await liveTournaments();
+    if(live.length){ await renderEntry(live); return; }
+  }
   if(id){
     const info=await checkClubExists(id);
     // the club this device opened last opens again only for its admin: another player on the same phone or PC
@@ -113,7 +118,8 @@ async function initClubGate(){
       // a screen's link (from the admin panel) opens the results screen at once
       if(roleParam==='screen') setTimeout(()=>doLogin(),50);
       // a player from Bridge Table's "Table No" (the club's table code prefix in the link): the players' names, then the table
-      const pp=params.get('p'); if(roleParam==='table'&&!tc&&/^\d{2}$/.test(pp||'')) bgPlayerEntry(pp);
+      // a table number already chosen on the entry screen (&tn=3): straight to the players
+      const pp=params.get('p'), tn=+params.get('tn')||0; if(roleParam==='table'&&!tc&&/^\d{2}$/.test(pp||'')){ if(tn) bgPlayerNames(pp,tn); else bgPlayerEntry(pp); }
       return;
     }
     if(!info||(info.active===false&&!isSuper())){ try{ localStorage.removeItem('bg_clubId'); }catch(e){} }
@@ -128,6 +134,19 @@ async function initClubGate(){
     if(live.length>1){ renderClubGate(live); return; }
   }
   renderClubGate();
+}
+// the entry screen of the tournaments running now: each with its table number keys, and Admin for its club's admin
+async function renderEntry(live){
+  const g=document.getElementById('clubGate'); g.style.display='block';
+  const box=document.getElementById('myClubsBox'); if(!box) return;
+  const u=me(), go=(t,q)=>location.pathname+'?club='+encodeURIComponent(t.club)+q;
+  const own=await Promise.all(live.map(async t=>{ if(isSuper()) return true; const i=await checkClubExists(t.club); return !!(i&&u&&i.owner===u.key); }));
+  box.innerHTML=live.map((t,k)=>`<div class="bg-entry"><div class="bg-entry-name">🏛 ${cleanData(t.c||'')}${t.n?' — '+cleanData(t.n):''}</div>
+    <div class="bg-entry-lbl">Table No</div>
+    <div class="bm3-keys k4" style="padding:0;">${Array.from({length:t.tb||0},(_,i)=>`<button class="bm3-key" onclick="location.replace('${go(t,'&role=table&p='+t.p+'&tn='+(i+1))}')">${i+1}</button>`).join('')}</div>
+    ${own[k]?`<button class="btn-primary" style="margin-top:10px;" onclick="location.replace('${go(t,'&admin=1')}')">⚙️ Admin</button>`:''}</div>`).join('')
+    +(isSuper()||Object.keys(await myClubs()).length?`<a href="${location.pathname}?admin=1" style="display:inline-block;margin-top:10px;font-size:0.75rem;color:var(--text3);">🏛 My clubs</a>`:'');
+  document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');
 }
 // the club tournaments running now (gate/live: name, club, tables, table code prefix)
 async function liveTournaments(){
@@ -316,6 +335,7 @@ window.doLogin=async function(){
   if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
   if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()?'❌ Wrong PIN':'❌ You are not this club\'s admin';return;}
   // the code says which table this is: prefix + table number (0003 = table 3)
+  document.body.classList.toggle('bg-device',role==='table');   // a table: the Bridgemate III look from here on
   if(role==='table'){ window.bmCodeTable=parseInt(String(pw).trim().slice(2),10)||null; window.bmCodePrefix=String(pw).trim().slice(0,2); }   // the prefix: for Change table
 
   // Preload all data from Firebase
@@ -436,6 +456,7 @@ window.showTableFinalResults=function(tableNo){
     </div>`;
 };
 window.performLogout=async function(){
+  document.body.classList.remove('bg-device');
   if(role==='table'){ try{ await unlockAllMyTables(); }catch(e){} }
   if(role==='admin'){
     const st=getState();
@@ -478,6 +499,9 @@ function refreshTopbar(){
     el.style.display='inline-flex';
     el.textContent='Round '+s.currentRound+'/'+s.roundCount+(s.name?' · '+s.name:'');
   } else el.style.display='none';
+  // a table's device bar: the club and the tournament, the table and the round
+  const bar=document.getElementById('bmDevBar');
+  if(bar) bar.innerHTML=`<span class="td">🏛</span><div class="ev"><b>${cleanData(CLUB_NAME||'')}${s.name?' · '+cleanData(s.name):''}</b>${bmTableNo?'Table '+bmTableNo:''}${bmTableNo&&s.currentRound?' – ':''}${s.currentRound?'Round '+s.currentRound:''}</div>`;
 }
 
 // ══════════════════════════════════════════════════════
