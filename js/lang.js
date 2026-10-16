@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "No game is running now.": "Şu anda açık bir oyun yok.",
     "Member number or name": "Üye numarası ya da isim",
     "Send the players the link: they open Bridge Table, tap Table No and choose their table.": "Oyunculara linki gönder: Bridge Table’ı açıp Masa No’ya basarlar ve masalarını seçerler.",
     "Table No": "Masa No", "Open the link the organiser sent you.": "Turnuvayı düzenleyenin gönderdiği linki aç.",
@@ -350,6 +351,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "No game is running now.": "Ingen spill pågår nå.",
     "Member number or name": "Medlemsnummer eller navn",
     "Send the players the link: they open Bridge Table, tap Table No and choose their table.": "Send spillerne lenken: de åpner Bridge Table, trykker på Bordnr. og velger bordet sitt.",
     "Table No": "Bordnr.", "Open the link the organiser sent you.": "Åpne lenken arrangøren sendte deg.",
@@ -697,6 +699,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "No game is running now.": "Ahora no hay ninguna partida en curso.",
     "Member number or name": "Número de socio o nombre",
     "Send the players the link: they open Bridge Table, tap Table No and choose their table.": "Envía el enlace a los jugadores: abren Bridge Table, tocan Mesa n.º y eligen su mesa.",
     "Table No": "Mesa n.º", "Open the link the organiser sent you.": "Abre el enlace que te envió el organizador.",
@@ -1072,6 +1075,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "No game is running now.": "Aucune partie n’est en cours.",
     "Member number or name": "Numéro de licence ou nom",
     "Send the players the link: they open Bridge Table, tap Table No and choose their table.": "Envoie le lien aux joueurs : ils ouvrent Bridge Table, touchent Table n° et choisissent leur table.",
     "Table No": "Table n°", "Open the link the organiser sent you.": "Ouvre le lien que l’organisateur t’a envoyé.",
@@ -1447,6 +1451,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "No game is running now.": "Al momento non c’è nessuna partita in corso.",
     "Member number or name": "Numero di tessera o nome",
     "Send the players the link: they open Bridge Table, tap Table No and choose their table.": "Manda il link ai giocatori: aprono Bridge Table, toccano Tavolo n. e scelgono il tavolo.",
     "Table No": "Tavolo n.", "Open the link the organiser sent you.": "Apri il link che ti ha mandato l’organizzatore.",
@@ -1822,6 +1827,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "No game is running now.": "Gerade läuft kein Spiel.",
     "Member number or name": "Mitgliedsnummer oder Name",
     "Send the players the link: they open Bridge Table, tap Table No and choose their table.": "Schick den Spielern den Link: sie öffnen Bridge Table, tippen auf Tisch-Nr. und wählen ihren Tisch.",
     "Table No": "Tisch-Nr.", "Open the link the organiser sent you.": "Öffne den Link, den dir der Veranstalter geschickt hat.",
@@ -2197,6 +2203,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "No game is running now.": "Сейчас нет идущих игр.",
     "Member number or name": "Номер члена или имя",
     "Send the players the link: they open Bridge Table, tap Table No and choose their table.": "Отправьте игрокам ссылку: они открывают Bridge Table, нажимают «Стол №» и выбирают свой стол.",
     "Table No": "Стол №", "Open the link the organiser sent you.": "Откройте ссылку, которую прислал организатор.",
@@ -2572,6 +2579,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "No game is running now.": "Teraz nie trwa żadna gra.",
     "Member number or name": "Numer członkowski lub nazwisko",
     "Send the players the link: they open Bridge Table, tap Table No and choose their table.": "Wyślij graczom link: otwierają Bridge Table, dotykają Stół nr i wybierają swój stół.",
     "Table No": "Stół nr", "Open the link the organiser sent you.": "Otwórz link, który wysłał organizator.",
@@ -2947,6 +2955,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "No game is running now.": "现在没有进行中的比赛。",
     "Member number or name": "会员号或姓名",
     "Send the players the link: they open Bridge Table, tap Table No and choose their table.": "把链接发给选手：他们打开 Bridge Table，点“桌号”并选择自己的牌桌。",
     "Table No": "桌号", "Open the link the organiser sent you.": "请打开组织者发给你的链接。",

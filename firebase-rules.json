@@ -219,6 +219,13 @@
           "membersInfo": {
             ".read": "auth != null && (root.child('test').child($ns).child('sess').child(auth.uid).exists() || root.child('test').child($ns).child('gate').child('tsess').child(auth.uid).exists())",
             ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'"
+          },
+          "live": {
+            ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).exists()",
+            "$club": {
+              ".write": "auth != null && (root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet' || root.child('test').child($ns).child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('test').child($ns).child('sess').child(auth.uid).child('k').val())",
+              ".validate": "newData.hasChildren(['n', 'c', 'tb', 'p', 'ts']) && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('c').isString() && newData.child('c').val().length <= 40 && newData.child('tb').isNumber() && newData.child('p').isString() && newData.child('p').val().matches(/^[0-9][0-9]$/) && newData.child('ts').isNumber()"
+            }
           }
         }
       }
@@ -298,6 +305,13 @@
       "membersInfo": {
         ".read": "auth != null && (root.child('sess').child(auth.uid).exists() || root.child('gate').child('tsess').child(auth.uid).exists())",
         ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'"
+      },
+      "live": {
+        ".read": "auth != null && root.child('sess').child(auth.uid).exists()",
+        "$club": {
+          ".write": "auth != null && (root.child('sess').child(auth.uid).child('k').val() === 'servet' || root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val())",
+          ".validate": "newData.hasChildren(['n', 'c', 'tb', 'p', 'ts']) && newData.child('n').isString() && newData.child('n').val().length <= 40 && newData.child('c').isString() && newData.child('c').val().length <= 40 && newData.child('tb').isNumber() && newData.child('p').isString() && newData.child('p').val().matches(/^[0-9][0-9]$/) && newData.child('ts').isNumber()"
+        }
       }
     }
   }

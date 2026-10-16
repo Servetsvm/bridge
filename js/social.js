@@ -424,6 +424,7 @@ const SB = (() => {
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
     if (d.sbopen) return openGame(d.sbopen);
+    if (d.bggo != null && sb.live && sb.live[+d.bggo]) return gateGo(sb.live[+d.bggo]);
     if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText()); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
     if (id === 'sbList') { setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
@@ -452,15 +453,21 @@ const SB = (() => {
     sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
     return openGame(id);
   }
+  // a club tournament: BridgeGate asks the table number, then the players, then the boards
+  const gateGo = g => { location.href = 'bridgegate/?club=' + encodeURIComponent(g.club) + '&role=table&p=' + g.p; };
   // Table No without the organiser's link on this device: the games running now (one: straight in), then the table number
   async function pick() {
     openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
-    let L = [];
+    let L = [], G = [];
     try { L = Object.entries(await C().get('sbi') || {}).map(([id, v]) => ({ id, ...v })).filter(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3).sort((a, b) => b.ts - a.ts); } catch (e) {}
-    if (L.length === 1) return openLink(L[0].id, 0);
-    if (!L.length) { closeOv(); flash(T('Open the link the organiser sent you.'), 3000); return; }
+    // the club tournaments (BridgeGate) running now
+    try { G = Object.entries(await C().get('gate/live') || {}).map(([club, v]) => ({ club, ...v })).filter(g => g && /^\d{2}$/.test(g.p || '') && Date.now() - g.ts < 24 * 3600e3); } catch (e) {}
+    if (L.length + G.length === 1) return L.length ? openLink(L[0].id, 0) : gateGo(G[0]);
+    if (!L.length && !G.length) { closeOv(); flash(T('No game is running now.'), 3000); return; }
     lob.L = L;
-    openOv('sb', `<h2>🃏 ${T('Table No')}</h2>${rowsHtml(true)}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+    const gRows = G.map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-bggo="${i}">${T('Open')}</button></div></div>`).join('');
+    sb.live = G;
+    openOv('sb', `<h2>🃏 ${T('Table No')}</h2>${gRows}${rowsHtml(true)}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
   }
   return { open, openLink, pick, lobbyHtml, locked };
 })();

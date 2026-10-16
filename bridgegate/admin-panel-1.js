@@ -261,6 +261,7 @@ window.adminSetup=function(){
   }
   const totalBoards=rounds*bpr;
   setMovements(result.movements);setPairs(result.pairs);setBoards({});setApprovals({});
+  setLive(false);   // a new tournament is listed when it starts
   const s=getState();
   s.name=name;s.tableCount=tables;s.boardsPerRound=bpr;s.totalBoards=totalBoards;s.roundCount=rounds;s.phantom=phantom;s.status='setup';s.currentRound=0;
   s.movement=mov;s.scoring=mov==='team'?'IMP':'BOTH';s._setupPlayers=players;s._setupSwissRounds=swissRounds||s._setupSwissRounds;
@@ -286,6 +287,7 @@ window.adminStart=async function(){
   s._startedAt=new Date().toISOString();
   // the names come from the tables (each table enters its players), so the tournament starts without them
   s.currentRound=1;s.status='running';s._roundStartedAt=new Date().toISOString();setState(s);
+  setLive(true);
   addLog('ok','Round 1 started','Tournament begins');
   toast('▶ Round 1 started!');refreshTopbar();renderAdminTab();
   adminSetupAutoRefresh();
@@ -299,7 +301,16 @@ window.saveStallMinutes=function(){
 };
 /* after the start: the players get Bridge Table's link (with this club and its table code prefix); there they tap
    Table No, type their member numbers or names and choose their table */
-const playersLink=async()=>location.origin+location.pathname.replace(/bridgegate\/[^/]*$/,'')+'#bg='+encodeURIComponent(CLUB_ID||'')+'.'+(await getTablePrefix());
+// the players get only Bridge Table's address: Table No there finds this tournament in the list of running ones
+const playersLink=async()=>location.origin+location.pathname.replace(/bridgegate\/[^/]*$/,'');
+// the running tournament in that list (gate/live/<club>): its name, the club, the tables and the table code prefix
+async function setLive(on){
+  try{
+    const s=getState(), url=await fbRootUrl('/live/'+CLUB_ID+'.json');
+    if(on) await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p:await getTablePrefix(),ts:Date.now()})});
+    else await fetch(url,{method:'DELETE'});
+  }catch(e){}
+}
 window.showTableLinkModal=async function(){
   const s=getState(), link=await playersLink();
   const text=`🃏 ${CLUB_NAME||'BridgeGate'}${s.name?' — '+s.name:''}\n${link}`;
@@ -493,6 +504,7 @@ window.adminFinish=async function(){
   s.status='finished';
   s._finishedAt=new Date().toISOString();
   setState(s);
+  setLive(false);
   const arc=getArchives();
   arc.unshift({state:{...s},boards:getBoards(),pairs:getPairs(),movements:getMovements(),hands:_cache['hands']||[],dd:_cache['dd']||{},finished:s._finishedAt});
   setArchives(arc);
@@ -583,6 +595,7 @@ window.adminReset=async function(){
     }
   }
   await Promise.all(['state','pairs','boards','movements','logs','approvals','hands','dd'].map(k=>DB.del(k)));
+  setLive(false);
   Object.keys(_cache).filter(k=>k!=='playerdb').forEach(k=>delete _cache[k]);
   toast('🗑 Reset complete — Player Registry preserved');refreshTopbar();renderAdminTab();
 };

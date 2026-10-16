@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 233;
+const APP_V = 234;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2561,26 +2561,19 @@ function welcomeClose(go) {
   closeOv();
   if (go) { ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
-// Table No: the club tournament the organiser's link brought (#bg=club.prefix) opens in BridgeGate, where the players
-// give their member numbers or names and choose their table
-const BG_LINK = 'bridge-bg';
 // the WhatsApp logo and an SMS speech bubble for the buttons that send a message
 const ICON_WA = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.88 9.88zm8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41z"/></svg>';
 const ICON_SMS = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 2.8h16A2.2 2.2 0 0 1 22.2 5v10.2a2.2 2.2 0 0 1-2.2 2.2H9.6L5 21.2v-3.8H4a2.2 2.2 0 0 1-2.2-2.2V5A2.2 2.2 0 0 1 4 2.8z"/><text x="12" y="12.9" font-size="7.4" font-weight="900" text-anchor="middle" fill="currentColor" font-family="Arial,Helvetica,sans-serif">SMS</text></svg>';
-function tableNo() {
-  let L = null; try { L = JSON.parse(localStorage.getItem(BG_LINK) || 'null'); } catch (e) {}
-  if (L && L.sb && typeof SB !== 'undefined') { SB.openLink(L.sb, 0); return; }   // a Social bridge game: the table number first
-  // no link on this device (opened in another app, or the organiser's own phone): the Social bridge games running now
-  if (!L || !L.c) { if (typeof SB !== 'undefined') SB.pick(); else flash(T('Open the link the organiser sent you.'), 3000); return; }
-  location.href = 'bridgegate/?club=' + encodeURIComponent(L.c) + '&role=table&p=' + L.p;
-}
+// Table No: the games running now (club tournaments in BridgeGate and Social bridge games); one opens at once,
+// then the table number, the players and the boards
+function tableNo() { if (typeof SB !== 'undefined') SB.pick(); }
 // a link tapped while Bridge Table is already open only changes the address's # part (no reload): read it then too
 window.addEventListener('hashchange', () => { if (/[#&](bg|sb|d)=/.test(location.hash)) checkSharedDeal(); });
 function checkSharedDeal() {
-  // the organiser's link (a club tournament #bg=club.prefix, or a Social bridge game #sb=CODE): kept for Table No
+  // an organiser's link from before (a club tournament #bg=club.prefix, or a Social bridge game #sb=CODE)
   const g = location.hash.match(/[#&]bg=([\w%-]+)\.(\d{2})/), sg = location.hash.match(/[#&]sb=([A-Z0-9]{4,12})(?:&t=(\d{1,2}))?/);
-  if (g || (sg && !sg[2])) {
-    try { localStorage.setItem(BG_LINK, JSON.stringify(g ? { c: decodeURIComponent(g[1]), p: g[2], ts: Date.now() } : { sb: sg[1], ts: Date.now() })); history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  if (g || (sg && !sg[2])) {   // an older link with a code: Table No finds the game anyway
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     flash('🃏 ' + T('Table No'), 2500); return;
   }
   // a Social bridge table's own link: that game opens with the table chosen
