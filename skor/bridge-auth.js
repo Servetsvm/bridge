@@ -14,8 +14,9 @@
   const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1] || (/^(localhost|127.0.0.1)$/.test(location.hostname) ? 'dev' : undefined);
   const ROOT = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');
   const API_KEY = 'AIzaSyDNugZ1tf4rXu7lDYzyZg9v1V3is7xz_Mc';
-  // the language: Bridge Table's (Turkish or English), unless one was chosen here
-  try { if (!localStorage.getItem('bg_language')) { const st = JSON.parse(localStorage.getItem('bric-masasi-v2') || 'null'), L = st && st.SET && st.SET.lang; if (L) localStorage.setItem('bg_language', L === 'tr' ? 'tr' : 'en'); } } catch (e) {}
+  // the language: the one this player uses in Bridge Table (Turkish or English), every time; a device that has never
+  // opened Bridge Table (a table's phone) the language it last used here, or the phone's own
+  try { const st = JSON.parse(localStorage.getItem('bric-masasi-v2') || 'null'), L = st && st.SET && st.SET.lang; if (L) localStorage.setItem('bg_language', L === 'tr' ? 'tr' : 'en'); else if (!localStorage.getItem('bg_language')) localStorage.setItem('bg_language', /^tr/i.test(navigator.language || '') ? 'tr' : 'en'); } catch (e) {}
   window.GATE_ROOT = ROOT;                 // the Bridge Table database (its test part on a test server)
   window.GATE_BASE = ROOT + '/gate';       // where the club tournaments live
   let tok = null, exp = 0, uid = null, p = null;
