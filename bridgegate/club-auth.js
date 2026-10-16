@@ -292,7 +292,7 @@ window.doLogin=async function(){
   if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
   if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()?'❌ Wrong PIN':'❌ You are not this club\'s admin';return;}
   // the code says which table this is: prefix + table number (0003 = table 3)
-  if(role==='table') window.bmCodeTable=parseInt(String(pw).trim().slice(2),10)||null;
+  if(role==='table'){ window.bmCodeTable=parseInt(String(pw).trim().slice(2),10)||null; window.bmCodePrefix=String(pw).trim().slice(0,2); }   // the prefix: for Change table
 
   // Preload all data from Firebase
   if(loginBtn){loginBtn.disabled=true;loginBtn.textContent='Loading...';}
@@ -327,6 +327,9 @@ window.doLogin=async function(){
   }
 
   refreshTopbar();renderPanel();
+  // signed in again on this page (a phone changing tables): the updates already arrive, the callbacks read role and table
+  if(window._bgSubscribed) return;
+  window._bgSubscribed=true;
   DB.subscribe('state',(val)=>{
     _cache['state']=val;
     refreshTopbar();

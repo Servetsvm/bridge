@@ -139,6 +139,17 @@ window.bgPlayerSit=function(){
   doLogin();
 };
 
+// this phone moves to another table (its player changes tables after a round): the table number again, then the players
+window.bgChangeTable=async function(){
+  const p=window.bmCodePrefix; if(!p) return;
+  try{ await unlockAllMyTables(); }catch(e){}
+  if(bmPollInterval){ clearInterval(bmPollInterval); bmPollInterval=null; }
+  bmTableNo=null; window.bmCodeTable=null; window._bgEntry=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
+  bgPlayerEntry(p);
+};
+
 window.bmSetSide=function(side){bmSide=side;};
 window.bmSelectTable=async function(){
   const s=getState();
@@ -209,10 +220,22 @@ function renderTableDetail(tableNo){
     const col=done?'var(--green)':isNext?'var(--gold)':'var(--border2)';
     const icon=done?'✅':isNext?'▶':'⭕';
     const score=done&&typeof bl.data.nsScore==='number'?(bl.data.nsScore>=0?'+':'')+bl.data.nsScore+' NS':'';
+    // the board's MP % and IMP against the other tables that have finished it (from this table's side: NS or EW)
+    let cmp='';
+    if(done&&typeof bl.data.nsScore==='number'){
+      const o=getOtherTablesSameBoard(bl.boardNo,tableNo,s.currentRound);
+      if(o.length){
+        let mp=0,imp=0; o.forEach(x=>{mp+=bl.data.nsScore>x.nsScore?2:bl.data.nsScore===x.nsScore?1:0; imp+=scoreToIMP(bl.data.nsScore-x.nsScore);});
+        let pct=Math.round(mp/(2*o.length)*1000)/10, im=imp/o.length;
+        if(bmSide==='ew'){ pct=Math.round((100-pct)*10)/10; im=-im; }
+        cmp=`MP ${pct}% · IMP ${fmtImp(im)}`;
+      }
+    }
     return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">
       <span style="font-size:1rem;">${icon}</span>
       <span style="font-size:0.82rem;font-weight:${isNext?700:400};color:${col};">Board ${bl.boardNo}</span>
       ${score?`<span style="font-size:0.72rem;color:var(--text3);margin-left:auto;">${score}</span>`:''}
+      ${cmp?`<span style="font-size:0.72rem;font-weight:700;color:var(--gold);">${cmp}</span>`:''}
       ${done&&bl.data.durationSec?`<span style="font-size:0.65rem;color:var(--text3);">${bl.data.durationSec<60?bl.data.durationSec+'s':Math.floor(bl.data.durationSec/60)+'m'}</span>`:''}
     </div>`;
   }).join('');
@@ -237,6 +260,7 @@ function renderTableDetail(tableNo){
     <div class="bm-device" style="max-width:360px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
         <button class="btn btn-ghost btn-sm" onclick="renderTablePanel()">← Back</button>
+        <button class="btn btn-ghost btn-sm" onclick="bgChangeTable()" title="Change table">🔄</button>
         <span style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold);">Table ${tableNo}</span>
         <span style="font-size:0.72rem;color:var(--text3);">${doneCount}/${totalBoards}</span>
         <span style="font-size:0.68rem;color:${bmSide==='ns'?'var(--blue)':'var(--gold)'};">${bmSide==='ns'?'🔵 NS':'🟡 EW'}</span>
@@ -443,6 +467,7 @@ window.bmShowRoundOver=function(tableNo){
           <div class="ro-move-boards">B${nextM.boardStart||'?'} – B${nextM.boardEnd||'?'}</div>
         </div>
         <button class="btn btn-gold btn-full" onclick="bmShowWaiting(${tableNo},${nextR})">OK — Show Waiting Screen →</button>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="bgChangeTable()">🔄 Change table</button>
       </div>
     </div>`;
 };
@@ -468,6 +493,7 @@ window.bmShowWaiting=function(tableNo,nextR){
         <div class="waiting-sub">Please take your seats at Table ${tableNo}</div>
       </div>
       <button class="btn btn-gold btn-full" style="margin-top:16px;" onclick="bmShowNewPlayers(${tableNo},${nextR})">Players seated →</button>
+      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="bgChangeTable()">🔄 Change table</button>
     </div>`;
 };
 

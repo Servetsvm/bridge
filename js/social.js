@@ -130,6 +130,8 @@ const SB = (() => {
     openOv('sb', sb.setup ? setupHtml() : !sb.id ? listHtml() : gameHtml());
     const s = document.querySelector('#ov .sheet'); if (s && top) s.scrollTop = top;
   }
+  // a game running now (opened in the last day and not finished)
+  const running = () => (sb.list || []).some(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
   function listHtml() {
     const rows = (sb.list || []).map(g => `<tr><td><b>🃏 ${esc(g.n)}</b><small>${fmtDate(g.ts)}${g.byn ? ' · ' + esc(g.byn) : ''}</small></td>
       <td data-l="${T('Tables')}" class="n">${g.tb}</td><td data-l="${T('Boards')}" class="n">${g.bd}</td>
@@ -137,7 +139,7 @@ const SB = (() => {
       <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${canManage(g) ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
     return `<h2>🃏 ${T('Social bridge')}</h2>
       <div class="muted">${T('Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.')}</div>
-      <div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button></div>
+      ${running() && !isAdm() ? `<div class="muted">🃏 ${T('A game is running now: join it with Table No. Only the administrator can open another game.')}</div>` : `<div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button></div>`}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
@@ -302,7 +304,8 @@ const SB = (() => {
   async function seatsGo() {
     const st = sb.seats; if (!st) return;
     await signIn();
-    const p = { n: st.n || '', s: st.s || '', e: st.e || '', w: st.w || '' };
+    // a seat left empty gets its direction (North …), so the table goes on to its boards
+    const p = {}; for (const k of ['n', 's', 'e', 'w']) p[k] = (st[k] || SEAT[SEATK[k]]).slice(0, 20);
     try { await C().put('sb/' + sb.id + '/t/' + st.t, p); (sb.g.t = sb.g.t || {})[st.t] = p; sb.seats = null; sb.err = ''; }
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
     show();
@@ -420,6 +423,7 @@ const SB = (() => {
       else if (sb.form) { sb.form[k] = +v; if (k === 'l') { if (+v === 0) { sb.form.s = sb.form.d = sb.form.k = null; } else if (sb.form.k == null || sb.form.k < 0) sb.form.k = null; } }
       return show();
     }
+    if (id === 'sbNew' && running() && !isAdm()) return show();
     if (id === 'sbNew') { sb.setup = { n: T('Social bridge') + ' ' + new Date().toLocaleDateString(), tb: 4, bd: 24, names: {} }; sb.err = ''; return show(); }
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
