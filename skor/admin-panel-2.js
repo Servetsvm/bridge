@@ -390,7 +390,7 @@ function buildPBNText(boards, movements, pairs, hands, tournamentName){
   });
   const boardNos=Object.keys(byBoardNo).sort((a,b)=>Number(a)-Number(b));
   if(!boardNos.length)return null;
-  let out=`% PBN 2.1\n% Exported from BridgeGate — ${(tournamentName||'Tournament')}\n% ${new Date().toISOString()}\n\n`;
+  let out=`% PBN 2.1\n% Exported from BricSkor — ${(tournamentName||'Tournament')}\n% ${new Date().toISOString()}\n\n`;
   boardNos.forEach(bn=>{
     const instances=byBoardNo[bn].sort((a,b)=>Number(a.round)-Number(b.round)||Number(a.table)-Number(b.table));
     const hand=handsByBoard[bn];

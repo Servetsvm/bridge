@@ -1488,3 +1488,4 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .tgate{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,.12)}
 .tgatebtn{text-align:center;text-decoration:none;font-size:1.05rem;padding:12px}
 .tonh{margin:4px 0 8px;font-size:1rem}
+.hbtns a.btn{text-decoration:none;display:flex;align-items:center;justify-content:center}

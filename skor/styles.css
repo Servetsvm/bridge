@@ -369,3 +369,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 :root:not([data-theme="light"]) body{background:radial-gradient(ellipse at 50% -10%,#1e5c3b 0%,#154629 45%,#0c1a14 100%) fixed;}
 :root:not([data-theme="light"]) #loginScreen{background:transparent;}
 .topbar{flex-wrap:wrap;gap:6px}.topbar-right{flex-wrap:wrap;justify-content:flex-end}
+/* ── the day theme in Bridge Table's colours: cream cards on a light green-grey, felt green for what stands out ── */
+[data-theme="light"]{
+  --bg:#e8eee6;--surface:#fffdf6;--surface2:#f1ebdb;--surface3:#e6dfcb;
+  --border:#d6d0bd;--border2:#c5bea6;
+  --text:#1d241f;--text2:#4f5d53;--text3:#7a857c;
+  --gold:#1e5c3b;--gold2:#2a7a4f;--golddim:rgba(30,92,59,0.10);
+  --green:#1d6b3c;--red:#c4122f;--blue:#1f5fa8;
+}
+[data-theme="light"] body{background:linear-gradient(180deg,#f6f4ec 0%,#e8eee6 100%) fixed;}
+[data-theme="light"] #loginScreen{background:transparent;}
+[data-theme="light"] .btn-primary,[data-theme="light"] .btn-gold,[data-theme="light"] .role-tab.active{color:#fff;}
+[data-theme="light"] .btn-primary{box-shadow:0 4px 0 #134029;}
+[data-theme="light"] .bm3{box-shadow:0 8px 24px rgba(0,0,0,.25),inset 0 0 0 2px #2a2a2a;}
+[data-theme="light"] .topbar{background:#fffdf6;border-bottom:1px solid #d6d0bd;}
+[data-theme="light"] .admin-tab.active{color:#fff;}
+[data-theme="light"] .language-code,[data-theme="light"] .bm-lcd-row.inv,[data-theme="light"] .bm-key.active,[data-theme="light"] .sb-tab.active{color:#fff;}

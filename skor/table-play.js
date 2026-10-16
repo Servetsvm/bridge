@@ -58,7 +58,7 @@ function renderTablePanel(){
   c.innerHTML=`
     <div class="bm-device">
       <div class="bm-lcd" style="text-align:center;">
-        <div class="bm-lcd-row inv" style="display:inline-block;margin-bottom:6px;">BridgeGate · Round ${String(s.currentRound).padStart(2,'0')}</div>
+        <div class="bm-lcd-row inv" style="display:inline-block;margin-bottom:6px;">BricSkor · Round ${String(s.currentRound).padStart(2,'0')}</div>
         <div class="bm-lcd-row" style="text-align:center;color:var(--text);">Select your table number</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">

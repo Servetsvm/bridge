@@ -1635,6 +1635,7 @@ const Net = (() => {
         <div class="muted">${T('Anyone who opens the app link while your table is open can ask to join; you accept or decline each request. Keep this app open while you play: your device runs the table. Robots play any seat that is empty or whose player leaves.')}</div>
         ${st.msg ? `<div class="err">${esc(T(st.msg))}</div>` : ''}
         ${scoreHtml()}
+        <div class="grp"><span>🏆 ${T('Online tournaments')}</span><div id="nTours">${typeof toursHtml === 'function' ? toursHtml() : ''}</div></div>
         <div class="row2"><button class="btn" id="nStop">${T('Close the table')}</button><button class="btn gold" id="oClose">${T('Done')}</button></div>`);
       return;
     }
@@ -1644,6 +1645,7 @@ const Net = (() => {
       <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" readonly value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Open tables')}</span>${tablesHtml()}</div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
+      <div class="grp"><span>🏆 ${T('Online tournaments')}</span><div id="nTours">${typeof toursHtml === 'function' ? toursHtml() : ''}</div></div>
       <div class="row2"><button class="btn new" id="nStart">${T('Open an online table')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
   }
   const panelRefresh = () => { if (ui.overlay === 'net') panel(); };

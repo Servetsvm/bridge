@@ -113,6 +113,8 @@ async function initClubGate(){
     }
     try{ localStorage.removeItem('bg_clubId'); }catch(e){}
   }
+  // the player's own club opens at once (the admin types the PIN and is in the admin panel)
+  if(u){ const mine=await myClubs(), ids=Object.keys(mine); if(ids.length===1&&await openClub(ids[0],null)){ setTimeout(()=>document.getElementById('pwInput')?.focus(),100); return; } }
   renderClubGate();
 }
 async function renderClubGate(){

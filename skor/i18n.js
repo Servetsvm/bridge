@@ -1,4 +1,4 @@
-// BridgeGate bilingual interface (English / Turkish)
+// BricSkor bilingual interface (English / Turkish)
 // Keeps the original English UI as the source of truth and translates only
 // visible interface text. Tournament data, player names and bridge codes remain
 // untouched.
@@ -9,7 +9,7 @@
   const SUPPORTED=['en','tr'];
 
   const TR={
-    'BridgeGate · Tournament System':'BridgeGate · Turnuva Sistemi',
+    'BricSkor · Tournament System':'BricSkor · Turnuva Sistemi',
     'Tournament Control System':'Turnuva Kontrol Sistemi',
     'Enter ↵':'Gir ↵',
     'Sign in to Bridge Table first (name and PIN), then come back here.':'Önce Bridge Table’a isim ve PIN ile giriş yap, sonra buraya dön.',
@@ -395,7 +395,7 @@
     'Firebase error:':'Firebase hatası:',
     'Failed:':'Başarısız:',
     'Online Only':'Yalnızca Çevrimiçi',
-    'BridgeGate requires an internet connection.':'BridgeGate internet bağlantısı gerektirir.',
+    'BricSkor requires an internet connection.':'BricSkor internet bağlantısı gerektirir.',
     'Please use the GitHub Pages URL.':'Lütfen GitHub Pages bağlantısını kullanın.',
     'Load Hand Records':'El Kayıtlarını Yükle',
     'Load the hands of this session: the file from your dealing machine or bridge program. The double-dummy analysis starts by itself.':'Bu oturumun ellerini yükleyin: dağıtım makinenizin ya da briç programınızın dosyası. Double-dummy analizi kendiliğinden başlar.',

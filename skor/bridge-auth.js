@@ -1,9 +1,16 @@
-/* Club tournaments (BridgeGate inside Bridge Table): the sign-in is Bridge Table's own. The same hidden database
+/* Club tournaments (BricSkor inside Bridge Table): the sign-in is Bridge Table's own. The same hidden database
    account as the app on this device (its refresh token is shared through this address's storage), and the player's
    Bridge name and PIN: the database session sess/<account> = { k: name, pin } is what the rules check.
    Servet is the super admin; the player who opens a club is its admin; a table signs in with its 4-digit code. */
 (function () {
   'use strict';
+  // Ctrl+Shift+R (a reload that bypasses this page's offline worker) goes back to Bridge Table's home page; a plain
+  // reload (a table's phone refreshed in the middle of a tournament) stays here
+  try {
+    const nav = performance.getEntriesByType('navigation')[0];
+    if (nav && nav.type === 'reload' && 'serviceWorker' in navigator && !navigator.serviceWorker.controller && localStorage.getItem('bric-skor-sw')) { location.replace('../'); return; }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.ready.then(() => { try { localStorage.setItem('bric-skor-sw', '1'); } catch (e) {} });
+  } catch (e) {}
   const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1] || (/^(localhost|127.0.0.1)$/.test(location.hostname) ? 'dev' : undefined);
   const ROOT = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');
   const API_KEY = 'AIzaSyDNugZ1tf4rXu7lDYzyZg9v1V3is7xz_Mc';

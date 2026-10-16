@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 211;
+const APP_V = 212;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1208,7 +1208,7 @@ function homeShell() {
       <div class="hpair">
       <div class="hcard hero hsmall">
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
-        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><button class="btn htour" data-hsec="tours">🏆 ${T('Tournaments')}</button><div class="hrow3"><button class="btn hwatch" id="sbOpen">🃏 ${T('Social bridge')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
+        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><a class="btn htour" href="skor/">🏆 ${T('Tournaments')}</a><div class="hrow3"><button class="btn hwatch" id="sbOpen">🃏 ${T('Social bridge')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
@@ -1289,7 +1289,7 @@ function renderHome() {
     set('hCount', T('{0} in the lobby', N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
     set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
     if (want === 'chat') N.st.lunread = 0;
-    set('hTours', toursHtml()); updateRcpt();
+    set('hTours', toursHtml()); set('nTours', toursHtml()); updateRcpt();
     const pl = N.playersHtml(); set('hPlayers', pl); set('pPlayers', pl);
     const pm = ui.pmTo ? `🔒 ${T('Private message to {0}', esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : '';
     set('hPmTo', pm); set('pPmTo', pm);
@@ -1509,9 +1509,8 @@ function toursHtml() {
   }).join('');
   const table = rows ? `<div class="ttwrap"><table class="ttab"><thead><tr><th>${T('Tournament')}</th><th>${T('Format')}</th><th class="n">${T('Boards')}</th><th>${T('Ranking')}</th><th class="n">${T('Players')}</th><th>${T('Status')}</th><th>${T('Ends in')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `<div class="muted">${L.length ? T('No tournaments here.') : T('No tournaments yet. Create one and invite the players you want.')}</div>`;
-  // the club tournament program (real cards at real tables, Bridgemate-style scoring) first; then the online tournaments
-  return `<div class="tgate"><a class="btn gold tgatebtn" href="gate/">🏛 ${T('Club tournament')}</a><div class="muted">${T('Real cards at real tables: the tournament director runs it, every table enters its scores with its code.')}</div></div>
-    <h4 class="tonh">🌐 ${T('Online tournaments')}</h4>${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button></div>`;
+  // the online tournaments (shown in the online table window; Tournaments on the home page opens BricSkor)
+  return `${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button></div>`;
 }
 // the action buttons of one tournament row (and a short note: an invitation, your table, how far you are)
 function tourRowBtns(t, me) {

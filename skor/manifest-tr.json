@@ -1,8 +1,8 @@
 {
-  "name": "BridgeGate Tournament Manager",
-  "short_name": "BridgeGate",
-  "description": "Live bridge tournament management — scoring, movements, standings.",
-  "lang": "en",
+  "name": "BricSkor Turnuva Yöneticisi",
+  "short_name": "BricSkor",
+  "description": "Canlı briç turnuva yönetimi — skorlama, hareketler ve sıralama.",
+  "lang": "tr",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
