@@ -422,7 +422,65 @@
     'Barometer — every table plays the same boards each round, then the pairs move':'Barometre — her turda tüm masalar aynı boardları oynar, sonra çiftler hareket eder',
     'Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).':'Mitchell: NS sabit, EW hareket eder. Howell: herkes hareket eder. Barometre: Howell gibi, ama her turda tüm masalar aynı boardları aynı anda oynar (her masaya bir board kopyası). İsviçre: eşleşmeler her turdan sonra kendiliğinden yeniden hesaplanır. Her harekette 1. masanın Kuzey-Güney çifti yerinde kalır (ör. tekerlekli sandalyedeki bir oyuncu için).',
     'Team Match — team-based match movement':'Takım Maçı — takımlara göre maç hareketi',
-    'This will delete the current tournament. Are you sure?':'Bu, mevcut turnuvayı silecek. Emin misiniz?'
+    'This will delete the current tournament. Are you sure?':'Bu, mevcut turnuvayı silecek. Emin misiniz?',
+    'Team Match — IMP':'Takım Maçı — IMP',
+    'No complete two-table board comparison yet.':'Henüz iki masada da bitmiş bir board karşılaştırması yok.',
+    'Team Match Settings':'Takım Maçı Ayarları',
+    'Team A':'Takım A',
+    'Team B':'Takım B',
+    'Pairs per Team':'Takım başına çift',
+    'Tournament begins':'Turnuva başlıyor',
+    'Finish tournament and archive results?':'Turnuva bitirilip sonuçlar arşivlensin mi?',
+    'Finish':'Bitir',
+    'Data imported':'Veriler içe aktarıldı',
+    'DELETE ALL DATA?':'TÜM VERİLER SİLİNSİN Mİ?',
+    'This will erase the current tournament.':'Bu, mevcut turnuvayı siler.',
+    'Player Registry will NOT be deleted.':'Oyuncu kaydı SİLİNMEZ.',
+    'Continue?':'Devam edilsin mi?',
+    'Clear entire player registry?':'Tüm oyuncu kaydı temizlensin mi?',
+    'Clear Registry':'Kaydı Temizle',
+    'Remove Player':'Oyuncuyu Kaldır',
+    'Clear all pair names? This cannot be undone.':'Tüm çift adları silinsin mi? Bu geri alınamaz.',
+    'Pair added':'Çift eklendi',
+    'Remove Pair':'Çifti Kaldır',
+    'Remove Partner Too?':'Eşi de kaldırılsın mı?',
+    'Pair removed':'Çift kaldırıldı',
+    'Hand file loaded':'El dosyası yüklendi',
+    'Boards loaded from file':'Boardlar dosyadan yüklendi',
+    'Double-dummy analysis finished':'Double-dummy analizi bitti',
+    'Delete this board result?':'Bu board sonucu silinsin mi?',
+    'Delete Board':'Boardu Sil',
+    'Clear the system log?':'Sistem kayıtları temizlensin mi?',
+    'Clear Logs':'Kayıtları Temizle',
+    'No connection to the database':'Veritabanına bağlantı yok',
+    'Firebase error':'Firebase hatası',
+    'Super Admin':'Süper Yönetici',
+    'You are about to leave the Admin screen while the tournament is still running.':'Turnuva sürerken yönetici ekranından çıkmak üzeresin.',
+    'Not allowed — please log in again':'İzin yok — lütfen yeniden giriş yap',
+    'Phantom':'Hayalet',
+    'PHANTOM':'HAYALET',
+    'Swiss pairing generated':'İsviçre eşleşmesi hazır',
+    'Swiss pairing generation failed':'İsviçre eşleşmesi yapılamadı',
+    '(inactive)':'(kapalı)',
+    'Open':'Aç',
+    'Awaiting approval':'Onay bekleniyor',
+    'Complete':'Tamamlandı',
+    'Player names entered':'Oyuncu adları girildi',
+    'Pair names updated':'Çift adları güncellendi',
+    'Board approved (self)':'Board onaylandı (aynı cihaz)',
+    'Tournament created':'Turnuva oluşturuldu',
+    'Dealer':'Dağıtan',
+    'e.g. Card misplayed':'ör. Yanlış kart oynandı',
+    'None':'Yok',
+    'Both':'Herkes',
+    'All':'Herkes',
+    'Pass':'Pas',
+    'mitchell':'Mitchell',
+    'howell':'Howell',
+    'barometer':'Barometre',
+    'swiss':'İsviçre',
+    'team':'Takım maçı',
+    'Team Match: 2-12 pairs per team':'Takım Maçı: takım başına 2-12 çift'
   };
 
   const PATTERNS=[
@@ -432,7 +490,7 @@
     [/^Analysis ready: (\d+) boards$/,(_,n)=>`Analiz hazır: ${n} board`],
     [/^(\d+) \/ (\d+) analysed$/,(_,a,b)=>`${a} / ${b} analiz edildi`],
     [/^Board (\d+)$/,(_,n)=>`Board ${n}`],
-    [/^Dealer ([NESW?]) · Vulnerable: (.*)$/,(_,d,v)=>`Dağıtan ${d} · Zon: ${v}`],
+    [/^Dealer ([NESW?]) · Vulnerable: (.*)$/,(_,d,v)=>`Dağıtan ${d} · Zon: ${TR[v]||v}`],
     [/^(\+|-)(\d+) vs DD$/,(_,s,n)=>`${s}${n} löve (DD'ye göre)`],
     [/^→ (\d+) tables$/,(_,n)=>`→ ${n} masa`],
     [/^→ (\d+) tables \+ phantom pair \(not supported for Swiss yet\)$/,(_,n)=>`→ ${n} masa + hayalet çift (İsviçre için henüz desteklenmiyor)`],
@@ -525,7 +583,21 @@
     [/^(NS|EW) VUL$/,(_,side)=>`${side} ZON`],
     [/^\+(\d+) overtricks?$/,(_,n)=>`+${n} fazla löve`],
     [/^(\d+) down$/,(_,n)=>`${n} batık`],
-    [/^→ (\d+) boards\/round × (\d+) rounds = (\d+) total boards$/,(_,b,r,t)=>`→ Tur başına ${b} board × ${r} tur = toplam ${t} board`]
+    [/^→ (\d+) boards\/round × (\d+) rounds = (\d+) total boards$/,(_,b,r,t)=>`→ Tur başına ${b} board × ${r} tur = toplam ${t} board`],
+    [/^(\d+) pairs\/team = (\d+) pairs = (\d+) players\. Each opponent pairing uses two tables and the same boards\.$/,(_,g1,g2,g3)=>`Takım başına ${g1} çift = ${g2} çift = ${g3} oyuncu. Her rakip eşleşmesi iki masa ve aynı boardları kullanır.`],
+    [/^(\d+)\/(\d+) boards done\. All rounds finished!$/,(_,g1,g2)=>`${g1}/${g2} board bitti. Tüm turlar tamamlandı!`],
+    [/^(\d+)\/(\d+) boards done\. Ready for Round (\d+)\.$/,(_,g1,g2,g3)=>`${g1}/${g2} board bitti. ${g3}. tur için hazır.`],
+    [/^(\d+) players imported$/,(_,g1)=>`${g1} oyuncu içe aktarıldı`],
+    [/^Remove "(.+)" from registry\?$/,(_,g1)=>`"${g1}" kayıttan kaldırılsın mı?`],
+    [/^Remove pair "(.+)"\? This cannot be undone\.$/,(_,g1)=>`"${g1}" çifti kaldırılsın mı? Bu geri alınamaz.`],
+    [/^Also remove paired player "(.+)"\?$/,(_,g1)=>`Eşi "${g1}" de kaldırılsın mı?`],
+    [/^Edit Board (\d+) \(Table (\d+), Round (\d+)\)$/,(_,g1,g2,g3)=>`Board ${g1} düzenle (Masa ${g2}, Tur ${g3})`],
+    [/^Board (\d+) approved$/,(_,g1)=>`Board ${g1} onaylandı`],
+    [/^Board (\d+) sent for approval$/,(_,g1)=>`Board ${g1} onaya gönderildi`],
+    [/^ADJ Score: Table (\d+) Board (\d+)$/,(_,g1,g2)=>`Ayarlanmış skor: Masa ${g1} Board ${g2}`],
+    [/^Swiss: max (\d+) rounds for (\d+) pairs$/,(_,g1,g2)=>`İsviçre: ${g2} çift için en fazla ${g1} tur`],
+    [/^Board edited: (.+)$/,(_,g1)=>`Board düzenlendi: ${g1}`],
+    [/^Board deleted: (.+)$/,(_,g1)=>`Board silindi: ${g1}`]
   ];
 
   let currentLanguage=readSavedLanguage()||'en';
@@ -545,7 +617,7 @@
   function fromTemplate(L,i,m){
     const t=L.p[i];
     if(t==null)return null;
-    const fill=s=>s.replace(/\{(\d)\}/g,(_,n)=>m[n]==='PASS'?(L.d.PASS||'PASS'):(m[n]||''));
+    const fill=s=>s.replace(/\{(\d)\}/g,(_,n)=>m[n]==='PASS'?(L.d.PASS||'PASS'):i===6&&n==='2'&&L.d[m[n]]?L.d[m[n]]:(m[n]||''));   // the vulnerability (None, Both …) in its words too
     if(!Array.isArray(t))return fill(t);
     if(i===0)return fill(t[0])+(m[2]?fill(m[2].includes('phantom')?t[1]:t[2]):'')+(m[3]?fill(t[3]):'');   // tables (+ phantom | + a pair sits out) (· same boards)
     return fill(t[0])+(m[2]?fill(t[1]):'');                                                              // boards loaded (— damaged skipped)
