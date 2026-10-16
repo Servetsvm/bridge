@@ -407,7 +407,11 @@ window.BG_LANG["it"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Sist
 "Analysis is not available on this device":"L’analisi non è disponibile su questo dispositivo",
 "Analysis stopped":"Analisi interrotta",
 "No complete boards found in this file":"Nessuna smazzata completa in questo file",
-"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Questo file è bloccato (chiave cripto). Salva le smazzate senza blocco o in PBN nel programma di distribuzione."},"p":[["→ {1} tavoli",
+"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Questo file è bloccato (chiave cripto). Salva le smazzate senza blocco o in PBN nel programma di distribuzione.",
+"Barometer — every table plays the same boards each round, then the pairs move":"Barometro — tutti i tavoli giocano le stesse smazzate a ogni turno, poi le coppie si spostano",
+"Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).":"Mitchell: NS fissi, EO si spostano. Howell: tutti si spostano. Barometro: come Howell, ma tutti i tavoli giocano le stesse smazzate nello stesso momento (una copia delle smazzate per tavolo). Svizzera: gli abbinamenti si ricalcolano automaticamente dopo ogni turno. In ogni movimento la coppia Nord-Sud del tavolo 1 resta seduta (es. per un giocatore in sedia a rotelle).",
+"Team Match — team-based match movement":"Incontro a squadre — movimento a squadre",
+"This will delete the current tournament. Are you sure?":"Questo eliminerà il torneo attuale. Sei sicuro?"},"p":[["→ {1} tavoli",
 " + coppia fantasma",
 " + una coppia riposa a ogni turno",
 " · ⚠ tutti i tavoli giocano le stesse smazzate a ogni turno: una copia delle smazzate per tavolo"],
@@ -508,4 +512,5 @@ window.BG_LANG["it"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Sist
 "Punti NS: {1}",
 "{1} IN ZONA",
 "+{1} prese in più",
-"{1} sotto"]};
+"{1} sotto",
+"→ {1} smazzate/turno × {2} turni = {3} smazzate in tutto"]};

@@ -407,7 +407,11 @@ window.BG_LANG["de"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Turn
 "Analysis is not available on this device":"Die Analyse ist auf diesem Gerät nicht verfügbar",
 "Analysis stopped":"Analyse gestoppt",
 "No complete boards found in this file":"Keine vollständigen Boards in dieser Datei",
-"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Diese Datei ist gesperrt (Krypto-Schlüssel). Speichere die Boards ungesperrt oder als PBN im Mischprogramm."},"p":[["→ {1} Tische",
+"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Diese Datei ist gesperrt (Krypto-Schlüssel). Speichere die Boards ungesperrt oder als PBN im Mischprogramm.",
+"Barometer — every table plays the same boards each round, then the pairs move":"Barometer — alle Tische spielen jede Runde dieselben Boards, dann wandern die Paare",
+"Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).":"Mitchell: NS fest, OW wandern. Howell: alle wandern. Barometer: wie Howell, aber alle Tische spielen dieselben Boards zur selben Zeit (ein Satz Boards pro Tisch). Schweizer System: die Paarungen werden nach jeder Runde automatisch neu berechnet. In jeder Bewegung bleibt das Nord-Süd-Paar an Tisch 1 sitzen (z. B. für einen Spieler im Rollstuhl).",
+"Team Match — team-based match movement":"Teamkampf — Bewegung für Teams",
+"This will delete the current tournament. Are you sure?":"Das löscht das aktuelle Turnier. Bist du sicher?"},"p":[["→ {1} Tische",
 " + Phantompaar",
 " + ein Paar setzt jede Runde aus",
 " · ⚠ alle Tische spielen jede Runde dieselben Boards: ein Satz Boards pro Tisch"],
@@ -508,4 +512,5 @@ window.BG_LANG["de"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Turn
 "NS-Ergebnis: {1}",
 "{1} IN GEFAHR",
 "+{1} Überstich(e)",
-"{1} Faller"]};
+"{1} Faller",
+"→ {1} Boards/Runde × {2} Runden = {3} Boards insgesamt"]};

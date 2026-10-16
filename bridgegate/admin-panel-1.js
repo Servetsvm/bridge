@@ -147,10 +147,11 @@ function renderSetup(){
       <select id="aMovement" onchange="adminUpdateCalc()">
         <option value="mitchell" ${s.movement==='mitchell'?'selected':''}>Mitchell — NS fixed, EW moves</option>
         <option value="howell" ${s.movement==='howell'?'selected':''}>Howell — all pairs move</option>
+        <option value="barometer" ${s.movement==='barometer'?'selected':''}>Barometer — every table plays the same boards each round, then the pairs move</option>
         <option value="swiss" ${s.movement==='swiss'?'selected':''}>Swiss — pairings adapt to standings each round</option>
         <option value="team" ${s.movement==='team'?'selected':''}>Team Match — team-based match movement</option>
       </select>
-      <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="movHint">${isTeam?'Team Match: 2 teams, 2 or more pairs per team, two-table mirrored boards and IMP scoring.':'Mitchell: NS fixed, EW moves. Howell: everyone moves. Swiss: pairing is re-computed automatically after every round.'}</div>
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="movHint">${isTeam?'Team Match: 2 teams, 2 or more pairs per team, two-table mirrored boards and IMP scoring.':'Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).'}</div>
     </div>
     <div id="aTeamSettings" style="display:${isTeam?'block':'none'};padding:10px 12px;margin:8px 0 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
       <div style="font-size:.76rem;font-weight:700;color:var(--gold);margin-bottom:8px;">🏆 Team Match Settings</div>
@@ -217,12 +218,12 @@ window.adminUpdateCalc=function(){
     tables=Math.floor(players/4);
     const pairCount=tables*2+(phantom?1:0);
     if(mov==='mitchell')rounds=tables;
-    else if(mov==='howell')rounds=pairCount%2?pairCount:pairCount-1;   // an odd number of pairs: each pair sits out one round
+    else if(mov==='howell'||mov==='barometer')rounds=pairCount%2?pairCount:pairCount-1;   // an odd number of pairs: each pair sits out one round
     else rounds=parseInt(document.getElementById('aSwissRounds')?.value||7);
   }
   const totalBoards=rounds*bpr;
   const hint=document.getElementById('calcHint'), bprHint=document.getElementById('bprHint');
-  if(hint)hint.textContent=mov==='team'?`→ ${tables} tables · 2 teams · ${tables} pairs/team`:`→ ${tables} table${tables!==1?'s':''}${players%4!==0?(mov==='howell'?' + one pair sits out each round':' + phantom'):''}${mov==='howell'&&(()=>{const pc=Math.floor(players/4)*2+(players%4!==0?1:0);return pc+pc%2;})()<=6?' · ⚠ every table plays the same boards each round: one copy of the boards per table':''}`;
+  if(hint)hint.textContent=mov==='team'?`→ ${tables} tables · 2 teams · ${tables} pairs/team`:`→ ${tables} table${tables!==1?'s':''}${players%4!==0?(mov==='howell'||mov==='barometer'?' + one pair sits out each round':' + phantom'):''}${mov==='barometer'||mov==='howell'&&(()=>{const pc=Math.floor(players/4)*2+(players%4!==0?1:0);return pc+pc%2;})()<=6?' · ⚠ every table plays the same boards each round: one copy of the boards per table':''}`;
   if(bprHint&&rounds>0)bprHint.textContent=`→ ${bpr} boards/round × ${rounds} rounds = ${totalBoards} total boards`;
   window._computedRounds=rounds;window._computedTotalBoards=totalBoards;
 };
@@ -251,11 +252,11 @@ window.adminSetup=function(){
     pairCount=tables*2+(phantom?1:0);
     if(mov==='swiss'&&phantom){toast('❌ Swiss (v1) needs a player count divisible by 4 — no bye/phantom support yet');return;}
     if(mov==='mitchell')rounds=tables;
-    else if(mov==='howell')rounds=pairCount%2?pairCount:pairCount-1;
+    else if(mov==='howell'||mov==='barometer')rounds=pairCount%2?pairCount:pairCount-1;
     else{swissRounds=parseInt(document.getElementById('aSwissRounds').value);if(isNaN(swissRounds)||swissRounds<3){toast('❌ Swiss: choose at least 3 rounds');return;}if(swissRounds>pairCount-1){toast(`❌ Swiss: max ${pairCount-1} rounds for ${pairCount} pairs`);return;}rounds=swissRounds;}
     const totalBoards=rounds*bpr;
     if(mov==='mitchell')result=generateMitchell(tables,bpr,phantom,totalBoards);
-    else if(mov==='howell')result=generateHowell(tables,bpr,totalBoards,phantom);
+    else if(mov==='howell'||mov==='barometer')result=generateHowell(tables,bpr,totalBoards,phantom,mov==='barometer');
     else result=generateSwissRound1(pairCount,bpr,rounds);
   }
   const totalBoards=rounds*bpr;

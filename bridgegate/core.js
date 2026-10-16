@@ -306,14 +306,16 @@ function howellPlan(m){
   };
   return go()?plan:null;
 }
-function generateHowell(tableCount, boardsPerRound, totalBoards, hasPhantom){
+// Howell, or Barometer (same=true: every table plays the same boards each round, one copy of the boards per table).
+// Pair 1 is the circle's fixed point: it stays at table 1, North-South, every round (e.g. a player in a wheelchair).
+function generateHowell(tableCount, boardsPerRound, totalBoards, hasPhantom, same){
   const movements={};const pairs={};
   const real=tableCount*2+(hasPhantom?1:0), n=real+(real%2), m=n-1, k=(m-1)/2;
   for(let i=1;i<=real;i++) pairs['p'+i]={id:'p'+i,name:'Pair '+i,dir:'',startTable:0,isPhantom:false};
   const rounds=boardsPerRound>0?Math.min(m,Math.floor(totalBoards/boardsPerRound)):m;
-  const plan=howellPlan(m);   // null: 2–3 tables, every table plays the same boards
-  // circle position v → pair v+1, ∞ → pair n (the phantom when the number of pairs is odd)
-  const pid=v=>v===m?(n>real?null:'p'+n):'p'+(v+1);
+  const plan=same?null:howellPlan(m);   // null: Barometer, or 2–3 tables: every table plays the same boards
+  // ∞ (always table 1) → pair 1, circle position v → pair v+2 (the last one is the phantom when the number of pairs is odd)
+  const pid=v=>v===m?'p1':(v+2<=real?'p'+(v+2):null);
   const nsN={};   // how often each pair has sat North-South: the one with fewer sits North-South
   for(let r=0;r<rounds;r++){
     const matches=plan?plan.map((c,i)=>c.y==null?[m,r,c.a,i]:[(c.x+r)%m,(c.y+r)%m,c.a,i])
@@ -326,7 +328,7 @@ function generateHowell(tableCount, boardsPerRound, totalBoards, hasPhantom){
       const set=plan?(add+r)%m:r;
       const boardStart=set*boardsPerRound+1;
       const boardEnd=Math.min(boardStart+boardsPerRound-1,totalBoards);
-      const flip=(nsN[B]||0)<(nsN[A]||0);
+      const flip=A==='p1'?false:B==='p1'?true:(nsN[B]||0)<(nsN[A]||0);   // pair 1 always North-South
       const ns=flip?B:A, ew=flip?A:B; nsN[ns]=(nsN[ns]||0)+1;
       movements[(r+1)+'_'+table]={ns,ew,boardStart,boardEnd};
     }
@@ -345,6 +347,7 @@ function generateSwissRound1(pairCount, boardsPerRound, roundCount){
   const ids=[];
   for(let i=1;i<=pairCount;i++){ pairs['p'+i]={id:'p'+i,name:'Pair '+i,dir:'',startTable:0,isPhantom:false}; ids.push('p'+i); }
   for(let i=ids.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ids[i],ids[j]]=[ids[j],ids[i]]; }
+  ids.splice(ids.indexOf('p1'),1); ids.unshift('p1');   // pair 1 stays at table 1, North-South
   const movements={};
   for(let m=0;m<pairCount/2;m++){
     const table=m+1;
@@ -399,6 +402,9 @@ function generateSwissRoundMovements(roundNum, boardsPerRound){
   const standings=calcSwissStandingsArray();
   const history=getSwissPairingHistory(getMovements());
   const matches=pairSwissMatches(standings,history);
+  // pair 1 stays at table 1, North-South (every table plays the same boards, so only the table numbers change)
+  const fixed=matches.findIndex(p=>p.includes('p1'));
+  if(fixed>0)matches.unshift(matches.splice(fixed,1)[0]);
   const movements={};
   const boardStart=(roundNum-1)*boardsPerRound+1;
   const boardEnd=boardStart+boardsPerRound-1;
@@ -406,8 +412,8 @@ function generateSwissRoundMovements(roundNum, boardsPerRound){
     const table=idx+1;
     const[a,b]=pair;
     // Alternate direction by round parity for rough NS/EW balance over the session.
-    const ns=roundNum%2===1?a:b;
-    const ew=roundNum%2===1?b:a;
+    const ns=a==='p1'?a:b==='p1'?b:roundNum%2===1?a:b;
+    const ew=ns===a?b:a;
     movements[roundNum+'_'+table]={ns,ew,boardStart,boardEnd};
   });
   return movements;

@@ -407,7 +407,11 @@ window.BG_LANG["fr"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Syst
 "Analysis is not available on this device":"L’analyse n’est pas disponible sur cet appareil",
 "Analysis stopped":"Analyse arrêtée",
 "No complete boards found in this file":"Aucune donne complète dans ce fichier",
-"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Ce fichier est verrouillé (clé crypto). Enregistre les donnes sans verrou ou en PBN dans le logiciel de distribution."},"p":[["→ {1} tables",
+"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Ce fichier est verrouillé (clé crypto). Enregistre les donnes sans verrou ou en PBN dans le logiciel de distribution.",
+"Barometer — every table plays the same boards each round, then the pairs move":"Baromètre — toutes les tables jouent les mêmes donnes à chaque tour, puis les paires bougent",
+"Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).":"Mitchell : NS fixes, EO bougent. Howell : tout le monde bouge. Baromètre : comme Howell, mais toutes les tables jouent les mêmes donnes en même temps (un jeu de donnes par table). Suisse : les rencontres sont recalculées automatiquement après chaque tour. Dans tous les mouvements, la paire Nord-Sud de la table 1 reste assise (ex. pour un joueur en fauteuil roulant).",
+"Team Match — team-based match movement":"Match par équipes — mouvement par équipes",
+"This will delete the current tournament. Are you sure?":"Ceci supprimera le tournoi en cours. Tu es sûr ?"},"p":[["→ {1} tables",
 " + paire fantôme",
 " + une paire en relais à chaque tour",
 " · ⚠ toutes les tables jouent les mêmes donnes à chaque tour : un jeu de donnes par table"],
@@ -508,4 +512,5 @@ window.BG_LANG["fr"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Syst
 "Score NS : {1}",
 "{1} VULNÉRABLE",
 "+{1} de mieux",
-"{1} de chute"]};
+"{1} de chute",
+"→ {1} donnes/tour × {2} tours = {3} donnes au total"]};

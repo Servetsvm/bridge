@@ -407,7 +407,11 @@ window.BG_LANG["ru"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Ту
 "Analysis is not available on this device":"Анализ недоступен на этом устройстве",
 "Analysis stopped":"Анализ остановлен",
 "No complete boards found in this file":"В этом файле нет полных сдач",
-"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Этот файл заблокирован (крипто-ключ). Сохраните сдачи без блокировки или в PBN в программе раздачи."},"p":[["→ {1} столов",
+"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Этот файл заблокирован (крипто-ключ). Сохраните сдачи без блокировки или в PBN в программе раздачи.",
+"Barometer — every table plays the same boards each round, then the pairs move":"Барометр — каждый тур все столы играют одни и те же сдачи, потом пары переходят",
+"Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).":"Митчелл: СЮ на месте, ВЗ переходят. Хауэлл: переходят все. Барометр: как Хауэлл, но все столы играют одни и те же сдачи одновременно (по комплекту сдач на стол). Швейцарка: пары подбираются заново автоматически после каждого тура. При любом движении пара Север-Юг за столом 1 остаётся на месте (напр. для игрока в инвалидной коляске).",
+"Team Match — team-based match movement":"Командный матч — движение для команд",
+"This will delete the current tournament. Are you sure?":"Текущий турнир будет удалён. Вы уверены?"},"p":[["→ {1} столов",
 " + фантомная пара",
 " + одна пара пропускает каждый тур",
 " · ⚠ все столы каждый тур играют одни и те же сдачи: по комплекту сдач на стол"],
@@ -508,4 +512,5 @@ window.BG_LANG["ru"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Ту
 "Результат СЮ: {1}",
 "{1} В ЗОНЕ",
 "+{1} лишних",
-"без {1}"]};
+"без {1}",
+"→ {1} сдач/тур × {2} туров = всего {3} сдач"]};

@@ -407,7 +407,11 @@ window.BG_LANG["es"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Sist
 "Analysis is not available on this device":"El análisis no está disponible en este dispositivo",
 "Analysis stopped":"Análisis detenido",
 "No complete boards found in this file":"No hay manos completas en este archivo",
-"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Este archivo está bloqueado (clave cripto). Guarda las manos sin bloquear o como PBN en el programa repartidor."},"p":[["→ {1} mesas",
+"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Este archivo está bloqueado (clave cripto). Guarda las manos sin bloquear o como PBN en el programa repartidor.",
+"Barometer — every table plays the same boards each round, then the pairs move":"Barómetro — todas las mesas juegan las mismas manos en cada ronda y luego las parejas se mueven",
+"Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).":"Mitchell: NS fijos, EO se mueven. Howell: todos se mueven. Barómetro: como Howell, pero todas las mesas juegan las mismas manos a la vez (un juego de manos por mesa). Suizo: el emparejamiento se recalcula automáticamente tras cada ronda. En todos los movimientos la pareja Norte-Sur de la mesa 1 no se mueve (p. ej. para un jugador en silla de ruedas).",
+"Team Match — team-based match movement":"Partido por equipos — movimiento por equipos",
+"This will delete the current tournament. Are you sure?":"Esto borrará el torneo actual. ¿Seguro?"},"p":[["→ {1} mesas",
 " + pareja fantasma",
 " + una pareja descansa cada ronda",
 " · ⚠ todas las mesas juegan las mismas manos cada ronda: un juego de manos por mesa"],
@@ -508,4 +512,5 @@ window.BG_LANG["es"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Sist
 "Puntos NS: {1}",
 "{1} VULNERABLE",
 "+{1} de más",
-"{1} multa(s)"]};
+"{1} multa(s)",
+"→ {1} manos/ronda × {2} rondas = {3} manos en total"]};

@@ -418,7 +418,11 @@
     'Analysis is not available on this device':'Bu cihazda analiz yapılamıyor',
     'Analysis stopped':'Analiz durdu',
     'No complete boards found in this file':'Bu dosyada tam bir board bulunamadı',
-    'This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.':'Bu dosya kilitli (şifre anahtarı). Boardları dağıtım programında kilitsiz ya da PBN olarak kaydedin.'
+    'This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.':'Bu dosya kilitli (şifre anahtarı). Boardları dağıtım programında kilitsiz ya da PBN olarak kaydedin.',
+    'Barometer — every table plays the same boards each round, then the pairs move':'Barometre — her turda tüm masalar aynı boardları oynar, sonra çiftler hareket eder',
+    'Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).':'Mitchell: NS sabit, EW hareket eder. Howell: herkes hareket eder. Barometre: Howell gibi, ama her turda tüm masalar aynı boardları aynı anda oynar (her masaya bir board kopyası). İsviçre: eşleşmeler her turdan sonra kendiliğinden yeniden hesaplanır. Her harekette 1. masanın Kuzey-Güney çifti yerinde kalır (ör. tekerlekli sandalyedeki bir oyuncu için).',
+    'Team Match — team-based match movement':'Takım Maçı — takımlara göre maç hareketi',
+    'This will delete the current tournament. Are you sure?':'Bu, mevcut turnuvayı silecek. Emin misiniz?'
   };
 
   const PATTERNS=[
@@ -520,7 +524,8 @@
     [/^NS Score: (.+)$/,(_,v)=>`NS Skoru: ${v}`],
     [/^(NS|EW) VUL$/,(_,side)=>`${side} ZON`],
     [/^\+(\d+) overtricks?$/,(_,n)=>`+${n} fazla löve`],
-    [/^(\d+) down$/,(_,n)=>`${n} batık`]
+    [/^(\d+) down$/,(_,n)=>`${n} batık`],
+    [/^→ (\d+) boards\/round × (\d+) rounds = (\d+) total boards$/,(_,b,r,t)=>`→ Tur başına ${b} board × ${r} tur = toplam ${t} board`]
   ];
 
   let currentLanguage=readSavedLanguage()||'en';

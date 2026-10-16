@@ -407,7 +407,11 @@ window.BG_LANG["no"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Turn
 "Analysis is not available on this device":"Analysen er ikke tilgjengelig på denne enheten",
 "Analysis stopped":"Analysen er stoppet",
 "No complete boards found in this file":"Fant ingen hele spill i denne filen",
-"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Denne filen er låst (kryptonøkkel). Lagre spillene ulåst eller som PBN i deleprogrammet."},"p":[["→ {1} bord",
+"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Denne filen er låst (kryptonøkkel). Lagre spillene ulåst eller som PBN i deleprogrammet.",
+"Barometer — every table plays the same boards each round, then the pairs move":"Barometer — alle bord spiller de samme spillene hver runde, så flytter parene",
+"Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).":"Mitchell: NS står fast, ØV flytter. Howell: alle flytter. Barometer: som Howell, men alle bord spiller de samme spillene samtidig (ett sett spill per bord). Monrad: parene settes på nytt automatisk etter hver runde. I alle bevegelser blir Nord-Syd-paret ved bord 1 sittende (f.eks. for en spiller i rullestol).",
+"Team Match — team-based match movement":"Lagkamp — bevegelse for lagkamp",
+"This will delete the current tournament. Are you sure?":"Dette sletter den nåværende turneringen. Er du sikker?"},"p":[["→ {1} bord",
 " + fantompar",
 " + ett par sitter over hver runde",
 " · ⚠ alle bord spiller de samme spillene hver runde: ett sett spill per bord"],
@@ -508,4 +512,5 @@ window.BG_LANG["no"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Turn
 "NS-score: {1}",
 "{1} I SONEN",
 "+{1} overstikk",
-"{1} beit"]};
+"{1} beit",
+"→ {1} spill/runde × {2} runder = {3} spill i alt"]};

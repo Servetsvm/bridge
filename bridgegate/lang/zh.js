@@ -407,7 +407,11 @@ window.BG_LANG["zh"]={"d":{"BridgeGate · Tournament System":"BridgeGate · 比�
 "Analysis is not available on this device":"此设备无法进行分析",
 "Analysis stopped":"分析已停止",
 "No complete boards found in this file":"此文件中没有完整的牌副",
-"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"此文件已加密锁定（加密密钥）。请在发牌软件中不加锁保存，或保存为 PBN。"},"p":[["→ {1} 张桌",
+"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"此文件已加密锁定（加密密钥）。请在发牌软件中不加锁保存，或保存为 PBN。",
+"Barometer — every table plays the same boards each round, then the pairs move":"Barometer — 每轮所有牌桌打相同的牌副，然后各对移位",
+"Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).":"Mitchell：南北固定，东西移位。Howell：所有人移位。Barometer：与 Howell 相同，但所有牌桌同时打相同的牌副（每张桌一套牌副）。瑞士制：每轮结束后自动重新配对。在任何移位方式中，1 号桌的南北搭档都留在原位（例如为坐轮椅的选手）。",
+"Team Match — team-based match movement":"团体赛 — 按队移位",
+"This will delete the current tournament. Are you sure?":"这将删除当前比赛。确定吗？"},"p":[["→ {1} 张桌",
 " + 虚拟对",
 " + 每轮有一对轮空",
 " · ⚠ 每轮所有牌桌打相同的牌副：每张桌需要一套牌副"],
@@ -508,4 +512,5 @@ window.BG_LANG["zh"]={"d":{"BridgeGate · Tournament System":"BridgeGate · 比�
 "南北得分：{1}",
 "{1} 有局",
 "超 {1} 墩",
-"宕 {1}"]};
+"宕 {1}",
+"→ 每轮 {1} 副 × {2} 轮 = 共 {3} 副"]};

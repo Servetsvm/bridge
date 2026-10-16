@@ -407,7 +407,11 @@ window.BG_LANG["pl"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Syst
 "Analysis is not available on this device":"Analiza nie jest dostępna na tym urządzeniu",
 "Analysis stopped":"Analiza zatrzymana",
 "No complete boards found in this file":"W tym pliku nie ma pełnych rozdań",
-"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Ten plik jest zablokowany (klucz kryptograficzny). Zapisz rozdania bez blokady albo jako PBN w programie do rozdawania."},"p":[["→ stołów: {1}",
+"This file is locked (crypto key). Save the boards unlocked or as PBN in the dealer program.":"Ten plik jest zablokowany (klucz kryptograficzny). Zapisz rozdania bez blokady albo jako PBN w programie do rozdawania.",
+"Barometer — every table plays the same boards each round, then the pairs move":"Barometr — w każdej rundzie wszystkie stoły grają te same rozdania, potem pary się przesiadają",
+"Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).":"Mitchell: NS stoją, EW się przesiadają. Howell: wszyscy się przesiadają. Barometr: jak Howell, ale wszystkie stoły grają te same rozdania w tym samym czasie (jeden komplet rozdań na stół). Szwajcarski: pary są dobierane na nowo automatycznie po każdej rundzie. W każdym ruchu para Północ-Południe przy stole 1 zostaje na miejscu (np. dla gracza na wózku).",
+"Team Match — team-based match movement":"Mecz drużynowy — ruch drużynowy",
+"This will delete the current tournament. Are you sure?":"To usunie obecny turniej. Na pewno?"},"p":[["→ stołów: {1}",
 " + para fantomowa",
 " + w każdej rundzie jedna para pauzuje",
 " · ⚠ wszystkie stoły grają w każdej rundzie te same rozdania: jeden komplet rozdań na stół"],
@@ -508,4 +512,5 @@ window.BG_LANG["pl"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Syst
 "Wynik NS: {1}",
 "{1} PO PARTII",
 "+{1} nadróbki",
-"{1} bez"]};
+"{1} bez",
+"→ {1} rozdań/rundę × {2} rund = łącznie {3} rozdań"]};
