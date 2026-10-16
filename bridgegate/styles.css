@@ -432,7 +432,7 @@ body.bg-device .language-toggle-login,body.bg-device .theme-toggle-login{top:8px
 body.bg-device .login-sub{color:#1f5d36;font-weight:700}
 body.bg-device .bg-entry{background:#fff;border-color:#d9dee3}
 body.bg-device .bg-entry-lbl{color:#1f5d36}
-body.bg-device .bm3-key,body.bg-device #playerEntry .bm3-key,body.bg-device .bg-entry .bm3-key{background:#fff;color:#1b1b1b;border:1px solid #d9dee3}
+body.bg-device #playerEntry .bm3-key,body.bg-device .bg-entry .bm3-key{background:#fff;color:#1b1b1b;border:1px solid #d9dee3}
 body.bg-device .pe-pos{background:#fff;border-color:#d9dee3;color:#1b1b1b}
 body.bg-device .pe-pos small{color:#1f5d36}
 body.bg-device .pe-mid{background:#1f5d36}
