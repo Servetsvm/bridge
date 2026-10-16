@@ -38,11 +38,6 @@
 
     <!-- LOGIN FORM: shown once the club is resolved (or Super Admin was chosen) -->
     <div id="loginForm" style="display:none;">
-      <div class="role-tabs" id="roleTabs">
-        <button class="role-tab active" id="rtab-admin" onclick="selRole('admin')">⚙️ Admin</button>
-        <button class="role-tab" id="rtab-table" onclick="selRole('table')">🃏 Table</button>
-        <button class="role-tab" id="rtab-screen" onclick="selRole('screen')">📺 Screen</button>
-      </div>
       <div class="pw-wrap" id="pwWrap">
         <input type="text" id="pwInput" placeholder="Table code (4 digits)" inputmode="numeric" maxlength="4" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
       </div>

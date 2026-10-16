@@ -788,6 +788,7 @@ function renderSecurity(){
     <div style="font-size:0.75rem;color:var(--text3);">Open this link on each table's phone or tablet and type that table's code.</div>
     <div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-full" style="background:#25d366;color:#fff;" onclick="secSend('wa',0)">💬 WhatsApp</button><button class="btn btn-ghost btn-full" onclick="secSend('sms',0)">✉️ SMS</button></div>
     <div style="font-size:0.75rem;color:var(--text3);margin-top:6px;">💬 / ✉️ under a table: its link and its code in one message.</div>
+    <a class="btn btn-blue btn-full" style="margin-top:14px;text-decoration:none;" href="${location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=screen'}" target="_blank" rel="noopener">📺 Screen</a>
   </div>`;
 }
 // the codes of every table, from the prefix being typed

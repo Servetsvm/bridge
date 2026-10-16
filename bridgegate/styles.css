@@ -32,9 +32,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .login-box{max-width:360px;width:100%;padding:36px 26px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);text-align:center;position:relative;}
 .login-logo{font-family:'Playfair Display',serif;font-size:34px;color:var(--gold);letter-spacing:1px;}
 .login-sub{color:var(--text2);font-size:0.8rem;padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--border);}
-.role-tabs{display:flex;gap:5px;margin-bottom:16px;}
-.role-tab{flex:1;padding:8px 0;background:var(--surface2);border:1px solid transparent;color:var(--text2);cursor:pointer;border-radius:30px;font-weight:500;font-size:0.76rem;transition:all 0.15s;font-family:inherit;}
-.role-tab.active{background:var(--gold);color:#0f0e0c;font-weight:700;border-color:var(--gold);}
 .pw-wrap{margin-bottom:8px;}
 .pw-wrap input{width:100%;padding:11px 16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.95rem;outline:none;text-align:center;letter-spacing:3px;font-family:inherit;}
 .pw-wrap input:focus{border-color:var(--gold);}
@@ -363,7 +360,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 }
 [data-theme="light"] body{background:linear-gradient(180deg,#f6f4ec 0%,#e8eee6 100%) fixed;}
 [data-theme="light"] #loginScreen{background:transparent;}
-[data-theme="light"] .btn-primary,[data-theme="light"] .btn-gold,[data-theme="light"] .role-tab.active{color:#fff;}
+[data-theme="light"] .btn-primary,[data-theme="light"] .btn-gold{color:#fff;}
 [data-theme="light"] .btn-primary{box-shadow:0 4px 0 #134029;}
 [data-theme="light"] .bm3{box-shadow:0 8px 24px rgba(0,0,0,.25),inset 0 0 0 2px #2a2a2a;}
 [data-theme="light"] .topbar{background:#fffdf6;border-bottom:1px solid #d6d0bd;}

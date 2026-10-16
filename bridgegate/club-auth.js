@@ -49,8 +49,7 @@ function showLoginForm(clubName){
     else badge.style.display='none';
   }
   document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');
-  // the Admin tab only for the club's admin (and the super admin); others start on the table code
-  const at=document.getElementById('rtab-admin'); if(at) at.style.display=isClubAdmin()?'':'none';
+  // the club's admin (and the super admin) signs in with their PIN; a table comes with its link and code, a screen with its link
   selRole(isClubAdmin()?'admin':'table');
 }
 
@@ -102,6 +101,8 @@ async function initClubGate(){
       if(roleParam&&['table','screen'].includes(roleParam)) selRole(roleParam);
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(()=>doLogin(),50); }
+      // a screen's link (from the admin panel) opens the results screen at once
+      if(roleParam==='screen') setTimeout(()=>doLogin(),50);
       return;
     }
     try{ localStorage.removeItem('bg_clubId'); }catch(e){}
@@ -207,8 +208,6 @@ let role='admin';
 
 window.selRole=function(r){
   role=r;
-  document.querySelectorAll('.role-tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('rtab-'+r)?.classList.add('active');
   document.getElementById('loginErr').textContent='';
   const inp=document.getElementById('pwInput'); inp.value='';
   // a table types its 4-digit code; the admin and the super admin their own Bridge Table PIN; the screen nothing
@@ -223,7 +222,6 @@ window.enterSuperAdminLogin=function(){
   const cl=document.getElementById('clubLinks'); if(cl) cl.style.display='none';
   document.getElementById('clubGate').style.display='none';
   document.getElementById('loginForm').style.display='block';
-  document.getElementById('roleTabs').style.display='none';
   document.getElementById('backToClubGate').style.display='block';
   document.getElementById('loginSub').textContent='Super Admin';
   selRole('superadmin');
@@ -231,7 +229,6 @@ window.enterSuperAdminLogin=function(){
 window.backToClubGate=function(){
   const cl=document.getElementById('clubLinks'); if(cl) cl.style.display='flex';
   document.getElementById('loginForm').style.display='none';
-  document.getElementById('roleTabs').style.display='flex';
   document.getElementById('backToClubGate').style.display='none';
   document.getElementById('loginSub').textContent=CLUB_NAME||'Tournament Control System';
   renderClubGate();
@@ -432,12 +429,12 @@ function finishLogoutUI(){
     if(CLUB_ID){
       document.getElementById('clubGate').style.display='none';
       document.getElementById('loginForm').style.display='block';
-      document.getElementById('roleTabs').style.display='flex'; { const cl=document.getElementById('clubLinks'); if(cl) cl.style.display='flex'; }
+      { const cl=document.getElementById('clubLinks'); if(cl) cl.style.display='flex'; }
       document.getElementById('backToClubGate').style.display='none';
       document.getElementById('loginSub').textContent=CLUB_NAME||'Tournament Control System';
     } else {
       document.getElementById('loginForm').style.display='none';
-      document.getElementById('roleTabs').style.display='flex'; { const cl=document.getElementById('clubLinks'); if(cl) cl.style.display='flex'; }
+      { const cl=document.getElementById('clubLinks'); if(cl) cl.style.display='flex'; }
       document.getElementById('backToClubGate').style.display='none';
       document.getElementById('loginSub').textContent='Tournament Control System';
       document.getElementById('clubGate').style.display='block';
