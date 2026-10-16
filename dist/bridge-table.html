@@ -8286,7 +8286,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 231;
+const APP_V = 232;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -13345,9 +13345,9 @@ const SB = (() => {
     const rows = L.map((r, i) => `${i + 1}. ${r.name} (${T('Table {0}', r.t)} ${dir(r)}) — ${r.pct != null ? r.pct + '%' : '—'} · ${r.imp > 0 ? '+' : ''}${r.imp} IMP · ${T('{0} boards', r.n)}`);
     return [head, ...rows].join('\n');
   }
-  // a table's link (as BridgeGate's table codes): it opens this game with that table chosen, ready to enter scores
-  const gameLink = t => location.origin + location.pathname + '#sb=' + sb.id + (t ? '&t=' + t : '');
-  const linkText = t => `🃏 ${sb.g.m.n}${t ? '\n' + T('Table {0}', t) : ''}\n${gameLink(t)}`;
+  // the players get only Bridge Table's address: the game is under Open tables, and Table No opens it (no code needed)
+  const appLink = () => location.origin + location.pathname.replace(/index\.html$/, '');
+  const linkText = () => `🃏 ${sb.g.m.n}\n${appLink()}`;
   const sendBtns = t => `<span class="sbsend"><button class="btn mini-btn sbwa" data-sbsend="wa:${t}" title="WhatsApp">${ICON_WA}</button><button class="btn mini-btn sbsms" data-sbsend="sms:${t}" title="SMS">${ICON_SMS}</button></span>`;
   // a table's players: a member number typed into a box becomes the member's name
   // the players at the table, drawn as the table; or the box for one seat
@@ -13506,7 +13506,7 @@ const SB = (() => {
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
     if (d.sbopen) return openGame(d.sbopen);
-    if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText(+t)); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
+    if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText()); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
     if (id === 'sbList') { setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
     if (d.sbview) { sb.view = d.sbview; sb.editT = 0; return show(); }
