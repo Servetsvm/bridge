@@ -1,127 +1,22 @@
-
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<!doctype html>
+<html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BridgeGate · Tournament System</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f0e0c">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BridgeGate">
-<link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BridgeGate</title>
+<style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0c1a14;color:#f2eee1;font-family:system-ui,sans-serif}a{color:#d9b25c}</style>
 </head>
 <body>
-<div id="toast"></div>
-
-<!-- FIRST-VISIT LANGUAGE CHOICE -->
-<div id="languageGate" class="language-gate" data-i18n-ignore role="dialog" aria-modal="true" aria-labelledby="languageGateTitle">
-  <div class="language-card">
-    <div class="language-mark">♠</div>
-    <div class="language-brand">BridgeGate</div>
-    <h1 id="languageGateTitle">Choose your language · Dilinizi seçin</h1>
-    <p>Language preference is saved on this device.<br>Dil tercihiniz bu cihazda kaydedilir.</p>
-    <div class="language-options">
-      <button type="button" class="language-option" onclick="setLanguage('en')">
-        <span class="language-code">EN</span>
-        <span><strong>English</strong><small>Continue in English</small></span>
-      </button>
-      <button type="button" class="language-option" onclick="setLanguage('tr')">
-        <span class="language-code">TR</span>
-        <span><strong>Türkçe</strong><small>Türkçe devam et</small></span>
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- LOGIN -->
-<div id="loginScreen">
-  <div class="login-box">
-    <button class="language-toggle-login" data-language-toggle data-i18n-ignore onclick="toggleLanguage()" aria-label="Switch language to Turkish" title="Türkçe">TR</button>
-    <button class="theme-toggle-login" onclick="toggleTheme()">🌓</button>
-    <div class="login-logo">♠ BridgeGate</div>
-    <a href="../" style="display:inline-block;margin-bottom:8px;font-size:0.75rem;color:var(--text3);text-decoration:none;">← Bridge Table</a>
-    <div class="login-sub" id="loginSub">Tournament Control System</div>
-
-    <!-- CLUB GATE: shown until a valid club is resolved from ?club=CLUBID or localStorage -->
-    <div id="clubGate" style="display:none;">
-      <div id="myClubsBox"></div>
-      <div class="pw-wrap">
-        <input type="text" id="clubIdInput" placeholder="Club ID" autocapitalize="off" autocomplete="off" onkeydown="if(event.key==='Enter')resolveClubFromInput()">
-      </div>
-      <div class="login-err" id="clubErr"></div>
-      <button class="btn-primary" id="clubContinueBtn" onclick="resolveClubFromInput()">Continue</button>
-      <div style="margin-top:14px;">
-        <a href="#" class="superLink" onclick="event.preventDefault();enterSuperAdminLogin();" style="font-size:0.72rem;color:var(--text3);text-decoration:none;display:none;">🛡️ Super Admin Login</a>
-      </div>
-    </div>
-
-    <!-- LOGIN FORM: shown once the club is resolved (or Super Admin was chosen) -->
-    <div id="loginForm" style="display:none;">
-      <div class="role-tabs" id="roleTabs">
-        <button class="role-tab active" id="rtab-admin" onclick="selRole('admin')">⚙️ Admin</button>
-        <button class="role-tab" id="rtab-table" onclick="selRole('table')">🃏 Table</button>
-        <button class="role-tab" id="rtab-screen" onclick="selRole('screen')">📺 Screen</button>
-      </div>
-      <div class="pw-wrap" id="pwWrap">
-        <input type="text" id="pwInput" placeholder="Table code (4 digits)" inputmode="numeric" maxlength="4" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
-      </div>
-      <div class="login-err" id="loginErr"></div>
-      <button class="btn-primary" onclick="doLogin()">Login</button>
-      <div id="backToClubGate" style="display:none;margin-top:12px;">
-        <a href="#" onclick="event.preventDefault();backToClubGate();" style="font-size:0.72rem;color:var(--text3);text-decoration:none;">← Back</a>
-      </div>
-      <!-- also here: a device that remembers its club opens this form directly, without the club gate -->
-      <div id="clubLinks" style="margin-top:14px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
-        <a href="#" onclick="event.preventDefault();changeClub();" style="font-size:0.72rem;color:var(--text3);text-decoration:none;">🏛 Change club</a>
-        <a href="#" class="superLink" onclick="event.preventDefault();enterSuperAdminLogin();" style="font-size:0.72rem;color:var(--text3);text-decoration:none;display:none;">🛡️ Super Admin Login</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- APP -->
-<div id="app">
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-logo">♠ BridgeGate</div>
-      <span class="topbar-club" id="topbarClub" style="display:none;"></span>
-      <span class="topbar-badge" id="topbarRole"></span>
-      <span class="topbar-round" id="topbarRound" style="display:none;"></span>
-    </div>
-    <div class="topbar-right">
-      <span id="connBadge" style="font-size:0.65rem;padding:2px 8px;border-radius:10px;background:var(--greendim);color:var(--green);border:1px solid rgba(76,175,125,0.3);">🟢 Online</span>
-      <button class="tbtn language-tbtn" data-language-toggle data-i18n-ignore onclick="toggleLanguage()" aria-label="Switch language to Turkish" title="Türkçe">TR</button>
-      <button class="tbtn" onclick="toggleTheme()">🌓</button>
-      <button class="tbtn" onclick="doLogout()">Logout</button>
-    </div>
-  </div>
-  <div id="panelContent"></div>
-</div>
-
-<!-- MODAL -->
-<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modalBox">
-    <h3 id="modalTitle"></h3>
-    <div id="modalBody"></div>
-    <div class="modal-actions" id="modalActions"></div>
-  </div>
-</div>
-
-<script src="bridge-auth.js"></script>
-<script src="i18n.js"></script>
-<script src="core.js"></script>
-<script src="club-auth.js"></script>
-<script src="superadmin-panel.js"></script>
-<script src="table-play.js"></script>
-<script src="screen-panel.js"></script>
-<script src="admin-panel-1.js"></script>
-<script src="admin-panel-2.js"></script>
-<script src="dealfiles.js"></script>
-<script src="dd.js"></script>
+<!-- The club tournaments moved from …/bridge/skor/ to …/bridge/bridgegate/ (BridgeGate): an old link (with ?club=…) goes on there -->
+<p>BridgeGate … <a id="go" href="../bridgegate/">../bridgegate/</a></p>
+<script>
+(async function () {
+  const to = '../bridgegate/' + location.search + location.hash;
+  document.getElementById('go').href = to;
+  // the old program's offline worker is no longer needed here
+  try { const regs = await navigator.serviceWorker.getRegistrations(); for (const r of regs) if (/\/skor\/$/.test(r.scope)) await r.unregister(); } catch (e) {}
+  location.replace(to);
+})();
+</script>
 </body>
 </html>

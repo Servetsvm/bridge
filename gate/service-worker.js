@@ -1,4 +1,4 @@
-// The club tournaments moved to …/bridge/skor/ (BridgeGate). This worker only removes itself and its old cache.
+// The club tournaments moved to …/bridge/bridgegate/ (BridgeGate). This worker only removes itself and its old cache.
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()

@@ -8152,7 +8152,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 216;
+const APP_V = 217;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9352,7 +9352,7 @@ function homeShell() {
       <div class="hpair">
       <div class="hcard hero hsmall">
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
-        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><a class="btn htour" href="skor/">🏆 ${T('Tournaments')}</a><div class="hrow3"><button class="btn hwatch" id="sbOpen">🃏 ${T('Social bridge')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
+        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><button class="btn gold hquick" id="hQuick">${T('Seat me at a table')}</button><a class="btn htour" href="bridgegate/">🏆 ${T('Tournaments')}</a><div class="hrow3"><button class="btn hwatch" id="sbOpen">🃏 ${T('Social bridge')}</button><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button></div></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
@@ -9653,7 +9653,7 @@ function toursHtml() {
   }).join('');
   const table = rows ? `<div class="ttwrap"><table class="ttab"><thead><tr><th>${T('Tournament')}</th><th>${T('Format')}</th><th class="n">${T('Boards')}</th><th>${T('Ranking')}</th><th class="n">${T('Players')}</th><th>${T('Status')}</th><th>${T('Ends in')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `<div class="muted">${L.length ? T('No tournaments here.') : T('No tournaments yet. Create one and invite the players you want.')}</div>`;
-  // the online tournaments (shown in the online table window; Tournaments on the home page opens BridgeGate (skor/))
+  // the online tournaments (shown in the online table window; Tournaments on the home page opens BridgeGate (bridgegate/))
   return `${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button></div>`;
 }
 // the action buttons of one tournament row (and a short note: an invitation, your table, how far you are)
@@ -9835,6 +9835,7 @@ function showOpenChoice() {
   openOv('open', `<h2>🌐 ${T('Open an online table')}</h2>
     <button class="btn new choice" data-open="pub"><b>🌍 ${T('Public table')}</b><small>${T('Listed in the lobby: anyone can ask to join, you accept.')}</small></button>
     <button class="btn choice" data-open="priv"><b>🔒 ${T('Private table')}</b><small>${T('Shown in the lobby with 🔒: invited players sit at once, others must ask you, no spectators.')}</small></button>
+    <div class="grp"><span>🏆 ${T('Online tournaments')}</span><div id="nTours">${toursHtml()}</div></div>
     <div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
 }
 // back to the home page from a board played alone (the board is kept for Continue)

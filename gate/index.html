@@ -7,11 +7,11 @@
 <style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0c1a14;color:#f2eee1;font-family:system-ui,sans-serif}a{color:#d9b25c}</style>
 </head>
 <body>
-<!-- The club tournaments moved from …/bridge/gate/ to …/bridge/skor/ (BridgeGate): an old link (with ?club=…) goes on there -->
-<p>BridgeGate … <a id="go" href="../skor/">../skor/</a></p>
+<!-- The club tournaments moved from …/bridge/gate/ to …/bridge/bridgegate/ (BridgeGate): an old link (with ?club=…) goes on there -->
+<p>BridgeGate … <a id="go" href="../bridgegate/">../bridgegate/</a></p>
 <script>
 (async function () {
-  const to = '../skor/' + location.search + location.hash;
+  const to = '../bridgegate/' + location.search + location.hash;
   document.getElementById('go').href = to;
   // the old program's offline worker is no longer needed here
   try { const regs = await navigator.serviceWorker.getRegistrations(); for (const r of regs) if (/\/gate\/$/.test(r.scope)) await r.unregister(); } catch (e) {}
