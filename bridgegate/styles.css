@@ -220,8 +220,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* ADMIN */
 .admin-wrap{max-width:700px;margin:0 auto;}
-.admin-tabs{display:flex;gap:4px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
-.admin-tabs::-webkit-scrollbar{display:none;}
+.admin-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;}
 .admin-tab{padding:7px 14px;border:1px solid var(--border);background:var(--surface2);border-radius:30px;color:var(--text2);cursor:pointer;font-size:0.75rem;font-weight:500;white-space:nowrap;transition:all 0.15s;font-family:inherit;}
 .admin-tab.active{background:var(--gold);color:#0f0e0c;border-color:var(--gold);font-weight:700;}
 .table-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;}
