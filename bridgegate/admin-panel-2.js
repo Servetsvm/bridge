@@ -772,50 +772,6 @@ function calcMPFromData(boards,movements){
 }
 
 
-// ── Security ──
-function renderSecurity(){
-  setTimeout(async()=>{ const p=await getTablePrefix(); const i=document.getElementById('secPrefix'); if(i){ i.value=p; secShowCodes(); } },0);
-  const link=location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=table';
-  return`
-  <div class="card">
-    <div class="card-title"><span>🔑</span> Table codes</div>
-    <p style="font-size:0.82rem;color:var(--text2);margin-bottom:14px;">Each table signs in with a 4-digit code: the 2-digit prefix below and its table number. With 00, table 1 is 0001, table 2 is 0002 and so on. Change the prefix to make the old codes stop working.</p>
-    <div class="field"><label>Prefix (2 digits)</label>
-      <div style="display:flex;gap:6px;"><input type="text" id="secPrefix" maxlength="2" inputmode="numeric" style="width:90px;font-size:1.2rem;text-align:center;" oninput="secShowCodes()"><button class="btn btn-gold" onclick="secSavePrefix()">💾 Save</button></div>
-    </div>
-    <div id="secCodes" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;margin:10px 0 16px;"></div>
-    <div class="field"><label>Link for the table devices</label><input type="text" readonly value="${link}" onclick="this.select()"></div>
-    <div style="font-size:0.75rem;color:var(--text3);">Open this link on each table's phone or tablet and type that table's code.</div>
-    <div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-full" style="background:#25d366;color:#fff;" onclick="secSend('wa',0)">${ICON_WA} WhatsApp</button><button class="btn btn-ghost btn-full" onclick="secSend('sms',0)">${ICON_SMS} SMS</button></div>
-    <div style="font-size:0.75rem;color:var(--text3);margin-top:6px;">${ICON_WA} / ${ICON_SMS} under a table: its link and its code in one message.</div>
-    <a class="btn btn-blue btn-full" style="margin-top:14px;text-decoration:none;" href="${location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=screen'}" target="_blank" rel="noopener">📺 Screen</a>
-  </div>`;
-}
-// the codes of every table, from the prefix being typed
-// the address a table opens (the club and the table role filled in)
-const secLink=()=>location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=table';
-// the message for one table (its code), or for every table (the link only)
-const secMsg=(n,code)=>n?`BridgeGate · ${CLUB_NAME||''}\n${i18nText?i18nText('Table')+' '+n:'Table '+n} · ${i18nText?i18nText('Code'):'Code'}: ${code}\n${secLink()}`:`BridgeGate · ${CLUB_NAME||''}\n${secLink()}`;
-window.secSend=function(how,n){
-  const p=(document.getElementById('secPrefix')?.value||'').replace(/\D/g,'');
-  const code=n?p+String(n).padStart(2,'0'):'';
-  // a table's link carries its code: tapping it signs that table in at once
-  const text=secMsg(n, code).replace(secLink(), code?secLink()+'&t='+code:secLink());
-  if(how==='wa') window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener');
-  else location.href='sms:?&body='+encodeURIComponent(text);
-};
-window.secShowCodes=function(){
-  const p=(document.getElementById('secPrefix')?.value||'').replace(/\D/g,'');
-  const box=document.getElementById('secCodes'); if(!box) return;
-  const n=Math.max(getState().tableCount||0, 1);
-  box.innerHTML=p.length===2?Array.from({length:Math.min(n,99)},(_,i)=>`<div style="padding:8px;border:1px solid var(--border);border-radius:8px;text-align:center;"><div style="font-size:0.7rem;color:var(--text3);">Table ${i+1}</div><div style="font-size:1.3rem;font-weight:700;letter-spacing:2px;color:var(--gold);">${p}${String(i+1).padStart(2,'0')}</div><div style="display:flex;gap:4px;justify-content:center;margin-top:6px;"><button class="btn btn-sm" style="background:#25d366;color:#fff;" title="WhatsApp" onclick="secSend('wa',${i+1})">${ICON_WA}</button><button class="btn btn-ghost btn-sm" title="SMS" onclick="secSend('sms',${i+1})">${ICON_SMS}</button></div></div>`).join(''):'';
-};
-window.secSavePrefix=async function(){
-  const p=(document.getElementById('secPrefix')?.value||'').trim();
-  try{ await saveTablePrefix(p); toast('✅ Table codes saved'); secShowCodes(); }
-  catch(e){ toast('❌ '+e.message); }
-};
-
 // ── Log ──
 function renderLog(){
   const logs=getLogs();

@@ -1542,4 +1542,10 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .sbsend .btn.sbwa,.btn.sbwa,.btn.wa{background:#25d366!important;color:#fff!important;border-color:#25d366!important}
 .sbsend .btn.sbsms,.btn.sms{background:#1e88e5!important;color:#fff!important;border-color:#1e88e5!important}
 .sbsend .btn{min-width:46px;min-height:36px;padding:4px 10px}
-.sbchg{align-items:center;justify-content:space-between}
+/* Social bridge for a player: the whole screen */
+#ov:has(.sheet.sbfull){padding:0}
+.sheet.sbfull{width:100%;max-width:none;height:100%;max-height:none;border-radius:0}
+/* the table this player sits at, and Change table */
+.sbchg{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:#1f5d36;color:#fff}
+.sbchg .sbtno{font-size:22px;font-weight:800}
+.sbchg .btn{font-size:16px;font-weight:700;padding:10px 14px}

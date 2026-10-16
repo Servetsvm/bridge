@@ -260,8 +260,8 @@ function renderTableDetail(tableNo){
     <div class="bm-device" style="max-width:360px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
         <button class="btn btn-ghost btn-sm" onclick="renderTablePanel()">← Back</button>
-        <button class="btn btn-ghost btn-sm" onclick="bgChangeTable()" title="Change table">🔄</button>
-        <span style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--gold);">Table ${tableNo}</span>
+        <button class="btn btn-gold btn-sm" style="margin-left:auto;font-weight:700;" onclick="bgChangeTable()">🔄 Change table</button>
+        <span style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold);">Table ${tableNo}</span>
         <span style="font-size:0.72rem;color:var(--text3);">${doneCount}/${totalBoards}</span>
         <span style="font-size:0.68rem;color:${bmSide==='ns'?'var(--blue)':'var(--gold)'};">${bmSide==='ns'?'🔵 NS':'🟡 EW'}</span>
         ${isPhantom?'<span class="phantom-badge">PHANTOM</span>':''}

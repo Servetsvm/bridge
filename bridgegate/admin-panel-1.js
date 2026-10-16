@@ -15,12 +15,11 @@ function renderAdminPanel(){
         <button class="admin-tab" onclick="setAdminTab('boards',this)">📊 Boards</button>
         <button class="admin-tab" onclick="setAdminTab('history',this)">📜 History</button>
         <button class="admin-tab" onclick="setAdminTab('log',this)">📋 Log</button>
-        <button class="admin-tab" onclick="setAdminTab('security',this)">🔑 Table codes</button>
       </div>
       <div id="adminContent"></div>
     </div>`;
   const tabs=document.querySelectorAll('.admin-tab');
-  const idx=['setup','players','movement','tables','boards','history','log','security'].indexOf(adminTab);
+  const idx=['setup','players','movement','tables','boards','history','log'].indexOf(adminTab);
   if(tabs[idx])tabs[idx].classList.add('active');
   renderAdminTab();
 }
@@ -32,7 +31,7 @@ window.setAdminTab=function(tab,btn){
 };
 function renderAdminTab(){
   const c=document.getElementById('adminContent');if(!c)return;
-  const m={setup:renderSetup,players:renderPlayersAdmin,movement:renderMovement,tables:renderTables,boards:renderBoards,history:renderHistory,log:renderLog,security:renderSecurity};
+  const m={setup:renderSetup,players:renderPlayersAdmin,movement:renderMovement,tables:renderTables,boards:renderBoards,history:renderHistory,log:renderLog};
   c.innerHTML=(m[adminTab]||renderSetup)();
   if(adminTab==='setup') setTimeout(adminUpdateCalc, 0);
 }
@@ -194,7 +193,7 @@ function renderSetup(){
       ${s.status==='running'&&s.currentRound<s.roundCount?`<button class="btn btn-gold" onclick="adminNextRound()">⏭ Next Round (${s.currentRound+1})</button>`:''}
       ${s.status==='running'&&s.currentRound>=s.roundCount?`<button class="btn btn-blue" onclick="adminFinish()">🏁 Finish Tournament</button>`:''}
     </div>
-    ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><button class="btn btn-green btn-full" onclick="showTableLinkModal()">📲 Send the players the link</button></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
+    ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;"><button class="btn btn-green btn-full" onclick="showTableLinkModal()">📲 Send the players the link</button><a class="btn btn-blue btn-full" style="text-decoration:none;text-align:center;" href="${location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=screen'}" target="_blank" rel="noopener">📺 Screen</a></div></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
   </div>
   <div class="card"><div class="card-title"><span>💾</span> Data</div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-blue" onclick="adminExport()">⬇ Export</button><button class="btn btn-purple" onclick="adminImportOpen()">⬆ Import</button><button class="btn btn-red" onclick="adminReset()">🗑 Reset</button></div></div>`;
 }
@@ -307,7 +306,8 @@ const playersLink=async()=>location.origin+location.pathname.replace(/bridgegate
 async function setLive(on){
   try{
     const s=getState(), url=await fbRootUrl('/live/'+CLUB_ID+'.json');
-    if(on) await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p:await getTablePrefix(),ts:Date.now()})});
+    const p=await getTablePrefix();
+    if(on){ try{ await saveTablePrefix(p); }catch(e){} await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p,ts:Date.now()})}); }
     else await fetch(url,{method:'DELETE'});
   }catch(e){}
 }

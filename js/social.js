@@ -130,6 +130,8 @@ const SB = (() => {
     sb.key = key;
     openOv('sb', sb.setup ? setupHtml() : !sb.id ? listHtml() : gameHtml());
     const s = document.querySelector('#ov .sheet'); if (s && top) s.scrollTop = top;
+    // a player's game fills the screen (table number, players, boards, the scoring)
+    if (s) s.classList.toggle('sbfull', !!(sb.id && !sb.setup && sb.g && sb.g.m && !canManage(sb.g.m)));
   }
   // a game running now (opened in the last day and not finished)
   const running = () => (sb.list || []).some(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
@@ -173,9 +175,10 @@ const SB = (() => {
     else if (sb.view === 'rank') body = rankHtml();
     else if (sb.view === 'tables') body = tablesHtml();
     else body = boardsHtml();
-    return `<h2>🃏 ${esc(m.n)}</h2>
-      <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>
-      ${sb.board ? '' : links}${mt && !done() && !pending() && !sb.board ? `<div class="row2 sbchg"><span class="muted">${T('Table {0}', mt)}</span><button class="btn" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
+    // a player sees only the game (full screen, no title lines); the organiser keeps the game's details
+    return `${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
+      <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
+      ${sb.board ? '' : links}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
@@ -396,22 +399,28 @@ const SB = (() => {
   }
 
   /* running games are listed with the open tables on the home page (the list is fetched at most once a minute) */
-  const lob = { L: null, ts: 0, busy: false, html: '' };
+  // the games running now, under Open tables: Social bridge games (sbi) and club tournaments in BridgeGate (gate/live)
+  const lob = { L: null, G: null, ts: 0, busy: false, html: '' };
+  const running24 = g => g && g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3;
   function lobbyHtml() {
     if (!lob.busy && Date.now() - lob.ts > 60e3 && C() && C().on) {
       lob.busy = true;
-      C().get('sbi').then(L => {
-        lob.L = Object.entries(L || {}).map(([id, v]) => ({ id, ...v })).filter(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3).sort((a, b) => b.ts - a.ts);
+      Promise.all([C().get('sbi').catch(() => null), C().get('gate/live').catch(() => null)]).then(([L, G]) => {
+        lob.L = Object.entries(L || {}).map(([id, v]) => ({ id, ...v })).filter(running24).sort((a, b) => b.ts - a.ts);
+        lob.G = Object.entries(G || {}).map(([club, v]) => ({ club, ...v })).filter(g => running24(g) && /^\d{2}$/.test(g.p || ''));
         const h = rowsHtml(); if (h !== lob.html) { lob.html = h; if (typeof render === 'function') render(); }
-      }).catch(() => {}).finally(() => { lob.busy = false; lob.ts = Date.now(); });
+      }).finally(() => { lob.busy = false; lob.ts = Date.now(); });
     }
     return lob.html = rowsHtml();
   }
-  // under Open tables a running game is only shown (the players join it with Table No); Table No's own list opens it
-  const rowsHtml = open => (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div>${open ? `<div class="otb"><button class="btn new" data-sbgo="${g.id}">${T('Open')}</button></div>` : `<div class="otb"><small>🃏 ${T('Table No')}</small></div>`}</div>`).join('');
+  // each game with its Table No button: the table number, then the players, then the boards
+  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn gold" data-bgtno="${i}">🃏 ${T('Table No')}</button></div></div>`).join('')
+    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn gold" data-sbtno="${g.id}">🃏 ${T('Table No')}</button></div></div>`).join('');
 
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
+    const tno = e.target.closest('[data-sbtno]'); if (tno) return openLink(tno.dataset.sbtno, 0);
+    const bno = e.target.closest('[data-bgtno]'); if (bno && lob.G && lob.G[+bno.dataset.bgtno]) return gateGo(lob.G[+bno.dataset.bgtno]);
     const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }
     if (ui.overlay !== 'sb') return;
     const el = e.target.closest('button'); if (!el) return;
@@ -429,7 +438,6 @@ const SB = (() => {
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
     if (d.sbopen) return openGame(d.sbopen);
-    if (d.bggo != null && sb.live && sb.live[+d.bggo]) return gateGo(sb.live[+d.bggo]);
     if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText()); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
     if (id === 'sbList') { setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
@@ -461,19 +469,5 @@ const SB = (() => {
   }
   // a club tournament: BridgeGate asks the table number, then the players, then the boards
   const gateGo = g => { location.href = 'bridgegate/?club=' + encodeURIComponent(g.club) + '&role=table&p=' + g.p; };
-  // Table No without the organiser's link on this device: the games running now (one: straight in), then the table number
-  async function pick() {
-    openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
-    let L = [], G = [];
-    try { L = Object.entries(await C().get('sbi') || {}).map(([id, v]) => ({ id, ...v })).filter(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3).sort((a, b) => b.ts - a.ts); } catch (e) {}
-    // the club tournaments (BridgeGate) running now
-    try { G = Object.entries(await C().get('gate/live') || {}).map(([club, v]) => ({ club, ...v })).filter(g => g && /^\d{2}$/.test(g.p || '') && Date.now() - g.ts < 24 * 3600e3); } catch (e) {}
-    if (L.length + G.length === 1) return L.length ? openLink(L[0].id, 0) : gateGo(G[0]);
-    if (!L.length && !G.length) { closeOv(); flash(T('No game is running now.'), 3000); return; }
-    lob.L = L;
-    const gRows = G.map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-bggo="${i}">${T('Open')}</button></div></div>`).join('');
-    sb.live = G;
-    openOv('sb', `<h2>🃏 ${T('Table No')}</h2>${gRows}${rowsHtml(true)}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
-  }
-  return { open, openLink, pick, lobbyHtml, locked };
+  return { open, openLink, lobbyHtml, locked };
 })();
