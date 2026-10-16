@@ -402,16 +402,26 @@ const SB = (() => {
   // the games running now, under Open tables: Social bridge games (sbi) and club tournaments in BridgeGate (gate/live)
   const lob = { L: null, G: null, ts: 0, busy: false, html: '' };
   const running24 = g => g && g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3;
+  async function loadLobby() {
+    const [L, G] = await Promise.all([C().get('sbi').catch(() => null), C().get('gate/live').catch(() => null)]);
+    lob.L = Object.entries(L || {}).map(([id, v]) => ({ id, ...v })).filter(running24).sort((a, b) => b.ts - a.ts);
+    lob.G = Object.entries(G || {}).map(([club, v]) => ({ club, ...v })).filter(g => running24(g) && /^\d{2}$/.test(g.p || ''));
+  }
   function lobbyHtml() {
     if (!lob.busy && Date.now() - lob.ts > 60e3 && C() && C().on) {
       lob.busy = true;
-      Promise.all([C().get('sbi').catch(() => null), C().get('gate/live').catch(() => null)]).then(([L, G]) => {
-        lob.L = Object.entries(L || {}).map(([id, v]) => ({ id, ...v })).filter(running24).sort((a, b) => b.ts - a.ts);
-        lob.G = Object.entries(G || {}).map(([club, v]) => ({ club, ...v })).filter(g => running24(g) && /^\d{2}$/.test(g.p || ''));
-        const h = rowsHtml(); if (h !== lob.html) { lob.html = h; if (typeof render === 'function') render(); }
-      }).finally(() => { lob.busy = false; lob.ts = Date.now(); });
+      loadLobby().then(() => { const h = rowsHtml(); if (h !== lob.html) { lob.html = h; if (typeof render === 'function') render(); } })
+        .catch(() => {}).finally(() => { lob.busy = false; lob.ts = Date.now(); });
     }
     return lob.html = rowsHtml();
+  }
+  // the home's Open tables button: the games running now in a window, each with its Table No
+  async function openTables() {
+    openOv('otab', `<h2>🃏 ${T('Open tables')}</h2><div class="muted">${T('Loading…')}</div>`);
+    try { await loadLobby(); lob.ts = Date.now(); } catch (e) {}
+    if (ui.overlay !== 'otab') return;
+    const rows = rowsHtml();
+    openOv('otab', `<h2>🃏 ${T('Open tables')}</h2><div class="otours">${rows || `<div class="muted">${T('No game is running now.')}</div>`}</div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
   }
   // each game with its Table No button: the table number, then the players, then the boards
   const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn gold" data-bgtno="${i}">🃏 ${T('Table No')}</button></div></div>`).join('')
@@ -419,6 +429,7 @@ const SB = (() => {
 
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
+    if (e.target.closest('#sbTables')) return openTables();
     const tno = e.target.closest('[data-sbtno]'); if (tno) return openLink(tno.dataset.sbtno, 0);
     const bno = e.target.closest('[data-bgtno]'); if (bno && lob.G && lob.G[+bno.dataset.bgtno]) return gateGo(lob.G[+bno.dataset.bgtno]);
     const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }

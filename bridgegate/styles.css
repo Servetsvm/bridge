@@ -386,3 +386,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* the WhatsApp logo / SMS bubble inside a button */
 .ico{width:1.2em;height:1.2em;vertical-align:-0.25em;display:inline-block;flex:none}
 .ico{width:1.35em;height:1.35em}
+/* a table's score entry: the Bridgemate III screen fills the whole phone (no top bar, the device edge to edge) */
+#app:has(#panelContent > .bm3) .topbar{display:none}
+#panelContent:has(> .bm3){padding:0;max-width:none}
+#panelContent > .bm3{max-width:none;min-height:100vh;min-height:100dvh;border-radius:0;padding:30px 8px 10px;box-sizing:border-box;display:flex;flex-direction:column}
+#panelContent > .bm3 .bm3-screen{flex:1;display:flex;flex-direction:column}
+#panelContent > .bm3 .bm3-actions{margin-top:auto}
