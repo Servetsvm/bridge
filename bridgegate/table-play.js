@@ -139,6 +139,8 @@ window.bgPlayerSit=function(){
   document.getElementById('loginForm').style.display='block';
   selRole('table');
   document.getElementById('pwInput').value=e.prefix+String(e.n).padStart(2,'0');
+  // the code works in the background: the box and the club links stay out of sight while the table signs in
+  ['pwWrap','clubLinks'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
   doLogin();
 };
 
@@ -216,33 +218,15 @@ function renderTableDetail(tableNo){
       <button class="btn btn-gold btn-sm" onclick="event.stopPropagation();bmEnterBoard(${nextBoard.boardNo})">Enter ↵</button>
     </div>`;
   }
-  // Board status overview for this table
-  const allBoardsHtml=boardList.map(bl=>{
-    const done=bl.data&&bl.data.status==='done';
-    const pending=bl.data&&bl.data.status!=='done'&&bl.data;
-    const isNext=nextBoard&&nextBoard.boardNo===bl.boardNo&&!approvalPending;
-    const col=done?'var(--green)':isNext?'var(--gold)':'var(--border2)';
-    const icon=done?'✅':isNext?'▶':'⭕';
-    const score=done&&typeof bl.data.nsScore==='number'?(bl.data.nsScore>=0?'+':'')+bl.data.nsScore+' NS':'';
-    // the board's MP % and IMP against the other tables that have finished it (from this table's side: NS or EW)
-    let cmp='';
-    if(done&&typeof bl.data.nsScore==='number'){
-      const o=getOtherTablesSameBoard(bl.boardNo,tableNo,s.currentRound);
-      if(o.length){
-        let mp=0,imp=0; o.forEach(x=>{mp+=bl.data.nsScore>x.nsScore?2:bl.data.nsScore===x.nsScore?1:0; imp+=scoreToIMP(bl.data.nsScore-x.nsScore);});
-        let pct=Math.round(mp/(2*o.length)*1000)/10, im=imp/o.length;
-        if(bmSide==='ew'){ pct=Math.round((100-pct)*10)/10; im=-im; }
-        cmp=`MP ${pct}% · IMP ${fmtImp(im)}`;
-      }
-    }
-    return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">
-      <span style="font-size:1rem;">${icon}</span>
-      <span style="font-size:0.82rem;font-weight:${isNext?700:400};color:${col};">Board ${bl.boardNo}</span>
-      ${score?`<span style="font-size:0.72rem;color:var(--text3);margin-left:auto;">${score}</span>`:''}
-      ${cmp?`<span style="font-size:0.72rem;font-weight:700;color:var(--gold);">${cmp}</span>`:''}
-      ${done&&bl.data.durationSec?`<span style="font-size:0.65rem;color:var(--text3);">${bl.data.durationSec<60?bl.data.durationSec+'s':Math.floor(bl.data.durationSec/60)+'m'}</span>`:''}
-    </div>`;
-  }).join('');
+  // a played board's MP % and IMP against the other tables that have finished it (from this table's side)
+  const cmpOf=bl=>{
+    if(!(bl.data&&bl.data.status==='done'&&typeof bl.data.nsScore==='number')) return '';
+    const o=getOtherTablesSameBoard(bl.boardNo,tableNo,s.currentRound); if(!o.length) return '';
+    let mp=0,imp=0; o.forEach(x=>{mp+=bl.data.nsScore>x.nsScore?2:bl.data.nsScore===x.nsScore?1:0; imp+=scoreToIMP(bl.data.nsScore-x.nsScore);});
+    let pct=Math.round(mp/(2*o.length)*1000)/10, im=imp/o.length;
+    if(bmSide==='ew'){ pct=Math.round((100-pct)*10)/10; im=-im; }
+    return `MP ${pct}% · IMP ${fmtImp(im)}`;
+  };
 
   const allDone=doneCount===totalBoards&&totalBoards>0;
   if(allDone)unlockTable(tableNo); // Remove lock — table finished
@@ -260,34 +244,27 @@ function renderTableDetail(tableNo){
     }
   }
 
+  // the four players round the table (North at the top), as on a Bridgemate III
+  const [pN,pS]=splitPairName(nsPair.isPhantom?'':nsPair.name), [pE,pW]=splitPairName(ewPair.isPhantom?'':ewPair.name);
+  const seat=(cls,l,n)=>`<div class="bm3t-seat ${cls}"><small>${l}</small><b>${n||'—'}</b></div>`;
+  // the boards of this round as large tiles: a played one with its score, the next one to tap
+  const tiles=boardList.map(bl=>{
+    const done=bl.data&&bl.data.status==='done', pend=approvalPending&&approvalPending.boardNo===bl.boardNo;
+    const isNext=!done&&!pend&&!approvalPending&&nextBoard&&nextBoard.boardNo===bl.boardNo;
+    const score=done&&typeof bl.data.nsScore==='number'?(bl.data.nsScore>0?'+':'')+bl.data.nsScore+' NS':done?'✓':'';
+    const cmp=cmpOf(bl);
+    return `<button class="bm3t-tile${done?' done':''}${isNext?' next':''}${pend?' pend':''}" ${!done&&!pend&&!approvalPending?`onclick="bmEnterBoard(${bl.boardNo})"`:'disabled'}><b>${bl.boardNo}</b><small>${done?score:pend?'⏳':isNext?'▶':'—'}</small>${cmp?`<i>${cmp}</i>`:''}</button>`;
+  }).join('');
   document.getElementById('panelContent').innerHTML=`
-    <div class="bm-device" style="max-width:360px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <button class="btn btn-ghost btn-sm" onclick="renderTablePanel()">← Back</button>
-        <button class="btn btn-gold btn-sm" style="margin-left:auto;font-weight:700;" onclick="bgChangeTable()">🔄 Change table</button>
-        <span style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--gold);">Table ${tableNo}</span>
-        <span style="font-size:0.72rem;color:var(--text3);">${doneCount}/${totalBoards}</span>
-        <span style="font-size:0.68rem;color:${bmSide==='ns'?'var(--blue)':'var(--gold)'};">${bmSide==='ns'?'🔵 NS':'🟡 EW'}</span>
-        ${isPhantom?'<span class="phantom-badge">PHANTOM</span>':''}
-      </div>
-      <div class="bm-lcd">
-        <div class="bm-lcd-row inv">Round ${s.currentRound}  ·  Table ${tableNo}  ·  Boards ${m.boardStart||'?'}–${m.boardEnd||'?'}</div>
-        <div class="bm-lcd-row">🔵 NS: ${nsPair.name.slice(0,30)}</div>
-        <div class="bm-lcd-row">🟡 EW: ${ewPair.name.slice(0,30)}</div>
-        <div class="bm-lcd-row" style="color:var(--gold);font-size:0.72rem;">${scoringName(s)==='IMP'?'IMP Scoring':'MP + IMP Scoring'}</div>
-      </div>
-      <div style="padding:4px 0 8px;">
-        <div style="font-size:0.7rem;color:var(--text3);font-weight:600;margin-bottom:4px;letter-spacing:0.05em;">BOARDS THIS ROUND</div>
-        ${allBoardsHtml}
-      </div>
-      <div id="boardsSection">
-        <div class="card">
-          <div class="card-title"><span>🃏</span> ${allDone?'All Boards Complete ✓':nextBoard?'Next Board: '+nextBoard.boardNo:approvalPending?'Awaiting Approval...':'Ready'}</div>
-          <div id="boardsList">${boardsHTML}</div>
-          ${isPhantom?`<div style="margin-top:8px;text-align:center;font-size:0.8rem;color:var(--purple);">👻 Phantom pair — sit out</div>`:''}
-        </div>
-        ${actionHTML}
-      </div>
+    <div class="bm3t">
+      <div class="bm3t-round"><div class="r">Round ${s.currentRound}</div><div class="p">NS ${nsNum} – EW ${ewNum}</div><div class="b">Boards ${m.boardStart||'?'} – ${m.boardEnd||'?'}</div></div>
+      <div class="bm3t-table">${seat('n','North',pN)}${seat('w','West',pW)}<div class="bm3t-mid">N<span>▲</span></div>${seat('e','East',pE)}${seat('s','South',pS)}</div>
+      ${isPhantom?`<div class="bm3t-note">👻 Phantom pair — sit out</div>`:''}
+      <div class="bm3-step">${allDone?'All Boards Complete ✓':'Boards'}</div>
+      <div class="bm3t-tiles">${tiles}</div>
+      ${approvalPending?`<div class="bm3t-pendrow">${boardsHTML}</div>`:''}
+      <div id="boardsSection">${actionHTML}</div>
+      <button class="btn btn-full bm3t-chg" onclick="bgChangeTable()">🔄 Change table</button>
     </div>`;
 
   // Other tables — same boards (all rounds, all tournament types)
