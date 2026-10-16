@@ -1561,3 +1561,10 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
   .sheet.sbfull{width:440px;height:min(880px,calc(100vh - 40px));border:12px solid #111;border-radius:30px;position:relative;padding-top:0}
 }
 .sbentry{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid #d9d4c3;border-radius:12px}.sbentry>b{font-size:17px}.sbentry>small{color:#777;margin-top:-6px}:root[data-theme="dark"] .sbentry{border-color:#3a4a40}
+/* on a phone "Add a convention" and "Write to the administrator" share one line with short labels (same size) */
+.prac .prask .sh{display:none}
+@media (max-width:600px){
+  .prac .prask .lg{display:none}.prac .prask .sh{display:inline}
+  .prac .praskrow:not(:has(#hConvReq)){flex-wrap:nowrap}
+  .prac .praskrow:not(:has(#hConvReq)) .prask{white-space:nowrap;flex:1 1 0}
+}
