@@ -175,7 +175,7 @@ const SB = (() => {
     const vul = [E.vulOf(b, 0), E.vulOf(b, 1)], vt = vul[0] && vul[1] ? T('All vulnerable') : vul[0] ? T('{0} vulnerable', SEAT_AB[0] + SEAT_AB[2]) : vul[1] ? T('{0} vulnerable', SEAT_AB[1] + SEAT_AB[3]) : T('None vulnerable');
     const head = `<h3>${T('Board {0}', b)} <small class="muted">${T('Dealer')}: ${SEAT[E.dealerOf(b)]} · ${vt}</small></h3>`;
     const mine = mt && R[mt], others = ts.filter(t => +t !== mt).length;
-    if (sb.form || (!done() && mt && !mine)) return head + formHtml(b) + (others && !sb.formT ? `<div class="muted">${T('{0} tables have played this board. You will see their results after entering yours.', others)}</div>` : '');
+    if (sb.form || (!done() && mt && !mine)) return formHtml(b) + (others && !sb.formT ? `<div class="muted">${T('{0} tables have played this board. You will see their results after entering yours.', others)}</div>` : '');
     if (!done() && !mt) return head + `<div class="muted">${T('First choose your table above.')}</div>`;
     if (!done() && !mine.ok) return head + `<div class="sbform"><div class="muted">${T('Table {0}', mt)}: ${esc(pairName(mt, 'ns'))} — ${esc(pairName(mt, 'ew'))}</div>
       <div class="sbprev"><b>${conTxt(mine)} ${resTxt(mine)} · ${scoreTxt(b, mine)}</b></div>
@@ -195,18 +195,35 @@ const SB = (() => {
     const f = sb.form || (sb.form = R[mt] ? { ...R[mt] } : { l: null, s: null, x: 0, d: null, k: null });
     const need = f.l ? f.l + 6 : 0;
     const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
-    let preview = '';
-    if (f.l === 0) preview = T('Passed out') + ' · 0';
-    else if (f.l && f.s != null && f.d != null && f.k != null) { const ns = nsScore(b, f), ew = E.sideOf(f.d) === 1; preview = `${conTxt(f)} ${resTxt(f)} · ${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; }
     const ok = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null);
-    return `<div class="sbform"><div class="muted">${T('Table {0}', mt)}: ${esc(pairName(mt, 'ns'))} — ${esc(pairName(mt, 'ew'))}</div>
-      <div class="grp"><span>${T('Contract')}</span>${seg('l', [[0, T('Pass')], ...[1, 2, 3, 4, 5, 6, 7].map(n => [n, n])], f.l)}</div>
-      ${f.l ? `<div class="grp"><span>${T('Suit')}</span>${seg('s', SUITS.map((x, i) => [i, sym(i)]), f.s)}</div>
-      <div class="grp"><span>${T('Doubled')}</span>${seg('x', [[0, '—'], [1, 'X'], [2, 'XX']], f.x)}</div>
-      <div class="grp"><span>${T('Declarer')}</span>${seg('d', [0, 1, 2, 3].map(s => [s, SEAT[s]]), f.d)}</div>
-      <div class="grp"><span>${T('Result')}</span>${seg('k', res, f.k)}</div>` : ''}
-      ${preview ? `<div class="sbprev"><b>${preview}</b></div>` : ''}
-      <div class="row2"><button class="btn new" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>${T('Save')}</button>${R[mt] ? `<button class="btn" id="sbCancel">${T('Cancel')}</button>` : ''}</div></div>`;
+    // the screen of a Bridgemate III: the contract and the N-S score on the display, then one row of large keys per step
+    const ns = ok ? (f.l ? nsScore(b, f) : 0) : null;
+    const contract = f.l === 0 ? T('Pass') : f.l ? `${f.l}${f.s != null ? sym(f.s) : ''}${f.x === 1 ? ' X' : f.x === 2 ? ' XX' : ''}${f.d != null ? ' ' + SEAT_AB[f.d] : ''}` : '—';
+    const vul = [E.vulOf(b, 0), E.vulOf(b, 1)], vc = vul[0] && vul[1] ? 'both' : vul[0] ? 'ns' : vul[1] ? 'ew' : 'none';
+    const vt = vul[0] && vul[1] ? T('All vulnerable') : vul[0] ? T('{0} vulnerable', SEAT_AB[0] + SEAT_AB[2]) : vul[1] ? T('{0} vulnerable', SEAT_AB[1] + SEAT_AB[3]) : T('None vulnerable');
+    const keys = (name, cls, opts, cur) => `<div class="bm3-keys ${cls}" data-sbseg="${name}">${opts.map(([v, l, c]) => `<button data-v="${v}" class="bm3-key ${c || ''}${String(cur) === String(v) ? ' active' : ''}">${l}</button>`).join('')}</div>`;
+    return `<div class="bm3"><div class="bm3-screen">
+      <div class="bm3-bar"><span class="td">🃏</span><div class="ev"><b>${esc(sb.g.m.n)}</b>${T('Table {0}', mt)} · ${T('Dealer')}: ${SEAT[E.dealerOf(b)]}</div></div>
+      <div class="bm3-head">
+        <div class="bm3-board"><small>${T('Board')}</small><b>${b}</b><span class="bm3-vul ${vc}">${vt}</span></div>
+        ${R[mt] ? `<div class="bm3-edit">✎</div>` : ''}
+        <div class="bm3-pairs"><div><i>${SEAT_AB[0] + SEAT_AB[2]}</i>${esc(pairName(mt, 'ns'))}</div><div><i>${SEAT_AB[1] + SEAT_AB[3]}</i>${esc(pairName(mt, 'ew'))}</div></div>
+      </div>
+      <div class="bm3-display">
+        <div class="bm3-contract">${contract}</div>
+        <div class="bm3-sub"><span>${T('Result')}: ${f.l && f.k != null ? resTxt(f) : '—'}</span></div>
+        <div class="bm3-score"><small>${SEAT_AB[0] + SEAT_AB[2]}</small><b class="${ns > 0 ? 'pos' : ns < 0 ? 'neg' : ''}">${ns == null ? '—' : signed(ns)}</b></div>
+      </div>
+      <div class="bm3-step">${T('Contract')}</div>
+      ${keys('l', 'k4', [...[1, 2, 3, 4, 5, 6, 7].map(n => [n, n]), [0, T('Pass'), 'pass']], f.l)}
+      ${f.l ? `${keys('s', 'k5', [0, 1, 2, 3, 4].map(i => [i, i === 4 ? 'NT' : SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.s)}
+      ${keys('x', 'k3', [[0, '—'], [1, 'X', 'dbl'], [2, 'XX', 'dbl']], f.x)}
+      <div class="bm3-step">${T('Declarer')}</div>
+      ${keys('d', 'k4', [0, 1, 2, 3].map(s => [s, SEAT_AB[s]]), f.d)}
+      <div class="bm3-step">${T('Result')}</div>
+      ${keys('k', 'k7', res.map(([k, l]) => [k, l, 'res ' + (k - need === 0 ? 'made' : k > need ? 'over' : 'down')]), f.k)}` : ''}
+      <div class="bm3-actions"${R[mt] ? '' : ' style="grid-template-columns:1fr"'}>${R[mt] ? `<button class="bm3-cancel" id="sbCancel">✕ ${T('Cancel')}</button>` : ''}<button class="bm3-ok" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>✓ ${T('Save')}</button></div>
+    </div></div>`;
   }
   function rankHtml() {
     const L = standings();
