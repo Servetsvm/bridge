@@ -91,12 +91,21 @@ async function initClubGate(){
   const params=new URLSearchParams(location.search);
   let id=params.get('club');
   const roleParam=params.get('role');
+  const fromLink=!!id;
   if(!id){ try{ id=localStorage.getItem('bg_clubId'); }catch(e){} }
   const u=me();
   if(u) await window.bridgeSession();
   if(id){
     const info=await checkClubExists(id);
-    if(info&&(info.active!==false||isSuper())){
+    // the club this device opened last opens again only for its admin: another player on the same phone or PC
+    // (signed in with another name) goes to the tournament running now, at the table number
+    const ownClub=info&&u&&(u.key==='servet'||info.owner===u.key);
+    // a player (not this club's admin) at a club whose tournament is running: the table number at once
+    if(info&&u&&!ownClub&&!roleParam){
+      const lt=(await liveTournaments()).find(t=>t.club===id);
+      if(lt){ location.replace(location.pathname+'?club='+encodeURIComponent(id)+'&role=table&p='+lt.p); return; }
+    }
+    if(info&&(info.active!==false||isSuper())&&(fromLink||ownClub)){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
       if(roleParam&&['table','screen'].includes(roleParam)) selRole(roleParam);
       // a table's own link carries its code (&t=0003): it signs in at once
@@ -107,20 +116,35 @@ async function initClubGate(){
       const pp=params.get('p'); if(roleParam==='table'&&!tc&&/^\d{2}$/.test(pp||'')) bgPlayerEntry(pp);
       return;
     }
-    try{ localStorage.removeItem('bg_clubId'); }catch(e){}
+    if(!info||(info.active===false&&!isSuper())){ try{ localStorage.removeItem('bg_clubId'); }catch(e){} }
   }
   // the player's own club opens at once (the admin types the PIN and is in the admin panel)
-  if(u){ const mine=await myClubs(), ids=Object.keys(mine); if(ids.length===1&&await openClub(ids[0],null)){ setTimeout(()=>document.getElementById('pwInput')?.focus(),100); return; } }
+  let mine={};
+  if(u){ mine=await myClubs(); const ids=Object.keys(mine); if(ids.length===1&&await openClub(ids[0],null)){ setTimeout(()=>document.getElementById('pwInput')?.focus(),100); return; } }
+  // a player: the tournament running now asks the table number at once (several: the player chooses)
+  if(u&&!Object.keys(mine).length&&!isSuper()){
+    const live=await liveTournaments();
+    if(live.length===1){ location.replace(location.pathname+'?club='+encodeURIComponent(live[0].club)+'&role=table&p='+live[0].p); return; }
+    if(live.length>1){ renderClubGate(live); return; }
+  }
   renderClubGate();
 }
-async function renderClubGate(){
+// the club tournaments running now (gate/live: name, club, tables, table code prefix)
+async function liveTournaments(){
+  try{ const r=await fetch(await fbRootUrl('/live.json')); const v=r.ok?await r.json():null;
+    return Object.entries(v||{}).map(([club,t])=>({club,...t})).filter(t=>t&&/^\d{2}$/.test(t.p||'')&&Date.now()-t.ts<24*3600e3).sort((a,b)=>b.ts-a.ts);
+  }catch(e){ return []; }
+}
+async function renderClubGate(live){
   const g=document.getElementById('clubGate'); g.style.display='block';
   const u=me(), box=document.getElementById('myClubsBox');
   document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');
   if(!box) return;
   if(!u){ box.innerHTML=`<div class="login-err" style="color:var(--text2);">Sign in to Bridge Table first (name and PIN), then come back here.</div><a class="btn-primary" style="display:block;text-decoration:none;margin-top:8px;" href="../">← Bridge Table</a>`; return; }
   const mine=await myClubs(), ids=Object.keys(mine);
-  box.innerHTML=`<div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px;">👤 ${cleanData(u.name)}</div>
+  // the tournaments running now: a player chooses one and gives the table number
+  const lv=(live||[]).map(t=>`<button class="btn-primary" style="margin-bottom:6px;" onclick="location.replace(location.pathname+'?club=${encodeURIComponent(t.club)}&role=table&p=${t.p}')">🃏 ${cleanData(t.c||'')}${t.n?' — '+cleanData(t.n):''}</button>`).join('');
+  box.innerHTML=`<div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px;">👤 ${cleanData(u.name)}</div>${lv}
     ${ids.length?`<div style="font-size:0.72rem;color:var(--text3);margin:6px 0 4px;">My clubs</div>`+ids.map(i=>`<button class="btn-primary" style="margin-bottom:6px;" onclick="openMyClub('${i}')">🏛 ${mine[i]}</button>`).join(''):''}
     <div style="font-size:0.72rem;color:var(--text3);margin:10px 0 4px;">${ids.length?'Open another club':'Open your club'}</div>
     <div class="pw-wrap"><input type="text" id="newClubName" maxlength="40" placeholder="Club name" onkeydown="if(event.key==='Enter')createMyClub()"></div>
