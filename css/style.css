@@ -1542,3 +1542,4 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .sbsend .btn.sbwa,.btn.sbwa,.btn.wa{background:#25d366!important;color:#fff!important;border-color:#25d366!important}
 .sbsend .btn.sbsms,.btn.sms{background:#1e88e5!important;color:#fff!important;border-color:#1e88e5!important}
 .sbsend .btn{min-width:46px;min-height:36px;padding:4px 10px}
+.sbchg{align-items:center;justify-content:space-between}

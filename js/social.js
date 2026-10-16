@@ -7,7 +7,8 @@ const SB = (() => {
   'use strict';
   const sb = { list: null, id: null, g: null, view: 'boards', board: 0, form: null, err: '', busy: false, timer: 0, setup: null };
   const C = () => Net.Cloud;
-  const myTableKey = id => 'bridge-sb-table-' + id;
+  // the table is remembered per game and per player: another name on the same phone chooses its own table
+  const myTableKey = id => 'bridge-sb-table-' + id + ':' + (localStorage.getItem('bridge-table-name') || '').toLowerCase();
   const myTable = () => { try { return +localStorage.getItem(myTableKey(sb.id)) || 0; } catch (e) { return 0; } };
   const setMyTable = t => { try { localStorage.setItem(myTableKey(sb.id), String(t)); } catch (e) {} };
   const SUITS = ['♣', '♦', '♥', '♠', 'NT'];
@@ -174,7 +175,7 @@ const SB = (() => {
     else body = boardsHtml();
     return `<h2>🃏 ${esc(m.n)}</h2>
       <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>
-      ${sb.board ? '' : links}${sb.board || pickTable || needNames ? '' : tabs}${body}
+      ${sb.board ? '' : links}${mt && !done() && !pending() && !sb.board ? `<div class="row2 sbchg"><span class="muted">${T('Table {0}', mt)}</span><button class="btn" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : `<button class="btn" id="sbList">← ${T('All games')}</button>`}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
@@ -448,6 +449,7 @@ const SB = (() => {
     if (id === 'sbSeatOk') return seatOk();
     if (id === 'sbSeatCancel') { sb.seatK = null; return show(); }
     if (id === 'sbSeatsGo') return seatsGo();
+    if (id === 'sbChangeT') { setMyTable(0); sb.seats = null; sb.seatK = null; sb.board = 0; sb.form = null; return show(); }   // this player moves to another table
     if (id === 'sbWa') { window.open('https://wa.me/?text=' + encodeURIComponent(standingsText()), '_blank', 'noopener'); return; }
   });
 

@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Change table": "Masa değiştir",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Şu anda açık bir oyun var: Masa No ile katıl. Başka bir oyunu sadece yönetici açabilir.",
     "No game is running now.": "Şu anda açık bir oyun yok.",
     "Member number or name": "Üye numarası ya da isim",
@@ -352,6 +353,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Change table": "Bytt bord",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Et spill pågår nå: bli med via Bordnr. Bare administratoren kan åpne et nytt spill.",
     "No game is running now.": "Ingen spill pågår nå.",
     "Member number or name": "Medlemsnummer eller navn",
@@ -701,6 +703,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Change table": "Cambiar de mesa",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Hay una partida en curso: únete con Mesa n.º. Solo el administrador puede abrir otra partida.",
     "No game is running now.": "Ahora no hay ninguna partida en curso.",
     "Member number or name": "Número de socio o nombre",
@@ -1078,6 +1081,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Change table": "Changer de table",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Une partie est en cours : rejoins-la avec Table n°. Seul l’administrateur peut ouvrir une autre partie.",
     "No game is running now.": "Aucune partie n’est en cours.",
     "Member number or name": "Numéro de licence ou nom",
@@ -1455,6 +1459,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Change table": "Cambia tavolo",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "C’è una partita in corso: entra con Tavolo n. Solo l’amministratore può aprirne un’altra.",
     "No game is running now.": "Al momento non c’è nessuna partita in corso.",
     "Member number or name": "Numero di tessera o nome",
@@ -1832,6 +1837,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Change table": "Tisch wechseln",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Gerade läuft ein Spiel: tritt mit Tisch-Nr. bei. Nur der Administrator kann ein weiteres Spiel öffnen.",
     "No game is running now.": "Gerade läuft kein Spiel.",
     "Member number or name": "Mitgliedsnummer oder Name",
@@ -2209,6 +2215,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Change table": "Сменить стол",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Сейчас идёт игра: присоединяйтесь через «Стол №». Открыть другую игру может только администратор.",
     "No game is running now.": "Сейчас нет идущих игр.",
     "Member number or name": "Номер члена или имя",
@@ -2586,6 +2593,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Change table": "Zmień stół",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "Trwa teraz gra: dołącz przez Stół nr. Tylko administrator może otworzyć kolejną grę.",
     "No game is running now.": "Teraz nie trwa żadna gra.",
     "Member number or name": "Numer członkowski lub nazwisko",
@@ -2963,6 +2971,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Change table": "换桌",
     "A game is running now: join it with Table No. Only the administrator can open another game.": "现在有比赛进行中：请通过“桌号”加入。只有管理员可以再开一场比赛。",
     "No game is running now.": "现在没有进行中的比赛。",
     "Member number or name": "会员号或姓名",
