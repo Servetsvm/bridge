@@ -131,7 +131,7 @@ function renderTableDetail(tableNo){
   } else if(nextBoard){
     boardsHTML=`<div class="board-item pending" style="border-color:var(--gold);cursor:pointer;" onclick="bmEnterBoard(${nextBoard.boardNo})">
       <span class="bi-num" style="color:var(--gold);font-size:1rem;">Board ${nextBoard.boardNo}</span>
-      <span class="bi-contract" style="color:var(--text2);font-size:0.8rem;">${totalBoards} of ${doneCount+1}. (next)</span>
+      <span class="bi-contract" style="color:var(--text2);font-size:0.8rem;">${doneCount+1} of ${totalBoards} (next)</span>
       <span style="font-size:0.78rem;color:var(--text3);"></span>
       <button class="btn btn-gold btn-sm" onclick="event.stopPropagation();bmEnterBoard(${nextBoard.boardNo})">Enter ↵</button>
     </div>`;
@@ -650,7 +650,7 @@ function renderResTiles(){
   const vals=[]; for(let v=7-l; v>=-(l+6); v--) vals.push(v);
   box.innerHTML=vals.map(v=>`<button class="bm3-key res${v>0?' over':v<0?' down':' made'}${v===boardForm.result?' active':''}" onclick="setRes(${v})">${v===0?'=':v>0?'+'+v:v}</button>`).join('');
   const r=boardForm.result;
-  if(lb) lb.textContent=r>0?`+${r} overtrick${r>1?'s':''}`:r<0?`${Math.abs(r)} down`:'made exactly';
+  if(lb) lb.textContent=window.i18nText?window.i18nText(r>0?`+${r} overtrick${r>1?'s':''}`:r<0?`${Math.abs(r)} down`:'made exactly'):(r>0?`+${r} overtrick${r>1?'s':''}`:r<0?`${Math.abs(r)} down`:'made exactly');
 }
 function updateResDisp(){ renderResTiles(); }
 function updateScore(){
@@ -672,9 +672,10 @@ function updateLCD(){
   }
   lc.innerHTML=contr;
   const lead=boardForm.leadSuit&&boardForm.leadRank?boardForm.leadSuit+boardForm.leadRank:boardForm.leadSuit||'—';
-  ll.textContent='Lead: '+lead;
+  const L=v=>window.i18nText?window.i18nText(v):v;
+  ll.textContent=L('Lead: '+lead);
   const r=boardForm.result;
-  lr.textContent='Result: '+(boardForm.isPass?'PASS':!boardForm.level?'—':r>0?'+'+r:r<0?String(r):'=');
+  lr.textContent=L('Result: '+(boardForm.isPass?'PASS':!boardForm.level?'—':r>0?'+'+r:r<0?String(r):'='));
 }
 
 // Save board and send to opponent for approval

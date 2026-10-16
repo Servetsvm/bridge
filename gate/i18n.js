@@ -11,6 +11,7 @@
   const TR={
     'BridgeGate · Tournament System':'BridgeGate · Turnuva Sistemi',
     'Tournament Control System':'Turnuva Kontrol Sistemi',
+    'Enter ↵':'Gir ↵',
     'Sign in to Bridge Table first (name and PIN), then come back here.':'Önce Bridge Table’a isim ve PIN ile giriş yap, sonra buraya dön.',
     'Bridge Table':'Bridge Table',
     'My clubs':'Kulüplerim',
@@ -506,6 +507,10 @@
     [/^Table (\d+) has finished$/,(_,n)=>`${n}. masa bitirdi`],
     [/^Table (\d+) is not in this tournament$/,(_,n)=>`${n}. masa bu turnuvada yok`],
     [/^Table (\d+) – Round (\d+)$/,(_,t,r)=>`Masa ${t} – Tur ${r}`],
+    [/^Round (\d+)\/(\d+)$/,(_,a,b)=>`Tur ${a}/${b}`],
+    [/^Next Board: (\d+)$/,(_,n)=>`Sıradaki board: ${n}`],
+    [/^(\d+) of (\d+) \(next\)$/,(_,a,b)=>`${a} / ${b} (sıradaki)`],
+    [/^Board\s+(\d+) — Awaiting Approval$/,(_,n)=>`Board ${n} — Onay bekleniyor`],
     [/^Contract: (.+)$/,(_,v)=>`Kontrat: ${v==='PASS'?'PAS':v}`],
     [/^Lead: (.+)$/,(_,v)=>`Çıkış: ${v}`],
     [/^Result: (.+)$/,(_,v)=>`Sonuç: ${v==='PASS'?'PAS':v}`],
