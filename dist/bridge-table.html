@@ -4360,6 +4360,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "waiting {0} min without playing": "{0} dk'dır oynamadan bekliyor",
     "Notify me": "Bana haber ver",
     "Convention": "Konvansiyon",
     "Admin": "Yönetici",
@@ -4713,6 +4714,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "waiting {0} min without playing": "har ventet {0} min uten å spille",
     "Notify me": "Varsle meg",
     "Convention": "Konvensjon",
     "Admin": "Administrator",
@@ -5066,6 +5068,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "waiting {0} min without playing": "esperando {0} min sin jugar",
     "Notify me": "Avísame",
     "Convention": "Convención",
     "Admin": "Administración",
@@ -5447,6 +5450,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "waiting {0} min without playing": "attend depuis {0} min sans jouer",
     "Notify me": "Préviens-moi",
     "Convention": "Convention",
     "Admin": "Administration",
@@ -5828,6 +5832,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "waiting {0} min without playing": "in attesa da {0} min senza giocare",
     "Notify me": "Avvisami",
     "Convention": "Convenzione",
     "Admin": "Amministrazione",
@@ -6209,6 +6214,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "waiting {0} min without playing": "wartet seit {0} Min. ohne zu spielen",
     "Notify me": "Sag mir Bescheid",
     "Convention": "Konvention",
     "Admin": "Verwaltung",
@@ -6590,6 +6596,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "waiting {0} min without playing": "ждёт {0} мин, не играя",
     "Notify me": "Сообщать мне",
     "Convention": "Конвенция",
     "Admin": "Управление",
@@ -6971,6 +6978,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "waiting {0} min without playing": "czeka {0} min bez gry",
     "Notify me": "Powiadom mnie",
     "Convention": "Konwencja",
     "Admin": "Administracja",
@@ -7352,6 +7360,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "waiting {0} min without playing": "已等待 {0} 分钟未打牌",
     "Notify me": "提醒我",
     "Convention": "约定",
     "Admin": "管理",
@@ -8356,7 +8365,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 249;
+const APP_V = 250;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12307,6 +12316,16 @@ const Net = (() => {
     if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : prac ? T('practising conventions') : T('playing with robots') };
     return { s: 'lobby', at: T('waiting in the lobby') };
   }
+  // since when each player has been waiting in the lobby without playing (as this app has seen it): after a quarter of
+  // an hour with no board played today they show 💤 and how long they have waited
+  const idleSince = new Map(), IDLE_MIN = 15;
+  function idleMins(n, s) {
+    const k = nameKey(n);
+    if (s !== 'lobby') { idleSince.delete(k); return 0; }
+    if (!idleSince.has(k)) idleSince.set(k, Date.now());
+    const m = Math.floor((Date.now() - idleSince.get(k)) / 60000), p = profOf(n);
+    return m >= IDLE_MIN && !(p && p.n > 0) ? m : 0;
+  }
   function lobbyGroups() {
     const me = nameKey(myName()), here = new Map(knownNames().map(n => [nameKey(n), n]));
     const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
@@ -12319,7 +12338,7 @@ const Net = (() => {
     for (const k in st.known) if (k !== me && !here.has(k)) off.set(k, st.known[k].name);
     for (const f of fr) if (nameKey(f) !== me && !here.has(nameKey(f))) off.set(nameKey(f), f);
     const G_ = { friends: [], play: [], lobby: [], off: [] };
-    for (const [k, n] of here) { const s = status(n); (fr.some(f => nameKey(f) === k) ? G_.friends : s.s === 'play' ? G_.play : G_.lobby).push({ n, ...s }); }
+    for (const [k, n] of here) { const s = status(n), idle = idleMins(n, s.s); if (idle) s.at = T('waiting {0} min without playing', idle); (fr.some(f => nameKey(f) === k) ? G_.friends : s.s === 'play' ? G_.play : G_.lobby).push({ n, ...s, idle }); }
     if (SET.showOff) for (const [k, n] of off) (fr.some(f => nameKey(f) === k) ? G_.friends : G_.off).push({ n, s: 'off' });
     for (const g in G_) G_[g].sort((a, b) => a.n.localeCompare(b.n));
     return G_;
@@ -12328,7 +12347,7 @@ const Net = (() => {
     const g = lobbyGroups(), all = [...g.friends, ...g.play, ...g.lobby, ...g.off];
     const nOn = 1 + all.filter(x => x.s !== 'off').length, nPlay = all.filter(x => x.s === 'play').length + (G && G.phase !== 'idle' ? 1 : 0);
     const nOff = st.cloud && Cloud.on && st.cloud.users ? Math.max(0, st.cloud.users - nOn) : all.filter(x => x.s === 'off').length;
-    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${(p => p && p.av ? p.av + ' ' : '')(profOf(x.n))}${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
+    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${(p => p && p.av ? p.av + ' ' : '')(profOf(x.n))}${esc(x.n)}${x.idle ? ` <span title="${T('waiting {0} min without playing', x.idle)}">💤</span>` : ''}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
       + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
     const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
     const admin = isAdmin() ? `<div class="ladmin" data-stats="1" title="${T('Visitor statistics')}">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';

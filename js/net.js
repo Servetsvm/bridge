@@ -916,6 +916,16 @@ const Net = (() => {
     if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : prac ? T('practising conventions') : T('playing with robots') };
     return { s: 'lobby', at: T('waiting in the lobby') };
   }
+  // since when each player has been waiting in the lobby without playing (as this app has seen it): after a quarter of
+  // an hour with no board played today they show 💤 and how long they have waited
+  const idleSince = new Map(), IDLE_MIN = 15;
+  function idleMins(n, s) {
+    const k = nameKey(n);
+    if (s !== 'lobby') { idleSince.delete(k); return 0; }
+    if (!idleSince.has(k)) idleSince.set(k, Date.now());
+    const m = Math.floor((Date.now() - idleSince.get(k)) / 60000), p = profOf(n);
+    return m >= IDLE_MIN && !(p && p.n > 0) ? m : 0;
+  }
   function lobbyGroups() {
     const me = nameKey(myName()), here = new Map(knownNames().map(n => [nameKey(n), n]));
     const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
@@ -928,7 +938,7 @@ const Net = (() => {
     for (const k in st.known) if (k !== me && !here.has(k)) off.set(k, st.known[k].name);
     for (const f of fr) if (nameKey(f) !== me && !here.has(nameKey(f))) off.set(nameKey(f), f);
     const G_ = { friends: [], play: [], lobby: [], off: [] };
-    for (const [k, n] of here) { const s = status(n); (fr.some(f => nameKey(f) === k) ? G_.friends : s.s === 'play' ? G_.play : G_.lobby).push({ n, ...s }); }
+    for (const [k, n] of here) { const s = status(n), idle = idleMins(n, s.s); if (idle) s.at = T('waiting {0} min without playing', idle); (fr.some(f => nameKey(f) === k) ? G_.friends : s.s === 'play' ? G_.play : G_.lobby).push({ n, ...s, idle }); }
     if (SET.showOff) for (const [k, n] of off) (fr.some(f => nameKey(f) === k) ? G_.friends : G_.off).push({ n, s: 'off' });
     for (const g in G_) G_[g].sort((a, b) => a.n.localeCompare(b.n));
     return G_;
@@ -937,7 +947,7 @@ const Net = (() => {
     const g = lobbyGroups(), all = [...g.friends, ...g.play, ...g.lobby, ...g.off];
     const nOn = 1 + all.filter(x => x.s !== 'off').length, nPlay = all.filter(x => x.s === 'play').length + (G && G.phase !== 'idle' ? 1 : 0);
     const nOff = st.cloud && Cloud.on && st.cloud.users ? Math.max(0, st.cloud.users - nOn) : all.filter(x => x.s === 'off').length;
-    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${(p => p && p.av ? p.av + ' ' : '')(profOf(x.n))}${esc(x.n)}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
+    const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${(p => p && p.av ? p.av + ' ' : '')(profOf(x.n))}${esc(x.n)}${x.idle ? ` <span title="${T('waiting {0} min without playing', x.idle)}">💤</span>` : ''}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
       + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
     const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
     const admin = isAdmin() ? `<div class="ladmin" data-stats="1" title="${T('Visitor statistics')}">👑 ${T('Logins today')}: <b>${loginsToday()}</b></div>` : '';
