@@ -1,5 +1,6 @@
 //  SCREEN PANEL — Leaderboard (no Boards tab)
 // ══════════════════════════════════════════════════════
+// the tab shown first: the live standings
 let screenTab='overall';
 
 function renderScreenPanel(){
@@ -37,7 +38,8 @@ function renderScreenPanel(){
     </div>`;
   startScreenAutoScroll();
   // Auto-refresh every 10s
-  setTimeout(()=>{if(role==='screen')renderScreenPanel();},10000);
+  // one redraw every 10 s (a new screen replaces the waiting one, so they never pile up during a long session)
+  clearTimeout(window._screenT); window._screenT=setTimeout(()=>{if(role==='screen')renderScreenPanel();},10000);
 }
 
 window.screenPrintPDF=function(){
@@ -126,7 +128,8 @@ window.setScreenTab=function(tab,btn){
 function renderSbTab(allRows){
   if(screenTab==='tables')return renderTablesTab();
   // the rankings stay hidden until the director finishes the tournament
-  if(getState().status!=='finished')return`<div class="empty-state"><div class="empty-icon">🔒</div>The results appear when the director finishes the tournament.</div>`;
+  // the hall's screen (and the admin) show the standings live; anywhere else they wait for the end of the tournament
+  if(getState().status!=='finished'&&role!=='screen'&&role!=='admin')return`<div class="empty-state"><div class="empty-icon">🔒</div>The results appear when the director finishes the tournament.</div>`;
   const data=screenTab==='ns'?allRows.filter(r=>r.dir==='NS'):screenTab==='ew'?allRows.filter(r=>r.dir==='EW'):allRows;
   if(!data.length)return`<div class="empty-state"><div class="empty-icon">♠</div>No scores entered yet</div>`;
   return`<div id="sbScrollWrap" style="max-height:60vh;overflow-y:auto;scroll-behavior:smooth;"><table class="sb-table">
@@ -190,7 +193,7 @@ function renderTablesTab(){
       </div>
       <div style="font-size:0.7rem;color:var(--text3);">Boards ${m.boardStart||'?'}–${m.boardEnd||'?'}</div>
       ${isStalled?`<div style="margin-top:6px;font-size:0.68rem;color:var(--red);font-weight:600;">⚠️ ${Math.floor(stalledMap[t])} min without a score</div>`:''}
-      ${isLocked?`<button onclick="adminForceUnlock(${t})" style="margin-top:6px;font-size:0.65rem;background:none;border:none;color:var(--text3);cursor:pointer;text-decoration:underline;">Force Unlock</button>`:''}
+      ${isLocked&&role==='admin'?`<button onclick="adminForceUnlock(${t})" style="margin-top:6px;font-size:0.65rem;background:none;border:none;color:var(--text3);cursor:pointer;text-decoration:underline;">Force Unlock</button>`:''}
     </div>`;
   }
   return html+'</div>';
