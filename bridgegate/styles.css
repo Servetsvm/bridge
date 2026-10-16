@@ -372,7 +372,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .language-menu button b{color:var(--gold);font-size:0.7rem;min-width:22px;}
 .language-menu button:hover,.language-menu button.on{border-color:var(--gold);background:var(--golddim);}
 /* a player's phone from Bridge Table's "Table No": the four players, then the table number */
-.pe-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;}
-.pe-seat small{display:block;font-size:.7rem;color:var(--text3);margin-bottom:2px;}
-.pe-seat input{width:100%;padding:9px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.9rem;font-family:inherit;box-sizing:border-box;}
 #playerEntry .bm3-key{background:var(--surface2);color:var(--text);border-color:var(--border);}
+/* the players' seats drawn as the table: North at the top, South at the bottom, West left, East right */
+.pe-table{display:grid;grid-template-columns:1fr 1.1fr 1fr;grid-template-areas:'. n .' 'w m e' '. s .';gap:8px;align-items:center;}
+.pe-pos{min-height:70px;padding:8px 6px;border:1px solid var(--border2);border-radius:12px;background:var(--surface2);color:var(--text);font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;}
+.pe-pos small{font-size:.68rem;color:var(--gold);font-weight:700;letter-spacing:.5px;text-transform:uppercase;}
+.pe-pos b{font-size:.85rem;font-weight:700;line-height:1.2;word-break:break-word;}
+.pe-N{grid-area:n}.pe-S{grid-area:s}.pe-W{grid-area:w}.pe-E{grid-area:e}
+.pe-mid{grid-area:m;aspect-ratio:1;border-radius:14px;background:#1f5d36;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;box-shadow:inset 0 0 0 3px rgba(255,255,255,.12);}
+.pe-input{width:100%;box-sizing:border-box;padding:12px;font-size:1.1rem;text-align:center;background:var(--bg);border:2px solid var(--border2);border-radius:10px;color:var(--text);font-family:inherit;}
+.pe-found{min-height:1.4em;margin-top:8px;font-size:.95rem;font-weight:700;text-align:center;}.pe-found.ok{color:var(--green);}.pe-found.no{color:var(--red);}

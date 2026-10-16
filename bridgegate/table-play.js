@@ -89,24 +89,53 @@ window.bgPlayerEntry=async function(prefix){
   pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">${s.name||'BridgeGate'}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">Select your table number</div></div>
     <div class="bm3-keys k4" style="padding:0;">${Array.from({length:s.tableCount||0},(_,i)=>`<button class="bm3-key" onclick="bgPlayerNames('${prefix}',${i+1})">${i+1}</button>`).join('')}</div>`;
 };
-// the four players at the chosen table: a member number brings the name, or the name is typed
+// the four players at the chosen table, drawn as the table: North at the top, South at the bottom, West and East at the sides
+const BG_SEATS={N:'North',S:'South',E:'East',W:'West'};
 window.bgPlayerNames=function(prefix,n){
   const pe=document.getElementById('playerEntry'); if(!pe) return;
-  const seat=(k,l)=>`<label class="pe-seat"><small>${l}</small><input id="pe${k}" data-member maxlength="40" autocomplete="off" placeholder="Member number or name"></label>`;
-  pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">Table ${n}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">Players</div></div>
-    <div class="pe-grid">${seat('N','North')}${seat('S','South')}${seat('E','East')}${seat('W','West')}</div>
-    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px;"><button class="btn btn-ghost" onclick="bgPlayerEntry('${prefix}')">← Back</button><button class="btn-primary" style="margin:0;" onclick="bgPlayerSit('${prefix}',${n})">Continue →</button></div>`;
-  setTimeout(()=>document.getElementById('peN')?.focus(),80);
+  if(!window._bgEntry||window._bgEntry.n!==n) window._bgEntry={prefix,n,seats:{N:'',S:'',E:'',W:''}};
+  const st=window._bgEntry.seats;
+  const seat=k=>`<button class="pe-pos pe-${k}" onclick="bgSeatEdit('${k}')"><small>${BG_SEATS[k]}</small><b>${st[k]?cleanData(st[k]):'＋'}</b></button>`;
+  pe.innerHTML=`<div class="pe-table">${seat('N')}${seat('W')}<div class="pe-mid">Table ${n}</div>${seat('E')}${seat('S')}</div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px;"><button class="btn btn-ghost" onclick="window._bgEntry=null;bgPlayerEntry('${prefix}')">← Back</button><button class="btn-primary" style="margin:0;" onclick="bgPlayerSit()">Continue →</button></div>`;
+};
+// one seat: a member number (its name is shown at once) or a name; OK goes back to the table
+window.bgSeatEdit=function(k){
+  const pe=document.getElementById('playerEntry'), e=window._bgEntry; if(!pe||!e) return;
+  pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">Table ${e.n}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">${BG_SEATS[k]}</div></div>
+    <input id="peInput" class="pe-input" maxlength="40" autocomplete="off" placeholder="Member number or name" value="${cleanData(e.seats[k]||'')}" oninput="bgSeatLook()" onkeydown="if(event.key==='Enter')bgSeatOk('${k}')">
+    <div id="peFound" class="pe-found"></div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px;"><button class="btn btn-ghost" onclick="bgPlayerNames('${e.prefix}',${e.n})">✕ Cancel</button><button class="btn-primary" style="margin:0;" onclick="bgSeatOk('${k}')">✓ OK</button></div>`;
+  setTimeout(()=>document.getElementById('peInput')?.focus(),80);
+};
+// a member number typed: its name under the box (or that it is unknown, so a name can be typed instead)
+let _bgLookT=0;
+window.bgSeatLook=function(){
+  clearTimeout(_bgLookT);
+  _bgLookT=setTimeout(async()=>{
+    const v=(document.getElementById('peInput')?.value||'').trim(), out=document.getElementById('peFound'); if(!out) return;
+    if(!/^\d{1,8}$/.test(v)){ out.textContent=''; return; }
+    const name=await memberName(v);
+    if((document.getElementById('peInput')?.value||'').trim()!==v) return;
+    out.textContent=name?'👤 '+name:'❓ '+v; out.className='pe-found'+(name?' ok':' no');
+  },250);
+};
+window.bgSeatOk=async function(k){
+  const e=window._bgEntry; if(!e) return;
+  let v=(document.getElementById('peInput')?.value||'').trim();
+  if(/^\d{1,8}$/.test(v)){ const name=await memberName(v); if(!name){ bgSeatLook(); return; } v=name; }   // an unknown number: type the name instead
+  e.seats[k]=v.slice(0,40);
+  bgPlayerNames(e.prefix,e.n);
 };
 // sign this phone in at that table (prefix + number); its names go to the pairs sitting there
-window.bgPlayerSit=async function(prefix,n){
-  const names={};
-  for(const k of ['N','S','E','W']){ let v=(document.getElementById('pe'+k)?.value||'').trim(); if(/^\d{1,8}$/.test(v)) v=(await memberName(v))||v; names[k]=v; }
-  try{ sessionStorage.setItem(BG_PENDING,JSON.stringify({t:n,...names})); }catch(e){}
+window.bgPlayerSit=function(){
+  const e=window._bgEntry; if(!e) return;
+  try{ sessionStorage.setItem(BG_PENDING,JSON.stringify({t:e.n,...e.seats})); }catch(err){}
+  window._bgEntry=null;
   document.getElementById('playerEntry')?.remove();
   document.getElementById('loginForm').style.display='block';
   selRole('table');
-  document.getElementById('pwInput').value=prefix+String(n).padStart(2,'0');
+  document.getElementById('pwInput').value=e.prefix+String(e.n).padStart(2,'0');
   doLogin();
 };
 
