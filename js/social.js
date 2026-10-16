@@ -240,12 +240,17 @@ const SB = (() => {
     const rows = L.map((r, i) => `${i + 1}. ${r.name} (${T('Table {0}', r.t)} ${dir(r)}) — ${r.pct != null ? r.pct + '%' : '—'} · ${r.imp > 0 ? '+' : ''}${r.imp} IMP · ${T('{0} boards', r.n)}`);
     return [head, ...rows].join('\n');
   }
+  // a table's link (as BridgeGate's table codes): it opens this game with that table chosen, ready to enter scores
+  const gameLink = t => location.origin + location.pathname + '#sb=' + sb.id + (t ? '&t=' + t : '');
+  const linkText = t => `🃏 ${sb.g.m.n}${t ? '\n' + T('Table {0}', t) : ''}\n${gameLink(t)}`;
+  const sendBtns = t => `<span class="sbsend"><button class="btn mini-btn sbwa" data-sbsend="wa:${t}" title="WhatsApp">💬</button><button class="btn mini-btn" data-sbsend="sms:${t}" title="SMS">✉️</button></span>`;
   function tablesHtml() {
-    const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || canManage(g.m));
-    return [...Array(g.m.tb).keys()].map(i => {
+    const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || canManage(g.m)), send = !done() && canManage(g.m);
+    return (send ? `<div class="muted">${T('Send each table its link: tapping it opens this game with that table chosen.')}</div>
+      <div class="sbtrow"><b>${T('The game’s link, for everyone')}</b><span></span><small></small>${sendBtns(0)}</div>` : '') + [...Array(g.m.tb).keys()].map(i => {
       const t = i + 1, p = (g.t || {})[t] || {}, played = Object.values(g.r || {}).filter(R => R[t]).length;
       if (sb.editT === t) return `<div class="tsetrow sbrow"><b>${T('Table {0}', t)}</b>${['n', 's', 'e', 'w'].map((k, j) => `<label><small>${SEAT[[0, 2, 1, 3][j]]}</small><input class="tok" maxlength="20" data-sbtn="${k}" value="${esc(p[k] || '')}"></label>`).join('')}<button class="btn new" id="sbTSave">${T('Save')}</button></div>`;
-      return `<div class="sbtrow"><b>${T('Table {0}', t)}</b><span>${SEAT_AB[0] + SEAT_AB[2]}: ${esc(pairName(t, 'ns'))}<br>${SEAT_AB[1] + SEAT_AB[3]}: ${esc(pairName(t, 'ew'))}</span><small>${T('{0} boards', played)}</small>${canEdit(t) ? `<button class="btn mini-btn" data-sbedit="${t}">✎</button>` : ''}</div>`;
+      return `<div class="sbtrow"><b>${T('Table {0}', t)}</b><span>${SEAT_AB[0] + SEAT_AB[2]}: ${esc(pairName(t, 'ns'))}<br>${SEAT_AB[1] + SEAT_AB[3]}: ${esc(pairName(t, 'ew'))}</span><small>${T('{0} boards', played)}</small>${canEdit(t) ? `<button class="btn mini-btn" data-sbedit="${t}">✎</button>` : ''}${send ? sendBtns(t) : ''}</div>`;
     }).join('');
   }
 
@@ -351,6 +356,7 @@ const SB = (() => {
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
     if (d.sbopen) return openGame(d.sbopen);
+    if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText(+t)); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
     if (id === 'sbList') { setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
     if (d.sbview) { sb.view = d.sbview; sb.editT = 0; return show(); }
@@ -368,5 +374,11 @@ const SB = (() => {
     if (id === 'sbWa') { window.open('https://wa.me/?text=' + encodeURIComponent(standingsText()), '_blank', 'noopener'); return; }
   });
 
-  return { open, lobbyHtml, locked };
+  // a table's link (#sb=CODE&t=N): this device sits at that table of that game
+  async function openLink(id, t) {
+    if (t) try { localStorage.setItem(myTableKey(id), String(t)); } catch (e) {}
+    sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
+    return openGame(id);
+  }
+  return { open, openLink, lobbyHtml, locked };
 })();

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 224;
+const APP_V = 225;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2562,6 +2562,9 @@ function welcomeClose(go) {
   if (go) { ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
 function checkSharedDeal() {
+  // a Social bridge table's link: that game opens with the table chosen
+  const s = location.hash.match(/[#&]sb=([A-Z0-9]{4,12})(?:&t=(\d{1,2}))?/);
+  if (s && typeof SB !== 'undefined') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} SB.openLink(s[1], +s[2] || 0); return; }
   const m = location.hash.match(/[#&]d=([\w-]{18})(?:&b=(\d+))?/); if (!m) { welcome(); return; }
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   const hands = dealFromCode(m[1]); if (!hands) return;

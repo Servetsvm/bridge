@@ -1478,6 +1478,7 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .sbtab .red,.sbform .red,.sbprev .red,h3 .red{color:#c0282d}
 .sbtrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e3dfcd}
 .sbtrow span{flex:1}.sbtrow small{color:#777}
+.sbsend{display:inline-flex;gap:4px}.sbsend .sbwa{background:#25d366;color:#fff;border-color:#25d366}
 .sbprev{margin:8px 0;padding:8px 10px;border-radius:8px;background:#eef3ee;font-size:16px}
 .sbcode{letter-spacing:2px}
 .sbme .seg button{flex:0 0 auto;min-width:38px}
@@ -4323,6 +4324,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Send each table its link: tapping it opens this game with that table chosen.": "Her masaya kendi linkini gönder: linke dokununca bu oyun o masa seçili olarak açılır.", "The game’s link, for everyone": "Oyunun linki, herkes için",
     "Daylong": "Gün boyu",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Robotlarla bireysel, 4 board, 3 saat: hızlı bir turnuva.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Herkes aynı 8 boardu robotlarla oynar, bir gün açık kalır.",
@@ -4666,6 +4668,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Send each table its link: tapping it opens this game with that table chosen.": "Send hvert bord sin lenke: et trykk åpner dette spillet med det bordet valgt.", "The game’s link, for everyone": "Spillets lenke, for alle",
     "Daylong": "Hele dagen",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individuell med roboter, 4 spill, 3 timer: en rask turnering.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Alle spiller de samme 8 spillene med roboter, åpen i ett døgn.",
@@ -5009,6 +5012,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Send each table its link: tapping it opens this game with that table chosen.": "Envía a cada mesa su enlace: al tocarlo se abre esta partida con esa mesa elegida.", "The game’s link, for everyone": "El enlace de la partida, para todos",
     "Daylong": "Todo el día",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individual con robots, 4 manos, 3 horas: un torneo rápido.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Todos juegan las mismas 8 manos con robots, abierto un día.",
@@ -5380,6 +5384,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Send each table its link: tapping it opens this game with that table chosen.": "Envoie à chaque table son lien : en le touchant, cette partie s’ouvre avec cette table choisie.", "The game’s link, for everyone": "Le lien de la partie, pour tous",
     "Daylong": "Toute la journée",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individuel avec robots, 4 donnes, 3 heures : un tournoi rapide.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Tout le monde joue les mêmes 8 donnes avec des robots, ouvert une journée.",
@@ -5751,6 +5756,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Send each table its link: tapping it opens this game with that table chosen.": "Manda a ogni tavolo il suo link: toccandolo si apre questa partita con quel tavolo scelto.", "The game’s link, for everyone": "Il link della partita, per tutti",
     "Daylong": "Tutto il giorno",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Individuale con robot, 4 smazzate, 3 ore: un torneo veloce.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Tutti giocano le stesse 8 smazzate con i robot, aperto per un giorno.",
@@ -6122,6 +6128,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Send each table its link: tapping it opens this game with that table chosen.": "Schick jedem Tisch seinen Link: ein Tipp öffnet dieses Spiel mit diesem Tisch gewählt.", "The game’s link, for everyone": "Der Link des Spiels, für alle",
     "Daylong": "Ganztägig",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Einzel mit Robotern, 4 Boards, 3 Stunden: ein schnelles Turnier.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Alle spielen dieselben 8 Boards mit Robotern, einen Tag lang offen.",
@@ -6493,6 +6500,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Send each table its link: tapping it opens this game with that table chosen.": "Отправьте каждому столу его ссылку: она открывает эту игру с уже выбранным столом.", "The game’s link, for everyone": "Ссылка на игру, для всех",
     "Daylong": "Весь день",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Личный с роботами, 4 сдачи, 3 часа: быстрый турнир.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Все играют одни и те же 8 сдач с роботами, открыт сутки.",
@@ -6864,6 +6872,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Send each table its link: tapping it opens this game with that table chosen.": "Wyślij każdemu stołowi jego link: dotknięcie otwiera tę grę z wybranym stołem.", "The game’s link, for everyone": "Link do gry, dla wszystkich",
     "Daylong": "Cały dzień",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "Indywidualny z robotami, 4 rozdania, 3 godziny: szybki turniej.",
     "Everyone plays the same 8 boards with robots, kept for a day.": "Wszyscy grają te same 8 rozdań z robotami, otwarty przez dobę.",
@@ -7235,6 +7244,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Send each table its link: tapping it opens this game with that table chosen.": "把各桌的链接发给各桌：点开即打开本场比赛并选好该桌。", "The game’s link, for everyone": "比赛链接，发给所有人",
     "Daylong": "全天赛",
     "Individual with robots, 4 boards, 3 hours: a quick tournament.": "与机器人的个人赛，4 副，3 小时：快速比赛。",
     "Everyone plays the same 8 boards with robots, kept for a day.": "所有人与机器人打相同的 8 副牌，开放一天。",
@@ -8229,7 +8239,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 224;
+const APP_V = 225;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10783,6 +10793,9 @@ function welcomeClose(go) {
   if (go) { ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
 function checkSharedDeal() {
+  // a Social bridge table's link: that game opens with the table chosen
+  const s = location.hash.match(/[#&]sb=([A-Z0-9]{4,12})(?:&t=(\d{1,2}))?/);
+  if (s && typeof SB !== 'undefined') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} SB.openLink(s[1], +s[2] || 0); return; }
   const m = location.hash.match(/[#&]d=([\w-]{18})(?:&b=(\d+))?/); if (!m) { welcome(); return; }
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   const hands = dealFromCode(m[1]); if (!hands) return;
@@ -13242,12 +13255,17 @@ const SB = (() => {
     const rows = L.map((r, i) => `${i + 1}. ${r.name} (${T('Table {0}', r.t)} ${dir(r)}) — ${r.pct != null ? r.pct + '%' : '—'} · ${r.imp > 0 ? '+' : ''}${r.imp} IMP · ${T('{0} boards', r.n)}`);
     return [head, ...rows].join('\n');
   }
+  // a table's link (as BridgeGate's table codes): it opens this game with that table chosen, ready to enter scores
+  const gameLink = t => location.origin + location.pathname + '#sb=' + sb.id + (t ? '&t=' + t : '');
+  const linkText = t => `🃏 ${sb.g.m.n}${t ? '\n' + T('Table {0}', t) : ''}\n${gameLink(t)}`;
+  const sendBtns = t => `<span class="sbsend"><button class="btn mini-btn sbwa" data-sbsend="wa:${t}" title="WhatsApp">💬</button><button class="btn mini-btn" data-sbsend="sms:${t}" title="SMS">✉️</button></span>`;
   function tablesHtml() {
-    const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || canManage(g.m));
-    return [...Array(g.m.tb).keys()].map(i => {
+    const g = sb.g, mt = myTable(), canEdit = t => !done() && (t === mt || canManage(g.m)), send = !done() && canManage(g.m);
+    return (send ? `<div class="muted">${T('Send each table its link: tapping it opens this game with that table chosen.')}</div>
+      <div class="sbtrow"><b>${T('The game’s link, for everyone')}</b><span></span><small></small>${sendBtns(0)}</div>` : '') + [...Array(g.m.tb).keys()].map(i => {
       const t = i + 1, p = (g.t || {})[t] || {}, played = Object.values(g.r || {}).filter(R => R[t]).length;
       if (sb.editT === t) return `<div class="tsetrow sbrow"><b>${T('Table {0}', t)}</b>${['n', 's', 'e', 'w'].map((k, j) => `<label><small>${SEAT[[0, 2, 1, 3][j]]}</small><input class="tok" maxlength="20" data-sbtn="${k}" value="${esc(p[k] || '')}"></label>`).join('')}<button class="btn new" id="sbTSave">${T('Save')}</button></div>`;
-      return `<div class="sbtrow"><b>${T('Table {0}', t)}</b><span>${SEAT_AB[0] + SEAT_AB[2]}: ${esc(pairName(t, 'ns'))}<br>${SEAT_AB[1] + SEAT_AB[3]}: ${esc(pairName(t, 'ew'))}</span><small>${T('{0} boards', played)}</small>${canEdit(t) ? `<button class="btn mini-btn" data-sbedit="${t}">✎</button>` : ''}</div>`;
+      return `<div class="sbtrow"><b>${T('Table {0}', t)}</b><span>${SEAT_AB[0] + SEAT_AB[2]}: ${esc(pairName(t, 'ns'))}<br>${SEAT_AB[1] + SEAT_AB[3]}: ${esc(pairName(t, 'ew'))}</span><small>${T('{0} boards', played)}</small>${canEdit(t) ? `<button class="btn mini-btn" data-sbedit="${t}">✎</button>` : ''}${send ? sendBtns(t) : ''}</div>`;
     }).join('');
   }
 
@@ -13353,6 +13371,7 @@ const SB = (() => {
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
     if (d.sbopen) return openGame(d.sbopen);
+    if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText(+t)); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
     if (id === 'sbList') { setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
     if (d.sbview) { sb.view = d.sbview; sb.editT = 0; return show(); }
@@ -13370,7 +13389,13 @@ const SB = (() => {
     if (id === 'sbWa') { window.open('https://wa.me/?text=' + encodeURIComponent(standingsText()), '_blank', 'noopener'); return; }
   });
 
-  return { open, lobbyHtml, locked };
+  // a table's link (#sb=CODE&t=N): this device sits at that table of that game
+  async function openLink(id, t) {
+    if (t) try { localStorage.setItem(myTableKey(id), String(t)); } catch (e) {}
+    sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
+    return openGame(id);
+  }
+  return { open, openLink, lobbyHtml, locked };
 })();
 
 </script>
