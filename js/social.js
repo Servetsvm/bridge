@@ -407,5 +407,15 @@ const SB = (() => {
     sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
     return openGame(id);
   }
-  return { open, openLink, lobbyHtml, locked };
+  // Table No without the organiser's link on this device: the games running now (one: straight in), then the table number
+  async function pick() {
+    openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
+    let L = [];
+    try { L = Object.entries(await C().get('sbi') || {}).map(([id, v]) => ({ id, ...v })).filter(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3).sort((a, b) => b.ts - a.ts); } catch (e) {}
+    if (L.length === 1) return openLink(L[0].id, 0);
+    if (!L.length) { closeOv(); flash(T('Open the link the organiser sent you.'), 3000); return; }
+    lob.L = L;
+    openOv('sb', `<h2>🃏 ${T('Table No')}</h2>${rowsHtml()}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  }
+  return { open, openLink, pick, lobbyHtml, locked };
 })();

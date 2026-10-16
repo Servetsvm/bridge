@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 228;
+const APP_V = 229;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2567,9 +2567,12 @@ const BG_LINK = 'bridge-bg';
 function tableNo() {
   let L = null; try { L = JSON.parse(localStorage.getItem(BG_LINK) || 'null'); } catch (e) {}
   if (L && L.sb && typeof SB !== 'undefined') { SB.openLink(L.sb, 0); return; }   // a Social bridge game: the table number first
-  if (!L || !L.c) { flash(T('Open the link the organiser sent you.'), 3000); return; }
+  // no link on this device (opened in another app, or the organiser's own phone): the Social bridge games running now
+  if (!L || !L.c) { if (typeof SB !== 'undefined') SB.pick(); else flash(T('Open the link the organiser sent you.'), 3000); return; }
   location.href = 'bridgegate/?club=' + encodeURIComponent(L.c) + '&role=table&p=' + L.p;
 }
+// a link tapped while Bridge Table is already open only changes the address's # part (no reload): read it then too
+window.addEventListener('hashchange', () => { if (/[#&](bg|sb|d)=/.test(location.hash)) checkSharedDeal(); });
 function checkSharedDeal() {
   // the organiser's link (a club tournament #bg=club.prefix, or a Social bridge game #sb=CODE): kept for Table No
   const g = location.hash.match(/[#&]bg=([\w%-]+)\.(\d{2})/), sg = location.hash.match(/[#&]sb=([A-Z0-9]{4,12})(?:&t=(\d{1,2}))?/);
