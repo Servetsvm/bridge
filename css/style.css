@@ -1485,3 +1485,6 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 :root[data-theme="dark"] .ddhd{color:#8fb6e6}
 .hico.hwa{color:#fff;background:#25d366;border-color:#1ea952}
 .hico.hwa:hover{background:#1ebe5a}
+.tgate{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,.12)}
+.tgatebtn{text-align:center;text-decoration:none;font-size:1.05rem;padding:12px}
+.tonh{margin:4px 0 8px;font-size:1rem}

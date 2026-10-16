@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 209;
+const APP_V = 210;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1509,7 +1509,9 @@ function toursHtml() {
   }).join('');
   const table = rows ? `<div class="ttwrap"><table class="ttab"><thead><tr><th>${T('Tournament')}</th><th>${T('Format')}</th><th class="n">${T('Boards')}</th><th>${T('Ranking')}</th><th class="n">${T('Players')}</th><th>${T('Status')}</th><th>${T('Ends in')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `<div class="muted">${L.length ? T('No tournaments here.') : T('No tournaments yet. Create one and invite the players you want.')}</div>`;
-  return `${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button><button class="btn new" id="sbOpen">🃏 ${T('Social bridge')}</button></div>`;
+  // the club tournament program (real cards at real tables, Bridgemate-style scoring) first; then the online tournaments
+  return `<div class="tgate"><a class="btn gold tgatebtn" href="gate/">🏛 ${T('Club tournament')}</a><div class="muted">${T('Real cards at real tables: the tournament director runs it, every table enters its scores with its code.')}</div></div>
+    <h4 class="tonh">🌐 ${T('Online tournaments')}</h4>${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button></div>`;
 }
 // the action buttons of one tournament row (and a short note: an invitation, your table, how far you are)
 function tourRowBtns(t, me) {

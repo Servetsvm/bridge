@@ -1500,6 +1500,9 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 :root[data-theme="dark"] .ddhd{color:#8fb6e6}
 .hico.hwa{color:#fff;background:#25d366;border-color:#1ea952}
 .hico.hwa:hover{background:#1ebe5a}
+.tgate{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(0,0,0,.12)}
+.tgatebtn{text-align:center;text-decoration:none;font-size:1.05rem;padding:12px}
+.tonh{margin:4px 0 8px;font-size:1rem}
 
 </style>
 
@@ -4287,6 +4290,9 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Club tournament": "Kulüp turnuvası",
+    "Real cards at real tables: the tournament director runs it, every table enters its scores with its code.": "Gerçek masalarda gerçek kartlarla: turnuvayı yönetici yürütür, her masa skorlarını kendi koduyla girer.",
+    "Online tournaments": "Online turnuvalar",
     "Send the app": "Uygulamayı gönder",
     "Whoever opens the link can install Bridge Table as an app.": "Linki açan kişi Bridge Table’ı uygulama olarak kurabilir.",
     "Play bridge with me: {0}": "Benimle briç oyna: {0}",
@@ -4622,6 +4628,9 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Club tournament": "Klubbturnering",
+    "Real cards at real tables: the tournament director runs it, every table enters its scores with its code.": "Ekte kort ved ekte bord: turneringslederen styrer, hvert bord legger inn resultatene med sin kode.",
+    "Online tournaments": "Nettturneringer",
     "Send the app": "Send appen",
     "Whoever opens the link can install Bridge Table as an app.": "Den som åpner lenken, kan installere Bridge Table som app.",
     "Play bridge with me: {0}": "Spill bridge med meg: {0}",
@@ -4957,6 +4966,9 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Club tournament": "Torneo de club",
+    "Real cards at real tables: the tournament director runs it, every table enters its scores with its code.": "Cartas reales en mesas reales: lo dirige el director del torneo y cada mesa anota sus resultados con su código.",
+    "Online tournaments": "Torneos en línea",
     "Send the app": "Enviar la app",
     "Whoever opens the link can install Bridge Table as an app.": "Quien abra el enlace puede instalar Bridge Table como app.",
     "Play bridge with me: {0}": "Juega al bridge conmigo: {0}",
@@ -5320,6 +5332,9 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Club tournament": "Tournoi de club",
+    "Real cards at real tables: the tournament director runs it, every table enters its scores with its code.": "De vraies cartes à de vraies tables : l’arbitre le dirige, chaque table saisit ses scores avec son code.",
+    "Online tournaments": "Tournois en ligne",
     "Send the app": "Envoyer l’app",
     "Whoever opens the link can install Bridge Table as an app.": "Qui ouvre le lien peut installer Bridge Table comme une app.",
     "Play bridge with me: {0}": "Joue au bridge avec moi : {0}",
@@ -5683,6 +5698,9 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Club tournament": "Torneo di circolo",
+    "Real cards at real tables: the tournament director runs it, every table enters its scores with its code.": "Carte vere a tavoli veri: lo dirige l’arbitro, ogni tavolo inserisce i punteggi con il suo codice.",
+    "Online tournaments": "Tornei online",
     "Send the app": "Invia l’app",
     "Whoever opens the link can install Bridge Table as an app.": "Chi apre il link può installare Bridge Table come app.",
     "Play bridge with me: {0}": "Gioca a bridge con me: {0}",
@@ -6046,6 +6064,9 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Club tournament": "Clubturnier",
+    "Real cards at real tables: the tournament director runs it, every table enters its scores with its code.": "Echte Karten an echten Tischen: der Turnierleiter führt es, jeder Tisch trägt seine Ergebnisse mit seinem Code ein.",
+    "Online tournaments": "Online-Turniere",
     "Send the app": "App senden",
     "Whoever opens the link can install Bridge Table as an app.": "Wer den Link öffnet, kann Bridge Table als App installieren.",
     "Play bridge with me: {0}": "Spiel Bridge mit mir: {0}",
@@ -6409,6 +6430,9 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Club tournament": "Клубный турнир",
+    "Real cards at real tables: the tournament director runs it, every table enters its scores with its code.": "Настоящие карты за настоящими столами: турнир ведёт директор, каждый стол вносит результаты своим кодом.",
+    "Online tournaments": "Онлайн-турниры",
     "Send the app": "Отправить приложение",
     "Whoever opens the link can install Bridge Table as an app.": "Кто откроет ссылку, сможет установить Bridge Table как приложение.",
     "Play bridge with me: {0}": "Сыграй со мной в бридж: {0}",
@@ -6772,6 +6796,9 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Club tournament": "Turniej klubowy",
+    "Real cards at real tables: the tournament director runs it, every table enters its scores with its code.": "Prawdziwe karty przy prawdziwych stołach: turniej prowadzi sędzia, każdy stół wpisuje wyniki swoim kodem.",
+    "Online tournaments": "Turnieje online",
     "Send the app": "Wyślij aplikację",
     "Whoever opens the link can install Bridge Table as an app.": "Kto otworzy link, może zainstalować Bridge Table jako aplikację.",
     "Play bridge with me: {0}": "Zagraj ze mną w brydża: {0}",
@@ -7135,6 +7162,9 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Club tournament": "俱乐部比赛",
+    "Real cards at real tables: the tournament director runs it, every table enters its scores with its code.": "在真实牌桌上用真牌打:由裁判主持,每桌用自己的代码录入成绩。",
+    "Online tournaments": "在线比赛",
     "Send the app": "发送应用",
     "Whoever opens the link can install Bridge Table as an app.": "打开链接的人可以把 Bridge Table 安装为应用。",
     "Play bridge with me: {0}": "来和我打桥牌:{0}",
@@ -8121,7 +8151,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 209;
+const APP_V = 210;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9622,7 +9652,9 @@ function toursHtml() {
   }).join('');
   const table = rows ? `<div class="ttwrap"><table class="ttab"><thead><tr><th>${T('Tournament')}</th><th>${T('Format')}</th><th class="n">${T('Boards')}</th><th>${T('Ranking')}</th><th class="n">${T('Players')}</th><th>${T('Status')}</th><th>${T('Ends in')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `<div class="muted">${L.length ? T('No tournaments here.') : T('No tournaments yet. Create one and invite the players you want.')}</div>`;
-  return `${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button><button class="btn new" id="sbOpen">🃏 ${T('Social bridge')}</button></div>`;
+  // the club tournament program (real cards at real tables, Bridgemate-style scoring) first; then the online tournaments
+  return `<div class="tgate"><a class="btn gold tgatebtn" href="gate/">🏛 ${T('Club tournament')}</a><div class="muted">${T('Real cards at real tables: the tournament director runs it, every table enters its scores with its code.')}</div></div>
+    <h4 class="tonh">🌐 ${T('Online tournaments')}</h4>${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button></div>`;
 }
 // the action buttons of one tournament row (and a short note: an invitation, your table, how far you are)
 function tourRowBtns(t, me) {
