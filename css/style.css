@@ -1580,3 +1580,4 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .hbtns .btn.hwatch.hsb,body.classic .hbtns .btn.hwatch.hsb{background:linear-gradient(170deg,#ffe58a,#f2b82c);color:#3b2600;border-color:#d9a92a}
 .prac .prconv,body.classic .prac .prconv{background:linear-gradient(#5fbf6a,#2e8b3a);color:#fff;border-color:#226b2c;text-shadow:0 1px 1px rgba(0,0,0,.2)}
 .prac .prconv.on,body.classic .prac .prconv.on{background:linear-gradient(#4aa857,#24702f);box-shadow:inset 0 0 0 3px #f2c94c}
+.hbtns .btn.hwatch.hsb,body.classic .hbtns .btn.hwatch.hsb{font-weight:800}
