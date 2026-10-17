@@ -8413,7 +8413,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 254;
+const APP_V = 255;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10694,6 +10694,7 @@ function showFieldTable(i, sel) {
   openOv('frev', `<h2>${T('Board')} ${e.board} · ${T('Robot tables')} ${i + 1}</h2><div class="big">${resultLine(rec)}</div>
     <div class="grp"><span>${T("The play — tap ▶ (or the table) to play the next card")}</span><div id="revPlay">${revPlayHtml(rec)}</div></div>
     <div class="grp"><span>${T('Auction')}</span><div class="auction">${auctionTable(auc, false, { board: e.board, dealer, seat: e.seat, sel })}</div>${sel != null && auc[sel] ? `<div class="expl">${explHtml(auc[sel])}</div>` : `<div class="muted tap">${T('Tap a call to see what it means')}</div>`}</div>
+    <div class="row2"><button class="btn" id="oFtCopy">📋 ${T('Copy for analysis')}</button></div>
     <div class="row2"><button class="btn" id="oFtBack">◀ ${T('Back')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 /* the boards played today, from the table: contract, result, score, IMPs and MP against the
@@ -10800,6 +10801,10 @@ document.addEventListener('click', ev_ => {
   const ri = ev_.target.closest('[data-ri]'); if (ri && ui.overlay === 'frev') { const i = +ri.dataset.ri; ui.revSel = ui.revSel === i ? null : i; showFieldTable(ui.fIdx, ui.revSel); return; }
   const ft = ev_.target.closest('[data-ftab]'); if (ft) { ui.revSel = null; ui.revStep = 0; stopRev(); showFieldTable(+ft.dataset.ftab); return; }
   if (ev_.target.closest('#oFtBack')) { stopRev(); showEnd(); return; }
+  // our board and the robot table's (its contract, auction and tricks; the hands are the same), to paste for Claude
+  if (ev_.target.closest('#oFtCopy') && ui.fRec) { const e = HIST.find(h => h.id === ui.fRec.id), rt = boardText(ui.fRec).split('\n').slice(1).filter(l => !/^[NESW]  /.test(l));
+    const txt = (e ? boardText(e) + '\n\n' : '') + `Robot table ${ui.fIdx + 1}\n` + rt.join('\n');
+    (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2500)).catch(() => prompt(T('Copy'), txt)); return; }
   if (ri) { const i = +ri.dataset.ri; showReview(ui.revId, ui.revSel === i ? null : i); ui.revSel = ui.revSel === i ? null : i; return; }
   if (ev_.target.closest('#oRevCopy')) { const e = HIST.find(h => h.id === ui.revId); if (e) { const txt = boardText(e); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2500)).catch(() => { ui.copyTxt = txt; openOv('copy', `<h2>${T('Copy for analysis')}</h2><textarea class="tok copytxt" rows="12" readonly>${esc(txt)}</textarea><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`); }); } return; }
   if (ev_.target.closest('#oRevBack')) { stopRev(); if (ui.revFrom === 'hist') showHist(); else { ui.resTab = 'list'; showResults(); } return; }
