@@ -722,7 +722,7 @@ const Net = (() => {
   async function roboErr(e, list) {
     const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
     if (!(await Cloud.session(name, SET.pinH))) return;
-    await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_'), { kim: name, ts: Date.now(), b: e.board, sys: SET.sys || '',
+    await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_'), { kim: name, ts: Date.now(), b: e.board, me: e.seat, sys: SET.sys || '',
       c: [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl], d: e.deal, a: e.auc || [], p: e.pl, er: list.slice(0, 20).map(x => [x.t, x.s, x.c, x.b, x.lost]) });
   }
   async function roboErrs() {

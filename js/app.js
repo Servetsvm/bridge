@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 256;
+const APP_V = 257;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1277,7 +1277,7 @@ function renderHome() {
   if (h.dataset.lang !== SET.lang) { h.dataset.lang = SET.lang; h.innerHTML = homeShell(); }
   const set = (id, html) => { const el = $(id); if (el && el.innerHTML !== html) { el.innerHTML = html; return true; } return false; };
   const cont = ui.saved && ui.saved.phase !== 'done';
-  set('hGo', cont ? T('Continue') : '🤖 ' + T('Play with robots'));
+  set('hGo', cont ? T('Continue') : '🤖 ' + T('Play offline'));
   set('hPrac', pracHtml());   // practise a convention (the heart of the page)
   set('hInst', instHtml());
   { const b = $('hNameBtn'), h = (myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`) + ' ✏️'; if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name, after a change on your card
@@ -2902,11 +2902,16 @@ async function showRoboErrs() {
   if (ui.overlay !== 'roboerr') return;
   ui.rbList = L;
   const n = L.reduce((a, r) => a + (r.er || []).length, 0);
-  const role = (r, x) => sideOf(x[1]) === sideOf(r.c[3]) ? T('declarer') : T('defence');
+  // who made it: the player's partner or an opponent (records from before the seat was kept: not known), declarer or defence
+  const mine = (r, x) => r.me != null && sideOf(x[1]) === sideOf(r.me), theirs = (r, x) => r.me != null && sideOf(x[1]) !== sideOf(r.me);
+  const role = (r, x) => [mine(r, x) ? T('partner') : theirs(r, x) ? T('opponent') : '', sideOf(x[1]) === sideOf(r.c[3]) ? T('declarer') : T('defence')].filter(Boolean).join(', ');
+  const all = L.flatMap(r => (r.er || []).map(x => [r, x]));
+  const sum = p => { const m = all.filter(([r, x]) => p(r, x)); return `${m.length} (${T('{0} tricks', m.reduce((a, [, x]) => a + x[4], 0))})`; };
+  const split = all.some(([r]) => r.me != null) ? `<div class="okmsg">🤝 ${T('partner')}: ${sum(mine)} · ⚔️ ${T('opponent')}: ${sum(theirs)}</div>` : '';
   const nd = L.reduce((a, r) => a + (r.er || []).filter(x => sideOf(x[1]) === sideOf(r.c[3])).length, 0);
   openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2>
     <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
-    ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div><div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
+    ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div>${split}<div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
     ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] })}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small></div>
       ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} <b class="pos">+${x[4]}</b></div>`).join('')}
       <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}

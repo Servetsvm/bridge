@@ -4370,6 +4370,9 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Play offline": "Offline oyna",
+    "partner": "ortak",
+    "opponent": "rakip",
     "Open table": "Açık masa",
     "Closed table": "Kapalı masa",
     "Robot mistakes": "Robot hataları",
@@ -4731,6 +4734,9 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Play offline": "Spill offline",
+    "partner": "makker",
+    "opponent": "motstander",
     "Open table": "Åpent bord",
     "Closed table": "Lukket bord",
     "Robot mistakes": "Robotfeil",
@@ -5092,6 +5098,9 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Play offline": "Jugar sin conexión",
+    "partner": "compañero",
+    "opponent": "rival",
     "Open table": "Mesa abierta",
     "Closed table": "Mesa cerrada",
     "Robot mistakes": "Errores de los robots",
@@ -5481,6 +5490,9 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Play offline": "Jouer hors ligne",
+    "partner": "partenaire",
+    "opponent": "adversaire",
     "Open table": "Table ouverte",
     "Closed table": "Table fermée",
     "Robot mistakes": "Erreurs des robots",
@@ -5870,6 +5882,9 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Play offline": "Gioca offline",
+    "partner": "compagno",
+    "opponent": "avversario",
     "Open table": "Tavolo aperto",
     "Closed table": "Tavolo chiuso",
     "Robot mistakes": "Errori dei robot",
@@ -6259,6 +6274,9 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Play offline": "Offline spielen",
+    "partner": "Partner",
+    "opponent": "Gegner",
     "Open table": "Offener Tisch",
     "Closed table": "Geschlossener Tisch",
     "Robot mistakes": "Roboterfehler",
@@ -6648,6 +6666,9 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Play offline": "Играть офлайн",
+    "partner": "партнёр",
+    "opponent": "соперник",
     "Open table": "Открытый стол",
     "Closed table": "Закрытый стол",
     "Robot mistakes": "Ошибки роботов",
@@ -7037,6 +7058,9 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Play offline": "Graj offline",
+    "partner": "partner",
+    "opponent": "przeciwnik",
     "Open table": "Stół otwarty",
     "Closed table": "Stół zamknięty",
     "Robot mistakes": "Błędy robotów",
@@ -7426,6 +7450,9 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Play offline": "离线打牌",
+    "partner": "同伴",
+    "opponent": "对手",
     "Open table": "开放牌桌",
     "Closed table": "封闭牌桌",
     "Robot mistakes": "机器人失误",
@@ -8438,7 +8465,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 256;
+const APP_V = 257;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9707,7 +9734,7 @@ function renderHome() {
   if (h.dataset.lang !== SET.lang) { h.dataset.lang = SET.lang; h.innerHTML = homeShell(); }
   const set = (id, html) => { const el = $(id); if (el && el.innerHTML !== html) { el.innerHTML = html; return true; } return false; };
   const cont = ui.saved && ui.saved.phase !== 'done';
-  set('hGo', cont ? T('Continue') : '🤖 ' + T('Play with robots'));
+  set('hGo', cont ? T('Continue') : '🤖 ' + T('Play offline'));
   set('hPrac', pracHtml());   // practise a convention (the heart of the page)
   set('hInst', instHtml());
   { const b = $('hNameBtn'), h = (myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`) + ' ✏️'; if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name, after a change on your card
@@ -11332,11 +11359,16 @@ async function showRoboErrs() {
   if (ui.overlay !== 'roboerr') return;
   ui.rbList = L;
   const n = L.reduce((a, r) => a + (r.er || []).length, 0);
-  const role = (r, x) => sideOf(x[1]) === sideOf(r.c[3]) ? T('declarer') : T('defence');
+  // who made it: the player's partner or an opponent (records from before the seat was kept: not known), declarer or defence
+  const mine = (r, x) => r.me != null && sideOf(x[1]) === sideOf(r.me), theirs = (r, x) => r.me != null && sideOf(x[1]) !== sideOf(r.me);
+  const role = (r, x) => [mine(r, x) ? T('partner') : theirs(r, x) ? T('opponent') : '', sideOf(x[1]) === sideOf(r.c[3]) ? T('declarer') : T('defence')].filter(Boolean).join(', ');
+  const all = L.flatMap(r => (r.er || []).map(x => [r, x]));
+  const sum = p => { const m = all.filter(([r, x]) => p(r, x)); return `${m.length} (${T('{0} tricks', m.reduce((a, [, x]) => a + x[4], 0))})`; };
+  const split = all.some(([r]) => r.me != null) ? `<div class="okmsg">🤝 ${T('partner')}: ${sum(mine)} · ⚔️ ${T('opponent')}: ${sum(theirs)}</div>` : '';
   const nd = L.reduce((a, r) => a + (r.er || []).filter(x => sideOf(x[1]) === sideOf(r.c[3])).length, 0);
   openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2>
     <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
-    ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div><div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
+    ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div>${split}<div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
     ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] })}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small></div>
       ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} <b class="pos">+${x[4]}</b></div>`).join('')}
       <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}
@@ -12268,7 +12300,7 @@ const Net = (() => {
   async function roboErr(e, list) {
     const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
     if (!(await Cloud.session(name, SET.pinH))) return;
-    await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_'), { kim: name, ts: Date.now(), b: e.board, sys: SET.sys || '',
+    await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_'), { kim: name, ts: Date.now(), b: e.board, me: e.seat, sys: SET.sys || '',
       c: [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl], d: e.deal, a: e.auc || [], p: e.pl, er: list.slice(0, 20).map(x => [x.t, x.s, x.c, x.b, x.lost]) });
   }
   async function roboErrs() {
