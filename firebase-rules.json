@@ -50,6 +50,16 @@
         }
       }
     },
+    "roboterr": {
+      ".read": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
+      ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
+      "$name": {
+        "$id": {
+          ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $name && !data.exists()",
+          ".validate": "newData.hasChildren(['kim', 'ts', 'er', 'd', 'p', 'c']) && newData.child('kim').isString() && newData.child('kim').val().length <= 20 && newData.child('ts').isNumber()"
+        }
+      }
+    },
     "destek": {
       ".read": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
       ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
@@ -93,6 +103,16 @@
                 ".write": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name && !data.exists() && (newData.child('by').val() === 'p' || newData.child('by').val() === 'auto')) || (auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet')",
                 ".validate": "newData.hasChildren(['by', 't', 'ts']) && newData.child('t').isString() && newData.child('t').val().length <= 1000 && newData.child('ts').isNumber()"
               }
+            }
+          }
+        },
+        "roboterr": {
+          ".read": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
+          ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet'",
+          "$name": {
+            "$id": {
+              ".write": "auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === $name && !data.exists()",
+              ".validate": "newData.hasChildren(['kim', 'ts', 'er', 'd', 'p', 'c']) && newData.child('kim').isString() && newData.child('kim').val().length <= 20 && newData.child('ts').isNumber()"
             }
           }
         },

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 253;
+const APP_V = 254;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -212,6 +212,32 @@ const Field = {
   },
 };
 /* ---- checking the card play after the board (double dummy, in a background worker) ---- */
+/* the robots' own cards: after a board with robots (not at an online table) the cards the robots played are checked
+   double dummy in a worker of their own, one board at a time; a card that gave away tricks goes to the
+   administrator's list of robot mistakes, from which the robots are improved by hand */
+const RoboAna = {
+  w: null, q: [],
+  add(e) {
+    if (!e || !e.pl || e.pl.length < 2 || !e.c || !e.deal || typeof Worker === 'undefined') return;
+    this.q.push(e); if (this.q.length === 1) setTimeout(() => this.next(), 5000);
+  },
+  next() {
+    const e = this.q[0]; if (!e) return;
+    const ours = sideOf(e.c.decl) === sideOf(e.seat) ? [e.c.decl, pd(e.c.decl)] : [e.seat];
+    const seats = [0, 1, 2, 3].filter(s => !ours.includes(s));
+    const done = list => {
+      clearTimeout(this.to); this.q.shift();
+      if (list && list.length) Net.roboErr(e, list).catch(() => {});
+      if (this.q.length) setTimeout(() => this.next(), 1000);
+      else if (this.w) { this.w.terminate(); this.w = null; }   // nothing left to check: the memory is given back
+    };
+    this.to = setTimeout(() => { if (this.w) { this.w.terminate(); this.w = null; } done(null); }, 180000);
+    if (!this.w) this.w = Field.mk();
+    if (!this.w) { done(null); return; }
+    this.w.onmessage = m => { const d = m.data; if (d && d.id === e.id && d.type === 'ana') done(d.list); else if (d && d.id === e.id && d.type === 'error') done(null); };
+    this.w.postMessage({ type: 'ana', id: e.id, deal: e.deal, c: e.c, pl: e.pl, seats, limit: 2e7 });
+  },
+};
 const cardH = c => RTXT[R(c)] + symHtml(S(c));
 const Ana = {
   w: null,
@@ -582,6 +608,7 @@ function finishBoard() {
   Store.saveRec(e);
   save(); render();
   scheduleSync();
+  if (g && !online()) RoboAna.add(e);   // the robots' cards are checked for mistakes
 }
 function tick() {
   clearTimeout(timer); if (!G || guest()) return; // when you are a guest, the host runs the table
@@ -1174,7 +1201,7 @@ function pracHtml() {
     <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Notify me")}</label>
     ${pracWarnHtml()}
     ${pracProgHtml()}
-    <div class="praskrow"><button class="prask" id="hConvAsk">➕ <span class="lg">${T('Add a convention')}</span><span class="sh">${T('Convention')}</span></button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ <span class="lg">${T('Write to the administrator')}</span><span class="sh">${T('Admin')}</span></button>`}</div>`;
+    <div class="praskrow"><button class="prask" id="hConvAsk">➕ <span class="lg">${T('Add a convention')}</span><span class="sh">${T('Convention')}</span></button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ <span class="lg">${T('Write to the administrator')}</span><span class="sh">${T('Admin')}</span></button>`}</div>`;
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
 function togglePractice(k, add) {
@@ -2394,6 +2421,9 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.supk) { showSupThread(t.dataset.supk); return; }
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
+  if (t.id === 'hRoboErr') { showRoboErrs(); return; }
+  if (t.dataset.rbdone) { Net.roboErrDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
+  if (t.id === 'rbCopy') { const txt = JSON.stringify(ui.rbList || []); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
   if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
   const sol = ev_.target.closest("[data-solo]"); if (sol) { Net.st.soloPub = sol.dataset.solo === "pub"; closeOv(); resume(); return; }
   const dtb = ev_.target.closest("[data-dtab]"); if (dtb) { ui.dockTab = dtb.dataset.dtab; renderDock(); return; }
@@ -2856,6 +2886,25 @@ async function showConvRequests() {
     ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${esc(r.ad)}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleDateString()}</small></div>
       <div class="cvb">${symText(esc(r.acik))}</div>${r.ornek ? `<div class="cvx">${symText(esc(r.ornek))}</div>` : ''}
       <button class="btn mini-btn" data-cvdone="${esc(r.path)}">✓ ${T('Done — remove')}</button></div>`).join('') : `<div class="muted">${T('No requests yet.')}</div>`}
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+/* the robots' mistakes (administrator): each board where a robot's card gave away tricks double dummy, with the
+   cards; copied for Claude, who improves the robots, and then removed */
+async function showRoboErrs() {
+  if (!Net.isAdmin()) return;
+  openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let L = []; try { L = await Net.roboErrs(); } catch (e) {}
+  if (ui.overlay !== 'roboerr') return;
+  ui.rbList = L;
+  const n = L.reduce((a, r) => a + (r.er || []).length, 0);
+  const role = (r, x) => sideOf(x[1]) === sideOf(r.c[3]) ? T('declarer') : T('defence');
+  const nd = L.reduce((a, r) => a + (r.er || []).filter(x => sideOf(x[1]) === sideOf(r.c[3])).length, 0);
+  openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2>
+    <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
+    ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div><div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
+    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] })}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small></div>
+      ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} <b class="pos">+${x[4]}</b></div>`).join('')}
+      <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 /* the administrator's list of players: every registered name, when it was made and last signed in; tick the ones

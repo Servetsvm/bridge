@@ -712,6 +712,22 @@ const Net = (() => {
     return out.sort((a, b) => b.ts - a.ts);
   }
   const convDone = path => Cloud.put('istek/' + path, null);
+  /* a robot's card that gave away tricks (double dummy), sent after the board: roboterr/<player>/<board> with the
+     deal, the auction, the play and the mistakes [trick, seat, card, better card, tricks lost]; only the
+     administrator reads the list */
+  async function roboErr(e, list) {
+    const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
+    if (!(await Cloud.session(name, SET.pinH))) return;
+    await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_'), { kim: name, ts: Date.now(), b: e.board, sys: SET.sys || '',
+      c: [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl], d: e.deal, a: e.auc || [], p: e.pl, er: list.slice(0, 20).map(x => [x.t, x.s, x.c, x.b, x.lost]) });
+  }
+  async function roboErrs() {
+    if (!Cloud.on || !isAdmin()) return [];
+    const all = await Cloud.get('roboterr') || {}, out = [];
+    for (const [k, list] of Object.entries(all)) for (const [id, r] of Object.entries(list || {})) if (r && r.er) out.push({ ...r, path: k + '/' + id });
+    return out.sort((a, b) => b.ts - a.ts);
+  }
+  const roboErrDone = path => Cloud.put('roboterr/' + path, null);
   // the administrator's visitor statistics: every day's logins (once per internet address in each period), by country
   /* what was played today (for the administrator's statistics, to see how the site is used): boards with robots, at
      online tables and in tournaments, practice boards, the conventions that came up and how often the player's calls
@@ -819,7 +835,7 @@ const Net = (() => {
   async function adminDelete(k) {
     if (!isAdmin() || k === ruleKey(myName())) return false;
     const u = await Cloud.get('users/' + seg(k)).catch(() => null), logins = await Cloud.get('logins?shallow=true').catch(() => null) || {};
-    const jobs = ['online/', 'destek/', 'istek/'].map(p => Cloud.put(p + seg(k), null).catch(() => {}));
+    const jobs = ['online/', 'destek/', 'istek/', 'roboterr/'].map(p => Cloud.put(p + seg(k), null).catch(() => {}));
     if (u && u.pin) jobs.push(Cloud.put('data/' + seg(u.pin), null).catch(() => {}));
     for (const day of Object.keys(logins)) jobs.push(Cloud.put('logins/' + day + '/' + seg(k), null).catch(() => {}));
     await Promise.all(jobs);
@@ -1763,5 +1779,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboErrs, roboErrDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
