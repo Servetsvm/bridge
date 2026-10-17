@@ -515,27 +515,31 @@ const Net = (() => {
   function tablesHtml() {
     // tables in play are listed: online tables, and players at a board with robots (not someone on the home page)
     const L = st.tables && st.tables.filter(listed);
-    // each table is drawn as a table: the player's name or "Robot" at every side
-    let rows = !L ? '' : L.length ? `<div class="tbls">${L.map(t => {
-      const nm = t.names || {}, away = t.away || [];
-      const pf = t.profs || {};
-      const cells = [0, 1, 2, 3].map(s => nm[s] ? (nameKey(nm[s]) === nameKey(myName()) ? `<b class="pname" data-who="${esc(nm[s])}">${esc(nm[s])}</b>` : `<b class="pname" data-pm="${esc(nm[s])}" title="${T("Private message")}">${esc(nm[s])}</b><button class="tinfo" data-who="${esc(nm[s])}" title="${T("Player card")}">ⓘ</button>`) + `${(pf[s] || (!t.online && t.prof)) && profTxt(pf[s] || t.prof) ? `<span class="pb">${esc(profTxt(pf[s] || t.prof))}</span>` : ''}${away.includes(s) ? `<em>${T('away · robot plays')}</em>` : ''}` : `<i>${T('Robot')}</i>`);
+    // each table is one line: open (🔓, an online table anyone may ask to join, or a player at the robots who chose
+    // "open to others") or closed (🔒), whose table it is and what is played there, the players, and the buttons
+    const pn = n => nameKey(n) === nameKey(myName()) ? `<b class="pname" data-who="${esc(n)}">${esc(n)}</b>` : `<b class="pname" data-pm="${esc(n)}" title="${T('Private message')}">${esc(n)}</b>`;
+    const line = (open, title, state, people, extra, btns) => `<div class="otour otbl ${open ? 'op' : 'cl'}"><div><b>${open ? '🔓' : '🔒'} ${title}</b>`
+      + `<small><span class="ostat">${open ? T('Open table') : T('Closed table')}</span> · ${state}</small>${extra}${people ? `<small>👥 ${people}</small>` : ''}</div><div class="otb">${btns}</div></div>`;
+    let rows = !L ? '' : L.map(t => {
+      const nm = t.names || {}, humans = [0, 1, 2, 3].filter(x => nm[x]).map(x => nm[x]), robots = 4 - humans.length;
       // a tournament is named on its table: an individual one can be joined (you play the same boards at your own table)
       const tp = t.tplay && typeof t.tplay === 'object' ? t.tplay : null, tt = t.tour && st.tours[t.tour.id];
-      const tinfo = tp ? `<div class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</div>`
-        : tt ? `<div class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</div>` : '';
-      const mid = `<div class="tname">${t.priv ? '🔒 ' : ''}${T("{0}'s table", esc(t.host))}</div>${tinfo}<div class="tstate">${t.online ? (t.priv ? T('Private table') : T('online')) : t.pc ? T('practising conventions') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}</div>${tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`}${t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}`;
-      return seatTable(cells, mid, 2);
-    }).join('')}</div>` : '';
+      const tinfo = tp ? `<small class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</small>`
+        : tt ? `<small class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</small>` : '';
+      const open = t.online ? !t.priv : !!(t.pub || tp);
+      const state = `${t.online ? T('online') : t.pc ? T('practising conventions') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}`;
+      const people = (humans.length ? humans.map(pn).join(', ') : pn(t.host)) + (robots > 0 && humans.length ? ` + ${robots} ${T('Robot')}` : '');
+      const btns = (tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`) + (t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : '');
+      return line(open, T("{0}'s table", esc(t.host)), state, people, tinfo, btns);
+    }).join('');
+    // the players the online list has at a board with robots, whose table the direct lines have not found
     const seen = new Set((L || []).flatMap(t => [t.host, ...Object.values(t.names || {})]).filter(Boolean).map(nameKey));
     const R = (st.cloud && Cloud.on && st.cloud.on || []).filter(x => x.at === 'robots' && x.name && nameKey(x.name) !== nameKey(myName()) && !seen.has(nameKey(x.name)));
-    const rows2 = R.map(x => {
-      const k = st.roomOf && st.roomOf[nameKey(x.name)], p = x.p && profTxt(cleanProf(x.p, true));
-      const cells = [0, 1, 2, 3].map(s => s === 2 ? `<b class="pname" data-pm="${esc(x.name)}" title="${T('Private message')}">${esc(x.name)}</b><button class="tinfo" data-who="${esc(x.name)}" title="${T('Player card')}">ⓘ</button>${p ? `<span class="pb">${esc(p)}</span>` : ''}` : `<i>${T('Robot')}</i>`);
-      const mid = `<div class="tname">${T("{0}'s table", esc(x.name))}</div><div class="tstate">${x.pc ? T('practising conventions') : T('playing with robots')}</div>${k ? `<button class="btn gold" data-jt="${k}">${T('Ask to join')}</button>` : ''}`;
-      return seatTable(cells, mid, 2);
+    rows += R.map(x => {
+      const k = st.roomOf && st.roomOf[nameKey(x.name)];
+      return line(!!k, T("{0}'s table", esc(x.name)), x.pc ? T('practising conventions') : T('playing with robots'), `${pn(x.name)} + 3 ${T('Robot')}`, '', k ? `<button class="btn gold" data-jt="${k}">${T('Ask to join')}</button>` : '');
     }).join('');
-    if (rows2) rows = rows ? rows.replace(/<\/div>$/, rows2 + '</div>') : `<div class="tbls">${rows2}</div>`;
+    if (rows) rows = `<div class="otours tlist">${rows}</div>`;
     // the tournaments that are open: an individual one is played at each player's own table, so it is listed here
     // even while nobody is at a board (join it from here)
     const me = devId(), live = Object.values(st.tours).filter(t => t.state !== 'off' && Date.now() < t.ts + t.hours * 3600e3 && (openTour(t) || t.joined[me] || isMine(t))).sort((a, b) => (a.state === 'live' ? 0 : 1) - (b.state === 'live' ? 0 : 1) || b.ts - a.ts);   // running ones first, newest first

@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Open table": "Açık masa",
+    "Closed table": "Kapalı masa",
     "Robot mistakes": "Robot hataları",
     "Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.": "Robotların oynadığı ve löve kaybettiren kartlar (double dummy). Robotları geliştirmesi için Claude'a kopyala, sonra listeden sil.",
     "Copy all for Claude": "Hepsini Claude için kopyala",
@@ -362,6 +364,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Open table": "Åpent bord",
+    "Closed table": "Lukket bord",
     "Robot mistakes": "Robotfeil",
     "Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.": "Kort robotene spilte som ga bort stikk (double dummy). Kopier dem til Claude for å forbedre robotene, og fjern dem så.",
     "Copy all for Claude": "Kopier alt til Claude",
@@ -721,6 +725,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Open table": "Mesa abierta",
+    "Closed table": "Mesa cerrada",
     "Robot mistakes": "Errores de los robots",
     "Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.": "Cartas de los robots que regalaron bazas (double dummy). Cópialas para que Claude mejore los robots y luego bórralas.",
     "Copy all for Claude": "Copiar todo para Claude",
@@ -1108,6 +1114,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Open table": "Table ouverte",
+    "Closed table": "Table fermée",
     "Robot mistakes": "Erreurs des robots",
     "Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.": "Cartes jouées par les robots qui ont coûté des levées (double dummy). Copiez-les pour que Claude améliore les robots, puis supprimez-les.",
     "Copy all for Claude": "Tout copier pour Claude",
@@ -1495,6 +1503,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Open table": "Tavolo aperto",
+    "Closed table": "Tavolo chiuso",
     "Robot mistakes": "Errori dei robot",
     "Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.": "Carte giocate dai robot che hanno regalato prese (double dummy). Copiale per Claude, che migliora i robot, poi rimuovile.",
     "Copy all for Claude": "Copia tutto per Claude",
@@ -1882,6 +1892,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Open table": "Offener Tisch",
+    "Closed table": "Geschlossener Tisch",
     "Robot mistakes": "Roboterfehler",
     "Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.": "Karten der Roboter, die Stiche gekostet haben (Double Dummy). Für Claude kopieren, um die Roboter zu verbessern, dann entfernen.",
     "Copy all for Claude": "Alles für Claude kopieren",
@@ -2269,6 +2281,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Open table": "Открытый стол",
+    "Closed table": "Закрытый стол",
     "Robot mistakes": "Ошибки роботов",
     "Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.": "Карты роботов, которые отдали взятки (double dummy). Скопируйте их для Claude, чтобы улучшить роботов, затем удалите.",
     "Copy all for Claude": "Скопировать всё для Claude",
@@ -2656,6 +2670,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Open table": "Stół otwarty",
+    "Closed table": "Stół zamknięty",
     "Robot mistakes": "Błędy robotów",
     "Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.": "Karty zagrane przez roboty, które oddały lewy (double dummy). Skopiuj je dla Claude, aby ulepszyć roboty, a potem usuń.",
     "Copy all for Claude": "Kopiuj wszystko dla Claude",
@@ -3043,6 +3059,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Open table": "开放牌桌",
+    "Closed table": "封闭牌桌",
     "Robot mistakes": "机器人失误",
     "Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.": "机器人打出并送掉墩数的牌（双明手分析）。复制给 Claude 改进机器人，然后删除。",
     "Copy all for Claude": "全部复制给 Claude",
