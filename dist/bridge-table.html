@@ -1596,6 +1596,8 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .prac .prconv,body.classic .prac .prconv{background:linear-gradient(#5fbf6a,#2e8b3a);color:#fff;border-color:#226b2c;text-shadow:0 1px 1px rgba(0,0,0,.2)}
 .prac .prconv.on,body.classic .prac .prconv.on{background:linear-gradient(#4aa857,#24702f);box-shadow:inset 0 0 0 3px #f2c94c}
 .hbtns .btn.hwatch.hsb,body.classic .hbtns .btn.hwatch.hsb{font-weight:800}
+.hbtns .btn.hwatch.hsb,body.classic .hbtns .btn.hwatch.hsb{font-size:20px}
+.hsmall .hbtns .btn.hwatch.hsb,body.classic .hsmall .hbtns .btn.hwatch.hsb{font-size:15.5px}
 
 </style>
 
@@ -8479,7 +8481,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 260;
+const APP_V = 261;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
