@@ -1558,3 +1558,5 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
   .prac .praskrow:not(:has(#hConvReq)){flex-wrap:nowrap}
   .prac .praskrow:not(:has(#hConvReq)) .prask{white-space:nowrap;flex:1 1 0}
 }
+/* on a phone there is room to spare in the middle: my cards and my partner's are a little taller */
+@media (max-width:700px){ #pos0 .fan .card,#pos2 .fan .card,body.classic #pos0 .fan .card,body.classic #pos2 .fan .card{height:calc(var(--cw)*1.85)} }
