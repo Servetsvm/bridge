@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 257;
+const APP_V = 258;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1198,7 +1198,7 @@ function pracHtml() {
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
-    <label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Notify me")}</label>
+    <div class="prhintrow"><label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Notify me")}</label><button class="btn hconv prconv" data-hsec="conv">📋 ${T('Convention card')}</button></div>
     ${pracWarnHtml()}
     ${pracProgHtml()}
     <div class="praskrow"><button class="prask" id="hConvAsk">➕ <span class="lg">${T('Add a convention')}</span><span class="sh">${T('Convention')}</span></button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ <span class="lg">${T('Write to the administrator')}</span><span class="sh">${T('Admin')}</span></button>`}</div>`;
@@ -1235,7 +1235,7 @@ function homeShell() {
       <div class="hpair">
       <div class="hcard hero hsmall">
         <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
-        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><a class="btn htour" href="bridgegate/">🏆 ${T('Tournaments')}</a><button class="btn hconv" data-hsec="conv">📋 ${T('Convention card')}</button><div class="hrow3"><button class="btn hwatch" id="sbOpen">🃏 ${T('Social bridge')}</button></div></div>
+        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><a class="btn htour" href="bridgegate/">🏆 ${T('Tournaments')}</a><button class="btn hwatch hsb" id="sbOpen">🃏 ${T('Social bridge')}</button></div>
         <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
       </div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
@@ -2351,7 +2351,7 @@ document.addEventListener('click', ev_ => {
   // Results: open a finished board, tap its calls, or go back to the list
   const hsb = ev_.target.closest('[data-hsec]'); if (hsb && hsb.dataset.hsec === 'chat') { const c = document.querySelector('.hchat'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'end' }); const i = $('lMsg'); if (i) setTimeout(() => i.focus(), 300); return; }
   if (hsb && hsb.closest('#ov')) closeOv();   // from the player card: close it and open the section
-  if (hsb) { const v = hsb.dataset.hsec; ui.hsec = !v || ui.hsec === v ? null : v; render(); if (ui.hsec === 'chat') { const i = $('lMsg2'); if (i) i.focus(); } return; }
+  if (hsb) { const v = hsb.dataset.hsec; ui.hsec = !v || ui.hsec === v ? null : v; render(); if (ui.hsec && hsb.classList.contains('prconv') && $('hSec')) $('hSec').scrollIntoView({ behavior: 'smooth', block: 'start' }); if (ui.hsec === 'chat') { const i = $('lMsg2'); if (i) i.focus(); } return; }
   const opb = ev_.target.closest('[data-open]'); if (opb) { closeOv(); ui.saved = null; Net.openTable(opb.dataset.open === 'priv'); return; }
   const ar = ev_.target.closest('[data-askr]'); if (ar) { const f = ui.askFin; ui.askFin = null; askClose(); if (f) f(ar.dataset.askr === '1'); return; }
   const cn = ev_.target.closest('[data-claimn]'); if (cn) { claimChosen(+cn.dataset.claimn); return; }

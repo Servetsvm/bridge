@@ -1567,3 +1567,9 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .otour.otbl .otb{display:flex;flex-direction:column;gap:4px}.otour.otbl .otb .btn{padding:6px 10px;font-size:13px}
 .otour.otbl .pname{cursor:pointer;text-decoration:underline dotted}
 :root[data-theme="dark"] .otour.otbl.op{background:#1f3326;border-color:#2f5a3c}:root[data-theme="dark"] .otour.otbl.cl{background:#2a2a27;border-color:#45453f}
+/* Social bridge beside Tournaments; the Convention card button beside "Notify me" in the practice box */
+.hbtns .btn.hwatch.hsb{grid-column:auto}
+.prac .prhintrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 2px 0}
+.prac .prhintrow .prhintsw{margin:0}
+.prac .prconv{flex:none;background:#b5651d;color:#fff;border:1px solid #8f4f16;border-radius:10px;font-size:14px;font-weight:700;padding:7px 12px}
+.prac .prconv.on{background:#8f4f16;box-shadow:inset 0 0 0 3px #f2c94c}
