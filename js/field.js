@@ -27,7 +27,8 @@ function simulateTable(deal, board, cards, agg, opt) {
   }
   const tricks = g.tricks[sideOf(c.decl)];
   const sc = scoreOf(c.level, c.strain, c.dbl, vulOf(board, c.decl), tricks);
-  return { c, tricks, ns: sideOf(c.decl) === 0 ? sc : -sc };
+  // with the auction and every trick, so the table can be replayed on the end screen
+  return { c, tricks, ns: sideOf(c.decl) === 0 ? sc : -sc, auc: auc.map(a => [a.seat, a.call]), pl: g.history.map(t => t.cards.map(x => [x.s, x.c])) };
 }
 
 /* body of the background worker; receives the engine object */

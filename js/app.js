@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 252;
+const APP_V = 253;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1729,7 +1729,7 @@ function openOv(name, html) {
 }
 function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no way past the name and PIN
   if (typeof SB !== "undefined" && SB.locked()) return;   // social bridge: a score waits for the other pair's confirmation
-  if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev') stopRev(); ui.overlay = null; $('ov').hidden = true; $('ov').classList.remove('float'); }
+  if (ui.overlay === 'deal') { ui.photoHands = null; ui.photoMsg = null; } if (ui.overlay === 'rev' || ui.overlay === 'frev') stopRev(); ui.overlay = null; $('ov').hidden = true; $('ov').classList.remove('float'); }
 /* ---- the problem of the day: the same deal and question for everyone each day (from the date), in turn
    "what do you open?", "partner opened: what do you answer?" and "what do you lead?". The answer is the robot's call
    (with its meaning), or for a lead the cards that give the defence the most tricks (double dummy). ---- */
@@ -1878,7 +1878,9 @@ function showEnd() {
   if (!f.done) fieldHtml = `<div class="muted">${T('The robot tables are playing this deal…')} (${f.tables.length}/${f.n || 10})</div>`;
   else {
     const fus = t => sideOf(e.seat) === 0 ? t.ns : -t.ns;
-    fieldHtml = `<table class="res"><thead><tr><th>${T('Table')}</th><th>${T('Contract')}</th><th>${T('Tricks')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th></tr></thead><tbody>${f.tables.map((t, i) => `<tr><td>${i + 1}</td><td>${t.passed ? T('Pass') : conKey(t.c)}</td><td>${t.tricks ?? ''}</td><td class="n">${fmtSigned(fus(t))}</td><td class="n">${fmtSigned(E.imps(e.us - fus(t)))}</td></tr>`).join('')}</tbody></table>`;
+    // the robot table with the best score for our side (★) can be opened: how the robots bid it and played it
+    let best = -1; f.tables.forEach((t, i) => { if (t.pl && (best < 0 || fus(t) > fus(f.tables[best]))) best = i; });
+    fieldHtml = (best >= 0 ? `<div class="muted">${T('Tap the best robot table (★) to see how it was bid and played.')}</div>` : '') + `<table class="res"><thead><tr><th>${T('Table')}</th><th>${T('Contract')}</th><th>${T('Tricks')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th></tr></thead><tbody>${f.tables.map((t, i) => `<tr${i === best ? ` class="rev fbest" data-ftab="${i}"` : ''}><td>${i + 1}${i === best ? ' ★' : ''}</td><td>${t.passed ? T('Pass') : conKey(t.c)}</td><td>${t.tricks ?? ''}</td><td class="n">${fmtSigned(fus(t))}</td><td class="n">${fmtSigned(E.imps(e.us - fus(t)))}</td></tr>`).join('')}</tbody></table>`;
   }
   const scoreTxt = e.imp != null ? `<div class="score2"><div class="${SET.mode === 'IMP' ? 'on' : ''}"><small>IMP</small><b>${fmtSigned(e.imp)}</b></div><div class="${SET.mode === 'MP' ? 'on' : ''}"><small>MP</small><b>${e.mp}%</b></div></div>` : '';
   const norm = f.normC;
@@ -2176,7 +2178,7 @@ function revPlayHtml(e) {
   const hand = s => {
     const left = e.deal[s].filter(c => !played.has(c));
     const tag = s === e.c.decl ? ' · ' + T('Decl') : s === pd(e.c.decl) ? ' · ' + T('Dummy') : '';
-    return `<div class="h ${pos[rel_(s)]}${s === next ? ' turn' : ''}"><b>${SEAT[s]}${s === e.seat ? ' (' + T('you') + ')' : ''}${tag}</b>${ORDER.map(su => { const cs = E.desc(E.inSuit(left, su)); return `${symHtml(su)} ${cs.length ? cs.map(c => RTXT[R(c)]).join(' ') : '—'}`; }).join('<br>')}</div>`;
+    return `<div class="h ${pos[rel_(s)]}${s === next ? ' turn' : ''}"><b>${SEAT[s]}${s === e.seat && !e.robot ? ' (' + T('you') + ')' : ''}${tag}</b>${ORDER.map(su => { const cs = E.desc(E.inSuit(left, su)); return `${symHtml(su)} ${cs.length ? cs.map(c => RTXT[R(c)]).join(' ') : '—'}`; }).join('<br>')}</div>`;
   };
   const mid = `<div class="rtrick" data-rs="next">${trick.map(([s, c]) => `<span class="rc ${pos[rel_(s)]}${s === w ? ' win' : ''}">${RTXT[R(c)]}${symHtml(S(c))}</span>`).join('')}</div>`;
   const tally = `${T('declarer')} ${t1}, ${T('defence')} ${t2}`;
@@ -2188,15 +2190,16 @@ function revPlayHtml(e) {
       <button class="btn gold" data-rs="auto">${ui.revTimer ? T('Pause') : T('Play')}</button>
       <button class="btn" data-rs="next" ${k < n ? '' : 'disabled'}>▶</button><button class="btn" data-rs="last" ${k < n ? '' : 'disabled'}>⏭</button></div>`;
 }
+const revRec = () => ui.overlay === 'frev' ? ui.fRec : HIST.find(h => h.id === ui.revId);
 function revStep(a) {
-  const e = HIST.find(h => h.id === ui.revId); if (!e || !e.pl) return;
+  const e = revRec(); if (!e || !e.pl) return;
   const n = e.pl.flat().length, k = ui.revStep || 0;
-  if (a === 'auto') { if (ui.revTimer) stopRev(); else { if (k >= n) ui.revStep = 0; ui.revTimer = setInterval(() => { if ((ui.revStep || 0) >= n || ui.overlay !== 'rev') { stopRev(); return; } ui.revStep++; revDraw(); }, 900); } }
+  if (a === 'auto') { if (ui.revTimer) stopRev(); else { if (k >= n) ui.revStep = 0; ui.revTimer = setInterval(() => { if ((ui.revStep || 0) >= n || ui.overlay !== 'rev' && ui.overlay !== 'frev') { stopRev(); return; } ui.revStep++; revDraw(); }, 900); } }
   else { stopRev(); ui.revStep = a === 'first' ? 0 : a === 'last' ? n : a === 'prev' ? Math.max(0, k - 1) : Math.min(n, k + 1); }
   revDraw();
 }
 function stopRev() { clearInterval(ui.revTimer); ui.revTimer = null; }
-function revDraw() { const e = HIST.find(h => h.id === ui.revId), el = $('revPlay'); if (e && el) el.innerHTML = revPlayHtml(e); }
+function revDraw() { const e = revRec(), el = $('revPlay'); if (e && el) el.innerHTML = revPlayHtml(e); }
 
 /* a finished board from Results: the four hands, the auction (tap a call for its meaning) and every trick */
 /* a finished board looked at again: the contract double dummy (worked out now in a worker when the board was left
@@ -2247,6 +2250,19 @@ function showReview(id, sel) {
     ${e.deal && !e.tour ? `<div class="row2"><button class="btn" id="oRevShare">🔗 ${T("Share this deal")}</button><button class="btn" id="oRevPbn">💾 PBN</button><button class="btn" id="oRevLin">💾 LIN</button></div>` : ""}
     <div class="row2"><button class="btn" id="oRevCopy">📋 ${T('Copy for analysis')}</button></div>
     <div class="row2"><button class="btn" id="oRevBack">${T('Back to the list')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+/* one robot table of the board just played: how the robots bid it and played it, card by card */
+function showFieldTable(i, sel) {
+  const e = G && G.result, f = G && G.field, t = f && f.tables[i]; if (!e || !t || !t.pl) return;
+  const rec = ui.fIdx === i && ui.fRec && ui.fRec.id === e.id ? ui.fRec : { id: e.id, board: e.board, seat: e.seat, deal: G.deal, c: t.c, tricks: t.tricks, us: sideOf(e.seat) === 0 ? t.ns : -t.ns, pl: t.pl, auc: t.auc, robot: true };
+  ui.fIdx = i; ui.fRec = rec;
+  const dealer = dealerOf(e.board), cards = sideCards();
+  const auc = (t.auc || []).map(([seat, call]) => ({ seat, call }));
+  auc.forEach((a, k) => { a.m = E.explainCall(auc.slice(0, k), a.seat, a.call, cards); });
+  openOv('frev', `<h2>${T('Board')} ${e.board} · ${T('Robot tables')} ${i + 1}</h2><div class="big">${resultLine(rec)}</div>
+    <div class="grp"><span>${T("The play — tap ▶ (or the table) to play the next card")}</span><div id="revPlay">${revPlayHtml(rec)}</div></div>
+    <div class="grp"><span>${T('Auction')}</span><div class="auction">${auctionTable(auc, false, { board: e.board, dealer, seat: e.seat, sel })}</div>${sel != null && auc[sel] ? `<div class="expl">${explHtml(auc[sel])}</div>` : `<div class="muted tap">${T('Tap a call to see what it means')}</div>`}</div>
+    <div class="row2"><button class="btn" id="oFtBack">◀ ${T('Back')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 /* the boards played today, from the table: contract, result, score, IMPs and MP against the
    robot field, with the totals; tap a board to replay it */
@@ -2349,7 +2365,10 @@ document.addEventListener('click', ev_ => {
   // previous / next deal in the replay
   const rg = ev_.target.closest('[data-revgo]'); if (rg) { const i = HIST.findIndex(h => h.id === ui.revId) + +rg.dataset.revgo; if (HIST[i]) { ui.revSel = null; ui.revStep = 0; stopRev(); showReview(HIST[i].id); } return; }
   const rs = ev_.target.closest('[data-rs]'); if (rs) { if (!rs.disabled) revStep(rs.dataset.rs); return; }
-  const ri = ev_.target.closest('[data-ri]'); if (ri) { const i = +ri.dataset.ri; showReview(ui.revId, ui.revSel === i ? null : i); ui.revSel = ui.revSel === i ? null : i; return; }
+  const ri = ev_.target.closest('[data-ri]'); if (ri && ui.overlay === 'frev') { const i = +ri.dataset.ri; ui.revSel = ui.revSel === i ? null : i; showFieldTable(ui.fIdx, ui.revSel); return; }
+  const ft = ev_.target.closest('[data-ftab]'); if (ft) { ui.revSel = null; ui.revStep = 0; stopRev(); showFieldTable(+ft.dataset.ftab); return; }
+  if (ev_.target.closest('#oFtBack')) { stopRev(); showEnd(); return; }
+  if (ri) { const i = +ri.dataset.ri; showReview(ui.revId, ui.revSel === i ? null : i); ui.revSel = ui.revSel === i ? null : i; return; }
   if (ev_.target.closest('#oRevCopy')) { const e = HIST.find(h => h.id === ui.revId); if (e) { const txt = boardText(e); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2500)).catch(() => { ui.copyTxt = txt; openOv('copy', `<h2>${T('Copy for analysis')}</h2><textarea class="tok copytxt" rows="12" readonly>${esc(txt)}</textarea><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`); }); } return; }
   if (ev_.target.closest('#oRevBack')) { stopRev(); if (ui.revFrom === 'hist') showHist(); else { ui.resTab = 'list'; showResults(); } return; }
   const t = ev_.target.closest('button,[data-c],[data-ai],#toast,#dExpl'); if (!t) return;
