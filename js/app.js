@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 261;
+const APP_V = 262;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -474,7 +474,7 @@ function newBoard(replay, boardNo, tour) {
   const deal = replay ? replay.map(h => h.slice()) : freshDeal(dealerOf(bn));
   UNDO.length = 0;
   G = { id: Date.now().toString(36) + E.rnd(1e6).toString(36), board: bn, dealer: dealerOf(bn), deal, auction: [], phase: 'bid', play: null, result: null, claimed: false, field: null, tour: tour || null, cards: sideCards() };
-  Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null, photoMsg: null, photoHands: null, signal: null });
+  Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null, photoMsg: null, photoHands: null, signal: null, fixSeat: null, fixCard: null });
   $('ov').hidden = true;
   Field.start(G);
   save(); render(); tick();
@@ -486,7 +486,17 @@ const UNDO = [];
 const ME = () => (online() ? Net.me : "local");
 // who acted at a seat: a human id ("local" offline) or "robot"
 const actor = seat => (online() ? Net.owner(seat) : (G.phase === "bid" ? (seat === U() ? "local" : "robot") : (userControls(seat) ? "local" : "robot")));
-function pushUndo(by) { const { field, ...rest } = G; UNDO.push({ by: by || "local", s: JSON.stringify(rest) }); if (UNDO.length > 120) UNDO.shift(); }
+function pushUndo(by, x) { const { field, ...rest } = G; UNDO.push({ by: by || "local", s: JSON.stringify(rest), ...(x || {}) }); if (UNDO.length > 120) UNDO.shift(); }
+// correcting the robots: offline, outside tournaments, when switched on in the settings
+const canFix = () => !!SET.fixBot && !online() && !guest() && !G.tour && !G.tprac;
+/* take back the last robot card: that robot's seat is then played by you, once (the card it should have played) */
+function fixUndo() {
+  let i = UNDO.length - 1; while (i >= 0 && UNDO[i].by !== 'robotfix') i--;
+  if (i < 0) { flash('🤖 ' + T('No robot card to take back'), 1800); return; }
+  const snap = UNDO[i]; ui.fixSeat = snap.seat; ui.fixCard = snap.c;   // set first: the robot must not play it again at once
+  undo('robotfix');
+  flash('↩ ' + T('Play the card {0} should have played', SEAT[snap.seat]), 2600);
+}
 /* take back the last call or card of player "who" (and everything played after it) */
 function undo(who) {
   who = who || ME();
@@ -529,6 +539,7 @@ function makeCall(seat, call, m, al) {
 }
 function userControls(seat) {
   if (online()) return Net.owner(seat) === Net.me;
+  if (ui.fixSeat != null && G.play && G.phase === 'play' && G.play.turn === ui.fixSeat && seat === ui.fixSeat) return true;   // correcting a robot's card
   if (!G.play) return seat === U();
   return seat === U() || (sideOf(G.play.contract.decl) === sideOf(U()) && sideOf(seat) === sideOf(U()));
 }
@@ -536,6 +547,9 @@ function playCard(seat, c) {
   const g = G.play;
   if (guest()) { if (userControls(seat)) Net.send({ t: "card", c }); return; }
   if (G.phase !== "play" || g.turn !== seat || g.trick.length >= 4 || !E.legalFor(g, seat).includes(c)) return;
+  // your card in a robot's place: kept as a correction (the robot's card and yours)
+  if (ui.fixSeat === seat) { if (c !== ui.fixCard) (G.fixes || (G.fixes = [])).push([g.history.length + 1, seat, ui.fixCard, c]); ui.fixSeat = null; ui.fixCard = null; }
+  else if (actor(seat) === 'robot' && canFix()) pushUndo('robotfix', { seat, c });
   { const who = actor(seat); if (who !== "robot") pushUndo(who); }
   // explain the signal when your robot partner (on defence) discards or encourages
   const cardPrac = pracList().some(k => CARD_KEYS.includes(k)) && !online() && !G.tour;
@@ -609,6 +623,8 @@ function finishBoard() {
   save(); render();
   scheduleSync();
   if (g && !online()) RoboAna.add(e);   // the robots' cards are checked for mistakes
+  // the cards you played in a robot's place go to the robot mistakes list
+  if (g && G.fixes && G.fixes.length && !online()) { e.fx = G.fixes.slice(); Net.roboErr(e, G.fixes.map(([t, s, c, b]) => ({ t, s, c, b, lost: 0 })), true).then(() => flash('🤖 ' + T('Your corrections were sent to improve the robots'), 2600)).catch(() => {}); }
 }
 function tick() {
   clearTimeout(timer); if (!G || guest()) return; // when you are a guest, the host runs the table
@@ -628,7 +644,7 @@ function tick() {
       timer = setTimeout(async () => {
         if (mayClaim && await robotClaim(g, t)) return;
         const c = await (think || robotCardAsync(g, t));
-        if (G && G.play === g && g.turn === t && !g.trick.some(x => x.s === t)) playCard(t, c);
+        if (G && G.play === g && g.turn === t && !userControls(t) && !g.trick.some(x => x.s === t)) playCard(t, c);
       }, delay());
     }
     else if (!userControls(g.turn)) { /* a friend is to play */ }
@@ -749,6 +765,7 @@ function isVisible(seat) {
   if (ui.ask && ui.ask.hands && G.phase === "play") return true;
   if (guest()) return handsNow()[seat].every(c => c >= 0); // the host only sends the cards you may see
   if (seat === U() || G.phase === "done") return true;
+  if (ui.fixSeat === seat && G.phase === "play") return true;   // correcting a robot: its hand is shown to pick the card
   if (G.phase !== 'play') return false;
   const g = G.play;
   if (seat === g.dummy && g.dummyShown) return true;
@@ -822,7 +839,7 @@ function renderBar() {
    <div class="tools">
      <button class="btn" id="bHome" title="${T('Home')}">⌂</button>
      <button class="btn new${ui.confirmNew > Date.now() ? ' warn' : ''}" id="bNew">${ui.confirmNew > Date.now() ? T('Sure?') : T('New Deal')}</button>
-     <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME())) ? "" : "disabled"}>${T('Undo')}</button>
+     <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME()) || (canFix() && UNDO.some(u => u.by === 'robotfix'))) ? "" : "disabled"}${canFix() ? ` title="${T("Take back the robot's card")}"` : ''}>${canFix() ? '↩ 🤖' : T('Undo')}</button>
      <button class="btn gold" id="bHint">${T('Hint')}</button>
      <button class="btn" id="bClaim" ${canClaim ? '' : 'disabled'}>${T('Claim')}</button>
      ${guest() ? `<button class="btn" id="nLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>` : online() ? `<button class="btn" id="nStop" title="${T("Close table")}">🚪<span class="lbt"> ${T("Close table")}</span></button><button class="btn" id="nHostLeave" title="${T("Leave")}">🚶<span class="lbt"> ${T("Leave")}</span></button>` : `<button class="btn" id="bLeave" title="${T("Leave")}">🚪<span class="lbt"> ${T("Leave")}</span></button>`}
@@ -1978,6 +1995,7 @@ function showSettings() {
    <div class="grp"><span>${T('Opponent robots')}</span>${seg('rlvl', [['easy', '🙂 ' + T('Beginner')], ['mid', '😐 ' + T('Medium')], ['expert', '😈 ' + T('Expert')]], SET.robotLvl || 'expert')}<div class="muted">${T('Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.')}</div></div>
    <div class="grp"><span>${T('Robot speed')}</span>${seg('speed', [[0, T('Slow')], [1, T('Normal')], [2, T('Fast')]], SET.speed)}</div>
    <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
+   <div class="grp"><span>${T('Correct the robots')}</span>${seg('fixbot', [[1, T('On')], [0, T('Off')]], SET.fixBot ? 1 : 0)}<div class="muted">${T("When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.")}</div></div>
    <div class="grp"><span>${T('Play a forced card automatically')}</span>${seg('auto', [[1, T('On')], [0, T('Off')]], SET.auto ? 1 : 0)}</div>
    <div class="grp"><span>${T('Sound and buzz when it is your turn')}</span>${seg('alert', [['online', T('At online tables')], ['always', T('Always')], ['off', T('Off')]], SET.alert || 'online')}</div>
    <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div></div>
@@ -2463,7 +2481,7 @@ document.addEventListener('click', ev_ => {
     if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
-    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'rlvl') SET.robotLvl = v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1';
+    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'rlvl') SET.robotLvl = v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1'; if (seg === 'fixbot') SET.fixBot = v === '1';
     if (seg === 'alert') { SET.alert = v; if (v !== 'off') beep(); }
     if (seg === 'notify') { setNotify(v === '1'); return; }
     if (seg === 'four') SET.four = v === '1'; if (seg === 'felt') SET.felt = v; if (seg === 'back') SET.back = v;
@@ -2498,6 +2516,7 @@ document.addEventListener('click', ev_ => {
     case "bUndo": {
       if (online() && !guest()) { requestUndo("host", Net.st.names[SET.seat] || "Host", SET.seat).then(ok => { if (ok === false) flash(T("Nothing to take back, or the other side said no"), 1800); }); break; }
       if (guest()) { undo(); break; }
+      if (canFix()) { fixUndo(); break; }
       flash('🤖 ' + T('The robots do not accept an undo'), 1800); break;
     }
     case "sDeal": showDealEntry(); break;
@@ -2913,7 +2932,7 @@ async function showRoboErrs() {
     <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
     ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div>${split}<div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
     ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] })}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small></div>
-      ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} <b class="pos">+${x[4]}</b></div>`).join('')}
+      ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} ${r.u ? `<b class="pos">✍️ ${T('player')}</b>` : `<b class="pos">+${x[4]}</b>`}</div>`).join('')}
       <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }

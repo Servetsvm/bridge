@@ -719,10 +719,11 @@ const Net = (() => {
   /* a robot's card that gave away tricks (double dummy), sent after the board: roboterr/<player>/<board> with the
      deal, the auction, the play and the mistakes [trick, seat, card, better card, tricks lost]; only the
      administrator reads the list */
-  async function roboErr(e, list) {
+  // user: corrections the player made in the robots' place (kept beside the double-dummy check of the same board)
+  async function roboErr(e, list, user) {
     const name = myName(); if (!Cloud.on || !name || !SET.pinH) return;
     if (!(await Cloud.session(name, SET.pinH))) return;
-    await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_'), { kim: name, ts: Date.now(), b: e.board, me: e.seat, sys: SET.sys || '',
+    await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_') + (user ? '_u' : ''), { ...(user ? { u: 1 } : {}), kim: name, ts: Date.now(), b: e.board, me: e.seat, sys: SET.sys || '',
       c: [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl], d: e.deal, a: e.auc || [], p: e.pl, er: list.slice(0, 20).map(x => [x.t, x.s, x.c, x.b, x.lost]) });
   }
   async function roboErrs() {
