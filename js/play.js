@@ -888,8 +888,18 @@ function ddChoose(g, seat, leg, opt) {
   if (n === 0) return null;
   if (opt.dbg) { opt.dbg.n = n; opt.dbg.avg = [...tot].map(([c, v]) => [c, v / n]); }   // for tests: what the robot thought
   let best = null, bv = -1; for (const c of asc(leg)) { const v = tot.get(c); if (v > bv + 1e-9) { bv = v; best = c; } }
+  // following to a trick the other side is winning: a card that wins it now is played when the samples rate it about
+  // as high as the best (within WIN_NEAR tricks on average). Ties went to the lowest card, so the robot ducked where
+  // the experts win the trick (checked on the 2025 Bermuda Bowl: it gave away fewer tricks, never more)
+  if (g.trick.length && sideOf(trickWinner(g.trick, g.trump)) !== sideOf(seat)) {
+    const wins = c => trickWinner(g.trick.concat([{ s: seat, c }]), g.trump) === seat;
+    if (!wins(best)) { let w = null, wv = -1; for (const c of asc(leg)) if (wins(c) && tot.get(c) > wv + 1e-9) { wv = tot.get(c); w = c; } if (w != null && wv >= bv - WIN_NEAR * n) return w; }
+  }
   return best;
 }
+// "win the trick" margin for ddChoose (tricks, on average over the samples). On 1,681 Bermuda Bowl 2025 positions
+// the robot then gave away 166 tricks instead of 189 (0.05 tested best on both halves of the matches)
+const WIN_NEAR = 0.05;
 const PLAY_OPT = { budget: 900, maxSamples: 40, ddTricks: 9 };
 function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;
