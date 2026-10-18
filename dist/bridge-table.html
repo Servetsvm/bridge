@@ -3720,7 +3720,9 @@ function ddChoose(g, seat, leg, opt) {
   DD.trump = g.trump;
   // equal cards (no unplayed outside card between them) are equivalent: evaluate one per group
   {
-    const pl = playedSet(g), mine = new Set(g.hands[seat]), reps = [];
+    // only cards of earlier tricks count as gone: a card in the current trick still decides it (West's ♥K on the table
+    // makes ♥A and ♥9 different, though no card between them is left), so it never joins the cards around it
+    const pl = new Set(g.history.flatMap(t => t.cards.map(x => x.c))), mine = new Set(g.hands[seat]), reps = [];
     for (const c of desc(leg)) {
       const prev = reps.length ? reps[reps.length - 1] : -1;
       let same = prev >= 0 && S(prev) === S(c);
@@ -3757,18 +3759,8 @@ function ddChoose(g, seat, leg, opt) {
   if (n === 0) return null;
   if (opt.dbg) { opt.dbg.n = n; opt.dbg.avg = [...tot].map(([c, v]) => [c, v / n]); }   // for tests: what the robot thought
   let best = null, bv = -1; for (const c of asc(leg)) { const v = tot.get(c); if (v > bv + 1e-9) { bv = v; best = c; } }
-  // following to a trick the other side is winning: a card that wins it now is played when the samples rate it about
-  // as high as the best (within WIN_NEAR tricks on average). Ties went to the lowest card, so the robot ducked where
-  // the experts win the trick (checked on the 2025 Bermuda Bowl: it gave away fewer tricks, never more)
-  if (g.trick.length && sideOf(trickWinner(g.trick, g.trump)) !== sideOf(seat)) {
-    const wins = c => trickWinner(g.trick.concat([{ s: seat, c }]), g.trump) === seat;
-    if (!wins(best)) { let w = null, wv = -1; for (const c of asc(leg)) if (wins(c) && tot.get(c) > wv + 1e-9) { wv = tot.get(c); w = c; } if (w != null && wv >= bv - WIN_NEAR * n) return w; }
-  }
   return best;
 }
-// "win the trick" margin for ddChoose (tricks, on average over the samples). On 1,681 Bermuda Bowl 2025 positions
-// the robot then gave away 166 tricks instead of 189 (0.05 tested best on both halves of the matches)
-const WIN_NEAR = 0.05;
 const PLAY_OPT = { budget: 900, maxSamples: 40, ddTricks: 9 };
 function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;
@@ -8580,7 +8572,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 265;
+const APP_V = 266;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
