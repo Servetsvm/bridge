@@ -1598,6 +1598,9 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .hbtns .btn.hwatch.hsb,body.classic .hbtns .btn.hwatch.hsb{font-weight:800}
 .hbtns .btn.hwatch.hsb,body.classic .hbtns .btn.hwatch.hsb{font-size:20px}
 .hsmall .hbtns .btn.hwatch.hsb,body.classic .hsmall .hbtns .btn.hwatch.hsb{font-size:15.5px}
+/* the strip while a robot's card waits for you */
+#status .fixbar{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 4px;max-width:420px;background:#fff1c2;color:#5a3d00;border:1px solid #f0c96a;border-radius:8px;padding:5px 8px;font-size:14px;font-weight:700}
+#status .fixbar .btn{padding:3px 10px;font-size:13px}
 
 </style>
 
@@ -4391,6 +4394,8 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Choose {0}'s card": "{0} robotunun kartını sen seç",
+    "Take back the robot's card?": "Robotun kartı geri alınsın mı?",
     "Correct the robots": "Robotları düzelt",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Robot yanlış kart oynayınca ↩ 🤖 o kartı geri alır, robotun oynaması gereken kartı sen oynarsın. Düzeltmelerin robotları geliştirmek için gönderilir.",
     "Take back the robot's card": "Robotun kartını geri al",
@@ -4762,6 +4767,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Choose {0}'s card": "Velg kortet for {0}",
+    "Take back the robot's card?": "Ta tilbake robotens kort?",
     "Correct the robots": "Rett robotene",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Når en robot spiller feil kort, tar ↩ 🤖 det tilbake, og du spiller kortet den burde ha spilt. Rettelsene dine sendes for å forbedre robotene.",
     "Take back the robot's card": "Ta tilbake robotens kort",
@@ -5133,6 +5140,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Choose {0}'s card": "Elige la carta de {0}",
+    "Take back the robot's card?": "¿Retirar la carta del robot?",
     "Correct the robots": "Corregir a los robots",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Cuando un robot juega una carta equivocada, ↩ 🤖 la retira y tú juegas la carta que debía jugar. Tus correcciones se envían para mejorar los robots.",
     "Take back the robot's card": "Retirar la carta del robot",
@@ -5532,6 +5541,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Choose {0}'s card": "Choisissez la carte de {0}",
+    "Take back the robot's card?": "Reprendre la carte du robot ?",
     "Correct the robots": "Corriger les robots",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Quand un robot joue une mauvaise carte, ↩ 🤖 la reprend et vous jouez la carte qu’il aurait dû jouer. Vos corrections sont envoyées pour améliorer les robots.",
     "Take back the robot's card": "Reprendre la carte du robot",
@@ -5931,6 +5942,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Choose {0}'s card": "Scegli la carta di {0}",
+    "Take back the robot's card?": "Riprendere la carta del robot?",
     "Correct the robots": "Correggi i robot",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Quando un robot gioca una carta sbagliata, ↩ 🤖 la riprende e tu giochi la carta che avrebbe dovuto giocare. Le tue correzioni vengono inviate per migliorare i robot.",
     "Take back the robot's card": "Riprendi la carta del robot",
@@ -6330,6 +6343,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Choose {0}'s card": "Wähle die Karte für {0}",
+    "Take back the robot's card?": "Karte des Roboters zurücknehmen?",
     "Correct the robots": "Roboter korrigieren",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Spielt ein Roboter eine falsche Karte, nimmt ↩ 🤖 sie zurück und du spielst die Karte, die er hätte spielen sollen. Deine Korrekturen werden gesendet, um die Roboter zu verbessern.",
     "Take back the robot's card": "Karte des Roboters zurücknehmen",
@@ -6729,6 +6744,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Choose {0}'s card": "Выберите карту за {0}",
+    "Take back the robot's card?": "Вернуть карту робота?",
     "Correct the robots": "Исправлять роботов",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Когда робот ходит неверной картой, ↩ 🤖 возвращает её, и вы играете карту, которой он должен был сыграть. Ваши исправления отправляются для улучшения роботов.",
     "Take back the robot's card": "Вернуть карту робота",
@@ -7128,6 +7145,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Choose {0}'s card": "Wybierz kartę za {0}",
+    "Take back the robot's card?": "Cofnąć kartę robota?",
     "Correct the robots": "Poprawiaj roboty",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Gdy robot zagra złą kartę, ↩ 🤖 ją cofa, a ty zagrywasz kartę, którą powinien był zagrać. Twoje poprawki są wysyłane, aby ulepszyć roboty.",
     "Take back the robot's card": "Cofnij kartę robota",
@@ -7527,6 +7546,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Choose {0}'s card": "替{0}选择出牌",
+    "Take back the robot's card?": "收回机器人的牌？",
     "Correct the robots": "纠正机器人",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "机器人出错牌时，↩ 🤖 可收回该牌，由你打出它本该出的牌。你的纠正会被发送以改进机器人。",
     "Take back the robot's card": "收回机器人的牌",
@@ -8545,11 +8566,11 @@ const E = {}; for (const f of window.BRIDGE) f(E);
 const { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealerOf, callTxt, legalCalls, isLegal, auctionOver, contractOf, ev, scoreOf } = E;
 
 let SET = { style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } };
-let G = null, HIST = [], BOARD = 0, timer = null;
+let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 263;
+const APP_V = 264;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9186,7 +9207,14 @@ function tick() {
         if (mayClaim && await robotClaim(g, t)) return;
         const c = await (think || robotCardAsync(g, t));
         if (G && G.play === g && g.turn === t && !userControls(t) && !g.trick.some(x => x.s === t)) playCard(t, c);
+        else if (G && G.phase === 'play' && G.play !== g) tick();
       }, delay());
+      // a robot that has done nothing for 30 seconds (its thinking lost or stuck) starts again
+      clearTimeout(wdog);
+      wdog = setTimeout(() => {
+        if (!G || G.phase !== 'play' || G.play !== g || g.turn !== t || userControls(t) || g.trick.some(x => x.s === t) || ui.overlay) return;
+        if (Bot.w) { Bot.w.terminate(); Bot.w = null; } Bot.wait = null; Bot.key = null; tick();
+      }, 30000);
     }
     else if (!userControls(g.turn)) { /* a friend is to play */ }
     else { const leg = E.legalFor(g, g.turn); if (leg.length === 1 && g.trick.length > 0 && SET.auto) timer = setTimeout(() => playCard(g.turn, leg[0]), 450); }
@@ -9551,7 +9579,9 @@ function renderStatus() {
   else if (G.phase === "idle") s = T("Press Start to deal");
   else if (G.phase === "lobby") s = guest() ? T("Waiting for the host to start") : T("Waiting for players — press Start when everyone is seated");
   else s = T('Board finished');
-  $("status").innerHTML = s + (ui.signal && G.phase === "play" ? `<div class="sig">${symText(ui.signal)}</div>` : "");
+  // a robot's card taken back: the strip stays until you play its card (or cancel, and the robot plays its own again)
+  const fix = ui.fixSeat != null && G.phase === 'play' ? `<div class="fixbar">🤖 ${T("Choose {0}'s card", SEAT[ui.fixSeat])}<button class="btn mini-btn" id="fixCancel">${T('Cancel')}</button></div>` : '';
+  $("status").innerHTML = fix + s + (ui.signal && G.phase === "play" ? `<div class="sig">${symText(ui.signal)}</div>` : "");
 }
 function render() {
   if (!G) return; document.body.classList.toggle("classic", SET.style !== "modern"); applyLook();
@@ -10921,6 +10951,7 @@ document.addEventListener('click', ev_ => {
   { const ak = ev_.target.closest('[data-akick]'); if (ak) { const n = ak.dataset.akick; askYes(T('Take {0} out of the lobby? They can come back in.', n), () => { Net.adminKick(n); flash(T('{0} is out of the lobby.', n), 2500); }); return; } }
   if (ev_.target.closest('#convWa')) { window.open('https://wa.me/?text=' + encodeURIComponent(convCardText()), '_blank', 'noopener'); return; }
   if (ev_.target.closest('#lobbyBack')) { closeOv(); Net.lobbyBack(); return; }
+  if (ev_.target.closest('#fixCancel')) { const st = ui.fixSeat, c = ui.fixCard; ui.fixSeat = null; ui.fixCard = null; if (st != null && G && G.play && G.play.turn === st && E.legalFor(G.play, st).includes(c)) playCard(st, c); else { render(); tick(); } return; }
   if (ev_.target.closest('#yesOk')) { const f = ui.yesFn; ui.yesFn = null; closeOv(); if (f) f(); return; }
   const tsit = ev_.target.closest('[data-tsit]'); if (tsit) { const S = tourSeats(); S[tsit.dataset.tid] = +tsit.dataset.tsit; try { localStorage.setItem('bridge-tour-seats', JSON.stringify(S)); } catch (e) {} closeOv(); playTour(tsit.dataset.tid); return; }
   const tl = ev_.target.closest('[data-tlist]'); if (tl) { ui.ttab = tl.dataset.tlist; render(); return; }   // the tournament list's tabs
@@ -11057,7 +11088,7 @@ document.addEventListener('click', ev_ => {
     case "bUndo": {
       if (online() && !guest()) { requestUndo("host", Net.st.names[SET.seat] || "Host", SET.seat).then(ok => { if (ok === false) flash(T("Nothing to take back, or the other side said no"), 1800); }); break; }
       if (guest()) { undo(); break; }
-      if (canFix()) { fixUndo(); break; }
+      if (canFix()) { if (UNDO.some(u => u.by === 'robotfix')) askYes(T("Take back the robot's card?"), fixUndo); else fixUndo(); break; }
       flash('🤖 ' + T('The robots do not accept an undo'), 1800); break;
     }
     case "sDeal": showDealEntry(); break;

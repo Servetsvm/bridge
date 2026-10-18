@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Choose {0}'s card": "{0} robotunun kartını sen seç",
+    "Take back the robot's card?": "Robotun kartı geri alınsın mı?",
     "Correct the robots": "Robotları düzelt",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Robot yanlış kart oynayınca ↩ 🤖 o kartı geri alır, robotun oynaması gereken kartı sen oynarsın. Düzeltmelerin robotları geliştirmek için gönderilir.",
     "Take back the robot's card": "Robotun kartını geri al",
@@ -374,6 +376,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Choose {0}'s card": "Velg kortet for {0}",
+    "Take back the robot's card?": "Ta tilbake robotens kort?",
     "Correct the robots": "Rett robotene",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Når en robot spiller feil kort, tar ↩ 🤖 det tilbake, og du spiller kortet den burde ha spilt. Rettelsene dine sendes for å forbedre robotene.",
     "Take back the robot's card": "Ta tilbake robotens kort",
@@ -745,6 +749,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Choose {0}'s card": "Elige la carta de {0}",
+    "Take back the robot's card?": "¿Retirar la carta del robot?",
     "Correct the robots": "Corregir a los robots",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Cuando un robot juega una carta equivocada, ↩ 🤖 la retira y tú juegas la carta que debía jugar. Tus correcciones se envían para mejorar los robots.",
     "Take back the robot's card": "Retirar la carta del robot",
@@ -1144,6 +1150,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Choose {0}'s card": "Choisissez la carte de {0}",
+    "Take back the robot's card?": "Reprendre la carte du robot ?",
     "Correct the robots": "Corriger les robots",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Quand un robot joue une mauvaise carte, ↩ 🤖 la reprend et vous jouez la carte qu’il aurait dû jouer. Vos corrections sont envoyées pour améliorer les robots.",
     "Take back the robot's card": "Reprendre la carte du robot",
@@ -1543,6 +1551,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Choose {0}'s card": "Scegli la carta di {0}",
+    "Take back the robot's card?": "Riprendere la carta del robot?",
     "Correct the robots": "Correggi i robot",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Quando un robot gioca una carta sbagliata, ↩ 🤖 la riprende e tu giochi la carta che avrebbe dovuto giocare. Le tue correzioni vengono inviate per migliorare i robot.",
     "Take back the robot's card": "Riprendi la carta del robot",
@@ -1942,6 +1952,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Choose {0}'s card": "Wähle die Karte für {0}",
+    "Take back the robot's card?": "Karte des Roboters zurücknehmen?",
     "Correct the robots": "Roboter korrigieren",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Spielt ein Roboter eine falsche Karte, nimmt ↩ 🤖 sie zurück und du spielst die Karte, die er hätte spielen sollen. Deine Korrekturen werden gesendet, um die Roboter zu verbessern.",
     "Take back the robot's card": "Karte des Roboters zurücknehmen",
@@ -2341,6 +2353,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Choose {0}'s card": "Выберите карту за {0}",
+    "Take back the robot's card?": "Вернуть карту робота?",
     "Correct the robots": "Исправлять роботов",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Когда робот ходит неверной картой, ↩ 🤖 возвращает её, и вы играете карту, которой он должен был сыграть. Ваши исправления отправляются для улучшения роботов.",
     "Take back the robot's card": "Вернуть карту робота",
@@ -2740,6 +2754,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Choose {0}'s card": "Wybierz kartę za {0}",
+    "Take back the robot's card?": "Cofnąć kartę robota?",
     "Correct the robots": "Poprawiaj roboty",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "Gdy robot zagra złą kartę, ↩ 🤖 ją cofa, a ty zagrywasz kartę, którą powinien był zagrać. Twoje poprawki są wysyłane, aby ulepszyć roboty.",
     "Take back the robot's card": "Cofnij kartę robota",
@@ -3139,6 +3155,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Choose {0}'s card": "替{0}选择出牌",
+    "Take back the robot's card?": "收回机器人的牌？",
     "Correct the robots": "纠正机器人",
     "When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.": "机器人出错牌时，↩ 🤖 可收回该牌，由你打出它本该出的牌。你的纠正会被发送以改进机器人。",
     "Take back the robot's card": "收回机器人的牌",

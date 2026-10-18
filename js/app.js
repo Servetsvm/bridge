@@ -4,11 +4,11 @@ const E = {}; for (const f of window.BRIDGE) f(E);
 const { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealerOf, callTxt, legalCalls, isLegal, auctionOver, contractOf, ev, scoreOf } = E;
 
 let SET = { style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } };
-let G = null, HIST = [], BOARD = 0, timer = null;
+let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 263;
+const APP_V = 264;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -645,7 +645,14 @@ function tick() {
         if (mayClaim && await robotClaim(g, t)) return;
         const c = await (think || robotCardAsync(g, t));
         if (G && G.play === g && g.turn === t && !userControls(t) && !g.trick.some(x => x.s === t)) playCard(t, c);
+        else if (G && G.phase === 'play' && G.play !== g) tick();
       }, delay());
+      // a robot that has done nothing for 30 seconds (its thinking lost or stuck) starts again
+      clearTimeout(wdog);
+      wdog = setTimeout(() => {
+        if (!G || G.phase !== 'play' || G.play !== g || g.turn !== t || userControls(t) || g.trick.some(x => x.s === t) || ui.overlay) return;
+        if (Bot.w) { Bot.w.terminate(); Bot.w = null; } Bot.wait = null; Bot.key = null; tick();
+      }, 30000);
     }
     else if (!userControls(g.turn)) { /* a friend is to play */ }
     else { const leg = E.legalFor(g, g.turn); if (leg.length === 1 && g.trick.length > 0 && SET.auto) timer = setTimeout(() => playCard(g.turn, leg[0]), 450); }
@@ -1010,7 +1017,9 @@ function renderStatus() {
   else if (G.phase === "idle") s = T("Press Start to deal");
   else if (G.phase === "lobby") s = guest() ? T("Waiting for the host to start") : T("Waiting for players — press Start when everyone is seated");
   else s = T('Board finished');
-  $("status").innerHTML = s + (ui.signal && G.phase === "play" ? `<div class="sig">${symText(ui.signal)}</div>` : "");
+  // a robot's card taken back: the strip stays until you play its card (or cancel, and the robot plays its own again)
+  const fix = ui.fixSeat != null && G.phase === 'play' ? `<div class="fixbar">🤖 ${T("Choose {0}'s card", SEAT[ui.fixSeat])}<button class="btn mini-btn" id="fixCancel">${T('Cancel')}</button></div>` : '';
+  $("status").innerHTML = fix + s + (ui.signal && G.phase === "play" ? `<div class="sig">${symText(ui.signal)}</div>` : "");
 }
 function render() {
   if (!G) return; document.body.classList.toggle("classic", SET.style !== "modern"); applyLook();
@@ -2380,6 +2389,7 @@ document.addEventListener('click', ev_ => {
   { const ak = ev_.target.closest('[data-akick]'); if (ak) { const n = ak.dataset.akick; askYes(T('Take {0} out of the lobby? They can come back in.', n), () => { Net.adminKick(n); flash(T('{0} is out of the lobby.', n), 2500); }); return; } }
   if (ev_.target.closest('#convWa')) { window.open('https://wa.me/?text=' + encodeURIComponent(convCardText()), '_blank', 'noopener'); return; }
   if (ev_.target.closest('#lobbyBack')) { closeOv(); Net.lobbyBack(); return; }
+  if (ev_.target.closest('#fixCancel')) { const st = ui.fixSeat, c = ui.fixCard; ui.fixSeat = null; ui.fixCard = null; if (st != null && G && G.play && G.play.turn === st && E.legalFor(G.play, st).includes(c)) playCard(st, c); else { render(); tick(); } return; }
   if (ev_.target.closest('#yesOk')) { const f = ui.yesFn; ui.yesFn = null; closeOv(); if (f) f(); return; }
   const tsit = ev_.target.closest('[data-tsit]'); if (tsit) { const S = tourSeats(); S[tsit.dataset.tid] = +tsit.dataset.tsit; try { localStorage.setItem('bridge-tour-seats', JSON.stringify(S)); } catch (e) {} closeOv(); playTour(tsit.dataset.tid); return; }
   const tl = ev_.target.closest('[data-tlist]'); if (tl) { ui.ttab = tl.dataset.tlist; render(); return; }   // the tournament list's tabs
@@ -2516,7 +2526,7 @@ document.addEventListener('click', ev_ => {
     case "bUndo": {
       if (online() && !guest()) { requestUndo("host", Net.st.names[SET.seat] || "Host", SET.seat).then(ok => { if (ok === false) flash(T("Nothing to take back, or the other side said no"), 1800); }); break; }
       if (guest()) { undo(); break; }
-      if (canFix()) { fixUndo(); break; }
+      if (canFix()) { if (UNDO.some(u => u.by === 'robotfix')) askYes(T("Take back the robot's card?"), fixUndo); else fixUndo(); break; }
       flash('🤖 ' + T('The robots do not accept an undo'), 1800); break;
     }
     case "sDeal": showDealEntry(); break;

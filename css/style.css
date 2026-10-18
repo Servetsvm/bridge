@@ -1583,3 +1583,6 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .hbtns .btn.hwatch.hsb,body.classic .hbtns .btn.hwatch.hsb{font-weight:800}
 .hbtns .btn.hwatch.hsb,body.classic .hbtns .btn.hwatch.hsb{font-size:20px}
 .hsmall .hbtns .btn.hwatch.hsb,body.classic .hsmall .hbtns .btn.hwatch.hsb{font-size:15.5px}
+/* the strip while a robot's card waits for you */
+#status .fixbar{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 4px;max-width:420px;background:#fff1c2;color:#5a3d00;border:1px solid #f0c96a;border-radius:8px;padding:5px 8px;font-size:14px;font-weight:700}
+#status .fixbar .btn{padding:3px 10px;font-size:13px}
