@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 262;
+const APP_V = 263;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2592,7 +2592,7 @@ function boardText(e) {
   const hand = h => [3, 2, 1, 0].map(s => SL[s] + ':' + h.filter(c => S(c) === s).sort((a, b) => b - a).map(c => RK[R(c)]).join('')).join(' ');
   const dealer = e.dealer != null ? e.dealer : dealerOf(e.board), v = [vulOf(e.board, 0), vulOf(e.board, 1)];
   const out = [`Bridge Table v${APP_V} · Board ${e.board} · Dealer ${N[dealer]} · Vul ${v[0] && v[1] ? 'All' : v[0] ? 'NS' : v[1] ? 'EW' : 'None'} · Me: ${N[e.seat]}`];
-  if (e.c) { const won = e.pl ? e.pl.filter(t => t.length === 4).filter(t => sideOf(E.trickWinner(t.map(([s, c]) => ({ s, c })), e.c.strain < 4 ? e.c.strain : -1)) === sideOf(e.c.decl)).length : null;
+  if (e.c) { const won = e.tricks != null ? e.tricks : e.pl ? e.pl.filter(t => t.length === 4).filter(t => sideOf(E.trickWinner(t.map(([s, c]) => ({ s, c })), e.c.strain < 4 ? e.c.strain : -1)) === sideOf(e.c.decl)).length : null;
     out.push(`Contract ${e.c.level}${'CDHSN'[e.c.strain]}${e.c.dbl === 1 ? 'X' : e.c.dbl === 2 ? 'XX' : ''} by ${N[e.c.decl]}` + (won != null ? ` · ${won} tricks` : '') + (e.dd && e.dd.you != null ? ` · double dummy ${e.dd.you}` : '')); }
   if (e.deal) e.deal.forEach((h, s) => out.push(`${N[s]}  ${hand(h)}`));
   if (e.auc) out.push('Auction: ' + e.auc.map(([s, call]) => `${N[s]}:${call === 'P' ? 'P' : call === 'X' ? 'X' : call === 'XX' ? 'XX' : LV(call) + 'CDHSN'[ST(call)]}`).join(' '));

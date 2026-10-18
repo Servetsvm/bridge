@@ -950,6 +950,11 @@ function generic(x, h) {
   let majorFit = -1, minorFit = -1, mfl = 0, nfl = 0;
   for (const s of [3, 2]) { const t = h.len[s] + P.len[s]; if (t >= 8 && t > mfl) { majorFit = s; mfl = t; } }
   for (const s of [1, 0]) { const t = h.len[s] + P.len[s]; if (t >= 8 && t > nfl) { minorFit = s; nfl = t; } }
+  // partner's natural notrump (an opening, or a rebid after an earlier call) shows a balanced hand, so two or more in
+  // every suit: a six-card major of mine is an eight-card fit (1♦–1♥–1NT with ♥KQT643: 4♥, not 3NT)
+  const pCalls = x.pa.filter(e => e.call !== 'P');
+  const pNatNT = pCalls.some((e, i) => isNum(e.call) && ST(e.call) === 4 && !(e.m && e.m.tag && !['nt1', 'nt2'].includes(e.m.tag)) && (i > 0 || !x.auc.slice(0, x.auc.indexOf(e)).some(a => a.call !== 'P')));
+  if (majorFit < 0 && pNatNT) for (const s of [3, 2]) { const t = h.len[s] + Math.max(2, P.len[s]); if (h.len[s] >= 6 && t > mfl) { majorFit = s; mfl = t; } }
   const oppStops = x.oppSuits.every(s => h.stop(s));
   const pBidNT = x.pa.some(e => isNum(e.call) && ST(e.call) === 4);
   let t;
