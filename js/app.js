@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 266;
+const APP_V = 267;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1003,10 +1003,20 @@ function renderBidbox() {
   const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st s${s}${red(s) ? " r" : ""}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
   // two rows, as on the big bridge sites: Pass, X, XX and the levels; then the suits of the chosen level
-  const html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
+  let html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
+  // what the calls of the chosen level mean, before one is made (the call under the mouse shows in #bidHover)
+  const mean = c => { const m = E.explainCall(G.auction, U(), c, G.cards) || {}; return `<div class="bpk"><b>${callHtml(c)}</b> ${symText(bidTxt(m.t || ''))}</div>`; };
+  html += `<div class="bpeek" id="bidHover" hidden></div>` + (ui.selLvl ? `<div class="bpeek">${[0, 1, 2, 3, 4].map(st => B(ui.selLvl, st)).filter(c => L.includes(c)).map(mean).join('')}</div>` : '');
   // redraw only when something changed, so the alert text being typed keeps its focus
   if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; const i = $('alTxt'); if (i) i.value = ui.alertTxt || ''; }
 }
+document.addEventListener('mouseover', e => {
+  const b = e.target.closest && e.target.closest('#bidbox [data-call]'), h = $('bidHover'); if (!h) return;
+  if (!b || b.disabled || !G || G.phase !== 'bid') { h.hidden = true; return; }
+  const c = /^\d+$/.test(b.dataset.call) ? +b.dataset.call : b.dataset.call; if (c === -1) { h.hidden = true; return; }
+  const m = E.explainCall(G.auction, U(), c, G.cards) || {};
+  h.innerHTML = `<div class="bpk"><b>${callHtml(c)}</b> ${symText(bidTxt(m.t || ''))}</div>`; h.hidden = false;
+});
 function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
@@ -1945,6 +1955,7 @@ function showEnd() {
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
    ${dealHtml(G.deal, U())}
    ${anaHtml(HIST.find(h => h.id === e.id) || e)}
+   ${rbNoteHtml(HIST.find(h => h.id === e.id) || e)}
    <div class="row2"><button class="btn gold" id="oNext">${T('Next deal')}</button><button class="btn" id="oReplay">${T('Replay this deal')}</button>${G.tour ? "" : `<button class="btn" id="oShare">🔗 ${T("Share")}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 function showAuction() {
@@ -2302,6 +2313,7 @@ function showReview(id, sel) {
     <div class="grp"><span>${T('Auction')}</span>${aucHtml}</div>
     <div class="row2"><button class="btn" data-revgo="-1" ${hi > 0 ? '' : 'disabled'}>◀ ${T('Previous deal')}</button><button class="btn" data-revgo="1" ${hi >= 0 && hi < HIST.length - 1 ? '' : 'disabled'}>${T('Next deal')} ▶</button></div>
     ${e.deal && !e.tour ? `<div class="row2"><button class="btn" id="oRevShare">🔗 ${T("Share this deal")}</button><button class="btn" id="oRevPbn">💾 PBN</button><button class="btn" id="oRevLin">💾 LIN</button></div>` : ""}
+    ${rbNoteHtml(e)}
     <div class="row2"><button class="btn" id="oRevCopy">📋 ${T('Copy for analysis')}</button></div>
     <div class="row2"><button class="btn" id="oRevBack">${T('Back to the list')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
@@ -2455,6 +2467,9 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
+  if (t.id === 'rbNoteSend') { const e = HIST.find(h => String(h.id) === t.dataset.id), txt = ($('rbNote') || {}).value || '';
+    if (!e || txt.trim().length < 3) { flash(T('Write what the robot did wrong'), 2000); return; }
+    t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
   if (t.dataset.rbdone) { Net.roboErrDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === 'rbCopy') { const txt = JSON.stringify(ui.rbList || []); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
   if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
@@ -2930,6 +2945,7 @@ async function showRoboErrs() {
   let L = []; try { L = await Net.roboErrs(); } catch (e) {}
   if (ui.overlay !== 'roboerr') return;
   ui.rbList = L;
+  for (const r of L) r.er = (r.er || []).filter(x => x[0] > 0);   // a note has no card of its own
   const n = L.reduce((a, r) => a + (r.er || []).length, 0);
   // who made it: the player's partner or an opponent (records from before the seat was kept: not known), declarer or defence
   const mine = (r, x) => r.me != null && sideOf(x[1]) === sideOf(r.me), theirs = (r, x) => r.me != null && sideOf(x[1]) !== sideOf(r.me);
@@ -2941,11 +2957,14 @@ async function showRoboErrs() {
   openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2>
     <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
     ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div>${split}<div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
-    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] })}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small></div>
+    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${r.c[0] ? conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] }) : T('Pass')}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small></div>
+      ${r.not ? `<div class="cvb">📝 ${esc(r.not)}</div>` : ''}
       ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} ${r.u ? `<b class="pos">✍️ ${T('player')}</b>` : `<b class="pos">+${x[4]}</b>`}</div>`).join('')}
       <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+// the player tells what a robot did wrong on this board (the bidding too, which the card check cannot see)
+const rbNoteHtml = e => e && e.deal && !online() ? `<div class="grp"><span>🤖 ${T('Report a robot mistake')}</span><textarea id="rbNote" class="tok" rows="2" maxlength="500" placeholder="${T('What did the robot do wrong? The bidding, a card…')}"></textarea><div class="row2"><button class="btn" id="rbNoteSend" data-id="${esc(String(e.id))}">📨 ${T('Send to the robot mistakes')}</button></div></div>` : '';
 /* the administrator's list of players: every registered name, when it was made and last signed in; tick the ones
    to remove (test names, for instance) and remove them with all their data */
 async function showPlayers() {

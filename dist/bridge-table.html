@@ -1601,6 +1601,12 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 /* the strip while a robot's card waits for you */
 #status .fixbar{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 4px;max-width:420px;background:#fff1c2;color:#5a3d00;border:1px solid #f0c96a;border-radius:8px;padding:5px 8px;font-size:14px;font-weight:700}
 #status .fixbar .btn{padding:3px 10px;font-size:13px}
+/* the meanings of the calls before one is made, under the bidding box */
+#bidbox .bpeek{display:flex;flex-direction:column;gap:1px;background:#fffbe8;color:#2b2410;border:1px solid #ecd9a0;border-radius:8px;padding:4px 8px;font-size:13px;line-height:1.35}
+#bidbox .bpeek[hidden]{display:none}
+#bidbox .bpk{line-height:1.3}
+#bidbox .bpk b{display:inline-block;min-width:2.4em}
+:root[data-theme="dark"] #bidbox .bpeek{background:#2e2a1c;color:#f1e8c8;border-color:#5a4c22}
 
 </style>
 
@@ -4396,6 +4402,11 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Report a robot mistake": "Robot hatası bildir",
+    "Send to the robot mistakes": "Robot hatalarına gönder",
+    "Sent to the robot mistakes": "Robot hatalarına gönderildi",
+    "Write what the robot did wrong": "Robotun neyi yanlış yaptığını yaz",
+    "What did the robot do wrong? The bidding, a card…": "Robot neyi yanlış yaptı? İhale, bir kart…",
     "Choose {0}'s card": "{0} robotunun kartını sen seç",
     "Take back the robot's card?": "Robotun kartı geri alınsın mı?",
     "Correct the robots": "Robotları düzelt",
@@ -4769,6 +4780,11 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Report a robot mistake": "Meld fra om en robotfeil",
+    "Send to the robot mistakes": "Send til robotfeilene",
+    "Sent to the robot mistakes": "Sendt til robotfeilene",
+    "Write what the robot did wrong": "Skriv hva roboten gjorde feil",
+    "What did the robot do wrong? The bidding, a card…": "Hva gjorde roboten feil? Meldingene, et kort…",
     "Choose {0}'s card": "Velg kortet for {0}",
     "Take back the robot's card?": "Ta tilbake robotens kort?",
     "Correct the robots": "Rett robotene",
@@ -5142,6 +5158,11 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Report a robot mistake": "Informar de un error del robot",
+    "Send to the robot mistakes": "Enviar a los errores de los robots",
+    "Sent to the robot mistakes": "Enviado a los errores de los robots",
+    "Write what the robot did wrong": "Escribe qué hizo mal el robot",
+    "What did the robot do wrong? The bidding, a card…": "¿Qué hizo mal el robot? La subasta, una carta…",
     "Choose {0}'s card": "Elige la carta de {0}",
     "Take back the robot's card?": "¿Retirar la carta del robot?",
     "Correct the robots": "Corregir a los robots",
@@ -5543,6 +5564,11 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Report a robot mistake": "Signaler une erreur du robot",
+    "Send to the robot mistakes": "Envoyer aux erreurs des robots",
+    "Sent to the robot mistakes": "Envoyé aux erreurs des robots",
+    "Write what the robot did wrong": "Écrivez ce que le robot a mal fait",
+    "What did the robot do wrong? The bidding, a card…": "Qu’a fait le robot de travers ? Les enchères, une carte…",
     "Choose {0}'s card": "Choisissez la carte de {0}",
     "Take back the robot's card?": "Reprendre la carte du robot ?",
     "Correct the robots": "Corriger les robots",
@@ -5944,6 +5970,11 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Report a robot mistake": "Segnala un errore del robot",
+    "Send to the robot mistakes": "Invia agli errori dei robot",
+    "Sent to the robot mistakes": "Inviato agli errori dei robot",
+    "Write what the robot did wrong": "Scrivi cosa ha sbagliato il robot",
+    "What did the robot do wrong? The bidding, a card…": "Cosa ha sbagliato il robot? La licita, una carta…",
     "Choose {0}'s card": "Scegli la carta di {0}",
     "Take back the robot's card?": "Riprendere la carta del robot?",
     "Correct the robots": "Correggi i robot",
@@ -6345,6 +6376,11 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Report a robot mistake": "Roboterfehler melden",
+    "Send to the robot mistakes": "An die Roboterfehler senden",
+    "Sent to the robot mistakes": "An die Roboterfehler gesendet",
+    "Write what the robot did wrong": "Schreibe, was der Roboter falsch gemacht hat",
+    "What did the robot do wrong? The bidding, a card…": "Was hat der Roboter falsch gemacht? Die Reizung, eine Karte…",
     "Choose {0}'s card": "Wähle die Karte für {0}",
     "Take back the robot's card?": "Karte des Roboters zurücknehmen?",
     "Correct the robots": "Roboter korrigieren",
@@ -6746,6 +6782,11 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Report a robot mistake": "Сообщить об ошибке робота",
+    "Send to the robot mistakes": "Отправить в ошибки роботов",
+    "Sent to the robot mistakes": "Отправлено в ошибки роботов",
+    "Write what the robot did wrong": "Напишите, что робот сделал не так",
+    "What did the robot do wrong? The bidding, a card…": "Что робот сделал не так? Торговля, карта…",
     "Choose {0}'s card": "Выберите карту за {0}",
     "Take back the robot's card?": "Вернуть карту робота?",
     "Correct the robots": "Исправлять роботов",
@@ -7147,6 +7188,11 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Report a robot mistake": "Zgłoś błąd robota",
+    "Send to the robot mistakes": "Wyślij do błędów robotów",
+    "Sent to the robot mistakes": "Wysłano do błędów robotów",
+    "Write what the robot did wrong": "Napisz, co robot zrobił źle",
+    "What did the robot do wrong? The bidding, a card…": "Co robot zrobił źle? Licytacja, karta…",
     "Choose {0}'s card": "Wybierz kartę za {0}",
     "Take back the robot's card?": "Cofnąć kartę robota?",
     "Correct the robots": "Poprawiaj roboty",
@@ -7548,6 +7594,11 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Report a robot mistake": "报告机器人失误",
+    "Send to the robot mistakes": "发送到机器人失误列表",
+    "Sent to the robot mistakes": "已发送到机器人失误列表",
+    "Write what the robot did wrong": "写下机器人哪里出错了",
+    "What did the robot do wrong? The bidding, a card…": "机器人哪里出错了？叫牌、某张牌……",
     "Choose {0}'s card": "替{0}选择出牌",
     "Take back the robot's card?": "收回机器人的牌？",
     "Correct the robots": "纠正机器人",
@@ -8572,7 +8623,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 266;
+const APP_V = 267;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9567,10 +9618,20 @@ function renderBidbox() {
   const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st s${s}${red(s) ? " r" : ""}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
   // two rows, as on the big bridge sites: Pass, X, XX and the levels; then the suits of the chosen level
-  const html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
+  let html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
+  // what the calls of the chosen level mean, before one is made (the call under the mouse shows in #bidHover)
+  const mean = c => { const m = E.explainCall(G.auction, U(), c, G.cards) || {}; return `<div class="bpk"><b>${callHtml(c)}</b> ${symText(bidTxt(m.t || ''))}</div>`; };
+  html += `<div class="bpeek" id="bidHover" hidden></div>` + (ui.selLvl ? `<div class="bpeek">${[0, 1, 2, 3, 4].map(st => B(ui.selLvl, st)).filter(c => L.includes(c)).map(mean).join('')}</div>` : '');
   // redraw only when something changed, so the alert text being typed keeps its focus
   if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; const i = $('alTxt'); if (i) i.value = ui.alertTxt || ''; }
 }
+document.addEventListener('mouseover', e => {
+  const b = e.target.closest && e.target.closest('#bidbox [data-call]'), h = $('bidHover'); if (!h) return;
+  if (!b || b.disabled || !G || G.phase !== 'bid') { h.hidden = true; return; }
+  const c = /^\d+$/.test(b.dataset.call) ? +b.dataset.call : b.dataset.call; if (c === -1) { h.hidden = true; return; }
+  const m = E.explainCall(G.auction, U(), c, G.cards) || {};
+  h.innerHTML = `<div class="bpk"><b>${callHtml(c)}</b> ${symText(bidTxt(m.t || ''))}</div>`; h.hidden = false;
+});
 function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
@@ -10509,6 +10570,7 @@ function showEnd() {
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
    ${dealHtml(G.deal, U())}
    ${anaHtml(HIST.find(h => h.id === e.id) || e)}
+   ${rbNoteHtml(HIST.find(h => h.id === e.id) || e)}
    <div class="row2"><button class="btn gold" id="oNext">${T('Next deal')}</button><button class="btn" id="oReplay">${T('Replay this deal')}</button>${G.tour ? "" : `<button class="btn" id="oShare">🔗 ${T("Share")}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 function showAuction() {
@@ -10866,6 +10928,7 @@ function showReview(id, sel) {
     <div class="grp"><span>${T('Auction')}</span>${aucHtml}</div>
     <div class="row2"><button class="btn" data-revgo="-1" ${hi > 0 ? '' : 'disabled'}>◀ ${T('Previous deal')}</button><button class="btn" data-revgo="1" ${hi >= 0 && hi < HIST.length - 1 ? '' : 'disabled'}>${T('Next deal')} ▶</button></div>
     ${e.deal && !e.tour ? `<div class="row2"><button class="btn" id="oRevShare">🔗 ${T("Share this deal")}</button><button class="btn" id="oRevPbn">💾 PBN</button><button class="btn" id="oRevLin">💾 LIN</button></div>` : ""}
+    ${rbNoteHtml(e)}
     <div class="row2"><button class="btn" id="oRevCopy">📋 ${T('Copy for analysis')}</button></div>
     <div class="row2"><button class="btn" id="oRevBack">${T('Back to the list')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
@@ -11019,6 +11082,9 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
+  if (t.id === 'rbNoteSend') { const e = HIST.find(h => String(h.id) === t.dataset.id), txt = ($('rbNote') || {}).value || '';
+    if (!e || txt.trim().length < 3) { flash(T('Write what the robot did wrong'), 2000); return; }
+    t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
   if (t.dataset.rbdone) { Net.roboErrDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === 'rbCopy') { const txt = JSON.stringify(ui.rbList || []); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
   if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
@@ -11494,6 +11560,7 @@ async function showRoboErrs() {
   let L = []; try { L = await Net.roboErrs(); } catch (e) {}
   if (ui.overlay !== 'roboerr') return;
   ui.rbList = L;
+  for (const r of L) r.er = (r.er || []).filter(x => x[0] > 0);   // a note has no card of its own
   const n = L.reduce((a, r) => a + (r.er || []).length, 0);
   // who made it: the player's partner or an opponent (records from before the seat was kept: not known), declarer or defence
   const mine = (r, x) => r.me != null && sideOf(x[1]) === sideOf(r.me), theirs = (r, x) => r.me != null && sideOf(x[1]) !== sideOf(r.me);
@@ -11505,11 +11572,14 @@ async function showRoboErrs() {
   openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2>
     <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
     ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div>${split}<div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
-    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] })}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small></div>
+    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${r.c[0] ? conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] }) : T('Pass')}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small></div>
+      ${r.not ? `<div class="cvb">📝 ${esc(r.not)}</div>` : ''}
       ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} ${r.u ? `<b class="pos">✍️ ${T('player')}</b>` : `<b class="pos">+${x[4]}</b>`}</div>`).join('')}
       <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+// the player tells what a robot did wrong on this board (the bidding too, which the card check cannot see)
+const rbNoteHtml = e => e && e.deal && !online() ? `<div class="grp"><span>🤖 ${T('Report a robot mistake')}</span><textarea id="rbNote" class="tok" rows="2" maxlength="500" placeholder="${T('What did the robot do wrong? The bidding, a card…')}"></textarea><div class="row2"><button class="btn" id="rbNoteSend" data-id="${esc(String(e.id))}">📨 ${T('Send to the robot mistakes')}</button></div></div>` : '';
 /* the administrator's list of players: every registered name, when it was made and last signed in; tick the ones
    to remove (test names, for instance) and remove them with all their data */
 async function showPlayers() {
@@ -12439,6 +12509,13 @@ const Net = (() => {
     if (!(await Cloud.session(name, SET.pinH))) return;
     await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_') + (user ? '_u' : ''), { ...(user ? { u: 1 } : {}), kim: name, ts: Date.now(), b: e.board, me: e.seat, sys: SET.sys || '',
       c: [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl], d: e.deal, a: e.auc || [], p: e.pl, er: list.slice(0, 20).map(x => [x.t, x.s, x.c, x.b, x.lost]) });
+  }
+  // a note from the player on a board (what the robot did wrong): kept with the board like a mistake, without a card
+  async function roboNote(e, text) {
+    const name = myName(); if (!Cloud.on || !name || !SET.pinH) throw new Error('offline');
+    if (!(await Cloud.session(name, SET.pinH))) throw new Error('signin');
+    await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_') + '_n' + Date.now().toString(36), { not: String(text).slice(0, 500), kim: name, ts: Date.now(), b: e.board, me: e.seat, sys: SET.sys || '',
+      c: e.c ? [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl] : [0, 4, 0, 0], d: e.deal, a: e.auc || [], p: e.pl && e.pl.length ? e.pl : 0, er: [[0, -1, 0, 0, 0]] });
   }
   async function roboErrs() {
     if (!Cloud.on || !isAdmin()) return [];
@@ -13498,7 +13575,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboErrs, roboErrDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>
