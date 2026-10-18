@@ -1592,3 +1592,6 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 #bidbox .bpk{line-height:1.3}
 #bidbox .bpk b{display:inline-block;min-width:2.4em}
 :root[data-theme="dark"] #bidbox .bpeek{background:#2e2a1c;color:#f1e8c8;border-color:#5a4c22}
+/* the meaning of the call under the mouse floats above the bidding box: the buttons never move under the mouse */
+#bidbox{position:relative}
+#bidbox #bidHover{position:absolute;left:0;right:0;bottom:calc(100% + 4px);z-index:20;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.25)}
