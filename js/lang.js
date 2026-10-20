@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Leave the current board?": "Oynanan el bırakılsın mı?",
     "Report a robot mistake": "Robot hatası bildir",
     "Send to the robot mistakes": "Robot hatalarına gönder",
     "Sent to the robot mistakes": "Robot hatalarına gönderildi",
@@ -381,6 +382,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Leave the current board?": "Forlate spillet som pågår?",
     "Report a robot mistake": "Meld fra om en robotfeil",
     "Send to the robot mistakes": "Send til robotfeilene",
     "Sent to the robot mistakes": "Sendt til robotfeilene",
@@ -759,6 +761,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Leave the current board?": "¿Abandonar la mano en curso?",
     "Report a robot mistake": "Informar de un error del robot",
     "Send to the robot mistakes": "Enviar a los errores de los robots",
     "Sent to the robot mistakes": "Enviado a los errores de los robots",
@@ -1165,6 +1168,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Leave the current board?": "Quitter la donne en cours ?",
     "Report a robot mistake": "Signaler une erreur du robot",
     "Send to the robot mistakes": "Envoyer aux erreurs des robots",
     "Sent to the robot mistakes": "Envoyé aux erreurs des robots",
@@ -1571,6 +1575,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Leave the current board?": "Lasciare la mano in corso?",
     "Report a robot mistake": "Segnala un errore del robot",
     "Send to the robot mistakes": "Invia agli errori dei robot",
     "Sent to the robot mistakes": "Inviato agli errori dei robot",
@@ -1977,6 +1982,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Leave the current board?": "Das laufende Board verlassen?",
     "Report a robot mistake": "Roboterfehler melden",
     "Send to the robot mistakes": "An die Roboterfehler senden",
     "Sent to the robot mistakes": "An die Roboterfehler gesendet",
@@ -2383,6 +2389,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Leave the current board?": "Покинуть текущую сдачу?",
     "Report a robot mistake": "Сообщить об ошибке робота",
     "Send to the robot mistakes": "Отправить в ошибки роботов",
     "Sent to the robot mistakes": "Отправлено в ошибки роботов",
@@ -2789,6 +2796,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Leave the current board?": "Opuścić bieżące rozdanie?",
     "Report a robot mistake": "Zgłoś błąd robota",
     "Send to the robot mistakes": "Wyślij do błędów robotów",
     "Sent to the robot mistakes": "Wysłano do błędów robotów",
@@ -3195,6 +3203,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Leave the current board?": "放弃正在进行的牌局？",
     "Report a robot mistake": "报告机器人失误",
     "Send to the robot mistakes": "发送到机器人失误列表",
     "Sent to the robot mistakes": "已发送到机器人失误列表",

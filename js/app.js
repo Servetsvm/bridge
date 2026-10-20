@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 270;
+const APP_V = 271;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2311,7 +2311,7 @@ function showReview(id, sel) {
     ${anaHtml(e)}
     <div class="grp"><span>${T('Auction')}</span>${aucHtml}</div>
     <div class="row2"><button class="btn" data-revgo="-1" ${hi > 0 ? '' : 'disabled'}>◀ ${T('Previous deal')}</button><button class="btn" data-revgo="1" ${hi >= 0 && hi < HIST.length - 1 ? '' : 'disabled'}>${T('Next deal')} ▶</button></div>
-    ${e.deal && !e.tour ? `<div class="row2"><button class="btn" id="oRevShare">🔗 ${T("Share this deal")}</button><button class="btn" id="oRevPbn">💾 PBN</button><button class="btn" id="oRevLin">💾 LIN</button></div>` : ""}
+    ${e.deal && !e.tour ? `<div class="row2"><button class="btn" id="oRevReplay">🔁 ${T("Replay this deal")}</button><button class="btn" id="oRevPbn">💾 PBN</button><button class="btn" id="oRevLin">💾 LIN</button></div>` : ""}
     ${rbNoteHtml(e)}
     <div class="row2"><button class="btn" id="oRevCopy">📋 ${T('Copy for analysis')}</button></div>
     <div class="row2"><button class="btn" id="oRevBack">${T('Back to the list')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
@@ -2598,7 +2598,9 @@ document.addEventListener('click', ev_ => {
     case "pRename": showGate(true); break;
     case "oShared": { const d = ui.sharedDeal; ui.sharedDeal = null; closeOv(); if (d) { ui.saved = null; newBoard(d.hands, d.b); } break; }
     case "oShare": if (G && G.deal) shareDeal(G.deal, G.board); break;
-    case "oRevShare": { const e = HIST.find(h => h.id === ui.revId); if (e && e.deal) shareDeal(e.deal, e.board); break; }
+    // a board from Results dealt again (same cards and number); its old result stays in the list. A board being played is left only after a yes
+    case "oRevReplay": { const e = HIST.find(h => h.id === ui.revId); if (!e || !e.deal) break; const go = () => { stopRev(); closeOv(); newBoard(e.deal, e.board); };
+      if (G && (G.phase === "bid" || G.phase === "play")) askYes(T("Leave the current board?"), go); else go(); break; }
     case "oRevPbn": case "oRevLin": { const e = HIST.find(h => h.id === ui.revId); if (e && e.deal) { if (t.id === "oRevPbn") saveFile(`bridge-board-${e.board}.pbn`, '% PBN 2.1\n' + pbnOf(e)); else saveFile(`bridge-board-${e.board}.lin`, linOf(e)); } break; }
     case "rPbn": exportPBN(HIST.filter(e => !e.tour)); break;
   }
