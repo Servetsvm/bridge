@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 269;
+const APP_V = 270;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1304,9 +1304,9 @@ function convCardHtml() {
 // the message that sends the app to someone
 const appInvite = () => 'Bridge https://servetsvm.github.io/bridge/?install=1';
 function convCardText() {
-  const cur = E.sysOf(SET.sys), on = E.CONVS.filter(c => SET.conv[c.k]);
-  return [`📋 ${T('Our convention card (with partner)')}${myNm() ? ' — ' + myNm() : ''}`, `${T('Base system')}: ${cur.n}`, '',
-    `${T('Conventions')}:`, ...on.map(c => `• ${c.n}`)].join('\n');
+  // the app's address, then the conventions that are on
+  const on = E.CONVS.filter(c => SET.conv[c.k]);
+  return ['https://servetsvm.github.io/bridge', '', `${T('Conventions')}:`, ...on.map(c => `• ${c.n}`)].join('\n');
 }
 function renderHome() {
   const h = $('home'), N = typeof Net !== 'undefined' ? Net : null;
