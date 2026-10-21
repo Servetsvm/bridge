@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 273;
+const APP_V = 274;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2218,7 +2218,8 @@ function startEnteredDeal() {
 }
 
 const kindOf = e => e.kind || (e.tour || e.tprac ? 't' : e.online ? 'o' : 'r');
-const kindMark = e => { const k = kindOf(e); return k === 't' ? `<span title="${T('Tournaments')}">🏆</span>` : k === 'o' ? `<span title="${T('online')}">🌐</span>` : `<span title="${T('Play offline')}">🤖</span>`; };
+const KIND_TIP = { t: 'Played in a tournament', o: 'Played at an online table', r: 'Played offline, with robots' };
+const kindMark = e => { const k = kindOf(e), tip = T(KIND_TIP[k]) + (k === 't' && e.tn ? ': ' + e.tn : ''); return `<span class="kmark" title="${esc(tip)}">${k === 't' ? '🏆' : k === 'o' ? '🌐' : '🤖'}</span>`; };
 function showResults() {
   const per = Store.periods(HIST), isImp = SET.mode === 'IMP', tab = ui.resTab;
   let body;
@@ -2227,7 +2228,7 @@ function showResults() {
      <div class="muted">${T('Every board is also played at 4 expert robot tables. IMP: your result against each table, averaged (cross-IMPs). MP: the percentage of the field you beat.')}</div>`;
   } else {
     const rows = HIST.slice(-100).reverse().map(e => `<tr class="rev" data-rev="${e.id}"><td>${kindMark(e)} ${new Date(e.ts || 0).toLocaleDateString()}${e.tn ? `<small class="rtn">${esc(e.tn)}</small>` : ''}</td><td>${e.board}</td><td>${e.passed ? T('Pass') : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
-    body = `<div class="muted">${T('Tap a board to see the auction and how it was played.')}</div><div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th>${T('Tr')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
+    body = `<div class="muted">${T('Tap a board to see the auction and how it was played.')}</div><div class="muted kkey">🏆 ${T('tournament')} · 🌐 ${T('online table')} · 🤖 ${T('offline')}</div><div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th>${T('Tr')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   }
   openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Board list')}</button><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button></div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
