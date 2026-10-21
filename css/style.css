@@ -1595,3 +1595,5 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 /* the meaning of the call under the mouse floats above the bidding box: the buttons never move under the mouse */
 #bidbox{position:relative}
 #bidbox #bidHover{position:absolute;left:0;right:0;bottom:calc(100% + 4px);z-index:20;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+/* Results: a tournament board's name under its date */
+.res .rtn{display:block;font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

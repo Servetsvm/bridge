@@ -1550,7 +1550,8 @@ const Net = (() => {
       // keep the board in your own results and statistics
       let e = HIST.find(h => h.id === G.id);
       if (!e) {
-        const r = G.result; e = { ...r, seat: st.seat, us: sideOf(st.seat) === 0 ? r.ns : -r.ns, imp: null, mp: null, online: true };
+        const r = G.result; e = { ...r, seat: st.seat, us: sideOf(st.seat) === 0 ? r.ns : -r.ns, imp: null, mp: null, online: true, kind: G.tour ? 't' : 'o' };
+        if (G.tour && st.tours && st.tours[G.tour.id] && st.tours[G.tour.id].name) e.tn = String(st.tours[G.tour.id].name).slice(0, 40);
         HIST.push(e); SEEN.add(E.dealKey(G.deal)); saveSeen();
         noteBoard({ mode: G.tour ? 't' : 'o' });   // a board at a friend's table counts in your day's activity
       }
