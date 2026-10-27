@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "own choice": "kendi seçimi", "measured": "ölçülen", "measured after {0} boards ({1} so far)": "ölçülen düzey {0} borddan sonra (şimdiye kadar {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Puandan ölçülür: robot masalarına karşı son 200 bord.",
     "No base system chosen yet.": "Henüz temel sistem seçilmedi.",
     "The name {0} was removed by the administrator. Choose a name to play.": "{0} ismi yönetici tarafından silindi. Oynamak için bir isim seç.",
     "Your robot partner bids it too.": "Robot ortağın da bunu oynar.",
@@ -396,6 +397,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "own choice": "eget valg", "measured": "målt", "measured after {0} boards ({1} so far)": "måles etter {0} spill ({1} så langt)", "Measured from the rating: the last 200 boards against the robot tables.": "Målt fra ratingen: de siste 200 spillene mot robotbordene.",
     "No base system chosen yet.": "Ingen grunnsystem valgt ennå.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Navnet {0} ble fjernet av administratoren. Velg et navn for å spille.",
     "Your robot partner bids it too.": "Robotmakkeren din melder det også.",
@@ -789,6 +791,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "own choice": "elección propia", "measured": "medido", "measured after {0} boards ({1} so far)": "se mide tras {0} manos ({1} hasta ahora)", "Measured from the rating: the last 200 boards against the robot tables.": "Medido a partir de la puntuación: las últimas 200 manos contra las mesas de robots.",
     "No base system chosen yet.": "Aún no has elegido un sistema base.",
     "The name {0} was removed by the administrator. Choose a name to play.": "El administrador eliminó el nombre {0}. Elige un nombre para jugar.",
     "Your robot partner bids it too.": "Tu compañero robot también lo juega.",
@@ -1210,6 +1213,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "own choice": "choix personnel", "measured": "mesuré", "measured after {0} boards ({1} so far)": "mesuré après {0} donnes ({1} jusqu’ici)", "Measured from the rating: the last 200 boards against the robot tables.": "Mesuré à partir du classement : les 200 dernières donnes contre les tables de robots.",
     "No base system chosen yet.": "Aucun système de base choisi pour l’instant.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Le nom {0} a été supprimé par l’administrateur. Choisissez un nom pour jouer.",
     "Your robot partner bids it too.": "Votre partenaire robot le joue aussi.",
@@ -1631,6 +1635,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "own choice": "scelta propria", "measured": "misurato", "measured after {0} boards ({1} so far)": "misurato dopo {0} mani ({1} finora)", "Measured from the rating: the last 200 boards against the robot tables.": "Misurato dal punteggio: le ultime 200 mani contro i tavoli dei robot.",
     "No base system chosen yet.": "Nessun sistema base scelto finora.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Il nome {0} è stato rimosso dall’amministratore. Scegli un nome per giocare.",
     "Your robot partner bids it too.": "Anche il tuo compagno robot lo gioca.",
@@ -2052,6 +2057,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "own choice": "eigene Wahl", "measured": "gemessen", "measured after {0} boards ({1} so far)": "gemessen ab {0} Boards (bisher {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Aus der Wertung gemessen: die letzten 200 Boards gegen die Robotertische.",
     "No base system chosen yet.": "Noch kein Grundsystem gewählt.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Der Name {0} wurde vom Administrator entfernt. Wähle einen Namen, um zu spielen.",
     "Your robot partner bids it too.": "Dein Roboterpartner reizt es auch.",
@@ -2473,6 +2479,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "own choice": "свой выбор", "measured": "по игре", "measured after {0} boards ({1} so far)": "оценка после {0} сдач (пока {1})", "Measured from the rating: the last 200 boards against the robot tables.": "По рейтингу: последние 200 сдач против столов роботов.",
     "No base system chosen yet.": "Базовая система ещё не выбрана.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Имя {0} удалено администратором. Выберите имя, чтобы играть.",
     "Your robot partner bids it too.": "Ваш партнёр-робот тоже его играет.",
@@ -2894,6 +2901,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "own choice": "własny wybór", "measured": "zmierzony", "measured after {0} boards ({1} so far)": "mierzony po {0} rozdaniach (na razie {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Mierzony z rankingu: ostatnie 200 rozdań przeciw stołom robotów.",
     "No base system chosen yet.": "Nie wybrano jeszcze systemu bazowego.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Nazwa {0} została usunięta przez administratora. Wybierz nazwę, aby grać.",
     "Your robot partner bids it too.": "Twój partner-robot też go gra.",
@@ -3315,6 +3323,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "own choice": "自选", "measured": "实测", "measured after {0} boards ({1} so far)": "满 {0} 副牌后显示实测（目前 {1}）", "Measured from the rating: the last 200 boards against the robot tables.": "根据积分测算：最近 200 副牌对机器人牌桌的成绩。",
     "No base system chosen yet.": "尚未选择基本体系。",
     "The name {0} was removed by the administrator. Choose a name to play.": "名字 {0} 已被管理员删除。请选择一个名字来打牌。",
     "Your robot partner bids it too.": "你的机器人搭档也按此叫牌。",

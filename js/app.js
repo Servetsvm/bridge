@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 288;
+const APP_V = 289;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1684,7 +1684,7 @@ function showPlayer(name) {
   const fields = [
     [T("Rating"), p && p.rtn ? `<b class="prt">${p.rt}</b> <small>(${p.rtn} ${T("boards")})</small>` : "—"],
     [T('Club'), p && p.club ? `🏛 ${esc(p.club)}` : '—'],
-    [T('Skill level'), lvl ?`<span class="plvl l-${lvl}">${T(LEVEL_N[lvl])}</span>` : '—'],
+    [T('Skill level'), lvlHtml(lvl, p)],
     [T('Joined'), p && p.joined ? esc(p.joined) : '—'],
     [T('Logins'), p && p.logins ? loginsTxt(p.logins) : '—'],
     [T('Title'), `<b>${T(titleOf(boards))}</b>`],
@@ -1726,6 +1726,17 @@ function convLine(p) {
 }
 // the player card's level and country lists
 const LEVELS = ['beg', 'int', 'adv', 'exp', 'wc'];
+/* the measured level: from the rating (1500 = as good as the robot tables; about 136 points per IMP a board over 200
+   boards), once the player has 50 scored boards */
+const MEASURE_MIN = 50;
+const measuredLvl = p => !p || !(p.rtn >= MEASURE_MIN) || !p.rt ? '' : p.rt < 1400 ? 'beg' : p.rt < 1500 ? 'int' : p.rt < 1580 ? 'adv' : p.rt < 1680 ? 'exp' : 'wc';
+// the player card's line: "Expert (own choice) · measured: Intermediate"
+function lvlHtml(lvl, p) {
+  const chip = l => `<span class="plvl l-${l}">${T(LEVEL_N[l])}</span>`, m = measuredLvl(p);
+  const own = lvl ? `${chip(lvl)} <small>(${T('own choice')})</small>` : '—';
+  const meas = m ? ` · <small>${T('measured')}:</small> ${chip(m)}` : p && p.rtn ? ` · <small class="muted">${T('measured after {0} boards ({1} so far)', MEASURE_MIN, p.rtn)}</small>` : '';
+  return `<span title="${T('Measured from the rating: the last 200 boards against the robot tables.')}">${own}${meas}</span>`;
+}
 const LEVEL_N = { beg: 'Beginner', int: 'Intermediate', adv: 'Advanced', exp: 'Expert', wc: 'World class' };
 const COUNTRIES = ['TR', 'NO', 'SE', 'DK', 'FI', 'IS', 'GB', 'IE', 'FR', 'DE', 'NL', 'BE', 'LU', 'CH', 'AT', 'IT', 'ES', 'PT', 'PL', 'CZ', 'SK', 'HU', 'RO', 'BG', 'GR', 'CY', 'HR', 'SI', 'RS', 'BA', 'UA', 'RU', 'EE', 'LV', 'LT', 'US', 'CA', 'MX', 'BR', 'AR', 'CL', 'CN', 'TW', 'HK', 'JP', 'KR', 'IN', 'ID', 'PK', 'AU', 'NZ', 'ZA', 'EG', 'IL', 'MA', 'AZ', 'GE', 'KZ'];
 const flagOf = c => /^[A-Z]{2}$/.test(c || '') ? String.fromCodePoint(...[...c].map(x => 127397 + x.charCodeAt(0))) : '';
