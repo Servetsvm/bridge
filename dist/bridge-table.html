@@ -8790,7 +8790,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 285;
+const APP_V = 286;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12691,8 +12691,8 @@ const Net = (() => {
         { const pr = w === 'robots' && typeof pracList === 'function' ? pracList().join(',') : ''; if (pr !== (st.prSent || '')) { await Cloud.put('logins/' + today() + '/' + fbKey(name) + '/pr', pr || null); st.prSent = pr; } }
         supCheck();   // a new message for you (the administrator: from a player)
         pruneKnown();
-        const [on, users, logins] = await Promise.all([Cloud.get('online'), isAdmin() ? Cloud.get('users?shallow=true').catch(() => null) : null, isAdmin() ? Cloud.get('logins/' + today()).catch(() => null) : null]);   // the number of players and the logins: the administrator only
-        st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: users ? Object.keys(users).length : null, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
+        const [on, users, logins] = await Promise.all([Cloud.get('online'), isAdmin() ? Cloud.get('users').catch(() => null) : null, isAdmin() ? Cloud.get('logins/' + today()).catch(() => null) : null]);   // the number of players and the logins: the administrator only
+        st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: users ? Object.keys(users).length : null, names: users ? Object.values(users).filter(u => u && u.name).map(u => String(u.name).slice(0, 20)) : null, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
         renderL();
       } catch (e) { st.cloudFail = (st.cloudFail || 0) + 1; if (st.cloudFail === 2) render(); }   // the database cannot be reached (a blocker, or no connection): the home page says so
@@ -12989,19 +12989,23 @@ const Net = (() => {
     for (const t of (st.tables || []).filter(listed)) for (const n of [t.host, ...Object.values(t.names || {})]) if (n && nameKey(n) !== me && !['robot', 'player'].includes(nameKey(n)) && !here.has(nameKey(n))) here.set(nameKey(n), n);
     const status = statusOf;
     const fr = (typeof friends === 'function' ? friends() : []);
-    const off = new Map();
-    for (const k in st.known) if (k !== me && !here.has(k)) off.set(k, st.known[k].name);
-    for (const f of fr) if (nameKey(f) !== me && !here.has(nameKey(f))) off.set(nameKey(f), f);
+    const off = new Map(), reg = st.cloud && Cloud.on && st.cloud.names;   // the administrator: every registered name
+    if (reg) { for (const n of reg) if (nameKey(n) !== me && !here.has(nameKey(n))) off.set(nameKey(n), n); }
+    else {
+      for (const k in st.known) if (k !== me && !here.has(k)) off.set(k, st.known[k].name);
+      for (const f of fr) if (nameKey(f) !== me && !here.has(nameKey(f))) off.set(nameKey(f), f);
+    }
     const G_ = { friends: [], play: [], lobby: [], off: [] };
     for (const [k, n] of here) { const s = status(n), idle = idleMins(n, s.s); if (idle) s.at = T('waiting {0} min without playing', idle); (fr.some(f => nameKey(f) === k) ? G_.friends : s.s === 'play' ? G_.play : G_.lobby).push({ n, ...s, idle }); }
     if (SET.showOff) for (const [k, n] of off) (fr.some(f => nameKey(f) === k) ? G_.friends : G_.off).push({ n, s: 'off' });
     for (const g in G_) G_[g].sort((a, b) => a.n.localeCompare(b.n));
+    G_.nOff = reg ? off.size : null;
     return G_;
   }
   function playersHtml() {
     const g = lobbyGroups(), all = [...g.friends, ...g.play, ...g.lobby, ...g.off];
     const nOn = 1 + all.filter(x => x.s !== 'off').length, nPlay = all.filter(x => x.s === 'play').length + (G && G.phase !== 'idle' ? 1 : 0);
-    const nOff = st.cloud && Cloud.on && st.cloud.users ? Math.max(0, st.cloud.users - nOn) : all.filter(x => x.s === 'off').length;
+    const nOff = g.nOff != null ? g.nOff : all.filter(x => x.s === 'off').length;
     const row = x => `<div class="lp st-${x.s}"><button class="lpn" data-pm="${esc(x.n)}" title="${T('Private message')}"><i class="dot"></i><span>${(p => p && p.av ? p.av + ' ' : '')(profOf(x.n))}${esc(x.n)}${x.idle ? ` <span title="${T('waiting {0} min without playing', x.idle)}">💤</span>` : ''}${st.dmUnread[nameKey(x.n)] ? ` <b class="badge">${st.dmUnread[nameKey(x.n)]}</b>` : ''}</span>${x.at ? `<small>${esc(x.at)}</small>` : ''}</button>`
       + `<button class="lpi" data-who="${esc(x.n)}" title="${T('Player card')}">ⓘ</button>${st.host && x.s === 'lobby' ? `<button class="lpi" data-tblinv="${esc(x.n)}" title="${T('Invite to my table')}">＋</button>` : ''}</div>`;
     const sec = (title, L) => L.length ? `<div class="lph">${title}</div>${L.map(row).join('')}` : '';
