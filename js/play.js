@@ -890,8 +890,18 @@ function ddChoose(g, seat, leg, opt) {
   if (n === 0) return null;
   if (opt.dbg) { opt.dbg.n = n; opt.dbg.avg = [...tot].map(([c, v]) => [c, v / n]); }   // for tests: what the robot thought
   let best = null, bv = -1; for (const c of asc(leg)) { const v = tot.get(c); if (v > bv + 1e-9) { bv = v; best = c; } }
+  // a defender following to partner's lead with the top touching honours of the suit (♠KQ6 under partner's ♠A): the
+  // lower honour, which promises the higher one, when the samples rate it within SIG_NEAR tricks of the best card (the
+  // lowest card would say "I do not want this suit"). Measured on 202 such Bermuda Bowl 2025 positions: it costs nothing
+  if (sideOf(seat) !== sideOf(g.contract.decl) && g.trick.length && g.trick[0].s === pd(seat) && S(best) === S(g.trick[0].c)) {
+    const all = desc(inSuit(g.hands[seat], S(best))), gone = new Set(g.history.flatMap(t => t.cards.map(x => x.c))), mine = new Set(g.hands[seat]);
+    const sameAs = (a, b) => { const lo = Math.min(a, b), hi = Math.max(a, b); for (let k = lo + 1; k < hi; k++) if (!gone.has(k) && !mine.has(k)) return false; return true; };
+    const q = all[1], rep = q != null && leg.find(r => S(r) === S(q) && sameAs(q, r));
+    if (all.length >= 2 && R(all[0]) >= 10 && R(q) === R(all[0]) - 1 && isMaster(g, all[0], seat) && rep != null && tot.get(rep) >= bv - SIG_NEAR * n) return q;
+  }
   return best;
 }
+const SIG_NEAR = 0.15;
 const PLAY_OPT = { budget: 900, maxSamples: 40, ddTricks: 9 };
 function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;

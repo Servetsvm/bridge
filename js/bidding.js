@@ -988,7 +988,13 @@ function generic(x, h) {
   let call = null, m = {};
   // partner chose 3NT: respect it unless we have slam values or a known 8-card major fit
   if (last === B(3, 4) && st.lastSeat === x.p && st.dbl === 0 && goal < 6 && !(t >= 2 && t < 4 && fitLen >= 8) && !(t < 4 && h.len[t] >= 7)) return { call: 'P', m: { t: 'Accepting partner\'s 3NT' } };
-  if (goal >= 6) {
+  // slam values but no trump agreed yet (partner has not shown three of it, and we have not bid it naturally): name it
+  // first, below game, so partner's key-card answer is about the right suit (2♣–2♠ with ♣AKQJT3: 3♣, not 4NT)
+  // (only in a game-forcing auction, with a strong suit of six or more of our own and partner showing another five-card suit)
+  const agreed = t < 4 && (P.len[t] >= 3 || x.my.some(e => e.m && e.m.len && e.m.len[t] >= 4));
+  const ownSuit = t < 4 && gf && h.len[t] >= 6 && h.top5(t) >= 3 && [0, 1, 2, 3].some(s => s !== t && P.len[s] >= 5);
+  if (goal >= 6 && ownSuit && !agreed && !bwUsed && cl <= 4 && B(cl, t) < B(4, 4)) { call = B(cl, t); m = { t: 'Natural: ' + SUIT[t] + ' suit, slam interest', ...range, len: lenm, f: 1 }; }
+  if (goal >= 6 && call === null) {
     if (!bwUsed && last < B(4, 4) && t < 4 && (t !== 0 || h.aces >= 2)) { call = B(4, 4); m = { tag: 'bw', trump: t, rkc: x.C.rkc0314 ? 2 : x.C.rkc ? 1 : 0, cv: x.C.rkc0314 ? 'rkc0314' : x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc0314 || x.C.rkc ? (x.C.rkc0314 ? 'RKCB 0314' : 'RKCB 1430') + ': asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?', ...range }; }
     else if (B(goal, t) > last) { call = B(goal, t); m = { t: (goal === 7 ? 'Grand' : 'Small') + ' slam', ...range, len: lenm }; }
   }
@@ -1041,6 +1047,13 @@ function explainCall(auc, seat, call, cards) {
   }
   if (call === 'X') return { t: 'Double' };
   if (call === 'XX') return { t: 'Redouble' };
+  // responder's 2NT after a one-level reply and opener's rebid (the other side silent): natural and invitational, so
+  // opener with the top of a minimum goes on to 3NT (1♣–1♠–2♣–2NT with 15 HCP: 3NT)
+  if (call === B(2, 4)) {
+    const my = auc.filter(e => e.seat === seat && e.call !== 'P'), pa = auc.filter(e => e.seat === (seat + 2) % 4 && e.call !== 'P');
+    if (my.length === 1 && isNum(my[0].call) && LV(my[0].call) === 1 && ST(my[0].call) < 4 && pa.length === 2 && isNum(pa[0].call) && LV(pa[0].call) === 1
+      && !auc.some(e => sideOf(e.seat) !== sideOf(seat) && e.call !== 'P')) return { min: 11, max: 12, t: 'Invitational: 11-12 HCP, balanced' };
+  }
   const s = ST(call);
   return s === 4 ? { t: 'Natural notrump' } : { t: 'Natural: ' + SUIT[s] + ' suit', len: { [s]: 4 } };
 }
