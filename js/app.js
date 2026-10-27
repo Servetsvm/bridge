@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 278;
+const APP_V = 279;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2798,14 +2798,25 @@ async function gateGo() {
     if (r === 'pin') return err(T('Wrong PIN for {0}.', name));
     if (r === 'offline') return err(T('The online database could not be reached.'));
   }
+  // another name is another player (also from "Change your name"): the one signed in now has their things put away
+  // under their own name, and the new name starts with its own (it used to take the results along, so a test name
+  // came into the leaderboard with someone else's boards)
+  let back = false, switched = false;
+  if (ui.gateRename && myNm() && Net.nameKey(name) !== Net.nameKey(myNm())) {
+    if (online()) return err(T('Close the online table first'));
+    acctStash(SET.pinFor || Net.nameKey(myNm())); acctLoad(null); switched = true;
+  }
   // a name used on this device before: that player's results, settings, friends and messages come back
-  let back = false;
-  if (!ui.gateRename) { try { back = !!localStorage.getItem(acctKey(Net.nameKey(name))); } catch (e) {} }
+  if (!ui.gateRename || switched) { try { back = !!localStorage.getItem(acctKey(Net.nameKey(name))); } catch (e) {} }
+  const own = back;
   if (back) { acctLoad(Net.nameKey(name)); try { localStorage.removeItem(acctKey(Net.nameKey(name))); } catch (e) {} }
   // a name new to this device always starts with a clean page: whatever is still here from someone else (left by an
   // older version's log-out) is put aside on the device, not lost, and not added to this account
   else if (!ui.gateRename && HIST.length) { acctStash('_kept' + Date.now()); acctLoad(null); back = true; }
-  gateDone(name, h, back);
+  // a new player's card is standard SAYC until they choose (it used to be the app's 2/1 with every convention on,
+  // which looked like the administrator's card)
+  if (mode === 'new' && (!ui.gateRename || switched) && !own) { SET.sys = 'sayc'; SET.conv = { ...E.sysOf('sayc').conv }; SET.practice = ''; Store.saveSettings(SET); save(); }
+  gateDone(name, h, back || switched);   // another player: the page is read again for them
 }
 // the administrator removed this device's name: signed out, with nothing of that name kept here; the name screen says why
 function nameRemoved(name) {
@@ -3022,6 +3033,7 @@ function playersDelete() {
   askYes(T('Remove {0} for good? Their results, settings, logins and messages are deleted.', names.join(', ')), async () => {
     openOv('players', `<h2>👥 ${T('Players')}</h2><div class="muted">⏳ ${T('Removing…')}</div>`);
     let ok = 0; for (const k of [...sel]) { try { if (await Net.adminDelete(k)) ok++; } catch (e) {} }
+    for (const n of names) delete Net.st.rated[Net.nameKey(n)]; try { localStorage.setItem('bridge-rated', JSON.stringify(Net.st.rated)); } catch (e) {}
     ui.plSel = new Set(); ui.plList = null; flash('🗑 ' + T('{0} removed', ok), 2500); showPlayers();
   });
 }
