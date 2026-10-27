@@ -172,11 +172,11 @@ const Net = (() => {
   function profOf(name) {
     const k = nameKey(name);
     for (const t of (st.tables || [])) { if (nameKey(t.host) === k && t.prof) return cleanProf(t.prof, true); for (const s in (t.names || {})) if (nameKey(t.names[s]) === k && t.profs && t.profs[s]) return cleanProf(t.profs[s], true); }
-    for (const m of (st.lchat || []).slice().reverse()) if (nameKey(m.from) === k && m.p) return m.p;   // from the lobby chat
+    for (const m of (st.lchat || []).slice().reverse()) if (nameKey(m.from) === k && m.p) return cleanProf(m.p, true);   // from the lobby chat
     if (k === nameKey(myName() || '')) return prof();
-    const pr = (st.present || {})[k]; if (pr && pr.p) return pr.p;
+    const pr = (st.present || {})[k]; if (pr && pr.p) return cleanProf(pr.p, true);
     const co = st.cloud && st.cloud.on && st.cloud.on.find(x => nameKey(x.name) === k); if (co && co.p) return cleanProf(co.p, true);
-    const kn = st.known && st.known[k]; if (kn && kn.p) return kn.p;
+    const kn = st.known && st.known[k]; if (kn && kn.p) return cleanProf(kn.p, true);   // also a profile kept by an older version (its old card is not shown)
     return null;
   }
   const sysShort = p => p && p.sys ? ({ twoone: '2/1', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' })[p.sys] || '' : '';
@@ -765,7 +765,7 @@ const Net = (() => {
     if (!Cloud.on || !isAdmin()) return [];
     const [on, lg] = await Promise.all([Cloud.get('online'), Cloud.get('logins/' + today()).catch(() => null)]), now = Date.now();
     const L = Object.entries(on || {}).filter(([, x]) => x && x.name && now - x.ts < 180e3)
-      .map(([k, x]) => ({ name: x.name, at: x.at || 'lobby', pr: x.at === 'robots' && lg && lg[k] && lg[k].pr || '', sys: x.p && x.p.sys || '' }));
+      .map(([k, x]) => ({ name: x.name, at: x.at || 'lobby', pr: x.at === 'robots' && lg && lg[k] && lg[k].pr || '', sys: x.p && x.p.cardV === 1 && x.p.sys || '' }));
     // and those the lobby sees directly (as in the players list): a player without a PIN, or on an older version
     const me = nameKey(myName());
     for (const n of [...knownNames(), ...(st.tables || []).filter(listed).flatMap(t => [t.host, ...Object.values(t.names || {})])]) if (n && nameKey(n) !== me && !['robot', 'player'].includes(nameKey(n)) && !L.some(x => nameKey(x.name) === nameKey(n))) {
