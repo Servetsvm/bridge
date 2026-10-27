@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 276;
+const APP_V = 277;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1226,7 +1226,8 @@ function pracHtml() {
   const bid = c => pracKnown(c.k) && !CARD_KEYS.includes(c.k), on = E.CONVS.filter(c => SET.conv[c.k] && bid(c)), off = E.CONVS.filter(c => !SET.conv[c.k] && bid(c));
   const item = (attr, k, label, checked) => `<label class="pdi${checked ? ' on' : ''}"><input type="checkbox" ${attr}="${k}" ${checked ? 'checked' : ''}><span>${label}</span></label>`;
   const sysPanel = ui.pracDrop === 'sys' ? `<div class="pdpanel">${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), s.k === cur.k)).join('')}</div>` : '';
-  const convPanel = ui.pracDrop === 'conv' ? `<div class="pdpanel wide">${item('data-pdoff', '1', T('Off — normal random deals'), !sel.length)}
+  const convPanel = ui.pracDrop === 'conv' ? `<div class="pdpanel wide"><div class="pdh">1. ${T('Base system')}</div>${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), s.k === cur.k)).join('')}
+      <div class="pdh">2. ${T('Practice a convention')}</div>${item('data-pdoff', '1', T('Off — normal random deals'), !sel.length)}
       <div class="pdh">${T('Basics (every system)')}</div>${PRAC_BASICS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       ${on.length ? `<div class="pdh">${T('In your system')}</div>${on.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
@@ -2363,7 +2364,7 @@ document.addEventListener('change', e => {
     SET.conv[k] = t.checked;
     if (t.checked && c && c.x) SET.conv[c.x] = false;
     if (!t.checked && pracList().includes(k)) SET.practice = pracList().filter(x => x !== k).join(',');   // taken off the card: no longer practised
-    Store.saveSettings(SET); save(); if (ui.overlay === "set") showSettings(); else render();
+    Store.saveSettings(SET); save(); if (ui.overlay === "set") showSettings(); else if (ui.overlay === 'cardconv') { render(); showCardConv(); } else render();
   }
   if (t.dataset.tinv != null && ui.tsel) { if (t.checked) ui.tsel.names.add(t.dataset.tinv); else ui.tsel.names.delete(t.dataset.tinv); return; }
   // your own player card: level, country and a few words, sent with your profile
@@ -2379,7 +2380,7 @@ document.addEventListener('change', e => {
   if (t.id === "hPracSel") { setPractice(t.value); render(); return; }
   if (t.id === "pdHint") { SET.pracHint = t.checked; Store.saveSettings(SET); save(); return; }
   // the two drop-downs on the home page: a base system (one), conventions to practise (any number)
-  if (t.dataset.pdsys) { SET.sys = t.dataset.pdsys; SET.conv = { ...E.sysOf(SET.sys).conv }; SET.practice = ''; Store.saveSettings(SET); save(); ui.pracDrop = null; render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
+  if (t.dataset.pdsys) { SET.sys = t.dataset.pdsys; SET.conv = { ...E.sysOf(SET.sys).conv }; SET.practice = ''; Store.saveSettings(SET); save(); if (ui.pracDrop !== 'conv') ui.pracDrop = null; render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
   if (t.dataset.pdconv) { togglePractice(t.dataset.pdconv, t.checked); render(); return; }
   if (t.dataset.pdoff) { SET.practice = ''; Store.saveSettings(SET); save(); render(); return; }
   if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
@@ -2475,6 +2476,9 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   if (t.id === 'caStd' || t.id === 'caMake') { cardAskDone(t.id === 'caMake'); return; }
+  if (t.dataset.casys) { SET.sys = t.dataset.casys; SET.conv = { ...E.sysOf(SET.sys).conv }; SET.practice = ''; Store.saveSettings(SET); save(); render(); showCardConv(); return; }
+  if (t.id === 'caBack') { showCardSys(); return; }
+  if (t.id === 'caDone') { closeOv(); render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); checkSharedDeal(); setTimeout(installAsk, 800); return; }
   if (t.id === 'rbNoteSend') { const e = HIST.find(h => String(h.id) === t.dataset.id), txt = ($('rbNote') || {}).value || '';
     if (!e || txt.trim().length < 3) { flash(T('Write what the robot did wrong'), 2000); return; }
     t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
@@ -2822,10 +2826,7 @@ function showCardAsk() {
 function cardAskDone(make) {
   closeOv();
   if (!make) { SET.sys = 'sayc'; SET.conv = { ...E.sysOf('sayc').conv }; SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(E.sysOf('sayc').n + ' — ' + T('your robot partner bids it too'), 2400); checkSharedDeal(); setTimeout(installAsk, 800); return; }
-  // the card opens on the home page: the base system and the conventions are chosen there
-  ui.hsec = 'conv'; render(); setTimeout(() => { const el = $('hSec'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
-  flash(T('Choose your base system and conventions: your robot partner plays them.'), 3500);
-  if (/[#&](bg|sb|d)=/.test(location.hash)) checkSharedDeal();
+  showCardSys();
 }
 // drag the small window by its top bar
 document.addEventListener('pointerdown', e => {
@@ -3188,4 +3189,16 @@ async function instGo() {
     <ol class="inststeps"><li>${T('Tap the Share button {0} at the bottom (on iPad at the top) of Safari.', '<b>⬆︎</b>')}</li><li>${T('Choose {0}.', `<b>${T('Add to Home Screen')}</b>`)}</li><li>${T('Tap {0}: Bridge Table appears on your home screen.', `<b>${T('Add')}</b>`)}</li></ol>
     <div class="muted">${T('In another browser on iPhone, open this page in Safari first.')}</div>
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+
+// a new player's own card, step 1: the base system (each with a few words), then step 2: the conventions
+function showCardSys() {
+  const cur = E.sysOf(SET.sys);
+  openOv('cardsys', `<h2>1. ${T('Base system')}</h2><div class="muted">${T('Your robot partner bids it too.')}</div>
+    <div class="cardsys">${E.SYSTEMS.map(x => `<button class="btn${x.k === cur.k ? ' new' : ''}" data-casys="${x.k}"><b>${esc(x.n)}</b><small>${symText(x.d)}</small></button>`).join('')}</div>`);
+}
+function showCardConv() {
+  openOv('cardconv', `<h2>2. ${T('Conventions')}</h2><div class="muted">${T('Base system')}: <b>${esc(E.sysOf(SET.sys).n)}</b> · ${T('Tick the ones you play.')}</div>
+    <div class="convs">${E.CONVS.map(c => `<label class="cvchip${SET.conv[c.k] ? ' on' : ''}" title="${esc(c.d)}"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}>${esc(c.n)}</label>`).join('')}</div>
+    <div class="row2"><button class="btn" id="caBack">◀ ${T('Back')}</button><button class="btn gold" id="caDone">${T('Done')}</button></div>`);
 }

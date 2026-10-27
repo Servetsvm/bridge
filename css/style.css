@@ -1597,3 +1597,7 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 #bidbox #bidHover{position:absolute;left:0;right:0;bottom:calc(100% + 4px);z-index:20;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.25)}
 /* Results: a tournament board's name under its date */
 .res .rtn{display:block;font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* a new player's own card, step 1: the systems with a few words each */
+.cardsys{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.cardsys .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left;gap:2px;padding:8px 10px}
+.cardsys .btn small{font-weight:400;font-size:12px;opacity:.85}
