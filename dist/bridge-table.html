@@ -8790,7 +8790,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 286;
+const APP_V = 287;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11389,8 +11389,9 @@ document.addEventListener('click', ev_ => {
     case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
     case "sRefresh": ui.statData = null; showStats(); break;
-    case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), () => {
+    case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), async () => {
       if (online()) { flash(T('Close the online table first'), 2000); return; }
+      await Net.goOffline();   // off the online list at once
       // this player's things are put away under the name; the device starts fresh for the next one
       acctStash(SET.pinFor || Net.nameKey(myNm()));
       try { localStorage.removeItem('bridge-table-name'); } catch (e) {}
@@ -12862,6 +12863,11 @@ const Net = (() => {
     return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, me: k === ruleKey(myName()) }))
       .sort((a, b) => (b.last || '').localeCompare(a.last || '') || b.ts - a.ts);
   }
+  // this player leaves (logs out): off the online list now, and no more beats from this page
+  async function goOffline() {
+    const name = myName(); st.out = true; if (!Cloud.on || !name) return;
+    try { await Promise.race([Cloud.put('online/' + fbKey(name), null), new Promise(r => setTimeout(r, 2500))]); } catch (e) {}
+  }
   async function adminDelete(k) {
     if (!isAdmin() || k === ruleKey(myName())) return false;
     const u = await Cloud.get('users/' + seg(k)).catch(() => null), logins = await Cloud.get('logins?shallow=true').catch(() => null) || {};
@@ -13818,7 +13824,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

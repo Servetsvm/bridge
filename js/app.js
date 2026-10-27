@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 286;
+const APP_V = 287;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2607,8 +2607,9 @@ document.addEventListener('click', ev_ => {
     case "bTheme": case "bTheme2": { SET.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; Store.saveSettings(SET); save(); applyLook(); ui.menu = false; render(); if (ui.overlay === "set") showSettings(); break; }
     case "gGo": gateGo(); break;
     case "sRefresh": ui.statData = null; showStats(); break;
-    case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), () => {
+    case "sLogout": askYes(T('Log out? You can sign in again with your name and PIN, or choose another name.'), async () => {
       if (online()) { flash(T('Close the online table first'), 2000); return; }
+      await Net.goOffline();   // off the online list at once
       // this player's things are put away under the name; the device starts fresh for the next one
       acctStash(SET.pinFor || Net.nameKey(myNm()));
       try { localStorage.removeItem('bridge-table-name'); } catch (e) {}

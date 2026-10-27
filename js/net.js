@@ -846,6 +846,11 @@ const Net = (() => {
     return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, me: k === ruleKey(myName()) }))
       .sort((a, b) => (b.last || '').localeCompare(a.last || '') || b.ts - a.ts);
   }
+  // this player leaves (logs out): off the online list now, and no more beats from this page
+  async function goOffline() {
+    const name = myName(); st.out = true; if (!Cloud.on || !name) return;
+    try { await Promise.race([Cloud.put('online/' + fbKey(name), null), new Promise(r => setTimeout(r, 2500))]); } catch (e) {}
+  }
   async function adminDelete(k) {
     if (!isAdmin() || k === ruleKey(myName())) return false;
     const u = await Cloud.get('users/' + seg(k)).catch(() => null), logins = await Cloud.get('logins?shallow=true').catch(() => null) || {};
@@ -1802,5 +1807,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
