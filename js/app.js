@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 279;
+const APP_V = 280;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1181,6 +1181,7 @@ function turnAlert() {
 }
 
 /* ================= home page: start, open tables, our convention card and the lobby chat ================= */
+const sysIs = k => (SET.sys || 'twoone') === k;   // 'none' (a new player's empty card) marks none
 const myNm = () => { try { return localStorage.getItem('bridge-table-name') || ''; } catch (e) { return ''; } };
 /* ---- several people on one device: each name keeps its own results, settings, progress, friends and messages.
    Logging out puts them away under the name (bridge-acct:<name>) and the device starts fresh; signing in with a
@@ -1225,8 +1226,8 @@ function pracHtml() {
   const sysName = k => ({ twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' })[k] || (E.SYSTEMS.find(s => s.k === k) || {}).n || k;
   const bid = c => pracKnown(c.k) && !CARD_KEYS.includes(c.k), on = E.CONVS.filter(c => SET.conv[c.k] && bid(c)), off = E.CONVS.filter(c => !SET.conv[c.k] && bid(c));
   const item = (attr, k, label, checked) => `<label class="pdi${checked ? ' on' : ''}"><input type="checkbox" ${attr}="${k}" ${checked ? 'checked' : ''}><span>${label}</span></label>`;
-  const sysPanel = ui.pracDrop === 'sys' ? `<div class="pdpanel">${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), s.k === cur.k)).join('')}</div>` : '';
-  const convPanel = ui.pracDrop === 'conv' ? `<div class="pdpanel wide"><div class="pdh">1. ${T('Base system')}</div>${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), s.k === cur.k)).join('')}
+  const sysPanel = ui.pracDrop === 'sys' ? `<div class="pdpanel">${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), sysIs(s.k))).join('')}</div>` : '';
+  const convPanel = ui.pracDrop === 'conv' ? `<div class="pdpanel wide"><div class="pdh">1. ${T('Base system')}</div>${E.SYSTEMS.map(s => item('data-pdsys', s.k, esc(sysName(s.k)), sysIs(s.k))).join('')}
       <div class="pdh">2. ${T('Practice a convention')}</div>${item('data-pdoff', '1', T('Off — normal random deals'), !sel.length)}
       <div class="pdh">${T('Basics (every system)')}</div>${PRAC_BASICS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       ${on.length ? `<div class="pdh">${T('In your system')}</div>${on.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
@@ -1235,7 +1236,7 @@ function pracHtml() {
       <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
   return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Deal practice')}</button></div></div>
     <div class="prrow2">
-      <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${esc(sysName(cur.k))}</div>${sysPanel}</div>
+      <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${SET.sys === 'none' ? '—' : esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
     </div>
     <div class="prhintrow"><label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Notify me")}</label><button class="btn hconv prconv" data-hsec="conv">📋 ${T('Convention card')}</button></div>
@@ -1299,8 +1300,8 @@ function homeSection(k) {
 function convCardHtml() {
   // first the base system (your robot partner bids it too), then the conventions within it
   const cur = E.sysOf(SET.sys);
-  return `<div class="grp"><span>${T('Base system')}</span><div class="seg sysseg" data-seg="sys">${E.SYSTEMS.map(s => `<button data-v="${s.k}" class="${cur.k === s.k ? 'on' : ''}">${esc(s.n.replace(/ \(.*\)/, ''))}</button>`).join('')}</div>
-    <div class="muted">${symText(cur.d)}</div></div>
+  return `<div class="grp"><span>${T('Base system')}</span><div class="seg sysseg" data-seg="sys">${E.SYSTEMS.map(s => `<button data-v="${s.k}" class="${sysIs(s.k) ? 'on' : ''}">${esc(s.n.replace(/ \(.*\)/, ''))}</button>`).join('')}</div>
+    <div class="muted">${SET.sys === 'none' ? T('No base system chosen yet.') : symText(cur.d)}</div></div>
     <div class="grp"><span>${T('Conventions')}</span><div class="convs">${E.CONVS.map(c => `<label class="cvchip${SET.conv[c.k] ? ' on' : ''}" title="${esc(c.d)}"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}>${esc(c.n)}</label>`).join('')}</div></div>
     <div class="row2"><button class="btn new" id="convWa">📲 ${T('Send on WhatsApp')}</button><button class="btn sms" id="convSms">${ICON_SMS} SMS</button></div>`;
 }
@@ -1664,7 +1665,7 @@ function showPlayer(name) {
   // your own card: change what the others see (name, system, level, country; the conventions on the card itself)
   const edit = me ? `<div class="pedit"><div class="pedh">✏️ ${T('Edit my card')}</div>
       <label><span>${T('Name')}</span><button id="pRename" class="tok prename">${esc(myNm())} ✏️</button></label>
-      <label><span>${T('System')}</span><select id="pSys" class="sel">${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label>
+      <label><span>${T('System')}</span><select id="pSys" class="sel">${SET.sys === 'none' ? '<option value="none" selected>—</option>' : ''}${E.SYSTEMS.map(s => `<option value="${s.k}" ${(SET.sys || 'twoone') === s.k ? 'selected' : ''}>${esc(({ twoone: '2/1 GF', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' })[s.k] || s.n)}</option>`).join('')}</select></label>
       <label><span>${T('Level')}</span><select id="pLvl" class="sel"><option value="">${T('Not set')}</option>${LEVELS.map(l => `<option value="${l}" ${SET.lvl === l ? 'selected' : ''}>${T(LEVEL_N[l])}</option>`).join('')}</select></label>
       <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
       <label><span>${T('Club')}</span><input id="pClub" class="tok" maxlength="24" value="${esc(SET.club || '')}" placeholder="${T('Your bridge club (optional)')}"></label>
@@ -2813,9 +2814,9 @@ async function gateGo() {
   // a name new to this device always starts with a clean page: whatever is still here from someone else (left by an
   // older version's log-out) is put aside on the device, not lost, and not added to this account
   else if (!ui.gateRename && HIST.length) { acctStash('_kept' + Date.now()); acctLoad(null); back = true; }
-  // a new player's card is standard SAYC until they choose (it used to be the app's 2/1 with every convention on,
-  // which looked like the administrator's card)
-  if (mode === 'new' && (!ui.gateRename || switched) && !own) { SET.sys = 'sayc'; SET.conv = { ...E.sysOf('sayc').conv }; SET.practice = ''; Store.saveSettings(SET); save(); }
+  // a new player's card is empty until they choose: no base system, no conventions (it used to be the app's 2/1 with
+  // every convention on, which looked like the administrator's card)
+  if (mode === 'new' && (!ui.gateRename || switched) && !own) { SET.sys = 'none'; SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.practice = ''; Store.saveSettings(SET); save(); }
   gateDone(name, h, back || switched);   // another player: the page is read again for them
 }
 // the administrator removed this device's name: signed out, with nothing of that name kept here; the name screen says why
@@ -3214,7 +3215,7 @@ async function instGo() {
 function showCardSys() {
   const cur = E.sysOf(SET.sys);
   openOv('cardsys', `<h2>1. ${T('Base system')}</h2><div class="muted">${T('Your robot partner bids it too.')}</div>
-    <div class="cardsys">${E.SYSTEMS.map(x => `<button class="btn${x.k === cur.k ? ' new' : ''}" data-casys="${x.k}"><b>${esc(x.n)}</b><small>${symText(x.d)}</small></button>`).join('')}</div>`);
+    <div class="cardsys">${E.SYSTEMS.map(x => `<button class="btn${sysIs(x.k) ? ' new' : ''}" data-casys="${x.k}"><b>${esc(x.n)}</b><small>${symText(x.d)}</small></button>`).join('')}</div>`);
 }
 function showCardConv() {
   openOv('cardconv', `<h2>2. ${T('Conventions')}</h2><div class="muted">${T('Base system')}: <b>${esc(E.sysOf(SET.sys).n)}</b> · ${T('Tick the ones you play.')}</div>
