@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 289;
+const APP_V = 290;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1727,8 +1727,8 @@ function convLine(p) {
 // the player card's level and country lists
 const LEVELS = ['beg', 'int', 'adv', 'exp', 'wc'];
 /* the measured level: from the rating (1500 = as good as the robot tables; about 136 points per IMP a board over 200
-   boards), once the player has 50 scored boards */
-const MEASURE_MIN = 50;
+   boards), from the first scored board */
+const MEASURE_MIN = 1;   // from the first scored board
 const measuredLvl = p => !p || !(p.rtn >= MEASURE_MIN) || !p.rt ? '' : p.rt < 1400 ? 'beg' : p.rt < 1500 ? 'int' : p.rt < 1580 ? 'adv' : p.rt < 1680 ? 'exp' : 'wc';
 // the player card's line: "Expert (own choice) · measured: Intermediate"
 function lvlHtml(lvl, p) {
