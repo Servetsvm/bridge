@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 275;
+const APP_V = 276;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2474,6 +2474,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
+  if (t.id === 'caStd' || t.id === 'caMake') { cardAskDone(t.id === 'caMake'); return; }
   if (t.id === 'rbNoteSend') { const e = HIST.find(h => String(h.id) === t.dataset.id), txt = ($('rbNote') || {}).value || '';
     if (!e || txt.trim().length < 3) { flash(T('Write what the robot did wrong'), 2000); return; }
     t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
@@ -2785,6 +2786,7 @@ async function gateGo() {
     // a new player: the name must be free; if it is taken, say so and offer free names close to it
     const r = await Net.register(name, h);
     if (r === 'taken') return err(T('The name {0} is already taken. Please choose another name.', name), await Net.suggestNames(name));
+    if (!ui.gateRename) ui.askCard = true;   // a new player chooses a system first
   } else {
     const r = await Net.login(name, h);
     if (r === 'nouser') return err(T('Nobody has the name {0} yet. Choose "I\'m new here" to take it.', name));
@@ -2808,8 +2810,22 @@ function gateDone(name, h, back) {
   Net.st.claimed = true; Net.shareInfo(); Net.Cloud.beat(); render();
   SET.cloudSet = 0; Net.cloudSync();   // your results and settings from your other devices
   flash(T('Welcome, {0}!', name), 2000);
+  if (ui.askCard) { ui.askCard = false; showCardAsk(); return; }
   checkSharedDeal();
   setTimeout(installAsk, 800);   // a new player who came through a shared link: install the app now?
+}
+/* a new player's first question: play standard SAYC, or make their own convention card (their robot partner plays it) */
+function showCardAsk() {
+  openOv('cardask', `<h2>📋 ${T('Your convention card')}</h2><div class="muted">${T('Which system do you and your robot partner play?')}</div>
+    <div class="row2"><button class="btn new" id="caStd">${T('Standard (SAYC)')}</button><button class="btn gold" id="caMake">📋 ${T('Make my convention card')}</button></div>`);
+}
+function cardAskDone(make) {
+  closeOv();
+  if (!make) { SET.sys = 'sayc'; SET.conv = { ...E.sysOf('sayc').conv }; SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(E.sysOf('sayc').n + ' — ' + T('your robot partner bids it too'), 2400); checkSharedDeal(); setTimeout(installAsk, 800); return; }
+  // the card opens on the home page: the base system and the conventions are chosen there
+  ui.hsec = 'conv'; render(); setTimeout(() => { const el = $('hSec'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 50);
+  flash(T('Choose your base system and conventions: your robot partner plays them.'), 3500);
+  if (/[#&](bg|sb|d)=/.test(location.hash)) checkSharedDeal();
 }
 // drag the small window by its top bar
 document.addEventListener('pointerdown', e => {

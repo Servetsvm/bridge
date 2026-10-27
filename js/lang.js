@@ -3,6 +3,10 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Your convention card": "Konvansiyon kartın",
+    "Which system do you and your robot partner play?": "Sen ve robot ortağın hangi sistemi oynayacaksınız?",
+    "Make my convention card": "Kartımı oluştur",
+    "Choose your base system and conventions: your robot partner plays them.": "Temel sistemini ve konvansiyonlarını seç: robot ortağın onları oynar.",
     "Played in a tournament": "Turnuvada oynandı",
     "Played at an online table": "Online masada oynandı",
     "Played offline, with robots": "Offline, robotlarla oynandı",
@@ -388,6 +392,10 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Your convention card": "Ditt konvensjonskort",
+    "Which system do you and your robot partner play?": "Hvilket system spiller du og robotmakkeren din?",
+    "Make my convention card": "Lag mitt konvensjonskort",
+    "Choose your base system and conventions: your robot partner plays them.": "Velg grunnsystem og konvensjoner: robotmakkeren din spiller dem.",
     "Played in a tournament": "Spilt i en turnering",
     "Played at an online table": "Spilt ved et online-bord",
     "Played offline, with robots": "Spilt offline, med roboter",
@@ -773,6 +781,10 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Your convention card": "Tu tarjeta de convenciones",
+    "Which system do you and your robot partner play?": "¿Qué sistema jugáis tú y tu compañero robot?",
+    "Make my convention card": "Crear mi tarjeta",
+    "Choose your base system and conventions: your robot partner plays them.": "Elige tu sistema base y tus convenciones: tu compañero robot las juega.",
     "Played in a tournament": "Jugada en un torneo",
     "Played at an online table": "Jugada en una mesa online",
     "Played offline, with robots": "Jugada sin conexión, con robots",
@@ -1186,6 +1198,10 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Your convention card": "Votre carte de conventions",
+    "Which system do you and your robot partner play?": "Quel système jouez-vous avec votre partenaire robot ?",
+    "Make my convention card": "Créer ma carte",
+    "Choose your base system and conventions: your robot partner plays them.": "Choisissez votre système de base et vos conventions : votre partenaire robot les joue.",
     "Played in a tournament": "Jouée dans un tournoi",
     "Played at an online table": "Jouée à une table en ligne",
     "Played offline, with robots": "Jouée hors ligne, avec les robots",
@@ -1599,6 +1615,10 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Your convention card": "La tua carta delle convenzioni",
+    "Which system do you and your robot partner play?": "Quale sistema giocate tu e il tuo compagno robot?",
+    "Make my convention card": "Crea la mia carta",
+    "Choose your base system and conventions: your robot partner plays them.": "Scegli il sistema base e le convenzioni: il tuo compagno robot le gioca.",
     "Played in a tournament": "Giocata in un torneo",
     "Played at an online table": "Giocata a un tavolo online",
     "Played offline, with robots": "Giocata offline, con i robot",
@@ -2012,6 +2032,10 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Your convention card": "Deine Konventionskarte",
+    "Which system do you and your robot partner play?": "Welches System spielst du mit deinem Roboterpartner?",
+    "Make my convention card": "Meine Karte erstellen",
+    "Choose your base system and conventions: your robot partner plays them.": "Wähle Grundsystem und Konventionen: dein Roboterpartner spielt sie.",
     "Played in a tournament": "In einem Turnier gespielt",
     "Played at an online table": "An einem Online-Tisch gespielt",
     "Played offline, with robots": "Offline mit Robotern gespielt",
@@ -2425,6 +2449,10 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Your convention card": "Ваша конвенционная карта",
+    "Which system do you and your robot partner play?": "Какую систему играете вы и ваш партнёр-робот?",
+    "Make my convention card": "Создать мою карту",
+    "Choose your base system and conventions: your robot partner plays them.": "Выберите базовую систему и конвенции: ваш партнёр-робот будет их играть.",
     "Played in a tournament": "Сыграна в турнире",
     "Played at an online table": "Сыграна за онлайн-столом",
     "Played offline, with robots": "Сыграна офлайн, с роботами",
@@ -2838,6 +2866,10 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Your convention card": "Twoja karta konwencji",
+    "Which system do you and your robot partner play?": "Jaki system grasz ty i twój partner-robot?",
+    "Make my convention card": "Utwórz moją kartę",
+    "Choose your base system and conventions: your robot partner plays them.": "Wybierz system bazowy i konwencje: twój partner-robot je gra.",
     "Played in a tournament": "Zagrane w turnieju",
     "Played at an online table": "Zagrane przy stole online",
     "Played offline, with robots": "Zagrane offline, z robotami",
@@ -3251,6 +3283,10 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Your convention card": "你的约定卡",
+    "Which system do you and your robot partner play?": "你和机器人搭档打什么体系？",
+    "Make my convention card": "创建我的约定卡",
+    "Choose your base system and conventions: your robot partner plays them.": "选择你的基本体系和约定：你的机器人搭档会按此打牌。",
     "Played in a tournament": "在比赛中打的",
     "Played at an online table": "在在线牌桌打的",
     "Played offline, with robots": "离线与机器人打的",
