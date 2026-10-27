@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 283;
+const APP_V = 284;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1698,7 +1698,7 @@ function titleOf(n) { return n >= 5000 ? 'Grandmaster' : n >= 2000 ? 'Master' : 
 const CONV_SHORT = { rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
 function convLine(p) {
   if (p.cline && p.cline.trim()) return esc(p.cline.trim());   // the player wrote it themselves
-  const y = p.sys ? E.sysOf(p.sys) : null;
+  const y = p.sys && p.sys !== 'none' ? E.sysOf(p.sys) : null;
   const head = y ? [{ twoone: '2/1', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' }[y.k] || y.k, y.maj5 ? '5-card majors' : '4-card majors', '1NT ' + y.nt[0] + '-' + y.nt[1]] : [];
   const on = p.conv ? Object.keys(CONV_SHORT).filter(k => p.conv[k]).map(k => CONV_SHORT[k]) : [];
   return esc([...head, ...on].join(', '));
@@ -3197,8 +3197,8 @@ setTimeout(installAsk, 1500);
    own card. Returns true when it asked. */
 function cardReset() {
   if (SET.cardV === 1 || !myNm() || online()) return false;
-  SET.sys = 'none'; SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.practice = ''; SET.cardV = 1;
-  Store.saveSettings(SET); save(); render();
+  SET.sys = 'none'; SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.practice = ''; SET.cline = ''; SET.cardV = 1;
+  Store.saveSettings(SET); save(); render(); if (typeof Net !== 'undefined') Net.shareInfo();
   const ask = () => { if (ui.overlay && !/^card(sys|conv)$/.test(ui.overlay)) { setTimeout(ask, 1500); return; } if (!ui.overlay) showCardSys(); };
   ask(); return true;
 }

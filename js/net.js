@@ -111,7 +111,7 @@ const Net = (() => {
   function prof() {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
-    return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
+    return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, cardV: SET.cardV === 1 ? 1 : 0, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
       lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', club: String(SET.club || '').trim().slice(0, 24), ...ratingOf(HIST) };   // the player card: level, country, a few words
   }
   /* the rating: 1500 plus 150 × the IMPs won against the robot field over the last 200 scored boards, shrunk for a
@@ -150,13 +150,15 @@ const Net = (() => {
   const num = v => v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
   function cleanProf(q, conv) {
     if (!q || typeof q !== 'object') return null;
+    // a card from before the one-time new card (October 2026) is not shown: no system, conventions or card line
+    if (q.cardV !== 1) q = { ...q, sys: undefined, conv: undefined, cline: '' };
     return { n: +q.n || 0, imp: num(q.imp), mp: num(q.mp), sys: typeof q.sys === 'string' ? q.sys.slice(0, 12) : undefined,
       conv: conv && q.conv && typeof q.conv === 'object' ? Object.fromEntries(E.CONVS.map(c => [c.k, !!q.conv[c.k]])) : undefined,
       per: Array.isArray(q.per) ? q.per.slice(0, 5).map(r => Array.isArray(r) ? [+r[0] || 0, num(r[1]), num(r[2])] : [0, null, null]) : undefined,
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
       joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
-      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
+      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", cardV: q.cardV === 1 ? 1 : 0, club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   // a board being played (bidding or card play): a finished board left on the screen does not count, nor the home page
@@ -180,7 +182,7 @@ const Net = (() => {
   const sysShort = p => p && p.sys ? ({ twoone: '2/1', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' })[p.sys] || '' : '';
   function profTxt(p) {
     if (!p) return "";
-    const s = p.sys ? ({ twoone: "2/1", sayc: "SAYC", acol: "Acol", sef: "SEF", precision: "Precision", polish: "Polish" })[p.sys] || "" : "";
+    const s = p.sys && p.cardV === 1 ? ({ twoone: "2/1", sayc: "SAYC", acol: "Acol", sef: "SEF", precision: "Precision", polish: "Polish" })[p.sys] || "" : "";
     const st = p.n ? `${p.n} ${T("boards")}${p.imp != null ? " · " + (p.imp > 0 ? "+" : "") + p.imp + " IMP" : p.mp != null ? " · " + p.mp + "%" : ""}` : "";
     return [s, st].filter(Boolean).join(" · ");
   }

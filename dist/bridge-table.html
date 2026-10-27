@@ -8790,7 +8790,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 283;
+const APP_V = 284;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10480,7 +10480,7 @@ function titleOf(n) { return n >= 5000 ? 'Grandmaster' : n >= 2000 ? 'Master' : 
 const CONV_SHORT = { rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
 function convLine(p) {
   if (p.cline && p.cline.trim()) return esc(p.cline.trim());   // the player wrote it themselves
-  const y = p.sys ? E.sysOf(p.sys) : null;
+  const y = p.sys && p.sys !== 'none' ? E.sysOf(p.sys) : null;
   const head = y ? [{ twoone: '2/1', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish Club' }[y.k] || y.k, y.maj5 ? '5-card majors' : '4-card majors', '1NT ' + y.nt[0] + '-' + y.nt[1]] : [];
   const on = p.conv ? Object.keys(CONV_SHORT).filter(k => p.conv[k]).map(k => CONV_SHORT[k]) : [];
   return esc([...head, ...on].join(', '));
@@ -11979,8 +11979,8 @@ setTimeout(installAsk, 1500);
    own card. Returns true when it asked. */
 function cardReset() {
   if (SET.cardV === 1 || !myNm() || online()) return false;
-  SET.sys = 'none'; SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.practice = ''; SET.cardV = 1;
-  Store.saveSettings(SET); save(); render();
+  SET.sys = 'none'; SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.practice = ''; SET.cline = ''; SET.cardV = 1;
+  Store.saveSettings(SET); save(); render(); if (typeof Net !== 'undefined') Net.shareInfo();
   const ask = () => { if (ui.overlay && !/^card(sys|conv)$/.test(ui.overlay)) { setTimeout(ask, 1500); return; } if (!ui.overlay) showCardSys(); };
   ask(); return true;
 }
@@ -12127,7 +12127,7 @@ const Net = (() => {
   function prof() {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
-    return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
+    return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, cardV: SET.cardV === 1 ? 1 : 0, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
       lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', club: String(SET.club || '').trim().slice(0, 24), ...ratingOf(HIST) };   // the player card: level, country, a few words
   }
   /* the rating: 1500 plus 150 × the IMPs won against the robot field over the last 200 scored boards, shrunk for a
@@ -12166,13 +12166,15 @@ const Net = (() => {
   const num = v => v == null || !isFinite(+v) ? null : Math.round(+v * 100) / 100;
   function cleanProf(q, conv) {
     if (!q || typeof q !== 'object') return null;
+    // a card from before the one-time new card (October 2026) is not shown: no system, conventions or card line
+    if (q.cardV !== 1) q = { ...q, sys: undefined, conv: undefined, cline: '' };
     return { n: +q.n || 0, imp: num(q.imp), mp: num(q.mp), sys: typeof q.sys === 'string' ? q.sys.slice(0, 12) : undefined,
       conv: conv && q.conv && typeof q.conv === 'object' ? Object.fromEntries(E.CONVS.map(c => [c.k, !!q.conv[c.k]])) : undefined,
       per: Array.isArray(q.per) ? q.per.slice(0, 5).map(r => Array.isArray(r) ? [+r[0] || 0, num(r[1]), num(r[2])] : [0, null, null]) : undefined,
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
       joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
-      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
+      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", cardV: q.cardV === 1 ? 1 : 0, club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   // a board being played (bidding or card play): a finished board left on the screen does not count, nor the home page
@@ -12196,7 +12198,7 @@ const Net = (() => {
   const sysShort = p => p && p.sys ? ({ twoone: '2/1', sayc: 'SAYC', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' })[p.sys] || '' : '';
   function profTxt(p) {
     if (!p) return "";
-    const s = p.sys ? ({ twoone: "2/1", sayc: "SAYC", acol: "Acol", sef: "SEF", precision: "Precision", polish: "Polish" })[p.sys] || "" : "";
+    const s = p.sys && p.cardV === 1 ? ({ twoone: "2/1", sayc: "SAYC", acol: "Acol", sef: "SEF", precision: "Precision", polish: "Polish" })[p.sys] || "" : "";
     const st = p.n ? `${p.n} ${T("boards")}${p.imp != null ? " · " + (p.imp > 0 ? "+" : "") + p.imp + " IMP" : p.mp != null ? " · " + p.mp + "%" : ""}` : "";
     return [s, st].filter(Boolean).join(" · ");
   }
