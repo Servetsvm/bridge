@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 277;
+const APP_V = 278;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2762,6 +2762,7 @@ async function pinHash(name, pin) {
 const needGate = () => typeof Net !== 'undefined' && (!myNm() || !SET.pinH || SET.pinFor !== Net.nameKey(myNm()));
 function showGate(rename) {
   ui.gateRename = !!rename;
+  { let r = null; try { r = localStorage.getItem('bridge-removed'); localStorage.removeItem('bridge-removed'); } catch (e) {} if (r) ui.gateErr = T('The name {0} was removed by the administrator. Choose a name to play.', r); }
   const mode = ui.gateMode || 'new';
   const keep = id => $(id) ? $(id).value : '';
   const nm = $('gName') ? keep('gName') : rename ? '' : myNm();
@@ -2805,6 +2806,12 @@ async function gateGo() {
   // older version's log-out) is put aside on the device, not lost, and not added to this account
   else if (!ui.gateRename && HIST.length) { acctStash('_kept' + Date.now()); acctLoad(null); back = true; }
   gateDone(name, h, back);
+}
+// the administrator removed this device's name: signed out, with nothing of that name kept here; the name screen says why
+function nameRemoved(name) {
+  try { localStorage.removeItem('bridge-table-name'); localStorage.setItem('bridge-removed', String(name).slice(0, 20)); } catch (e) {}
+  acctLoad(null); SET.pinH = null; SET.pinFor = null; Store.saveSettings(SET); save();
+  location.reload();
 }
 function gateDone(name, h, back) {
   try { localStorage.setItem('bridge-table-name', name); } catch (e) {}

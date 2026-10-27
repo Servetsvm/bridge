@@ -655,9 +655,9 @@ const Net = (() => {
       const name = myName(); if (st.out || !Cloud.on || !name || !SET.pinH) return;
       const w = st.on ? 'table' : G && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // a finished board left on the screen counts as the lobby
       try {
-        // a name chosen before the database existed is registered now; if someone else holds it with another PIN,
-        // this player chooses again
-        if (!(await Cloud.exists(name))) await Cloud.claim(name, SET.pinH);
+        // a name no longer in the database was removed by the administrator: this device signs out (it used to take
+        // the name again, for names chosen before the database existed; they are all in it now)
+        if (!(await Cloud.exists(name))) { if (typeof nameRemoved === 'function' && !st.on) nameRemoved(name); return; }
         if (!(await Cloud.session(name, SET.pinH))) {
           if (st.claimed) return;   // was signed in already: a passing error, not a wrong PIN
           { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
