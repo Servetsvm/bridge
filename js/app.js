@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 287;
+const APP_V = 288;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -108,10 +108,30 @@ function langFromCountry() {
     SET.lang = v; applyLang(); Store.saveSettings(SET); save(); render();
   });
 }
+/* the season: results played before it are kept aside on the device (bridge-hist-arch), not shown or counted */
+const SEASON_TS = 1793116092089;   // 27 October 2026
+const oldSeason = h => !h || !(h.ts >= SEASON_TS);
+function seasonArchive(L) {
+  if (!L || !L.length) return;
+  try { const a = JSON.parse(localStorage.getItem('bridge-hist-arch') || '[]'), have = new Set(a.map(h => h && h.id)); for (const h of L) if (h && !have.has(h.id)) a.push(h); localStorage.setItem('bridge-hist-arch', JSON.stringify(a)); }
+  catch (e) { try { localStorage.setItem('bridge-hist-arch-' + Date.now(), JSON.stringify(L.map(h => h && { ...h, deal: undefined, auc: undefined, pl: undefined, fieldList: undefined }))); } catch (x) {} }
+}
+function seasonStart() {
+  const old = HIST.filter(oldSeason);
+  if (old.length) { seasonArchive(old); HIST = HIST.filter(h => !oldSeason(h)); }
+  // once on this device: its tournament list and the leaderboard it has seen start again
+  let done = null; try { done = localStorage.getItem('bridge-season'); } catch (e) {}
+  if (done !== String(SEASON_TS)) {
+    try { const t = localStorage.getItem('bridge-tours'); if (t) localStorage.setItem('bridge-tours-arch', t); localStorage.removeItem('bridge-tours'); localStorage.removeItem('bridge-rated'); localStorage.setItem('bridge-season', String(SEASON_TS)); } catch (e) {}
+    if (typeof Net !== 'undefined') { Net.st.rated = {}; Net.st.tours = {}; Net.st.tres = {}; }   // already read by the lobby
+  }
+  if (old.length) save();
+}
 function load(d) {
   d = d || Store.loadLocal();
   if (d) { SET = Object.assign(SET, d.SET || {}); G = d.G || null; HIST = d.HIST || []; BOARD = d.BOARD || 0; }
   if (G && G.phase === "lobby") G = null; // an online waiting room is not restored after a restart
+  seasonStart();
   SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) }; CARD_CK = cardCk();
   if (!SET.lang) { SET.lang = detectLang(); SET.langAuto = true; }
   applyLang();
@@ -124,7 +144,7 @@ function load(d) {
 function mergeCloud(recs, settings) {
   const have = new Set(HIST.map(h => h.id)), inCloud = new Set(recs.map(r => r.id));
   for (const h of HIST) if (!inCloud.has(h.id)) Store.saveRec(h);
-  for (const r of recs) if (!have.has(r.id)) HIST.push(r);
+  for (const r of recs) if (!have.has(r.id) && !oldSeason(r)) HIST.push(r);   // not the boards from before the season
   HIST.sort((a, b) => (a.ts || 0) - (b.ts || 0));
   if (settings) { SET = Object.assign(SET, settings); SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) }; }
   if (SET.seatHome != null) { SET.seat = SET.seatHome; delete SET.seatHome; }   // the seat you had before an online table moved you (the app was closed there)
@@ -141,7 +161,7 @@ function syncNow(quiet) {
   syncState.msg = "Syncing…"; if (ui.overlay === "set") showSettings();
   GitSync.sync({ hist: HIST, seen: [...SEEN] }).then(m => {
     if (!m) return;
-    HIST = m.hist; SEEN = new Set(m.seen); saveSeen();
+    HIST = m.hist.filter(h => !oldSeason(h)); SEEN = new Set(m.seen); saveSeen();
     BOARD = Math.max(BOARD, ...HIST.map(h => h.board || 0));
     syncState.msg = "Synced " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     save(); renderBar(); if (ui.overlay === "set") showSettings(); else if (ui.overlay === "res") showResults();
@@ -1212,6 +1232,7 @@ function acctLoad(k) {
   const dev = {}; for (const x of DEVICE_SET) if (SET[x] !== undefined) dev[x] = SET[x];
   SET = Object.assign({ style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } }, a ? a.set : {}, dev);
   HIST = a ? a.hist || [] : []; BOARD = a ? a.board || 0 : 0; G = idleG(); ui.saved = a ? a.saved || null : null;
+  seasonStart();   // a player put away before the season: their old boards are kept aside too
   for (const x of ACCT_LS) { try { if (a && a.ls && a.ls[x] != null) localStorage.setItem(x, a.ls[x]); else localStorage.removeItem(x); } catch (e) {} }
   SET.cloudSet = 0;
   return !!a;

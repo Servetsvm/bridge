@@ -1049,8 +1049,11 @@ const Net = (() => {
     syncing = (async () => {
       const path = 'data/' + SET.pinH;
       let remote = null; try { if (!(await Cloud.session(myName(), SET.pinH))) return; remote = await Cloud.get(path); } catch (e) { return; }
-      const rh = remote && Array.isArray(remote.hist) ? remote.hist.filter(Boolean) : [];
-      const map = new Map(rh.map(r => [r.id, r])); let localNew = false;
+      let rh = remote && Array.isArray(remote.hist) ? remote.hist.filter(Boolean) : [];
+      // boards from before the season stay out (kept aside on this device); the database is written again without them
+      const rOld = typeof oldSeason === 'function' ? rh.filter(oldSeason) : [];
+      if (rOld.length) { seasonArchive(rOld); rh = rh.filter(h => !oldSeason(h)); }
+      const map = new Map(rh.map(r => [r.id, r])); let localNew = rOld.length > 0;
       for (const l of HIST) { const r = map.get(l.id); if (!r) { map.set(l.id, l); localNew = true; continue; } const m = { ...r, ...l }; if (l.imp == null && r.imp != null) { m.imp = r.imp; m.mp = r.mp; } map.set(l.id, m); if (l.imp != null && r.imp == null) localNew = true; }
       const merged = [...map.values()].sort((a, b) => (a.ts || 0) - (b.ts || 0));
       const gotNew = merged.length > HIST.length;
