@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 281;
+const APP_V = 282;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2481,8 +2481,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
-  if (t.id === 'caStd' || t.id === 'caMake') { cardAskDone(t.id === 'caMake'); return; }
-  if (t.dataset.casys) { SET.sys = t.dataset.casys; SET.conv = { ...E.sysOf(SET.sys).conv }; SET.practice = ''; Store.saveSettings(SET); save(); render(); showCardConv(); return; }
+  if (t.dataset.casys) { SET.sys = t.dataset.casys; SET.practice = ''; Store.saveSettings(SET); save(); render(); showCardConv(); return; }
   if (t.id === 'caBack') { showCardSys(); return; }
   if (t.id === 'caDone') { closeOv(); render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); checkSharedDeal(); setTimeout(installAsk, 800); return; }
   if (t.id === 'rbNoteSend') { const e = HIST.find(h => String(h.id) === t.dataset.id), txt = ($('rbNote') || {}).value || '';
@@ -2838,19 +2837,9 @@ function gateDone(name, h, back) {
   Net.st.claimed = true; Net.shareInfo(); Net.Cloud.beat(); render();
   SET.cloudSet = 0; Net.cloudSync();   // your results and settings from your other devices
   flash(T('Welcome, {0}!', name), 2000);
-  if (ui.askCard) { ui.askCard = false; showCardAsk(); return; }
+  if (ui.askCard) { ui.askCard = false; showCardSys(); return; }
   checkSharedDeal();
   setTimeout(installAsk, 800);   // a new player who came through a shared link: install the app now?
-}
-/* a new player's first question: play standard SAYC, or make their own convention card (their robot partner plays it) */
-function showCardAsk() {
-  openOv('cardask', `<h2>📋 ${T('Your convention card')}</h2><div class="muted">${T('Which system do you and your robot partner play?')}</div>
-    <div class="row2"><button class="btn new" id="caStd">${T('Standard (SAYC)')}</button><button class="btn gold" id="caMake">📋 ${T('Make my convention card')}</button></div>`);
-}
-function cardAskDone(make) {
-  closeOv();
-  if (!make) { SET.sys = 'sayc'; SET.conv = { ...E.sysOf('sayc').conv }; SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(E.sysOf('sayc').n + ' — ' + T('your robot partner bids it too'), 2400); checkSharedDeal(); setTimeout(installAsk, 800); return; }
-  showCardSys();
 }
 // drag the small window by its top bar
 document.addEventListener('pointerdown', e => {
@@ -3208,7 +3197,7 @@ function cardReset() {
   if (SET.cardV === 1 || !myNm() || online()) return false;
   SET.sys = 'none'; SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.practice = ''; SET.cardV = 1;
   Store.saveSettings(SET); save(); render();
-  const ask = () => { if (ui.overlay && ui.overlay !== 'cardask') { setTimeout(ask, 1500); return; } if (!ui.overlay) showCardAsk(); };
+  const ask = () => { if (ui.overlay && !/^card(sys|conv)$/.test(ui.overlay)) { setTimeout(ask, 1500); return; } if (!ui.overlay) showCardSys(); };
   ask(); return true;
 }
 setTimeout(cardReset, 20000);   // normally right after the database was asked (Net.cloudSync); this when it cannot be reached
@@ -3226,10 +3215,11 @@ async function instGo() {
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 
-// a new player's own card, step 1: the base system (each with a few words), then step 2: the conventions
+// a player's own card (a new player, and everyone once): step 1 the base system (each with a few words), then step 2
+// the conventions, none ticked until the player ticks them
 function showCardSys() {
   const cur = E.sysOf(SET.sys);
-  openOv('cardsys', `<h2>1. ${T('Base system')}</h2><div class="muted">${T('Your robot partner bids it too.')}</div>
+  openOv('cardsys', `<h2>📋 ${T('Your convention card')}</h2><h3>1. ${T('Base system')}</h3><div class="muted">${T('Your robot partner bids it too.')}</div>
     <div class="cardsys">${E.SYSTEMS.map(x => `<button class="btn${sysIs(x.k) ? ' new' : ''}" data-casys="${x.k}"><b>${esc(x.n)}</b><small>${symText(x.d)}</small></button>`).join('')}</div>`);
 }
 function showCardConv() {
