@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 280;
+const APP_V = 281;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -71,7 +71,12 @@ const SEEN_KEY = 'bridge-table-seen';
 let SEEN = new Set();
 function loadSeen() { try { SEEN = new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch (e) { SEEN = new Set(); } }
 function saveSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify([...SEEN].slice(-30000))); } catch (e) {} }
+// the convention card's time: set when the base system or a convention changes, so the newer card wins across devices
+var CARD_CK = null;
+function cardSeen() { CARD_CK = cardCk(); }
+const cardCk = () => (SET.sys || '') + JSON.stringify(SET.conv || {});
 function save() {
+  { const ck = cardCk(); if (CARD_CK !== null && ck !== CARD_CK) SET.cardTs = Date.now(); CARD_CK = ck; }
   if (online() && Net.host) Net.broadcast();
   const slim = HIST.map((h, i) => (i < HIST.length - 60 ? { ...h, deal: undefined, fieldList: undefined, auc: undefined, pl: undefined } : h));
   Store.saveLocal({ SET, G: guest() ? Net.st.savedG : (G && G.phase === "idle" ? ui.saved || null : G), HIST: slim, BOARD });
@@ -107,7 +112,7 @@ function load(d) {
   d = d || Store.loadLocal();
   if (d) { SET = Object.assign(SET, d.SET || {}); G = d.G || null; HIST = d.HIST || []; BOARD = d.BOARD || 0; }
   if (G && G.phase === "lobby") G = null; // an online waiting room is not restored after a restart
-  SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) };
+  SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) }; CARD_CK = cardCk();
   if (!SET.lang) { SET.lang = detectLang(); SET.langAuto = true; }
   applyLang();
   // the player card's "joined" date (the first day this device played; from the oldest board for old players) and logins
@@ -2816,7 +2821,7 @@ async function gateGo() {
   else if (!ui.gateRename && HIST.length) { acctStash('_kept' + Date.now()); acctLoad(null); back = true; }
   // a new player's card is empty until they choose: no base system, no conventions (it used to be the app's 2/1 with
   // every convention on, which looked like the administrator's card)
-  if (mode === 'new' && (!ui.gateRename || switched) && !own) { SET.sys = 'none'; SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.practice = ''; Store.saveSettings(SET); save(); }
+  if (mode === 'new' && (!ui.gateRename || switched) && !own) { SET.sys = 'none'; SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.practice = ''; SET.cardV = 1; Store.saveSettings(SET); save(); }
   gateDone(name, h, back || switched);   // another player: the page is read again for them
 }
 // the administrator removed this device's name: signed out, with nothing of that name kept here; the name screen says why
@@ -3197,6 +3202,16 @@ function installAsk() {
     <div class="row2"><button class="btn new" id="instGo">📲 ${T('Install')}</button><button class="btn" id="oClose">${T('Not now')}</button></div>`);
 }
 setTimeout(installAsk, 1500);
+/* once for every player (October 2026): the base system and the conventions are emptied and each player makes their
+   own card. Returns true when it asked. */
+function cardReset() {
+  if (SET.cardV === 1 || !myNm() || online()) return false;
+  SET.sys = 'none'; SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.practice = ''; SET.cardV = 1;
+  Store.saveSettings(SET); save(); render();
+  const ask = () => { if (ui.overlay && ui.overlay !== 'cardask') { setTimeout(ask, 1500); return; } if (!ui.overlay) showCardAsk(); };
+  ask(); return true;
+}
+setTimeout(cardReset, 20000);   // normally right after the database was asked (Net.cloudSync); this when it cannot be reached
 async function instGo() {
   if (!INST && !isIOS()) {
     // Chrome has not offered its install window (yet): the browser menu does it

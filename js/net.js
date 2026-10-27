@@ -1031,7 +1031,7 @@ const Net = (() => {
 
   /* your results on every device: kept in the database under a key made from your name and PIN (only someone who
      knows both can find them). Boards from both sides are merged; your settings come along to a new device. */
-  const SYNC_KEYS = ['sys', 'conv', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN', 'pracS', 'pracHint'];
+  const SYNC_KEYS = ['sys', 'conv', 'cardV', 'cardTs', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN', 'pracS', 'pracHint'];
   let syncing = null, syncT = null;
   async function cloudSync() {
     if (!Cloud.on || !SET.pinH || syncing) return syncing;
@@ -1047,11 +1047,15 @@ const Net = (() => {
       // settings: a device that has not had them yet takes them from the database
       if (remote && remote.set && !SET.cloudSet) { for (const k of SYNC_KEYS) if (remote.set[k] !== undefined) SET[k] = remote.set[k]; SET.cloudSet = 1; if (typeof applyLang === 'function') applyLang(); }
       if (gotNew || (remote && remote.set && SET.cloudSet === 1)) { SET.cloudSet = 2; Store.saveSettings(SET); save(); render(); }
-      if (localNew || !remote) {
+      // the convention card: the newer one wins (made on another device: taken; made here: sent)
+      const rs = remote && remote.set, rt = (rs && rs.cardTs) || 0;
+      if (rt > (SET.cardTs || 0)) { SET.sys = rs.sys; SET.conv = { ...E.ALL_ON, ...(rs.conv || {}) }; SET.cardV = rs.cardV; SET.cardTs = rt; SET.practice = ''; if (typeof cardSeen === 'function') cardSeen(); Store.saveSettings(SET); save(); render(); }
+      if (localNew || !remote || (SET.cardTs || 0) > rt) {
         const set = {}; for (const k of SYNC_KEYS) if (SET[k] !== undefined) set[k] = SET[k];
         try { await Cloud.put(path, { v: 1, updated: Date.now(), name: myName(), hist: merged.slice(-400).map(Store.compact), set }); } catch (e) {}
         SET.cloudSet = 2;
       }
+      if (typeof cardReset === 'function' && cardReset()) cloudSyncSoon();   // the one-time new card, once the database's card is known (and then sent)
     })().finally(() => { syncing = null; });
     return syncing;
   }
