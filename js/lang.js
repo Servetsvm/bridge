@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Welcome": "Hoş geldin", "Good morning, {0}": "Günaydın, {0}", "Good afternoon, {0}": "İyi günler, {0}", "Good evening, {0}": "İyi akşamlar, {0}", "Bid and play with three robots; every board counts for your rating.": "Üç robotla deklere ver ve oyna; her el puanına sayılır.", "Play with friends; robots take the empty seats.": "Arkadaşlarınla oyna; boş yerlere robot oturur.", "Club tournaments with movements and results.": "Hareketli ve sonuçlu kulüp turnuvaları.", "Real cards at real tables; the app keeps the score.": "Gerçek kartlarla gerçek masalarda; skoru uygulama tutar.", "Home page": "Ana sayfa", "New": "Yeni", "Classic": "Klasik",
     "own choice": "kendi seçimi", "measured": "ölçülen", "measured after {0} boards ({1} so far)": "ölçülen düzey {0} borddan sonra (şimdiye kadar {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Puandan ölçülür: robot masalarına karşı son 200 bord.",
     "No base system chosen yet.": "Henüz temel sistem seçilmedi.",
     "The name {0} was removed by the administrator. Choose a name to play.": "{0} ismi yönetici tarafından silindi. Oynamak için bir isim seç.",
@@ -397,6 +398,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Welcome": "Velkommen", "Good morning, {0}": "God morgen, {0}", "Good afternoon, {0}": "God dag, {0}", "Good evening, {0}": "God kveld, {0}", "Bid and play with three robots; every board counts for your rating.": "Meld og spill med tre roboter; hvert spill teller på ratingen din.", "Play with friends; robots take the empty seats.": "Spill med venner; roboter tar de tomme plassene.", "Club tournaments with movements and results.": "Klubbturneringer med movement og resultater.", "Real cards at real tables; the app keeps the score.": "Ekte kort ved ekte bord; appen fører regnskapet.", "Home page": "Startside", "New": "Ny", "Classic": "Klassisk",
     "own choice": "eget valg", "measured": "målt", "measured after {0} boards ({1} so far)": "måles etter {0} spill ({1} så langt)", "Measured from the rating: the last 200 boards against the robot tables.": "Målt fra ratingen: de siste 200 spillene mot robotbordene.",
     "No base system chosen yet.": "Ingen grunnsystem valgt ennå.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Navnet {0} ble fjernet av administratoren. Velg et navn for å spille.",
@@ -791,6 +793,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Welcome": "Bienvenido", "Good morning, {0}": "Buenos días, {0}", "Good afternoon, {0}": "Buenas tardes, {0}", "Good evening, {0}": "Buenas noches, {0}", "Bid and play with three robots; every board counts for your rating.": "Subasta y juega con tres robots; cada mano cuenta para tu puntuación.", "Play with friends; robots take the empty seats.": "Juega con amigos; los robots ocupan los asientos libres.", "Club tournaments with movements and results.": "Torneos de club con movimientos y resultados.", "Real cards at real tables; the app keeps the score.": "Cartas reales en mesas reales; la app lleva la puntuación.", "Home page": "Página de inicio", "New": "Nueva", "Classic": "Clásica",
     "own choice": "elección propia", "measured": "medido", "measured after {0} boards ({1} so far)": "se mide tras {0} manos ({1} hasta ahora)", "Measured from the rating: the last 200 boards against the robot tables.": "Medido a partir de la puntuación: las últimas 200 manos contra las mesas de robots.",
     "No base system chosen yet.": "Aún no has elegido un sistema base.",
     "The name {0} was removed by the administrator. Choose a name to play.": "El administrador eliminó el nombre {0}. Elige un nombre para jugar.",
@@ -1213,6 +1216,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Welcome": "Bienvenue", "Good morning, {0}": "Bonjour, {0}", "Good afternoon, {0}": "Bon après-midi, {0}", "Good evening, {0}": "Bonsoir, {0}", "Bid and play with three robots; every board counts for your rating.": "Enchérissez et jouez avec trois robots ; chaque donne compte pour votre classement.", "Play with friends; robots take the empty seats.": "Jouez avec des amis ; les robots prennent les places libres.", "Club tournaments with movements and results.": "Tournois de club avec mouvements et résultats.", "Real cards at real tables; the app keeps the score.": "De vraies cartes à de vraies tables ; l’appli tient la marque.", "Home page": "Page d’accueil", "New": "Nouvelle", "Classic": "Classique",
     "own choice": "choix personnel", "measured": "mesuré", "measured after {0} boards ({1} so far)": "mesuré après {0} donnes ({1} jusqu’ici)", "Measured from the rating: the last 200 boards against the robot tables.": "Mesuré à partir du classement : les 200 dernières donnes contre les tables de robots.",
     "No base system chosen yet.": "Aucun système de base choisi pour l’instant.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Le nom {0} a été supprimé par l’administrateur. Choisissez un nom pour jouer.",
@@ -1635,6 +1639,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Welcome": "Benvenuto", "Good morning, {0}": "Buongiorno, {0}", "Good afternoon, {0}": "Buon pomeriggio, {0}", "Good evening, {0}": "Buonasera, {0}", "Bid and play with three robots; every board counts for your rating.": "Licita e gioca con tre robot; ogni mano conta per il tuo punteggio.", "Play with friends; robots take the empty seats.": "Gioca con gli amici; i robot occupano i posti liberi.", "Club tournaments with movements and results.": "Tornei di club con movimenti e risultati.", "Real cards at real tables; the app keeps the score.": "Carte vere a tavoli veri; l’app tiene il punteggio.", "Home page": "Pagina iniziale", "New": "Nuova", "Classic": "Classica",
     "own choice": "scelta propria", "measured": "misurato", "measured after {0} boards ({1} so far)": "misurato dopo {0} mani ({1} finora)", "Measured from the rating: the last 200 boards against the robot tables.": "Misurato dal punteggio: le ultime 200 mani contro i tavoli dei robot.",
     "No base system chosen yet.": "Nessun sistema base scelto finora.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Il nome {0} è stato rimosso dall’amministratore. Scegli un nome per giocare.",
@@ -2057,6 +2062,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Welcome": "Willkommen", "Good morning, {0}": "Guten Morgen, {0}", "Good afternoon, {0}": "Guten Tag, {0}", "Good evening, {0}": "Guten Abend, {0}", "Bid and play with three robots; every board counts for your rating.": "Reizen und spielen mit drei Robotern; jedes Board zählt für deine Wertung.", "Play with friends; robots take the empty seats.": "Spiele mit Freunden; Roboter nehmen die freien Plätze.", "Club tournaments with movements and results.": "Clubturniere mit Movements und Ergebnissen.", "Real cards at real tables; the app keeps the score.": "Echte Karten an echten Tischen; die App führt die Wertung.", "Home page": "Startseite", "New": "Neu", "Classic": "Klassisch",
     "own choice": "eigene Wahl", "measured": "gemessen", "measured after {0} boards ({1} so far)": "gemessen ab {0} Boards (bisher {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Aus der Wertung gemessen: die letzten 200 Boards gegen die Robotertische.",
     "No base system chosen yet.": "Noch kein Grundsystem gewählt.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Der Name {0} wurde vom Administrator entfernt. Wähle einen Namen, um zu spielen.",
@@ -2479,6 +2485,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Welcome": "Добро пожаловать", "Good morning, {0}": "Доброе утро, {0}", "Good afternoon, {0}": "Добрый день, {0}", "Good evening, {0}": "Добрый вечер, {0}", "Bid and play with three robots; every board counts for your rating.": "Торгуйтесь и играйте с тремя роботами; каждая сдача идёт в ваш рейтинг.", "Play with friends; robots take the empty seats.": "Играйте с друзьями; свободные места займут роботы.", "Club tournaments with movements and results.": "Клубные турниры с перемещениями и результатами.", "Real cards at real tables; the app keeps the score.": "Настоящие карты за настоящими столами; счёт ведёт приложение.", "Home page": "Главная страница", "New": "Новая", "Classic": "Классическая",
     "own choice": "свой выбор", "measured": "по игре", "measured after {0} boards ({1} so far)": "оценка после {0} сдач (пока {1})", "Measured from the rating: the last 200 boards against the robot tables.": "По рейтингу: последние 200 сдач против столов роботов.",
     "No base system chosen yet.": "Базовая система ещё не выбрана.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Имя {0} удалено администратором. Выберите имя, чтобы играть.",
@@ -2901,6 +2908,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Welcome": "Witaj", "Good morning, {0}": "Dzień dobry, {0}", "Good afternoon, {0}": "Dzień dobry, {0}", "Good evening, {0}": "Dobry wieczór, {0}", "Bid and play with three robots; every board counts for your rating.": "Licytuj i graj z trzema robotami; każde rozdanie liczy się do rankingu.", "Play with friends; robots take the empty seats.": "Graj ze znajomymi; roboty zajmą wolne miejsca.", "Club tournaments with movements and results.": "Turnieje klubowe z ruchami i wynikami.", "Real cards at real tables; the app keeps the score.": "Prawdziwe karty przy prawdziwych stołach; aplikacja liczy wyniki.", "Home page": "Strona główna", "New": "Nowa", "Classic": "Klasyczna",
     "own choice": "własny wybór", "measured": "zmierzony", "measured after {0} boards ({1} so far)": "mierzony po {0} rozdaniach (na razie {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Mierzony z rankingu: ostatnie 200 rozdań przeciw stołom robotów.",
     "No base system chosen yet.": "Nie wybrano jeszcze systemu bazowego.",
     "The name {0} was removed by the administrator. Choose a name to play.": "Nazwa {0} została usunięta przez administratora. Wybierz nazwę, aby grać.",
@@ -3323,6 +3331,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Welcome": "欢迎", "Good morning, {0}": "早上好，{0}", "Good afternoon, {0}": "下午好，{0}", "Good evening, {0}": "晚上好，{0}", "Bid and play with three robots; every board counts for your rating.": "与三个机器人叫牌和打牌；每副牌都计入你的积分。", "Play with friends; robots take the empty seats.": "与朋友一起打；空位由机器人补上。", "Club tournaments with movements and results.": "带轮转和成绩的俱乐部比赛。", "Real cards at real tables; the app keeps the score.": "真牌真桌，应用负责记分。", "Home page": "主页", "New": "新版", "Classic": "经典",
     "own choice": "自选", "measured": "实测", "measured after {0} boards ({1} so far)": "满 {0} 副牌后显示实测（目前 {1}）", "Measured from the rating: the last 200 boards against the robot tables.": "根据积分测算：最近 200 副牌对机器人牌桌的成绩。",
     "No base system chosen yet.": "尚未选择基本体系。",
     "The name {0} was removed by the administrator. Choose a name to play.": "名字 {0} 已被管理员删除。请选择一个名字来打牌。",
