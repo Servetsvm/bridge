@@ -1291,6 +1291,7 @@ function setPractice(k) {
 function startPractice(k) { setPractice(k); }
 function stopPractice() { SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(T('Practice ended — normal random deals'), 2000); }
 function homeShell() {
+  if (SET.homeV !== 'classic') return homeShell2();
   const langs = LANGS;
   const sec = (k, label) => `<button class="hsec" data-hsec="${k}">${label}</button>`;
   return `<div class="home">
@@ -1315,6 +1316,42 @@ function homeShell() {
     <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
       </div></div><div class="composer"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><textarea class="cmsg" id="lMsg" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="lSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></aside>
   </div><div id="hSheet"></div></div>`;
+}
+// the new home page: the you strip, the Play card (a fan of four cards) with three tiles, the practice box, the open
+// tables; the lobby chat beside them (under them on a phone). Same ids as the classic page.
+function homeShell2() {
+  const fan = [['A', '♠', ''], ['K', '♥', ' rd'], ['Q', '♦', ' rd'], ['J', '♣', '']].map(([r, su, c], i) => `<span class="h2c${c}" style="--i:${i}"><b>${r}</b><i>${su}</i></span>`).join('');
+  const tile = (attrs, ico, title, sub) => `<${attrs.startsWith('href') ? 'a' : 'button'} class="h2tile" ${attrs}><span class="h2ti" aria-hidden="true">${ico}</span><b>${title}</b><small>${sub}</small></${attrs.startsWith('href') ? 'a' : 'button'}>`;
+  return `<div class="home v2">
+  <header class="h2head"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
+    <div class="h2tools"><label class="hlang" title="${T('Language')}"><span aria-hidden="true">🌐</span><select id="hLang" class="sel" aria-label="${T('Language')}">${LANGS.map(([v, l]) => `<option value="${v}" ${SET.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico hwa" id="bShareApp" title="${T('Send the app')}" aria-label="${T('Send the app')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
+  <div class="hgrid">
+    <section class="hmain">
+      <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2greet" id="hGreet"></div><div class="h2chips" id="hMe"></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
+      <div class="h2play">
+        <div class="h2fan" aria-hidden="true">${fan}</div>
+        <div class="h2ptx"><h2>${T('Play offline')}</h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button></div>
+      </div>
+      <div class="h2tiles">
+        ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
+        ${tile('href="bridgegate/"', '🏆', T('Tournaments'), T('Club tournaments with movements and results.'))}
+        ${tile('id="sbOpen" type="button"', '🃏', T('Social bridge'), T('Real cards at real tables; the app keeps the score.'))}
+      </div>
+      <div id="hPend"></div>
+      <div class="hcard prac" id="hPrac"></div>
+      <div id="hSec"></div>
+      <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
+    </section>
+    <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
+      </div></div><div class="composer"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><textarea class="cmsg" id="lMsg" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="lSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></aside>
+  </div><div id="hSheet"></div></div>`;
+}
+// the greeting of the you strip, by the time of day
+function greetTxt() {
+  const h = new Date().getHours(), n = myNm();
+  if (!n) return T('Welcome');
+  return T(h < 5 ? 'Good evening, {0}' : h < 12 ? 'Good morning, {0}' : h < 18 ? 'Good afternoon, {0}' : 'Good evening, {0}', esc(n));
 }
 // the section opened with the buttons at the top of the home page (tournaments, our card, players, chat on a phone)
 function homeSection(k) {
@@ -1343,13 +1380,21 @@ function convCardText() {
 }
 function renderHome() {
   const h = $('home'), N = typeof Net !== 'undefined' ? Net : null;
-  if (h.dataset.lang !== SET.lang) { h.dataset.lang = SET.lang; h.innerHTML = homeShell(); }
+  const hv = SET.lang + (SET.homeV === 'classic' ? ':c' : ':n');
+  if (h.dataset.lang !== hv) { h.dataset.lang = hv; h.innerHTML = homeShell(); }
+  document.body.classList.toggle('homev2', SET.homeV !== 'classic');
   const set = (id, html) => { const el = $(id); if (el && el.innerHTML !== html) { el.innerHTML = html; return true; } return false; };
   const cont = ui.saved && ui.saved.phase !== 'done';
-  set('hGo', cont ? T('Continue') : '🤖 ' + T('Play offline'));
+  set('hGo', $('hGoSub') ? '▶ ' + T(cont ? 'Continue' : 'Start') : cont ? T('Continue') : '🤖 ' + T('Play offline'));   // the new page names the card "Play offline"; its button starts
   set('hPrac', pracHtml());   // practise a convention (the heart of the page)
   set('hInst', instHtml());
-  { const b = $('hNameBtn'), h = (myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`) + ' ✏️'; if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name, after a change on your card
+  { const b = $('hNameBtn'), v2 = b && b.classList.contains('h2name'), nm = myNm(), p = typeof Net !== 'undefined' ? Net.prof() : null;
+    const h = v2 ? `<span class="h2av">${p && p.av ? p.av : esc(((nm || '?').trim()[0] || '?').toUpperCase())}</span>` : (nm ? esc(nm) : `<i>${T('Name')}</i>`) + ' ✏️';
+    if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name (the new page: your picture or initial), after a change on your card
+  set('hGreet', greetTxt());
+  { const p = typeof Net !== 'undefined' ? Net.prof() : null, m = p && p.rtn ? measuredLvl(p) : '';   // the you strip: rating and the measured level
+    set('hMe', p ? `<span class="h2chip"><small>${T('Rating')}</small><b>${p.rtn ? p.rt : '—'}</b></span>${m ? `<span class="h2chip"><small>${T('measured')}</small><span class="plvl l-${m}">${T(LEVEL_N[m])}</span></span>` : ''}` : ''); }
+  set('hGoSub', cont ? T('Your last board is waiting.') : T('Bid and play with three robots; every board counts for your rating.'));   // your name, after a change on your card
   { const hs = $('hSys'), v = SET.sys || 'twoone'; if (hs && hs.value !== v) hs.value = v; }   // also when it was changed on the convention card
 
   // the daily tournament: your progress and your place so far
@@ -2052,6 +2097,7 @@ function showSettings() {
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
    <div class="grp"><span>${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>
+   <div class="grp"><span>${T('Home page')}</span>${seg('homev', [['new', T('New')], ['classic', T('Classic')]], SET.homeV === 'classic' ? 'classic' : 'new')}</div>
    <div class="grp"><span>${T('Card style')}</span>${seg("style", [["classic", T("Classic tiles")], ["modern", T("Modern fan")]], SET.style || "classic")}</div>
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
    <div class="grp"><span>${T('Scoring')}</span>${seg('mode', [['IMP', 'IMP'], ['MP', T('Matchpoints (%)')]], SET.mode)}</div>
@@ -2562,7 +2608,7 @@ document.addEventListener('click', ev_ => {
     if (seg === 'notify') { setNotify(v === '1'); return; }
     if (seg === 'four') SET.four = v === '1'; if (seg === 'felt') SET.felt = v; if (seg === 'back') SET.back = v;
     if (seg === 'sfx') { SET.sfx = v === '1'; sfx('card'); } if (seg === 'theme') SET.theme = v; if (seg === 'big') SET.big = v === '1';
-    if (seg === "style") SET.style = v;
+    if (seg === "style") SET.style = v; if (seg === 'homev') SET.homeV = v;
     if (seg === "mode") SET.mode = v; if (seg === 'opp') SET.opp = v;
     Store.saveSettings(SET); save(); showSettings(); render(); return;
   }
