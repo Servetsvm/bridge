@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 293;
+const APP_V = 294;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1323,12 +1323,12 @@ function homeShell2() {
   const fan = [['A', '♠', ''], ['K', '♥', ' rd'], ['Q', '♦', ' rd'], ['J', '♣', '']].map(([r, su, c], i) => `<span class="h2c${c}" style="--i:${i}"><b>${r}</b><i>${su}</i></span>`).join('');
   const tile = (attrs, ico, title, sub) => `<${attrs.startsWith('href') ? 'a' : 'button'} class="h2tile" ${attrs}><span class="h2ti" aria-hidden="true">${ico}</span><b>${title}</b><small>${sub}</small></${attrs.startsWith('href') ? 'a' : 'button'}>`;
   return `<div class="home v2">
-  <header class="h2head"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
+  <header class="h2head"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div><button class="h2lobby" data-hsec="chat" title="${T('Lobby chat')}">💬 ${T('Lobby')} <small id="hLobN"></small><b class="h2unr" id="hChatN"></b></button>
     <div class="h2tools"><label class="hlang" title="${T('Language')}"><span aria-hidden="true">🌐</span><select id="hLang" class="sel" aria-label="${T('Language')}">${LANGS.map(([v, l]) => `<option value="${v}" ${SET.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico hwa" id="bShareApp" title="${T('Send the app')}" aria-label="${T('Send the app')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
   <div class="hgrid">
-    <section class="hmain">
-      <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2greet" id="hGreet"></div><div class="h2chips" id="hMe"></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
+    <section class="hmain"><div class="h2cola">
+      <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2chips" id="hMe"></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
       <div class="h2play">
         <div class="h2fan" aria-hidden="true">${fan}</div>
         <div class="h2ptx"><h2>${T('Play offline')}</h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button></div>
@@ -1339,19 +1339,11 @@ function homeShell2() {
         ${tile('id="sbOpen" type="button"', '🃏', T('Social bridge'), T('Real cards at real tables; the app keeps the score.'))}
       </div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>   <!-- the open tables right under the ways to play -->
-      <div id="hPend"></div>
+      </div><div class="h2colb"><div id="hPend"></div>
       <div class="hcard prac" id="hPrac"></div>
       <div id="hSec"></div>
-    </section>
-    <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
-      </div></div><div class="composer"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><textarea class="cmsg" id="lMsg" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="lSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></aside>
+    </div></section>
   </div><div id="hSheet"></div></div>`;
-}
-// the greeting of the you strip, by the time of day
-function greetTxt() {
-  const h = new Date().getHours(), n = myNm();
-  if (!n) return T('Welcome');
-  return T(h < 5 ? 'Good evening, {0}' : h < 12 ? 'Good morning, {0}' : h < 18 ? 'Good afternoon, {0}' : 'Good evening, {0}', esc(n));
 }
 // the section opened with the buttons at the top of the home page (tournaments, our card, players, chat on a phone)
 function homeSection(k) {
@@ -1391,7 +1383,6 @@ function renderHome() {
   { const b = $('hNameBtn'), v2 = b && b.classList.contains('h2name'), nm = myNm(), p = typeof Net !== 'undefined' ? Net.prof() : null;
     const h = v2 ? `<span class="h2av">${p && p.av ? p.av : esc(((nm || '?').trim()[0] || '?').toUpperCase())}</span>` : (nm ? esc(nm) : `<i>${T('Name')}</i>`) + ' ✏️';
     if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name (the new page: your picture or initial), after a change on your card
-  set('hGreet', greetTxt());
   { const p = typeof Net !== 'undefined' ? Net.prof() : null, m = p && p.rtn ? measuredLvl(p) : '';   // the you strip: rating and the measured level
     set('hMe', p ? `<span class="h2chip"><small>${T('Rating')}</small><b>${p.rtn ? p.rt : '—'}</b></span>${m ? `<span class="h2chip"><small>${T('measured')}</small><span class="plvl l-${m}">${T(LEVEL_N[m])}</span></span>` : ''}` : ''); }
   set('hGoSub', cont ? T('Your last board is waiting.') : T('Bid and play with three robots; every board counts for your rating.'));   // your name, after a change on your card
@@ -1427,7 +1418,7 @@ function renderHome() {
     set('hTables', N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
-    set('hCount', T('{0} in the lobby', N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
+    set('hCount', T('{0} in the lobby', N.lobbyCount())); set('hLobN', String(N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
     set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
     if (want === 'chat') N.st.lunread = 0;
     set('hTours', toursHtml()); set('nTours', toursHtml()); updateRcpt();
@@ -2480,7 +2471,7 @@ document.addEventListener('click', ev_ => {
     return;
   }
   // Results: open a finished board, tap its calls, or go back to the list
-  const hsb = ev_.target.closest('[data-hsec]'); if (hsb && hsb.dataset.hsec === 'chat') { const c = document.querySelector('.hchat'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'end' }); const i = $('lMsg'); if (i) setTimeout(() => i.focus(), 300); return; }
+  const hsb = ev_.target.closest('[data-hsec]'); if (hsb && hsb.dataset.hsec === 'chat' && document.querySelector('.hchat')) { const c = document.querySelector('.hchat');   /* the new page has no chat beside it: the Lobby button opens it as a panel (below) */ if (c) c.scrollIntoView({ behavior: 'smooth', block: 'end' }); const i = $('lMsg'); if (i) setTimeout(() => i.focus(), 300); return; }
   if (hsb && hsb.closest('#ov')) closeOv();   // from the player card: close it and open the section
   if (hsb) { const v = hsb.dataset.hsec; ui.hsec = !v || ui.hsec === v ? null : v; render(); if (ui.hsec && hsb.classList.contains('prconv') && $('hSec')) $('hSec').scrollIntoView({ behavior: 'smooth', block: 'start' }); if (ui.hsec === 'chat') { const i = $('lMsg2'); if (i) i.focus(); } return; }
   const opb = ev_.target.closest('[data-open]'); if (opb) { closeOv(); ui.saved = null; Net.openTable(opb.dataset.open === 'priv'); return; }
