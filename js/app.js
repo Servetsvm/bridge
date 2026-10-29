@@ -1291,7 +1291,7 @@ function setPractice(k) {
 function startPractice(k) { setPractice(k); }
 function stopPractice() { SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(T('Practice ended — normal random deals'), 2000); }
 function homeShell() {
-  if (SET.homeV !== 'classic') return homeShell2();
+  if (SET.homeV === 'new') return homeShell2();   // while it is being tried, the new page is chosen in Settings
   const langs = LANGS;
   const sec = (k, label) => `<button class="hsec" data-hsec="${k}">${label}</button>`;
   return `<div class="home">
@@ -1380,9 +1380,9 @@ function convCardText() {
 }
 function renderHome() {
   const h = $('home'), N = typeof Net !== 'undefined' ? Net : null;
-  const hv = SET.lang + (SET.homeV === 'classic' ? ':c' : ':n');
+  const hv = SET.lang + (SET.homeV === 'new' ? ':n' : ':c');
   if (h.dataset.lang !== hv) { h.dataset.lang = hv; h.innerHTML = homeShell(); }
-  document.body.classList.toggle('homev2', SET.homeV !== 'classic');
+  document.body.classList.toggle('homev2', SET.homeV === 'new');
   const set = (id, html) => { const el = $(id); if (el && el.innerHTML !== html) { el.innerHTML = html; return true; } return false; };
   const cont = ui.saved && ui.saved.phase !== 'done';
   set('hGo', $('hGoSub') ? '▶ ' + T(cont ? 'Continue' : 'Start') : cont ? T('Continue') : '🤖 ' + T('Play offline'));   // the new page names the card "Play offline"; its button starts
@@ -2097,7 +2097,7 @@ function showSettings() {
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
    <div class="grp"><span>${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>
-   <div class="grp"><span>${T('Home page')}</span>${seg('homev', [['new', T('New')], ['classic', T('Classic')]], SET.homeV === 'classic' ? 'classic' : 'new')}</div>
+   <div class="grp"><span>${T('Home page')}</span>${seg('homev', [['new', T('New')], ['classic', T('Classic')]], SET.homeV === 'new' ? 'new' : 'classic')}</div>
    <div class="grp"><span>${T('Card style')}</span>${seg("style", [["classic", T("Classic tiles")], ["modern", T("Modern fan")]], SET.style || "classic")}</div>
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
    <div class="grp"><span>${T('Scoring')}</span>${seg('mode', [['IMP', 'IMP'], ['MP', T('Matchpoints (%)')]], SET.mode)}</div>
