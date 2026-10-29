@@ -1749,3 +1749,44 @@ body.homev2 .h2head .h2lobby{margin-left:auto}
   body.homev2 .h2tools .hlang .sel{max-width:104px}
   body.homev2 .h2tools .hico{width:34px;height:34px;font-size:16px}
 }
+/* the Lobby button with a message waiting: a red count and a soft glow */
+body.homev2 .h2lobby .h2unr{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#c4122f;color:#fff;font-size:12px}
+body.homev2 .h2lobby.unr{animation:h2glow 1.6s ease-in-out infinite}
+@keyframes h2glow{0%,100%{box-shadow:0 2px 6px rgba(0,0,0,.3),0 0 0 0 rgba(255,214,120,.0)}50%{box-shadow:0 2px 6px rgba(0,0,0,.3),0 0 0 6px rgba(255,214,120,.45)}}
+@media (prefers-reduced-motion:reduce){ body.homev2 .h2lobby.unr{animation:none;box-shadow:0 0 0 3px #fff6dc} }
+
+/* the practice box on the new page, in the same hand as the left column: a title row with the one strong button,
+   the two choices as rows (a small label over the value, like the you strip), the progress as a quiet band, and the
+   smaller links at the foot. On a wide screen it is as tall as the left column. */
+@media (min-width:900px){
+  body.homev2 .home.v2 .hmain{align-items:stretch}
+  body.homev2 .h2colb{height:100%}
+  body.homev2 .h2colb .hcard.prac{flex:1;display:flex;flex-direction:column}
+  body.homev2 .h2colb .hcard.prac .praskrow{margin-top:auto}
+}
+body.homev2 .home.v2 .hcard.prac{padding:14px 16px;gap:0}
+body.homev2 .home.v2 .prac .prtop{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--h2-line)}
+body.homev2 .home.v2 .prac .prhd{margin:0}
+body.homev2 .home.v2 .prac .prhd .prtitle{font:700 clamp(17px,2vw,20px)/1.15 var(--f-face);letter-spacing:.02em}
+body.homev2 .home.v2 .prac .prrow2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+body.homev2 .home.v2 .prac .prf{position:relative;display:grid;grid-template-columns:minmax(0,1fr);background:var(--h2-paper-2);border:1px solid var(--h2-line);border-radius:12px;padding:8px 12px 10px;transition:box-shadow .15s ease}
+body.homev2 .home.v2 .prac .prf:hover{box-shadow:inset 0 0 0 1px var(--h2-brass)}
+body.homev2 .home.v2 .prac .prf .prdrop,body.homev2 .home.v2 .prac .prf .prdrop.sys,body.homev2 .home.v2 .prac .prf .prdrop:not(.sys),body.homev2 .home.v2 .prac .prf .prdrop.on{background:none;border:0;box-shadow:none;padding:0;margin:0;width:100%;
+  font:600 11.5px/1.2 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--h2-muted);justify-content:space-between}
+body.homev2 .home.v2 .prac .prf .prdrop::after{content:"";position:absolute;inset:0;border-radius:12px}   /* the whole row opens the list */
+body.homev2 .home.v2 .prac .prf .prdrop i{font-size:14px;color:var(--h2-muted)}
+body.homev2 .home.v2 .prac .prf .prval{margin:3px 0 0;font-size:15px;font-weight:700;color:var(--h2-ink);line-height:1.25;min-height:0}
+body.homev2 .home.v2 .prac .prf .prdrop.on + .prval{color:#1d6b3c}
+body.homev2 .home.v2 .prac .prf .pdpanel{z-index:5}
+body.homev2 .home.v2 .prac .prhintrow{margin:10px 0 0;padding:0}
+body.homev2 .home.v2 .prac .prhintsw{font-size:14px;color:var(--h2-ink)}
+body.homev2 .home.v2 .prac .prprog{margin:10px 0 0;background:var(--h2-paper-2);border:1px solid var(--h2-line);border-radius:12px;padding:8px 12px}
+body.homev2 .home.v2 .prac .prph,body.homev2 .home.v2 .prac .prptog{color:var(--h2-muted)}
+body.homev2 .home.v2 .prac .prptog small{color:var(--h2-ink)}
+body.homev2 .home.v2 .prac .prweak{background:transparent;color:var(--h2-ink);border:1px solid var(--h2-brass);box-shadow:none}
+body.homev2 .home.v2 .prac .prweak:hover{background:rgba(217,178,92,.16);filter:none}
+body.homev2 .home.v2 .prac .praskrow{margin-top:12px;padding-top:10px;border-top:1px solid var(--h2-line);gap:6px}
+body.homev2 .home.v2 .prac .prask{border-style:solid;border-radius:999px;padding:5px 12px;font-size:13px}
+:root[data-theme="dark"] body.homev2 .home.v2 .prac .prf .prdrop.on + .prval{color:#7fd09a}
+:root[data-theme="dark"] body.homev2 .home.v2 .prac .prprog{background:var(--h2-paper-2);border-color:var(--h2-line)}
+@media (max-width:420px){ body.homev2 .home.v2 .prac .prf{padding:7px 10px 8px} body.homev2 .home.v2 .prac .prf .prval{font-size:14px} body.homev2 .home.v2 .prac .prtop{margin-bottom:8px;padding-bottom:8px} }

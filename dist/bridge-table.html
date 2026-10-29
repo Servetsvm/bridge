@@ -1764,6 +1764,47 @@ body.homev2 .h2head .h2lobby{margin-left:auto}
   body.homev2 .h2tools .hlang .sel{max-width:104px}
   body.homev2 .h2tools .hico{width:34px;height:34px;font-size:16px}
 }
+/* the Lobby button with a message waiting: a red count and a soft glow */
+body.homev2 .h2lobby .h2unr{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#c4122f;color:#fff;font-size:12px}
+body.homev2 .h2lobby.unr{animation:h2glow 1.6s ease-in-out infinite}
+@keyframes h2glow{0%,100%{box-shadow:0 2px 6px rgba(0,0,0,.3),0 0 0 0 rgba(255,214,120,.0)}50%{box-shadow:0 2px 6px rgba(0,0,0,.3),0 0 0 6px rgba(255,214,120,.45)}}
+@media (prefers-reduced-motion:reduce){ body.homev2 .h2lobby.unr{animation:none;box-shadow:0 0 0 3px #fff6dc} }
+
+/* the practice box on the new page, in the same hand as the left column: a title row with the one strong button,
+   the two choices as rows (a small label over the value, like the you strip), the progress as a quiet band, and the
+   smaller links at the foot. On a wide screen it is as tall as the left column. */
+@media (min-width:900px){
+  body.homev2 .home.v2 .hmain{align-items:stretch}
+  body.homev2 .h2colb{height:100%}
+  body.homev2 .h2colb .hcard.prac{flex:1;display:flex;flex-direction:column}
+  body.homev2 .h2colb .hcard.prac .praskrow{margin-top:auto}
+}
+body.homev2 .home.v2 .hcard.prac{padding:14px 16px;gap:0}
+body.homev2 .home.v2 .prac .prtop{margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--h2-line)}
+body.homev2 .home.v2 .prac .prhd{margin:0}
+body.homev2 .home.v2 .prac .prhd .prtitle{font:700 clamp(17px,2vw,20px)/1.15 var(--f-face);letter-spacing:.02em}
+body.homev2 .home.v2 .prac .prrow2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+body.homev2 .home.v2 .prac .prf{position:relative;display:grid;grid-template-columns:minmax(0,1fr);background:var(--h2-paper-2);border:1px solid var(--h2-line);border-radius:12px;padding:8px 12px 10px;transition:box-shadow .15s ease}
+body.homev2 .home.v2 .prac .prf:hover{box-shadow:inset 0 0 0 1px var(--h2-brass)}
+body.homev2 .home.v2 .prac .prf .prdrop,body.homev2 .home.v2 .prac .prf .prdrop.sys,body.homev2 .home.v2 .prac .prf .prdrop:not(.sys),body.homev2 .home.v2 .prac .prf .prdrop.on{background:none;border:0;box-shadow:none;padding:0;margin:0;width:100%;
+  font:600 11.5px/1.2 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--h2-muted);justify-content:space-between}
+body.homev2 .home.v2 .prac .prf .prdrop::after{content:"";position:absolute;inset:0;border-radius:12px}   /* the whole row opens the list */
+body.homev2 .home.v2 .prac .prf .prdrop i{font-size:14px;color:var(--h2-muted)}
+body.homev2 .home.v2 .prac .prf .prval{margin:3px 0 0;font-size:15px;font-weight:700;color:var(--h2-ink);line-height:1.25;min-height:0}
+body.homev2 .home.v2 .prac .prf .prdrop.on + .prval{color:#1d6b3c}
+body.homev2 .home.v2 .prac .prf .pdpanel{z-index:5}
+body.homev2 .home.v2 .prac .prhintrow{margin:10px 0 0;padding:0}
+body.homev2 .home.v2 .prac .prhintsw{font-size:14px;color:var(--h2-ink)}
+body.homev2 .home.v2 .prac .prprog{margin:10px 0 0;background:var(--h2-paper-2);border:1px solid var(--h2-line);border-radius:12px;padding:8px 12px}
+body.homev2 .home.v2 .prac .prph,body.homev2 .home.v2 .prac .prptog{color:var(--h2-muted)}
+body.homev2 .home.v2 .prac .prptog small{color:var(--h2-ink)}
+body.homev2 .home.v2 .prac .prweak{background:transparent;color:var(--h2-ink);border:1px solid var(--h2-brass);box-shadow:none}
+body.homev2 .home.v2 .prac .prweak:hover{background:rgba(217,178,92,.16);filter:none}
+body.homev2 .home.v2 .prac .praskrow{margin-top:12px;padding-top:10px;border-top:1px solid var(--h2-line);gap:6px}
+body.homev2 .home.v2 .prac .prask{border-style:solid;border-radius:999px;padding:5px 12px;font-size:13px}
+:root[data-theme="dark"] body.homev2 .home.v2 .prac .prf .prdrop.on + .prval{color:#7fd09a}
+:root[data-theme="dark"] body.homev2 .home.v2 .prac .prprog{background:var(--h2-paper-2);border-color:var(--h2-line)}
+@media (max-width:420px){ body.homev2 .home.v2 .prac .prf{padding:7px 10px 8px} body.homev2 .home.v2 .prac .prf .prval{font-size:14px} body.homev2 .home.v2 .prac .prtop{margin-bottom:8px;padding-bottom:8px} }
 
 </style>
 
@@ -4582,6 +4623,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Message sent": "Mesaj gönderildi",
     "Welcome": "Hoş geldin", "Good morning, {0}": "Günaydın, {0}", "Good afternoon, {0}": "İyi günler, {0}", "Good evening, {0}": "İyi akşamlar, {0}", "Bid and play with three robots; every board counts for your rating.": "Üç robotla deklere ver ve oyna; her el puanına sayılır.", "Play with friends; robots take the empty seats.": "Arkadaşlarınla oyna; boş yerlere robot oturur.", "Club tournaments with movements and results.": "Hareketli ve sonuçlu kulüp turnuvaları.", "Real cards at real tables; the app keeps the score.": "Gerçek kartlarla gerçek masalarda; skoru uygulama tutar.", "Home page": "Ana sayfa", "New": "Yeni", "Classic": "Klasik",
     "own choice": "kendi seçimi", "measured": "ölçülen", "measured after {0} boards ({1} so far)": "ölçülen düzey {0} borddan sonra (şimdiye kadar {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Puandan ölçülür: robot masalarına karşı son 200 bord.",
     "No base system chosen yet.": "Henüz temel sistem seçilmedi.",
@@ -4977,6 +5019,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Message sent": "Melding sendt",
     "Welcome": "Velkommen", "Good morning, {0}": "God morgen, {0}", "Good afternoon, {0}": "God dag, {0}", "Good evening, {0}": "God kveld, {0}", "Bid and play with three robots; every board counts for your rating.": "Meld og spill med tre roboter; hvert spill teller på ratingen din.", "Play with friends; robots take the empty seats.": "Spill med venner; roboter tar de tomme plassene.", "Club tournaments with movements and results.": "Klubbturneringer med movement og resultater.", "Real cards at real tables; the app keeps the score.": "Ekte kort ved ekte bord; appen fører regnskapet.", "Home page": "Startside", "New": "Ny", "Classic": "Klassisk",
     "own choice": "eget valg", "measured": "målt", "measured after {0} boards ({1} so far)": "måles etter {0} spill ({1} så langt)", "Measured from the rating: the last 200 boards against the robot tables.": "Målt fra ratingen: de siste 200 spillene mot robotbordene.",
     "No base system chosen yet.": "Ingen grunnsystem valgt ennå.",
@@ -5372,6 +5415,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Message sent": "Mensaje enviado",
     "Welcome": "Bienvenido", "Good morning, {0}": "Buenos días, {0}", "Good afternoon, {0}": "Buenas tardes, {0}", "Good evening, {0}": "Buenas noches, {0}", "Bid and play with three robots; every board counts for your rating.": "Subasta y juega con tres robots; cada mano cuenta para tu puntuación.", "Play with friends; robots take the empty seats.": "Juega con amigos; los robots ocupan los asientos libres.", "Club tournaments with movements and results.": "Torneos de club con movimientos y resultados.", "Real cards at real tables; the app keeps the score.": "Cartas reales en mesas reales; la app lleva la puntuación.", "Home page": "Página de inicio", "New": "Nueva", "Classic": "Clásica",
     "own choice": "elección propia", "measured": "medido", "measured after {0} boards ({1} so far)": "se mide tras {0} manos ({1} hasta ahora)", "Measured from the rating: the last 200 boards against the robot tables.": "Medido a partir de la puntuación: las últimas 200 manos contra las mesas de robots.",
     "No base system chosen yet.": "Aún no has elegido un sistema base.",
@@ -5795,6 +5839,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Message sent": "Message envoyé",
     "Welcome": "Bienvenue", "Good morning, {0}": "Bonjour, {0}", "Good afternoon, {0}": "Bon après-midi, {0}", "Good evening, {0}": "Bonsoir, {0}", "Bid and play with three robots; every board counts for your rating.": "Enchérissez et jouez avec trois robots ; chaque donne compte pour votre classement.", "Play with friends; robots take the empty seats.": "Jouez avec des amis ; les robots prennent les places libres.", "Club tournaments with movements and results.": "Tournois de club avec mouvements et résultats.", "Real cards at real tables; the app keeps the score.": "De vraies cartes à de vraies tables ; l’appli tient la marque.", "Home page": "Page d’accueil", "New": "Nouvelle", "Classic": "Classique",
     "own choice": "choix personnel", "measured": "mesuré", "measured after {0} boards ({1} so far)": "mesuré après {0} donnes ({1} jusqu’ici)", "Measured from the rating: the last 200 boards against the robot tables.": "Mesuré à partir du classement : les 200 dernières donnes contre les tables de robots.",
     "No base system chosen yet.": "Aucun système de base choisi pour l’instant.",
@@ -6218,6 +6263,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Message sent": "Messaggio inviato",
     "Welcome": "Benvenuto", "Good morning, {0}": "Buongiorno, {0}", "Good afternoon, {0}": "Buon pomeriggio, {0}", "Good evening, {0}": "Buonasera, {0}", "Bid and play with three robots; every board counts for your rating.": "Licita e gioca con tre robot; ogni mano conta per il tuo punteggio.", "Play with friends; robots take the empty seats.": "Gioca con gli amici; i robot occupano i posti liberi.", "Club tournaments with movements and results.": "Tornei di club con movimenti e risultati.", "Real cards at real tables; the app keeps the score.": "Carte vere a tavoli veri; l’app tiene il punteggio.", "Home page": "Pagina iniziale", "New": "Nuova", "Classic": "Classica",
     "own choice": "scelta propria", "measured": "misurato", "measured after {0} boards ({1} so far)": "misurato dopo {0} mani ({1} finora)", "Measured from the rating: the last 200 boards against the robot tables.": "Misurato dal punteggio: le ultime 200 mani contro i tavoli dei robot.",
     "No base system chosen yet.": "Nessun sistema base scelto finora.",
@@ -6641,6 +6687,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Message sent": "Nachricht gesendet",
     "Welcome": "Willkommen", "Good morning, {0}": "Guten Morgen, {0}", "Good afternoon, {0}": "Guten Tag, {0}", "Good evening, {0}": "Guten Abend, {0}", "Bid and play with three robots; every board counts for your rating.": "Reizen und spielen mit drei Robotern; jedes Board zählt für deine Wertung.", "Play with friends; robots take the empty seats.": "Spiele mit Freunden; Roboter nehmen die freien Plätze.", "Club tournaments with movements and results.": "Clubturniere mit Movements und Ergebnissen.", "Real cards at real tables; the app keeps the score.": "Echte Karten an echten Tischen; die App führt die Wertung.", "Home page": "Startseite", "New": "Neu", "Classic": "Klassisch",
     "own choice": "eigene Wahl", "measured": "gemessen", "measured after {0} boards ({1} so far)": "gemessen ab {0} Boards (bisher {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Aus der Wertung gemessen: die letzten 200 Boards gegen die Robotertische.",
     "No base system chosen yet.": "Noch kein Grundsystem gewählt.",
@@ -7064,6 +7111,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Message sent": "Сообщение отправлено",
     "Welcome": "Добро пожаловать", "Good morning, {0}": "Доброе утро, {0}", "Good afternoon, {0}": "Добрый день, {0}", "Good evening, {0}": "Добрый вечер, {0}", "Bid and play with three robots; every board counts for your rating.": "Торгуйтесь и играйте с тремя роботами; каждая сдача идёт в ваш рейтинг.", "Play with friends; robots take the empty seats.": "Играйте с друзьями; свободные места займут роботы.", "Club tournaments with movements and results.": "Клубные турниры с перемещениями и результатами.", "Real cards at real tables; the app keeps the score.": "Настоящие карты за настоящими столами; счёт ведёт приложение.", "Home page": "Главная страница", "New": "Новая", "Classic": "Классическая",
     "own choice": "свой выбор", "measured": "по игре", "measured after {0} boards ({1} so far)": "оценка после {0} сдач (пока {1})", "Measured from the rating: the last 200 boards against the robot tables.": "По рейтингу: последние 200 сдач против столов роботов.",
     "No base system chosen yet.": "Базовая система ещё не выбрана.",
@@ -7487,6 +7535,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Message sent": "Wiadomość wysłana",
     "Welcome": "Witaj", "Good morning, {0}": "Dzień dobry, {0}", "Good afternoon, {0}": "Dzień dobry, {0}", "Good evening, {0}": "Dobry wieczór, {0}", "Bid and play with three robots; every board counts for your rating.": "Licytuj i graj z trzema robotami; każde rozdanie liczy się do rankingu.", "Play with friends; robots take the empty seats.": "Graj ze znajomymi; roboty zajmą wolne miejsca.", "Club tournaments with movements and results.": "Turnieje klubowe z ruchami i wynikami.", "Real cards at real tables; the app keeps the score.": "Prawdziwe karty przy prawdziwych stołach; aplikacja liczy wyniki.", "Home page": "Strona główna", "New": "Nowa", "Classic": "Klasyczna",
     "own choice": "własny wybór", "measured": "zmierzony", "measured after {0} boards ({1} so far)": "mierzony po {0} rozdaniach (na razie {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Mierzony z rankingu: ostatnie 200 rozdań przeciw stołom robotów.",
     "No base system chosen yet.": "Nie wybrano jeszcze systemu bazowego.",
@@ -7910,6 +7959,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Message sent": "消息已发送",
     "Welcome": "欢迎", "Good morning, {0}": "早上好，{0}", "Good afternoon, {0}": "下午好，{0}", "Good evening, {0}": "晚上好，{0}", "Bid and play with three robots; every board counts for your rating.": "与三个机器人叫牌和打牌；每副牌都计入你的积分。", "Play with friends; robots take the empty seats.": "与朋友一起打；空位由机器人补上。", "Club tournaments with movements and results.": "带轮转和成绩的俱乐部比赛。", "Real cards at real tables; the app keeps the score.": "真牌真桌，应用负责记分。", "Home page": "主页", "New": "新版", "Classic": "经典",
     "own choice": "自选", "measured": "实测", "measured after {0} boards ({1} so far)": "满 {0} 副牌后显示实测（目前 {1}）", "Measured from the rating: the last 200 boards against the robot tables.": "根据积分测算：最近 200 副牌对机器人牌桌的成绩。",
     "No base system chosen yet.": "尚未选择基本体系。",
@@ -8956,7 +9006,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 294;
+const APP_V = 295;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10367,7 +10417,8 @@ function renderHome() {
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
     set('hCount', T('{0} in the lobby', N.lobbyCount())); set('hLobN', String(N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
-    set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
+    { const un = want !== 'chat' ? N.st.lunread || 0 : 0, lb = document.querySelector('.h2lobby');   // the new page: a red count on the Lobby button
+      set('hChatN', un ? (lb ? String(un) : '(' + un + ')') : ''); if (lb) lb.classList.toggle('unr', !!un); }
     if (want === 'chat') N.st.lunread = 0;
     set('hTours', toursHtml()); set('nTours', toursHtml()); updateRcpt();
     const pl = N.playersHtml(); set('hPlayers', pl); set('pPlayers', pl);
@@ -11774,6 +11825,8 @@ function pmTo(name) {
 function lobbySend(text) {
   text = String(text || '').trim(); if (!text) return;
   if (ui.pmTo) Net.dmSend(ui.pmTo, text); else Net.lsend(text);
+  // the new home page: the lobby panel closes once the message is sent (a reply lights the Lobby button)
+  if (ui.hsec === 'chat' && document.body.classList.contains('homev2')) { ui.hsec = null; flash('✓ ' + T('Message sent'), 1500); }
   render(); renderDock();
 }
 /* ---- your name and PIN: nothing can be done before a name is chosen, and every name gets a 4-digit PIN (old

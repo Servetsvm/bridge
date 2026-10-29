@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 294;
+const APP_V = 295;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1419,7 +1419,8 @@ function renderHome() {
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
     set('hCount', T('{0} in the lobby', N.lobbyCount())); set('hLobN', String(N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
-    set('hChatN', want !== 'chat' && N.st.lunread ? '(' + N.st.lunread + ')' : '');
+    { const un = want !== 'chat' ? N.st.lunread || 0 : 0, lb = document.querySelector('.h2lobby');   // the new page: a red count on the Lobby button
+      set('hChatN', un ? (lb ? String(un) : '(' + un + ')') : ''); if (lb) lb.classList.toggle('unr', !!un); }
     if (want === 'chat') N.st.lunread = 0;
     set('hTours', toursHtml()); set('nTours', toursHtml()); updateRcpt();
     const pl = N.playersHtml(); set('hPlayers', pl); set('pPlayers', pl);
@@ -2826,6 +2827,8 @@ function pmTo(name) {
 function lobbySend(text) {
   text = String(text || '').trim(); if (!text) return;
   if (ui.pmTo) Net.dmSend(ui.pmTo, text); else Net.lsend(text);
+  // the new home page: the lobby panel closes once the message is sent (a reply lights the Lobby button)
+  if (ui.hsec === 'chat' && document.body.classList.contains('homev2')) { ui.hsec = null; flash('✓ ' + T('Message sent'), 1500); }
   render(); renderDock();
 }
 /* ---- your name and PIN: nothing can be done before a name is chosen, and every name gets a 4-digit PIN (old
