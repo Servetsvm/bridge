@@ -1699,11 +1699,12 @@ body.homev2 .home.v2 .hcard.prac .prtitle{font-family:var(--f-face);color:var(--
 body.homev2 .home.v2 .htables h3{margin-bottom:6px}
 body.homev2 .home.v2 .htables .muted{font-size:14px}
 @media (max-width:640px){
-  body.homev2 .h2tiles{grid-template-columns:1fr;gap:8px}
-  body.homev2 .h2tile{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"i t" "i s";column-gap:12px;row-gap:2px;align-items:center;padding:11px 14px}
-  body.homev2 .h2ti{grid-area:i;margin:0;font-size:24px}
-  body.homev2 .h2tile b{grid-area:t}
-  body.homev2 .h2tile small{grid-area:s}
+  /* a phone: the three ways to play side by side as small squares (picture and name; the sentence shows on a wider screen) */
+  body.homev2 .h2tiles{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  body.homev2 .h2tile{align-items:center;text-align:center;justify-content:center;gap:4px;padding:10px 6px}
+  body.homev2 .h2ti{margin:0;font-size:22px}
+  body.homev2 .h2tile b{font-size:13.5px;line-height:1.15}
+  body.homev2 .h2tile small{display:none}
 }
 @media (max-width:420px){ body.homev2 .h2ptx p{font-size:12.5px} body.homev2 .h2go{padding:9px 14px} }
 @media (prefers-reduced-motion:reduce){ body.homev2 .h2c{animation:none} body.homev2 .h2tile{transition:none} }
@@ -1723,6 +1724,19 @@ body.homev2 .home.v2 .prac .prask{color:var(--h2-muted);border:1px dashed var(--
 body.homev2 .home.v2 .prac .prask:hover{background:var(--h2-paper-2);color:var(--h2-ink)}
 :root[data-theme="dark"] body.homev2 .home.v2 .prac .prask{color:var(--h2-muted);border-color:var(--h2-line)}
 :root[data-theme="dark"] body.homev2 .home.v2 .prac .prtop .prtitle{color:var(--h2-ink)}
+/* the new page fits more on one screen: tighter gaps, a smaller you strip, and the open tables (now under the ways to
+   play) take one line when there is no table: the title, the note and a small refresh button side by side */
+body.homev2 .home.v2,body.homev2 .home.v2 .hmain{gap:10px}
+body.homev2 .h2me{padding:9px 12px;row-gap:2px}
+body.homev2 .h2av{width:42px;height:42px;font-size:20px}
+body.homev2 .h2me .hstats{margin-top:4px;padding-top:6px}
+body.homev2 .home.v2 .htables{padding:10px 12px}
+body.homev2 .home.v2 .htables:has(.tables > .muted){display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px}
+body.homev2 .home.v2 .htables:has(.tables > .muted) h3{margin:0;font-size:15px}
+body.homev2 .home.v2 .htables:has(.tables > .muted) #hTables{flex:1 1 220px;min-width:0}
+body.homev2 .home.v2 .htables .tables:has(> .muted){display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+body.homev2 .home.v2 .htables .tables > .muted{margin:0;font-size:13.5px;flex:1 1 auto;text-align:left}
+body.homev2 .home.v2 .htables .tables > #nFind{margin:0;padding:6px 12px;font-size:13.5px;width:auto;background:var(--h2-paper-2);color:var(--h2-ink);border:1px solid var(--h2-line);border-radius:999px;box-shadow:none}
 
 </style>
 
@@ -8915,7 +8929,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 292;
+const APP_V = 293;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10245,10 +10259,10 @@ function homeShell2() {
         ${tile('href="bridgegate/"', '🏆', T('Tournaments'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Social bridge'), T('Real cards at real tables; the app keeps the score.'))}
       </div>
+      <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>   <!-- the open tables right under the ways to play -->
       <div id="hPend"></div>
       <div class="hcard prac" id="hPrac"></div>
       <div id="hSec"></div>
-      <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
     </section>
     <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
       </div></div><div class="composer"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><textarea class="cmsg" id="lMsg" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="lSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></aside>
