@@ -1868,3 +1868,5 @@ body.homev2 .home.v2 .prac .prask .supc{background:#c4122f;color:#fff;border-rad
 .sbtrow b small,.sbtab td small{display:block;font-weight:400;opacity:.75;font-size:11px}
 .sbtno small{font-weight:400;opacity:.8}
 @media (max-width:480px){ .tmpair{grid-template-columns:1fr auto 1fr} .tmpair small{grid-column:1/-1} }
+.rtline{margin:2px 0 6px}
+.res td small{display:block;opacity:.7;font-size:11px}

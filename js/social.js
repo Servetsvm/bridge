@@ -46,14 +46,15 @@ const SB = (() => {
   function matches() {
     const g = sb.g, L = [];
     for (let k = 1; 2 * k <= g.m.tb; k++) {
-      const o = 2 * k - 1, c = 2 * k, rows = []; let ih = 0, ia = 0;
+      const o = 2 * k - 1, c = 2 * k, rows = []; let ih = 0, ia = 0, bh = 0;
       for (let b = 1; b <= g.m.bd; b++) {
         const R = (g.r || {})[b] || {}, ro = R[o] && R[o].ok ? R[o] : null, rc = R[c] && R[c].ok ? R[c] : null;
-        const i = ro && rc ? E.imps(nsScore(b, ro) - nsScore(b, rc)) : null; if (i > 0) ih += i; else if (i < 0) ia -= i;
+        const d = ro && rc ? nsScore(b, ro) - nsScore(b, rc) : null, i = d == null ? null : E.imps(d); if (i > 0) ih += i; else if (i < 0) ia -= i;
+        if (d != null) bh += d > 0 ? 1 : d === 0 ? 0.5 : 0;   // matchpoints: the board won by the score
         if (ro || rc) rows.push({ b, o: ro && nsScore(b, ro), c: rc && nsScore(b, rc), i });
       }
-      const vh = vpOf(ih - ia, g.m.bd);
-      L.push({ k, h: o, a: c, ih, ia, n: rows.filter(r => r.i != null).length, rows, vh, va: Math.round((20 - vh) * 100) / 100 });
+      const vh = vpOf(ih - ia, g.m.bd), n = rows.filter(r => r.i != null).length, mh = n ? Math.round(bh / n * 1000) / 10 : null;
+      L.push({ k, h: o, a: c, ih, ia, n, rows, vh, va: Math.round((20 - vh) * 100) / 100, mh, ma: mh == null ? null : Math.round((100 - mh) * 10) / 10 });
     }
     return L;
   }
@@ -183,6 +184,7 @@ const SB = (() => {
       <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${canManage(g) ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
     return `<h2>🃏 ${T('Team match')}</h2>
       <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')}</div>
+      ${isAdm() ? `<div class="row2"><button class="btn gold" id="rtOpen">🤖 ${T('Team match with robots')}</button></div>` : ''}
       ${running() && !isAdm() ? `<div class="muted">🃏 ${T('A game is running now: join it with Table No. Only the administrator can open another game.')}</div>` : `<div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button></div>`}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
@@ -301,12 +303,12 @@ const SB = (() => {
   function teamRankHtml() {
     const M = matches();
     if (!M.some(x => x.rows.length)) return `<div class="muted">${T('No scores yet.')}</div>`;
-    const cards = M.map(x => `<div class="teams"><div class="tmhead">${T('Match {0}', x.k)} · ${T('{0} boards', x.n)}</div><div class="tscore"><div><b>${esc(teamName(x.h))}</b><small>VP ${x.vh}</small></div><div class="tsn">${x.ih} – ${x.ia}</div><div><b>${esc(teamName(x.a))}</b><small>VP ${x.va}</small></div></div>
+    const cards = M.map(x => `<div class="teams"><div class="tmhead">${T('Match {0}', x.k)} · ${T('{0} boards', x.n)}</div><div class="tscore"><div><b>${esc(teamName(x.h))}</b><small>VP ${x.vh} · MP ${x.mh ?? '—'}%</small></div><div class="tsn">${x.ih} – ${x.ia}</div><div><b>${esc(teamName(x.a))}</b><small>VP ${x.va} · MP ${x.ma ?? '—'}%</small></div></div>
       <details class="tmbd"><summary>${T('Board by board')}</summary><div class="resscroll"><table class="res"><thead><tr><th>${T('Bd')}</th><th class="n">${T('Open room')}</th><th class="n">${T('Closed room')}</th><th class="n">${esc(teamName(x.h))}</th><th class="n">${esc(teamName(x.a))}</th></tr></thead><tbody>${x.rows.map(r => `<tr><td>${r.b}</td><td class="n">${r.o == null ? '…' : signed(r.o)}</td><td class="n">${r.c == null ? '…' : signed(r.c)}</td><td class="n">${r.i > 0 ? r.i : ''}</td><td class="n">${r.i < 0 ? -r.i : ''}</td></tr>`).join('')}</tbody></table></div></details></div>`).join('');
-    const TL = M.flatMap(x => [{ name: teamName(x.h), vp: x.vh, d: x.ih - x.ia, n: x.n }, { name: teamName(x.a), vp: x.va, d: x.ia - x.ih, n: x.n }]).sort((a, b) => b.vp - a.vp || b.d - a.d);
-    const tab = M.length < 2 ? '' : `<h3>${T('Standings')}</h3><div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${T('Team')}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th><th class="n">VP</th></tr></thead><tbody>${TL.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="IMP" class="n">${signed(r.d)}</td><td data-l="VP" class="n">${r.vp}</td></tr>`).join('')}</tbody></table></div>`;
+    const TL = M.flatMap(x => [{ name: teamName(x.h), vp: x.vh, d: x.ih - x.ia, n: x.n, mp: x.mh }, { name: teamName(x.a), vp: x.va, d: x.ia - x.ih, n: x.n, mp: x.ma }]).sort((a, b) => b.vp - a.vp || b.d - a.d);
+    const tab = M.length < 2 ? '' : `<h3>${T('Standings')}</h3><div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${T('Team')}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th><th class="n">MP %</th><th class="n">VP</th></tr></thead><tbody>${TL.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="IMP" class="n">${signed(r.d)}</td><td data-l="MP %" class="n">${r.mp ?? '—'}</td><td data-l="VP" class="n">${r.vp}</td></tr>`).join('')}</tbody></table></div>`;
     return cards + tab + `<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
-      <div class="muted">${T('Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).')}</div>`;
+      <div class="muted">${T('Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).')} ${T('MP: a board won by the score is 100 %, an equal score 50 %.')}</div>`;
   }
   function rankHtml() {
     if (isTeam()) return teamRankHtml();
@@ -322,7 +324,7 @@ const SB = (() => {
     if (isTeam()) {
       const m = sb.g.m;
       return [`🃏 ${m.n} — ${new Date(m.ts).toLocaleDateString()}\n${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}`,
-        ...matches().map(x => `${teamName(x.h)} ${x.ih} – ${x.ia} ${teamName(x.a)} (VP ${x.vh} – ${x.va}, ${T('{0} boards', x.n)})`)].join('\n');
+        ...matches().map(x => `${teamName(x.h)} ${x.ih} – ${x.ia} ${teamName(x.a)} (VP ${x.vh} – ${x.va} · MP ${x.mh ?? '—'}% – ${x.ma ?? '—'}%, ${T('{0} boards', x.n)})`)].join('\n');
     }
     const m = sb.g.m, L = standings(), dir = r => r.dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3];
     const head = `🃏 ${m.n} — ${new Date(m.ts).toLocaleDateString()}\n${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}\n${T('Standings')} (MP % · IMP):`;
@@ -533,5 +535,5 @@ const SB = (() => {
     sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
     return openGame(id);
   }
-  return { open, openLink, lobbyHtml, locked };
+  return { open, openLink, lobbyHtml, locked, vpOf };
 })();
