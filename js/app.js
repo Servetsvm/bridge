@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 295;
+const APP_V = 296;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -132,7 +132,7 @@ function load(d) {
   if (d) { SET = Object.assign(SET, d.SET || {}); G = d.G || null; HIST = d.HIST || []; BOARD = d.BOARD || 0; }
   if (G && G.phase === "lobby") G = null; // an online waiting room is not restored after a restart
   seasonStart();
-  SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) }; CARD_CK = cardCk();
+  SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) }; CARD_CK = cardCk(); fixedSet();
   if (!SET.lang) { SET.lang = detectLang(); SET.langAuto = true; }
   applyLang();
   // the player card's "joined" date (the first day this device played; from the oldest board for old players) and logins
@@ -863,9 +863,9 @@ function renderBar() {
   const g = G.play;
   const canClaim = G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
   const last = HIST.length ? HIST[HIST.length - 1] : null;
-  const lastTxt = last ? (last.imp != null ? (SET.mode === 'IMP' ? fmtSigned(last.imp) + ' IMP' : last.mp + '%') : fmtSigned(last.us || 0)) : '&nbsp;';
+  const lastTxt = last ? (last.imp != null ? (fmtSigned(last.imp) + ' IMP · ' + last.mp + '%') : fmtSigned(last.us || 0)) : '&nbsp;';
   const per = Store.periods(HIST)[0];
-  const dayTxt = SET.mode === 'IMP' ? (per.scored ? fmtSigned(per.impSum) + ' IMP' : '—') : (per.mpAvg != null ? per.mpAvg + '%' : '—');
+  const dayTxt = per.scored ? fmtSigned(per.impSum) + ' IMP' + (per.mpAvg != null ? ' · ' + per.mpAvg + '%' : '') : '—';
   $('bar').innerHTML = `
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
    <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
@@ -1185,7 +1185,12 @@ function sfx(k) {
   } catch (e) {}
 }
 // light or dark screens and larger cards (Settings); "automatic" follows the phone or PC
+// what every player has (no longer chosen in Settings)
+function fixedSet() {
+  Object.assign(SET, { homeV: 'new', style: 'modern', felt: 'green', back: 'blue', four: true, big: true, opp: 'same', robotLvl: 'expert', speed: 0 });
+}
 function applyLook() {
+  fixedSet();
   const dark = SET.theme === 'dark' || (SET.theme !== 'light' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
   document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   document.body.classList.toggle('bigcards', !!SET.big);
@@ -1290,33 +1295,7 @@ function setPractice(k) {
 }
 function startPractice(k) { setPractice(k); }
 function stopPractice() { SET.practice = ''; Store.saveSettings(SET); save(); render(); flash(T('Practice ended — normal random deals'), 2000); }
-function homeShell() {
-  if (SET.homeV === 'new') return homeShell2();   // while it is being tried, the new page is chosen in Settings
-  const langs = LANGS;
-  const sec = (k, label) => `<button class="hsec" data-hsec="${k}">${label}</button>`;
-  return `<div class="home">
-  <header class="hhead"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div>
-    <button id="hNameBtn" class="tok hnamebtn hdrname" title="${T('Edit my card')}">${myNm() ? esc(myNm()) : `<i>${T('Name')}</i>`} ✏️</button>
-    <div class="hhr"><label class="hlang" title="${T('Language')}">🌐 <select id="hLang" class="sel" aria-label="${T('Language')}">${langs.map(([v, l]) => `<option value="${v}" ${SET.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-      <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico hwa" id="bShareApp" title="${T('Send the app')}" aria-label="${T('Send the app')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
-  <div class="hgrid">
-    <section class="hmain">
-      <div class="hcard prac" id="hPrac"></div>
-      <div class="hpair">
-      <div class="hcard hero hsmall">
-        <div class="muted">${T('Play with robots, join a table or open your own.')}</div>
-        <div class="hbtns"><button class="btn new" id="bGo"><span id="hGo"></span></button><button class="btn hopen" id="hOpen">🌐 ${T('Open an online table')}</button><a class="btn htour" href="bridgegate/">🏆 ${T('Tournaments')}</a><button class="btn hwatch hsb" id="sbOpen">🃏 ${T('Social bridge')}</button></div>
-        <button class="hstats" id="hStats" title="${T('Your rating')}"></button>
-      </div>
-      <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
-      </div>
-      <div id="hSec"></div>
-      <div id="hPend"></div>
-    </section>
-    <aside class="hcard hchat"><div class="grip gripx" data-grip="chatw" title="${T('Drag to resize')}"></div><h3>${T('Lobby chat')} <small id="hCount"></small><button class="btn mini-btn" id="lClear" title="${T('Clear the chat')}">🗑</button></h3><div class="lsplit"><div class="lplayers"><div id="hPlayers"></div>${playersFoot()}</div><div class="grip gripc" data-grip="plw" title="${T('Drag to resize')}"></div><div class="lcol"><div class="lmsgs" id="hChat"></div><div class="pmto" id="hPmTo"></div>
-      </div></div><div class="composer"><button class="btn rcpt" id="lRcpt" title="${T("Who gets the message")}">🌐 ▾</button><textarea class="cmsg" id="lMsg" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="lSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div></aside>
-  </div><div id="hSheet"></div></div>`;
-}
+function homeShell() { return homeShell2(); }
 // the new home page: the you strip, the Play card (a fan of four cards) with three tiles, the practice box, the open
 // tables; the lobby chat beside them (under them on a phone). Same ids as the classic page.
 function homeShell2() {
@@ -1372,9 +1351,8 @@ function convCardText() {
 }
 function renderHome() {
   const h = $('home'), N = typeof Net !== 'undefined' ? Net : null;
-  const hv = SET.lang + (SET.homeV === 'new' ? ':n' : ':c');
-  if (h.dataset.lang !== hv) { h.dataset.lang = hv; h.innerHTML = homeShell(); }
-  document.body.classList.toggle('homev2', SET.homeV === 'new');
+  if (h.dataset.lang !== SET.lang) { h.dataset.lang = SET.lang; h.innerHTML = homeShell(); }
+  document.body.classList.add('homev2');
   const set = (id, html) => { const el = $(id); if (el && el.innerHTML !== html) { el.innerHTML = html; return true; } return false; };
   const cont = ui.saved && ui.saved.phase !== 'done';
   set('hGo', $('hGoSub') ? '▶ ' + T(cont ? 'Continue' : 'Start') : cont ? T('Continue') : '🤖 ' + T('Play offline'));   // the new page names the card "Play offline"; its button starts
@@ -1864,10 +1842,12 @@ function openOv(name, html) {
   if (ui.overlay === "gate" && name !== "gate" && needGate()) return;
   // during a game on a wider screen, a player card or a private chat is a small window you can drag aside (the table stays usable)
   const fl = ["player", "dm", "net", "lead"].includes(name) && G && G.phase !== "idle" && innerWidth >= 700, ov = $("ov");
+  const keep = ui.overlay === name && ov.firstChild ? [ov.firstChild.scrollTop, ov.scrollTop] : null;   // the same window again: it stays where it was
   ui.overlay = name; ov.classList.toggle("float", fl);
   const bar = fl || (name !== "gate" && innerWidth >= 900 && matchMedia("(pointer:fine)").matches);   // on a computer every window can be dragged by its top bar
   ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}${["end", "res", "rev", "set", "hist", "tour", "tsetup", "deal", "help", "auc", "sb"].includes(name) ? " wide" : ""}" data-ov="${name}">${bar ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
   ov.hidden = false;
+  if (keep) { ov.firstChild.scrollTop = keep[0]; ov.scrollTop = keep[1]; }
   if (fl && typeof SIZES !== "undefined" && SIZES.fw2) { const s = ov.firstChild; s.style.width = SIZES.fw2 + "px"; s.style.height = SIZES.fh2 + "px"; }
   if (fl && ui.fpos) { const s = ov.firstChild; s.style.left = ui.fpos.x + "px"; s.style.top = ui.fpos.y + "px"; s.style.right = "auto"; }
 }
@@ -2026,7 +2006,7 @@ function showEnd() {
     let best = -1; f.tables.forEach((t, i) => { if (t.pl && (best < 0 || fus(t) > fus(f.tables[best]))) best = i; });
     fieldHtml = (best >= 0 ? `<div class="muted">${T('Tap the best robot table (★) to see how it was bid and played.')}</div>` : '') + `<table class="res"><thead><tr><th>${T('Table')}</th><th>${T('Contract')}</th><th>${T('Tricks')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th></tr></thead><tbody>${f.tables.map((t, i) => `<tr${i === best ? ` class="rev fbest" data-ftab="${i}"` : ''}><td>${i + 1}${i === best ? ' ★' : ''}</td><td>${t.passed ? T('Pass') : conKey(t.c)}</td><td>${t.tricks ?? ''}</td><td class="n">${fmtSigned(fus(t))}</td><td class="n">${fmtSigned(E.imps(e.us - fus(t)))}</td></tr>`).join('')}</tbody></table>`;
   }
-  const scoreTxt = e.imp != null ? `<div class="score2"><div class="${SET.mode === 'IMP' ? 'on' : ''}"><small>IMP</small><b>${fmtSigned(e.imp)}</b></div><div class="${SET.mode === 'MP' ? 'on' : ''}"><small>MP</small><b>${e.mp}%</b></div></div>` : '';
+  const scoreTxt = e.imp != null ? `<div class="score2"><div class="on"><small>IMP</small><b>${fmtSigned(e.imp)}</b></div><div class="on"><small>MP</small><b>${e.mp}%</b></div></div>` : '';
   const norm = f.normC;
   openOv('end', `<h2>${T('Board')} ${e.board}</h2><div class="big">${resultLine(e)}</div>${G.claimed ? `<div class="muted">${T('The remaining tricks were settled by claim.')}</div>` : ''}
    ${scoreTxt}
@@ -2089,26 +2069,13 @@ function showSettings() {
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
    <div class="grp"><span>${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>
-   <div class="grp"><span>${T('Home page')}</span>${seg('homev', [['new', T('New')], ['classic', T('Classic')]], SET.homeV === 'new' ? 'new' : 'classic')}</div>
-   <div class="grp"><span>${T('Card style')}</span>${seg("style", [["classic", T("Classic tiles")], ["modern", T("Modern fan")]], SET.style || "classic")}</div>
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
-   <div class="grp"><span>${T('Scoring')}</span>${seg('mode', [['IMP', 'IMP'], ['MP', T('Matchpoints (%)')]], SET.mode)}</div>
-   <div class="grp"><span>${T("Opponents' system")}</span>${seg('opp', [['same', T('Same as ours')], ['sayc', T('Standard (SAYC)')]], SET.opp)}</div>
-   <div class="grp"><span>${T('Opponent robots')}</span>${seg('rlvl', [['easy', '🙂 ' + T('Beginner')], ['mid', '😐 ' + T('Medium')], ['expert', '😈 ' + T('Expert')]], SET.robotLvl || 'expert')}<div class="muted">${T('Only when you play alone with robots; your partner always plays its best. Tournaments and online tables always use expert robots.')}</div></div>
-   <div class="grp"><span>${T('Robot speed')}</span>${seg('speed', [[0, T('Slow')], [1, T('Normal')], [2, T('Fast')]], SET.speed)}</div>
    <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
    <div class="grp"><span>${T('Correct the robots')}</span>${seg('fixbot', [[1, T('On')], [0, T('Off')]], SET.fixBot ? 1 : 0)}<div class="muted">${T("When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.")}</div></div>
    <div class="grp"><span>${T('Play a forced card automatically')}</span>${seg('auto', [[1, T('On')], [0, T('Off')]], SET.auto ? 1 : 0)}</div>
    <div class="grp"><span>${T('Sound and buzz when it is your turn')}</span>${seg('alert', [['online', T('At online tables')], ['always', T('Always')], ['off', T('Off')]], SET.alert || 'online')}</div>
-   <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div></div>
+   <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify !== false ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div></div>
    <div class="grp"><span>${T('Table sounds')}</span>${seg('sfx', [[1, T('On')], [0, T('Off')]], SET.sfx ? 1 : 0)}</div>
-   <div class="grp"><span>${T('Screen')}</span>${seg('theme', [['auto', T('Automatic')], ['light', T('Light')], ['dark', T('Dark')]], SET.theme || 'auto')}</div>
-   <div class="grp"><span>${T('Table')}</span>${seg('felt', [['green', '🟩 ' + T('Green')], ['blue', '🟦 ' + T('Blue')], ['wood', '🟫 ' + T('Wood')], ['red', '🟥 ' + T('Red')], ['dark', '⬛ ' + T('Dark')]], SET.felt || 'green')}</div>
-   <div class="grp"><span>${T('Card back')}</span>${seg('back', [['blue', '<span class="bkx" style="background:repeating-linear-gradient(45deg,#1f4fa0 0 3px,#2b63c2 3px 6px)"></span>'], ['green', '<span class="bkx" style="background:radial-gradient(circle,#2f8a52 0 25%,transparent 26%) 0 0/6px 6px,#1b5e3a"></span>'], ['red', '<span class="bkx" style="background:repeating-linear-gradient(-45deg,#8e1b2c 0 3px,#b72c40 3px 6px)"></span>'], ['navy', '<span class="bkx" style="background:linear-gradient(135deg,transparent 40%,#d9b25c 40% 60%,transparent 60%) 0 0/7px 7px,#14213d"></span>']], SET.back || 'blue')}</div>
-   <div class="grp"><span>${T('Deck')}</span>${seg('four', [[0, T('2 colours') + ' <span class="sym s3">♠</span><span class="sym s2 red">♥</span><span class="sym s1 red">♦</span><span class="sym s0">♣</span>'], [1, T('4 colours') + ' <b style="color:#1b1b1b">♠</b><b style="color:#c4122f">♥</b><b style="color:#e07000">♦</b><b style="color:#1a8a3a">♣</b>']], SET.four ? 1 : 0)}</div>
-   <div class="grp"><span>${T('Card size')}</span>${seg('big', [[0, T('Normal')], [1, T('Large')]], SET.big ? 1 : 0)}</div>
-   <div class="grp"><span>${T('Sync between devices (GitHub)')}</span><div class="muted">${T('Scores, statistics and the list of deals you have seen are kept in a private gist on your GitHub account. Play offline on any device; everything merges when it is online again.')}</div>
-   ${GitSync.enabled ? `<div><b>${T('Connected.')}</b> ${syncState.msg || (GitSync.last ? T('Last sync') + ' ' + new Date(GitSync.last).toLocaleString() : "")}</div><div class="row2"><button class="btn gold" id="sNow">${T('Sync now')}</button><button class="btn" id="sOff">${T('Disconnect')}</button></div>` : `<div class="muted">1. ${T('Open')} <a href="https://github.com/settings/tokens/new?scopes=gist&description=Bridge%20Table" target="_blank" rel="noopener">github.com → new token</a> (${T('scope: <b>gist</b> only, expiration: no expiration) and copy the token.')}<br>2. ${T('Paste it here on each device (PC and phone).')}</div><div class="row2"><input id="syncToken" type="password" autocomplete="off" placeholder="ghp_…" class="tok"><button class="btn gold" id="sSave">${T('Connect')}</button></div>${syncState.msg ? `<div class="muted">${syncState.msg}</div>` : ""}`}</div>
    <div class="muted">${T('Changes apply from the next deal.')} ${Store.online ? T('Settings and scores are saved to your account.') : T('Scores are saved on this device.')} ${T('Every deal you get is new — a deal is never dealt to you twice.')}</div>
    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button><button class="btn" id="sReset">${T('Delete score history')}</button></div>
    <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>
@@ -2800,7 +2767,7 @@ setTimeout(() => { if (typeof Net !== 'undefined' && !Net.st.tourResumed) { Net.
 /* a phone or PC notification while the app is in the background (Settings → Notifications): join requests,
    messages, invitations and your turn at an online table. It needs the app open somewhere: a closed app gets nothing */
 function notify(text) {
-  if (!SET.notify || !document.hidden || !text || !('Notification' in window) || Notification.permission !== 'granted') return;
+  if (SET.notify === false || !document.hidden || !text || !('Notification' in window) || Notification.permission !== 'granted') return;
   const o = { body: text, icon: 'icons/icon-192.png', tag: 'bridge-table', renotify: true };
   try {
     if (navigator.serviceWorker) navigator.serviceWorker.getRegistration().then(r => r ? r.showNotification(T('Bridge Table'), o) : new Notification(T('Bridge Table'), o)).catch(() => {});
@@ -2815,6 +2782,13 @@ function setNotify(on) {
     if (p !== 'granted') flash(T('Notifications are blocked — allow them in the browser settings'), 3500);
   }).catch(() => {});
 }
+// notifications are on unless switched off: the browser's question comes once, with the first tap after the name
+document.addEventListener('pointerdown', function askNotify() {
+  if (!myNm() || SET.notify === false || SET.notifyAsked || !('Notification' in window)) return;
+  document.removeEventListener('pointerdown', askNotify);
+  SET.notifyAsked = 1; Store.saveSettings(SET); save();
+  if (Notification.permission === 'default') Notification.requestPermission().then(p => { if (p === 'denied') { SET.notify = false; Store.saveSettings(SET); save(); } }).catch(() => {});
+});
 /* private messages in the lobby chat: tap a player's name, the next message goes only to them (✕ ends it) */
 function pmTo(name) {
   ui.pmTo = name; Net.st.dmUnread[Net.nameKey ? Net.nameKey(name) : name.toLowerCase()] = 0;
