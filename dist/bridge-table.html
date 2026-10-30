@@ -1885,6 +1885,20 @@ body.homev2 .home.v2 .prac .prask:hover{background:#fff;border-color:var(--h2-br
 :root[data-theme="dark"] body.homev2 .home.v2 .prac .prask{color:var(--h2-ink);border-color:var(--h2-line)}
 body.homev2 .home.v2 .prac .prask .supc{background:#c4122f;color:#fff;border-radius:999px;padding:0 6px;font-size:12px}
 @media (max-width:640px){ body.homev2 .h2pr .h2chtag{font-size:12px} }
+/* the team match: which table is which room, the team names two by two, a match's score */
+.tmleg{display:grid;gap:6px;margin:6px 0}
+.tmleg>div{padding:7px 10px;border-radius:10px;background:rgba(242,201,76,.12);border:1px solid rgba(184,134,11,.25)}
+.tmleg small{display:block;opacity:.8;margin-top:2px}
+.tmnames{display:grid;gap:6px}
+.tmpair{display:grid;grid-template-columns:auto 1fr auto 1fr;align-items:center;gap:6px}
+.tmpair input{min-width:0;width:100%}
+.tmpair small{opacity:.75;white-space:nowrap}
+.teams .tscore small{display:block;color:#f2c94c;font-weight:700}
+.teams .tmhead{font-weight:700;margin-top:8px}
+.tmbd summary{cursor:pointer;font-weight:700;margin:4px 0}
+.sbtrow b small,.sbtab td small{display:block;font-weight:400;opacity:.75;font-size:11px}
+.sbtno small{font-weight:400;opacity:.8}
+@media (max-width:480px){ .tmpair{grid-template-columns:1fr auto 1fr} .tmpair small{grid-column:1/-1} }
 
 </style>
 
@@ -4799,6 +4813,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Team {0}": "Takım {0}", "Open room": "Açık salon", "Closed room": "Kapalı salon", "Match {0}": "{0}. maç", "Teams": "Takımlar", "Team names": "Takım isimleri", "{0} teams": "{0} takım", "Team": "Takım", "Board by board": "El el", "Two teams, two rooms, real cards: the app scores IMPs and VPs.": "İki takım, iki salon, gerçek kartlar: IMP ve VP'yi uygulama hesaplar.", "Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.": "Takımlar ikişer ikişer gerçek kartlarla karşılaşır: her takımın bir çifti Açık salonda, diğeri Kapalı salonda aynı elleri oynar. Uygulama iki salonu IMP ile karşılaştırır ve maçın VP'sini verir. Masadaki herkes o masanın oynadığı elleri istediği sırayla girebilir.", "{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.": "{0} masa: her maçta ilk takım Açık salonda, ikinci takım Kapalı salonda Kuzey-Güney oturur.", "IMP from North-South’s side, against the other room of the same match.": "IMP Kuzey-Güney açısından, aynı maçın diğer salonuna karşı.", "Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).": "Bir el, iki salon da girdiğinde sayılır: iki Kuzey-Güney skorunun farkı IMP'ye çevrilir. VP, WBF ölçeğine göre (toplam 20).",
     "Tick the players whose score history is deleted: their boards, results and rating start again (their name, settings and championship results stay). Boards played after this are kept.": "Skor geçmişi silinecek oyuncuları işaretle: elleri, sonuçları ve puanı sıfırdan başlar (ismi, ayarları ve şampiyona sonuçları kalır). Bundan sonra oynanan eller korunur.", "Delete the ticked ({0})": "İşaretlileri sil ({0})", "Delete the score history of {0}?": "{0} için skor geçmişi silinsin mi?",
     "Same boards for everyone, one crown. Can you take it?": "Herkese aynı eller, tek bir taç. Sen alabilir misin?", "Everyone plays the same 8 boards a round — your result is set against every other player's. No clock: play whenever you like. The leader wears the 👑, the month's best takes the trophy.": "Her turda herkes aynı 8 eli oynar — sonucun diğer bütün oyuncularınkiyle karşılaştırılır. Süre yok: istediğin zaman oyna. Lider 👑 taşır, ayın en iyisi kupayı alır.", "Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.": "Her oyuncu bir karttır: en düşük ♣2'den en yüksek ♠A'ya, 52 basamak. Kartını puanın ve oynadığın el sayısı belirler; kupalar kalıcı basamak kazandırır.", "Beginning: the first {0} boards": "Başlangıç: ilk {0} el", "Intermediate: from {0} boards": "Orta: {0} elden sonra", "Advanced: from {0} boards": "İleri: {0} elden sonra", "Expert: from {0} boards — ♠A only for the championship's leader": "Uzman: {0} elden sonra — ♠A yalnızca şampiyona liderinin", "Every 8 rating points is one card higher. A month's championship +3 cards, 2nd or 3rd place +1, for good.": "Her 8 puan bir kart yukarı. Ay şampiyonluğu +3 kart, 2. veya 3.lük +1 kart; kalıcı.", "Your card": "Senin kartın",
     "Rank card": "Kart rütbesi", "Leader of the championship": "Şampiyonanın lideri", "The top card for a player: ♠A belongs to the leader of the championship.": "Bir oyuncunun ulaşabileceği en yüksek kart: ♠A şampiyonanın liderine aittir.", "{0} more boards to reach {1}": "{1} için {0} el daha", "{0} rating points to {1}": "{1} için {0} puan daha",
@@ -5204,6 +5219,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Team {0}": "Lag {0}", "Open room": "Åpent rom", "Closed room": "Lukket rom", "Match {0}": "Kamp {0}", "Teams": "Lag", "Team names": "Lagnavn", "{0} teams": "{0} lag", "Team": "Lag", "Board by board": "Spill for spill", "Two teams, two rooms, real cards: the app scores IMPs and VPs.": "To lag, to rom, ekte kort: appen regner IMP og VP.", "Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.": "Lagene møtes to og to med ekte kort: ett par fra hvert lag i åpent rom, det andre i lukket rom, på de samme spillene. Appen sammenligner rommene i IMP og gir kampen VP. Alle ved et bord kan legge inn spillene bordet har spilt, i hvilken som helst rekkefølge.", "{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.": "{0} bord: i hver kamp sitter det første laget Nord-Syd i åpent rom, det andre i lukket rom.", "IMP from North-South’s side, against the other room of the same match.": "IMP sett fra Nord-Syd, mot det andre rommet i samme kamp.", "Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).": "Et spill teller når begge rom har lagt det inn: forskjellen mellom de to Nord-Syd-resultatene i IMP. VP etter WBF-skalaen (20 å dele).",
     "Same boards for everyone, one crown. Can you take it?": "Samme spill for alle, én krone. Kan du ta den?", "Everyone plays the same 8 boards a round — your result is set against every other player's. No clock: play whenever you like. The leader wears the 👑, the month's best takes the trophy.": "Alle spiller de samme 8 spillene i en runde — resultatet ditt måles mot alle andres. Ingen klokke: spill når du vil. Lederen bærer 👑, månedens beste tar trofeet.", "Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.": "Hver spiller er et kort, fra ♣2 (lavest) til ♠A (høyest): 52 trinn. Ratingen og antall spill avgjør det; trofeer gir varige trinn.", "Beginning: the first {0} boards": "Begynner: de første {0} spillene", "Intermediate: from {0} boards": "Middels: fra {0} spill", "Advanced: from {0} boards": "Viderekommen: fra {0} spill", "Expert: from {0} boards — ♠A only for the championship's leader": "Ekspert: fra {0} spill — ♠A bare for lederen i mesterskapet", "Every 8 rating points is one card higher. A month's championship +3 cards, 2nd or 3rd place +1, for good.": "Hvert 8. ratingpoeng er ett kort høyere. Månedens mesterskap +3 kort, 2. eller 3. plass +1, for alltid.", "Your card": "Ditt kort",
     "Rank card": "Rangkort", "Leader of the championship": "Leder i mesterskapet", "The top card for a player: ♠A belongs to the leader of the championship.": "Det høyeste kortet for en spiller: ♠A tilhører lederen i mesterskapet.", "{0} more boards to reach {1}": "{0} spill til før {1}", "{0} rating points to {1}": "{0} ratingpoeng til {1}",
     "Month": "Måned", "Honour roll": "Æresliste", "Trophy cabinet": "Troféskap", "{0} · {1} champion": "{0} · {1}-mester", "{0} · {1}, 2nd place": "{0} · {1}, 2. plass", "{0} · {1}, 3rd place": "{0} · {1}, 3. plass", "The champions of {0}: {1} (IMP) · {2} (MP)": "Mesterne for {0}: {1} (IMP) · {2} (MP)", "{0}: only this month's boards. At least {1} boards in the month to win it; the champions are known on the 1st.": "{0}: bare denne månedens spill. Minst {1} spill i måneden for å vinne den; mesterne kåres den 1.", "No champions yet: the first ones are known when the first month closes.": "Ingen mestere ennå: de første kåres når den første måneden er over.",
@@ -5607,6 +5623,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Team {0}": "Equipo {0}", "Open room": "Sala abierta", "Closed room": "Sala cerrada", "Match {0}": "Partido {0}", "Teams": "Equipos", "Team names": "Nombres de los equipos", "{0} teams": "{0} equipos", "Team": "Equipo", "Board by board": "Mano a mano", "Two teams, two rooms, real cards: the app scores IMPs and VPs.": "Dos equipos, dos salas, cartas reales: la app calcula IMP y VP.", "Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.": "Los equipos se enfrentan de dos en dos con cartas reales: una pareja de cada equipo en la sala abierta y la otra en la cerrada, con las mismas manos. La app compara las salas en IMP y da los VP del partido. Cualquiera en una mesa introduce las manos que jugó esa mesa, en cualquier orden.", "{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.": "{0} mesas: en cada partido el primer equipo se sienta Norte-Sur en la sala abierta y el segundo en la cerrada.", "IMP from North-South’s side, against the other room of the same match.": "IMP desde Norte-Sur, contra la otra sala del mismo partido.", "Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).": "Una mano cuenta cuando ambas salas la han introducido: la diferencia de los dos resultados Norte-Sur en IMP. VP según la escala WBF (20 a repartir).",
     "Same boards for everyone, one crown. Can you take it?": "Las mismas manos para todos, una sola corona. ¿Te la llevas?", "Everyone plays the same 8 boards a round — your result is set against every other player's. No clock: play whenever you like. The leader wears the 👑, the month's best takes the trophy.": "Todos juegan las mismas 8 manos por ronda — tu resultado se compara con el de todos los demás. Sin reloj: juega cuando quieras. El líder lleva la 👑, el mejor del mes se lleva el trofeo.", "Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.": "Cada jugador es una carta, del ♣2 (la más baja) al ♠A (la más alta): 52 escalones. Tu puntuación y las manos jugadas la deciden; los trofeos suman escalones para siempre.", "Beginning: the first {0} boards": "Inicio: las primeras {0} manos", "Intermediate: from {0} boards": "Intermedio: desde {0} manos", "Advanced: from {0} boards": "Avanzado: desde {0} manos", "Expert: from {0} boards — ♠A only for the championship's leader": "Experto: desde {0} manos — el ♠A solo para el líder del campeonato", "Every 8 rating points is one card higher. A month's championship +3 cards, 2nd or 3rd place +1, for good.": "Cada 8 puntos es una carta más alta. Un campeonato del mes +3 cartas, 2.º o 3.er puesto +1, para siempre.", "Your card": "Tu carta",
     "Rank card": "Carta de rango", "Leader of the championship": "Líder del campeonato", "The top card for a player: ♠A belongs to the leader of the championship.": "La carta más alta para un jugador: el ♠A es del líder del campeonato.", "{0} more boards to reach {1}": "{0} manos más para llegar a {1}", "{0} rating points to {1}": "{0} puntos para {1}",
     "Month": "Mes", "Honour roll": "Cuadro de honor", "Trophy cabinet": "Vitrina de trofeos", "{0} · {1} champion": "{0} · campeón {1}", "{0} · {1}, 2nd place": "{0} · {1}, 2.º puesto", "{0} · {1}, 3rd place": "{0} · {1}, 3.er puesto", "The champions of {0}: {1} (IMP) · {2} (MP)": "Los campeones de {0}: {1} (IMP) · {2} (MP)", "{0}: only this month's boards. At least {1} boards in the month to win it; the champions are known on the 1st.": "{0}: solo las manos de este mes. Al menos {1} manos en el mes para ganarlo; los campeones se conocen el día 1.", "No champions yet: the first ones are known when the first month closes.": "Aún no hay campeones: los primeros se conocen al cerrar el primer mes.",
@@ -6038,6 +6055,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Team {0}": "Équipe {0}", "Open room": "Salle ouverte", "Closed room": "Salle fermée", "Match {0}": "Match {0}", "Teams": "Équipes", "Team names": "Noms des équipes", "{0} teams": "{0} équipes", "Team": "Équipe", "Board by board": "Donne par donne", "Two teams, two rooms, real cards: the app scores IMPs and VPs.": "Deux équipes, deux salles, de vraies cartes : l’appli calcule IMP et PV.", "Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.": "Les équipes s’affrontent deux à deux avec de vraies cartes : une paire de chaque équipe en salle ouverte, l’autre en salle fermée, sur les mêmes donnes. L’appli compare les salles en IMP et donne les PV du match. Chacun à une table saisit les donnes jouées à cette table, dans n’importe quel ordre.", "{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.": "{0} tables : dans chaque match la première équipe est Nord-Sud en salle ouverte, la seconde en salle fermée.", "IMP from North-South’s side, against the other room of the same match.": "IMP du côté Nord-Sud, contre l’autre salle du même match.", "Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).": "Une donne compte quand les deux salles l’ont saisie : la différence des deux marques Nord-Sud en IMP. PV selon l’échelle WBF (20 à partager).",
     "Same boards for everyone, one crown. Can you take it?": "Les mêmes donnes pour tous, une seule couronne. Saurez-vous la prendre ?", "Everyone plays the same 8 boards a round — your result is set against every other player's. No clock: play whenever you like. The leader wears the 👑, the month's best takes the trophy.": "Chacun joue les mêmes 8 donnes par tour — votre résultat est comparé à celui de tous les autres. Pas d’horloge : jouez quand vous voulez. Le leader porte la 👑, le meilleur du mois remporte le trophée.", "Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.": "Chaque joueur est une carte, du ♣2 (la plus basse) à l’♠A (la plus haute) : 52 marches. Votre classement et les donnes jouées la déterminent ; les trophées ajoutent des marches pour de bon.", "Beginning: the first {0} boards": "Débutant : les {0} premières donnes", "Intermediate: from {0} boards": "Intermédiaire : dès {0} donnes", "Advanced: from {0} boards": "Avancé : dès {0} donnes", "Expert: from {0} boards — ♠A only for the championship's leader": "Expert : dès {0} donnes — l’♠A seulement pour le leader du championnat", "Every 8 rating points is one card higher. A month's championship +3 cards, 2nd or 3rd place +1, for good.": "Tous les 8 points, une carte de plus. Un titre du mois +3 cartes, 2e ou 3e place +1, définitivement.", "Your card": "Votre carte",
     "Rank card": "Carte de rang", "Leader of the championship": "Leader du championnat", "The top card for a player: ♠A belongs to the leader of the championship.": "La plus haute carte pour un joueur : l’♠A appartient au leader du championnat.", "{0} more boards to reach {1}": "encore {0} donnes pour atteindre {1}", "{0} rating points to {1}": "{0} points de classement pour {1}",
     "Month": "Mois", "Honour roll": "Palmarès", "Trophy cabinet": "Vitrine des trophées", "{0} · {1} champion": "{0} · champion {1}", "{0} · {1}, 2nd place": "{0} · {1}, 2e place", "{0} · {1}, 3rd place": "{0} · {1}, 3e place", "The champions of {0}: {1} (IMP) · {2} (MP)": "Les champions de {0} : {1} (IMP) · {2} (MP)", "{0}: only this month's boards. At least {1} boards in the month to win it; the champions are known on the 1st.": "{0} : seulement les donnes de ce mois. Au moins {1} donnes dans le mois pour le gagner ; les champions sont connus le 1er.", "No champions yet: the first ones are known when the first month closes.": "Pas encore de champions : les premiers seront connus à la fin du premier mois.",
@@ -6469,6 +6487,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Team {0}": "Squadra {0}", "Open room": "Sala aperta", "Closed room": "Sala chiusa", "Match {0}": "Incontro {0}", "Teams": "Squadre", "Team names": "Nomi delle squadre", "{0} teams": "{0} squadre", "Team": "Squadra", "Board by board": "Smazzata per smazzata", "Two teams, two rooms, real cards: the app scores IMPs and VPs.": "Due squadre, due sale, carte vere: l’app calcola IMP e VP.", "Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.": "Le squadre si incontrano a due a due con carte vere: una coppia di ogni squadra in sala aperta, l’altra in sala chiusa, sulle stesse smazzate. L’app confronta le sale a IMP e assegna i VP dell’incontro. Chiunque a un tavolo inserisce le smazzate giocate a quel tavolo, in qualsiasi ordine.", "{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.": "{0} tavoli: in ogni incontro la prima squadra siede Nord-Sud in sala aperta, la seconda in sala chiusa.", "IMP from North-South’s side, against the other room of the same match.": "IMP dal lato Nord-Sud, contro l’altra sala dello stesso incontro.", "Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).": "Una smazzata conta quando entrambe le sale l’hanno inserita: la differenza dei due punteggi Nord-Sud in IMP. VP secondo la scala WBF (20 da dividere).",
     "Same boards for everyone, one crown. Can you take it?": "Le stesse mani per tutti, una sola corona. Riuscirai a prenderla?", "Everyone plays the same 8 boards a round — your result is set against every other player's. No clock: play whenever you like. The leader wears the 👑, the month's best takes the trophy.": "Tutti giocano le stesse 8 mani per turno — il tuo risultato è confrontato con quello di tutti gli altri. Niente orologio: gioca quando vuoi. Il leader porta la 👑, il migliore del mese vince il trofeo.", "Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.": "Ogni giocatore è una carta, dal ♣2 (la più bassa) all’♠A (la più alta): 52 gradini. Il tuo punteggio e le mani giocate la decidono; i trofei aggiungono gradini per sempre.", "Beginning: the first {0} boards": "Inizio: le prime {0} mani", "Intermediate: from {0} boards": "Intermedio: da {0} mani", "Advanced: from {0} boards": "Avanzato: da {0} mani", "Expert: from {0} boards — ♠A only for the championship's leader": "Esperto: da {0} mani — l’♠A solo per il leader del campionato", "Every 8 rating points is one card higher. A month's championship +3 cards, 2nd or 3rd place +1, for good.": "Ogni 8 punti una carta più in alto. Un titolo del mese +3 carte, 2° o 3° posto +1, per sempre.", "Your card": "La tua carta",
     "Rank card": "Carta di rango", "Leader of the championship": "Leader del campionato", "The top card for a player: ♠A belongs to the leader of the championship.": "La carta più alta per un giocatore: l’♠A spetta al leader del campionato.", "{0} more boards to reach {1}": "ancora {0} mani per arrivare a {1}", "{0} rating points to {1}": "{0} punti per {1}",
     "Month": "Mese", "Honour roll": "Albo d’oro", "Trophy cabinet": "Bacheca dei trofei", "{0} · {1} champion": "{0} · campione {1}", "{0} · {1}, 2nd place": "{0} · {1}, 2° posto", "{0} · {1}, 3rd place": "{0} · {1}, 3° posto", "The champions of {0}: {1} (IMP) · {2} (MP)": "I campioni di {0}: {1} (IMP) · {2} (MP)", "{0}: only this month's boards. At least {1} boards in the month to win it; the champions are known on the 1st.": "{0}: solo le mani di questo mese. Almeno {1} mani nel mese per vincerlo; i campioni si conoscono il giorno 1.", "No champions yet: the first ones are known when the first month closes.": "Ancora nessun campione: i primi si conoscono alla chiusura del primo mese.",
@@ -6900,6 +6919,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Team {0}": "Team {0}", "Open room": "Offener Raum", "Closed room": "Geschlossener Raum", "Match {0}": "Kampf {0}", "Teams": "Teams", "Team names": "Teamnamen", "{0} teams": "{0} Teams", "Team": "Team", "Board by board": "Board für Board", "Two teams, two rooms, real cards: the app scores IMPs and VPs.": "Zwei Teams, zwei Räume, echte Karten: die App rechnet IMP und VP.", "Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.": "Die Teams spielen paarweise gegeneinander mit echten Karten: ein Paar jedes Teams im offenen Raum, das andere im geschlossenen Raum, mit denselben Boards. Die App vergleicht die Räume in IMP und vergibt die VP des Kampfes. Jeder am Tisch gibt die dort gespielten Boards ein, in beliebiger Reihenfolge.", "{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.": "{0} Tische: in jedem Kampf sitzt das erste Team im offenen Raum Nord-Süd, das zweite im geschlossenen Raum.", "IMP from North-South’s side, against the other room of the same match.": "IMP aus Sicht von Nord-Süd, gegen den anderen Raum desselben Kampfes.", "Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).": "Ein Board zählt, wenn beide Räume es eingegeben haben: die Differenz der beiden Nord-Süd-Ergebnisse in IMP. VP nach der WBF-Skala (20 zu verteilen).",
     "Same boards for everyone, one crown. Can you take it?": "Dieselben Boards für alle, eine Krone. Holst du sie dir?", "Everyone plays the same 8 boards a round — your result is set against every other player's. No clock: play whenever you like. The leader wears the 👑, the month's best takes the trophy.": "Alle spielen pro Runde dieselben 8 Boards — dein Ergebnis wird mit allen anderen verglichen. Keine Uhr: spiel, wann du willst. Der Führende trägt die 👑, der Beste des Monats holt die Trophäe.", "Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.": "Jeder Spieler ist eine Karte, von ♣2 (niedrigste) bis ♠A (höchste): 52 Stufen. Deine Wertung und deine gespielten Boards bestimmen sie; Trophäen geben bleibende Stufen.", "Beginning: the first {0} boards": "Anfang: die ersten {0} Boards", "Intermediate: from {0} boards": "Mittel: ab {0} Boards", "Advanced: from {0} boards": "Fortgeschritten: ab {0} Boards", "Expert: from {0} boards — ♠A only for the championship's leader": "Experte: ab {0} Boards — ♠A nur für den Führenden der Meisterschaft", "Every 8 rating points is one card higher. A month's championship +3 cards, 2nd or 3rd place +1, for good.": "Alle 8 Wertungspunkte eine Karte höher. Ein Monatstitel +3 Karten, 2. oder 3. Platz +1, dauerhaft.", "Your card": "Deine Karte",
     "Rank card": "Rangkarte", "Leader of the championship": "Führender der Meisterschaft", "The top card for a player: ♠A belongs to the leader of the championship.": "Die höchste Karte für einen Spieler: ♠A gehört dem Führenden der Meisterschaft.", "{0} more boards to reach {1}": "noch {0} Boards bis {1}", "{0} rating points to {1}": "{0} Wertungspunkte bis {1}",
     "Month": "Monat", "Honour roll": "Ehrentafel", "Trophy cabinet": "Trophäenschrank", "{0} · {1} champion": "{0} · {1}-Meister", "{0} · {1}, 2nd place": "{0} · {1}, 2. Platz", "{0} · {1}, 3rd place": "{0} · {1}, 3. Platz", "The champions of {0}: {1} (IMP) · {2} (MP)": "Die Meister im {0}: {1} (IMP) · {2} (MP)", "{0}: only this month's boards. At least {1} boards in the month to win it; the champions are known on the 1st.": "{0}: nur die Boards dieses Monats. Mindestens {1} Boards im Monat, um ihn zu gewinnen; die Meister stehen am 1. fest.", "No champions yet: the first ones are known when the first month closes.": "Noch keine Meister: die ersten stehen fest, wenn der erste Monat endet.",
@@ -7331,6 +7351,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Team {0}": "Команда {0}", "Open room": "Открытый зал", "Closed room": "Закрытый зал", "Match {0}": "Матч {0}", "Teams": "Команды", "Team names": "Названия команд", "{0} teams": "{0} команд", "Team": "Команда", "Board by board": "По сдачам", "Two teams, two rooms, real cards: the app scores IMPs and VPs.": "Две команды, два зала, настоящие карты: приложение считает IMP и VP.", "Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.": "Команды встречаются попарно с настоящими картами: одна пара каждой команды в открытом зале, другая в закрытом, на тех же сдачах. Приложение сравнивает залы в IMP и даёт матчу VP. Любой за столом вводит сдачи, сыгранные за этим столом, в любом порядке.", "{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.": "{0} столов: в каждом матче первая команда сидит Север-Юг в открытом зале, вторая — в закрытом.", "IMP from North-South’s side, against the other room of the same match.": "IMP со стороны Север-Юг, против другого зала того же матча.", "Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).": "Сдача засчитывается, когда её ввели оба зала: разница двух результатов Север-Юг в IMP. VP по шкале WBF (всего 20).",
     "Same boards for everyone, one crown. Can you take it?": "Одинаковые сдачи для всех, одна корона. Сможете её взять?", "Everyone plays the same 8 boards a round — your result is set against every other player's. No clock: play whenever you like. The leader wears the 👑, the month's best takes the trophy.": "В каждом туре все играют одни и те же 8 сдач — ваш результат сравнивается с результатами всех остальных. Без часов: играйте когда хотите. Лидер носит 👑, лучший за месяц получает кубок.", "Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.": "Каждый игрок — карта, от ♣2 (младшая) до ♠A (старшая): 52 ступени. Её определяют рейтинг и число сыгранных сдач; трофеи дают постоянные ступени.", "Beginning: the first {0} boards": "Начало: первые {0} сдач", "Intermediate: from {0} boards": "Средний: от {0} сдач", "Advanced: from {0} boards": "Продвинутый: от {0} сдач", "Expert: from {0} boards — ♠A only for the championship's leader": "Эксперт: от {0} сдач — ♠A только у лидера чемпионата", "Every 8 rating points is one card higher. A month's championship +3 cards, 2nd or 3rd place +1, for good.": "Каждые 8 очков рейтинга — на карту выше. Победа в месяце +3 карты, 2-е или 3-е место +1, навсегда.", "Your card": "Ваша карта",
     "Rank card": "Карта ранга", "Leader of the championship": "Лидер чемпионата", "The top card for a player: ♠A belongs to the leader of the championship.": "Высшая карта для игрока: ♠A принадлежит лидеру чемпионата.", "{0} more boards to reach {1}": "ещё {0} сдач до {1}", "{0} rating points to {1}": "{0} очков рейтинга до {1}",
     "Month": "Месяц", "Honour roll": "Доска почёта", "Trophy cabinet": "Витрина трофеев", "{0} · {1} champion": "{0} · чемпион {1}", "{0} · {1}, 2nd place": "{0} · {1}, 2-е место", "{0} · {1}, 3rd place": "{0} · {1}, 3-е место", "The champions of {0}: {1} (IMP) · {2} (MP)": "Чемпионы ({0}): {1} (IMP) · {2} (MP)", "{0}: only this month's boards. At least {1} boards in the month to win it; the champions are known on the 1st.": "{0}: только сдачи этого месяца. Чтобы выиграть месяц, нужно не меньше {1} сдач; чемпионы известны 1-го числа.", "No champions yet: the first ones are known when the first month closes.": "Чемпионов пока нет: первые станут известны после окончания первого месяца.",
@@ -7762,6 +7783,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Team {0}": "Drużyna {0}", "Open room": "Pokój otwarty", "Closed room": "Pokój zamknięty", "Match {0}": "Mecz {0}", "Teams": "Drużyny", "Team names": "Nazwy drużyn", "{0} teams": "{0} drużyn", "Team": "Drużyna", "Board by board": "Rozdanie po rozdaniu", "Two teams, two rooms, real cards: the app scores IMPs and VPs.": "Dwie drużyny, dwa pokoje, prawdziwe karty: aplikacja liczy IMP i VP.", "Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.": "Drużyny grają parami prawdziwymi kartami: jedna para każdej drużyny w pokoju otwartym, druga w zamkniętym, na tych samych rozdaniach. Aplikacja porównuje pokoje w IMP i daje meczowi VP. Każdy przy stole wpisuje rozdania zagrane przy tym stole, w dowolnej kolejności.", "{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.": "{0} stołów: w każdym meczu pierwsza drużyna siedzi NS w pokoju otwartym, druga w zamkniętym.", "IMP from North-South’s side, against the other room of the same match.": "IMP z perspektywy NS, przeciw drugiemu pokojowi tego samego meczu.", "Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).": "Rozdanie liczy się, gdy oba pokoje je wpisały: różnica dwóch wyników NS w IMP. VP według skali WBF (20 do podziału).",
     "Same boards for everyone, one crown. Can you take it?": "Te same rozdania dla wszystkich, jedna korona. Zdobędziesz ją?", "Everyone plays the same 8 boards a round — your result is set against every other player's. No clock: play whenever you like. The leader wears the 👑, the month's best takes the trophy.": "W każdej rundzie wszyscy grają te same 8 rozdań — twój wynik porównuje się z wynikami wszystkich innych. Bez zegara: graj kiedy chcesz. Lider nosi 👑, najlepszy w miesiącu bierze puchar.", "Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.": "Każdy gracz to karta, od ♣2 (najniższej) do ♠A (najwyższej): 52 stopnie. Decydują ranking i liczba rozdań; trofea dodają stałe stopnie.", "Beginning: the first {0} boards": "Początek: pierwsze {0} rozdań", "Intermediate: from {0} boards": "Średni: od {0} rozdań", "Advanced: from {0} boards": "Zaawansowany: od {0} rozdań", "Expert: from {0} boards — ♠A only for the championship's leader": "Ekspert: od {0} rozdań — ♠A tylko dla lidera mistrzostw", "Every 8 rating points is one card higher. A month's championship +3 cards, 2nd or 3rd place +1, for good.": "Co 8 punktów rankingu jedna karta wyżej. Mistrzostwo miesiąca +3 karty, 2. lub 3. miejsce +1, na stałe.", "Your card": "Twoja karta",
     "Rank card": "Karta rangi", "Leader of the championship": "Lider mistrzostw", "The top card for a player: ♠A belongs to the leader of the championship.": "Najwyższa karta dla gracza: ♠A należy do lidera mistrzostw.", "{0} more boards to reach {1}": "jeszcze {0} rozdań do {1}", "{0} rating points to {1}": "{0} punktów rankingu do {1}",
     "Month": "Miesiąc", "Honour roll": "Lista honorowa", "Trophy cabinet": "Gablota z trofeami", "{0} · {1} champion": "{0} · mistrz {1}", "{0} · {1}, 2nd place": "{0} · {1}, 2. miejsce", "{0} · {1}, 3rd place": "{0} · {1}, 3. miejsce", "The champions of {0}: {1} (IMP) · {2} (MP)": "Mistrzowie ({0}): {1} (IMP) · {2} (MP)", "{0}: only this month's boards. At least {1} boards in the month to win it; the champions are known on the 1st.": "{0}: tylko rozdania z tego miesiąca. Co najmniej {1} rozdań w miesiącu, by go wygrać; mistrzów poznamy 1. dnia.", "No champions yet: the first ones are known when the first month closes.": "Jeszcze brak mistrzów: pierwszych poznamy po zakończeniu pierwszego miesiąca.",
@@ -8193,6 +8215,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Team {0}": "{0} 队", "Open room": "开室", "Closed room": "闭室", "Match {0}": "第 {0} 场", "Teams": "队伍", "Team names": "队名", "{0} teams": "{0} 支队", "Team": "队伍", "Board by board": "逐副", "Two teams, two rooms, real cards: the app scores IMPs and VPs.": "两队、两室、真实纸牌:应用计算 IMP 和 VP。", "Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.": "各队两两用真实纸牌对抗:每队一对在开室,另一对在闭室,打同样的牌。应用按 IMP 比较两室并给出比赛的 VP。桌上任何人都可按任意顺序录入该桌打过的牌。", "{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.": "{0} 桌:每场比赛第一队在开室坐南北,第二队在闭室坐南北。", "IMP from North-South’s side, against the other room of the same match.": "IMP 以南北方计算,对比同一场比赛的另一室。", "Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).": "两室都录入后该副牌才计分:两个南北得分之差换算为 IMP。VP 按 WBF 标准(共 20)。",
     "Same boards for everyone, one crown. Can you take it?": "人人同样的牌，只有一顶王冠。你能拿下吗？", "Everyone plays the same 8 boards a round — your result is set against every other player's. No clock: play whenever you like. The leader wears the 👑, the month's best takes the trophy.": "每轮所有人打同样的8副牌——你的成绩与其他所有人比较。不计时：想打就打。领先者戴上👑，月度最佳赢得奖杯。", "Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.": "每位玩家都是一张牌，从♣2（最低）到♠A（最高）：共52级。由你的积分和打过的牌数决定；奖杯带来永久等级。", "Beginning: the first {0} boards": "入门：前{0}副牌", "Intermediate: from {0} boards": "中级：{0}副牌起", "Advanced: from {0} boards": "高级：{0}副牌起", "Expert: from {0} boards — ♠A only for the championship's leader": "专家：{0}副牌起——♠A只属于锦标赛领先者", "Every 8 rating points is one card higher. A month's championship +3 cards, 2nd or 3rd place +1, for good.": "每8个积分升一张牌。月度冠军+3张牌，第2或第3名+1张，永久有效。", "Your card": "你的牌",
     "Rank card": "等级牌", "Leader of the championship": "锦标赛领先者", "The top card for a player: ♠A belongs to the leader of the championship.": "玩家可达的最高牌：♠A 属于锦标赛领先者。", "{0} more boards to reach {1}": "再打{0}副牌升到{1}", "{0} rating points to {1}": "再得{0}积分升到{1}",
     "Month": "月份", "Honour roll": "荣誉榜", "Trophy cabinet": "奖杯柜", "{0} · {1} champion": "{0} · {1}冠军", "{0} · {1}, 2nd place": "{0} · {1}，第2名", "{0} · {1}, 3rd place": "{0} · {1}，第3名", "The champions of {0}: {1} (IMP) · {2} (MP)": "{0}冠军：{1}（IMP）· {2}（MP）", "{0}: only this month's boards. At least {1} boards in the month to win it; the champions are known on the 1st.": "{0}：只计本月的牌。当月至少{1}副牌才能夺冠；冠军在每月1日揭晓。", "No champions yet: the first ones are known when the first month closes.": "还没有冠军：第一个月结束时揭晓首批冠军。",
@@ -9247,7 +9270,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 315;
+const APP_V = 316;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10840,7 +10863,7 @@ function homeShell2() {
       <div class="h2tiles">
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('href="bridgegate/"', '🏆', T('Tournaments'), T('Club tournaments with movements and results.'))}
-        ${tile('id="sbOpen" type="button"', '🃏', T('Social bridge'), T('Real cards at real tables; the app keeps the score.'))}
+        ${tile('id="sbOpen" type="button"', '🃏', T('Team match'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
       </div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>   <!-- the open tables right under the ways to play -->
       </div><div class="h2colb"><div id="hPend"></div>
@@ -14762,8 +14785,10 @@ const Net = (() => {
 
 </script>
 <script>
-/* Bridge Table — social bridge: a game played with real cards at real tables (up to 12); the app only keeps the
-   scores. Anyone at a table enters the result of a board that table played (contract, declarer, tricks); the boards
+/* Bridge Table — the team match: teams meet two by two, each match at two tables with real cards (table 1 the Open
+   room, the first team North-South; table 2 the Closed room, the second team North-South; tables 3-4 the next match…);
+   the app only keeps the scores: each board room against room in IMPs, the match in IMPs and VPs. (Games from before
+   it, pairs at tables, still open with their matchpoints.) Anyone at a table enters the result of a board that table played (contract, declarer, tricks); the boards
    are played in any order and need not all be played. A table sees what the other tables did on a board only after
    entering its own result there. Rankings by matchpoints and IMPs. Games are kept in the online database (sb/<code>,
    with a list in sbi/<code>) and can be opened later; the administrator can delete them. */
@@ -14793,6 +14818,32 @@ const SB = (() => {
   // the administrator, or the player who opened the game: they finish, open again, correct scores and delete it
   const canManage = m => isAdm() || isOrganiser(m);
   const done = () => sb.g && sb.g.m && sb.g.m.st === 'done';
+  // a team match: the North-South team of table t is team t, East-West the other team of the match (tables 2k-1, 2k)
+  const isTeam = m => !!(m || (sb.g && sb.g.m) || {}).type;
+  const partnerT = t => +t % 2 ? +t + 1 : +t - 1;
+  const teamName = (i, m) => (((m || sb.g.m).tm || [])[i - 1]) || T('Team {0}', i);
+  const roomName = t => t % 2 ? T('Open room') : T('Closed room');
+  // the WBF scale of victory points (20 to share) for an IMP margin over a number of boards
+  function vpOf(m, bd) {
+    const tau = (Math.sqrt(5) - 1) / 2, B = 15 * Math.sqrt(bd || 1);
+    const w = Math.round(Math.min(20, 10 + 10 * (1 - Math.pow(tau, 3 * Math.abs(m) / B)) / (1 - Math.pow(tau, 3))) * 100) / 100;
+    return m >= 0 ? w : Math.round((20 - w) * 100) / 100;
+  }
+  // each match: the IMPs of both teams over the boards both rooms have confirmed, and the VPs
+  function matches() {
+    const g = sb.g, L = [];
+    for (let k = 1; 2 * k <= g.m.tb; k++) {
+      const o = 2 * k - 1, c = 2 * k, rows = []; let ih = 0, ia = 0;
+      for (let b = 1; b <= g.m.bd; b++) {
+        const R = (g.r || {})[b] || {}, ro = R[o] && R[o].ok ? R[o] : null, rc = R[c] && R[c].ok ? R[c] : null;
+        const i = ro && rc ? E.imps(nsScore(b, ro) - nsScore(b, rc)) : null; if (i > 0) ih += i; else if (i < 0) ia -= i;
+        if (ro || rc) rows.push({ b, o: ro && nsScore(b, ro), c: rc && nsScore(b, rc), i });
+      }
+      const vh = vpOf(ih - ia, g.m.bd);
+      L.push({ k, h: o, a: c, ih, ia, n: rows.filter(r => r.i != null).length, rows, vh, va: Math.round((20 - vh) * 100) / 100 });
+    }
+    return L;
+  }
 
   // a member number → the member's name, from the member list the federation file filled
   const members = {};
@@ -14818,6 +14869,7 @@ const SB = (() => {
   // only scores the other pair has confirmed count
   function boardCmp(b) {
     const R = (sb.g.r || {})[b] || {}, ts = Object.keys(R).filter(t => R[t].ok), out = {};
+    if (isTeam()) { for (const t of ts) { const me = nsScore(b, R[t]), p = R[partnerT(+t)]; out[t] = { ns: me, cmp: p && p.ok ? { imp: E.imps(me - nsScore(b, p)), mp: null } : null }; } return out; }
     for (const t of ts) {
       const me = nsScore(b, R[t]), field = ts.filter(x => x !== t).map(x => nsScore(b, R[x]));
       out[t] = { ns: me, cmp: field.length ? E.compare(me, field) : null };
@@ -14845,6 +14897,7 @@ const SB = (() => {
   function pairName(t, dir) {
     const p = ((sb.g.t || {})[t]) || {}, a = dir === 'ns' ? [p.n, p.s] : [p.e, p.w];
     const s = a.filter(Boolean).join(' – ');
+    if (isTeam()) { const pl = a.filter(x => x && !SEAT.includes(x)).join(' – '); return teamName(dir === 'ns' ? t : partnerT(t)) + (pl ? ' (' + pl + ')' : ''); }
     return s || T('Table {0}', t) + ' ' + (dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]);
   }
   const conTxt = r => !r.l ? T('Passed out') : `${r.l}${sym(r.s)}${r.x === 1 ? 'X' : r.x === 2 ? 'XX' : ''} ${SEAT_AB[r.d]}`;
@@ -14886,11 +14939,14 @@ const SB = (() => {
   const runningGames = () => (sb.list || []).filter(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
   function entryHtml() {
     const R = runningGames();
-    return `<h2>🃏 ${T('Social bridge')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
-      <div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>
+    return `<h2>🃏 ${T('Team match')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
+      <div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>${legend(g)}
       ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
       + `<div class="row2"><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
+  // a team match: the tables of each match and who sits North-South there
+  const legend = m => !isTeam(m) ? '' : `<div class="tmleg">${[...Array(Math.floor(m.tb / 2)).keys()].map(i => { const a = teamName(2 * i + 1, m), b = teamName(2 * i + 2, m);
+    return `<div><b>${T('Match {0}', i + 1)}: ${esc(a)} – ${esc(b)}</b><small>${T('Table {0}', 2 * i + 1)} · ${T('Open room')}: ${esc(a)} ${SEAT_AB[0] + SEAT_AB[2]} · ${T('Table {0}', 2 * i + 2)} · ${T('Closed room')}: ${esc(b)} ${SEAT_AB[0] + SEAT_AB[2]}</small></div>`; }).join('')}</div>`;
   // a score this table entered that the other pair has not confirmed yet: the screen stays on that board until it is
   const pending = () => { if (!sb.g || done() || sb.formT) return 0; const mt = myTable(); if (!mt) return 0; for (const b in (sb.g.r || {})) { const r = sb.g.r[b][mt]; if (r && !r.ok) return +b; } return 0; };
   const locked = () => ui.overlay === 'sb' && !!sb.id && !sb.setup && !!pending();
@@ -14909,11 +14965,11 @@ const SB = (() => {
   const running = () => (sb.list || []).some(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
   function listHtml() {
     const rows = (sb.list || []).map(g => `<tr><td><b>🃏 ${esc(g.n)}</b><small>${fmtDate(g.ts)}${g.byn ? ' · ' + esc(g.byn) : ''}</small></td>
-      <td data-l="${T('Tables')}" class="n">${g.tb}</td><td data-l="${T('Boards')}" class="n">${g.bd}</td>
+      <td data-l="${T('Tables')}" class="n">${g.tb}${isTeam(g) ? `<small>${T('{0} teams', g.tb)}</small>` : ''}</td><td data-l="${T('Boards')}" class="n">${g.bd}</td>
       <td data-l="${T('Status')}">${g.st === 'done' ? `<span class="tst">${T('Finished')}</span>` : `<span class="tst run">${T('Running')}</span>`}</td>
       <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${canManage(g) ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
-    return `<h2>🃏 ${T('Social bridge')}</h2>
-      <div class="muted">${T('Played with real cards at real tables: the app keeps the scores. Anyone at a table enters the boards that table played, in any order.')}</div>
+    return `<h2>🃏 ${T('Team match')}</h2>
+      <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')}</div>
       ${running() && !isAdm() ? `<div class="muted">🃏 ${T('A game is running now: join it with Table No. Only the administrator can open another game.')}</div>` : `<div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button></div>`}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
@@ -14924,7 +14980,9 @@ const SB = (() => {
     const s = sb.setup;
     return `<h2>🃏 ${T('New game')}</h2>
       <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
-      <div class="grp"><span>${T('Tables')}</span>${seg('tb', [...Array(12).keys()].map(i => [i + 1, i + 1]), s.tb)}</div>
+      <div class="grp"><span>${T('Teams')}</span>${seg('tb', [2, 4, 6, 8, 10, 12].map(n => [n, n]), s.tb)}</div>
+      <div class="grp"><span>${T('Team names')}</span><div class="tmnames">${[...Array(s.tb / 2).keys()].map(i => `<div class="tmpair"><small>${T('Match {0}', i + 1)}</small><input class="tok" maxlength="20" data-sbteam="${2 * i}" placeholder="${T('Team {0}', 2 * i + 1)}" value="${esc(s.tm[2 * i] || '')}"><span>–</span><input class="tok" maxlength="20" data-sbteam="${2 * i + 1}" placeholder="${T('Team {0}', 2 * i + 2)}" value="${esc(s.tm[2 * i + 1] || '')}"></div>`).join('')}</div></div>
+      <div class="muted">${T('{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.', s.tb)}</div>
       <div class="grp"><span>${T('Boards')}</span>${seg('bd', [8, 12, 16, 20, 24, 28, 32, 36].map(n => [n, n]), s.bd)}</div>
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`;
@@ -14932,6 +14990,7 @@ const SB = (() => {
   function readSetup() {
     const s = sb.setup; if (!s) return;
     const n = $('sbName'); if (n) s.n = n.value.trim().slice(0, 40);
+    for (const i of document.querySelectorAll('[data-sbteam]')) s.tm[+i.dataset.sbteam] = i.value.trim().slice(0, 20);
   }
   function gameHtml() {
     const g = sb.g, m = g.m, mt = myTable();
@@ -14941,16 +15000,16 @@ const SB = (() => {
     let body = '';
     const tn = (g.t || {})[mt] || {}, needNames = mt && !done() && !pending() && !sb.board && !['n', 's', 'e', 'w'].some(k => tn[k]);
     const pickTable = !mt && !done() && !canManage(m);
-    if (pickTable) body = `<div class="grp"><span>${T('My table')}</span><div class="bm3-keys k4 sbpick" data-sbseg="me">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key">${i + 1}</button>`).join('')}</div></div>`;
+    if (pickTable) body = `<div class="grp"><span>${T('My table')}</span><div class="bm3-keys k4 sbpick" data-sbseg="me">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key">${i + 1}</button>`).join('')}</div></div>${legend(m)}`;
     else if (needNames) body = compassHtml(mt);
     else if (sb.board) body = boardHtml(sb.board);
     else if (sb.view === 'rank') body = rankHtml();
     else if (sb.view === 'tables') body = tablesHtml();
     else body = boardsHtml();
     // a player sees only the game (full screen, no title lines); the organiser keeps the game's details
-    return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) : T('Social bridge')}</div></div>`}${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
-      <div class="muted">${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
-      ${sb.board ? '' : links}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
+    return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) + (isTeam() ? ' · ' + roomName(mt) : '') : T('Team match')}</div></div>`}${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
+      <div class="muted">${isTeam() ? T('{0} teams', m.tb) : T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
+      ${sb.board ? '' : links}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : canManage(m) ? `<button class="btn" id="sbList">← ${T('All games')}</button>` : ''}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
@@ -14979,11 +15038,12 @@ const SB = (() => {
       <div class="row2"><button class="btn new" id="sbOk">✓ ${T('We confirm')}</button><button class="btn" id="sbFix">✎ ${T('Correct')}</button></div>
       ${others ? `<div class="muted">${T('Results of the other tables appear after the confirmation.')}</div>` : ''}</div>`;
     const c = boardCmp(b), wait = ts.filter(t => !R[t].ok).length;
-    const rows = ts.map(t => { const r = R[t], x = c[t] || { ns: nsScore(b, r), cmp: null }; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
+    const tm = isTeam();
+    const rows = ts.map(t => { const r = R[t], x = c[t] || { ns: nsScore(b, r), cmp: null }; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}${tm ? `<small>${roomName(+t)}</small>` : ''}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
       <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}${r.ld ? ` <small>· ${leadHtml(r.ld)}</small>` : ''}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
-      <td data-l="MP %" class="n">${!r.ok ? '⏳' : x.cmp ? x.cmp.mp : '—'}</td><td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td>${canManage(g.m) ? `<td class="tact"><button class="btn mini-btn" data-sbadm="${t}" title="${T('Correct')}">✎</button></td>` : ''}</tr>`; }).join('');
-    return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th><th class="n">MP %</th><th class="n">IMP</th>${canManage(g.m) ? '<th></th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="muted">${T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the organiser or the administrator can change a confirmed score.')}</div>`;
+      ${tm ? '' : `<td data-l="MP %" class="n">${!r.ok ? '⏳' : x.cmp ? x.cmp.mp : '—'}</td>`}<td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td>${canManage(g.m) ? `<td class="tact"><button class="btn mini-btn" data-sbadm="${t}" title="${T('Correct')}">✎</button></td>` : ''}</tr>`; }).join('');
+    return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th>${tm ? '' : '<th class="n">MP %</th>'}<th class="n">IMP</th>${canManage(g.m) ? '<th></th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="muted">${tm ? T('IMP from North-South’s side, against the other room of the same match.') : T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the organiser or the administrator can change a confirmed score.')}</div>`;
   }
   const scoreTxt = (b, r) => { const ns = nsScore(b, r), ew = r.l && E.sideOf(r.d) === 1; return `${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; };
   function formHtml(b) {
@@ -15000,7 +15060,7 @@ const SB = (() => {
     const vt = vul[0] && vul[1] ? T('All vulnerable') : vul[0] ? T('{0} vulnerable', SEAT_AB[0] + SEAT_AB[2]) : vul[1] ? T('{0} vulnerable', SEAT_AB[1] + SEAT_AB[3]) : T('None vulnerable');
     const keys = (name, cls, opts, cur) => `<div class="bm3-keys ${cls}" data-sbseg="${name}">${opts.map(([v, l, c]) => `<button data-v="${v}" class="bm3-key ${c || ''}${String(cur) === String(v) ? ' active' : ''}">${l}</button>`).join('')}</div>`;
     return `<div class="bm3"><div class="bm3-screen">
-      <div class="bm3-bar"><span class="td">🃏</span><div class="ev"><b>${esc(sb.g.m.n)}</b>${T('Table {0}', mt)} · ${T('Dealer')}: ${SEAT[E.dealerOf(b)]}</div></div>
+      <div class="bm3-bar"><span class="td">🃏</span><div class="ev"><b>${esc(sb.g.m.n)}</b>${T('Table {0}', mt)}${isTeam() ? ' · ' + roomName(mt) : ''} · ${T('Dealer')}: ${SEAT[E.dealerOf(b)]}</div></div>
       <div class="bm3-head">
         <div class="bm3-board"><small>${T('Board')}</small><b>${b}</b><span class="bm3-vul ${vc}">${vt}</span></div>
         ${R[mt] ? `<div class="bm3-edit">✎</div>` : ''}
@@ -15025,7 +15085,18 @@ const SB = (() => {
       <div class="bm3-actions"${R[mt] ? '' : ' style="grid-template-columns:1fr"'}>${R[mt] ? `<button class="bm3-cancel" id="sbCancel">✕ ${T('Cancel')}</button>` : ''}<button class="bm3-ok" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>✓ ${T('Save')}</button></div>
     </div></div>`;
   }
+  function teamRankHtml() {
+    const M = matches();
+    if (!M.some(x => x.rows.length)) return `<div class="muted">${T('No scores yet.')}</div>`;
+    const cards = M.map(x => `<div class="teams"><div class="tmhead">${T('Match {0}', x.k)} · ${T('{0} boards', x.n)}</div><div class="tscore"><div><b>${esc(teamName(x.h))}</b><small>VP ${x.vh}</small></div><div class="tsn">${x.ih} – ${x.ia}</div><div><b>${esc(teamName(x.a))}</b><small>VP ${x.va}</small></div></div>
+      <details class="tmbd"><summary>${T('Board by board')}</summary><div class="resscroll"><table class="res"><thead><tr><th>${T('Bd')}</th><th class="n">${T('Open room')}</th><th class="n">${T('Closed room')}</th><th class="n">${esc(teamName(x.h))}</th><th class="n">${esc(teamName(x.a))}</th></tr></thead><tbody>${x.rows.map(r => `<tr><td>${r.b}</td><td class="n">${r.o == null ? '…' : signed(r.o)}</td><td class="n">${r.c == null ? '…' : signed(r.c)}</td><td class="n">${r.i > 0 ? r.i : ''}</td><td class="n">${r.i < 0 ? -r.i : ''}</td></tr>`).join('')}</tbody></table></div></details></div>`).join('');
+    const TL = M.flatMap(x => [{ name: teamName(x.h), vp: x.vh, d: x.ih - x.ia, n: x.n }, { name: teamName(x.a), vp: x.va, d: x.ia - x.ih, n: x.n }]).sort((a, b) => b.vp - a.vp || b.d - a.d);
+    const tab = M.length < 2 ? '' : `<h3>${T('Standings')}</h3><div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${T('Team')}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th><th class="n">VP</th></tr></thead><tbody>${TL.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="IMP" class="n">${signed(r.d)}</td><td data-l="VP" class="n">${r.vp}</td></tr>`).join('')}</tbody></table></div>`;
+    return cards + tab + `<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
+      <div class="muted">${T('Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).')}</div>`;
+  }
   function rankHtml() {
+    if (isTeam()) return teamRankHtml();
     const L = standings();
     if (!L.length) return `<div class="muted">${T('No scores yet.')}</div>`;
     const rows = L.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b><small>${T('Table {0}', r.t)} · ${r.dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]}</small></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="MP %" class="n">${r.pct ?? '—'}</td><td data-l="IMP" class="n">${signed(r.imp)}</td></tr>`).join('');
@@ -15035,6 +15106,11 @@ const SB = (() => {
   }
   // the standings as a plain message (as on the screen: MP % and IMP)
   function standingsText() {
+    if (isTeam()) {
+      const m = sb.g.m;
+      return [`🃏 ${m.n} — ${new Date(m.ts).toLocaleDateString()}\n${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}`,
+        ...matches().map(x => `${teamName(x.h)} ${x.ih} – ${x.ia} ${teamName(x.a)} (VP ${x.vh} – ${x.va}, ${T('{0} boards', x.n)})`)].join('\n');
+    }
     const m = sb.g.m, L = standings(), dir = r => r.dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3];
     const head = `🃏 ${m.n} — ${new Date(m.ts).toLocaleDateString()}\n${T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}\n${T('Standings')} (MP % · IMP):`;
     const rows = L.map((r, i) => `${i + 1}. ${r.name} (${T('Table {0}', r.t)} ${dir(r)}) — ${r.pct != null ? r.pct + '%' : '—'} · ${r.imp > 0 ? '+' : ''}${r.imp} IMP · ${T('{0} boards', r.n)}`);
@@ -15095,7 +15171,7 @@ const SB = (() => {
     return [...Array(g.m.tb).keys()].map(i => {
       const t = i + 1, p = (g.t || {})[t] || {}, played = Object.values(g.r || {}).filter(R => R[t]).length;
       if (sb.editT === t) return namesForm(t);
-      return `<div class="sbtrow"><b>${T('Table {0}', t)}</b><span>${SEAT_AB[0] + SEAT_AB[2]}: ${esc(pairName(t, 'ns'))}<br>${SEAT_AB[1] + SEAT_AB[3]}: ${esc(pairName(t, 'ew'))}</span><small>${T('{0} boards', played)}</small>${canEdit(t) ? `<button class="btn mini-btn" data-sbedit="${t}">✎</button>` : ''}</div>`;
+      return `<div class="sbtrow"><b>${T('Table {0}', t)}${isTeam() ? `<small>${roomName(t)}</small>` : ''}</b><span>${SEAT_AB[0] + SEAT_AB[2]}: ${esc(pairName(t, 'ns'))}<br>${SEAT_AB[1] + SEAT_AB[3]}: ${esc(pairName(t, 'ew'))}</span><small>${T('{0} boards', played)}</small>${canEdit(t) ? `<button class="btn mini-btn" data-sbedit="${t}">✎</button>` : ''}</div>`;
     }).join('');
   }
 
@@ -15106,8 +15182,9 @@ const SB = (() => {
     sb.busy = true; sb.err = ''; show();
     try {
       const uid = await C().uid(), id = newCode(), ts = Date.now();
-      const m = { n: s.n || T('Social bridge'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey() };
-      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk } };
+      const tm = [...Array(s.tb).keys()].map(i => s.tm[i] || T('Team {0}', i + 1));
+      const m = { n: s.n || T('Team match'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey(), type: 'team', tm };
+      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk, type: 'team', tm } };
       for (let t = 1; t <= s.tb; t++) { const p = s.names[t] || {}; up['sb/' + id + '/t/' + t] = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }
       await C().patch('', up);
       sb.setup = null; sb.busy = false; await loadGame(id); sb.view = 'tables'; sb.board = 0; show(); poll();
@@ -15189,7 +15266,7 @@ const SB = (() => {
   }
   // the games running now, each with Join
   const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-bgjoin="${i}">${T('Join')}</button></div></div>`).join('')
-    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Social bridge')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-sbjoin="${g.id}">${T('Join')}</button></div></div>`).join('');
+    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Team match')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-sbjoin="${g.id}">${T('Join')}</button></div></div>`).join('');
 
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
@@ -15208,7 +15285,7 @@ const SB = (() => {
       return show();
     }
     if (id === 'sbNew' && running() && !isAdm()) return show();
-    if (id === 'sbNew') { sb.setup = { n: T('Social bridge') + ' ' + new Date().toLocaleDateString(), tb: 4, bd: 24, names: {} }; sb.err = ''; return show(); }
+    if (id === 'sbNew') { sb.setup = { n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [] }; sb.err = ''; return show(); }
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
     if (d.sbopen) return openGame(d.sbopen);

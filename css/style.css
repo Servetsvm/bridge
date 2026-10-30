@@ -1854,3 +1854,17 @@ body.homev2 .home.v2 .prac .prask:hover{background:#fff;border-color:var(--h2-br
 :root[data-theme="dark"] body.homev2 .home.v2 .prac .prask{color:var(--h2-ink);border-color:var(--h2-line)}
 body.homev2 .home.v2 .prac .prask .supc{background:#c4122f;color:#fff;border-radius:999px;padding:0 6px;font-size:12px}
 @media (max-width:640px){ body.homev2 .h2pr .h2chtag{font-size:12px} }
+/* the team match: which table is which room, the team names two by two, a match's score */
+.tmleg{display:grid;gap:6px;margin:6px 0}
+.tmleg>div{padding:7px 10px;border-radius:10px;background:rgba(242,201,76,.12);border:1px solid rgba(184,134,11,.25)}
+.tmleg small{display:block;opacity:.8;margin-top:2px}
+.tmnames{display:grid;gap:6px}
+.tmpair{display:grid;grid-template-columns:auto 1fr auto 1fr;align-items:center;gap:6px}
+.tmpair input{min-width:0;width:100%}
+.tmpair small{opacity:.75;white-space:nowrap}
+.teams .tscore small{display:block;color:#f2c94c;font-weight:700}
+.teams .tmhead{font-weight:700;margin-top:8px}
+.tmbd summary{cursor:pointer;font-weight:700;margin:4px 0}
+.sbtrow b small,.sbtab td small{display:block;font-weight:400;opacity:.75;font-size:11px}
+.sbtno small{font-weight:400;opacity:.8}
+@media (max-width:480px){ .tmpair{grid-template-columns:1fr auto 1fr} .tmpair small{grid-column:1/-1} }
