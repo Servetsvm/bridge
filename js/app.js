@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 317;
+const APP_V = 318;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -920,6 +920,7 @@ function finishBoard() {
   G.result = e; G.phase = 'done'; if (!e.passed) sfx(e.us >= 0 ? 'good' : 'bad');
   if (online() && !guest()) Net.boardDone(e);
   if (G.tprac) { const c = tourCompare(G.tprac.id, G.tprac.b, e); if (c) { e.tprac = c; flash('🏆 ' + T('Against the tournament ({0} players): {1} IMP · {2}%', c.n, fmtSigned(c.imp), c.mp), 4500); } }
+  if (G.tour && G.tour.table != null) tourMark(G.tour.id);   // still playing at this tournament table
   if (G.tour && G.tour.table == null && !guest()) { e.tour = G.tour; tourSend(e); }   // an individual board (also while someone watches)
   else if (G.tour && G.tour.table != null && online() && !guest()) { e.tour = G.tour; Net.tourTableResult(G.tour.id, G.tour.table, G.tour.b, e.ns, conTxt(e)); }
   // where it was played, for the Results list: a tournament (with its name), an online table, or alone with robots
@@ -1843,6 +1844,7 @@ function tourAutoStart(t) {
 // sit at your tournament table: open it if you are its first named player, otherwise join it once it is in the
 // lobby (tried for about a minute); until then a robot plays your seat
 function tourSit(t, s) {
+  tourMark(t.id);
   if (s.seat === s.hostSeat) { Net.openTourTable(t.id); return; }
   let tries = 0;
   const tryJoin = () => {
@@ -1855,10 +1857,15 @@ function tourSit(t, s) {
 }
 /* back online (the app opened again): if a tournament you play at tables is still running and your table has
    boards left, you go straight back to your seat (a robot played it while you were away) */
+// the tournament table you last sat at, and when (a closing sent while this device was off may never arrive)
+function tourMark(id) { try { localStorage.setItem('bridge-tour-last', JSON.stringify({ id, ts: Date.now() })); } catch (e) {} }
 function tourResume() {
   if (online() || (G && (G.phase === 'bid' || G.phase === 'play'))) return;
+  let last = null; try { last = JSON.parse(localStorage.getItem('bridge-tour-last') || 'null'); } catch (e) {}
+  if (!last || Date.now() - last.ts > 30 * 60e3) return;   // only straight back: not hours later
   for (const t of Object.values(Net.st.tours)) {
     if (t.state !== 'live' || t.format !== 'tables' || !t.joined[Net.devId()]) continue;
+    if (t.id !== last.id || Date.now() > t.ts + (t.hours || 72) * 3600e3) continue;
     const s = Net.myTourSeat(t); if (!s) continue;
     if (Object.keys(tableDone(t.id, s.ti)).length >= t.n) continue;
     flash('🏆 ' + T('Back to your seat in {0}', t.name), 3000);
@@ -2580,7 +2587,8 @@ const kindOf = e => e.kind || (e.tour || e.tprac ? 't' : e.online ? 'o' : 'r');
 const KIND_TIP = { t: 'Played in a tournament', o: 'Played at an online table', r: 'Played offline, with robots' };
 const kindMark = e => { const k = kindOf(e), tip = T(KIND_TIP[k]) + (k === 't' && e.tn ? ': ' + e.tn : ''); return `<span class="kmark" title="${esc(tip)}">${k === 't' ? '🏆' : k === 'o' ? '🌐' : '🤖'}</span>`; };
 function showResults() {
-  const per = Store.periods(HIST), isImp = SET.mode === 'IMP', tab = ui.resTab;
+  const adm = typeof Net !== 'undefined' && Net.isAdmin();
+  const per = Store.periods(HIST), isImp = SET.mode === 'IMP', tab = ui.resTab === 'robot' && !adm ? 'list' : ui.resTab;   // the robots' tab: the administrator only
   let body;
   if (tab === 'robot') {
     const rr = robotRating();
@@ -2597,7 +2605,7 @@ function showResults() {
     const rows = HIST.slice(-100).reverse().map(e => `<tr class="rev" data-rev="${e.id}"><td>${kindMark(e)} ${new Date(e.ts || 0).toLocaleDateString()}${e.tn ? `<small class="rtn">${esc(e.tn)}</small>` : ''}</td><td>${e.board}</td><td>${e.passed ? T('Pass') : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
     body = `<div class="muted">${T('Tap a board to see the auction and how it was played.')}</div><div class="muted kkey">🏆 ${T('tournament')} · 🌐 ${T('online table')} · 🤖 ${T('offline')}</div><div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th>${T('Tr')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   }
-  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Board list')}</button><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button><button data-v="robot" class="${tab === 'robot' ? 'on' : ''}">🤖 ${T('Robots')}</button></div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Board list')}</button><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button>${adm ? `<button data-v="robot" class="${tab === 'robot' ? 'on' : ''}">🤖 ${T('Robots')}</button>` : ''}</div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 
 /* replay of a finished board, one card at a time: ui.revStep cards have been played.
