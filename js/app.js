@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 328;
+const APP_V = 329;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -238,6 +238,7 @@ const Field = {
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); scheduleSync(); } }
     if (m.type === 'ddtable') { const les = bidLessons(L.deal, L.board, f.tables, m.t); if (les.length && typeof Net !== 'undefined') les.forEach((x, i) => Net.roboBid(m.id, i, L.deal, L.board, x).catch(() => {})); return; }
     if (m.type === 'error') this.partDone(m.id);
+    if (m.type === 'fieldDone' && ui.overlay === 'rteam') showRTeam();   // a Closed room result came in
     if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
 };
@@ -925,7 +926,7 @@ function finishBoard() {
   else if (G.tour && G.tour.table != null && online() && !guest()) { e.tour = G.tour; Net.tourTableResult(G.tour.id, G.tour.table, G.tour.b, e.ns, conTxt(e)); }
   // where it was played, for the Results list: a tournament (with its name), an online table, or alone with robots
   e.kind = G.tour || G.tprac || G.champ ? 't' : online() ? 'o' : 'r';
-  if (G.rteam && !online() && RT && !RT.end && !RT.ids.includes(e.id)) { e.rteam = { ...G.rteam }; RT.ids.push(e.id); if (RT.ids.length >= RT.n) RT.end = Date.now(); saveRT(); }
+  if (G.rteam && !online() && RT && !RT.end && !RT.ids.includes(e.id)) { e.rteam = { ...G.rteam }; RT.ids.push(e.id); if (RT.ids.length >= RT.n) { RT.end = Date.now(); setTimeout(showRTeam, 900); } saveRT(); }   // the last board: the match's result
   if (G.champ && !online()) { e.champ = { ...G.champ }; e.tn = T('Championship') + ' · ' + T('Round {0}', G.champ.r); champSend(e); }
   if (e.kind === 't' && (G.tour || G.tprac)) { const id = (G.tour || G.tprac).id, t = typeof Net !== 'undefined' && Net.st.tours && Net.st.tours[id]; if (t && t.name) e.tn = String(t.name).slice(0, 40); }
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
@@ -3482,6 +3483,7 @@ function showRTeam() {
   const s = rtTotals();
   const rows = s.L.map(x => `<tr><td>${x.j}</td><td>${x.e.passed || !x.e.c ? T('Pass') : conKey(x.e.c) + ' · ' + T('{0} tricks', x.e.tricks)}<small>${fmtSigned(x.e.us)}</small></td><td>${x.t ? `${x.t.k}${x.t.t != null && x.t.k !== 'Pass' ? ' · ' + T('{0} tricks', x.t.t) : ''}<small>${fmtSigned(x.cl)}</small>` : '⏳'}</td><td class="n">${x.imp > 0 ? x.imp : ''}</td><td class="n">${x.imp < 0 ? -x.imp : ''}</td><td class="n">${x.mp == null ? '' : x.mp * 100}</td></tr>`).join('');
   openOv('rteam', `<h2>🤖 ${T('Team match with robots')}</h2>
+    ${RT.end ? `<div class="rtover">🏁 ${T('The match is over')}<b>${s.n < s.L.length ? '⏳ ' + T('The Closed room is still playing…') : s.a > s.b ? '🏆 ' + T('You won the match!') : s.a < s.b ? '🤖 ' + T('The robots won the match') : '🤝 ' + T('A draw')}</b></div>` : ''}
     <div class="teams"><div class="tmhead">${T('Board {0} of {1}', s.L.length, RT.n)}${RT.end ? ' · ' + T('Finished') : ''}</div><div class="tscore"><div><b>${esc(myNm() || T('You'))}</b><small>VP ${s.vp} · MP ${s.mp ?? '—'}%</small></div><div class="tsn">${s.a} – ${s.b}</div><div><b>🤖 ${T('Robots')}</b><small>VP ${s.vo} · MP ${s.mp == null ? '—' : Math.round((100 - s.mp) * 10) / 10}%</small></div></div>
     ${rows ? `<div class="resscroll"><table class="res"><thead><tr><th>${T('Bd')}</th><th>${T('Open room')}</th><th>${T('Closed room')}</th><th class="n">IMP +</th><th class="n">IMP −</th><th class="n">MP</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No boards yet.')}</div>`}</div>
     <div class="muted">${T('The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).')}</div>
