@@ -395,7 +395,9 @@ const SB = (() => {
     const rows = Object.keys(sb.g.r || {}).map(Number).sort((a, b) => a - b).map(b => { const r = (sb.g.r[b] || {})[1]; if (!r || !r.ok) return ''; const o = oneOf(b, r); if (!o) return ''; const p = seatsOf(r);
       return `<tr><td>${b}</td><td><small>${esc(p.n)} – ${esc(p.s)}<br>${esc(p.e)} – ${esc(p.w)}</small></td><td><b>${conTxt(r)}</b> ${resTxt(r)}</td><td class="n">${r.h}</td><td class="n">${signed(nsScore(b, r))}</td><td class="n">${o.side == null ? '—' : (o.side ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]) + ' ' + o.exp}</td><td class="n"><b>${oneTile(b, r)}</b></td></tr>`; }).join('');
     const byBoard = rows ? `<div class="onebd"><h3>${T('Board by board')}</h3><div class="resscroll"><table class="res"><thead><tr><th>${T('Bd')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]} ${T('Points')}</th><th class="n">${T('Score')}</th><th class="n">${T('Expected')}</th><th class="n">IMP</th></tr></thead><tbody>${rows}</tbody></table></div></div>` : '';
-    return `${tab(Q, T('Pair'))}${byBoard}<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
+    // the next board not entered yet at this table
+    let nx = 0; if (myTable() && !done()) for (let b = 1; b <= sb.g.m.bd; b++) if (!((sb.g.r || {})[b] || {})[1]) { nx = b; break; }
+    return `${nx ? `<div class="row2"><button class="btn new sbnext" data-sbboard="${nx}">▶ ${T('Next board')} (${nx})</button></div>` : ''}${byBoard}<h3>${T('Pairs')}</h3>${tab(Q, T('Pair'))}<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
       <div class="muted">${T('Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.')}</div>`;
   }
   function rankHtml() {
@@ -526,7 +528,7 @@ const SB = (() => {
   async function confirmScore() {
     const b = sb.board, mt = myTable(); if (!b || !mt || sb.busy) return;
     sb.busy = true;
-    try { await C().put('sb/' + sb.id + '/r/' + b + '/' + mt + '/ok', true); sb.g.r[b][mt].ok = true; sb.err = ''; }
+    try { await C().put('sb/' + sb.id + '/r/' + b + '/' + mt + '/ok', true); sb.g.r[b][mt].ok = true; sb.err = ''; if (isOne()) { sb.board = 0; sb.view = 'rank'; } }   // the single table: on to the table of the boards
     catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
     sb.busy = false; try { await loadGame(sb.id); } catch (e) {} show();
   }
