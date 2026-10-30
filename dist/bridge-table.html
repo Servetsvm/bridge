@@ -9071,7 +9071,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 297;
+const APP_V = 298;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9311,7 +9311,7 @@ const RoboAna = {
   },
   next() {
     const e = this.q[0]; if (!e) return;
-    const ours = sideOf(e.c.decl) === sideOf(e.seat) ? [e.c.decl, pd(e.c.decl)] : [e.seat];
+    const ours = e.watch ? [] : sideOf(e.c.decl) === sideOf(e.seat) ? [e.c.decl, pd(e.c.decl)] : [e.seat];   // watched: all four were robots
     const seats = [0, 1, 2, 3].filter(s => !ours.includes(s));
     const done = list => {
       clearTimeout(this.to); this.q.shift();
@@ -9675,7 +9675,7 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
-  if (G.watch) { e.watch = true; G.result = e; G.phase = 'done'; render(); return; }   // watched: shown, not recorded
+  if (G.watch) { e.watch = true; G.result = e; G.phase = 'done'; render(); if (g) RoboAna.add(e); return; }   // watched: shown, not recorded (the robots' cards are checked)
   const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
   // a practice board where the convention really came up counts for it (shown on its tile)
   if (pracList().length && !online() && !G.tour) {
@@ -10910,11 +10910,13 @@ function openOv(name, html) {
   // during a game on a wider screen, a player card or a private chat is a small window you can drag aside (the table stays usable)
   const fl = ["player", "dm", "net", "lead"].includes(name) && G && G.phase !== "idle" && innerWidth >= 700, ov = $("ov");
   const keep = ui.overlay === name && ov.firstChild ? [ov.firstChild.scrollTop, ov.scrollTop] : null;   // the same window again: it stays where it was
+  const typed = keep ? [...ov.querySelectorAll('textarea[id],input[id]:not([type=checkbox]):not([type=radio]):not([type=file])')].map(x => [x.id, x.value, document.activeElement === x ? [x.selectionStart, x.selectionEnd] : null]) : [];
   ui.overlay = name; ov.classList.toggle("float", fl);
   const bar = fl || (name !== "gate" && innerWidth >= 900 && matchMedia("(pointer:fine)").matches);   // on a computer every window can be dragged by its top bar
   ov.innerHTML = `<div class="sheet${fl ? " fsheet" : ""}${["end", "res", "rev", "set", "hist", "tour", "tsetup", "deal", "help", "auc", "sb"].includes(name) ? " wide" : ""}" data-ov="${name}">${bar ? `<div class="fbar" title="${T("Drag to move")}"><span>⠿</span><button class="btn mini-btn" id="oClose">✕</button></div>` : ""}${html}</div>`;
   ov.hidden = false;
   if (keep) { ov.firstChild.scrollTop = keep[0]; ov.scrollTop = keep[1]; }
+  for (const [id, v, sel] of typed) { const x = document.getElementById(id); if (!x || !ov.contains(x)) continue; if (v && !x.value) x.value = v; if (sel) { x.focus({ preventScroll: true }); try { x.setSelectionRange(sel[0], sel[1]); } catch (e) {} } }
   if (fl && typeof SIZES !== "undefined" && SIZES.fw2) { const s = ov.firstChild; s.style.width = SIZES.fw2 + "px"; s.style.height = SIZES.fh2 + "px"; }
   if (fl && ui.fpos) { const s = ov.firstChild; s.style.left = ui.fpos.x + "px"; s.style.top = ui.fpos.y + "px"; s.style.right = "auto"; }
 }
@@ -11593,7 +11595,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.casys) { setSys(t.dataset.casys); Store.saveSettings(SET); save(); render(); showCardConv(); return; }
   if (t.id === 'caBack') { showCardSys(); return; }
   if (t.id === 'caDone') { closeOv(); render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); checkSharedDeal(); setTimeout(installAsk, 800); return; }
-  if (t.id === 'rbNoteSend') { const e = HIST.find(h => String(h.id) === t.dataset.id), txt = ($('rbNote') || {}).value || '';
+  if (t.id === 'rbNoteSend') { const e = HIST.find(h => String(h.id) === t.dataset.id) || (G && G.result && String(G.result.id) === t.dataset.id ? G.result : null), txt = ($('rbNote') || {}).value || '';
     if (!e || txt.trim().length < 3) { flash(T('Write what the robot did wrong'), 2000); return; }
     t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
   if (t.dataset.rbdone) { Net.roboErrDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
@@ -12100,7 +12102,8 @@ async function showConvRequests() {
    cards; copied for Claude, who improves the robots, and then removed */
 async function showRoboErrs() {
   if (!Net.isAdmin()) return;
-  openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  // read again after a removal: the list stays where it was (no "Loading…" in between, which sent it to the top)
+  if (ui.overlay !== 'roboerr') openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let L = []; try { L = await Net.roboErrs(); } catch (e) {}
   if (ui.overlay !== 'roboerr') return;
   ui.rbList = L;
