@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 329;
+const APP_V = 330;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3476,7 +3476,7 @@ function showRTeam() {
   if (!RT) {
     openOv('rteam', `<h2>🤖 ${T('Team match with robots')}</h2>
       <div class="muted">${T('You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.')}</div>
-      <div class="grp"><span>${T('Boards')}</span><div class="row2">${[8, 12, 16, 24].map(n => `<button class="btn new" data-rtn="${n}">${n}</button>`).join('')}</div></div>
+      <div class="grp"><span>${T('Boards')}</span><div class="row2">${[4, 8, 12, 16, 24].map(n => `<button class="btn new" data-rtn="${n}">${n}</button>`).join('')}</div></div>
       <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
     return;
   }
