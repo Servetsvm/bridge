@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 313;
+const APP_V = 314;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2383,7 +2383,7 @@ function showSettings() {
    <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify !== false ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div></div>
    <div class="grp"><span>${T('Table sounds')}</span>${seg('sfx', [[1, T('On')], [0, T('Off')]], SET.sfx ? 1 : 0)}</div>
    <div class="muted">${T('Changes apply from the next deal.')} ${Store.online ? T('Settings and scores are saved to your account.') : T('Scores are saved on this device.')} ${T('Every deal you get is new — a deal is never dealt to you twice.')}</div>
-   <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button><button class="btn" id="sReset">${T('Delete score history')}</button></div>
+   <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn" id="sReset">${T('Delete score history')}</button>` : ''}</div>
    <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>
    <div class="muted ver">v${APP_V} · ${innerWidth}×${innerHeight} · ×${Math.round(devicePixelRatio * 100) / 100} · 🤖 ${Bot.dds ? 'DDS' : Bot.dds === false || typeof ddsFactory !== 'function' ? 'JS' : 'DDS…'}</div>`);
 }
@@ -2954,7 +2954,7 @@ document.addEventListener('click', ev_ => {
     case 'dmSend': { const i = $('dmMsg'); if (i && i.value.trim() && ui.dmWith) { Net.dmSend(ui.dmWith, i.value); i.value = ''; showDm(ui.dmWith); } break; }
     case 'lFab': showLChat(); break;
     case 'oClose': closeOv(); break;
-    case 'sReset': HIST = []; save(); showSettings(); render(); break;
+    case 'sReset': if (typeof Net === 'undefined' || !Net.isAdmin()) break; HIST = []; save(); showSettings(); render(); break;   // the administrator only
     case "sSave": { const v = ($("syncToken") || {}).value; if (v) { GitSync.setToken(v); syncState.msg = ""; syncNow(); showSettings(); } break; }
     case "sNow": syncNow(); break;
     case "sOff": GitSync.setToken(null); syncState.msg = ""; showSettings(); break;
