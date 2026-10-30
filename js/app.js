@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 298;
+const APP_V = 299;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1844,6 +1844,19 @@ function resultLine(e) {
 }
 function openOv(name, html) {
   if (ui.overlay === "gate" && name !== "gate" && needGate()) return;
+  // the end of a board (or a board in Results) drawn again while you type in it (a robot mistake): it waits until you
+  // leave the box, so the page does not jump under your fingers on a phone
+  const ae = document.activeElement;
+  if ((name === 'end' || name === 'rev') && ui.overlay === name && ae && $('ov').contains(ae) && ae.tagName === 'TEXTAREA') {
+    ui.ovLater = [name, html];
+    let off = 0;
+    if (!ui.ovWait) ui.ovWait = setInterval(() => {   // drawn once the box has been left for a moment (a tap on Send goes through first)
+      if (document.activeElement === ae && ae.isConnected) { off = 0; return; }
+      if (++off < 2) return;
+      clearInterval(ui.ovWait); ui.ovWait = null; const l = ui.ovLater; ui.ovLater = null; if (l && ui.overlay === l[0]) openOv(l[0], l[1]);
+    }, 400);
+    return;
+  }
   // during a game on a wider screen, a player card or a private chat is a small window you can drag aside (the table stays usable)
   const fl = ["player", "dm", "net", "lead"].includes(name) && G && G.phase !== "idle" && innerWidth >= 700, ov = $("ov");
   const keep = ui.overlay === name && ov.firstChild ? [ov.firstChild.scrollTop, ov.scrollTop] : null;   // the same window again: it stays where it was
