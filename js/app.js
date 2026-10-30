@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 302;
+const APP_V = 303;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2277,6 +2277,8 @@ async function readPhoto(file) {
     const counts = r.hands.map((h, s) => SEAT[s] + ' ' + (h ? h.length : 0));
     const total = r.hands.reduce((a, h) => a + (h ? h.length : 0), 0);
     ui.dealForm.pbn = r.pbn; ui.dealForm.h = ["", "", "", ""]; ui.photoHands = r.hands;
+    // the dealer (the seat in the black disc) and the vulnerability (the red triangles), when the picture shows them
+    if (r.dealer != null) ui.dealForm.dealer = r.dealer; if (r.vul != null) ui.dealForm.vul = r.vul;
     const full = r.hands.filter(h => h && h.length === 13).length;
     ui.photoErr = full < 3;
     ui.photoMsg = (full >= 3 ? T('Read {0} cards ({1}). Check the code, then press Play this deal.', total, counts.join(', ')) : T('Only part of the deal could be read ({0}). Fix the code below before playing.', counts.join(', ')));

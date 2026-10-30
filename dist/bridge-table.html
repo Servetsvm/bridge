@@ -4635,9 +4635,37 @@ const Photo = (() => {
       const sol = solveSuit(ls); if (sol) seats.forEach((g, s) => { g.lines[i].ranks = sol[s]; });
     }
     const SU = ['♠', '♥', '♦', '♣'];
-    return { kind: 'record', hands: seats.map(g => g ? g.lines.flatMap((l, i) => l.ranks.map(rk => ({ rank: rk === 'T' ? '10' : rk, suit: SU[i] }))) : null) };
+    const box = seats.every(Boolean) ? compass(im, seats) : null;
+    return { kind: 'record', ...(box || {}), hands: seats.map(g => g ? g.lines.flatMap((l, i) => l.ranks.map(rk => ({ rank: rk === 'T' ? '10' : rk, suit: SU[i] }))) : null) };
   }
 
+  /* the compass box between the four hands of a hand record: the dealer (a filled black disc with the seat letter,
+     on the side of that seat) and the vulnerability (the red triangles: North/South, East/West) */
+  function compass(im, seats) {
+    const { W, H, d } = im, [N, E, S, Wt] = seats, h = N.lines[0].h;
+    const x0 = Math.round(Wt.x + 3 * h), x1 = Math.round(E.x - 0.2 * h), y0 = Math.round(N.lines[3].y + h), y1 = Math.round(S.lines[0].y - h);
+    if (x1 - x0 < 2 * h || y1 - y0 < 2 * h || x0 < 0 || y0 < 0 || x1 >= W || y1 >= H) return null;
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, out = {};
+    // the dealer: the biggest dark, round, well-filled shape in the box
+    const dark = i => { const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2], mx = Math.max(r, g, b); return mx < 110 && mx - Math.min(r, g, b) < 45; };
+    const seen = new Uint8Array(W * H); let best = null;
+    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+      const i = y * W + x; if (seen[i] || !dark(i)) continue;
+      const st = [i]; seen[i] = 1; let n = 0, a0 = x, a1 = x, b0 = y, b1 = y;
+      while (st.length) { const p = st.pop(), px = p % W, py = (p / W) | 0; n++; if (px < a0) a0 = px; if (px > a1) a1 = px; if (py < b0) b0 = py; if (py > b1) b1 = py;
+        for (const q of [p - 1, p + 1, p - W, p + W]) { const qx = q % W, qy = (q / W) | 0; if (qx < x0 || qx > x1 || qy < y0 || qy > y1 || seen[q] || !dark(q)) continue; seen[q] = 1; st.push(q); } }
+      const w = a1 - a0 + 1, hh = b1 - b0 + 1, fill = n / (w * hh);
+      if (w < 0.6 * h || w > 3 * h || Math.abs(w - hh) > 0.25 * Math.max(w, hh) || fill < 0.5 || fill > 0.92) continue;
+      if (!best || n > best.n) best = { n, x: (a0 + a1) / 2, y: (b0 + b1) / 2 };
+    }
+    if (best) { const dx = (best.x - cx) / (x1 - x0), dy = (best.y - cy) / (y1 - y0); out.dealer = Math.abs(dy) > Math.abs(dx) ? (dy < 0 ? 0 : 2) : (dx > 0 ? 1 : 3); }
+    // the vulnerability: the colour of the four triangles, halfway between the middle and each side
+    const red = (px, py) => { let rr = 0, n = 0; for (let y = Math.round(py) - 3; y <= py + 3; y++) for (let x = Math.round(px) - 3; x <= px + 3; x++) { if (x < 0 || y < 0 || x >= W || y >= H) continue; const i = (y * W + x) * 4; n++; if (d[i] > 140 && d[i] - d[i + 1] > 60 && d[i] - d[i + 2] > 50) rr++; } return n && rr / n > 0.6; };
+    const hx = (x1 - x0) * 0.3, hy = (y1 - y0) * 0.3;
+    const ns = red(cx, cy - hy) || red(cx, cy + hy), ew = red(cx - hx, cy) || red(cx + hx, cy);
+    out.vul = (ns ? 1 : 0) + (ew ? 2 : 0);
+    return out;
+  }
   /* ---- result → card numbers (0-51) and a PBN code ---- */
   const RI = { '2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, J: 9, Q: 10, K: 11, A: 12 }, SI = { '♣': 0, '♦': 1, '♥': 2, '♠': 3 };
   function toCards(res) { return res.hands.map(h => h ? h.filter(c => c.rank in RI && c.suit in SI).map(c => SI[c.suit] * 13 + RI[c.rank]) : null); }
@@ -4676,7 +4704,7 @@ const Photo = (() => {
     }
     if (!res) throw new Error('No hands found in this picture. Use the end-of-board screen of the app, or a hand record with ♠ ♥ ♦ ♣ lines.');
     const hands = toCards(res);
-    return { kind: res.kind, hands, pbn: pbn(hands) };
+    return { kind: res.kind, hands, pbn: pbn(hands), dealer: res.dealer, vul: res.vul };
   }
   return { read, _internals: { loadImage, glyphs, readTiles, readRecord, toCards, pbn } };
 })();
@@ -9098,7 +9126,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 302;
+const APP_V = 303;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11367,6 +11395,8 @@ async function readPhoto(file) {
     const counts = r.hands.map((h, s) => SEAT[s] + ' ' + (h ? h.length : 0));
     const total = r.hands.reduce((a, h) => a + (h ? h.length : 0), 0);
     ui.dealForm.pbn = r.pbn; ui.dealForm.h = ["", "", "", ""]; ui.photoHands = r.hands;
+    // the dealer (the seat in the black disc) and the vulnerability (the red triangles), when the picture shows them
+    if (r.dealer != null) ui.dealForm.dealer = r.dealer; if (r.vul != null) ui.dealForm.vul = r.vul;
     const full = r.hands.filter(h => h && h.length === 13).length;
     ui.photoErr = full < 3;
     ui.photoMsg = (full >= 3 ? T('Read {0} cards ({1}). Check the code, then press Play this deal.', total, counts.join(', ')) : T('Only part of the deal could be read ({0}). Fix the code below before playing.', counts.join(', ')));
