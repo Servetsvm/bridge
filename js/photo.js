@@ -51,13 +51,45 @@ const Photo = (() => {
   }
 
   /* ---- image → glyphs ---- */
-  function raster(img, s) {
+  function raster(img, s, deep = 1) {
     const W = Math.round(img.naturalWidth * s), H = Math.round(img.naturalHeight * s);
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const cx = cv.getContext("2d", { willReadFrequently: true });
     cx.imageSmoothingQuality = "high"; cx.drawImage(img, 0, 0, W, H);
     const d = cx.getImageData(0, 0, W, H).data;
     cv.width = cv.height = 0; // free the canvas memory at once
-    return { W, H, d, img, s };
+    const flat = flatten(d, W, H, deep);
+    return { W, H, d, img, s, flat, deep };
+  }
+  /* a photo of a screen or of paper: the white is grey and uneven (light, shadow, the screen's own glow). Each part of
+     the picture is lightened by its own paper colour (the bright value around it), so the paper becomes white and the
+     print stays dark and red; with deep > 1 the grey edges of thin print are darkened too. A screenshot, already white,
+     is left as it is (returns false). */
+  function flatten(d, W, H, deep) {
+    const N = W * H; let white = 0;
+    for (let i = 0; i < N; i += 7) { const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2]; if (Math.min(r, g, b) > 215 && Math.max(r, g, b) - Math.min(r, g, b) < 40) white++; }
+    if (white / (N / 7) > 0.35) return false;
+    const B = Math.max(16, Math.round(W / 40)), bw = Math.ceil(W / B), bh = Math.ceil(H / B), bg = new Float32Array(bw * bh), hist = new Uint32Array(256);
+    for (let by = 0; by < bh; by++) for (let bx = 0; bx < bw; bx++) {
+      hist.fill(0); let n = 0;
+      for (let y = by * B; y < Math.min(H, by * B + B); y += 2) for (let x = bx * B; x < Math.min(W, bx * B + B); x += 2) { const i = (y * W + x) * 4; hist[Math.max(d[i], d[i + 1], d[i + 2])]++; n++; }
+      // the paper is the bright majority of the block: its 80th percentile
+      let k = 255, acc = 0; const want = n * 0.2; while (k > 0 && acc + hist[k] < want) acc += hist[k--];
+      bg[by * bw + bx] = k;
+    }
+    // a block that is mostly print or a dark frame takes the paper colour of its brighter neighbours
+    const bg2 = bg.slice();
+    for (let by = 0; by < bh; by++) for (let bx = 0; bx < bw; bx++) { let m = bg[by * bw + bx]; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = bx + dx, y = by + dy; if (x >= 0 && y >= 0 && x < bw && y < bh) m = Math.max(m, bg[y * bw + x]); } bg2[by * bw + bx] = m; }
+    for (let y = 0; y < H; y++) {
+      const fy = Math.min(bh - 1, Math.max(0, y / B - 0.5)), y0 = Math.floor(fy), y1 = Math.min(bh - 1, y0 + 1), ty = fy - y0;
+      for (let x = 0; x < W; x++) {
+        const fx = Math.min(bw - 1, Math.max(0, x / B - 0.5)), x0 = Math.floor(fx), x1 = Math.min(bw - 1, x0 + 1), tx = fx - x0;
+        const p = (bg2[y0 * bw + x0] * (1 - tx) + bg2[y0 * bw + x1] * tx) * (1 - ty) + (bg2[y1 * bw + x0] * (1 - tx) + bg2[y1 * bw + x1] * tx) * ty;
+        if (p < 90) continue;   // a dark area (a frame, the desk): no paper there
+        const f = 250 / p, i = (y * W + x) * 4, v = c => Math.max(0, Math.min(255, 250 - (250 - c * f) * deep));
+        d[i] = v(d[i]); d[i + 1] = v(d[i + 1]); d[i + 2] = v(d[i + 2]);
+      }
+    }
+    return true;
   }
   function loadImage(file) {
     return new Promise((res, rej) => {
@@ -230,10 +262,18 @@ const Photo = (() => {
       o.dist = {}; for (const k of Object.keys(X.R)) o.dist[k] = nearest(X.R, [k], b, ar).d;
       o.isSuit = o.c === 3 ? o.suit.d < 70 : o.suit.d + 8 < o.rank.d;
     }
-    // text lines
-    const L = M.slice().sort((a, b) => (a.y0 + a.y1) - (b.y0 + b.y1)), lines = [];
+    // text lines, built from left to right: a glyph joins the line whose last glyph stands just before it at about the
+    // same height (the nearest one). Lines are local, so West's and East's lines stay apart even in a slightly tilted
+    // photo, where a line drifts up or down across the page.
+    const L = M.slice().sort((a, b) => a.x0 - b.x0), lines = [];
     for (const o of L) {
-      const cy = (o.y0 + o.y1) / 2, ln = lines.find(l => Math.abs(l.cy - cy) < Math.max(l.h, o.h) * 0.45);
+      const cy = (o.y0 + o.y1) / 2;
+      let ln = null, bd = 1e9;
+      for (const l of lines) {
+        const last = l.g[l.g.length - 1], lcy = (last.y0 + last.y1) / 2, gap = o.x0 - last.x1, dy = Math.abs(lcy - cy), h = Math.max(last.h, o.h);
+        if (gap < -h * 0.3 || gap > h * 1.6 || dy > h * 0.45) continue;
+        const sc = dy + Math.max(0, gap) * 0.2; if (sc < bd) { bd = sc; ln = l; }
+      }
       if (ln) { ln.g.push(o); ln.h = Math.max(ln.h, o.h); } else lines.push({ cy, h: o.h, g: [o] });
     }
     // a hand line: a suit symbol followed by rank characters; one text line may hold two hands (West and East)
@@ -242,12 +282,15 @@ const Photo = (() => {
       const g = l.g.sort((a, b) => a.x0 - b.x0);
       for (let i = 0; i < g.length; i++) {
         if (!g[i].isSuit) continue;
-        const sym = g[i], ranks = []; let last = sym;
-        for (let j = i + 1; j < g.length && !g[j].isSuit; j++) {
+        // what follows the symbol closely is its ranks: a black glyph there is a rank even when it looks a little like
+        // ♠ or ♣ (a blurred 7 or 8 in a photo); only a red symbol or a wide gap ends the line
+        const sym = g[i], ranks = []; let last = sym, j = i + 1;
+        for (; j < g.length && !(g[j].isSuit && g[j].c === 3); j++) {
           if (g[j].x0 - last.x1 > Math.max(sym.h, g[j].h) * 1.6) break;
           if (g[j].rank.d > 110) break;
           ranks.push(g[j]); last = g[j];
         }
+        if (ranks.length) i = j - 1;
         hl.push({ x: sym.x0, y: (sym.y0 + sym.y1) / 2, h: sym.h, red: sym.c === 3, ranks: decode(ranks), toks: tokens(ranks) });
       }
     }
@@ -294,13 +337,26 @@ const Photo = (() => {
     try { return readIm(im); } finally { im.d = null; if (im.img) { im.img.removeAttribute("src"); im.img = null; } }
   }
   function readIm(im) {
+    let out = null, err = null;
+    try { out = readOnce(im); } catch (e) { err = e; }
+    const full = r => r ? r.hands.filter(h => h && h.length === 13).length : -1;
+    // a photo where a hand is missing: once more with the thin print darkened (it can break apart on grey paper)
+    if (im.flat && full(out) < 4 && im.img) {
+      const imD = raster(im.img, im.s, 1.3);
+      try { const r = readOnce(imD); if (full(r) > full(out)) out = r; } catch (e) {}
+      imD.d = null;
+    }
+    if (!out) throw err;
+    return out;
+  }
+  function readOnce(im) {
     let res = readTiles(im);
     const okT = res && toCards(res).filter(h => h && h.length === 13).length >= 3;
     if (!okT) {
       // printed text: enlarge small print so that letters are about 32 pixels high, then read
       const raw = glyphs(im), hs = raw.map(o => o.h).sort((a, b) => a - b), medH = hs.length ? hs[hs.length >> 1] : 30;
       const f = Math.min(3, Math.max(1, 32 / Math.max(8, medH)));
-      const im2 = f > 1.15 ? raster(im.img, im.s * f) : im;
+      const im2 = f > 1.15 ? raster(im.img, im.s * f, im.deep) : im;
       const r2 = readRecord(im2); if (r2) res = r2;
       if (im2 !== im) im2.d = null;
     }

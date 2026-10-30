@@ -4356,13 +4356,45 @@ const Photo = (() => {
   }
 
   /* ---- image → glyphs ---- */
-  function raster(img, s) {
+  function raster(img, s, deep = 1) {
     const W = Math.round(img.naturalWidth * s), H = Math.round(img.naturalHeight * s);
     const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const cx = cv.getContext("2d", { willReadFrequently: true });
     cx.imageSmoothingQuality = "high"; cx.drawImage(img, 0, 0, W, H);
     const d = cx.getImageData(0, 0, W, H).data;
     cv.width = cv.height = 0; // free the canvas memory at once
-    return { W, H, d, img, s };
+    const flat = flatten(d, W, H, deep);
+    return { W, H, d, img, s, flat, deep };
+  }
+  /* a photo of a screen or of paper: the white is grey and uneven (light, shadow, the screen's own glow). Each part of
+     the picture is lightened by its own paper colour (the bright value around it), so the paper becomes white and the
+     print stays dark and red; with deep > 1 the grey edges of thin print are darkened too. A screenshot, already white,
+     is left as it is (returns false). */
+  function flatten(d, W, H, deep) {
+    const N = W * H; let white = 0;
+    for (let i = 0; i < N; i += 7) { const r = d[i * 4], g = d[i * 4 + 1], b = d[i * 4 + 2]; if (Math.min(r, g, b) > 215 && Math.max(r, g, b) - Math.min(r, g, b) < 40) white++; }
+    if (white / (N / 7) > 0.35) return false;
+    const B = Math.max(16, Math.round(W / 40)), bw = Math.ceil(W / B), bh = Math.ceil(H / B), bg = new Float32Array(bw * bh), hist = new Uint32Array(256);
+    for (let by = 0; by < bh; by++) for (let bx = 0; bx < bw; bx++) {
+      hist.fill(0); let n = 0;
+      for (let y = by * B; y < Math.min(H, by * B + B); y += 2) for (let x = bx * B; x < Math.min(W, bx * B + B); x += 2) { const i = (y * W + x) * 4; hist[Math.max(d[i], d[i + 1], d[i + 2])]++; n++; }
+      // the paper is the bright majority of the block: its 80th percentile
+      let k = 255, acc = 0; const want = n * 0.2; while (k > 0 && acc + hist[k] < want) acc += hist[k--];
+      bg[by * bw + bx] = k;
+    }
+    // a block that is mostly print or a dark frame takes the paper colour of its brighter neighbours
+    const bg2 = bg.slice();
+    for (let by = 0; by < bh; by++) for (let bx = 0; bx < bw; bx++) { let m = bg[by * bw + bx]; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const x = bx + dx, y = by + dy; if (x >= 0 && y >= 0 && x < bw && y < bh) m = Math.max(m, bg[y * bw + x]); } bg2[by * bw + bx] = m; }
+    for (let y = 0; y < H; y++) {
+      const fy = Math.min(bh - 1, Math.max(0, y / B - 0.5)), y0 = Math.floor(fy), y1 = Math.min(bh - 1, y0 + 1), ty = fy - y0;
+      for (let x = 0; x < W; x++) {
+        const fx = Math.min(bw - 1, Math.max(0, x / B - 0.5)), x0 = Math.floor(fx), x1 = Math.min(bw - 1, x0 + 1), tx = fx - x0;
+        const p = (bg2[y0 * bw + x0] * (1 - tx) + bg2[y0 * bw + x1] * tx) * (1 - ty) + (bg2[y1 * bw + x0] * (1 - tx) + bg2[y1 * bw + x1] * tx) * ty;
+        if (p < 90) continue;   // a dark area (a frame, the desk): no paper there
+        const f = 250 / p, i = (y * W + x) * 4, v = c => Math.max(0, Math.min(255, 250 - (250 - c * f) * deep));
+        d[i] = v(d[i]); d[i + 1] = v(d[i + 1]); d[i + 2] = v(d[i + 2]);
+      }
+    }
+    return true;
   }
   function loadImage(file) {
     return new Promise((res, rej) => {
@@ -4535,10 +4567,18 @@ const Photo = (() => {
       o.dist = {}; for (const k of Object.keys(X.R)) o.dist[k] = nearest(X.R, [k], b, ar).d;
       o.isSuit = o.c === 3 ? o.suit.d < 70 : o.suit.d + 8 < o.rank.d;
     }
-    // text lines
-    const L = M.slice().sort((a, b) => (a.y0 + a.y1) - (b.y0 + b.y1)), lines = [];
+    // text lines, built from left to right: a glyph joins the line whose last glyph stands just before it at about the
+    // same height (the nearest one). Lines are local, so West's and East's lines stay apart even in a slightly tilted
+    // photo, where a line drifts up or down across the page.
+    const L = M.slice().sort((a, b) => a.x0 - b.x0), lines = [];
     for (const o of L) {
-      const cy = (o.y0 + o.y1) / 2, ln = lines.find(l => Math.abs(l.cy - cy) < Math.max(l.h, o.h) * 0.45);
+      const cy = (o.y0 + o.y1) / 2;
+      let ln = null, bd = 1e9;
+      for (const l of lines) {
+        const last = l.g[l.g.length - 1], lcy = (last.y0 + last.y1) / 2, gap = o.x0 - last.x1, dy = Math.abs(lcy - cy), h = Math.max(last.h, o.h);
+        if (gap < -h * 0.3 || gap > h * 1.6 || dy > h * 0.45) continue;
+        const sc = dy + Math.max(0, gap) * 0.2; if (sc < bd) { bd = sc; ln = l; }
+      }
       if (ln) { ln.g.push(o); ln.h = Math.max(ln.h, o.h); } else lines.push({ cy, h: o.h, g: [o] });
     }
     // a hand line: a suit symbol followed by rank characters; one text line may hold two hands (West and East)
@@ -4547,12 +4587,15 @@ const Photo = (() => {
       const g = l.g.sort((a, b) => a.x0 - b.x0);
       for (let i = 0; i < g.length; i++) {
         if (!g[i].isSuit) continue;
-        const sym = g[i], ranks = []; let last = sym;
-        for (let j = i + 1; j < g.length && !g[j].isSuit; j++) {
+        // what follows the symbol closely is its ranks: a black glyph there is a rank even when it looks a little like
+        // ♠ or ♣ (a blurred 7 or 8 in a photo); only a red symbol or a wide gap ends the line
+        const sym = g[i], ranks = []; let last = sym, j = i + 1;
+        for (; j < g.length && !(g[j].isSuit && g[j].c === 3); j++) {
           if (g[j].x0 - last.x1 > Math.max(sym.h, g[j].h) * 1.6) break;
           if (g[j].rank.d > 110) break;
           ranks.push(g[j]); last = g[j];
         }
+        if (ranks.length) i = j - 1;
         hl.push({ x: sym.x0, y: (sym.y0 + sym.y1) / 2, h: sym.h, red: sym.c === 3, ranks: decode(ranks), toks: tokens(ranks) });
       }
     }
@@ -4599,13 +4642,26 @@ const Photo = (() => {
     try { return readIm(im); } finally { im.d = null; if (im.img) { im.img.removeAttribute("src"); im.img = null; } }
   }
   function readIm(im) {
+    let out = null, err = null;
+    try { out = readOnce(im); } catch (e) { err = e; }
+    const full = r => r ? r.hands.filter(h => h && h.length === 13).length : -1;
+    // a photo where a hand is missing: once more with the thin print darkened (it can break apart on grey paper)
+    if (im.flat && full(out) < 4 && im.img) {
+      const imD = raster(im.img, im.s, 1.3);
+      try { const r = readOnce(imD); if (full(r) > full(out)) out = r; } catch (e) {}
+      imD.d = null;
+    }
+    if (!out) throw err;
+    return out;
+  }
+  function readOnce(im) {
     let res = readTiles(im);
     const okT = res && toCards(res).filter(h => h && h.length === 13).length >= 3;
     if (!okT) {
       // printed text: enlarge small print so that letters are about 32 pixels high, then read
       const raw = glyphs(im), hs = raw.map(o => o.h).sort((a, b) => a - b), medH = hs.length ? hs[hs.length >> 1] : 30;
       const f = Math.min(3, Math.max(1, 32 / Math.max(8, medH)));
-      const im2 = f > 1.15 ? raster(im.img, im.s * f) : im;
+      const im2 = f > 1.15 ? raster(im.img, im.s * f, im.deep) : im;
       const r2 = readRecord(im2); if (r2) res = r2;
       if (im2 !== im) im2.d = null;
     }
@@ -4623,6 +4679,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Let the robots play it": "Robotlara oynat", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Robotlara oynat: dört el açık, robotlar deklere verip yavaşça oynar, sen izlersin. Puanına sayılmaz.", "The robots are playing this deal — watch": "Robotlar bu eli oynuyor — izle",
     "Message sent": "Mesaj gönderildi",
     "Welcome": "Hoş geldin", "Good morning, {0}": "Günaydın, {0}", "Good afternoon, {0}": "İyi günler, {0}", "Good evening, {0}": "İyi akşamlar, {0}", "Bid and play with three robots; every board counts for your rating.": "Üç robotla deklere ver ve oyna; her el puanına sayılır.", "Play with friends; robots take the empty seats.": "Arkadaşlarınla oyna; boş yerlere robot oturur.", "Club tournaments with movements and results.": "Hareketli ve sonuçlu kulüp turnuvaları.", "Real cards at real tables; the app keeps the score.": "Gerçek kartlarla gerçek masalarda; skoru uygulama tutar.", "Home page": "Ana sayfa", "New": "Yeni", "Classic": "Klasik",
     "own choice": "kendi seçimi", "measured": "ölçülen", "measured after {0} boards ({1} so far)": "ölçülen düzey {0} borddan sonra (şimdiye kadar {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Puandan ölçülür: robot masalarına karşı son 200 bord.",
@@ -5019,6 +5076,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Let the robots play it": "La robotene spille det", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "La robotene spille det: alle fire hender er åpne, robotene melder og spiller sakte, og du ser på. Det teller ikke på ratingen din.", "The robots are playing this deal — watch": "Robotene spiller dette spillet — se på",
     "Message sent": "Melding sendt",
     "Welcome": "Velkommen", "Good morning, {0}": "God morgen, {0}", "Good afternoon, {0}": "God dag, {0}", "Good evening, {0}": "God kveld, {0}", "Bid and play with three robots; every board counts for your rating.": "Meld og spill med tre roboter; hvert spill teller på ratingen din.", "Play with friends; robots take the empty seats.": "Spill med venner; roboter tar de tomme plassene.", "Club tournaments with movements and results.": "Klubbturneringer med movement og resultater.", "Real cards at real tables; the app keeps the score.": "Ekte kort ved ekte bord; appen fører regnskapet.", "Home page": "Startside", "New": "Ny", "Classic": "Klassisk",
     "own choice": "eget valg", "measured": "målt", "measured after {0} boards ({1} so far)": "måles etter {0} spill ({1} så langt)", "Measured from the rating: the last 200 boards against the robot tables.": "Målt fra ratingen: de siste 200 spillene mot robotbordene.",
@@ -5415,6 +5473,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Let the robots play it": "Que lo jueguen los robots", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Que lo jueguen los robots: las cuatro manos están abiertas, los robots subastan y juegan despacio y tú miras. No cuenta para tu puntuación.", "The robots are playing this deal — watch": "Los robots juegan esta mano — mira",
     "Message sent": "Mensaje enviado",
     "Welcome": "Bienvenido", "Good morning, {0}": "Buenos días, {0}", "Good afternoon, {0}": "Buenas tardes, {0}", "Good evening, {0}": "Buenas noches, {0}", "Bid and play with three robots; every board counts for your rating.": "Subasta y juega con tres robots; cada mano cuenta para tu puntuación.", "Play with friends; robots take the empty seats.": "Juega con amigos; los robots ocupan los asientos libres.", "Club tournaments with movements and results.": "Torneos de club con movimientos y resultados.", "Real cards at real tables; the app keeps the score.": "Cartas reales en mesas reales; la app lleva la puntuación.", "Home page": "Página de inicio", "New": "Nueva", "Classic": "Clásica",
     "own choice": "elección propia", "measured": "medido", "measured after {0} boards ({1} so far)": "se mide tras {0} manos ({1} hasta ahora)", "Measured from the rating: the last 200 boards against the robot tables.": "Medido a partir de la puntuación: las últimas 200 manos contra las mesas de robots.",
@@ -5839,6 +5898,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Let the robots play it": "Faire jouer les robots", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Faire jouer les robots : les quatre mains sont visibles, les robots enchérissent et jouent lentement, et vous regardez. Cela ne compte pas pour votre classement.", "The robots are playing this deal — watch": "Les robots jouent cette donne — regardez",
     "Message sent": "Message envoyé",
     "Welcome": "Bienvenue", "Good morning, {0}": "Bonjour, {0}", "Good afternoon, {0}": "Bon après-midi, {0}", "Good evening, {0}": "Bonsoir, {0}", "Bid and play with three robots; every board counts for your rating.": "Enchérissez et jouez avec trois robots ; chaque donne compte pour votre classement.", "Play with friends; robots take the empty seats.": "Jouez avec des amis ; les robots prennent les places libres.", "Club tournaments with movements and results.": "Tournois de club avec mouvements et résultats.", "Real cards at real tables; the app keeps the score.": "De vraies cartes à de vraies tables ; l’appli tient la marque.", "Home page": "Page d’accueil", "New": "Nouvelle", "Classic": "Classique",
     "own choice": "choix personnel", "measured": "mesuré", "measured after {0} boards ({1} so far)": "mesuré après {0} donnes ({1} jusqu’ici)", "Measured from the rating: the last 200 boards against the robot tables.": "Mesuré à partir du classement : les 200 dernières donnes contre les tables de robots.",
@@ -6263,6 +6323,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Let the robots play it": "Falla giocare ai robot", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Falla giocare ai robot: le quattro mani sono scoperte, i robot licitano e giocano lentamente e tu guardi. Non conta per il tuo punteggio.", "The robots are playing this deal — watch": "I robot giocano questa mano — guarda",
     "Message sent": "Messaggio inviato",
     "Welcome": "Benvenuto", "Good morning, {0}": "Buongiorno, {0}", "Good afternoon, {0}": "Buon pomeriggio, {0}", "Good evening, {0}": "Buonasera, {0}", "Bid and play with three robots; every board counts for your rating.": "Licita e gioca con tre robot; ogni mano conta per il tuo punteggio.", "Play with friends; robots take the empty seats.": "Gioca con gli amici; i robot occupano i posti liberi.", "Club tournaments with movements and results.": "Tornei di club con movimenti e risultati.", "Real cards at real tables; the app keeps the score.": "Carte vere a tavoli veri; l’app tiene il punteggio.", "Home page": "Pagina iniziale", "New": "Nuova", "Classic": "Classica",
     "own choice": "scelta propria", "measured": "misurato", "measured after {0} boards ({1} so far)": "misurato dopo {0} mani ({1} finora)", "Measured from the rating: the last 200 boards against the robot tables.": "Misurato dal punteggio: le ultime 200 mani contro i tavoli dei robot.",
@@ -6687,6 +6748,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Let the robots play it": "Von den Robotern spielen lassen", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Von den Robotern spielen lassen: alle vier Hände offen, die Roboter reizen und spielen langsam, und du schaust zu. Es zählt nicht für deine Wertung.", "The robots are playing this deal — watch": "Die Roboter spielen dieses Board — schau zu",
     "Message sent": "Nachricht gesendet",
     "Welcome": "Willkommen", "Good morning, {0}": "Guten Morgen, {0}", "Good afternoon, {0}": "Guten Tag, {0}", "Good evening, {0}": "Guten Abend, {0}", "Bid and play with three robots; every board counts for your rating.": "Reizen und spielen mit drei Robotern; jedes Board zählt für deine Wertung.", "Play with friends; robots take the empty seats.": "Spiele mit Freunden; Roboter nehmen die freien Plätze.", "Club tournaments with movements and results.": "Clubturniere mit Movements und Ergebnissen.", "Real cards at real tables; the app keeps the score.": "Echte Karten an echten Tischen; die App führt die Wertung.", "Home page": "Startseite", "New": "Neu", "Classic": "Klassisch",
     "own choice": "eigene Wahl", "measured": "gemessen", "measured after {0} boards ({1} so far)": "gemessen ab {0} Boards (bisher {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Aus der Wertung gemessen: die letzten 200 Boards gegen die Robotertische.",
@@ -7111,6 +7173,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Let the robots play it": "Пусть сыграют роботы", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Пусть сыграют роботы: все четыре руки открыты, роботы торгуются и играют медленно, а вы смотрите. В рейтинг не идёт.", "The robots are playing this deal — watch": "Роботы играют эту сдачу — смотрите",
     "Message sent": "Сообщение отправлено",
     "Welcome": "Добро пожаловать", "Good morning, {0}": "Доброе утро, {0}", "Good afternoon, {0}": "Добрый день, {0}", "Good evening, {0}": "Добрый вечер, {0}", "Bid and play with three robots; every board counts for your rating.": "Торгуйтесь и играйте с тремя роботами; каждая сдача идёт в ваш рейтинг.", "Play with friends; robots take the empty seats.": "Играйте с друзьями; свободные места займут роботы.", "Club tournaments with movements and results.": "Клубные турниры с перемещениями и результатами.", "Real cards at real tables; the app keeps the score.": "Настоящие карты за настоящими столами; счёт ведёт приложение.", "Home page": "Главная страница", "New": "Новая", "Classic": "Классическая",
     "own choice": "свой выбор", "measured": "по игре", "measured after {0} boards ({1} so far)": "оценка после {0} сдач (пока {1})", "Measured from the rating: the last 200 boards against the robot tables.": "По рейтингу: последние 200 сдач против столов роботов.",
@@ -7535,6 +7598,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Let the robots play it": "Niech zagrają roboty", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Niech zagrają roboty: cztery ręce są odkryte, roboty licytują i grają powoli, a ty oglądasz. Nie liczy się do rankingu.", "The robots are playing this deal — watch": "Roboty grają to rozdanie — oglądaj",
     "Message sent": "Wiadomość wysłana",
     "Welcome": "Witaj", "Good morning, {0}": "Dzień dobry, {0}", "Good afternoon, {0}": "Dzień dobry, {0}", "Good evening, {0}": "Dobry wieczór, {0}", "Bid and play with three robots; every board counts for your rating.": "Licytuj i graj z trzema robotami; każde rozdanie liczy się do rankingu.", "Play with friends; robots take the empty seats.": "Graj ze znajomymi; roboty zajmą wolne miejsca.", "Club tournaments with movements and results.": "Turnieje klubowe z ruchami i wynikami.", "Real cards at real tables; the app keeps the score.": "Prawdziwe karty przy prawdziwych stołach; aplikacja liczy wyniki.", "Home page": "Strona główna", "New": "Nowa", "Classic": "Klasyczna",
     "own choice": "własny wybór", "measured": "zmierzony", "measured after {0} boards ({1} so far)": "mierzony po {0} rozdaniach (na razie {1})", "Measured from the rating: the last 200 boards against the robot tables.": "Mierzony z rankingu: ostatnie 200 rozdań przeciw stołom robotów.",
@@ -7959,6 +8023,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Let the robots play it": "让机器人来打", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "让机器人来打：四家牌全部明示，机器人慢慢叫牌和打牌，你来观看。不计入你的积分。", "The robots are playing this deal — watch": "机器人正在打这副牌 — 观看",
     "Message sent": "消息已发送",
     "Welcome": "欢迎", "Good morning, {0}": "早上好，{0}", "Good afternoon, {0}": "下午好，{0}", "Good evening, {0}": "晚上好，{0}", "Bid and play with three robots; every board counts for your rating.": "与三个机器人叫牌和打牌；每副牌都计入你的积分。", "Play with friends; robots take the empty seats.": "与朋友一起打；空位由机器人补上。", "Club tournaments with movements and results.": "带轮转和成绩的俱乐部比赛。", "Real cards at real tables; the app keeps the score.": "真牌真桌，应用负责记分。", "Home page": "主页", "New": "新版", "Classic": "经典",
     "own choice": "自选", "measured": "实测", "measured after {0} boards ({1} so far)": "满 {0} 副牌后显示实测（目前 {1}）", "Measured from the rating: the last 200 boards against the robot tables.": "根据积分测算：最近 200 副牌对机器人牌桌的成绩。",
@@ -9006,7 +9071,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 296;
+const APP_V = 297;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9040,8 +9105,8 @@ const online = () => typeof Net !== "undefined" && Net.on;
 const guest = () => typeof Net !== "undefined" && Net.guest;
 // your seat (a tournament is always played from South); a spectator has no seat of their own (meSeat -1)
 const U = () => (guest() ? Net.st.seat : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
-const meSeat = () => (guest() && Net.st.watching ? -1 : U());
-const delay = () => [1100, 650, 250][SET.speed];
+const meSeat = () => (guest() && Net.st.watching ? -1 : G && G.watch ? -1 : U());
+const delay = () => G && G.watch ? 1700 : [1100, 650, 250][SET.speed];   // watching the robots: slowly, to follow every card
 const $ = id => document.getElementById(id);
 const red = s => s === 1 || s === 2;
 const symHtml = s => s === 4 ? "NT" : `<span class="sym s${s}${red(s) ? " red" : ""}">${STR[s]}</span>`;
@@ -9508,7 +9573,7 @@ const bidTurn = () => (G.dealer + G.auction.length) % 4;
 const UNDO = [];
 const ME = () => (online() ? Net.me : "local");
 // who acted at a seat: a human id ("local" offline) or "robot"
-const actor = seat => (online() ? Net.owner(seat) : (G.phase === "bid" ? (seat === U() ? "local" : "robot") : (userControls(seat) ? "local" : "robot")));
+const actor = seat => (G && G.watch ? 'robot' : online() ? Net.owner(seat) : (G.phase === "bid" ? (seat === U() ? "local" : "robot") : (userControls(seat) ? "local" : "robot")));
 function pushUndo(by, x) { const { field, ...rest } = G; UNDO.push({ by: by || "local", s: JSON.stringify(rest), ...(x || {}) }); if (UNDO.length > 120) UNDO.shift(); }
 // correcting the robots: offline, outside tournaments, when switched on in the settings
 const canFix = () => !!SET.fixBot && !online() && !guest() && !G.tour && !G.tprac;
@@ -9561,6 +9626,7 @@ function makeCall(seat, call, m, al) {
   save(); render(); tick();
 }
 function userControls(seat) {
+  if (G && G.watch) return false;   // the robots play every seat
   if (online()) return Net.owner(seat) === Net.me;
   if (ui.fixSeat != null && G.play && G.phase === 'play' && G.play.turn === ui.fixSeat && seat === ui.fixSeat) return true;   // correcting a robot's card
   if (!G.play) return seat === U();
@@ -9609,6 +9675,7 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
+  if (G.watch) { e.watch = true; G.result = e; G.phase = 'done'; render(); return; }   // watched: shown, not recorded
   const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
   // a practice board where the convention really came up counts for it (shown on its tile)
   if (pracList().length && !online() && !G.tour) {
@@ -9654,7 +9721,7 @@ function finishBoard() {
 }
 function tick() {
   clearTimeout(timer); if (!G || guest()) return; // when you are a guest, the host runs the table
-  const robot = s => online() ? Net.owner(s) === "robot" : (G.phase === "bid" ? s !== U() : !userControls(s));
+  const robot = s => online() ? Net.owner(s) === "robot" : (G.phase === "bid" ? G.watch || s !== U() : !userControls(s));
   if (G.phase === "bid") {
     const t = bidTurn();
     if (robot(t)) timer = setTimeout(() => { const r = E.aiBid(G.auction, t, G.deal[t], G.cards); makeCall(t, r.call, r.m); }, delay());
@@ -9664,7 +9731,7 @@ function tick() {
     else if (robot(g.turn)) {
       const t = g.turn, left = g.hands[t].length;
       // a robot side about to lead may claim the rest (asked once per trick, near the end of the board)
-      const mayClaim = !g.trick.length && g.rcl !== g.history.length && robot(pd(t)) && left >= 2 && left <= 8;
+      const mayClaim = !G.watch && !g.trick.length && g.rcl !== g.history.length && robot(pd(t)) && left >= 2 && left <= 8;
       // the robot starts thinking at once (in the background); its card goes down after the usual pause, or when it is ready
       const think = mayClaim ? null : robotCardAsync(g, t);
       timer = setTimeout(async () => {
@@ -9795,6 +9862,7 @@ function cardHtml(c, cls) {
 }
 const handsNow = () => G.phase === "play" ? (ui.ask && ui.ask.hands) || G.play.hands : G.deal;   // a claim being asked shows every remaining card
 function isVisible(seat) {
+  if (G && G.watch) return true;
   if (ui.ask && ui.ask.hands && G.phase === "play") return true;
   if (guest()) return handsNow()[seat].every(c => c >= 0); // the host only sends the cards you may see
   if (seat === U() || G.phase === "done") return true;
@@ -10047,7 +10115,8 @@ function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
-  if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
+  if (G.watch && (G.phase === 'bid' || G.phase === 'play')) s = '🤖 ' + T('The robots are playing this deal — watch');
+  else if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
   else if (G.phase === "play" && ui.ask) s = T("Do you agree?");
   else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = T('Gathering the trick…'); else if (userControls(g.turn)) s = g.turn === U() ? T('Your turn: play a card') : T("Play from {0}'s hand", SEAT[g.turn]); else s = T('{0} is playing…', nameOf(g.turn)); }
   else if (G.phase === "idle") s = T("Press Start to deal");
@@ -11224,7 +11293,9 @@ function showDealEntry(err) {
    <div class="grp"><span>${T('Dealer')}</span>${seg('ddealer', [0, 1, 2, 3].map(s => [s, SEAT[s]]), v.dealer)}</div>
    <div class="grp"><span>${T('Vulnerable')}</span>${seg('dvul', [[0, T('None')], [1, SEAT_AB[0] + '-' + SEAT_AB[2]], [2, SEAT_AB[1] + '-' + SEAT_AB[3]], [3, T('Both')]], v.vul)}</div>
    ${err ? `<div class="err">${err}</div>` : ''}
-   <div class="row2"><button class="btn gold" id="dPlay">${T('Play this deal')}</button><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
+   <div class="row2"><button class="btn gold" id="dPlay">${T('Play this deal')}</button><button class="btn new" id="dWatch">🤖 ${T('Let the robots play it')}</button></div>
+   <div class="muted">${T('Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.')}</div>
+   <div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
 }
 async function readPhoto(file) {
   readDealForm();
@@ -11245,7 +11316,7 @@ function readDealForm() {
   const v = ui.dealForm; if (!$('dPbn')) return v;
   v.pbn = $('dPbn').value; for (let s = 0; s < 4; s++) v.h[s] = $('dH' + s).value; return v;
 }
-function startEnteredDeal() {
+function startEnteredDeal(watch) {
   const v = readDealForm();
   try {
     let hands = v.pbn.trim() ? parsePBN(v.pbn) : v.h.map(parseHand);
@@ -11258,6 +11329,7 @@ function startEnteredDeal() {
     let bn = 1; for (let b = 1; b <= 16; b++) if (dealerOf(b) === v.dealer && vulOf(b, 0) === (v.vul === 1 || v.vul === 3) && vulOf(b, 1) === (v.vul === 2 || v.vul === 3)) { bn = b; break; }
     ui.photoHands = null; ui.photoMsg = null; ui.dealForm = null;
     closeOv(); newBoard(hands, bn);
+    if (watch) { G.watch = true; clearTimeout(timer); render(); tick(); flash('🤖 ' + T('The robots are playing this deal — watch'), 2500); }
   } catch (e) { showDealEntry(e.message); }
 }
 
@@ -11600,6 +11672,7 @@ document.addEventListener('click', ev_ => {
     }
     case "sDeal": showDealEntry(); break;
     case "dPlay": startEnteredDeal(); break;
+    case "dWatch": startEnteredDeal(true); break;
     case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;
     case "bHelp": case "bHelp2": showHelp(); break;
     case "bHist": showHist(); break;

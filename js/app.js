@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 296;
+const APP_V = 297;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -42,8 +42,8 @@ const online = () => typeof Net !== "undefined" && Net.on;
 const guest = () => typeof Net !== "undefined" && Net.guest;
 // your seat (a tournament is always played from South); a spectator has no seat of their own (meSeat -1)
 const U = () => (guest() ? Net.st.seat : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
-const meSeat = () => (guest() && Net.st.watching ? -1 : U());
-const delay = () => [1100, 650, 250][SET.speed];
+const meSeat = () => (guest() && Net.st.watching ? -1 : G && G.watch ? -1 : U());
+const delay = () => G && G.watch ? 1700 : [1100, 650, 250][SET.speed];   // watching the robots: slowly, to follow every card
 const $ = id => document.getElementById(id);
 const red = s => s === 1 || s === 2;
 const symHtml = s => s === 4 ? "NT" : `<span class="sym s${s}${red(s) ? " red" : ""}">${STR[s]}</span>`;
@@ -510,7 +510,7 @@ const bidTurn = () => (G.dealer + G.auction.length) % 4;
 const UNDO = [];
 const ME = () => (online() ? Net.me : "local");
 // who acted at a seat: a human id ("local" offline) or "robot"
-const actor = seat => (online() ? Net.owner(seat) : (G.phase === "bid" ? (seat === U() ? "local" : "robot") : (userControls(seat) ? "local" : "robot")));
+const actor = seat => (G && G.watch ? 'robot' : online() ? Net.owner(seat) : (G.phase === "bid" ? (seat === U() ? "local" : "robot") : (userControls(seat) ? "local" : "robot")));
 function pushUndo(by, x) { const { field, ...rest } = G; UNDO.push({ by: by || "local", s: JSON.stringify(rest), ...(x || {}) }); if (UNDO.length > 120) UNDO.shift(); }
 // correcting the robots: offline, outside tournaments, when switched on in the settings
 const canFix = () => !!SET.fixBot && !online() && !guest() && !G.tour && !G.tprac;
@@ -563,6 +563,7 @@ function makeCall(seat, call, m, al) {
   save(); render(); tick();
 }
 function userControls(seat) {
+  if (G && G.watch) return false;   // the robots play every seat
   if (online()) return Net.owner(seat) === Net.me;
   if (ui.fixSeat != null && G.play && G.phase === 'play' && G.play.turn === ui.fixSeat && seat === ui.fixSeat) return true;   // correcting a robot's card
   if (!G.play) return seat === U();
@@ -611,6 +612,7 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
+  if (G.watch) { e.watch = true; G.result = e; G.phase = 'done'; render(); return; }   // watched: shown, not recorded
   const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
   // a practice board where the convention really came up counts for it (shown on its tile)
   if (pracList().length && !online() && !G.tour) {
@@ -656,7 +658,7 @@ function finishBoard() {
 }
 function tick() {
   clearTimeout(timer); if (!G || guest()) return; // when you are a guest, the host runs the table
-  const robot = s => online() ? Net.owner(s) === "robot" : (G.phase === "bid" ? s !== U() : !userControls(s));
+  const robot = s => online() ? Net.owner(s) === "robot" : (G.phase === "bid" ? G.watch || s !== U() : !userControls(s));
   if (G.phase === "bid") {
     const t = bidTurn();
     if (robot(t)) timer = setTimeout(() => { const r = E.aiBid(G.auction, t, G.deal[t], G.cards); makeCall(t, r.call, r.m); }, delay());
@@ -666,7 +668,7 @@ function tick() {
     else if (robot(g.turn)) {
       const t = g.turn, left = g.hands[t].length;
       // a robot side about to lead may claim the rest (asked once per trick, near the end of the board)
-      const mayClaim = !g.trick.length && g.rcl !== g.history.length && robot(pd(t)) && left >= 2 && left <= 8;
+      const mayClaim = !G.watch && !g.trick.length && g.rcl !== g.history.length && robot(pd(t)) && left >= 2 && left <= 8;
       // the robot starts thinking at once (in the background); its card goes down after the usual pause, or when it is ready
       const think = mayClaim ? null : robotCardAsync(g, t);
       timer = setTimeout(async () => {
@@ -797,6 +799,7 @@ function cardHtml(c, cls) {
 }
 const handsNow = () => G.phase === "play" ? (ui.ask && ui.ask.hands) || G.play.hands : G.deal;   // a claim being asked shows every remaining card
 function isVisible(seat) {
+  if (G && G.watch) return true;
   if (ui.ask && ui.ask.hands && G.phase === "play") return true;
   if (guest()) return handsNow()[seat].every(c => c >= 0); // the host only sends the cards you may see
   if (seat === U() || G.phase === "done") return true;
@@ -1049,7 +1052,8 @@ function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
-  if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
+  if (G.watch && (G.phase === 'bid' || G.phase === 'play')) s = '🤖 ' + T('The robots are playing this deal — watch');
+  else if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
   else if (G.phase === "play" && ui.ask) s = T("Do you agree?");
   else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = T('Gathering the trick…'); else if (userControls(g.turn)) s = g.turn === U() ? T('Your turn: play a card') : T("Play from {0}'s hand", SEAT[g.turn]); else s = T('{0} is playing…', nameOf(g.turn)); }
   else if (G.phase === "idle") s = T("Press Start to deal");
@@ -2226,7 +2230,9 @@ function showDealEntry(err) {
    <div class="grp"><span>${T('Dealer')}</span>${seg('ddealer', [0, 1, 2, 3].map(s => [s, SEAT[s]]), v.dealer)}</div>
    <div class="grp"><span>${T('Vulnerable')}</span>${seg('dvul', [[0, T('None')], [1, SEAT_AB[0] + '-' + SEAT_AB[2]], [2, SEAT_AB[1] + '-' + SEAT_AB[3]], [3, T('Both')]], v.vul)}</div>
    ${err ? `<div class="err">${err}</div>` : ''}
-   <div class="row2"><button class="btn gold" id="dPlay">${T('Play this deal')}</button><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
+   <div class="row2"><button class="btn gold" id="dPlay">${T('Play this deal')}</button><button class="btn new" id="dWatch">🤖 ${T('Let the robots play it')}</button></div>
+   <div class="muted">${T('Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.')}</div>
+   <div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
 }
 async function readPhoto(file) {
   readDealForm();
@@ -2247,7 +2253,7 @@ function readDealForm() {
   const v = ui.dealForm; if (!$('dPbn')) return v;
   v.pbn = $('dPbn').value; for (let s = 0; s < 4; s++) v.h[s] = $('dH' + s).value; return v;
 }
-function startEnteredDeal() {
+function startEnteredDeal(watch) {
   const v = readDealForm();
   try {
     let hands = v.pbn.trim() ? parsePBN(v.pbn) : v.h.map(parseHand);
@@ -2260,6 +2266,7 @@ function startEnteredDeal() {
     let bn = 1; for (let b = 1; b <= 16; b++) if (dealerOf(b) === v.dealer && vulOf(b, 0) === (v.vul === 1 || v.vul === 3) && vulOf(b, 1) === (v.vul === 2 || v.vul === 3)) { bn = b; break; }
     ui.photoHands = null; ui.photoMsg = null; ui.dealForm = null;
     closeOv(); newBoard(hands, bn);
+    if (watch) { G.watch = true; clearTimeout(timer); render(); tick(); flash('🤖 ' + T('The robots are playing this deal — watch'), 2500); }
   } catch (e) { showDealEntry(e.message); }
 }
 
@@ -2602,6 +2609,7 @@ document.addEventListener('click', ev_ => {
     }
     case "sDeal": showDealEntry(); break;
     case "dPlay": startEnteredDeal(); break;
+    case "dWatch": startEnteredDeal(true); break;
     case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;
     case "bHelp": case "bHelp2": showHelp(); break;
     case "bHist": showHist(); break;
