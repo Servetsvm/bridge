@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 299;
+const APP_V = 300;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -228,15 +228,30 @@ const Field = {
       for (const t of f.tables) { if (t.passed) continue; const k = conId(t.c); cnt[k] = (cnt[k] || 0) + 1; if (!best || cnt[k] > cnt[conId(best)]) best = t.c; }
       f.normC = best;
       if (best) this.dd(m.id, 'norm', L.deal, best);
+      { const r = RHIST.find(h => h.id === m.id); if (r) { applyField(r, f); saveRH(); } }
       const e = HIST.find(h => h.id === m.id);
       if (e) { applyField(e, f); Store.saveRec(e); scheduleSync(); if (e.tour && e.tour.table == null) tourSend(e); }
     }
-    if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; }
+    if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); } }
     if (m.type === 'error') this.partDone(m.id);
     if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
 };
 /* ---- checking the card play after the board (double dummy, in a background worker) ---- */
+/* ---- the robots' chart: the deals given to the robots (watched), kept on this device apart from your Results ---- */
+const RH_KEY = 'bridge-robot-hist';
+let RHIST = (() => { try { return JSON.parse(localStorage.getItem(RH_KEY) || '[]') || []; } catch (e) { return []; } })();
+const saveRH = () => { try { localStorage.setItem(RH_KEY, JSON.stringify(RHIST.slice(-300))); } catch (e) {} };
+// a watched board against double dummy: the declaring side's score with the tricks taken, against the tricks the contract takes double dummy
+function robotImp(e) {
+  const v = e && e.c && e.dd ? e.dd.you : null; if (v == null) return null;
+  const vul = vulOf(e.board, e.c.decl), sc = t => scoreOf(e.c.level, e.c.strain, e.c.dbl, vul, t);
+  return E.imps(sc(e.tricks) - sc(v));
+}
+function robotRating() {
+  const L = RHIST.map(robotImp).filter(x => x != null).slice(-200), s = L.reduce((a, x) => a + x, 0);
+  return { rt: Math.round(1500 + 150 * s / (L.length + 20)), n: L.length, avg: L.length ? s / L.length : 0 };
+}
 /* the robots' own cards: after a board with robots (not at an online table) the cards the robots played are checked
    double dummy in a worker of their own, one board at a time; a card that gave away tricks goes to the
    administrator's list of robot mistakes, from which the robots are improved by hand */
@@ -612,7 +627,7 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
-  if (G.watch) { e.watch = true; G.result = e; G.phase = 'done'; render(); if (g) RoboAna.add(e); return; }   // watched: shown, not recorded (the robots' cards are checked)
+  if (G.watch) { e.watch = true; G.result = e; G.phase = 'done'; RHIST = RHIST.filter(h => h.id !== e.id); RHIST.push(e); saveRH(); render(); if (g) RoboAna.add(e); return; }   // watched: in the robots' chart, not your Results   // watched: shown, not recorded (the robots' cards are checked)
   const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
   // a practice board where the convention really came up counts for it (shown on its tile)
   if (pracList().length && !online() && !G.tour) {
@@ -2291,14 +2306,21 @@ const kindMark = e => { const k = kindOf(e), tip = T(KIND_TIP[k]) + (k === 't' &
 function showResults() {
   const per = Store.periods(HIST), isImp = SET.mode === 'IMP', tab = ui.resTab;
   let body;
-  if (tab === 'stats') {
+  if (tab === 'robot') {
+    const rr = robotRating();
+    const rows = RHIST.slice(-100).reverse().map(e => { const v = e.dd ? e.dd.you : null, d = robotImp(e);
+      return `<tr><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.c ? conKey(e.c) : T('Pass')}</td><td class="n">${e.c ? e.tricks : ''}</td><td class="n">${v == null ? '…' : v}</td><td class="n">${d == null ? '' : `<b class="${d < 0 ? 'neg' : d > 0 ? 'pos' : ''}">${fmtSigned(d)}</b>`}</td></tr>`; }).join('');
+    body = `<div class="okmsg">🤖 ${T('Robot rating')}: <b>${rr.n ? rr.rt : '—'}</b> · ${T('{0} boards', rr.n)}${rr.n ? ' · ' + fmtSigned(Math.round(rr.avg * 100) / 100) + ' IMP / ' + T('Bd') : ''}</div>
+      <div class="muted">${T('The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.')}</div>
+      <div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Tr')}</th><th class="n">DD</th><th class="n">IMP</th></tr></thead><tbody>${rows || `<tr><td colspan="6">${T('No deals given to the robots yet. Enter a deal, then Let the robots play it.')}</td></tr>`}</tbody></table></div>`;
+  } else if (tab === 'stats') {
     body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Period')}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th><th class="n">${T('Points')}</th></tr></thead><tbody>${per.map(p => `<tr><td>${T(p.name)}</td><td class="n">${p.n}</td><td class="n">${p.scored ? fmtSigned(p.impSum) : "—"}</td><td class="n">${p.impAvg != null ? fmtSigned(p.impAvg) : "—"}</td><td class="n">${p.mpAvg != null ? p.mpAvg : "—"}</td><td class="n">${fmtSigned(p.pts)}</td></tr>`).join("")}</tbody></table></div>
      <div class="muted">${T('Every board is also played at 4 expert robot tables. IMP: your result against each table, averaged (cross-IMPs). MP: the percentage of the field you beat.')}</div>`;
   } else {
     const rows = HIST.slice(-100).reverse().map(e => `<tr class="rev" data-rev="${e.id}"><td>${kindMark(e)} ${new Date(e.ts || 0).toLocaleDateString()}${e.tn ? `<small class="rtn">${esc(e.tn)}</small>` : ''}</td><td>${e.board}</td><td>${e.passed ? T('Pass') : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
     body = `<div class="muted">${T('Tap a board to see the auction and how it was played.')}</div><div class="muted kkey">🏆 ${T('tournament')} · 🌐 ${T('online table')} · 🤖 ${T('offline')}</div><div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th>${T('Tr')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   }
-  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Board list')}</button><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button></div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Board list')}</button><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button><button data-v="robot" class="${tab === 'robot' ? 'on' : ''}">🤖 ${T('Robots')}</button></div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 
 /* replay of a finished board, one card at a time: ui.revStep cards have been played.
