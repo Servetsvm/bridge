@@ -1908,6 +1908,7 @@ body.homev2 .home.v2 .prac .prask .supc{background:#c4122f;color:#fff;border-rad
 .sbreq b{grid-column:1}.sbreq small{grid-column:1;opacity:.8}
 .sbreq .btn{grid-row:1/span 2}
 .sbc-pos[disabled]{opacity:.55;cursor:default}
+.bm3-hcp{background:#fff;color:#14281d;width:100%;box-sizing:border-box;font-size:26px;font-weight:800;text-align:center;padding:10px;border-radius:12px;border:2px solid #2f6fd6;margin:4px 0 8px}
 
 </style>
 
@@ -4822,6 +4823,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Single table": "Tek masa", "High-card points": "Puan", "Change the seating": "Oturuşu değiştir", "Not required: the directions are used.": "Zorunlu değil: boş bırakılırsa yön adları kullanılır.", "North-South’s points (0–40)": "Kuzey-Güney'in puanı (0–40)", "N-S {0} points": "KG {0} puan", "20–20: nothing expected": "20–20: beklenti yok", "{0} expected {1}": "{0} beklenen {1}", "Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.": "Dört oyuncu, gerçek kartlar. Her el kontrat ve Kuzey-Güney'in puanıyla girilir: 21 ve üstü puanı olan taraftan tablodaki skor beklenir, aradaki fark IMP olarak iki ortağa da yazılır.", "IMP from North-South’s side: the score against the score expected of the side with 21 or more points.": "IMP Kuzey-Güney açısından: skor, 21 ve üstü puanı olan taraftan beklenen skorla karşılaştırılır.", "Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.": "Her el: 21 ve üstü puanı olan tarafın skoru, puanına ve zonuna göre beklenen skorla karşılaştırılır; fark IMP olarak iki ortağa da yazılır. 38–40 puan 37 sayılır.",
     "Real cards": "Gerçek kartlarla", "Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.": "Online: uygulamada kartlarla oynanır; boş yerlere robot oturur. 🃏 Gerçek kartlarla: gerçek masalarda oynanır, skoru uygulama tutar.", "Seat requests": "Oturma istekleri", "Withdraw the request": "İsteği geri al", "You asked for {0}: the organiser accepts it.": "{0} için istek gönderdin: oyunu açan kabul edince oturursun.", "Your request was not accepted. Choose another seat.": "İsteğin kabul edilmedi. Başka bir yer seç.", "Choose a table and a seat: the organiser accepts you.": "Bir masa ve yer seç: oyunu açan seni kabul eder.", "Tap a free seat to ask for it.": "Oturmak için boş bir yere bas.",
     "Playing too? Choose your table to enter its scores.": "Sen de oynuyorsan masanı seç, o masanın skorlarını gir.",
     "Board {0} of {1}": "El {0}/{1}", "No boards yet.": "Henüz el yok.", "New match": "Yeni maç", "Finish the match": "Maçı bitir", "Match score": "Maç tablosu", "Team match with robots": "Robotlarla takım maçı", "Finish the team match now?": "Takım maçı şimdi bitirilsin mi?", "MP: a board won by the score is 100 %, an equal score 50 %.": "MP: skoru yüksek olan takım eli %100 kazanır, eşit skor %50.", "You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.": "Siz ve robot ortağınız Açık salonda oynarsınız; robot takım arkadaşlarınız aynı elleri Kapalı salonda robotlara karşı oynar. Her el IMP ve MP ile, maç VP ile puanlanır.", "The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).": "Kapalı salon, aynı eldeki ilk robot masasıdır. MP: skoru yüksek olan takım eli %100 kazanır, eşit skor %50. VP, WBF ölçeğine göre (toplam 20).",
@@ -5231,6 +5233,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Single table": "Ett bord", "High-card points": "Honnørpoeng", "Change the seating": "Bytt plassering", "Not required: the directions are used.": "Ikke påkrevd: retningene brukes.", "North-South’s points (0–40)": "Nord-Syds poeng (0–40)", "N-S {0} points": "NS {0} poeng", "20–20: nothing expected": "20–20: ingen forventning", "{0} expected {1}": "{0} forventet {1}", "Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.": "Fire spillere, ekte kort. Hvert spill legges inn med kontrakt og Nord-Syds poeng: siden med 21 eller flere poeng forventes tabellens resultat, og forskjellen regnes i IMP for begge partnere.", "IMP from North-South’s side: the score against the score expected of the side with 21 or more points.": "IMP sett fra Nord-Syd: resultatet mot det som forventes av siden med 21 eller flere poeng.", "Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.": "Hvert spill: resultatet til siden med 21 eller flere poeng mot det forventede (etter poeng og sone), i IMP; begge partnere får dem. 38–40 poeng regnes som 37.",
     "Real cards": "Ekte kort", "Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.": "Online: spilles i appen med kortene der; roboter tar tomme plasser. 🃏 Ekte kort: spilles ved ekte bord, appen fører resultatene.", "Seat requests": "Plassforespørsler", "Withdraw the request": "Trekk tilbake forespørselen", "You asked for {0}: the organiser accepts it.": "Du ba om {0}: arrangøren godtar det.", "Your request was not accepted. Choose another seat.": "Forespørselen ble ikke godtatt. Velg en annen plass.", "Choose a table and a seat: the organiser accepts you.": "Velg et bord og en plass: arrangøren godtar deg.", "Tap a free seat to ask for it.": "Trykk på en ledig plass for å be om den.",
     "Playing too? Choose your table to enter its scores.": "Spiller du også? Velg bordet ditt for å legge inn resultatene.",
     "Board {0} of {1}": "Spill {0} av {1}", "No boards yet.": "Ingen spill ennå.", "New match": "Ny kamp", "Finish the match": "Avslutt kampen", "Match score": "Kampresultat", "Team match with robots": "Lagkamp med roboter", "Finish the team match now?": "Avslutte lagkampen nå?", "MP: a board won by the score is 100 %, an equal score 50 %.": "MP: et spill vunnet på poeng gir 100 %, likt 50 %.", "You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.": "Du og en robotmakker spiller i åpent rom; robotlagkameratene dine spiller de samme spillene i lukket rom mot roboter. Hvert spill regnes i IMP og MP, kampen i VP.", "The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).": "Lukket rom er det første robotbordet på samme spill. MP: et spill vunnet på poeng gir 100 %, likt 50 %. VP etter WBF-skalaen (20 å dele).",
@@ -5638,6 +5641,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Single table": "Una mesa", "High-card points": "Puntos de honor", "Change the seating": "Cambiar la colocación", "Not required: the directions are used.": "No es obligatorio: se usan las posiciones.", "North-South’s points (0–40)": "Puntos de Norte-Sur (0–40)", "N-S {0} points": "NS {0} puntos", "20–20: nothing expected": "20–20: sin expectativa", "{0} expected {1}": "{0} esperado {1}", "Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.": "Cuatro jugadores, cartas reales. Cada mano se introduce con su contrato y los puntos de Norte-Sur: del lado con 21 o más puntos se espera la puntuación de la tabla, y la diferencia cuenta en IMP para ambos compañeros.", "IMP from North-South’s side: the score against the score expected of the side with 21 or more points.": "IMP desde Norte-Sur: la puntuación frente a la esperada del lado con 21 o más puntos.", "Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.": "Cada mano: la puntuación del lado con 21 o más puntos frente a la esperada (por puntos y vulnerabilidad), en IMP; la reciben ambos compañeros. 38–40 puntos cuentan como 37.",
     "Real cards": "Cartas reales", "Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.": "Online: se juega en la app con sus cartas; los robots ocupan los asientos libres. 🃏 Cartas reales: se juega en mesas reales, la app lleva los resultados.", "Seat requests": "Solicitudes de asiento", "Withdraw the request": "Retirar la solicitud", "You asked for {0}: the organiser accepts it.": "Pediste {0}: el organizador lo acepta.", "Your request was not accepted. Choose another seat.": "Tu solicitud no fue aceptada. Elige otro asiento.", "Choose a table and a seat: the organiser accepts you.": "Elige una mesa y un asiento: el organizador te acepta.", "Tap a free seat to ask for it.": "Toca un asiento libre para pedirlo.",
     "Playing too? Choose your table to enter its scores.": "¿También juegas? Elige tu mesa para introducir sus resultados.",
     "Board {0} of {1}": "Mano {0} de {1}", "No boards yet.": "Aún no hay manos.", "New match": "Nuevo partido", "Finish the match": "Terminar el partido", "Match score": "Marcador", "Team match with robots": "Partido de equipos con robots", "Finish the team match now?": "¿Terminar ahora el partido de equipos?", "MP: a board won by the score is 100 %, an equal score 50 %.": "MP: una mano ganada por la puntuación vale 100 %, empate 50 %.", "You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.": "Tú y un compañero robot jugáis en la sala abierta; tus compañeros de equipo robots juegan las mismas manos en la sala cerrada contra robots. Cada mano se puntúa en IMP y MP, el partido en VP.", "The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).": "La sala cerrada es la primera mesa de robots con la misma mano. MP: una mano ganada por la puntuación vale 100 %, empate 50 %. VP según la escala WBF (20 a repartir).",
@@ -6073,6 +6077,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Single table": "Une table", "High-card points": "Points d’honneur", "Change the seating": "Changer le placement", "Not required: the directions are used.": "Facultatif : les positions sont utilisées.", "North-South’s points (0–40)": "Points de Nord-Sud (0–40)", "N-S {0} points": "NS {0} points", "20–20: nothing expected": "20–20 : rien d’attendu", "{0} expected {1}": "{0} attendu {1}", "Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.": "Quatre joueurs, de vraies cartes. Chaque donne est saisie avec son contrat et les points de Nord-Sud : du camp avec 21 points ou plus on attend la marque du tableau, et la différence compte en IMP pour les deux partenaires.", "IMP from North-South’s side: the score against the score expected of the side with 21 or more points.": "IMP du côté Nord-Sud : la marque contre celle attendue du camp avec 21 points ou plus.", "Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.": "Chaque donne : la marque du camp avec 21 points ou plus contre la marque attendue (selon ses points et sa vulnérabilité), en IMP ; les deux partenaires les reçoivent. 38–40 points comptent comme 37.",
     "Real cards": "Vraies cartes", "Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.": "En ligne : joué dans l’appli avec ses cartes ; les robots prennent les places libres. 🃏 Vraies cartes : joué à de vraies tables, l’appli tient les marques.", "Seat requests": "Demandes de place", "Withdraw the request": "Retirer la demande", "You asked for {0}: the organiser accepts it.": "Vous avez demandé {0} : l’organisateur l’accepte.", "Your request was not accepted. Choose another seat.": "Votre demande n’a pas été acceptée. Choisissez une autre place.", "Choose a table and a seat: the organiser accepts you.": "Choisissez une table et une place : l’organisateur vous accepte.", "Tap a free seat to ask for it.": "Touchez une place libre pour la demander.",
     "Playing too? Choose your table to enter its scores.": "Vous jouez aussi ? Choisissez votre table pour saisir ses résultats.",
     "Board {0} of {1}": "Donne {0} sur {1}", "No boards yet.": "Pas encore de donnes.", "New match": "Nouveau match", "Finish the match": "Terminer le match", "Match score": "Score du match", "Team match with robots": "Match par quatre avec robots", "Finish the team match now?": "Terminer le match maintenant ?", "MP: a board won by the score is 100 %, an equal score 50 %.": "MP : une donne gagnée à la marque vaut 100 %, égalité 50 %.", "You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.": "Vous et un partenaire robot jouez en salle ouverte ; vos coéquipiers robots jouent les mêmes donnes en salle fermée contre des robots. Chaque donne est marquée en IMP et MP, le match en PV.", "The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).": "La salle fermée est la première table de robots sur la même donne. MP : une donne gagnée à la marque vaut 100 %, égalité 50 %. PV selon l’échelle WBF (20 à partager).",
@@ -6508,6 +6513,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Single table": "Un tavolo", "High-card points": "Punti onori", "Change the seating": "Cambia la disposizione", "Not required: the directions are used.": "Non obbligatorio: si usano le posizioni.", "North-South’s points (0–40)": "Punti di Nord-Sud (0–40)", "N-S {0} points": "NS {0} punti", "20–20: nothing expected": "20–20: nessuna attesa", "{0} expected {1}": "{0} atteso {1}", "Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.": "Quattro giocatori, carte vere. Ogni smazzata si inserisce con il contratto e i punti di Nord-Sud: dalla linea con 21 o più punti ci si attende il punteggio della tabella, e la differenza conta in IMP per entrambi i compagni.", "IMP from North-South’s side: the score against the score expected of the side with 21 or more points.": "IMP dal lato Nord-Sud: il punteggio contro quello atteso dalla linea con 21 o più punti.", "Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.": "Ogni smazzata: il punteggio della linea con 21 o più punti contro quello atteso (per punti e zona), in IMP; li ricevono entrambi i compagni. 38–40 punti contano come 37.",
     "Real cards": "Carte vere", "Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.": "Online: si gioca nell’app con le sue carte; i robot occupano i posti liberi. 🃏 Carte vere: si gioca a tavoli veri, l’app tiene i punteggi.", "Seat requests": "Richieste di posto", "Withdraw the request": "Ritira la richiesta", "You asked for {0}: the organiser accepts it.": "Hai chiesto {0}: l’organizzatore lo accetta.", "Your request was not accepted. Choose another seat.": "La richiesta non è stata accettata. Scegli un altro posto.", "Choose a table and a seat: the organiser accepts you.": "Scegli un tavolo e un posto: l’organizzatore ti accetta.", "Tap a free seat to ask for it.": "Tocca un posto libero per chiederlo.",
     "Playing too? Choose your table to enter its scores.": "Giochi anche tu? Scegli il tuo tavolo per inserirne i risultati.",
     "Board {0} of {1}": "Smazzata {0} di {1}", "No boards yet.": "Nessuna smazzata ancora.", "New match": "Nuovo incontro", "Finish the match": "Termina l’incontro", "Match score": "Punteggio dell’incontro", "Team match with robots": "Incontro a squadre con i robot", "Finish the team match now?": "Terminare ora l’incontro?", "MP: a board won by the score is 100 %, an equal score 50 %.": "MP: una smazzata vinta per punteggio vale 100 %, pari 50 %.", "You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.": "Tu e un compagno robot giocate in sala aperta; i tuoi compagni di squadra robot giocano le stesse smazzate in sala chiusa contro i robot. Ogni smazzata si conta a IMP e MP, l’incontro a VP.", "The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).": "La sala chiusa è il primo tavolo di robot sulla stessa smazzata. MP: una smazzata vinta per punteggio vale 100 %, pari 50 %. VP secondo la scala WBF (20 da dividere).",
@@ -6943,6 +6949,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Single table": "Ein Tisch", "High-card points": "Figurenpunkte", "Change the seating": "Sitzordnung ändern", "Not required: the directions are used.": "Nicht nötig: die Himmelsrichtungen werden verwendet.", "North-South’s points (0–40)": "Punkte von Nord-Süd (0–40)", "N-S {0} points": "NS {0} Punkte", "20–20: nothing expected": "20–20: keine Erwartung", "{0} expected {1}": "{0} erwartet {1}", "Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.": "Vier Spieler, echte Karten. Jedes Board wird mit Kontrakt und den Punkten von Nord-Süd eingegeben: von der Seite mit 21 oder mehr Punkten wird das Ergebnis der Tabelle erwartet, die Differenz zählt in IMP für beide Partner.", "IMP from North-South’s side: the score against the score expected of the side with 21 or more points.": "IMP aus Sicht von Nord-Süd: das Ergebnis gegen das von der Seite mit 21 oder mehr Punkten erwartete.", "Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.": "Jedes Board: das Ergebnis der Seite mit 21 oder mehr Punkten gegen das erwartete (nach Punkten und Gefahrenlage), in IMP; beide Partner bekommen sie. 38–40 Punkte zählen als 37.",
     "Real cards": "Echte Karten", "Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.": "Online: in der App mit ihren Karten gespielt; Roboter besetzen leere Plätze. 🃏 Echte Karten: an echten Tischen gespielt, die App führt die Ergebnisse.", "Seat requests": "Platzanfragen", "Withdraw the request": "Anfrage zurückziehen", "You asked for {0}: the organiser accepts it.": "Du hast {0} angefragt: der Veranstalter nimmt an.", "Your request was not accepted. Choose another seat.": "Deine Anfrage wurde nicht angenommen. Wähle einen anderen Platz.", "Choose a table and a seat: the organiser accepts you.": "Wähle einen Tisch und einen Platz: der Veranstalter nimmt dich an.", "Tap a free seat to ask for it.": "Tippe auf einen freien Platz, um ihn anzufragen.",
     "Playing too? Choose your table to enter its scores.": "Spielst du mit? Wähle deinen Tisch, um seine Ergebnisse einzugeben.",
     "Board {0} of {1}": "Board {0} von {1}", "No boards yet.": "Noch keine Boards.", "New match": "Neuer Kampf", "Finish the match": "Kampf beenden", "Match score": "Spielstand", "Team match with robots": "Teamkampf mit Robotern", "Finish the team match now?": "Den Teamkampf jetzt beenden?", "MP: a board won by the score is 100 %, an equal score 50 %.": "MP: ein nach Punkten gewonnenes Board zählt 100 %, gleich 50 %.", "You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.": "Du und ein Roboterpartner spielt im offenen Raum; deine Roboter-Teamkollegen spielen dieselben Boards im geschlossenen Raum gegen Roboter. Jedes Board zählt in IMP und MP, der Kampf in VP.", "The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).": "Der geschlossene Raum ist der erste Robotertisch mit demselben Blatt. MP: ein nach Punkten gewonnenes Board zählt 100 %, gleich 50 %. VP nach der WBF-Skala (20 zu verteilen).",
@@ -7378,6 +7385,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Single table": "Один стол", "High-card points": "Очки", "Change the seating": "Пересадка", "Not required: the directions are used.": "Не обязательно: используются стороны света.", "North-South’s points (0–40)": "Очки Север-Юг (0–40)", "N-S {0} points": "СЮ {0} очков", "20–20: nothing expected": "20–20: ожидания нет", "{0} expected {1}": "{0} ожидается {1}", "Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.": "Четыре игрока, настоящие карты. Каждая сдача вводится с контрактом и очками Север-Юг: от линии с 21 и более очками ожидается результат из таблицы, разница считается в IMP обоим партнёрам.", "IMP from North-South’s side: the score against the score expected of the side with 21 or more points.": "IMP со стороны Север-Юг: результат против ожидаемого от линии с 21 и более очками.", "Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.": "Каждая сдача: результат линии с 21 и более очками против ожидаемого (по очкам и зональности), в IMP; их получают оба партнёра. 38–40 очков считаются как 37.",
     "Real cards": "Настоящие карты", "Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.": "Онлайн: играется в приложении его картами; свободные места занимают роботы. 🃏 Настоящие карты: игра за настоящими столами, приложение ведёт счёт.", "Seat requests": "Запросы на места", "Withdraw the request": "Отозвать запрос", "You asked for {0}: the organiser accepts it.": "Вы запросили {0}: организатор подтверждает.", "Your request was not accepted. Choose another seat.": "Запрос не принят. Выберите другое место.", "Choose a table and a seat: the organiser accepts you.": "Выберите стол и место: организатор вас примет.", "Tap a free seat to ask for it.": "Нажмите на свободное место, чтобы запросить его.",
     "Playing too? Choose your table to enter its scores.": "Тоже играете? Выберите свой стол, чтобы вводить его результаты.",
     "Board {0} of {1}": "Сдача {0} из {1}", "No boards yet.": "Сдач пока нет.", "New match": "Новый матч", "Finish the match": "Завершить матч", "Match score": "Счёт матча", "Team match with robots": "Командный матч с роботами", "Finish the team match now?": "Завершить командный матч сейчас?", "MP: a board won by the score is 100 %, an equal score 50 %.": "MP: сдача, выигранная по очкам, — 100 %, равный результат — 50 %.", "You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.": "Вы и партнёр-робот играете в открытом зале; ваши товарищи по команде — роботы — играют те же сдачи в закрытом зале против роботов. Каждая сдача считается в IMP и MP, матч — в VP.", "The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).": "Закрытый зал — первый стол роботов на той же сдаче. MP: сдача, выигранная по очкам, — 100 %, равный результат — 50 %. VP по шкале WBF (всего 20).",
@@ -7813,6 +7821,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Single table": "Jeden stół", "High-card points": "Punkty honorowe", "Change the seating": "Zmień rozsadzenie", "Not required: the directions are used.": "Nieobowiązkowe: używane są kierunki.", "North-South’s points (0–40)": "Punkty NS (0–40)", "N-S {0} points": "NS {0} pkt", "20–20: nothing expected": "20–20: brak oczekiwania", "{0} expected {1}": "{0} oczekiwane {1}", "Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.": "Czterech graczy, prawdziwe karty. Każde rozdanie wpisuje się z kontraktem i punktami NS: od strony z 21 lub więcej punktami oczekuje się zapisu z tabeli, a różnica liczy się w IMP dla obu partnerów.", "IMP from North-South’s side: the score against the score expected of the side with 21 or more points.": "IMP z perspektywy NS: zapis wobec oczekiwanego od strony z 21 lub więcej punktami.", "Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.": "Każde rozdanie: zapis strony z 21 lub więcej punktami wobec oczekiwanego (wg punktów i założenia), w IMP; dostają je obaj partnerzy. 38–40 punktów liczy się jak 37.",
     "Real cards": "Prawdziwe karty", "Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.": "Online: gra w aplikacji jej kartami; wolne miejsca zajmują roboty. 🃏 Prawdziwe karty: gra przy prawdziwych stołach, aplikacja liczy wyniki.", "Seat requests": "Prośby o miejsce", "Withdraw the request": "Wycofaj prośbę", "You asked for {0}: the organiser accepts it.": "Poprosiłeś o {0}: organizator akceptuje.", "Your request was not accepted. Choose another seat.": "Prośba nie została przyjęta. Wybierz inne miejsce.", "Choose a table and a seat: the organiser accepts you.": "Wybierz stół i miejsce: organizator cię zaakceptuje.", "Tap a free seat to ask for it.": "Dotknij wolnego miejsca, aby o nie poprosić.",
     "Playing too? Choose your table to enter its scores.": "Też grasz? Wybierz swój stół, aby wpisywać jego wyniki.",
     "Board {0} of {1}": "Rozdanie {0} z {1}", "No boards yet.": "Brak rozdań.", "New match": "Nowy mecz", "Finish the match": "Zakończ mecz", "Match score": "Wynik meczu", "Team match with robots": "Mecz drużynowy z robotami", "Finish the team match now?": "Zakończyć teraz mecz drużynowy?", "MP: a board won by the score is 100 %, an equal score 50 %.": "MP: rozdanie wygrane zapisem to 100 %, remis 50 %.", "You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.": "Ty i partner-robot gracie w pokoju otwartym; twoi koledzy z drużyny — roboty — grają te same rozdania w pokoju zamkniętym przeciw robotom. Każde rozdanie liczy się w IMP i MP, mecz w VP.", "The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).": "Pokój zamknięty to pierwszy stół robotów na tym samym rozdaniu. MP: rozdanie wygrane zapisem to 100 %, remis 50 %. VP według skali WBF (20 do podziału).",
@@ -8248,6 +8257,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Single table": "单桌", "High-card points": "大牌点", "Change the seating": "调换座位", "Not required: the directions are used.": "非必填:留空则使用方位名。", "North-South’s points (0–40)": "南北大牌点 (0–40)", "N-S {0} points": "南北 {0} 点", "20–20: nothing expected": "20–20:无期望分", "{0} expected {1}": "{0} 期望 {1}", "Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.": "四名玩家,真实纸牌。每副牌录入定约和南北大牌点:21 点及以上的一方期望得到表中的分数,差额按 IMP 计给两位同伴。", "IMP from North-South’s side: the score against the score expected of the side with 21 or more points.": "IMP 以南北方计算:实际分数对比 21 点及以上一方的期望分。", "Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.": "每副牌:21 点及以上一方的分数对比其期望分(按点数和局况),换算为 IMP,两位同伴都计入。38–40 点按 37 计算。",
     "Real cards": "真实纸牌", "Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.": "在线:在应用中用应用的牌打;空位由机器人补上。🃏 真实纸牌:在真实牌桌上打,应用记录成绩。", "Seat requests": "入座请求", "Withdraw the request": "撤回请求", "You asked for {0}: the organiser accepts it.": "你已申请 {0}:由组织者确认。", "Your request was not accepted. Choose another seat.": "请求未被接受。请选择其他座位。", "Choose a table and a seat: the organiser accepts you.": "选择桌号和座位:由组织者接受你。", "Tap a free seat to ask for it.": "点击空座位申请入座。",
     "Playing too? Choose your table to enter its scores.": "你也参加吗?选择你的桌号来录入该桌成绩。",
     "Board {0} of {1}": "第 {0}/{1} 副", "No boards yet.": "还没有牌。", "New match": "新比赛", "Finish the match": "结束比赛", "Match score": "比赛比分", "Team match with robots": "与机器人的队式赛", "Finish the team match now?": "现在结束队式赛吗?", "MP: a board won by the score is 100 %, an equal score 50 %.": "MP:按分数赢下一副牌得 100%,平分得 50%。", "You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.": "你和机器人同伴在开室打牌;你的机器人队友在闭室对机器人打同样的牌。每副按 IMP 和 MP 计分,比赛按 VP 计分。", "The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).": "闭室是同一副牌的第一张机器人桌。MP:按分数赢下一副牌得 100%,平分得 50%。VP 按 WBF 标准(共 20)。",
@@ -9306,7 +9316,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 322;
+const APP_V = 323;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -14921,7 +14931,33 @@ const SB = (() => {
   const canManage = m => isAdm() || isOrganiser(m);
   const done = () => sb.g && sb.g.m && sb.g.m.st === 'done';
   // a team match: the North-South team of table t is team t, East-West the other team of the match (tables 2k-1, 2k)
-  const isTeam = m => !!(m || (sb.g && sb.g.m) || {}).type;
+  const isTeam = m => (m || (sb.g && sb.g.m) || {}).type === 'team';
+  const isOne = m => (m || (sb.g && sb.g.m) || {}).type === 'one';
+  // the single table: the score expected of the side with 21+ points [not vulnerable, vulnerable]; 38-40 as 37
+  const EXP = { 21: [50, 50], 22: [70, 70], 23: [110, 110], 24: [200, 290], 25: [300, 490], 26: [350, 520], 27: [400, 600], 28: [430, 630], 29: [460, 660], 30: [490, 690], 31: [630, 900], 32: [700, 1150], 33: [900, 1350], 34: [1000, 1500], 35: [1100, 1650], 36: [1200, 1800], 37: [1300, 1950] };
+  const validH = h => Number.isInteger(h) && h >= 0 && h <= 40;
+  // a board at the single table: the strong side, what it was expected to score, and the IMPs (North-South's view)
+  function oneOf(b, r) {
+    if (!r || !validH(r.h)) return null;
+    const ns = nsScore(b, r);
+    if (r.h === 20) return { side: null, exp: 0, imp: E.imps(ns) };
+    const side = r.h > 20 ? 0 : 1, pts = side ? 40 - r.h : r.h, exp = EXP[Math.min(pts, 37)][E.vulOf(b, side) ? 1 : 0];
+    const imp = E.imps((side ? -ns : ns) - exp);
+    return { side, exp, imp: side ? -imp : imp };
+  }
+  // the players of a board (the seating when it was entered)
+  const seatsOf = r => { const p = (r && r.p) || {}; return { n: p.n || SEAT[0], e: p.e || SEAT[1], s: p.s || SEAT[2], w: p.w || SEAT[3] }; };
+  // each player's IMPs (their pair's on the boards they played) and each pair's
+  function oneStand() {
+    const P = {}, Q = {}, add = (O, k, name, v) => { const x = O[k] || (O[k] = { name, n: 0, imp: 0 }); x.n++; x.imp += v; };
+    for (const b in (sb.g.r || {})) {
+      const r = (sb.g.r[b] || {})[1]; if (!r || !r.ok) continue; const o = oneOf(+b, r); if (!o) continue; const p = seatsOf(r);
+      for (const [k, v] of [['n', o.imp], ['s', o.imp], ['e', -o.imp], ['w', -o.imp]]) add(P, p[k].toLowerCase(), p[k], v);
+      for (const [a, c, v] of [[p.n, p.s, o.imp], [p.e, p.w, -o.imp]]) { const nm = [a, c].sort((x, y) => x.localeCompare(y)); add(Q, nm.join('|').toLowerCase(), nm.join(' – '), v); }
+    }
+    const srt = O => Object.values(O).sort((a, b) => b.imp - a.imp);
+    return { P: srt(P), Q: srt(Q) };
+  }
   const partnerT = t => +t % 2 ? +t + 1 : +t - 1;
   const teamName = (i, m) => (((m || sb.g.m).tm || [])[i - 1]) || T('Team {0}', i);
   const roomName = t => t % 2 ? T('Open room') : T('Closed room');
@@ -14972,6 +15008,7 @@ const SB = (() => {
   // only scores the other pair has confirmed count
   function boardCmp(b) {
     const R = (sb.g.r || {})[b] || {}, ts = Object.keys(R).filter(t => R[t].ok), out = {};
+    if (isOne()) { for (const t of ts) { const o = oneOf(+b, R[t]); out[t] = { ns: nsScore(b, R[t]), cmp: o ? { imp: o.imp, mp: null } : null }; } return out; }
     if (isTeam()) { for (const t of ts) { const me = nsScore(b, R[t]), p = R[partnerT(+t)]; out[t] = { ns: me, cmp: p && p.ok ? { imp: E.imps(me - nsScore(b, p)), mp: null } : null }; } return out; }
     for (const t of ts) {
       const me = nsScore(b, R[t]), field = ts.filter(x => x !== t).map(x => nsScore(b, R[x]));
@@ -15045,7 +15082,7 @@ const SB = (() => {
     return `<h2>🃏 ${T('Team match')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
       <div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>${legend(g)}
       ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
-      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
+      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   // a team match: the tables of each match and who sits North-South there
   const legend = m => !isTeam(m) ? '' : `<div class="tmleg">${[...Array(Math.floor(m.tb / 2)).keys()].map(i => { const a = teamName(2 * i + 1, m), b = teamName(2 * i + 2, m);
@@ -15112,7 +15149,7 @@ const SB = (() => {
       <div class="muted">🌐 ${T('Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.')}</div>
       <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')}</div>
       ${isAdm() ? `<div class="row2"><button class="btn gold" id="rtOpen">🤖 ${T('Team match with robots')}</button></div>` : ''}
-      <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button></div>
+      <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button></div>
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
@@ -15120,6 +15157,14 @@ const SB = (() => {
   const seg = (name, opts, cur) => `<div class="seg" data-sbseg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   function setupHtml() {
     const s = sb.setup;
+    if (s.one) { const p = s.names[1] || {};
+      return `<h2>🪑 ${T('Single table')}</h2>
+      <div class="muted">${T('Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.')}</div>
+      <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
+      <div class="grp"><span>${T('Players')}</span><div class="tsetrow sbrow">${['n', 's', 'e', 'w'].map(k => `<label><small>${SEAT[SEATK[k]]}</small><input class="tok" maxlength="20" data-sbpl="${k}" data-member placeholder="${SEAT[SEATK[k]]}" value="${esc(p[k] || '')}"></label>`).join('')}</div><div class="muted">${T('Not required: the directions are used.')}</div></div>
+      <div class="grp"><span>${T('Boards')}</span>${seg('bd', [8, 12, 16, 20, 24, 28, 32].map(n => [n, n]), s.bd)}</div>
+      ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
+      <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`; }
     return `<h2>🃏 ${T('New game')}</h2>
       <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
       <div class="grp"><span>${T('Teams')}</span>${seg('tb', [2, 4, 6, 8, 10, 12].map(n => [n, n]), s.tb)}</div>
@@ -15133,6 +15178,7 @@ const SB = (() => {
     const s = sb.setup; if (!s) return;
     const n = $('sbName'); if (n) s.n = n.value.trim().slice(0, 40);
     for (const i of document.querySelectorAll('[data-sbteam]')) s.tm[+i.dataset.sbteam] = i.value.trim().slice(0, 20);
+    for (const i of document.querySelectorAll('[data-sbpl]')) (s.names[1] = s.names[1] || {})[i.dataset.sbpl] = i.value.trim().slice(0, 20);
   }
   function gameHtml() {
     const g = sb.g, m = g.m, mt = myTable();
@@ -15148,9 +15194,9 @@ const SB = (() => {
     else if (sb.view === 'tables') body = tablesHtml();
     else body = boardsHtml();
     // a player sees only the game (full screen, no title lines); the organiser keeps the game's details
-    return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) + (isTeam() ? ' · ' + roomName(mt) : '') : T('Team match')}</div></div>`}${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
-      <div class="muted">${isTeam() ? T('{0} teams', m.tb) : T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
-      ${sb.board || !canManage(m) || done() ? '' : reqListHtml()}${sb.board ? '' : links}${orgPick}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable ? '' : tabs}${body}
+    return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) + (isTeam() ? ' · ' + roomName(mt) : '') : T('Team match')}</div></div>`}${canManage(m) ? `<h2>${isOne() ? '🪑' : '🃏'} ${esc(m.n)}</h2>
+      <div class="muted">${isOne() ? T('Single table') : isTeam() ? T('{0} teams', m.tb) : T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
+      ${sb.board || !canManage(m) || done() ? '' : reqListHtml()}${sb.board ? '' : links}${orgPick}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span>${isOne() ? `<button class="btn gold" id="sbSeating">🔄 ${T('Change the seating')}</button>` : `<button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button>`}</div>` : ''}${sb.board || pickTable ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : canManage(m) ? `<button class="btn" id="sbList">← ${T('All games')}</button>` : ''}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
@@ -15179,13 +15225,14 @@ const SB = (() => {
       <div class="row2"><button class="btn new" id="sbOk">✓ ${T('We confirm')}</button><button class="btn" id="sbFix">✎ ${T('Correct')}</button></div>
       ${others ? `<div class="muted">${T('Results of the other tables appear after the confirmation.')}</div>` : ''}</div>`;
     const c = boardCmp(b), wait = ts.filter(t => !R[t].ok).length;
-    const tm = isTeam();
-    const rows = ts.map(t => { const r = R[t], x = c[t] || { ns: nsScore(b, r), cmp: null }; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}${tm ? `<small>${roomName(+t)}</small>` : ''}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
-      <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}${r.ld ? ` <small>· ${leadHtml(r.ld)}</small>` : ''}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
+    const tm = isTeam() || isOne();
+    const rows = ts.map(t => { const r = R[t], x = c[t] || { ns: nsScore(b, r), cmp: null }; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}${isTeam() ? `<small>${roomName(+t)}</small>` : ''}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
+      <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}${r.ld ? ` <small>· ${leadHtml(r.ld)}</small>` : ''}${isOne() ? oneLine(b, r) : ''}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
       ${tm ? '' : `<td data-l="MP %" class="n">${!r.ok ? '⏳' : x.cmp ? x.cmp.mp : '—'}</td>`}<td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td>${canManage(g.m) ? `<td class="tact"><button class="btn mini-btn" data-sbadm="${t}" title="${T('Correct')}">✎</button></td>` : ''}</tr>`; }).join('');
     return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th>${tm ? '' : '<th class="n">MP %</th>'}<th class="n">IMP</th>${canManage(g.m) ? '<th></th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="muted">${tm ? T('IMP from North-South’s side, against the other room of the same match.') : T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the organiser or the administrator can change a confirmed score.')}</div>`;
+      <div class="muted">${isOne() ? T('IMP from North-South’s side: the score against the score expected of the side with 21 or more points.') : tm ? T('IMP from North-South’s side, against the other room of the same match.') : T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the organiser or the administrator can change a confirmed score.')}</div>`;
   }
+  const oneLine = (b, r) => { const o = oneOf(b, r); return o ? `<small>${T('N-S {0} points', r.h)} · ${o.side == null ? T('20–20: nothing expected') : T('{0} expected {1}', o.side ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2], o.exp)}</small>` : ''; };
   const scoreTxt = (b, r) => { const ns = nsScore(b, r), ew = r.l && E.sideOf(r.d) === 1; return `${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; };
   function formHtml(b) {
     const mt = sb.formT || myTable(), R = (sb.g.r || {})[b] || {};
@@ -15193,7 +15240,7 @@ const SB = (() => {
     const lead = f.ls != null && f.ls >= 0 && f.lr != null && f.lr >= 0;
     const need = f.l ? f.l + 6 : 0;
     const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
-    const ok = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null && lead);
+    const okb = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null && lead), ok = okb && (!isOne() || validH(f.h));
     // the screen of a Bridgemate III: the contract and the N-S score on the display, then one row of large keys per step
     const ns = ok ? (f.l ? nsScore(b, f) : 0) : null;
     const contract = f.l === 0 ? T('Pass') : f.l ? `${f.l}${f.s != null ? sym(f.s) : ''}${f.x === 1 ? ' X' : f.x === 2 ? ' XX' : ''}${f.d != null ? ' ' + SEAT_AB[f.d] : ''}` : '—';
@@ -15223,6 +15270,7 @@ const SB = (() => {
       ${keys('lr', 'k7 small', RANKS.map((r, i) => [i, r]), f.lr)}` : ''}
       ${f.l && f.s != null && f.d != null && lead ? `<div class="bm3-step">${T('Result')}</div>
       ${keys('k', 'k7', res.map(([k, l]) => [k, l, 'res ' + (k - need === 0 ? 'made' : k > need ? 'over' : 'down')]), f.k)}` : ''}
+      ${isOne() && (f.l === 0 || f.k != null) ? `<div class="bm3-step">${T('North-South’s points (0–40)')}</div><input class="bm3-hcp" id="sbHcp" type="number" inputmode="numeric" min="0" max="40" value="${f.h ?? ''}" placeholder="${T('High-card points')}" data-okb="${okb ? 1 : ''}">` : ''}
       <div class="bm3-actions"${R[mt] ? '' : ' style="grid-template-columns:1fr"'}>${R[mt] ? `<button class="bm3-cancel" id="sbCancel">✕ ${T('Cancel')}</button>` : ''}<button class="bm3-ok" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>✓ ${T('Save')}</button></div>
     </div></div>`;
   }
@@ -15236,7 +15284,14 @@ const SB = (() => {
     return cards + tab + `<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
       <div class="muted">${T('Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).')} ${T('MP: a board won by the score is 100 %, an equal score 50 %.')}</div>`;
   }
+  function oneRankHtml() {
+    const { P, Q } = oneStand(); if (!P.length) return `<div class="muted">${T('No scores yet.')}</div>`;
+    const tab = (L, h) => `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${h}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th></tr></thead><tbody>${L.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="IMP" class="n"><b>${signed(r.imp)}</b></td></tr>`).join('')}</tbody></table></div>`;
+    return `<h3>${T('Players')}</h3>${tab(P, T('Player'))}<h3>${T('Pairs')}</h3>${tab(Q, T('Pair'))}<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
+      <div class="muted">${T('Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.')}</div>`;
+  }
   function rankHtml() {
+    if (isOne()) return oneRankHtml();
     if (isTeam()) return teamRankHtml();
     const L = standings();
     if (!L.length) return `<div class="muted">${T('No scores yet.')}</div>`;
@@ -15247,6 +15302,10 @@ const SB = (() => {
   }
   // the standings as a plain message (as on the screen: MP % and IMP)
   function standingsText() {
+    if (isOne()) {
+      const m = sb.g.m, { P } = oneStand();
+      return [`🪑 ${m.n} — ${new Date(m.ts).toLocaleDateString()}`, ...P.map((r, i) => `${i + 1}. ${r.name} ${r.imp > 0 ? '+' : ''}${r.imp} IMP (${T('{0} boards', r.n)})`)].join('\n');
+    }
     if (isTeam()) {
       const m = sb.g.m;
       return [`🃏 ${m.n} — ${new Date(m.ts).toLocaleDateString()}\n${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}`,
@@ -15287,6 +15346,11 @@ const SB = (() => {
     }, 250);
   });
   document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'sbSeatIn') $('sbSeatOk')?.click(); });
+  document.addEventListener('input', e => {
+    if (!e.target || e.target.id !== 'sbHcp' || !sb.form) return;
+    const v = e.target.value.trim(), h = /^\d{1,2}$/.test(v) ? +v : null; sb.form.h = validH(h) ? h : null;
+    const b = $('sbSave'); if (b) b.disabled = !(e.target.dataset.okb && sb.form.h != null) || sb.busy;
+  });
   async function seatOk() {
     const inp = $('sbSeatIn'); if (!inp || !sb.seats || !sb.seatK) return;
     let v = inp.value.trim();
@@ -15322,25 +15386,27 @@ const SB = (() => {
     sb.busy = true; sb.err = ''; show();
     try {
       const uid = await C().uid(), id = newCode(), ts = Date.now();
-      const tm = [...Array(s.tb).keys()].map(i => s.tm[i] || T('Team {0}', i + 1));
-      const m = { n: s.n || T('Team match'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey(), type: 'team', tm };
-      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk, type: 'team', tm } };
+      const type = s.one ? 'one' : 'team', tm = s.one ? [] : [...Array(s.tb).keys()].map(i => s.tm[i] || T('Team {0}', i + 1));
+      const m = { n: s.n || T(s.one ? 'Single table' : 'Team match'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey(), type, tm };
+      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk, type, tm } };
       for (let t = 1; t <= s.tb; t++) { const p = s.names[t] || {}; up['sb/' + id + '/t/' + t] = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }
       await C().patch('', up);
-      sb.setup = null; sb.busy = false; await loadGame(id); sb.view = 'tables'; sb.board = 0; show(); poll();
+      sb.setup = null; sb.busy = false; await loadGame(id); sb.view = s.one ? 'boards' : 'tables'; sb.board = 0; if (s.one) setMyTable(1); show(); poll();
     } catch (e) { sb.busy = false; sb.err = T('Could not save. Check the internet connection and try again.'); show(); }
   }
   async function openGame(id) {
     sb.err = '';
     try { if (!(await loadGame(id))) { sb.err = T('No game with this code.'); return show(); } }
     catch (e) { sb.err = T('Could not reach the server. Check the internet connection.'); return show(); }
-    sb.view = canManage(sb.g.m) && !done() ? 'tables' : 'boards'; sb.board = 0; sb.form = null; sb.editT = 0; setLast(done() ? '' : id); show(); poll();
+    if (isOne() && !myTable() && !done()) setMyTable(1);   // the single table: everyone sits at it
+    sb.view = canManage(sb.g.m) && !done() && !isOne() ? 'tables' : 'boards'; sb.board = 0; sb.form = null; sb.editT = 0; setLast(done() ? '' : id); show(); poll();
   }
   async function save() {
     const b = sb.board, mt = myTable(), f = sb.form; if (!b || !mt || !f || sb.busy) return;
     const t = sb.formT || mt;
     const r = f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k, ld: SUITS[f.ls] + RANKS[f.lr] } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
     r.sc = nsScore(b, r); r.ts = Date.now();
+    if (isOne()) { if (!validH(f.h)) return; r.h = f.h; const p = (sb.g.t || {})[1] || {}; r.p = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }   // the points, and who sat where
     if (sb.formT) r.ok = true;   // the administrator's correction needs no confirmation
     sb.busy = true; show();
     if (sb.formT) await signIn();   // a correction: the organiser is known by name
@@ -15425,6 +15491,7 @@ const SB = (() => {
       else if (sb.form) { sb.form[k] = +v; if (k === 'l') { if (+v === 0) { sb.form.s = sb.form.d = sb.form.k = null; } else if (sb.form.k == null || sb.form.k < 0) sb.form.k = null; } }
       return show();
     }
+    if (id === 'sbOne') { sb.setup = { one: true, n: T('Single table') + ' ' + new Date().toLocaleDateString(), tb: 1, bd: 8, names: {}, tm: [] }; sb.err = ''; return show(); }
     if (id === 'sbNew') { sb.setup = { n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [] }; sb.err = ''; return show(); }
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
@@ -15434,6 +15501,7 @@ const SB = (() => {
     if (d.sbent) { const [gid, t] = d.sbent.split(':'); sb.entry = false; return openLink(gid, +t); }   // that table: the organiser sits, a player asks for a seat there
     if (d.sbrqs) return sendReq(d.sbrqs);
     if (id === 'sbReqX') return dropReq();
+    if (id === 'sbSeating') { sb.view = 'tables'; sb.editT = 1; show(); return; }
     if (d.sbacc || d.sbrej) { const v = d.sbacc || d.sbrej, i = v.indexOf(':'); return answerReq(+v.slice(0, i), v.slice(i + 1), !!d.sbacc); }
     if (d.sbmng) { sb.entry = false; return openGame(d.sbmng); }
     if (id === 'sbList') { sb.entry = false; setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }

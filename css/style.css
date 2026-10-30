@@ -1877,3 +1877,4 @@ body.homev2 .home.v2 .prac .prask .supc{background:#c4122f;color:#fff;border-rad
 .sbreq b{grid-column:1}.sbreq small{grid-column:1;opacity:.8}
 .sbreq .btn{grid-row:1/span 2}
 .sbc-pos[disabled]{opacity:.55;cursor:default}
+.bm3-hcp{background:#fff;color:#14281d;width:100%;box-sizing:border-box;font-size:26px;font-weight:800;text-align:center;padding:10px;border-radius:12px;border:2px solid #2f6fd6;margin:4px 0 8px}

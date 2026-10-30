@@ -33,7 +33,33 @@ const SB = (() => {
   const canManage = m => isAdm() || isOrganiser(m);
   const done = () => sb.g && sb.g.m && sb.g.m.st === 'done';
   // a team match: the North-South team of table t is team t, East-West the other team of the match (tables 2k-1, 2k)
-  const isTeam = m => !!(m || (sb.g && sb.g.m) || {}).type;
+  const isTeam = m => (m || (sb.g && sb.g.m) || {}).type === 'team';
+  const isOne = m => (m || (sb.g && sb.g.m) || {}).type === 'one';
+  // the single table: the score expected of the side with 21+ points [not vulnerable, vulnerable]; 38-40 as 37
+  const EXP = { 21: [50, 50], 22: [70, 70], 23: [110, 110], 24: [200, 290], 25: [300, 490], 26: [350, 520], 27: [400, 600], 28: [430, 630], 29: [460, 660], 30: [490, 690], 31: [630, 900], 32: [700, 1150], 33: [900, 1350], 34: [1000, 1500], 35: [1100, 1650], 36: [1200, 1800], 37: [1300, 1950] };
+  const validH = h => Number.isInteger(h) && h >= 0 && h <= 40;
+  // a board at the single table: the strong side, what it was expected to score, and the IMPs (North-South's view)
+  function oneOf(b, r) {
+    if (!r || !validH(r.h)) return null;
+    const ns = nsScore(b, r);
+    if (r.h === 20) return { side: null, exp: 0, imp: E.imps(ns) };
+    const side = r.h > 20 ? 0 : 1, pts = side ? 40 - r.h : r.h, exp = EXP[Math.min(pts, 37)][E.vulOf(b, side) ? 1 : 0];
+    const imp = E.imps((side ? -ns : ns) - exp);
+    return { side, exp, imp: side ? -imp : imp };
+  }
+  // the players of a board (the seating when it was entered)
+  const seatsOf = r => { const p = (r && r.p) || {}; return { n: p.n || SEAT[0], e: p.e || SEAT[1], s: p.s || SEAT[2], w: p.w || SEAT[3] }; };
+  // each player's IMPs (their pair's on the boards they played) and each pair's
+  function oneStand() {
+    const P = {}, Q = {}, add = (O, k, name, v) => { const x = O[k] || (O[k] = { name, n: 0, imp: 0 }); x.n++; x.imp += v; };
+    for (const b in (sb.g.r || {})) {
+      const r = (sb.g.r[b] || {})[1]; if (!r || !r.ok) continue; const o = oneOf(+b, r); if (!o) continue; const p = seatsOf(r);
+      for (const [k, v] of [['n', o.imp], ['s', o.imp], ['e', -o.imp], ['w', -o.imp]]) add(P, p[k].toLowerCase(), p[k], v);
+      for (const [a, c, v] of [[p.n, p.s, o.imp], [p.e, p.w, -o.imp]]) { const nm = [a, c].sort((x, y) => x.localeCompare(y)); add(Q, nm.join('|').toLowerCase(), nm.join(' – '), v); }
+    }
+    const srt = O => Object.values(O).sort((a, b) => b.imp - a.imp);
+    return { P: srt(P), Q: srt(Q) };
+  }
   const partnerT = t => +t % 2 ? +t + 1 : +t - 1;
   const teamName = (i, m) => (((m || sb.g.m).tm || [])[i - 1]) || T('Team {0}', i);
   const roomName = t => t % 2 ? T('Open room') : T('Closed room');
@@ -84,6 +110,7 @@ const SB = (() => {
   // only scores the other pair has confirmed count
   function boardCmp(b) {
     const R = (sb.g.r || {})[b] || {}, ts = Object.keys(R).filter(t => R[t].ok), out = {};
+    if (isOne()) { for (const t of ts) { const o = oneOf(+b, R[t]); out[t] = { ns: nsScore(b, R[t]), cmp: o ? { imp: o.imp, mp: null } : null }; } return out; }
     if (isTeam()) { for (const t of ts) { const me = nsScore(b, R[t]), p = R[partnerT(+t)]; out[t] = { ns: me, cmp: p && p.ok ? { imp: E.imps(me - nsScore(b, p)), mp: null } : null }; } return out; }
     for (const t of ts) {
       const me = nsScore(b, R[t]), field = ts.filter(x => x !== t).map(x => nsScore(b, R[x]));
@@ -157,7 +184,7 @@ const SB = (() => {
     return `<h2>🃏 ${T('Team match')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
       <div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>${legend(g)}
       ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
-      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
+      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   // a team match: the tables of each match and who sits North-South there
   const legend = m => !isTeam(m) ? '' : `<div class="tmleg">${[...Array(Math.floor(m.tb / 2)).keys()].map(i => { const a = teamName(2 * i + 1, m), b = teamName(2 * i + 2, m);
@@ -224,7 +251,7 @@ const SB = (() => {
       <div class="muted">🌐 ${T('Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.')}</div>
       <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')}</div>
       ${isAdm() ? `<div class="row2"><button class="btn gold" id="rtOpen">🤖 ${T('Team match with robots')}</button></div>` : ''}
-      <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button></div>
+      <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button></div>
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
@@ -232,6 +259,14 @@ const SB = (() => {
   const seg = (name, opts, cur) => `<div class="seg" data-sbseg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   function setupHtml() {
     const s = sb.setup;
+    if (s.one) { const p = s.names[1] || {};
+      return `<h2>🪑 ${T('Single table')}</h2>
+      <div class="muted">${T('Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.')}</div>
+      <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
+      <div class="grp"><span>${T('Players')}</span><div class="tsetrow sbrow">${['n', 's', 'e', 'w'].map(k => `<label><small>${SEAT[SEATK[k]]}</small><input class="tok" maxlength="20" data-sbpl="${k}" data-member placeholder="${SEAT[SEATK[k]]}" value="${esc(p[k] || '')}"></label>`).join('')}</div><div class="muted">${T('Not required: the directions are used.')}</div></div>
+      <div class="grp"><span>${T('Boards')}</span>${seg('bd', [8, 12, 16, 20, 24, 28, 32].map(n => [n, n]), s.bd)}</div>
+      ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
+      <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`; }
     return `<h2>🃏 ${T('New game')}</h2>
       <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
       <div class="grp"><span>${T('Teams')}</span>${seg('tb', [2, 4, 6, 8, 10, 12].map(n => [n, n]), s.tb)}</div>
@@ -245,6 +280,7 @@ const SB = (() => {
     const s = sb.setup; if (!s) return;
     const n = $('sbName'); if (n) s.n = n.value.trim().slice(0, 40);
     for (const i of document.querySelectorAll('[data-sbteam]')) s.tm[+i.dataset.sbteam] = i.value.trim().slice(0, 20);
+    for (const i of document.querySelectorAll('[data-sbpl]')) (s.names[1] = s.names[1] || {})[i.dataset.sbpl] = i.value.trim().slice(0, 20);
   }
   function gameHtml() {
     const g = sb.g, m = g.m, mt = myTable();
@@ -260,9 +296,9 @@ const SB = (() => {
     else if (sb.view === 'tables') body = tablesHtml();
     else body = boardsHtml();
     // a player sees only the game (full screen, no title lines); the organiser keeps the game's details
-    return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) + (isTeam() ? ' · ' + roomName(mt) : '') : T('Team match')}</div></div>`}${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
-      <div class="muted">${isTeam() ? T('{0} teams', m.tb) : T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
-      ${sb.board || !canManage(m) || done() ? '' : reqListHtml()}${sb.board ? '' : links}${orgPick}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable ? '' : tabs}${body}
+    return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) + (isTeam() ? ' · ' + roomName(mt) : '') : T('Team match')}</div></div>`}${canManage(m) ? `<h2>${isOne() ? '🪑' : '🃏'} ${esc(m.n)}</h2>
+      <div class="muted">${isOne() ? T('Single table') : isTeam() ? T('{0} teams', m.tb) : T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
+      ${sb.board || !canManage(m) || done() ? '' : reqListHtml()}${sb.board ? '' : links}${orgPick}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span>${isOne() ? `<button class="btn gold" id="sbSeating">🔄 ${T('Change the seating')}</button>` : `<button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button>`}</div>` : ''}${sb.board || pickTable ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : canManage(m) ? `<button class="btn" id="sbList">← ${T('All games')}</button>` : ''}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
@@ -291,13 +327,14 @@ const SB = (() => {
       <div class="row2"><button class="btn new" id="sbOk">✓ ${T('We confirm')}</button><button class="btn" id="sbFix">✎ ${T('Correct')}</button></div>
       ${others ? `<div class="muted">${T('Results of the other tables appear after the confirmation.')}</div>` : ''}</div>`;
     const c = boardCmp(b), wait = ts.filter(t => !R[t].ok).length;
-    const tm = isTeam();
-    const rows = ts.map(t => { const r = R[t], x = c[t] || { ns: nsScore(b, r), cmp: null }; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}${tm ? `<small>${roomName(+t)}</small>` : ''}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
-      <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}${r.ld ? ` <small>· ${leadHtml(r.ld)}</small>` : ''}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
+    const tm = isTeam() || isOne();
+    const rows = ts.map(t => { const r = R[t], x = c[t] || { ns: nsScore(b, r), cmp: null }; return `<tr class="${+t === mt ? 'me' : ''}"><td data-l="${T('Table')}" class="n">${t}${isTeam() ? `<small>${roomName(+t)}</small>` : ''}</td><td data-l="${T('Pairs')}"><small>${esc(pairName(t, 'ns'))}<br>${esc(pairName(t, 'ew'))}</small></td>
+      <td data-l="${T('Contract')}"><b>${conTxt(r)}</b> ${resTxt(r)}${r.ld ? ` <small>· ${leadHtml(r.ld)}</small>` : ''}${isOne() ? oneLine(b, r) : ''}</td><td data-l="${SEAT_AB[0] + SEAT_AB[2]}" class="n">${x.ns > 0 ? x.ns : ''}</td><td data-l="${SEAT_AB[1] + SEAT_AB[3]}" class="n">${x.ns < 0 ? -x.ns : ''}</td>
       ${tm ? '' : `<td data-l="MP %" class="n">${!r.ok ? '⏳' : x.cmp ? x.cmp.mp : '—'}</td>`}<td data-l="IMP" class="n">${x.cmp ? signed(x.cmp.imp) : '—'}</td>${canManage(g.m) ? `<td class="tact"><button class="btn mini-btn" data-sbadm="${t}" title="${T('Correct')}">✎</button></td>` : ''}</tr>`; }).join('');
     return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th>${tm ? '' : '<th class="n">MP %</th>'}<th class="n">IMP</th>${canManage(g.m) ? '<th></th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="muted">${tm ? T('IMP from North-South’s side, against the other room of the same match.') : T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the organiser or the administrator can change a confirmed score.')}</div>`;
+      <div class="muted">${isOne() ? T('IMP from North-South’s side: the score against the score expected of the side with 21 or more points.') : tm ? T('IMP from North-South’s side, against the other room of the same match.') : T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the organiser or the administrator can change a confirmed score.')}</div>`;
   }
+  const oneLine = (b, r) => { const o = oneOf(b, r); return o ? `<small>${T('N-S {0} points', r.h)} · ${o.side == null ? T('20–20: nothing expected') : T('{0} expected {1}', o.side ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2], o.exp)}</small>` : ''; };
   const scoreTxt = (b, r) => { const ns = nsScore(b, r), ew = r.l && E.sideOf(r.d) === 1; return `${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; };
   function formHtml(b) {
     const mt = sb.formT || myTable(), R = (sb.g.r || {})[b] || {};
@@ -305,7 +342,7 @@ const SB = (() => {
     const lead = f.ls != null && f.ls >= 0 && f.lr != null && f.lr >= 0;
     const need = f.l ? f.l + 6 : 0;
     const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
-    const ok = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null && lead);
+    const okb = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null && lead), ok = okb && (!isOne() || validH(f.h));
     // the screen of a Bridgemate III: the contract and the N-S score on the display, then one row of large keys per step
     const ns = ok ? (f.l ? nsScore(b, f) : 0) : null;
     const contract = f.l === 0 ? T('Pass') : f.l ? `${f.l}${f.s != null ? sym(f.s) : ''}${f.x === 1 ? ' X' : f.x === 2 ? ' XX' : ''}${f.d != null ? ' ' + SEAT_AB[f.d] : ''}` : '—';
@@ -335,6 +372,7 @@ const SB = (() => {
       ${keys('lr', 'k7 small', RANKS.map((r, i) => [i, r]), f.lr)}` : ''}
       ${f.l && f.s != null && f.d != null && lead ? `<div class="bm3-step">${T('Result')}</div>
       ${keys('k', 'k7', res.map(([k, l]) => [k, l, 'res ' + (k - need === 0 ? 'made' : k > need ? 'over' : 'down')]), f.k)}` : ''}
+      ${isOne() && (f.l === 0 || f.k != null) ? `<div class="bm3-step">${T('North-South’s points (0–40)')}</div><input class="bm3-hcp" id="sbHcp" type="number" inputmode="numeric" min="0" max="40" value="${f.h ?? ''}" placeholder="${T('High-card points')}" data-okb="${okb ? 1 : ''}">` : ''}
       <div class="bm3-actions"${R[mt] ? '' : ' style="grid-template-columns:1fr"'}>${R[mt] ? `<button class="bm3-cancel" id="sbCancel">✕ ${T('Cancel')}</button>` : ''}<button class="bm3-ok" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>✓ ${T('Save')}</button></div>
     </div></div>`;
   }
@@ -348,7 +386,14 @@ const SB = (() => {
     return cards + tab + `<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
       <div class="muted">${T('Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).')} ${T('MP: a board won by the score is 100 %, an equal score 50 %.')}</div>`;
   }
+  function oneRankHtml() {
+    const { P, Q } = oneStand(); if (!P.length) return `<div class="muted">${T('No scores yet.')}</div>`;
+    const tab = (L, h) => `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${h}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th></tr></thead><tbody>${L.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="IMP" class="n"><b>${signed(r.imp)}</b></td></tr>`).join('')}</tbody></table></div>`;
+    return `<h3>${T('Players')}</h3>${tab(P, T('Player'))}<h3>${T('Pairs')}</h3>${tab(Q, T('Pair'))}<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
+      <div class="muted">${T('Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.')}</div>`;
+  }
   function rankHtml() {
+    if (isOne()) return oneRankHtml();
     if (isTeam()) return teamRankHtml();
     const L = standings();
     if (!L.length) return `<div class="muted">${T('No scores yet.')}</div>`;
@@ -359,6 +404,10 @@ const SB = (() => {
   }
   // the standings as a plain message (as on the screen: MP % and IMP)
   function standingsText() {
+    if (isOne()) {
+      const m = sb.g.m, { P } = oneStand();
+      return [`🪑 ${m.n} — ${new Date(m.ts).toLocaleDateString()}`, ...P.map((r, i) => `${i + 1}. ${r.name} ${r.imp > 0 ? '+' : ''}${r.imp} IMP (${T('{0} boards', r.n)})`)].join('\n');
+    }
     if (isTeam()) {
       const m = sb.g.m;
       return [`🃏 ${m.n} — ${new Date(m.ts).toLocaleDateString()}\n${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}`,
@@ -399,6 +448,11 @@ const SB = (() => {
     }, 250);
   });
   document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'sbSeatIn') $('sbSeatOk')?.click(); });
+  document.addEventListener('input', e => {
+    if (!e.target || e.target.id !== 'sbHcp' || !sb.form) return;
+    const v = e.target.value.trim(), h = /^\d{1,2}$/.test(v) ? +v : null; sb.form.h = validH(h) ? h : null;
+    const b = $('sbSave'); if (b) b.disabled = !(e.target.dataset.okb && sb.form.h != null) || sb.busy;
+  });
   async function seatOk() {
     const inp = $('sbSeatIn'); if (!inp || !sb.seats || !sb.seatK) return;
     let v = inp.value.trim();
@@ -434,25 +488,27 @@ const SB = (() => {
     sb.busy = true; sb.err = ''; show();
     try {
       const uid = await C().uid(), id = newCode(), ts = Date.now();
-      const tm = [...Array(s.tb).keys()].map(i => s.tm[i] || T('Team {0}', i + 1));
-      const m = { n: s.n || T('Team match'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey(), type: 'team', tm };
-      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk, type: 'team', tm } };
+      const type = s.one ? 'one' : 'team', tm = s.one ? [] : [...Array(s.tb).keys()].map(i => s.tm[i] || T('Team {0}', i + 1));
+      const m = { n: s.n || T(s.one ? 'Single table' : 'Team match'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey(), type, tm };
+      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk, type, tm } };
       for (let t = 1; t <= s.tb; t++) { const p = s.names[t] || {}; up['sb/' + id + '/t/' + t] = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }
       await C().patch('', up);
-      sb.setup = null; sb.busy = false; await loadGame(id); sb.view = 'tables'; sb.board = 0; show(); poll();
+      sb.setup = null; sb.busy = false; await loadGame(id); sb.view = s.one ? 'boards' : 'tables'; sb.board = 0; if (s.one) setMyTable(1); show(); poll();
     } catch (e) { sb.busy = false; sb.err = T('Could not save. Check the internet connection and try again.'); show(); }
   }
   async function openGame(id) {
     sb.err = '';
     try { if (!(await loadGame(id))) { sb.err = T('No game with this code.'); return show(); } }
     catch (e) { sb.err = T('Could not reach the server. Check the internet connection.'); return show(); }
-    sb.view = canManage(sb.g.m) && !done() ? 'tables' : 'boards'; sb.board = 0; sb.form = null; sb.editT = 0; setLast(done() ? '' : id); show(); poll();
+    if (isOne() && !myTable() && !done()) setMyTable(1);   // the single table: everyone sits at it
+    sb.view = canManage(sb.g.m) && !done() && !isOne() ? 'tables' : 'boards'; sb.board = 0; sb.form = null; sb.editT = 0; setLast(done() ? '' : id); show(); poll();
   }
   async function save() {
     const b = sb.board, mt = myTable(), f = sb.form; if (!b || !mt || !f || sb.busy) return;
     const t = sb.formT || mt;
     const r = f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k, ld: SUITS[f.ls] + RANKS[f.lr] } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
     r.sc = nsScore(b, r); r.ts = Date.now();
+    if (isOne()) { if (!validH(f.h)) return; r.h = f.h; const p = (sb.g.t || {})[1] || {}; r.p = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }   // the points, and who sat where
     if (sb.formT) r.ok = true;   // the administrator's correction needs no confirmation
     sb.busy = true; show();
     if (sb.formT) await signIn();   // a correction: the organiser is known by name
@@ -537,6 +593,7 @@ const SB = (() => {
       else if (sb.form) { sb.form[k] = +v; if (k === 'l') { if (+v === 0) { sb.form.s = sb.form.d = sb.form.k = null; } else if (sb.form.k == null || sb.form.k < 0) sb.form.k = null; } }
       return show();
     }
+    if (id === 'sbOne') { sb.setup = { one: true, n: T('Single table') + ' ' + new Date().toLocaleDateString(), tb: 1, bd: 8, names: {}, tm: [] }; sb.err = ''; return show(); }
     if (id === 'sbNew') { sb.setup = { n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [] }; sb.err = ''; return show(); }
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
@@ -546,6 +603,7 @@ const SB = (() => {
     if (d.sbent) { const [gid, t] = d.sbent.split(':'); sb.entry = false; return openLink(gid, +t); }   // that table: the organiser sits, a player asks for a seat there
     if (d.sbrqs) return sendReq(d.sbrqs);
     if (id === 'sbReqX') return dropReq();
+    if (id === 'sbSeating') { sb.view = 'tables'; sb.editT = 1; show(); return; }
     if (d.sbacc || d.sbrej) { const v = d.sbacc || d.sbrej, i = v.indexOf(':'); return answerReq(+v.slice(0, i), v.slice(i + 1), !!d.sbacc); }
     if (d.sbmng) { sb.entry = false; return openGame(d.sbmng); }
     if (id === 'sbList') { sb.entry = false; setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
