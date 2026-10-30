@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 309;
+const APP_V = 310;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -320,9 +320,11 @@ const MONTH_MIN = 40;
 const ymOf = ts => { const d = new Date(ts); return d.getUTCFullYear() * 100 + d.getUTCMonth() + 1; };
 const ymStart = ym => Date.UTC(Math.floor(ym / 100), ym % 100 - 1, 1), ymNext = ym => (ym % 100 === 12 ? ym + 89 : ym + 1);
 const ymName = ym => new Date(ymStart(ym) + 864e5).toLocaleDateString(SET.lang || 'en', { month: 'long', year: 'numeric', timeZone: 'UTC' });
-// a month's ranking: its boards, each compared with the other results on that board in by the month's end
-function monthRank(tree, ym) {
-  const a = ymStart(ym), z = ymStart(ymNext(ym)), P = {};
+// a period's ranking (from a to z): its boards, each compared with the other results on that board in by z; min: the
+// boards needed to win it (a month: MONTH_MIN)
+function monthRank(tree, ym) { return periodRank(tree, ymStart(ym), ymStart(ymNext(ym)), MONTH_MIN); }
+function periodRank(tree, a, z, min) {
+  const P = {};
   for (const R of Object.values(tree || {})) for (const B of Object.values(R || {})) {
     const L = Object.entries(B || {}).filter(([, x]) => x && typeof x.us === 'number' && x.ts < z);
     for (const [k, x] of L) {
@@ -334,7 +336,7 @@ function monthRank(tree, ym) {
       const p = P[k] || (P[k] = { k, name: x.n || k, n: 0, imp: 0, mp: 0 }); p.n++; p.imp += imp; p.mp += mp;
     }
   }
-  const L = Object.values(P).map(p => ({ ...p, ai: p.imp / p.n, am: p.mp / p.n, ok: p.n >= MONTH_MIN }));
+  const L = Object.values(P).map(p => ({ ...p, ai: p.imp / p.n, am: p.mp / p.n, ok: p.n >= (min || 0) }));
   const q = L.filter(p => p.ok);
   return { all: L.sort((x, y) => y.ai - x.ai), imp: q.slice().sort((x, y) => y.ai - x.ai).slice(0, 3), mp: q.slice().sort((x, y) => y.am - x.am).slice(0, 3) };
 }
@@ -427,9 +429,14 @@ async function showChamp() {
   const tree = await champLoad(true); if (ui.overlay !== 'champ') return;
   const L = champRank(tree), me = Net.fbKey(myNm() || ''), tab = ui.chTab || 'all';
   let body;
-  if (tab === 'month') {
-    const ym = ymOf(Date.now()), M = monthRank(tree, ym);
-    body = `<div class="muted">${T('{0}: only this month\'s boards. At least {1} boards in the month to win it; the champions are known on the 1st.', ymName(ym), MONTH_MIN)}</div><div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${M.all.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}${p.ok ? '' : ' dim'}"><td>${i + 1}</td><td><b class="pname" data-who="${esc(p.name)}">${esc(p.name)}</b></td><td class="n">${p.n}${p.ok ? '' : ' / ' + MONTH_MIN}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
+  const per = ui.chPer || 'all';
+  const perSeg = `<div class="seg" data-seg="chper">${[['day', T('Today')], ['week', T('This week')], ['month', T('This month')], ['year', T('This year')], ['all', T('All time')]].map(([v, l]) => `<button data-v="${v}" class="${per === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  if (tab === 'all' && per !== 'all') {
+    // today, this week (from Monday), this month, this year: UTC, the same for everyone
+    const d = new Date(), y = d.getUTCFullYear(), mo = d.getUTCMonth(), day = Date.UTC(y, mo, d.getUTCDate());
+    const from = per === 'day' ? day : per === 'week' ? day - ((d.getUTCDay() + 6) % 7) * 864e5 : per === 'month' ? Date.UTC(y, mo, 1) : Date.UTC(y, 0, 1);
+    const ym = ymOf(Date.now()), M = periodRank(tree, from, Date.now() + 1, per === 'month' ? MONTH_MIN : 0);
+    body = perSeg + (per !== 'month' ? '' : `<div class="muted">${T('{0}: only this month\'s boards. At least {1} boards in the month to win it; the champions are known on the 1st.', ymName(ym), MONTH_MIN)}</div>`) + `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${M.all.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}${p.ok ? '' : ' dim'}"><td>${i + 1}</td><td><b class="pname" data-who="${esc(p.name)}">${esc(p.name)}</b></td><td class="n">${p.n}${p.ok ? '' : ' / ' + MONTH_MIN}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   } else if (tab === 'honour') {
     const H = champMonths(tree), cell = L => L.map((p, i) => `${MEDAL[i]} ${esc(p.name)}`).join('<br>') || '—';
     body = H.length ? `<div class="resscroll"><table class="res"><thead><tr><th>${T('Month')}</th><th>IMP</th><th>MP</th></tr></thead><tbody>${H.map(m => `<tr><td>${esc(ymName(m.ym))}</td><td>${cell(m.imp)}</td><td>${cell(m.mp)}</td></tr>`).join('')}</tbody></table></div>` : `<div class="muted">${T('No champions yet: the first ones are known when the first month closes.')}</div>`;
@@ -444,11 +451,11 @@ async function showChamp() {
     }
     body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Round')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Score')}</th><th class="n">👥</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows.join('') || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   } else {
-    body = `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname${champMark(p.name) ? ' gold' : ''}" data-who="${esc(p.name)}">${esc(p.name)}${champMark(p.name)}</b> ${rankOf(Net.profOf(p.name), p.name)}</td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
+    body = perSeg + `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname${champMark(p.name) ? ' gold' : ''}" data-who="${esc(p.name)}">${esc(p.name)}${champMark(p.name)}</b> ${rankOf(Net.profOf(p.name), p.name)}</td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
   }
   openOv('champ', `<h2>🏆 ${T('Championship')}</h2>
     <div class="muted">${T('Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player\'s on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.')}</div>
-    <div class="seg" data-seg="chtab"><button data-v="all" class="${tab === 'all' ? 'on' : ''}">${T('Standings')}</button><button data-v="month" class="${tab === 'month' ? 'on' : ''}">${T('This month')}</button><button data-v="honour" class="${tab === 'honour' ? 'on' : ''}">🏆 ${T('Honour roll')}</button><button data-v="mine" class="${tab === 'mine' ? 'on' : ''}">${T('My rounds')}</button></div>
+    <div class="seg" data-seg="chtab"><button data-v="all" class="${tab === 'all' ? 'on' : ''}">${T('Standings')}</button><button data-v="honour" class="${tab === 'honour' ? 'on' : ''}">🏆 ${T('Honour roll')}</button><button data-v="mine" class="${tab === 'mine' ? 'on' : ''}">${T('My rounds')}</button></div>
     ${body}
     <div class="row2"><button class="btn gold" id="chGo">▶ ${T('Play')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
@@ -2861,6 +2868,7 @@ document.addEventListener('click', ev_ => {
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
     if (seg === 'learnd') { ui.learnDays = +v; showLearn(); return; }
     if (seg === 'chtab') { ui.chTab = v; showChamp(); return; }
+    if (seg === 'chper') { ui.chPer = v; showChamp(); return; }
     if (seg === "stattab") { ui.statTab = v; showStats(); return; }
     if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
