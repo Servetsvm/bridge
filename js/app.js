@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 305;
+const APP_V = 306;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -315,13 +315,74 @@ function champSend(e) {
   const x = { us: e.us || 0, c, t: e.tricks ?? null, ...(e.imp != null ? { fi: e.imp, fm: e.mp } : {}) };
   Net.champPut(e.champ.r, e.champ.b, x).then(() => { CH.at = 0; champLoad(true); }).catch(() => flash(T('Your championship result could not be sent — check the connection.'), 3500));
 }
+/* ---- the months of the championship (UTC months, the same for everyone) ---- */
+const MONTH_MIN = 40;
+const ymOf = ts => { const d = new Date(ts); return d.getUTCFullYear() * 100 + d.getUTCMonth() + 1; };
+const ymStart = ym => Date.UTC(Math.floor(ym / 100), ym % 100 - 1, 1), ymNext = ym => (ym % 100 === 12 ? ym + 89 : ym + 1);
+const ymName = ym => new Date(ymStart(ym) + 864e5).toLocaleDateString(SET.lang || 'en', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+// a month's ranking: its boards, each compared with the other results on that board in by the month's end
+function monthRank(tree, ym) {
+  const a = ymStart(ym), z = ymStart(ymNext(ym)), P = {};
+  for (const R of Object.values(tree || {})) for (const B of Object.values(R || {})) {
+    const L = Object.entries(B || {}).filter(([, x]) => x && typeof x.us === 'number' && x.ts < z);
+    for (const [k, x] of L) {
+      if (x.ts < a) continue;
+      const o = L.filter(([j]) => j !== k).map(([, y]) => y.us);
+      let imp, mp;
+      if (o.length) { imp = o.reduce((s, v) => s + E.imps(x.us - v), 0) / o.length; mp = 100 * o.reduce((s, v) => s + (x.us > v ? 1 : x.us === v ? 0.5 : 0), 0) / o.length; }
+      else if (x.fi != null) { imp = x.fi; mp = x.fm != null ? x.fm : 50; } else continue;
+      const p = P[k] || (P[k] = { k, name: x.n || k, n: 0, imp: 0, mp: 0 }); p.n++; p.imp += imp; p.mp += mp;
+    }
+  }
+  const L = Object.values(P).map(p => ({ ...p, ai: p.imp / p.n, am: p.mp / p.n, ok: p.n >= MONTH_MIN }));
+  const q = L.filter(p => p.ok);
+  return { all: L.sort((x, y) => y.ai - x.ai), imp: q.slice().sort((x, y) => y.ai - x.ai).slice(0, 3), mp: q.slice().sort((x, y) => y.am - x.am).slice(0, 3) };
+}
+// every closed month with its champions (newest first), worked out once per reading of the championship
+function champMonths(tree) {
+  if (CH.monthsFor === CH.at && CH.months) return CH.months;
+  let first = null; for (const R of Object.values(tree || {})) for (const B of Object.values(R || {})) for (const x of Object.values(B || {})) if (x && x.ts && (!first || x.ts < first)) first = x.ts;
+  const out = [], now = ymOf(Date.now());
+  if (first) for (let ym = ymOf(first); ym < now; ym = ymNext(ym)) { const r = monthRank(tree, ym); if (r.imp.length || r.mp.length) out.unshift({ ym, imp: r.imp, mp: r.mp }); }
+  CH.months = out; CH.monthsFor = CH.at; return out;
+}
+// a player's trophies (🥇🥈🥉 of each month, IMP and MP)
+function trophiesOf(name) {
+  if (!CH.tree) return [];
+  const k = Net.fbKey(name), out = [];
+  for (const m of champMonths(CH.tree)) for (const kind of ['imp', 'mp']) { const i = m[kind].findIndex(p => p.k === k); if (i >= 0) out.push({ ym: m.ym, kind, place: i + 1 }); }
+  return out;
+}
+const MEDAL = ['🏆', '🥈', '🥉'];
+const trophyTxt = t => MEDAL[t.place - 1] + ' ' + T(t.place === 1 ? '{0} · {1} champion' : t.place === 2 ? '{0} · {1}, 2nd place' : '{0} · {1}, 3rd place', ymName(t.ym), t.kind.toUpperCase());
+// last month's champions carry a golden name and 🏆 for this month
+function champMark(name) {
+  if (!CH.tree || !name) return '';
+  const m = champMonths(CH.tree)[0]; if (!m || ymNext(m.ym) !== ymOf(Date.now())) return '';
+  const k = Net.fbKey(name); return (m.imp[0] && m.imp[0].k === k) || (m.mp[0] && m.mp[0].k === k) ? ' 🏆' : '';
+}
+// the trophy cabinet on a player card
+function trophyHtml(name) {
+  const L = trophiesOf(name); if (!L.length) return '';
+  return `<div class="trophies"><div class="tropht">🏆 ${T('Trophy cabinet')}</div>${L.map(t => `<div class="troph p${t.place}">${esc(trophyTxt(t))}</div>`).join('')}</div>`;
+}
+// the administrator hears once when a month has closed with its champions
+function champMonthNote() {
+  if (typeof Net === 'undefined' || !Net.isAdmin() || !CH.tree) return;
+  const m = champMonths(CH.tree)[0]; if (!m || SET.champNoted === m.ym) return;
+  SET.champNoted = m.ym; Store.saveSettings(SET); save();
+  flash('🏆 ' + T('The champions of {0}: {1} (IMP) · {2} (MP)', ymName(m.ym), m.imp[0] ? m.imp[0].name : '—', m.mp[0] ? m.mp[0].name : '—'), 8000);
+}
 // the home page card: the leader, your place, start or go on
 function champCardHtml() {
   if (typeof Net === 'undefined' || !Net.Cloud.on) return '';
   if (!CH.tree || Date.now() - CH.at > 60000) champLoad();
   const L = CH.tree ? champRank(CH.tree) : [], me = Net.fbKey(myNm() || ''), i = L.findIndex(p => p.k === me), lead = L[0];
   const w = CH.tree && myNm() ? champWhere(CH.tree, null) : null;
+  const mo = CH.tree ? champMonths(CH.tree)[0] : null, fresh = mo && ymNext(mo.ym) === ymOf(Date.now()) && new Date().getUTCDate() <= 7;
+  if (mo) setTimeout(champMonthNote, 0);
   return `<div class="h2chh"><span class="h2cht">🏆 ${T('Championship')}</span>${L.length ? `<small>${T('{0} players', L.length)}</small>` : ''}</div>
+    ${fresh ? `<div class="h2chnew">🎉 ${T('The champions of {0}: {1} (IMP) · {2} (MP)', ymName(mo.ym), mo.imp[0] ? esc(mo.imp[0].name) : '—', mo.mp[0] ? esc(mo.mp[0].name) : '—')}</div>` : ''}
     <div class="h2chl">${lead ? `👑 <b>${esc(lead.name)}</b> <small>${fmtSigned(Math.round(lead.ai * 100) / 100)} IMP · ${Math.round(lead.am)}%</small>` : `<small>${T('No leader yet — finish a round to be ranked.')}</small>`}</div>
     <div class="h2chm">${i >= 0 ? T('You: place {0}', i + 1) : myNm() ? T('Not ranked yet — finish a round') : ''}</div>
     <div class="h2chb"><button class="btn h2go" id="chGo">▶ ${w && w.n ? T('Continue round {0} ({1}/8)', w.r, w.n) : T('Round {0}', w ? w.r : 1)}</button><button class="btn h2chs" id="chShow">${T('Standings')}</button></div>`;
@@ -332,7 +393,13 @@ async function showChamp() {
   const tree = await champLoad(true); if (ui.overlay !== 'champ') return;
   const L = champRank(tree), me = Net.fbKey(myNm() || ''), tab = ui.chTab || 'all';
   let body;
-  if (tab === 'mine') {
+  if (tab === 'month') {
+    const ym = ymOf(Date.now()), M = monthRank(tree, ym);
+    body = `<div class="muted">${T('{0}: only this month\'s boards. At least {1} boards in the month to win it; the champions are known on the 1st.', ymName(ym), MONTH_MIN)}</div><div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${M.all.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}${p.ok ? '' : ' dim'}"><td>${i + 1}</td><td><b class="pname" data-who="${esc(p.name)}">${esc(p.name)}</b></td><td class="n">${p.n}${p.ok ? '' : ' / ' + MONTH_MIN}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
+  } else if (tab === 'honour') {
+    const H = champMonths(tree), cell = L => L.map((p, i) => `${MEDAL[i]} ${esc(p.name)}`).join('<br>') || '—';
+    body = H.length ? `<div class="resscroll"><table class="res"><thead><tr><th>${T('Month')}</th><th>IMP</th><th>MP</th></tr></thead><tbody>${H.map(m => `<tr><td>${esc(ymName(m.ym))}</td><td>${cell(m.imp)}</td><td>${cell(m.mp)}</td></tr>`).join('')}</tbody></table></div>` : `<div class="muted">${T('No champions yet: the first ones are known when the first month closes.')}</div>`;
+  } else if (tab === 'mine') {
     const rows = [];
     for (const [r, R] of Object.entries(tree || {}).sort((a, b) => b[0] - a[0])) for (let b = 1; b <= 8; b++) {
       const B = (R || {})[b] || {}, x = B[me]; if (!x) continue;
@@ -343,11 +410,11 @@ async function showChamp() {
     }
     body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Round')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Score')}</th><th class="n">👥</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows.join('') || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   } else {
-    body = `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname" data-who="${esc(p.name)}">${esc(p.name)}</b></td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
+    body = `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname${champMark(p.name) ? ' gold' : ''}" data-who="${esc(p.name)}">${esc(p.name)}${champMark(p.name)}</b></td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
   }
   openOv('champ', `<h2>🏆 ${T('Championship')}</h2>
     <div class="muted">${T('Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player\'s on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.')}</div>
-    <div class="seg" data-seg="chtab"><button data-v="all" class="${tab === 'all' ? 'on' : ''}">${T('Standings')}</button><button data-v="mine" class="${tab === 'mine' ? 'on' : ''}">${T('My rounds')}</button></div>
+    <div class="seg" data-seg="chtab"><button data-v="all" class="${tab === 'all' ? 'on' : ''}">${T('Standings')}</button><button data-v="month" class="${tab === 'month' ? 'on' : ''}">${T('This month')}</button><button data-v="honour" class="${tab === 'honour' ? 'on' : ''}">🏆 ${T('Honour roll')}</button><button data-v="mine" class="${tab === 'mine' ? 'on' : ''}">${T('My rounds')}</button></div>
     ${body}
     <div class="row2"><button class="btn gold" id="chGo">▶ ${T('Play')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
@@ -1852,6 +1919,7 @@ function readTourSeats() {
 }
 // a player's card: tap a name in the lobby to see their system and rating (your own Results stay on your device)
 function showPlayer(name) {
+  if (!CH.tree && typeof Net !== 'undefined' && Net.Cloud.on) champLoad().then(() => { if (ui.overlay === 'player' && CH.tree) showPlayer(name); });
   const me = name === T('You') || name.trim().toLowerCase() === (myNm() || '').trim().toLowerCase();
   const p = me ? Net.prof() : Net.profOf(name);
   const shown = me ? (myNm() || T('You')) : name, lvl = p && p.lvl, ctry = p && p.ctry;
@@ -1880,9 +1948,10 @@ function showPlayer(name) {
       <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
   openOv('player', `<div class="pcard">
     <div class="phead"><div class="pav${p && p.av ? " emo" : ""}">${p && p.av ? p.av : esc((shown.trim()[0] || "?").toUpperCase())}</div>
-      <div class="pmain"><div class="pnm">${esc(shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
+      <div class="pmain"><div class="pnm${champMark(shown) ? ' gold' : ''}">${esc(shown)}${champMark(shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
         <div class="psub">${where ? `<span class="pwhere">● ${esc(where)}</span>` : ''}</div></div></div>
     <table class="pfields">${fields.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>
+    ${trophyHtml(shown)}
     ${me ? `<textarea id="pCline" class="tok pconv pclin" maxlength="300" rows="3" placeholder="${T('Your conventions, e.g. 2/1, 5-card majors, 1NT 15-17, RKCB 1430, Stayman…')}">${esc(SET.cline || (p ? convLine({ ...p, cline: '' }) : ''))}</textarea>` : conv ? `<div class="pconv">${conv}</div>` : ''}
     ${edit}
     ${tot ? `<table class="res ptot"><thead><tr><th></th><th class="n">${T('boards')}</th><th class="n">${T('IMP / board')}</th><th class="n">MP %</th></tr></thead><tbody><tr><td>${T('Total')}</td><td class="n">${boards}</td><td class="n">${tot[1] == null ? '—' : fmtSigned(tot[1])}</td><td class="n">${tot[2] == null ? '—' : tot[2] + '%'}</td></tr></tbody></table>`

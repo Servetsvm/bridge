@@ -1802,3 +1802,11 @@ body.homev2 .h2chl{font-size:15px;min-width:0;overflow-wrap:anywhere}
 body.homev2 .h2chb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:2px}
 body.homev2 .h2chb .h2go{margin:0;padding:9px 14px;font-size:15px}
 body.homev2 .h2chb .h2chs{background:var(--h2-paper-2);color:var(--h2-ink);border:1px solid var(--h2-line);border-radius:10px;padding:8px 12px;font-size:14px;box-shadow:none}
+/* the championship's months: golden names of last month's champions, the trophy cabinet, the new champions on the home card */
+.gold,.pname.gold{color:#b8860b!important;font-weight:800;text-shadow:0 0 1px rgba(184,134,11,.25)}
+:root[data-theme="dark"] .gold,:root[data-theme="dark"] .pname.gold{color:#f2c94c!important}
+.trophies{margin:10px 0 4px;padding:10px 12px;border-radius:12px;background:linear-gradient(180deg,rgba(242,201,76,.16),rgba(242,201,76,.06));border:1px solid rgba(184,134,11,.35)}
+.tropht{font-weight:800;margin-bottom:6px}
+.troph{font-size:14px;line-height:1.5}.troph.p1{font-weight:800}
+body.homev2 .h2chnew{font-size:13.5px;padding:6px 10px;border-radius:10px;background:rgba(242,201,76,.18);border:1px solid rgba(184,134,11,.35)}
+.res tr.dim td{opacity:.6}
