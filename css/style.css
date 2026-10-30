@@ -1870,3 +1870,10 @@ body.homev2 .home.v2 .prac .prask .supc{background:#c4122f;color:#fff;border-rad
 @media (max-width:480px){ .tmpair{grid-template-columns:1fr auto 1fr} .tmpair small{grid-column:1/-1} }
 .rtline{margin:2px 0 6px}
 .res td small{display:block;opacity:.7;font-size:11px}
+/* team match: seat requests */
+.sbreqs{border:2px solid #e2a50b;border-radius:12px;padding:8px 10px;background:rgba(242,201,76,.14)}
+.sbreq{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:6px;padding:6px 0;border-top:1px solid rgba(0,0,0,.08)}
+.sbreq:first-of-type{border-top:0}
+.sbreq b{grid-column:1}.sbreq small{grid-column:1;opacity:.8}
+.sbreq .btn{grid-row:1/span 2}
+.sbc-pos[disabled]{opacity:.55;cursor:default}

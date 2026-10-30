@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 320;
+const APP_V = 321;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2853,6 +2853,13 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'rtOpen') { showRTeam(); return; }
+  // the team match online: a new tournament of the Team match type
+  if (t.id === 'sbOnline') {
+    const tt = Net.newTour(8), k = TOUR_KINDS.teams;
+    Object.assign(tt, { kind: 'teams', format: k.set.format, n: k.set.n, scoring: k.set.scoring, hours: k.set.hours, name: (T('Team match') + ' · ' + new Date().toLocaleDateString()).slice(0, 40) });
+    while (tt.tables.length < 2) tt.tables.push(['', '', '', '']); tt.tables.length = 2;
+    ui.tsel = null; closeOv(); render(); showTourSetup(tt.id); return;
+  }
   if (t.dataset.rtn) { RT = { n: +t.dataset.rtn, ids: [], ts: Date.now() }; saveRT(); closeOv(); newBoard(); return; }
   if (t.id === 'rtGo') { closeOv(); if (!G || G.phase === 'done' || !G.rteam) newBoard(); return; }
   if (t.id === 'rtEnd') { askYes(T('Finish the team match now?'), () => { RT.end = Date.now(); saveRT(); showRTeam(); }); return; }

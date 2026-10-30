@@ -22,6 +22,7 @@ const SB = (() => {
   const signed = v => (v > 0 ? '+' : '') + v;
   const sym = s => s === 4 ? 'NT' : `<span class="${s === 1 || s === 2 ? 'red' : ''}">${SUITS[s]}</span>`;
   const isAdm = () => Net.isAdmin && Net.isAdmin();
+  const SEATK = { n: 0, e: 1, s: 2, w: 3 };
   // the player signed in on this device (name and PIN), as the database rules know it
   const myName = () => { try { return SET.pinH ? localStorage.getItem('bridge-table-name') || '' : ''; } catch (e) { return ''; } };
   const myKey = () => { const n = myName(); return n && Net.ruleKey ? Net.ruleKey(n) : ''; };
@@ -156,15 +157,54 @@ const SB = (() => {
     return `<h2>🃏 ${T('Team match')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
       <div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>${legend(g)}
       ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
-      + `<div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
+      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   // a team match: the tables of each match and who sits North-South there
   const legend = m => !isTeam(m) ? '' : `<div class="tmleg">${[...Array(Math.floor(m.tb / 2)).keys()].map(i => { const a = teamName(2 * i + 1, m), b = teamName(2 * i + 2, m);
     return `<div><b>${T('Match {0}', i + 1)}: ${esc(a)} – ${esc(b)}</b><small>${T('Table {0}', 2 * i + 1)} · ${T('Open room')}: ${esc(a)} ${SEAT_AB[0] + SEAT_AB[2]} · ${T('Table {0}', 2 * i + 2)} · ${T('Closed room')}: ${esc(b)} ${SEAT_AB[0] + SEAT_AB[2]}</small></div>`; }).join('')}</div>`;
+  /* ---- seat requests: a player asks for a seat, the organiser accepts ---- */
+  const reqKey = () => (myKey() || ('u' + ((C().uidNow && C().uidNow()) || ''))).replace(/[.#$\[\]\/%]/g, '_');   // a database key
+  const freeSeat = v => !v || SEAT.includes(v);   // empty, or only its direction's name
+  function myReq() { const k = reqKey(); if (!sb.g || !k) return null; for (const t in (sb.g.t || {})) { const q = ((sb.g.t[t] || {}).q || {})[k]; if (q) return { ...q, t: +t, k }; } return null; }
+  function waitingReqs() { const L = []; for (const t in ((sb.g && sb.g.t) || {})) for (const [k, q] of Object.entries((sb.g.t[t] || {}).q || {})) if (q && q.st === 'wait') L.push({ ...q, t: +t, k }); return L.sort((a, b) => a.ts - b.ts); }
+  // the player's screen until they are seated: the table, then the seat; or the request waiting
+  function reqHtml() {
+    const m = sb.g.m, q = myReq();
+    if (q && q.st === 'wait') return `<div class="sbwait">⏳ ${T('You asked for {0}: the organiser accepts it.', T('Table {0}', q.t) + ' · ' + SEAT[SEATK[q.s]])}</div><div class="row2"><button class="btn" id="sbReqX">✕ ${T('Withdraw the request')}</button></div>`;
+    const t = sb.reqT, p = t ? (sb.g.t || {})[t] || {} : null;
+    return `${q && q.st === 'no' ? `<div class="no">${T('Your request was not accepted. Choose another seat.')}</div>` : ''}<div class="grp"><span>${T('My table')}</span><div class="muted">${T('Choose a table and a seat: the organiser accepts you.')}</div><div class="bm3-keys k4 sbpick" data-sbseg="rq">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key${t === i + 1 ? ' active' : ''}">${i + 1}</button>`).join('')}</div>${t ? '' : legend(m)}</div>
+      ${t ? `<div class="grp"><span>${T('Table {0}', t)}${isTeam() ? ' · ' + roomName(t) : ''}</span><div class="sbc-table">${['n', 'w', 'mid', 'e', 's'].map(k => k === 'mid' ? `<div class="sbc-mid">${T('Table {0}', t)}</div>` : `<button class="sbc-pos sbc-${k}" data-sbrqs="${k}"${freeSeat(p[k]) ? '' : ' disabled'}><small>${SEAT[SEATK[k]]}</small><b>${freeSeat(p[k]) ? '＋' : esc(p[k])}</b></button>`).join('')}</div><div class="muted">${T('Tap a free seat to ask for it.')}</div></div>` : ''}`;
+  }
+  // the organiser: the requests waiting, each accepted or declined
+  function reqListHtml() {
+    const L = waitingReqs(); if (!L.length) return '';
+    return `<div class="grp sbreqs"><span>🙋 ${T('Seat requests')}</span>${L.map(q => `<div class="sbreq"><b>${esc(q.n)}</b><small>${T('Table {0}', q.t)}${isTeam() ? ' · ' + roomName(q.t) : ''} · ${SEAT[SEATK[q.s]]}</small><button class="btn new mini-btn" data-sbacc="${q.t}:${esc(q.k)}">✓ ${T('Accept')}</button><button class="btn tdel mini-btn" data-sbrej="${q.t}:${esc(q.k)}">✕</button></div>`).join('')}</div>`;
+  }
+  async function sendReq(seatK) {
+    const t = sb.reqT; if (!t || sb.busy) return;
+    sb.busy = true;
+    try {
+      await C().uid(); const k = reqKey(), old = myReq(), up = {};
+      if (old && old.t !== t) up['sb/' + sb.id + '/t/' + old.t + '/q/' + k] = null;
+      up['sb/' + sb.id + '/t/' + t + '/q/' + k] = { n: (myName() || T('Player')).slice(0, 20), s: seatK, ts: Date.now(), st: 'wait' };
+      await C().patch('', up); sb.err = '';
+    } catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
+    sb.busy = false; try { await loadGame(sb.id); } catch (e) {} show();
+  }
+  async function dropReq() { const q = myReq(); if (!q) return; try { await C().put('sb/' + sb.id + '/t/' + q.t + '/q/' + q.k, null); } catch (e) {} sb.reqT = 0; try { await loadGame(sb.id); } catch (e) {} show(); }
+  async function answerReq(t, k, ok) {
+    const q = (((sb.g.t || {})[t] || {}).q || {})[k]; if (!q) return;
+    await signIn();
+    const base = 'sb/' + sb.id + '/t/' + t, up = { [base + '/q/' + k + '/st']: ok ? 'ok' : 'no' };
+    if (ok) up[base + '/' + q.s] = String(q.n).slice(0, 20);
+    try { await C().patch('', up); sb.err = ''; } catch (e) { sb.err = T('Could not save. Check the internet connection and try again.'); }
+    try { await loadGame(sb.id); } catch (e) {} show();
+  }
   // a score this table entered that the other pair has not confirmed yet: the screen stays on that board until it is
   const pending = () => { if (!sb.g || done() || sb.formT) return 0; const mt = myTable(); if (!mt) return 0; for (const b in (sb.g.r || {})) { const r = sb.g.r[b][mt]; if (r && !r.ok) return +b; } return 0; };
   const locked = () => ui.overlay === 'sb' && !!sb.id && !sb.setup && !!pending();
   function show() {
+    if (sb.id && !sb.setup && sb.g && !myTable() && !canManage(sb.g.m)) { const q = myReq(); if (q && q.st === 'ok') { setMyTable(q.t); sb.reqT = 0; } }
     if (sb.id && !sb.setup) { const p = pending(); if (p) sb.board = p; }
     // a redraw of the same screen (a button tapped, a score saved) keeps the page where it was; a new screen starts at the top
     const key = sb.setup ? 'setup' : !sb.id ? 'list' : sb.id + ':' + sb.board + ':' + sb.view, old = document.querySelector('#ov .sheet');
@@ -181,9 +221,10 @@ const SB = (() => {
       <td data-l="${T('Status')}">${g.st === 'done' ? `<span class="tst">${T('Finished')}</span>` : `<span class="tst run">${T('Running')}</span>`}</td>
       <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${canManage(g) ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
     return `<h2>🃏 ${T('Team match')}</h2>
+      <div class="muted">🌐 ${T('Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.')}</div>
       <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')}</div>
       ${isAdm() ? `<div class="row2"><button class="btn gold" id="rtOpen">🤖 ${T('Team match with robots')}</button></div>` : ''}
-      <div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button></div>
+      <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button></div>
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
@@ -214,7 +255,7 @@ const SB = (() => {
     const tn = (g.t || {})[mt] || {}, needNames = mt && !done() && !pending() && !sb.board && !['n', 's', 'e', 'w'].some(k => tn[k]);
     const pickTable = !mt && !done() && !canManage(m);
     const orgPick = !mt && !done() && canManage(m) && !sb.board ? `<div class="grp"><span>${T('My table')}</span><div class="muted">${T('Playing too? Choose your table to enter its scores.')}</div><div class="bm3-keys k4 sbpick" data-sbseg="me">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key">${i + 1}</button>`).join('')}</div>${legend(m)}</div>` : '';
-    if (pickTable) body = `<div class="grp"><span>${T('My table')}</span><div class="bm3-keys k4 sbpick" data-sbseg="me">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key">${i + 1}</button>`).join('')}</div></div>${legend(m)}`;
+    if (pickTable) body = reqHtml();
     else if (needNames) body = compassHtml(mt);
     else if (sb.board) body = boardHtml(sb.board);
     else if (sb.view === 'rank') body = rankHtml();
@@ -223,7 +264,7 @@ const SB = (() => {
     // a player sees only the game (full screen, no title lines); the organiser keeps the game's details
     return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) + (isTeam() ? ' · ' + roomName(mt) : '') : T('Team match')}</div></div>`}${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
       <div class="muted">${isTeam() ? T('{0} teams', m.tb) : T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
-      ${sb.board ? '' : links}${orgPick}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
+      ${sb.board || !canManage(m) || done() ? '' : reqListHtml()}${sb.board ? '' : links}${orgPick}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : canManage(m) ? `<button class="btn" id="sbList">← ${T('All games')}</button>` : ''}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
@@ -336,7 +377,6 @@ const SB = (() => {
   const sendBtns = t => `<span class="sbsend"><button class="btn mini-btn sbwa" data-sbsend="wa:${t}" title="WhatsApp">${ICON_WA}</button><button class="btn mini-btn sbsms" data-sbsend="sms:${t}" title="SMS">${ICON_SMS}</button></span>`;
   // a table's players: a member number typed into a box becomes the member's name
   // the players at the table, drawn as the table; or the box for one seat
-  const SEATK = { n: 0, e: 1, s: 2, w: 3 };
   function compassHtml(t) {
     if (!sb.seats || sb.seats.t !== t) sb.seats = { t, n: '', s: '', e: '', w: '' };
     const st = sb.seats;
@@ -495,6 +535,7 @@ const SB = (() => {
       const k = sg.dataset.sbseg, v = el.dataset.v;
       if (k === 'tb' || k === 'bd') { readSetup(); sb.setup[k] = +v; }
       else if (k === 'me') { setMyTable(+v); sb.form = null; }
+      else if (k === 'rq') { sb.reqT = +v; }
       else if (sb.form) { sb.form[k] = +v; if (k === 'l') { if (+v === 0) { sb.form.s = sb.form.d = sb.form.k = null; } else if (sb.form.k == null || sb.form.k < 0) sb.form.k = null; } }
       return show();
     }
@@ -504,7 +545,10 @@ const SB = (() => {
     if (d.sbopen) return openGame(d.sbopen);
     if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText()); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
-    if (d.sbent) { const [gid, t] = d.sbent.split(':'); sb.entry = false; return openLink(gid, +t); }   // this player sits at that table
+    if (d.sbent) { const [gid, t] = d.sbent.split(':'); sb.entry = false; return openLink(gid, +t); }   // that table: the organiser sits, a player asks for a seat there
+    if (d.sbrqs) return sendReq(d.sbrqs);
+    if (id === 'sbReqX') return dropReq();
+    if (d.sbacc || d.sbrej) { const v = d.sbacc || d.sbrej, i = v.indexOf(':'); return answerReq(+v.slice(0, i), v.slice(i + 1), !!d.sbacc); }
     if (d.sbmng) { sb.entry = false; return openGame(d.sbmng); }
     if (id === 'sbList') { sb.entry = false; setLast(''); sb.id = null; sb.g = null; show(); loadList().then(() => { if (ui.overlay === 'sb' && !sb.id) show(); }); return; }
     if (d.sbview) { sb.view = d.sbview; sb.editT = 0; return show(); }
@@ -523,15 +567,18 @@ const SB = (() => {
     if (id === 'sbSeatOk') return seatOk();
     if (id === 'sbSeatCancel') { sb.seatK = null; return show(); }
     if (id === 'sbSeatsGo') return seatsGo();
-    if (id === 'sbChangeT') { setMyTable(0); sb.seats = null; sb.seatK = null; sb.board = 0; sb.form = null; return show(); }   // this player moves to another table
+    if (id === 'sbChangeT') {   // this player moves to another table (a player's accepted seat is given up: they ask again)
+      const q = !canManage(sb.g.m) && myReq(); if (q) { delete sb.g.t[q.t].q[q.k]; C().put('sb/' + sb.id + '/t/' + q.t + '/q/' + q.k, null).catch(() => {}); }
+      setMyTable(0); sb.seats = null; sb.seatK = null; sb.board = 0; sb.form = null; sb.reqT = 0; return show();
+    }
     if (id === 'sbWa') { window.open('https://wa.me/?text=' + encodeURIComponent(standingsText()), '_blank', 'noopener'); return; }
   });
 
   // a table's link (#sb=CODE&t=N): this device sits at that table of that game
   async function openLink(id, t) {
-    if (t) try { localStorage.setItem(myTableKey(id), String(t)); } catch (e) {}
-    sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
-    return openGame(id);
+    sb.setup = null; sb.reqT = t || 0; openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
+    await openGame(id);
+    if (t && sb.g && canManage(sb.g.m)) { setMyTable(t); sb.reqT = 0; show(); }   // the organiser sits at once
   }
   return { open, openLink, lobbyHtml, locked, vpOf };
 })();
