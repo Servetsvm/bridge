@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 300;
+const APP_V = 301;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -228,11 +228,11 @@ const Field = {
       for (const t of f.tables) { if (t.passed) continue; const k = conId(t.c); cnt[k] = (cnt[k] || 0) + 1; if (!best || cnt[k] > cnt[conId(best)]) best = t.c; }
       f.normC = best;
       if (best) this.dd(m.id, 'norm', L.deal, best);
-      { const r = RHIST.find(h => h.id === m.id); if (r) { applyField(r, f); saveRH(); } }
+      { const r = RHIST.find(h => h.id === m.id); if (r) { applyField(r, f); r.normC = f.normC ? { ...f.normC } : null; saveRH(); scheduleSync(); } }
       const e = HIST.find(h => h.id === m.id);
       if (e) { applyField(e, f); Store.saveRec(e); scheduleSync(); if (e.tour && e.tour.table == null) tourSend(e); }
     }
-    if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); } }
+    if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); scheduleSync(); } }
     if (m.type === 'error') this.partDone(m.id);
     if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
@@ -243,10 +243,13 @@ const RH_KEY = 'bridge-robot-hist';
 let RHIST = (() => { try { return JSON.parse(localStorage.getItem(RH_KEY) || '[]') || []; } catch (e) { return []; } })();
 const saveRH = () => { try { localStorage.setItem(RH_KEY, JSON.stringify(RHIST.slice(-300))); } catch (e) {} };
 // a watched board against double dummy: the declaring side's score with the tricks taken, against the tricks the contract takes double dummy
+// the four expert robot tables (playing the normal way, each hand seeing only its own cards and dummy) against double
+// dummy: the tables that played the most common contract, their declarer's tricks against that contract double dummy
 function robotImp(e) {
-  const v = e && e.c && e.dd ? e.dd.you : null; if (v == null) return null;
-  const vul = vulOf(e.board, e.c.decl), sc = t => scoreOf(e.c.level, e.c.strain, e.c.dbl, vul, t);
-  return E.imps(sc(e.tricks) - sc(v));
+  const c = e && e.normC, v = e && e.dd ? e.dd.norm : null; if (!c || v == null || !e.fieldList) return null;
+  const k = conKey(c), L = e.fieldList.filter(t => t.k === k && t.t != null); if (!L.length) return null;
+  const vul = vulOf(e.board, c.decl), sc = t => scoreOf(c.level, c.strain, c.dbl, vul, t);
+  return L.reduce((a, t) => a + E.imps(sc(t.t) - sc(v)), 0) / L.length;
 }
 function robotRating() {
   const L = RHIST.map(robotImp).filter(x => x != null).slice(-200), s = L.reduce((a, x) => a + x, 0);
@@ -627,7 +630,7 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
-  if (G.watch) { e.watch = true; G.result = e; G.phase = 'done'; RHIST = RHIST.filter(h => h.id !== e.id); RHIST.push(e); saveRH(); render(); if (g) RoboAna.add(e); return; }   // watched: in the robots' chart, not your Results   // watched: shown, not recorded (the robots' cards are checked)
+  if (G.watch) { e.watch = true; e.normC = G.field && G.field.normC ? { ...G.field.normC } : null; G.result = e; G.phase = 'done'; RHIST = RHIST.filter(h => h.id !== e.id); RHIST.push(e); saveRH(); render(); if (g) RoboAna.add(e); return; }   // watched: in the robots' chart, not your Results   // watched: shown, not recorded (the robots' cards are checked)
   const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
   // a practice board where the convention really came up counts for it (shown on its tile)
   if (pracList().length && !online() && !G.tour) {
@@ -2093,6 +2096,7 @@ function robotCardAsync(g, t) {
 }
 async function robotCardFor(g, t) {
   const lv = SET.robotLvl || 'expert';
+  if (G.watch) return Bot.ask(g, t, { ...BOT_OPT, open: true });   // a deal given to the robots: played with every hand open
   if (lv === 'expert' || online() || G.tour || G.tprac || sideOf(t) === sideOf(U())) return Bot.ask(g, t, BOT_OPT);
   return robotCard(g, t);
 }
@@ -2308,10 +2312,11 @@ function showResults() {
   let body;
   if (tab === 'robot') {
     const rr = robotRating();
-    const rows = RHIST.slice(-100).reverse().map(e => { const v = e.dd ? e.dd.you : null, d = robotImp(e);
-      return `<tr><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.c ? conKey(e.c) : T('Pass')}</td><td class="n">${e.c ? e.tricks : ''}</td><td class="n">${v == null ? '…' : v}</td><td class="n">${d == null ? '' : `<b class="${d < 0 ? 'neg' : d > 0 ? 'pos' : ''}">${fmtSigned(d)}</b>`}</td></tr>`; }).join('');
+    const rows = RHIST.slice(-100).reverse().map(e => { const v = e.dd ? e.dd.norm : null, d = robotImp(e), k = e.normC ? conKey(e.normC) : null;
+      const tr = k && e.fieldList ? e.fieldList.filter(t => t.k === k && t.t != null).map(t => t.t).join(' ') : '';
+      return `<tr><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${k || '…'}</td><td class="n">${tr || '…'}</td><td class="n">${v == null ? '…' : v}</td><td class="n">${d == null ? '' : `<b class="${d < 0 ? 'neg' : d > 0 ? 'pos' : ''}">${fmtSigned(Math.round(d * 10) / 10)}</b>`}</td></tr>`; }).join('');
     body = `<div class="okmsg">🤖 ${T('Robot rating')}: <b>${rr.n ? rr.rt : '—'}</b> · ${T('{0} boards', rr.n)}${rr.n ? ' · ' + fmtSigned(Math.round(rr.avg * 100) / 100) + ' IMP / ' + T('Bd') : ''}</div>
-      <div class="muted">${T('The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.')}</div>
+      <div class="muted">${T('The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer\'s tricks against double dummy, in IMPs.')}</div>
       <div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Tr')}</th><th class="n">DD</th><th class="n">IMP</th></tr></thead><tbody>${rows || `<tr><td colspan="6">${T('No deals given to the robots yet. Enter a deal, then Let the robots play it.')}</td></tr>`}</tbody></table></div>`;
   } else if (tab === 'stats') {
     body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Period')}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th><th class="n">${T('Points')}</th></tr></thead><tbody>${per.map(p => `<tr><td>${T(p.name)}</td><td class="n">${p.n}</td><td class="n">${p.scored ? fmtSigned(p.impSum) : "—"}</td><td class="n">${p.impAvg != null ? fmtSigned(p.impAvg) : "—"}</td><td class="n">${p.mpAvg != null ? p.mpAvg : "—"}</td><td class="n">${fmtSigned(p.pts)}</td></tr>`).join("")}</tbody></table></div>

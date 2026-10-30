@@ -906,6 +906,15 @@ const PLAY_OPT = { budget: 900, maxSamples: 40, ddTricks: 9 };
 function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;
   const leg = legalFor(g, seat); if (leg.length === 1) return leg[0];
+  // open play (a deal given to the robots to watch): every hand is seen, so the robot plays the double-dummy best card
+  // (of the equally good cards the lowest)
+  if (opt.open) {
+    const v = DDSM ? ddsValues(g.hands, g.trick, seat, g.trump) : null;
+    if (v && leg.every(c => v.has(c))) { let best = null; for (const c of asc(leg)) if (best == null || v.get(c) > v.get(best)) best = c; return best; }
+    DD.trump = g.trump; let best = null, bv = -1;
+    for (const c of asc(leg)) { let x; try { x = ddEval(g.hands, g.trick, seat, c, 2e7, bv >= 0 ? bv : null); } catch (e) { x = -1; } if (x > bv) { bv = x; best = c; } }
+    if (best != null) return best;
+  }
   // declarer (and dummy) may look ahead from the first trick (ddDecl); the defence from ddTricks + 1 cards left (the
   // robots: from the first trick after the opening lead, measured best with DDS), its samples fitting the signals
   const def = sideOf(seat) !== sideOf(g.contract.decl), ddLim = def ? opt.ddTricks + (DEFF.dd ? 1 : 0) : (opt.ddDecl || opt.ddTricks);

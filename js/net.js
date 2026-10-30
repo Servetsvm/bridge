@@ -99,7 +99,7 @@ const Net = (() => {
   }
   // what the lobby sees of this table
   function tableInfo() {
-    return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0,
+    return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? (G.watch ? 'idle' : G.phase) : null, board: G ? G.board : 0,
       prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub, solo: !st.host && !st.guest, tplay: tplay(), pc: !st.host && !st.guest && typeof pracList === 'function' && pracList().length ? 1 : 0 };
   }
   // an individual tournament board played here: shown on this table in the lobby, and others can join the tournament
@@ -655,7 +655,7 @@ const Net = (() => {
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
       const name = myName(); if (st.out || !Cloud.on || !name || !SET.pinH) return;
-      const w = st.on ? 'table' : G && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // a finished board left on the screen counts as the lobby
+      const w = st.on ? 'table' : G && !G.watch && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // watching the robots is not playing   // a finished board left on the screen counts as the lobby
       try {
         // a name no longer in the database was removed by the administrator: this device signs out (it used to take
         // the name again, for names chosen before the database existed; they are all in it now)
@@ -1058,15 +1058,23 @@ const Net = (() => {
       const merged = [...map.values()].sort((a, b) => (a.ts || 0) - (b.ts || 0));
       const gotNew = merged.length > HIST.length;
       if (gotNew) { HIST = merged; BOARD = Math.max(BOARD, ...HIST.map(h => h.board || 0)); }
+      // the robots' chart, the same on every device: the boards of both kept (one copy of each)
+      let robotNew = false;
+      if (typeof RHIST !== 'undefined') {
+        const rr = remote && Array.isArray(remote.robot) ? remote.robot.filter(Boolean) : [], rm = new Map(rr.map(r => [r.id, r]));
+        for (const l of RHIST) { const r = rm.get(l.id); if (!r || (l.dd && l.dd.norm != null && !(r.dd && r.dd.norm != null))) { rm.set(l.id, { ...r, ...l }); robotNew = true; } }
+        const before = RHIST.length; RHIST = [...rm.values()].sort((a, b) => (a.ts || 0) - (b.ts || 0)).slice(-300);
+        if (RHIST.length !== before) { saveRH(); render(); }
+      }
       // settings: a device that has not had them yet takes them from the database
       if (remote && remote.set && !SET.cloudSet) { for (const k of SYNC_KEYS) if (remote.set[k] !== undefined) SET[k] = remote.set[k]; SET.cloudSet = 1; if (typeof applyLang === 'function') applyLang(); }
       if (gotNew || (remote && remote.set && SET.cloudSet === 1)) { SET.cloudSet = 2; Store.saveSettings(SET); save(); render(); }
       // the convention card: the newer one wins (made on another device: taken; made here: sent)
       const rs = remote && remote.set, rt = (rs && rs.cardTs) || 0;
       if (rt > (SET.cardTs || 0)) { SET.sys = rs.sys; SET.conv = { ...E.ALL_ON, ...(rs.conv || {}) }; SET.cardV = rs.cardV; SET.cardTs = rt; SET.practice = ''; if (typeof cardSeen === 'function') cardSeen(); Store.saveSettings(SET); save(); render(); }
-      if (localNew || !remote || (SET.cardTs || 0) > rt) {
+      if (localNew || robotNew || !remote || (SET.cardTs || 0) > rt) {
         const set = {}; for (const k of SYNC_KEYS) if (SET[k] !== undefined) set[k] = SET[k];
-        try { await Cloud.put(path, { v: 1, updated: Date.now(), name: myName(), hist: merged.slice(-400).map(Store.compact), set }); } catch (e) {}
+        try { await Cloud.put(path, { v: 1, updated: Date.now(), name: myName(), hist: merged.slice(-400).map(Store.compact), set, robot: (typeof RHIST !== 'undefined' ? RHIST : []).slice(-200).map(e => ({ id: e.id, ts: e.ts, board: e.board, seat: e.seat, c: e.c || null, tricks: e.tricks ?? null, dd: e.dd || null, normC: e.normC || null, fieldList: e.fieldList || null })) }); } catch (e) {}
         SET.cloudSet = 2;
       }
       if (typeof cardReset === 'function' && cardReset()) cloudSyncSoon();   // the one-time new card, once the database's card is known (and then sent)

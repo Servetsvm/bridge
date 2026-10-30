@@ -3992,6 +3992,15 @@ const PLAY_OPT = { budget: 900, maxSamples: 40, ddTricks: 9 };
 function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;
   const leg = legalFor(g, seat); if (leg.length === 1) return leg[0];
+  // open play (a deal given to the robots to watch): every hand is seen, so the robot plays the double-dummy best card
+  // (of the equally good cards the lowest)
+  if (opt.open) {
+    const v = DDSM ? ddsValues(g.hands, g.trick, seat, g.trump) : null;
+    if (v && leg.every(c => v.has(c))) { let best = null; for (const c of asc(leg)) if (best == null || v.get(c) > v.get(best)) best = c; return best; }
+    DD.trump = g.trump; let best = null, bv = -1;
+    for (const c of asc(leg)) { let x; try { x = ddEval(g.hands, g.trick, seat, c, 2e7, bv >= 0 ? bv : null); } catch (e) { x = -1; } if (x > bv) { bv = x; best = c; } }
+    if (best != null) return best;
+  }
   // declarer (and dummy) may look ahead from the first trick (ddDecl); the defence from ddTricks + 1 cards left (the
   // robots: from the first trick after the opening lead, measured best with DDS), its samples fitting the signals
   const def = sideOf(seat) !== sideOf(g.contract.decl), ddLim = def ? opt.ddTricks + (DEFF.dd ? 1 : 0) : (opt.ddDecl || opt.ddTricks);
@@ -4679,6 +4688,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Robotlara oynattığın eller (robotlar dört eli görerek, double dummy oynar): senin Sonuçlarına ve puanına girmez. Puan: aynı el dört uzman robot masasında normal şekilde de oynanır; deklaranlarının aldığı löveler double dummy ile karşılaştırılır (IMP).",
     "Robot rating": "Robot puanı", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Robotlara oynattığın eller: senin Sonuçlarına ve puanına girmez. Robotlar double dummy ile ölçülür: deklaranın aldığı löveler, kontratın dört el açıkken aldığı lövelerle karşılaştırılır (IMP).", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Henüz robotlara oynatılan el yok. Bir el gir, sonra Robotlara oynat’a bas.",
     "Let the robots play it": "Robotlara oynat", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Robotlara oynat: dört el açık, robotlar deklere verip yavaşça oynar, sen izlersin. Puanına sayılmaz.", "The robots are playing this deal — watch": "Robotlar bu eli oynuyor — izle",
     "Message sent": "Mesaj gönderildi",
@@ -5077,6 +5087,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Spillene du lot robotene spille (de spiller med alle hender åpne, double dummy): ikke i dine resultater eller din rating. Ratingen: samme spill spilles også ved fire ekspertrobotbord på vanlig måte; spilleførernes stikk mot double dummy, i IMP.",
     "Robot rating": "Robotrating", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Spillene du lot robotene spille: ikke i dine resultater eller din rating. Robotene måles mot double dummy: stikkene spillefører tok mot stikkene kontrakten gir med alle hender åpne, i IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Ingen spill gitt til robotene ennå. Legg inn et spill og trykk La robotene spille det.",
     "Let the robots play it": "La robotene spille det", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "La robotene spille det: alle fire hender er åpne, robotene melder og spiller sakte, og du ser på. Det teller ikke på ratingen din.", "The robots are playing this deal — watch": "Robotene spiller dette spillet — se på",
     "Message sent": "Melding sendt",
@@ -5475,6 +5486,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Las manos que dejaste jugar a los robots (las juegan viendo las cuatro manos, doble muerto): no cuentan en tus resultados ni en tu puntuación. La puntuación: la misma mano se juega también en cuatro mesas de robots expertos de forma normal; las bazas de sus carteadores frente al doble muerto, en IMPs.",
     "Robot rating": "Puntuación de los robots", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Las manos que dejaste jugar a los robots: no cuentan en tus resultados ni en tu puntuación. Los robots se miden contra el doble muerto: las bazas de su carteador frente a las que da el contrato con todas las manos vistas, en IMPs.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Aún no hay manos jugadas por los robots. Introduce una mano y pulsa Que lo jueguen los robots.",
     "Let the robots play it": "Que lo jueguen los robots", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Que lo jueguen los robots: las cuatro manos están abiertas, los robots subastan y juegan despacio y tú miras. No cuenta para tu puntuación.", "The robots are playing this deal — watch": "Los robots juegan esta mano — mira",
     "Message sent": "Mensaje enviado",
@@ -5901,6 +5913,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Les donnes jouées par les robots (ils les jouent toutes mains visibles, au double mort) : ni dans vos résultats ni dans votre classement. Le classement : la même donne est aussi jouée normalement à quatre tables de robots experts ; les levées de leurs déclarants face au double mort, en IMP.",
     "Robot rating": "Classement des robots", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Les donnes jouées par les robots : ni dans vos résultats ni dans votre classement. Les robots sont mesurés au double mort : les levées de leur déclarant face à celles du contrat, toutes mains visibles, en IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Aucune donne jouée par les robots pour l’instant. Saisissez une donne, puis Faire jouer les robots.",
     "Let the robots play it": "Faire jouer les robots", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Faire jouer les robots : les quatre mains sont visibles, les robots enchérissent et jouent lentement, et vous regardez. Cela ne compte pas pour votre classement.", "The robots are playing this deal — watch": "Les robots jouent cette donne — regardez",
     "Message sent": "Message envoyé",
@@ -6327,6 +6340,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Le mani fatte giocare ai robot (le giocano a carte viste, doppio morto): non entrano nei tuoi risultati né nel tuo punteggio. Il punteggio: la stessa mano è giocata normalmente anche a quattro tavoli di robot esperti; le prese dei loro giocanti contro il doppio morto, in IMP.",
     "Robot rating": "Punteggio dei robot", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Le mani fatte giocare ai robot: non entrano nei tuoi risultati né nel tuo punteggio. I robot sono misurati sul doppio morto: le prese del loro giocante contro quelle del contratto a carte viste, in IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Nessuna mano ancora giocata dai robot. Inserisci una mano, poi Falla giocare ai robot.",
     "Let the robots play it": "Falla giocare ai robot", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Falla giocare ai robot: le quattro mani sono scoperte, i robot licitano e giocano lentamente e tu guardi. Non conta per il tuo punteggio.", "The robots are playing this deal — watch": "I robot giocano questa mano — guarda",
     "Message sent": "Messaggio inviato",
@@ -6753,6 +6767,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Die Boards, die du die Roboter spielen ließt (sie spielen mit allen Händen offen, Double Dummy): nicht in deinen Ergebnissen und deiner Wertung. Die Wertung: dasselbe Board wird auch an vier Expertenrobotertischen normal gespielt; die Stiche ihrer Alleinspieler gegen Double Dummy, in IMP.",
     "Robot rating": "Roboterwertung", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Die Boards, die du die Roboter spielen ließt: nicht in deinen Ergebnissen und deiner Wertung. Die Roboter werden am Double Dummy gemessen: die Stiche ihres Alleinspielers gegen die Stiche des Kontrakts bei offenen Händen, in IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Noch keine Boards von den Robotern gespielt. Gib ein Board ein und tippe Von den Robotern spielen lassen.",
     "Let the robots play it": "Von den Robotern spielen lassen", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Von den Robotern spielen lassen: alle vier Hände offen, die Roboter reizen und spielen langsam, und du schaust zu. Es zählt nicht für deine Wertung.", "The robots are playing this deal — watch": "Die Roboter spielen dieses Board — schau zu",
     "Message sent": "Nachricht gesendet",
@@ -7179,6 +7194,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Сдачи, сыгранные роботами (они играют, видя все руки, дабл-дамми): не входят в ваши результаты и рейтинг. Рейтинг: та же сдача играется обычным образом ещё за четырьмя столами роботов-экспертов; взятки их разыгрывающих против дабл-дамми, в IMP.",
     "Robot rating": "Рейтинг роботов", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Сдачи, сыгранные роботами: не входят в ваши результаты и рейтинг. Роботы сравниваются с дабл-дамми: взятки их разыгрывающего против взяток контракта при открытых руках, в IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Роботы ещё не играли сдач. Введите сдачу и нажмите «Пусть сыграют роботы».",
     "Let the robots play it": "Пусть сыграют роботы", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Пусть сыграют роботы: все четыре руки открыты, роботы торгуются и играют медленно, а вы смотрите. В рейтинг не идёт.", "The robots are playing this deal — watch": "Роботы играют эту сдачу — смотрите",
     "Message sent": "Сообщение отправлено",
@@ -7605,6 +7621,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Rozdania zagrane przez roboty (grają widząc wszystkie ręce, double dummy): nie trafiają do twoich wyników ani rankingu. Ranking: to samo rozdanie jest też grane normalnie przy czterech stołach robotów-ekspertów; lewy ich rozgrywających wobec double dummy, w IMP.",
     "Robot rating": "Ranking robotów", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Rozdania zagrane przez roboty: nie trafiają do twoich wyników ani rankingu. Roboty są mierzone względem double dummy: lewy ich rozgrywającego wobec lew kontraktu przy odkrytych rękach, w IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Roboty nie zagrały jeszcze żadnego rozdania. Wpisz rozdanie i naciśnij Niech zagrają roboty.",
     "Let the robots play it": "Niech zagrają roboty", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Niech zagrają roboty: cztery ręce są odkryte, roboty licytują i grają powoli, a ty oglądasz. Nie liczy się do rankingu.", "The robots are playing this deal — watch": "Roboty grają to rozdanie — oglądaj",
     "Message sent": "Wiadomość wysłana",
@@ -8031,6 +8048,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "交给机器人打的牌（它们看着四手牌按双明手打）：不计入你的成绩和积分。积分：同一副牌也在四张专家机器人牌桌上正常打；它们庄家的墩数与双明手相比，以IMP计。",
     "Robot rating": "机器人积分", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "交给机器人打的牌：不计入你的成绩和积分。机器人以双明手为标准衡量：庄家拿到的墩数与四手明牌时该定约的墩数相比，以IMP计。", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "还没有交给机器人打的牌。输入一副牌，然后点 让机器人来打。",
     "Let the robots play it": "让机器人来打", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "让机器人来打：四家牌全部明示，机器人慢慢叫牌和打牌，你来观看。不计入你的积分。", "The robots are playing this deal — watch": "机器人正在打这副牌 — 观看",
     "Message sent": "消息已发送",
@@ -9080,7 +9098,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 300;
+const APP_V = 301;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9300,11 +9318,11 @@ const Field = {
       for (const t of f.tables) { if (t.passed) continue; const k = conId(t.c); cnt[k] = (cnt[k] || 0) + 1; if (!best || cnt[k] > cnt[conId(best)]) best = t.c; }
       f.normC = best;
       if (best) this.dd(m.id, 'norm', L.deal, best);
-      { const r = RHIST.find(h => h.id === m.id); if (r) { applyField(r, f); saveRH(); } }
+      { const r = RHIST.find(h => h.id === m.id); if (r) { applyField(r, f); r.normC = f.normC ? { ...f.normC } : null; saveRH(); scheduleSync(); } }
       const e = HIST.find(h => h.id === m.id);
       if (e) { applyField(e, f); Store.saveRec(e); scheduleSync(); if (e.tour && e.tour.table == null) tourSend(e); }
     }
-    if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); } }
+    if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); scheduleSync(); } }
     if (m.type === 'error') this.partDone(m.id);
     if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
@@ -9315,10 +9333,13 @@ const RH_KEY = 'bridge-robot-hist';
 let RHIST = (() => { try { return JSON.parse(localStorage.getItem(RH_KEY) || '[]') || []; } catch (e) { return []; } })();
 const saveRH = () => { try { localStorage.setItem(RH_KEY, JSON.stringify(RHIST.slice(-300))); } catch (e) {} };
 // a watched board against double dummy: the declaring side's score with the tricks taken, against the tricks the contract takes double dummy
+// the four expert robot tables (playing the normal way, each hand seeing only its own cards and dummy) against double
+// dummy: the tables that played the most common contract, their declarer's tricks against that contract double dummy
 function robotImp(e) {
-  const v = e && e.c && e.dd ? e.dd.you : null; if (v == null) return null;
-  const vul = vulOf(e.board, e.c.decl), sc = t => scoreOf(e.c.level, e.c.strain, e.c.dbl, vul, t);
-  return E.imps(sc(e.tricks) - sc(v));
+  const c = e && e.normC, v = e && e.dd ? e.dd.norm : null; if (!c || v == null || !e.fieldList) return null;
+  const k = conKey(c), L = e.fieldList.filter(t => t.k === k && t.t != null); if (!L.length) return null;
+  const vul = vulOf(e.board, c.decl), sc = t => scoreOf(c.level, c.strain, c.dbl, vul, t);
+  return L.reduce((a, t) => a + E.imps(sc(t.t) - sc(v)), 0) / L.length;
 }
 function robotRating() {
   const L = RHIST.map(robotImp).filter(x => x != null).slice(-200), s = L.reduce((a, x) => a + x, 0);
@@ -9699,7 +9720,7 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
-  if (G.watch) { e.watch = true; G.result = e; G.phase = 'done'; RHIST = RHIST.filter(h => h.id !== e.id); RHIST.push(e); saveRH(); render(); if (g) RoboAna.add(e); return; }   // watched: in the robots' chart, not your Results   // watched: shown, not recorded (the robots' cards are checked)
+  if (G.watch) { e.watch = true; e.normC = G.field && G.field.normC ? { ...G.field.normC } : null; G.result = e; G.phase = 'done'; RHIST = RHIST.filter(h => h.id !== e.id); RHIST.push(e); saveRH(); render(); if (g) RoboAna.add(e); return; }   // watched: in the robots' chart, not your Results   // watched: shown, not recorded (the robots' cards are checked)
   const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
   // a practice board where the convention really came up counts for it (shown on its tile)
   if (pracList().length && !online() && !G.tour) {
@@ -11165,6 +11186,7 @@ function robotCardAsync(g, t) {
 }
 async function robotCardFor(g, t) {
   const lv = SET.robotLvl || 'expert';
+  if (G.watch) return Bot.ask(g, t, { ...BOT_OPT, open: true });   // a deal given to the robots: played with every hand open
   if (lv === 'expert' || online() || G.tour || G.tprac || sideOf(t) === sideOf(U())) return Bot.ask(g, t, BOT_OPT);
   return robotCard(g, t);
 }
@@ -11380,10 +11402,11 @@ function showResults() {
   let body;
   if (tab === 'robot') {
     const rr = robotRating();
-    const rows = RHIST.slice(-100).reverse().map(e => { const v = e.dd ? e.dd.you : null, d = robotImp(e);
-      return `<tr><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${e.c ? conKey(e.c) : T('Pass')}</td><td class="n">${e.c ? e.tricks : ''}</td><td class="n">${v == null ? '…' : v}</td><td class="n">${d == null ? '' : `<b class="${d < 0 ? 'neg' : d > 0 ? 'pos' : ''}">${fmtSigned(d)}</b>`}</td></tr>`; }).join('');
+    const rows = RHIST.slice(-100).reverse().map(e => { const v = e.dd ? e.dd.norm : null, d = robotImp(e), k = e.normC ? conKey(e.normC) : null;
+      const tr = k && e.fieldList ? e.fieldList.filter(t => t.k === k && t.t != null).map(t => t.t).join(' ') : '';
+      return `<tr><td>${new Date(e.ts || 0).toLocaleDateString()}</td><td>${e.board}</td><td>${k || '…'}</td><td class="n">${tr || '…'}</td><td class="n">${v == null ? '…' : v}</td><td class="n">${d == null ? '' : `<b class="${d < 0 ? 'neg' : d > 0 ? 'pos' : ''}">${fmtSigned(Math.round(d * 10) / 10)}</b>`}</td></tr>`; }).join('');
     body = `<div class="okmsg">🤖 ${T('Robot rating')}: <b>${rr.n ? rr.rt : '—'}</b> · ${T('{0} boards', rr.n)}${rr.n ? ' · ' + fmtSigned(Math.round(rr.avg * 100) / 100) + ' IMP / ' + T('Bd') : ''}</div>
-      <div class="muted">${T('The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.')}</div>
+      <div class="muted">${T('The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer\'s tricks against double dummy, in IMPs.')}</div>
       <div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Tr')}</th><th class="n">DD</th><th class="n">IMP</th></tr></thead><tbody>${rows || `<tr><td colspan="6">${T('No deals given to the robots yet. Enter a deal, then Let the robots play it.')}</td></tr>`}</tbody></table></div>`;
   } else if (tab === 'stats') {
     body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Period')}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th><th class="n">${T('Points')}</th></tr></thead><tbody>${per.map(p => `<tr><td>${T(p.name)}</td><td class="n">${p.n}</td><td class="n">${p.scored ? fmtSigned(p.impSum) : "—"}</td><td class="n">${p.impAvg != null ? fmtSigned(p.impAvg) : "—"}</td><td class="n">${p.mpAvg != null ? p.mpAvg : "—"}</td><td class="n">${fmtSigned(p.pts)}</td></tr>`).join("")}</tbody></table></div>
@@ -12498,7 +12521,7 @@ const Net = (() => {
   }
   // what the lobby sees of this table
   function tableInfo() {
-    return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? G.phase : null, board: G ? G.board : 0,
+    return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? (G.watch ? 'idle' : G.phase) : null, board: G ? G.board : 0,
       prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub, solo: !st.host && !st.guest, tplay: tplay(), pc: !st.host && !st.guest && typeof pracList === 'function' && pracList().length ? 1 : 0 };
   }
   // an individual tournament board played here: shown on this table in the lobby, and others can join the tournament
@@ -13054,7 +13077,7 @@ const Net = (() => {
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
       const name = myName(); if (st.out || !Cloud.on || !name || !SET.pinH) return;
-      const w = st.on ? 'table' : G && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // a finished board left on the screen counts as the lobby
+      const w = st.on ? 'table' : G && !G.watch && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // watching the robots is not playing   // a finished board left on the screen counts as the lobby
       try {
         // a name no longer in the database was removed by the administrator: this device signs out (it used to take
         // the name again, for names chosen before the database existed; they are all in it now)
@@ -13457,15 +13480,23 @@ const Net = (() => {
       const merged = [...map.values()].sort((a, b) => (a.ts || 0) - (b.ts || 0));
       const gotNew = merged.length > HIST.length;
       if (gotNew) { HIST = merged; BOARD = Math.max(BOARD, ...HIST.map(h => h.board || 0)); }
+      // the robots' chart, the same on every device: the boards of both kept (one copy of each)
+      let robotNew = false;
+      if (typeof RHIST !== 'undefined') {
+        const rr = remote && Array.isArray(remote.robot) ? remote.robot.filter(Boolean) : [], rm = new Map(rr.map(r => [r.id, r]));
+        for (const l of RHIST) { const r = rm.get(l.id); if (!r || (l.dd && l.dd.norm != null && !(r.dd && r.dd.norm != null))) { rm.set(l.id, { ...r, ...l }); robotNew = true; } }
+        const before = RHIST.length; RHIST = [...rm.values()].sort((a, b) => (a.ts || 0) - (b.ts || 0)).slice(-300);
+        if (RHIST.length !== before) { saveRH(); render(); }
+      }
       // settings: a device that has not had them yet takes them from the database
       if (remote && remote.set && !SET.cloudSet) { for (const k of SYNC_KEYS) if (remote.set[k] !== undefined) SET[k] = remote.set[k]; SET.cloudSet = 1; if (typeof applyLang === 'function') applyLang(); }
       if (gotNew || (remote && remote.set && SET.cloudSet === 1)) { SET.cloudSet = 2; Store.saveSettings(SET); save(); render(); }
       // the convention card: the newer one wins (made on another device: taken; made here: sent)
       const rs = remote && remote.set, rt = (rs && rs.cardTs) || 0;
       if (rt > (SET.cardTs || 0)) { SET.sys = rs.sys; SET.conv = { ...E.ALL_ON, ...(rs.conv || {}) }; SET.cardV = rs.cardV; SET.cardTs = rt; SET.practice = ''; if (typeof cardSeen === 'function') cardSeen(); Store.saveSettings(SET); save(); render(); }
-      if (localNew || !remote || (SET.cardTs || 0) > rt) {
+      if (localNew || robotNew || !remote || (SET.cardTs || 0) > rt) {
         const set = {}; for (const k of SYNC_KEYS) if (SET[k] !== undefined) set[k] = SET[k];
-        try { await Cloud.put(path, { v: 1, updated: Date.now(), name: myName(), hist: merged.slice(-400).map(Store.compact), set }); } catch (e) {}
+        try { await Cloud.put(path, { v: 1, updated: Date.now(), name: myName(), hist: merged.slice(-400).map(Store.compact), set, robot: (typeof RHIST !== 'undefined' ? RHIST : []).slice(-200).map(e => ({ id: e.id, ts: e.ts, board: e.board, seat: e.seat, c: e.c || null, tricks: e.tricks ?? null, dd: e.dd || null, normC: e.normC || null, fieldList: e.fieldList || null })) }); } catch (e) {}
         SET.cloudSet = 2;
       }
       if (typeof cardReset === 'function' && cardReset()) cloudSyncSoon();   // the one-time new card, once the database's card is known (and then sent)
