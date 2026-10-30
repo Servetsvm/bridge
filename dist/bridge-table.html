@@ -9281,7 +9281,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 318;
+const APP_V = 319;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -15012,7 +15012,7 @@ const SB = (() => {
     return `<h2>🃏 ${T('Team match')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
       <div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>${legend(g)}
       ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
-      + `<div class="row2"><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
+      + `<div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   // a team match: the tables of each match and who sits North-South there
   const legend = m => !isTeam(m) ? '' : `<div class="tmleg">${[...Array(Math.floor(m.tb / 2)).keys()].map(i => { const a = teamName(2 * i + 1, m), b = teamName(2 * i + 2, m);
@@ -15031,8 +15031,6 @@ const SB = (() => {
     // a player's game fills the screen (table number, players, boards, the scoring)
     if (s) s.classList.toggle('sbfull', !!(sb.id && !sb.setup && sb.g && sb.g.m && !canManage(sb.g.m)));
   }
-  // a game running now (opened in the last day and not finished)
-  const running = () => (sb.list || []).some(g => g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
   function listHtml() {
     const rows = (sb.list || []).map(g => `<tr><td><b>🃏 ${esc(g.n)}</b><small>${fmtDate(g.ts)}${g.byn ? ' · ' + esc(g.byn) : ''}</small></td>
       <td data-l="${T('Tables')}" class="n">${g.tb}${isTeam(g) ? `<small>${T('{0} teams', g.tb)}</small>` : ''}</td><td data-l="${T('Boards')}" class="n">${g.bd}</td>
@@ -15041,7 +15039,7 @@ const SB = (() => {
     return `<h2>🃏 ${T('Team match')}</h2>
       <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')}</div>
       ${isAdm() ? `<div class="row2"><button class="btn gold" id="rtOpen">🤖 ${T('Team match with robots')}</button></div>` : ''}
-      ${running() && !isAdm() ? `<div class="muted">🃏 ${T('A game is running now: join it with Table No. Only the administrator can open another game.')}</div>` : `<div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button></div>`}
+      <div class="row2"><button class="btn gold" id="sbNew">➕ ${T('New game')}</button></div>
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
@@ -15355,7 +15353,6 @@ const SB = (() => {
       else if (sb.form) { sb.form[k] = +v; if (k === 'l') { if (+v === 0) { sb.form.s = sb.form.d = sb.form.k = null; } else if (sb.form.k == null || sb.form.k < 0) sb.form.k = null; } }
       return show();
     }
-    if (id === 'sbNew' && running() && !isAdm()) return show();
     if (id === 'sbNew') { sb.setup = { n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [] }; sb.err = ''; return show(); }
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
