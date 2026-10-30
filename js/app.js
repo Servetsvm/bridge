@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 306;
+const APP_V = 307;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -257,7 +257,7 @@ function champLoad(force) {
   if (typeof Net === 'undefined' || !Net.Cloud.on) return Promise.resolve(CH.tree);
   if (!force && CH.tree && Date.now() - CH.at < 60000) return Promise.resolve(CH.tree);
   if (CH.p) return CH.p;
-  return CH.p = Net.champGet().then(t => { CH.tree = t || {}; CH.at = Date.now(); return CH.tree; }).catch(() => CH.tree).finally(() => { CH.p = null; render(); });
+  return CH.p = Net.champGet().then(t => { CH.tree = t || {}; CH.at = Date.now(); const L = champRank(CH.tree); CH.leader = L.length ? L[0].k : null; return CH.tree; }).catch(() => CH.tree).finally(() => { CH.p = null; render(); });
 }
 /* the ranking: for every player, each board compared with every other player's result on it (IMP: the average of the
    IMPs against each; MP: the share of them beaten, ties half); alone on a board: the robot tables' figures */
@@ -373,6 +373,32 @@ function champMonthNote() {
   SET.champNoted = m.ym; Store.saveSettings(SET); save();
   flash('🏆 ' + T('The champions of {0}: {1} (IMP) · {2} (MP)', ymName(m.ym), m.imp[0] ? m.imp[0].name : '—', m.mp[0] ? m.mp[0].name : '—'), 8000);
 }
+/* ---- the rank card: ♣2 … ♠A ---- */
+const RK_S = '♣♦♥♠', RK_R = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'], RK_GATE = [0, 50, 200, 500];
+const rankTxt = i => RK_S[Math.floor(i / 13)] + RK_R[i % 13];
+// a player's card from the profile (rating, boards) and the trophies; the championship's leader holds ♠A
+function cardRank(p, name) {
+  if (!p) return null;
+  const rt = p.rtn ? p.rt : 1350, boards = p.per && p.per[4] ? p.per[4][0] || 0 : p.n || 0;
+  const tro = name ? trophiesOf(name) : [], bonus = tro.reduce((a, t) => a + (t.place === 1 ? 3 : 1), 0);
+  const base = Math.max(0, Math.min(50, Math.round((rt - 1350) / 8)));
+  const cap = boards < RK_GATE[1] ? 12 : boards < RK_GATE[2] ? 25 : boards < RK_GATE[3] ? 38 : 50;
+  let i = Math.min(base + bonus, cap, 50);
+  if (name && CH.leader && CH.leader === Net.fbKey(name)) i = 51;
+  return { i, cap, boards, rt, bonus, base };
+}
+const rankChip = r => r ? `<span class="rkc s${Math.floor(r.i / 13)}" title="${T('Rank card')}">${rankTxt(r.i)}</span>` : '';
+const rankOf = (p, name) => rankChip(cardRank(p, name));
+// the player card: the card large, and what the next one needs
+function rankBig(p, name) {
+  const r = cardRank(p, name); if (!r) return '—';
+  let next;
+  if (r.i === 51) next = '👑 ' + T('Leader of the championship');
+  else if (r.i === 50) next = T('The top card for a player: ♠A belongs to the leader of the championship.');
+  else if (r.i >= r.cap) { const g = RK_GATE[Math.floor(r.cap / 13) + 1]; next = T('{0} more boards to reach {1}', g - r.boards, RK_S[Math.floor(r.cap / 13) + 1]); }
+  else { const need = Math.max(1, Math.ceil(1350 + 8 * (r.i - r.bonus + 1) - 4 - r.rt)); next = T('{0} rating points to {1}', need, rankTxt(r.i + 1)); }
+  return `<span class="rkbig s${Math.floor(r.i / 13)}">${rankTxt(r.i)}</span> <small class="muted">${next}</small>`;
+}
 // the home page card: the leader, your place, start or go on
 function champCardHtml() {
   if (typeof Net === 'undefined' || !Net.Cloud.on) return '';
@@ -410,7 +436,7 @@ async function showChamp() {
     }
     body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Round')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Score')}</th><th class="n">👥</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows.join('') || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   } else {
-    body = `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname${champMark(p.name) ? ' gold' : ''}" data-who="${esc(p.name)}">${esc(p.name)}${champMark(p.name)}</b></td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
+    body = `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname${champMark(p.name) ? ' gold' : ''}" data-who="${esc(p.name)}">${esc(p.name)}${champMark(p.name)}</b> ${rankOf(Net.profOf(p.name), p.name)}</td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
   }
   openOv('champ', `<h2>🏆 ${T('Championship')}</h2>
     <div class="muted">${T('Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player\'s on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.')}</div>
@@ -1592,7 +1618,7 @@ function renderHome() {
     const h = v2 ? `<span class="h2av">${p && p.av ? p.av : esc(((nm || '?').trim()[0] || '?').toUpperCase())}</span>` : (nm ? esc(nm) : `<i>${T('Name')}</i>`) + ' ✏️';
     if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name (the new page: your picture or initial), after a change on your card
   { const p = typeof Net !== 'undefined' ? Net.prof() : null, m = p && p.rtn ? measuredLvl(p) : '';   // the you strip: rating and the measured level
-    set('hMe', p ? `<span class="h2chip"><small>${T('Rating')}</small><b>${p.rtn ? p.rt : '—'}</b></span>${m ? `<span class="h2chip"><small>${T('measured')}</small><span class="plvl l-${m}">${T(LEVEL_N[m])}</span></span>` : ''}` : ''); }
+    set('hMe', p ? `${rankOf(p, myNm())}<span class="h2chip"><small>${T('Rating')}</small><b>${p.rtn ? p.rt : '—'}</b></span>${m ? `<span class="h2chip"><small>${T('measured')}</small><span class="plvl l-${m}">${T(LEVEL_N[m])}</span></span>` : ''}` : ''); }
   set('hChamp', champCardHtml());
   set('hGoSub', cont ? T('Your last board is waiting.') : T('Bid and play with three robots; every board counts for your rating.'));   // your name, after a change on your card
   { const hs = $('hSys'), v = SET.sys || 'twoone'; if (hs && hs.value !== v) hs.value = v; }   // also when it was changed on the convention card
@@ -1929,6 +1955,7 @@ function showPlayer(name) {
   const tot = p && p.per ? p.per[4] : p ? [p.n, p.imp, p.mp] : null;
   const boards = tot ? tot[0] || 0 : 0;
   const fields = [
+    [T('Rank card'), rankBig(p, shown)],
     [T("Rating"), p && p.rtn ? `<b class="prt">${p.rt}</b> <small>(${p.rtn} ${T("boards")})</small>` : "—"],
     [T('Club'), p && p.club ? `🏛 ${esc(p.club)}` : '—'],
     [T('Skill level'), lvlHtml(lvl, p)],
@@ -1948,7 +1975,7 @@ function showPlayer(name) {
       <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
   openOv('player', `<div class="pcard">
     <div class="phead"><div class="pav${p && p.av ? " emo" : ""}">${p && p.av ? p.av : esc((shown.trim()[0] || "?").toUpperCase())}</div>
-      <div class="pmain"><div class="pnm${champMark(shown) ? ' gold' : ''}">${esc(shown)}${champMark(shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
+      <div class="pmain"><div class="pnm${champMark(shown) ? ' gold' : ''}">${esc(shown)}${champMark(shown)} ${rankOf(p, shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
         <div class="psub">${where ? `<span class="pwhere">● ${esc(where)}</span>` : ''}</div></div></div>
     <table class="pfields">${fields.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>
     ${trophyHtml(shown)}

@@ -1810,3 +1810,8 @@ body.homev2 .h2chb .h2chs{background:var(--h2-paper-2);color:var(--h2-ink);borde
 .troph{font-size:14px;line-height:1.5}.troph.p1{font-weight:800}
 body.homev2 .h2chnew{font-size:13.5px;padding:6px 10px;border-radius:10px;background:rgba(242,201,76,.18);border:1px solid rgba(184,134,11,.35)}
 .res tr.dim td{opacity:.6}
+/* the rank card beside a name: a small playing card (suit colours of the four-colour deck); large on the player card */
+.rkc,.rkbig{display:inline-flex;align-items:center;justify-content:center;font:700 12px/1 var(--f-card);padding:2px 4px;min-width:26px;border-radius:4px;background:#fffdf6;color:#1b1b1b;border:1px solid rgba(0,0,0,.25);box-shadow:0 1px 2px rgba(0,0,0,.2);vertical-align:middle;white-space:nowrap}
+.rkc.s0,.rkbig.s0{color:#1a7a2e}.rkc.s1,.rkbig.s1{color:#d06a00}.rkc.s2,.rkbig.s2{color:#c4122f}.rkc.s3,.rkbig.s3{color:#1b1b1b}
+.rkbig{font-size:22px;padding:6px 8px;min-width:48px;border-radius:7px;margin-right:4px}
+:root[data-theme="dark"] .rkc,:root[data-theme="dark"] .rkbig{background:#fffdf6}
