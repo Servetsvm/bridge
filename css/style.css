@@ -1790,3 +1790,15 @@ body.homev2 .home.v2 .prac .prask{border-style:solid;border-radius:999px;padding
 :root[data-theme="dark"] body.homev2 .home.v2 .prac .prf .prdrop.on + .prval{color:#7fd09a}
 :root[data-theme="dark"] body.homev2 .home.v2 .prac .prprog{background:var(--h2-paper-2);border-color:var(--h2-line)}
 @media (max-width:420px){ body.homev2 .home.v2 .prac .prf{padding:7px 10px 8px} body.homev2 .home.v2 .prac .prf .prval{font-size:14px} body.homev2 .home.v2 .prac .prtop{margin-bottom:8px;padding-bottom:8px} }
+/* the championship card beside the Play card: a gold-edged paper card (side by side on a wider screen) */
+body.homev2 .h2pr{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+@media (min-width:640px){ body.homev2 .h2pr{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)} }
+body.homev2 .h2champ{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:16px;background:var(--h2-paper);color:var(--h2-ink);border:1px solid var(--h2-line);box-shadow:var(--h2-shadow),inset 0 0 0 2px var(--h2-brass);min-width:0}
+body.homev2 .h2champ:empty{display:none}
+body.homev2 .h2chh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+body.homev2 .h2cht{font:700 clamp(17px,4.4vw,20px)/1.1 var(--f-face);letter-spacing:.02em}
+body.homev2 .h2chh small,body.homev2 .h2chl small,body.homev2 .h2chm{color:var(--h2-muted);font-size:13px}
+body.homev2 .h2chl{font-size:15px;min-width:0;overflow-wrap:anywhere}
+body.homev2 .h2chb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:2px}
+body.homev2 .h2chb .h2go{margin:0;padding:9px 14px;font-size:15px}
+body.homev2 .h2chb .h2chs{background:var(--h2-paper-2);color:var(--h2-ink);border:1px solid var(--h2-line);border-radius:10px;padding:8px 12px;font-size:14px;box-shadow:none}

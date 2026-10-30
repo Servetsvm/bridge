@@ -281,6 +281,17 @@
         }
       }
     },
+    "champ": {
+      ".read": "auth != null",
+      "$r": {
+        "$b": {
+          "$k": {
+            ".write": "auth != null && (root.child('sess').child(auth.uid).child('k').val() === $k && !data.exists() || root.child('sess').child(auth.uid).child('k').val() === 'servet')",
+            ".validate": "!newData.exists() || newData.hasChildren(['n', 'ts', 'us']) && newData.child('n').isString() && newData.child('n').val().length <= 20 && newData.child('us').isNumber() && newData.child('ts').isNumber()"
+          }
+        }
+      }
+    },
     "gate": {
       ".read": false,
       "clubs": {

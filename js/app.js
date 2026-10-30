@@ -41,7 +41,7 @@ const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: nu
 const online = () => typeof Net !== "undefined" && Net.on;
 const guest = () => typeof Net !== "undefined" && Net.guest;
 // your seat (a tournament is always played from South); a spectator has no seat of their own (meSeat -1)
-const U = () => (guest() ? Net.st.seat : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
+const U = () => (guest() ? Net.st.seat : G && G.champ ? 2 : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
 const meSeat = () => (guest() && Net.st.watching ? -1 : G && G.watch ? -1 : U());
 const delay = () => G && G.watch ? 1700 : [1100, 650, 250][SET.speed];   // watching the robots: slowly, to follow every card
 const $ = id => document.getElementById(id);
@@ -242,6 +242,115 @@ const Field = {
   },
 };
 /* ---- checking the card play after the board (double dummy, in a background worker) ---- */
+/* ---- the championship: rounds of 8 boards, the same for everyone, played whenever you like (each round once, from
+   South). Every result is compared with all the other players' on that board, in IMPs and matchpoints; a board no one
+   else has played yet counts against the robot tables until someone does. The ranking is per board over all boards. ---- */
+const CH = { tree: null, at: 0, p: null };
+const champLive = () => !!(G && G.champ && (G.phase === 'bid' || G.phase === 'play'));
+function champDeal(r, b) {
+  E.seed(((Math.imul(r, 2654435761) ^ 0x5bd1e995) + Math.imul(b, 40503)) >>> 0 || 1);
+  const d = E.shuffle([...Array(52).keys()]); E.seed(null);
+  return [0, 1, 2, 3].map(k => d.slice(k * 13, k * 13 + 13));
+}
+// the championship from the database (read again after a minute, or when asked)
+function champLoad(force) {
+  if (typeof Net === 'undefined' || !Net.Cloud.on) return Promise.resolve(CH.tree);
+  if (!force && CH.tree && Date.now() - CH.at < 60000) return Promise.resolve(CH.tree);
+  if (CH.p) return CH.p;
+  return CH.p = Net.champGet().then(t => { CH.tree = t || {}; CH.at = Date.now(); return CH.tree; }).catch(() => CH.tree).finally(() => { CH.p = null; render(); });
+}
+/* the ranking: for every player, each board compared with every other player's result on it (IMP: the average of the
+   IMPs against each; MP: the share of them beaten, ties half); alone on a board: the robot tables' figures */
+function champRank(tree) {
+  const P = {};
+  for (const [r, R] of Object.entries(tree || {})) for (const [b, B] of Object.entries(R || {})) {
+    const L = Object.entries(B || {}).filter(([, x]) => x && typeof x.us === 'number');
+    for (const [k, x] of L) {
+      const p = P[k] || (P[k] = { k, name: x.n || k, n: 0, imp: 0, mp: 0, rounds: {}, last: 0 });
+      const o = L.filter(([j]) => j !== k).map(([, y]) => y.us);
+      let imp, mp;
+      if (o.length) { imp = o.reduce((a, v) => a + E.imps(x.us - v), 0) / o.length; mp = 100 * o.reduce((a, v) => a + (x.us > v ? 1 : x.us === v ? 0.5 : 0), 0) / o.length; }
+      else if (x.fi != null) { imp = x.fi; mp = x.fm != null ? x.fm : 50; }
+      else continue;
+      p.n++; p.imp += imp; p.mp += mp; p.rounds[r] = (p.rounds[r] || 0) + 1; p.last = Math.max(p.last, x.ts || 0);
+    }
+  }
+  return Object.values(P).filter(p => Object.values(p.rounds).some(n => n >= 8)).map(p => ({ ...p, ai: p.imp / p.n, am: p.mp / p.n }))
+    .sort((a, b) => b.ai - a.ai || b.am - a.am);
+}
+// where you are: the round you are in (a board or more played) or the next one open to you
+function champWhere(tree, myIp) {
+  const me = Net.fbKey(myNm()), R = tree || {}, max = Math.max(0, ...Object.keys(R).map(Number).filter(Boolean));
+  for (let r = 1; r <= max + 1; r++) {
+    const done = [1, 2, 3, 4, 5, 6, 7, 8].filter(b => R[r] && R[r][b] && R[r][b][me]);
+    if (done.length === 8) continue;
+    if (done.length) return { r, b: [1, 2, 3, 4, 5, 6, 7, 8].find(b => !done.includes(b)), n: done.length };
+    // a round someone else played from this internet connection is not yours (the same boards would be known)
+    const used = myIp && Object.values(R[r] || {}).some(B => Object.entries(B || {}).some(([k, x]) => k !== me && x && x.ip === myIp));
+    if (used) continue;
+    return { r, b: 1, n: 0 };
+  }
+  return { r: max + 1, b: 1, n: 0 };
+}
+async function startChamp() {
+  if (!myNm()) { flash(T('Sign in with your name first.'), 2500); return; }
+  if (typeof Net === 'undefined' || !Net.Cloud.on) { flash(T('The championship needs the online database.'), 2800); return; }
+  if (online()) { flash(T('Close the online table first'), 2000); return; }
+  flash('🏆 ' + T('Loading…'), 1200);
+  let [tree, ip] = await Promise.all([champLoad(true), Net.ipTag()]);
+  if (!tree) tree = await champLoad(true);   // a read already under way (from the home page) may have failed: once more
+  if (!tree) { flash(T('The championship needs the online database.'), 2800); return; }
+  // a board finished here but not in the database yet counts as played
+  const w = champWhere(tree, ip && ip.ip);
+  if (G && G.champ && G.champ.r === w.r && G.phase === 'done' && G.champ.b === w.b) w.b++;
+  if (w.b > 8) { flash(T('Round {0} finished', w.r), 2500); showChamp(); return; }
+  ui.saved = null; closeOv(); Net.st.soloPub = false;
+  ui.champNext = { r: w.r, b: w.b };
+  newBoard(champDeal(w.r, w.b), w.b);
+  Net.shareInfo();
+  flash('🏆 ' + T('Championship') + ' · ' + T('Round {0}', w.r) + ' · ' + w.b + '/8', 2400);
+}
+function champSend(e) {
+  const c = e.c ? [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl] : null;
+  const x = { us: e.us || 0, c, t: e.tricks ?? null, ...(e.imp != null ? { fi: e.imp, fm: e.mp } : {}) };
+  Net.champPut(e.champ.r, e.champ.b, x).then(() => { CH.at = 0; champLoad(true); }).catch(() => flash(T('Your championship result could not be sent — check the connection.'), 3500));
+}
+// the home page card: the leader, your place, start or go on
+function champCardHtml() {
+  if (typeof Net === 'undefined' || !Net.Cloud.on) return '';
+  if (!CH.tree || Date.now() - CH.at > 60000) champLoad();
+  const L = CH.tree ? champRank(CH.tree) : [], me = Net.fbKey(myNm() || ''), i = L.findIndex(p => p.k === me), lead = L[0];
+  const w = CH.tree && myNm() ? champWhere(CH.tree, null) : null;
+  return `<div class="h2chh"><span class="h2cht">🏆 ${T('Championship')}</span>${L.length ? `<small>${T('{0} players', L.length)}</small>` : ''}</div>
+    <div class="h2chl">${lead ? `👑 <b>${esc(lead.name)}</b> <small>${fmtSigned(Math.round(lead.ai * 100) / 100)} IMP · ${Math.round(lead.am)}%</small>` : `<small>${T('No leader yet — finish a round to be ranked.')}</small>`}</div>
+    <div class="h2chm">${i >= 0 ? T('You: place {0}', i + 1) : myNm() ? T('Not ranked yet — finish a round') : ''}</div>
+    <div class="h2chb"><button class="btn h2go" id="chGo">▶ ${w && w.n ? T('Continue round {0} ({1}/8)', w.r, w.n) : T('Round {0}', w ? w.r : 1)}</button><button class="btn h2chs" id="chShow">${T('Standings')}</button></div>`;
+}
+// the championship page: the standings (every player) and your rounds
+async function showChamp() {
+  if (ui.overlay !== 'champ') openOv('champ', `<h2>🏆 ${T('Championship')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  const tree = await champLoad(true); if (ui.overlay !== 'champ') return;
+  const L = champRank(tree), me = Net.fbKey(myNm() || ''), tab = ui.chTab || 'all';
+  let body;
+  if (tab === 'mine') {
+    const rows = [];
+    for (const [r, R] of Object.entries(tree || {}).sort((a, b) => b[0] - a[0])) for (let b = 1; b <= 8; b++) {
+      const B = (R || {})[b] || {}, x = B[me]; if (!x) continue;
+      const o = Object.entries(B).filter(([k, y]) => k !== me && y && typeof y.us === 'number').map(([, y]) => y.us);
+      const imp = o.length ? o.reduce((a, v) => a + E.imps(x.us - v), 0) / o.length : x.fi, mp = o.length ? 100 * o.reduce((a, v) => a + (x.us > v ? 1 : x.us === v ? 0.5 : 0), 0) / o.length : x.fm;
+      const con = x.c ? x.c[0] + STR[x.c[1]] + (x.c[2] === 1 ? 'X' : x.c[2] === 2 ? 'XX' : '') + ' ' + SEAT_AB[x.c[3]] : T('Pass');
+      rows.push(`<tr><td>${r}</td><td>${b}</td><td>${con}${x.c ? ' · ' + x.t : ''}</td><td class="n">${fmtSigned(x.us)}</td><td class="n">${o.length}</td><td class="n">${imp == null ? '—' : fmtSigned(Math.round(imp * 10) / 10)}</td><td class="n">${mp == null ? '—' : Math.round(mp) + '%'}</td></tr>`);
+    }
+    body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Round')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Score')}</th><th class="n">👥</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows.join('') || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
+  } else {
+    body = `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname" data-who="${esc(p.name)}">${esc(p.name)}</b></td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
+  }
+  openOv('champ', `<h2>🏆 ${T('Championship')}</h2>
+    <div class="muted">${T('Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player\'s on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.')}</div>
+    <div class="seg" data-seg="chtab"><button data-v="all" class="${tab === 'all' ? 'on' : ''}">${T('Standings')}</button><button data-v="mine" class="${tab === 'mine' ? 'on' : ''}">${T('My rounds')}</button></div>
+    ${body}
+    <div class="row2"><button class="btn gold" id="chGo">▶ ${T('Play')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
 /* ---- the robots' bidding lessons: each robot table's contract against the best contract its side could make with
    all four hands open (double dummy); a lesson when it cost 4 IMPs or more: a missed game or slam, an overbid, a wrong
    contract. At most two per board (the costliest, one per auction). ---- */
@@ -545,6 +654,7 @@ function newBoard(replay, boardNo, tour) {
   const deal = replay ? replay.map(h => h.slice()) : freshDeal(dealerOf(bn));
   UNDO.length = 0;
   G = { id: Date.now().toString(36) + E.rnd(1e6).toString(36), board: bn, dealer: dealerOf(bn), deal, auction: [], phase: 'bid', play: null, result: null, claimed: false, field: null, tour: tour || null, cards: sideCards() };
+  if (ui.champNext) { G.champ = ui.champNext; ui.champNext = null; }   // a championship board (from South, a closed table)
   Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null, photoMsg: null, photoHands: null, signal: null, fixSeat: null, fixCard: null });
   $('ov').hidden = true;
   Field.start(G);
@@ -692,8 +802,9 @@ function finishBoard() {
   if (G.tour && G.tour.table == null && !guest()) { e.tour = G.tour; tourSend(e); }   // an individual board (also while someone watches)
   else if (G.tour && G.tour.table != null && online() && !guest()) { e.tour = G.tour; Net.tourTableResult(G.tour.id, G.tour.table, G.tour.b, e.ns, conTxt(e)); }
   // where it was played, for the Results list: a tournament (with its name), an online table, or alone with robots
-  e.kind = G.tour || G.tprac ? 't' : online() ? 'o' : 'r';
-  if (e.kind === 't') { const id = (G.tour || G.tprac).id, t = typeof Net !== 'undefined' && Net.st.tours && Net.st.tours[id]; if (t && t.name) e.tn = String(t.name).slice(0, 40); }
+  e.kind = G.tour || G.tprac || G.champ ? 't' : online() ? 'o' : 'r';
+  if (G.champ && !online()) { e.champ = { ...G.champ }; e.tn = T('Championship') + ' · ' + T('Round {0}', G.champ.r); champSend(e); }
+  if (e.kind === 't' && (G.tour || G.tprac)) { const id = (G.tour || G.tprac).id, t = typeof Net !== 'undefined' && Net.st.tours && Net.st.tours[id]; if (t && t.name) e.tn = String(t.name).slice(0, 40); }
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
   Store.saveRec(e);
   save(); render();
@@ -1171,6 +1282,7 @@ function renderDock() {
 }
 function dockSend(text) {
   text = String(text || '').trim(); if (!text) return;
+  if (champLive()) { flash(T('The lobby chat is closed while you play in the championship.'), 2600); return; }
   if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else lobbySend(text);
   // the panel stays open after sending; it is closed with ✕
   renderDock();
@@ -1358,10 +1470,11 @@ function homeShell2() {
   <div class="hgrid">
     <section class="hmain"><div class="h2cola">
       <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2chips" id="hMe"></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
-      <div class="h2play">
+      <div class="h2pr"><div class="h2play">
         <div class="h2fan" aria-hidden="true">${fan}</div>
         <div class="h2ptx"><h2>${T('Play offline')}</h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button></div>
       </div>
+      <div class="h2champ" id="hChamp"></div></div>
       <div class="h2tiles">
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('href="bridgegate/"', '🏆', T('Tournaments'), T('Club tournaments with movements and results.'))}
@@ -1413,6 +1526,7 @@ function renderHome() {
     if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name (the new page: your picture or initial), after a change on your card
   { const p = typeof Net !== 'undefined' ? Net.prof() : null, m = p && p.rtn ? measuredLvl(p) : '';   // the you strip: rating and the measured level
     set('hMe', p ? `<span class="h2chip"><small>${T('Rating')}</small><b>${p.rtn ? p.rt : '—'}</b></span>${m ? `<span class="h2chip"><small>${T('measured')}</small><span class="plvl l-${m}">${T(LEVEL_N[m])}</span></span>` : ''}` : ''); }
+  set('hChamp', champCardHtml());
   set('hGoSub', cont ? T('Your last board is waiting.') : T('Bid and play with three robots; every board counts for your rating.'));   // your name, after a change on your card
   { const hs = $('hSys'), v = SET.sys || 'twoone'; if (hs && hs.value !== v) hs.value = v; }   // also when it was changed on the convention card
 
@@ -1505,7 +1619,7 @@ function tableBoard() {
   Net.note(T('Tournament board {0} of {1}', b, t.n));
 }
 // the next deal after a board: tournaments go on with their own boards
-function nextDeal() { if (G && G.tour) nextTourBoard(); else if (G && G.tprac) practiceTour(G.tprac.id, G.tprac.b + 1); else if (!(ui.dealQ && nextFileDeal())) newBoard(); }
+function nextDeal() { if (G && G.champ) { startChamp(); return; } if (G && G.tour) nextTourBoard(); else if (G && G.tprac) practiceTour(G.tprac.id, G.tprac.b + 1); else if (!(ui.dealQ && nextFileDeal())) newBoard(); }
 /* practice a tournament's boards again (yours or one you did not play): nothing is recorded in the tournament;
    after each board your score is compared with everyone who played it there */
 function practiceTour(id, b) {
@@ -2600,6 +2714,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   if (t.id === 'hLearn') { showLearn(); return; }
+  if (t.id === 'chGo') { startChamp(); return; }
+  if (t.id === 'chShow') { showChamp(); return; }
   if (t.id === 'learnCopy') { const txt = JSON.stringify(ui.learnCopy || {}); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
   if (t.dataset.casys) { setSys(t.dataset.casys); Store.saveSettings(SET); save(); render(); showCardConv(); return; }
   if (t.id === 'caBack') { showCardSys(); return; }
@@ -2640,6 +2756,7 @@ document.addEventListener('click', ev_ => {
     }
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
     if (seg === 'learnd') { ui.learnDays = +v; showLearn(); return; }
+    if (seg === 'chtab') { ui.chTab = v; showChamp(); return; }
     if (seg === "stattab") { ui.statTab = v; showStats(); return; }
     if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
@@ -2883,6 +3000,7 @@ function pmTo(name) {
 }
 function lobbySend(text) {
   text = String(text || '').trim(); if (!text) return;
+  if (champLive()) { flash(T('The lobby chat is closed while you play in the championship.'), 2600); return; }
   if (ui.pmTo) Net.dmSend(ui.pmTo, text); else Net.lsend(text);
   // the new home page: the lobby panel closes once the message is sent (a reply lights the Lobby button)
   if (ui.hsec === 'chat' && document.body.classList.contains('homev2')) { ui.hsec = null; flash('✓ ' + T('Message sent'), 1500); }

@@ -100,7 +100,7 @@ const Net = (() => {
   // what the lobby sees of this table
   function tableInfo() {
     return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? (G.watch ? 'idle' : G.phase) : null, board: G ? G.board : 0,
-      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub, solo: !st.host && !st.guest, tplay: tplay(), pc: !st.host && !st.guest && typeof pracList === 'function' && pracList().length ? 1 : 0 };
+      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub && !(G && G.champ), champ: G && G.champ && (G.phase === 'bid' || G.phase === 'play') ? 1 : 0, solo: !st.host && !st.guest, tplay: tplay(), pc: !st.host && !st.guest && typeof pracList === 'function' && pracList().length ? 1 : 0 };
   }
   // an individual tournament board played here: shown on this table in the lobby, and others can join the tournament
   function tplay() {
@@ -530,9 +530,9 @@ const Net = (() => {
       const tinfo = tp ? `<small class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</small>`
         : tt ? `<small class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</small>` : '';
       const open = t.online ? !t.priv : !!(t.pub || tp);
-      const state = `${t.online ? T('online') : t.pc ? T('practising conventions') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}`;
+      const state = `${t.online ? T('online') : t.champ ? '🏆 ' + T('in the championship') : t.pc ? T('practising conventions') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}`;
       const people = (humans.length ? humans.map(pn).join(', ') : pn(t.host)) + (robots > 0 && humans.length ? ` + ${robots} ${T('Robot')}` : '');
-      const btns = (tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`) + (t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : '');
+      const btns = t.champ ? '' : (tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`) + (t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : '');
       return line(open, T("{0}'s table", esc(t.host)), state, people, tinfo, btns);
     }).join('');
     // the players the online list has at a board with robots, whose table the direct lines have not found
@@ -656,7 +656,7 @@ const Net = (() => {
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
       const name = myName(); if (st.out || !Cloud.on || !name || !SET.pinH) return;
-      const w = st.on ? 'table' : G && !G.watch && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // watching the robots is not playing   // a finished board left on the screen counts as the lobby
+      const w = st.on ? 'table' : G && !G.watch && (G.phase === 'bid' || G.phase === 'play') ? (G.champ ? 'champ' : 'robots') : 'lobby';   // watching the robots is not playing   // a finished board left on the screen counts as the lobby
       try {
         // a name no longer in the database was removed by the administrator: this device signs out (it used to take
         // the name again, for names chosen before the database existed; they are all in it now)
@@ -728,6 +728,15 @@ const Net = (() => {
     if (!(await Cloud.session(name, SET.pinH))) return;
     await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_') + (user ? '_u' : ''), { ...(user ? { u: 1 } : {}), kim: name, ts: Date.now(), b: e.board, me: e.seat, sys: SET.sys || '',
       c: [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl], d: e.deal, a: e.auc || [], p: e.pl, er: list.slice(0, 20).map(x => [x.t, x.s, x.c, x.b, x.lost]) });
+  }
+  /* the championship: champ/<round>/<board>/<player> = that player's result (from South), written once; anyone signed
+     in reads the whole championship to rank it */
+  async function champGet() { if (!Cloud.on) return null; return (await Cloud.get('champ')) || {}; }
+  async function champPut(r, b, x) {
+    const name = myName(); if (!Cloud.on || !name || !SET.pinH) throw new Error('offline');
+    if (!(await Cloud.session(name, SET.pinH))) throw new Error('signin');
+    const ip = await ipTag();
+    await Cloud.put('champ/' + r + '/' + b + '/' + fbKey(name), { n: String(name).slice(0, 20), ts: Date.now(), ...(ip.ip ? { ip: ip.ip } : {}), ...x });
   }
   // a bidding lesson from the robot tables of a board (kept with the robot mistakes; only the administrator reads them)
   async function roboBid(id, i, deal, board, x) {
@@ -964,6 +973,7 @@ const Net = (() => {
   function statusOf(n) {
     const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
     const w = whereIs(n), c = cloudOn && cloudOn.find(x => nameKey(x.name) === nameKey(n)), prac = c && c.pc;
+    if (c && c.at === 'champ') return { s: 'play', at: '🏆 ' + T('in the championship') };
     if (w && !w.lobby) return { s: 'play', at: w.online ? T("At {0}'s table", w.host) : prac ? T('practising conventions') : T('playing with robots') };
     if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : prac ? T('practising conventions') : T('playing with robots') };
     return { s: 'lobby', at: T('waiting in the lobby') };
@@ -1242,6 +1252,7 @@ const Net = (() => {
   /* a join request opens its own window (with a sound), so it is not missed during play; when it is answered
      the next one, if any, is shown */
   function showReq() {
+    if (G && G.champ && (G.phase === 'bid' || G.phase === 'play')) { for (const id of Object.keys(st.pending || {})) decline(id); return; }
     const pend = Object.entries(st.pending || {}).filter(([, p]) => !p.quiet);
     if (!pend.length) { if (ui.overlay === 'req') closeOv(); return; }
     if (ui.overlay && ui.overlay !== 'req' && ui.overlay !== 'net' && ui.overlay !== 'lchat') { flash(String(pend[0][1].d.name || 'Guest').slice(0, 20) + ' — ' + T('Asking to join'), 3000); return; }
@@ -1826,5 +1837,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboBid, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
