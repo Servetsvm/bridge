@@ -310,7 +310,7 @@ const SB = (() => {
     const g = sb.g, mt = myTable();
     const cells = [...Array(g.m.bd).keys()].map(i => {
       const b = i + 1, R = (g.r || {})[b] || {}, n = Object.keys(R).length, me = mt && R[mt];
-      return `<button class="sbb${me ? ' me' : ''}${n ? ' some' : ''}" data-sbboard="${b}"><b>${b}</b><small>${me ? (me.ok ? '✓ ' : '⏳ ') : ''}${n ? T('{0} tables', n) : '—'}</small></button>`;
+      return `<button class="sbb${me ? ' me' : ''}${n ? ' some' : ''}" data-sbboard="${b}"><b>${b}</b><small>${me ? (me.ok ? '✓ ' : '⏳ ') : ''}${isOne() ? oneTile(b, me) : n ? T('{0} tables', n) : '—'}</small></button>`;
     }).join('');
     return `<div class="muted">${done() ? T('Tap a board to see what was played.') : mt ? T('Tap a board your table played to enter its score.') : canManage(g.m) ? T('Tap a board to see what was played.') : T('First choose your table above.')}</div><div class="sbgrid">${cells}</div>`;
   }
@@ -334,6 +334,8 @@ const SB = (() => {
     return head + `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">${T('Table')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]}</th><th class="n">${SEAT_AB[1] + SEAT_AB[3]}</th>${tm ? '' : '<th class="n">MP %</th>'}<th class="n">IMP</th>${canManage(g.m) ? '<th></th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
       <div class="muted">${isOne() ? T('IMP from North-South’s side: the score against the score expected of the side with 21 or more points.') : tm ? T('IMP from North-South’s side, against the other room of the same match.') : T('MP % and IMP from North-South’s side, against the other tables.')}${wait ? ' ⏳ ' + T('{0} tables waiting for confirmation', wait) : ''} ${T('Only the organiser or the administrator can change a confirmed score.')}</div>`;
   }
+  // a board's tile at the single table: the IMPs and to which side
+  const oneTile = (b, r) => { const o = r && r.ok && oneOf(b, r); return !o ? (r ? '' : '—') : o.imp === 0 ? '0 IMP' : `${o.imp > 0 ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]} +${Math.abs(o.imp)}`; };
   const oneLine = (b, r) => { const o = oneOf(b, r); return o ? `<small>${T('N-S {0} points', r.h)} · ${o.side == null ? T('20–20: nothing expected') : T('{0} expected {1}', o.side ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2], o.exp)}</small>` : ''; };
   const scoreTxt = (b, r) => { const ns = nsScore(b, r), ew = r.l && E.sideOf(r.d) === 1; return `${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; };
   function formHtml(b) {
@@ -389,7 +391,11 @@ const SB = (() => {
   function oneRankHtml() {
     const { Q } = oneStand(); if (!Q.length) return `<div class="muted">${T('No scores yet.')}</div>`;
     const tab = (L, h) => `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${h}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th></tr></thead><tbody>${L.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="IMP" class="n"><b>${signed(r.imp)}</b></td></tr>`).join('')}</tbody></table></div>`;
-    return `${tab(Q, T('Pair'))}<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
+    // board by board: who sat North-South and East-West, the contract, the points, the score, the expected score, the IMPs
+    const rows = Object.keys(sb.g.r || {}).map(Number).sort((a, b) => a - b).map(b => { const r = (sb.g.r[b] || {})[1]; if (!r || !r.ok) return ''; const o = oneOf(b, r); if (!o) return ''; const p = seatsOf(r);
+      return `<tr><td>${b}</td><td><small>${esc(p.n)} – ${esc(p.s)}<br>${esc(p.e)} – ${esc(p.w)}</small></td><td><b>${conTxt(r)}</b> ${resTxt(r)}</td><td class="n">${r.h}</td><td class="n">${signed(nsScore(b, r))}</td><td class="n">${o.side == null ? '—' : (o.side ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]) + ' ' + o.exp}</td><td class="n"><b>${oneTile(b, r)}</b></td></tr>`; }).join('');
+    const byBoard = rows ? `<div class="onebd"><h3>${T('Board by board')}</h3><div class="resscroll"><table class="res"><thead><tr><th>${T('Bd')}</th><th>${T('Pairs')}</th><th>${T('Contract')}</th><th class="n">${SEAT_AB[0] + SEAT_AB[2]} ${T('Points')}</th><th class="n">${T('Score')}</th><th class="n">${T('Expected')}</th><th class="n">IMP</th></tr></thead><tbody>${rows}</tbody></table></div></div>` : '';
+    return `${tab(Q, T('Pair'))}${byBoard}<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
       <div class="muted">${T('Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.')}</div>`;
   }
   function rankHtml() {
