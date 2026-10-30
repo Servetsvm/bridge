@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 314;
+const APP_V = 315;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2743,6 +2743,7 @@ document.addEventListener('change', e => {
   if (t.id === 'dFile' && t.files && t.files[0]) { importDeals(t.files[0]); t.value = ''; return; }
   if (t.id === "hPracSel") { setPractice(t.value); render(); return; }
   if (t.id === "pdHint") { SET.pracHint = t.checked; Store.saveSettings(SET); save(); return; }
+  if (t.dataset && t.dataset.wipek) { const s = ui.wipeSel || (ui.wipeSel = new Set()); if (t.checked) s.add(t.dataset.wipek); else s.delete(t.dataset.wipek); showWipe(); return; }
   // the two drop-downs on the home page: a base system (one), conventions to practise (any number)
   if (t.dataset.pdsys) { setSys(t.dataset.pdsys); Store.saveSettings(SET); save(); if (ui.pracDrop !== 'conv') ui.pracDrop = null; render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
   if (t.dataset.pdconv) { togglePractice(t.dataset.pdconv, t.checked); render(); return; }
@@ -2841,6 +2842,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
+  if (t.id === 'wipeGo') { wipeGo(); return; }
   if (t.id === 'chShow') { showChamp(); return; }
   if (t.id === 'learnCopy') { const txt = JSON.stringify(ui.learnCopy || {}); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
   if (t.dataset.casys) { setSys(t.dataset.casys); Store.saveSettings(SET); save(); render(); showCardConv(); return; }
@@ -2954,7 +2956,7 @@ document.addEventListener('click', ev_ => {
     case 'dmSend': { const i = $('dmMsg'); if (i && i.value.trim() && ui.dmWith) { Net.dmSend(ui.dmWith, i.value); i.value = ''; showDm(ui.dmWith); } break; }
     case 'lFab': showLChat(); break;
     case 'oClose': closeOv(); break;
-    case 'sReset': if (typeof Net === 'undefined' || !Net.isAdmin()) break; HIST = []; save(); showSettings(); render(); break;   // the administrator only
+    case 'sReset': if (typeof Net !== 'undefined' && Net.isAdmin()) showWipe(); break;   // the administrator only: whose history
     case "sSave": { const v = ($("syncToken") || {}).value; if (v) { GitSync.setToken(v); syncState.msg = ""; syncNow(); showSettings(); } break; }
     case "sNow": syncNow(); break;
     case "sOff": GitSync.setToken(null); syncState.msg = ""; showSettings(); break;
@@ -3419,6 +3421,28 @@ async function showLearn() {
     ${Object.keys(bk).length ? `<table class="res stats"><tbody>${Object.entries(bk).sort((a, b) => b[1][1] - a[1][1]).map(([k, v]) => row(KB[k] || k, v, 'IMP')).join('')}</tbody></table>` : `<div class="muted">${T('No bidding lessons yet.')}</div>`}
     ${ex.length ? `<h3 class="sth">${T('Costliest examples')}</h3>${ex.map(r => `<div class="anarow">${T('Board')} ${r.b}: ${aucTxt(r.a)} → <b>${cn(r.c[0], r.c[1])} ${SEAT_AB[r.c[3]]}</b> (${T('{0} tricks', r.ddT)}) · ${T('best')}: <b>${r.best ? cn(r.best[0], r.best[1]) + ' ' + SEAT_AB[r.best[2]] : ''}</b> · <b class="neg">−${r.er[0][4]} IMP</b> · ${KB[r.bk] || ''}</div>`).join('')}` : ''}
     <div class="row2"><button class="btn gold" id="learnCopy">📋 ${T('Copy the report for Claude')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+/* the administrator deletes score history: the players listed (himself too), the ticked ones' boards removed */
+async function showWipe() {
+  if (!Net.isAdmin()) return;
+  if (!ui.wipeList) { openOv('wipe', `<h2>🗑 ${T('Delete score history')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`); try { ui.wipeList = await Net.adminUsers(); } catch (e) { ui.wipeList = []; } ui.wipeSel = new Set(); }
+  const L = ui.wipeList || [], sel = ui.wipeSel || (ui.wipeSel = new Set());
+  const rows = L.map(x => `<label class="plrow${sel.has(x.k) ? ' on' : ''}"><input type="checkbox" data-wipek="${esc(x.k)}" ${sel.has(x.k) ? 'checked' : ''}><b>${esc(x.name)}</b>${x.me ? ` <small>(${T('You')})</small>` : ''}</label>`).join('');
+  openOv('wipe', `<h2>🗑 ${T('Delete score history')}</h2>
+    <div class="muted">${T('Tick the players whose score history is deleted: their boards, results and rating start again (their name, settings and championship results stay). Boards played after this are kept.')}</div>
+    <div class="pllist">${rows || `<div class="muted">${T('Nobody yet.')}</div>`}</div>
+    <div class="row2"><button class="btn bad" id="wipeGo" ${sel.size ? '' : 'disabled'}>🗑 ${T('Delete the ticked ({0})', sel.size)}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+function wipeGo() {
+  const sel = ui.wipeSel; if (!sel || !sel.size) return;
+  const names = (ui.wipeList || []).filter(x => sel.has(x.k)).map(x => x.name);
+  askYes(T('Delete the score history of {0}?', names.join(', ')), async () => {
+    openOv('wipe', `<h2>🗑 ${T('Delete score history')}</h2><div class="muted">⏳ ${T('Removing…')}</div>`);
+    let ok = 0; const me = (ui.wipeList || []).find(x => x.me);
+    for (const k of [...sel]) { try { if (await Net.adminWipe(k)) ok++; } catch (e) {} }
+    if (me && sel.has(me.k)) { HIST = []; SET.wipeSeen = Date.now(); Store.saveSettings(SET); save(); render(); }   // your own, here at once
+    ui.wipeSel = new Set(); ui.wipeList = null; closeOv(); flash('🗑 ' + T('{0} removed', ok), 2500);
+  });
 }
 /* the administrator's list of players: every registered name, when it was made and last signed in; tick the ones
    to remove (test names, for instance) and remove them with all their data */
