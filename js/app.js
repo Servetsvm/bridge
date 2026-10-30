@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 310;
+const APP_V = 311;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -397,7 +397,18 @@ function cardRank(p, name) {
   if (name && CH.leader && CH.leader === Net.fbKey(name)) i = 51;
   return { i, cap, boards, rt, bonus, base };
 }
-const rankChip = r => r ? `<span class="rkc s${Math.floor(r.i / 13)}" title="${T('Rank card')}">${rankTxt(r.i)}</span>` : '';
+const rankChip = r => r ? `<span class="rkc s${Math.floor(r.i / 13)}" data-rank="1" role="button" tabindex="0" title="${T('Rank card')}">${rankTxt(r.i)}</span>` : '';
+// what the rank card means (tap any card)
+function showRankHelp() {
+  const me = typeof Net !== 'undefined' ? cardRank(Net.prof(), myNm()) : null;
+  const row = (s, txt) => `<tr><td><span class="rkbig s${s}">${RK_S[s]}</span></td><td>${txt}</td></tr>`;
+  openOv('rank', `<h2>${T('Rank card')}</h2>
+    <div class="muted">${T('Every player is a card, from ♣2 (the lowest) to ♠A (the highest): 52 steps. Your rating and the boards you have played decide it; trophies add steps that stay.')}</div>
+    <table class="res"><tbody>${row(0, T('Beginning: the first {0} boards', RK_GATE[1]))}${row(1, T('Intermediate: from {0} boards', RK_GATE[1]))}${row(2, T('Advanced: from {0} boards', RK_GATE[2]))}${row(3, T('Expert: from {0} boards — ♠A only for the championship\'s leader', RK_GATE[3]))}</tbody></table>
+    <div class="muted">${T('Every 8 rating points is one card higher. A month\'s championship +3 cards, 2nd or 3rd place +1, for good.')}</div>
+    ${me ? `<div class="grp"><span>${T('Your card')}</span>${rankBig(Net.prof(), myNm())}</div>` : ''}
+    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
 const rankOf = (p, name) => rankChip(cardRank(p, name));
 // the player card: the card large, and what the next one needs
 function rankBig(p, name) {
@@ -419,8 +430,9 @@ function champCardHtml() {
   if (mo) setTimeout(champMonthNote, 0);
   return `<div class="h2chh"><span class="h2cht">🏆 ${T('Championship')}</span>${L.length ? `<small>${T('{0} players', L.length)}</small>` : ''}</div>
     ${fresh ? `<div class="h2chnew">🎉 ${T('The champions of {0}: {1} (IMP) · {2} (MP)', ymName(mo.ym), mo.imp[0] ? esc(mo.imp[0].name) : '—', mo.mp[0] ? esc(mo.mp[0].name) : '—')}</div>` : ''}
-    <div class="h2chl">${lead ? `👑 <b>${esc(lead.name)}</b> <small>${fmtSigned(Math.round(lead.ai * 100) / 100)} IMP · ${Math.round(lead.am)}%</small>` : `<small>${T('No leader yet — finish a round to be ranked.')}</small>`}</div>
-    <div class="h2chm">${i >= 0 ? T('You: place {0}', i + 1) : myNm() ? T('Not ranked yet — finish a round') : ''}</div>
+    <div class="h2chtag">${T('Same boards for everyone, one crown. Can you take it?')}</div>
+    ${lead ? `<div class="h2chl">👑 <b>${esc(lead.name)}</b> <small>${fmtSigned(Math.round(lead.ai * 100) / 100)} IMP · ${Math.round(lead.am)}%</small></div>` : ''}
+    ${i >= 0 ? `<div class="h2chm">${T('You: place {0}', i + 1)}</div>` : ''}
     <div class="h2chb"><button class="btn h2go" id="chGo">▶ ${w && w.n ? T('Continue round {0} ({1}/8)', w.r, w.n) : T('Round {0}', w ? w.r : 1)}</button><button class="btn h2chs" id="chShow">${T('Standings')}</button></div>`;
 }
 // the championship page: the standings (every player) and your rounds
@@ -451,10 +463,10 @@ async function showChamp() {
     }
     body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Round')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Score')}</th><th class="n">👥</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows.join('') || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   } else {
-    body = perSeg + `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname${champMark(p.name) ? ' gold' : ''}" data-who="${esc(p.name)}">${esc(p.name)}${champMark(p.name)}</b> ${rankOf(Net.profOf(p.name), p.name)}</td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
+    body = perSeg + `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname${champMark(p.name) ? ' champgold' : ''}" data-who="${esc(p.name)}">${esc(p.name)}${champMark(p.name)}</b> ${rankOf(Net.profOf(p.name), p.name)}</td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
   }
   openOv('champ', `<h2>🏆 ${T('Championship')}</h2>
-    <div class="muted">${T('Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player\'s on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.')}</div>
+    <div class="chintro">${T('Everyone plays the same 8 boards a round — your result is set against every other player\'s. No clock: play whenever you like. The leader wears the 👑, the month\'s best takes the trophy.')}</div>
     <div class="seg" data-seg="chtab"><button data-v="all" class="${tab === 'all' ? 'on' : ''}">${T('Standings')}</button><button data-v="honour" class="${tab === 'honour' ? 'on' : ''}">🏆 ${T('Honour roll')}</button><button data-v="mine" class="${tab === 'mine' ? 'on' : ''}">${T('My rounds')}</button></div>
     ${body}
     <div class="row2"><button class="btn gold" id="chGo">▶ ${T('Play')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
@@ -1302,12 +1314,14 @@ function renderBidbox() {
   let html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
   // what the calls of the chosen level mean, before one is made (the call under the mouse shows in #bidHover)
   const mean = c => { const m = E.explainCall(G.auction, U(), c, G.cards) || {}; return `<div class="bpk"><b>${callHtml(c)}</b> ${symText(bidTxt(m.t || ''))}</div>`; };
-  html += `<div class="bpeek" id="bidHover" hidden></div>` + (ui.selLvl ? `<div class="bpeek">${[0, 1, 2, 3, 4].map(st => B(ui.selLvl, st)).filter(c => L.includes(c)).map(mean).join('')}</div>` : '');
+  html += `<div class="bpeek" id="bidHover" hidden></div>` + (ui.selLvl && SET.expl ? `<div class="bpeek">${[0, 1, 2, 3, 4].map(st => B(ui.selLvl, st)).filter(c => L.includes(c)).map(mean).join('')}</div>` : '');
   // redraw only when something changed, so the alert text being typed keeps its focus
   if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; const i = $('alTxt'); if (i) i.value = ui.alertTxt || ''; }
 }
+document.addEventListener('click', e => { const r = e.target.closest && e.target.closest('[data-rank]'); if (r) { e.stopPropagation(); showRankHelp(); } }, true);
 document.addEventListener('mouseover', e => {
   const b = e.target.closest && e.target.closest('#bidbox [data-call]'), h = $('bidHover'); if (!h) return;
+  if (!SET.expl) { h.hidden = true; return; }   // the meanings only with Bid explanations on
   if (!b || b.disabled || !G || G.phase !== 'bid') { h.hidden = true; return; }
   const c = /^\d+$/.test(b.dataset.call) ? +b.dataset.call : b.dataset.call; if (c === -1) { h.hidden = true; return; }
   const m = E.explainCall(G.auction, U(), c, G.cards) || {};
@@ -1457,6 +1471,7 @@ function sfx(k) {
 // light or dark screens and larger cards (Settings); "automatic" follows the phone or PC
 // what every player has (no longer chosen in Settings)
 function fixedSet() {
+  if (SET.explV !== 1) { SET.explV = 1; SET.expl = false; }   // the bid explanations start hidden (once; Settings turns them on)
   Object.assign(SET, { homeV: 'new', style: 'modern', felt: 'green', back: 'blue', four: true, big: true, opp: 'same', robotLvl: 'expert', speed: 0 });
 }
 function applyLook() {
@@ -1990,7 +2005,7 @@ function showPlayer(name) {
       <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
   openOv('player', `<div class="pcard">
     <div class="phead"><div class="pav${p && p.av ? " emo" : ""}">${p && p.av ? p.av : esc((shown.trim()[0] || "?").toUpperCase())}</div>
-      <div class="pmain"><div class="pnm${champMark(shown) ? ' gold' : ''}">${esc(shown)}${champMark(shown)} ${rankOf(p, shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
+      <div class="pmain"><div class="pnm${champMark(shown) ? ' champgold' : ''}">${esc(shown)}${champMark(shown)} ${rankOf(p, shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
         <div class="psub">${where ? `<span class="pwhere">● ${esc(where)}</span>` : ''}</div></div></div>
     <table class="pfields">${fields.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>
     ${trophyHtml(shown)}
@@ -2300,14 +2315,14 @@ function showEnd() {
   const norm = f.normC;
   openOv('end', `<h2>${T('Board')} ${e.board}</h2><div class="big">${resultLine(e)}</div>${G.claimed ? `<div class="muted">${T('The remaining tricks were settled by claim.')}</div>` : ''}
    ${scoreTxt}
-   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}${e.prv.some(r => !r.ok && !r.pd) && !G.tour ? `<button class="btn gold prretry" id="oReplayP">🔁 ${T('Play this hand again and find the right call')}</button>` : ''}</div>` : ''}
+   ${e.prv ? `<div class="grp"><span>📚 ${T('Convention review')}</span>${prvHtml(e.prv)}${e.prv.some(r => !r.ok && !r.pd) && !G.tour && !G.champ ? `<button class="btn gold prretry" id="oReplayP">🔁 ${T('Play this hand again and find the right call')}</button>` : ''}</div>` : ''}
    <div class="grp"><span>${T('Par check')}</span><div>${T('Normal contract (most common at the robot tables)')}: ${f.done ? (norm ? conKey(norm) + ' — ' + T('double dummy') + ' ' + ddTxt('norm', norm) : T('Pass')) : '…'}</div>
    </div>${e.c ? ddBox(e.c, f.dd.you) : ''}
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
    ${dealHtml(G.deal, U())}
    ${anaHtml(HIST.find(h => h.id === e.id) || e)}
    ${rbNoteHtml(HIST.find(h => h.id === e.id) || e)}
-   <div class="row2"><button class="btn gold" id="oNext">${T('Next deal')}</button><button class="btn" id="oReplay">${T('Replay this deal')}</button>${G.tour ? "" : `<button class="btn" id="oShare">🔗 ${T("Share")}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+   <div class="row2"><button class="btn gold" id="oNext">${T('Next deal')}</button>${G.champ ? '' : `<button class="btn" id="oReplay">${T('Replay this deal')}</button>`}${G.tour ? "" : `<button class="btn" id="oShare">🔗 ${T("Share")}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 function showAuction() {
   if (!G.auction.length) return;
@@ -2667,7 +2682,7 @@ function showReview(id, sel) {
     ${anaHtml(e)}
     <div class="grp"><span>${T('Auction')}</span>${aucHtml}</div>
     <div class="row2"><button class="btn" data-revgo="-1" ${hi > 0 ? '' : 'disabled'}>◀ ${T('Previous deal')}</button><button class="btn" data-revgo="1" ${hi >= 0 && hi < HIST.length - 1 ? '' : 'disabled'}>${T('Next deal')} ▶</button></div>
-    ${e.deal && !e.tour ? `<div class="row2"><button class="btn" id="oRevReplay">🔁 ${T("Replay this deal")}</button><button class="btn" id="oRevPbn">💾 PBN</button><button class="btn" id="oRevLin">💾 LIN</button></div>` : ""}
+    ${e.deal && !e.tour ? `<div class="row2">${e.champ ? "" : `<button class="btn" id="oRevReplay">🔁 ${T("Replay this deal")}</button>`}<button class="btn" id="oRevPbn">💾 PBN</button><button class="btn" id="oRevLin">💾 LIN</button></div>` : ""}
     ${rbNoteHtml(e)}
     <div class="row2"><button class="btn" id="oRevCopy">📋 ${T('Copy for analysis')}</button></div>
     <div class="row2"><button class="btn" id="oRevBack">${T('Back to the list')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
