@@ -213,6 +213,7 @@ const SB = (() => {
     let body = '';
     const tn = (g.t || {})[mt] || {}, needNames = mt && !done() && !pending() && !sb.board && !['n', 's', 'e', 'w'].some(k => tn[k]);
     const pickTable = !mt && !done() && !canManage(m);
+    const orgPick = !mt && !done() && canManage(m) && !sb.board ? `<div class="grp"><span>${T('My table')}</span><div class="muted">${T('Playing too? Choose your table to enter its scores.')}</div><div class="bm3-keys k4 sbpick" data-sbseg="me">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key">${i + 1}</button>`).join('')}</div>${legend(m)}</div>` : '';
     if (pickTable) body = `<div class="grp"><span>${T('My table')}</span><div class="bm3-keys k4 sbpick" data-sbseg="me">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key">${i + 1}</button>`).join('')}</div></div>${legend(m)}`;
     else if (needNames) body = compassHtml(mt);
     else if (sb.board) body = boardHtml(sb.board);
@@ -222,7 +223,7 @@ const SB = (() => {
     // a player sees only the game (full screen, no title lines); the organiser keeps the game's details
     return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? T('Table {0}', mt) + (isTeam() ? ' · ' + roomName(mt) : '') : T('Team match')}</div></div>`}${canManage(m) ? `<h2>🃏 ${esc(m.n)}</h2>
       <div class="muted">${isTeam() ? T('{0} teams', m.tb) : T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
-      ${sb.board ? '' : links}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
+      ${sb.board ? '' : links}${orgPick}${mt && !done() && !pending() && !sb.board ? `<div class="sbchg"><span class="sbtno">${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable || needNames ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : canManage(m) ? `<button class="btn" id="sbList">← ${T('All games')}</button>` : ''}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
