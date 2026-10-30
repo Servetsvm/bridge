@@ -284,7 +284,7 @@ const SB = (() => {
   }
   function gameHtml() {
     const g = sb.g, m = g.m, mt = myTable();
-    const tabs = `<div class="seg ttabs">${[['boards', T('Board list')], ['rank', T('Standings')], ['tables', T('Tables')]].map(([v, l]) => `<button data-sbview="${v}" class="${sb.view === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+    const tabs = `<div class="seg ttabs">${[['boards', T('Board list')], ['rank', T('Standings')], ...(isOne() ? [] : [['tables', T('Tables')]])].map(([v, l]) => `<button data-sbview="${v}" class="${sb.view === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
     // the organiser sends the players one link; a player chooses the table on a screen of its own
     const links = done() || !canManage(m) || isOne() ? '' : `<div class="grp sblinks"><div class="muted">📲 ${T('Send the players the link: they open Bridge Table, tap Table No and choose their table.')}</div><div class="sblk"><span class="sblt all"><b>${T('The game’s link, for everyone')}</b>${sendBtns(0)}</span></div></div>`;
     let body = '';
