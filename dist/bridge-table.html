@@ -1805,6 +1805,18 @@ body.homev2 .home.v2 .prac .prask{border-style:solid;border-radius:999px;padding
 :root[data-theme="dark"] body.homev2 .home.v2 .prac .prf .prdrop.on + .prval{color:#7fd09a}
 :root[data-theme="dark"] body.homev2 .home.v2 .prac .prprog{background:var(--h2-paper-2);border-color:var(--h2-line)}
 @media (max-width:420px){ body.homev2 .home.v2 .prac .prf{padding:7px 10px 8px} body.homev2 .home.v2 .prac .prf .prval{font-size:14px} body.homev2 .home.v2 .prac .prtop{margin-bottom:8px;padding-bottom:8px} }
+/* the championship card beside the Play card: a gold-edged paper card (side by side on a wider screen) */
+body.homev2 .h2pr{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+@media (min-width:640px){ body.homev2 .h2pr{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)} }
+body.homev2 .h2champ{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:16px;background:var(--h2-paper);color:var(--h2-ink);border:1px solid var(--h2-line);box-shadow:var(--h2-shadow),inset 0 0 0 2px var(--h2-brass);min-width:0}
+body.homev2 .h2champ:empty{display:none}
+body.homev2 .h2chh{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+body.homev2 .h2cht{font:700 clamp(17px,4.4vw,20px)/1.1 var(--f-face);letter-spacing:.02em}
+body.homev2 .h2chh small,body.homev2 .h2chl small,body.homev2 .h2chm{color:var(--h2-muted);font-size:13px}
+body.homev2 .h2chl{font-size:15px;min-width:0;overflow-wrap:anywhere}
+body.homev2 .h2chb{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:2px}
+body.homev2 .h2chb .h2go{margin:0;padding:9px 14px;font-size:15px}
+body.homev2 .h2chb .h2chs{background:var(--h2-paper-2);color:var(--h2-ink);border:1px solid var(--h2-line);border-radius:10px;padding:8px 12px;font-size:14px;box-shadow:none}
 
 </style>
 
@@ -4719,6 +4731,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Championship": "Şampiyona", "Round": "Tur", "Round {0}": "Tur {0}", "in the championship": "şampiyonada", "The lobby chat is closed while you play in the championship.": "Şampiyonada oynarken lobi sohbeti kapalıdır.", "Sign in with your name first.": "Önce isminle giriş yap.", "The championship needs the online database.": "Şampiyona için çevrimiçi veritabanı gerekiyor.", "Round {0} finished": "Tur {0} bitti", "Your championship result could not be sent — check the connection.": "Şampiyona sonucun gönderilemedi — bağlantını kontrol et.", "No leader yet — finish a round to be ranked.": "Henüz lider yok — sıralamaya girmek için bir tur bitir.", "You: place {0}": "Sen: {0}. sıra", "Not ranked yet — finish a round": "Henüz sıralamada değilsin — bir tur bitir", "Continue round {0} ({1}/8)": "Tur {0}'e devam ({1}/8)", "My rounds": "Turlarım", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "Herkes aynı elleri, tur tur, istediği zaman oynar (süre sınırı yok; her tur bir kez, Güney'den). Her sonuç o eli oynayan bütün diğer oyuncularınkiyle karşılaştırılır (IMP ve MP); sıralama oynanan bütün ellerin el başına ortalamasıdır. Oynarken masan kapalıdır ve lobi sohbeti kapanır.",
     "Learning report": "Öğrenme raporu", "Missed game": "Kaçırılan oyun", "Missed slam": "Kaçırılan şlem", "Overbid": "Fazla yükselme", "Wrong contract": "Yanlış kontrat", "Card play": "Kart oyunu", "Bidding": "Deklarasyon", "Opening lead": "Açılış atağı", "Declarer play": "Deklaran oyunu", "Defence": "Savunma", "tricks": "löve", "Last 7 days": "Son 7 gün", "Last 30 days": "Son 30 gün", "No bidding lessons yet.": "Henüz deklarasyon dersi yok.", "Costliest examples": "En pahalı örnekler", "best": "en iyisi", "Copy the report for Claude": "Raporu Claude için kopyala", "What the robots got wrong on the boards played by everyone, against double dummy: their cards, and the contracts the robot tables reached against the best contract with all hands open. Copy it for Claude: the robots are improved from it.": "Herkesin oynadığı ellerde robotların double dummy'ye göre yanlış yaptıkları: kartları ve robot masalarının vardığı kontratların, dört el açıkken en iyi kontratla karşılaştırması. Claude için kopyala: robotlar bundan geliştirilir.",
     "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Robotlara oynattığın eller (robotlar dört eli görerek, double dummy oynar): senin Sonuçlarına ve puanına girmez. Puan: aynı el dört uzman robot masasında normal şekilde de oynanır; deklaranlarının aldığı löveler double dummy ile karşılaştırılır (IMP).",
     "Robot rating": "Robot puanı", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Robotlara oynattığın eller: senin Sonuçlarına ve puanına girmez. Robotlar double dummy ile ölçülür: deklaranın aldığı löveler, kontratın dört el açıkken aldığı lövelerle karşılaştırılır (IMP).", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Henüz robotlara oynatılan el yok. Bir el gir, sonra Robotlara oynat’a bas.",
@@ -5119,6 +5132,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Championship": "Mesterskap", "Round": "Runde", "Round {0}": "Runde {0}", "in the championship": "i mesterskapet", "The lobby chat is closed while you play in the championship.": "Lobbychatten er stengt mens du spiller i mesterskapet.", "Sign in with your name first.": "Logg inn med navnet ditt først.", "The championship needs the online database.": "Mesterskapet trenger nettdatabasen.", "Round {0} finished": "Runde {0} ferdig", "Your championship result could not be sent — check the connection.": "Mesterskapsresultatet ditt kunne ikke sendes — sjekk tilkoblingen.", "No leader yet — finish a round to be ranked.": "Ingen leder ennå — fullfør en runde for å bli rangert.", "You: place {0}": "Du: plass {0}", "Not ranked yet — finish a round": "Ikke rangert ennå — fullfør en runde", "Continue round {0} ({1}/8)": "Fortsett runde {0} ({1}/8)", "My rounds": "Mine runder", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "Alle spiller de samme spillene, runde for runde, når de vil (ingen tidsgrense; hver runde én gang, fra Syd). Hvert resultat sammenlignes med alle andre spilleres på det spillet, i IMP og matchpoeng; rangeringen er per spill over alle spilte spill. Mens du spiller er bordet ditt stengt og lobbychatten av.",
     "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Spillene du lot robotene spille (de spiller med alle hender åpne, double dummy): ikke i dine resultater eller din rating. Ratingen: samme spill spilles også ved fire ekspertrobotbord på vanlig måte; spilleførernes stikk mot double dummy, i IMP.",
     "Robot rating": "Robotrating", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Spillene du lot robotene spille: ikke i dine resultater eller din rating. Robotene måles mot double dummy: stikkene spillefører tok mot stikkene kontrakten gir med alle hender åpne, i IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Ingen spill gitt til robotene ennå. Legg inn et spill og trykk La robotene spille det.",
     "Let the robots play it": "La robotene spille det", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "La robotene spille det: alle fire hender er åpne, robotene melder og spiller sakte, og du ser på. Det teller ikke på ratingen din.", "The robots are playing this deal — watch": "Robotene spiller dette spillet — se på",
@@ -5518,6 +5532,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Championship": "Campeonato", "Round": "Ronda", "Round {0}": "Ronda {0}", "in the championship": "en el campeonato", "The lobby chat is closed while you play in the championship.": "El chat del vestíbulo está cerrado mientras juegas en el campeonato.", "Sign in with your name first.": "Primero entra con tu nombre.", "The championship needs the online database.": "El campeonato necesita la base de datos en línea.", "Round {0} finished": "Ronda {0} terminada", "Your championship result could not be sent — check the connection.": "No se pudo enviar tu resultado del campeonato — revisa la conexión.", "No leader yet — finish a round to be ranked.": "Aún no hay líder — termina una ronda para clasificarte.", "You: place {0}": "Tú: puesto {0}", "Not ranked yet — finish a round": "Aún sin clasificar — termina una ronda", "Continue round {0} ({1}/8)": "Seguir la ronda {0} ({1}/8)", "My rounds": "Mis rondas", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "Todos juegan las mismas manos, ronda a ronda, cuando quieran (sin límite de tiempo; cada ronda una vez, desde Sur). Cada resultado se compara con el de todos los demás jugadores en esa mano, en IMPs y puntos de match; la clasificación es por mano sobre todas las jugadas. Mientras juegas, tu mesa está cerrada y el chat del vestíbulo apagado.",
     "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Las manos que dejaste jugar a los robots (las juegan viendo las cuatro manos, doble muerto): no cuentan en tus resultados ni en tu puntuación. La puntuación: la misma mano se juega también en cuatro mesas de robots expertos de forma normal; las bazas de sus carteadores frente al doble muerto, en IMPs.",
     "Robot rating": "Puntuación de los robots", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Las manos que dejaste jugar a los robots: no cuentan en tus resultados ni en tu puntuación. Los robots se miden contra el doble muerto: las bazas de su carteador frente a las que da el contrato con todas las manos vistas, en IMPs.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Aún no hay manos jugadas por los robots. Introduce una mano y pulsa Que lo jueguen los robots.",
     "Let the robots play it": "Que lo jueguen los robots", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Que lo jueguen los robots: las cuatro manos están abiertas, los robots subastan y juegan despacio y tú miras. No cuenta para tu puntuación.", "The robots are playing this deal — watch": "Los robots juegan esta mano — mira",
@@ -5945,6 +5960,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Championship": "Championnat", "Round": "Tour", "Round {0}": "Tour {0}", "in the championship": "dans le championnat", "The lobby chat is closed while you play in the championship.": "Le chat du salon est fermé pendant que vous jouez le championnat.", "Sign in with your name first.": "Connectez-vous d’abord avec votre nom.", "The championship needs the online database.": "Le championnat a besoin de la base de données en ligne.", "Round {0} finished": "Tour {0} terminé", "Your championship result could not be sent — check the connection.": "Votre résultat du championnat n’a pas pu être envoyé — vérifiez la connexion.", "No leader yet — finish a round to be ranked.": "Pas encore de leader — terminez un tour pour être classé.", "You: place {0}": "Vous : place {0}", "Not ranked yet — finish a round": "Pas encore classé — terminez un tour", "Continue round {0} ({1}/8)": "Continuer le tour {0} ({1}/8)", "My rounds": "Mes tours", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "Tout le monde joue les mêmes donnes, tour par tour, quand il veut (sans limite de temps ; chaque tour une fois, en Sud). Chaque résultat est comparé à celui de tous les autres joueurs sur cette donne, en IMP et en points de match ; le classement est par donne sur toutes les donnes jouées. Pendant que vous jouez, votre table est fermée et le chat du salon coupé.",
     "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Les donnes jouées par les robots (ils les jouent toutes mains visibles, au double mort) : ni dans vos résultats ni dans votre classement. Le classement : la même donne est aussi jouée normalement à quatre tables de robots experts ; les levées de leurs déclarants face au double mort, en IMP.",
     "Robot rating": "Classement des robots", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Les donnes jouées par les robots : ni dans vos résultats ni dans votre classement. Les robots sont mesurés au double mort : les levées de leur déclarant face à celles du contrat, toutes mains visibles, en IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Aucune donne jouée par les robots pour l’instant. Saisissez une donne, puis Faire jouer les robots.",
     "Let the robots play it": "Faire jouer les robots", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Faire jouer les robots : les quatre mains sont visibles, les robots enchérissent et jouent lentement, et vous regardez. Cela ne compte pas pour votre classement.", "The robots are playing this deal — watch": "Les robots jouent cette donne — regardez",
@@ -6372,6 +6388,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Championship": "Campionato", "Round": "Turno", "Round {0}": "Turno {0}", "in the championship": "nel campionato", "The lobby chat is closed while you play in the championship.": "La chat della sala è chiusa mentre giochi nel campionato.", "Sign in with your name first.": "Prima entra con il tuo nome.", "The championship needs the online database.": "Il campionato richiede il database online.", "Round {0} finished": "Turno {0} finito", "Your championship result could not be sent — check the connection.": "Non è stato possibile inviare il tuo risultato del campionato — controlla la connessione.", "No leader yet — finish a round to be ranked.": "Ancora nessun leader — finisci un turno per entrare in classifica.", "You: place {0}": "Tu: posto {0}", "Not ranked yet — finish a round": "Non ancora in classifica — finisci un turno", "Continue round {0} ({1}/8)": "Continua il turno {0} ({1}/8)", "My rounds": "I miei turni", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "Tutti giocano le stesse mani, turno per turno, quando vogliono (senza limite di tempo; ogni turno una volta, da Sud). Ogni risultato è confrontato con quello di tutti gli altri giocatori su quella mano, in IMP e matchpoint; la classifica è per mano su tutte le mani giocate. Mentre giochi il tuo tavolo è chiuso e la chat della sala spenta.",
     "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Le mani fatte giocare ai robot (le giocano a carte viste, doppio morto): non entrano nei tuoi risultati né nel tuo punteggio. Il punteggio: la stessa mano è giocata normalmente anche a quattro tavoli di robot esperti; le prese dei loro giocanti contro il doppio morto, in IMP.",
     "Robot rating": "Punteggio dei robot", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Le mani fatte giocare ai robot: non entrano nei tuoi risultati né nel tuo punteggio. I robot sono misurati sul doppio morto: le prese del loro giocante contro quelle del contratto a carte viste, in IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Nessuna mano ancora giocata dai robot. Inserisci una mano, poi Falla giocare ai robot.",
     "Let the robots play it": "Falla giocare ai robot", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Falla giocare ai robot: le quattro mani sono scoperte, i robot licitano e giocano lentamente e tu guardi. Non conta per il tuo punteggio.", "The robots are playing this deal — watch": "I robot giocano questa mano — guarda",
@@ -6799,6 +6816,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Championship": "Meisterschaft", "Round": "Runde", "Round {0}": "Runde {0}", "in the championship": "in der Meisterschaft", "The lobby chat is closed while you play in the championship.": "Der Lobby-Chat ist geschlossen, während du in der Meisterschaft spielst.", "Sign in with your name first.": "Melde dich zuerst mit deinem Namen an.", "The championship needs the online database.": "Die Meisterschaft braucht die Online-Datenbank.", "Round {0} finished": "Runde {0} beendet", "Your championship result could not be sent — check the connection.": "Dein Meisterschaftsergebnis konnte nicht gesendet werden — prüfe die Verbindung.", "No leader yet — finish a round to be ranked.": "Noch kein Führender — beende eine Runde, um gewertet zu werden.", "You: place {0}": "Du: Platz {0}", "Not ranked yet — finish a round": "Noch nicht gewertet — beende eine Runde", "Continue round {0} ({1}/8)": "Runde {0} fortsetzen ({1}/8)", "My rounds": "Meine Runden", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "Alle spielen dieselben Boards, Runde für Runde, wann sie wollen (ohne Zeitlimit; jede Runde einmal, von Süd). Jedes Ergebnis wird mit dem aller anderen Spieler auf diesem Board verglichen, in IMP und Matchpunkten; die Wertung ist pro Board über alle gespielten Boards. Während du spielst, ist dein Tisch geschlossen und der Lobby-Chat aus.",
     "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Die Boards, die du die Roboter spielen ließt (sie spielen mit allen Händen offen, Double Dummy): nicht in deinen Ergebnissen und deiner Wertung. Die Wertung: dasselbe Board wird auch an vier Expertenrobotertischen normal gespielt; die Stiche ihrer Alleinspieler gegen Double Dummy, in IMP.",
     "Robot rating": "Roboterwertung", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Die Boards, die du die Roboter spielen ließt: nicht in deinen Ergebnissen und deiner Wertung. Die Roboter werden am Double Dummy gemessen: die Stiche ihres Alleinspielers gegen die Stiche des Kontrakts bei offenen Händen, in IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Noch keine Boards von den Robotern gespielt. Gib ein Board ein und tippe Von den Robotern spielen lassen.",
     "Let the robots play it": "Von den Robotern spielen lassen", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Von den Robotern spielen lassen: alle vier Hände offen, die Roboter reizen und spielen langsam, und du schaust zu. Es zählt nicht für deine Wertung.", "The robots are playing this deal — watch": "Die Roboter spielen dieses Board — schau zu",
@@ -7226,6 +7244,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Championship": "Чемпионат", "Round": "Тур", "Round {0}": "Тур {0}", "in the championship": "в чемпионате", "The lobby chat is closed while you play in the championship.": "Чат лобби закрыт, пока вы играете в чемпионате.", "Sign in with your name first.": "Сначала войдите под своим именем.", "The championship needs the online database.": "Для чемпионата нужна онлайн-база данных.", "Round {0} finished": "Тур {0} завершён", "Your championship result could not be sent — check the connection.": "Не удалось отправить ваш результат чемпионата — проверьте соединение.", "No leader yet — finish a round to be ranked.": "Лидера пока нет — завершите тур, чтобы попасть в рейтинг.", "You: place {0}": "Вы: место {0}", "Not ranked yet — finish a round": "Пока вне рейтинга — завершите тур", "Continue round {0} ({1}/8)": "Продолжить тур {0} ({1}/8)", "My rounds": "Мои туры", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "Все играют одинаковые сдачи, тур за туром, когда захотят (без ограничения времени; каждый тур один раз, за Юга). Каждый результат сравнивается с результатами всех других игроков на этой сдаче, в IMP и матчпойнтах; рейтинг — в среднем за сдачу по всем сыгранным. Пока вы играете, ваш стол закрыт, а чат лобби выключен.",
     "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Сдачи, сыгранные роботами (они играют, видя все руки, дабл-дамми): не входят в ваши результаты и рейтинг. Рейтинг: та же сдача играется обычным образом ещё за четырьмя столами роботов-экспертов; взятки их разыгрывающих против дабл-дамми, в IMP.",
     "Robot rating": "Рейтинг роботов", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Сдачи, сыгранные роботами: не входят в ваши результаты и рейтинг. Роботы сравниваются с дабл-дамми: взятки их разыгрывающего против взяток контракта при открытых руках, в IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Роботы ещё не играли сдач. Введите сдачу и нажмите «Пусть сыграют роботы».",
     "Let the robots play it": "Пусть сыграют роботы", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Пусть сыграют роботы: все четыре руки открыты, роботы торгуются и играют медленно, а вы смотрите. В рейтинг не идёт.", "The robots are playing this deal — watch": "Роботы играют эту сдачу — смотрите",
@@ -7653,6 +7672,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Championship": "Mistrzostwa", "Round": "Runda", "Round {0}": "Runda {0}", "in the championship": "w mistrzostwach", "The lobby chat is closed while you play in the championship.": "Czat w poczekalni jest zamknięty, gdy grasz w mistrzostwach.", "Sign in with your name first.": "Najpierw zaloguj się swoim imieniem.", "The championship needs the online database.": "Mistrzostwa wymagają bazy danych online.", "Round {0} finished": "Runda {0} zakończona", "Your championship result could not be sent — check the connection.": "Nie udało się wysłać twojego wyniku — sprawdź połączenie.", "No leader yet — finish a round to be ranked.": "Jeszcze brak lidera — ukończ rundę, aby trafić do rankingu.", "You: place {0}": "Ty: miejsce {0}", "Not ranked yet — finish a round": "Jeszcze nie w rankingu — ukończ rundę", "Continue round {0} ({1}/8)": "Kontynuuj rundę {0} ({1}/8)", "My rounds": "Moje rundy", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "Wszyscy grają te same rozdania, runda po rundzie, kiedy chcą (bez limitu czasu; każda runda raz, z pozycji S). Każdy wynik porównuje się z wynikami wszystkich innych graczy w tym rozdaniu, w IMP i punktach meczowych; ranking to średnia na rozdanie ze wszystkich zagranych. Gdy grasz, twój stół jest zamknięty, a czat w poczekalni wyłączony.",
     "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "Rozdania zagrane przez roboty (grają widząc wszystkie ręce, double dummy): nie trafiają do twoich wyników ani rankingu. Ranking: to samo rozdanie jest też grane normalnie przy czterech stołach robotów-ekspertów; lewy ich rozgrywających wobec double dummy, w IMP.",
     "Robot rating": "Ranking robotów", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "Rozdania zagrane przez roboty: nie trafiają do twoich wyników ani rankingu. Roboty są mierzone względem double dummy: lewy ich rozgrywającego wobec lew kontraktu przy odkrytych rękach, w IMP.", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "Roboty nie zagrały jeszcze żadnego rozdania. Wpisz rozdanie i naciśnij Niech zagrają roboty.",
     "Let the robots play it": "Niech zagrają roboty", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "Niech zagrają roboty: cztery ręce są odkryte, roboty licytują i grają powoli, a ty oglądasz. Nie liczy się do rankingu.", "The robots are playing this deal — watch": "Roboty grają to rozdanie — oglądaj",
@@ -8080,6 +8100,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Championship": "锦标赛", "Round": "轮", "Round {0}": "第{0}轮", "in the championship": "锦标赛中", "The lobby chat is closed while you play in the championship.": "你在锦标赛中打牌时，大厅聊天关闭。", "Sign in with your name first.": "请先用你的名字登录。", "The championship needs the online database.": "锦标赛需要在线数据库。", "Round {0} finished": "第{0}轮已完成", "Your championship result could not be sent — check the connection.": "你的锦标赛成绩未能发送 — 请检查网络。", "No leader yet — finish a round to be ranked.": "还没有领先者 — 完成一轮即可上榜。", "You: place {0}": "你：第{0}名", "Not ranked yet — finish a round": "尚未上榜 — 完成一轮", "Continue round {0} ({1}/8)": "继续第{0}轮（{1}/8）", "My rounds": "我的轮次", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "所有人按轮次打同样的牌，随时都可以打（无时间限制；每轮只打一次，坐南）。每个成绩都与该副牌上所有其他玩家的成绩比较（IMP和比赛分）；排名按所有已打牌的每副平均计算。比赛中你的牌桌关闭，大厅聊天关闭。",
     "The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer's tricks against double dummy, in IMPs.": "交给机器人打的牌（它们看着四手牌按双明手打）：不计入你的成绩和积分。积分：同一副牌也在四张专家机器人牌桌上正常打；它们庄家的墩数与双明手相比，以IMP计。",
     "Robot rating": "机器人积分", "The deals you let the robots play: not in your Results or your rating. The robots are measured against double dummy: the tricks their declarer took against the tricks the contract takes with every hand open, in IMPs.": "交给机器人打的牌：不计入你的成绩和积分。机器人以双明手为标准衡量：庄家拿到的墩数与四手明牌时该定约的墩数相比，以IMP计。", "No deals given to the robots yet. Enter a deal, then Let the robots play it.": "还没有交给机器人打的牌。输入一副牌，然后点 让机器人来打。",
     "Let the robots play it": "让机器人来打", "Let the robots play it: the four hands are open, the robots bid and play slowly, and you watch. It does not count for your rating.": "让机器人来打：四家牌全部明示，机器人慢慢叫牌和打牌，你来观看。不计入你的积分。", "The robots are playing this deal — watch": "机器人正在打这副牌 — 观看",
@@ -9130,7 +9151,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 304;
+const APP_V = 305;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9163,7 +9184,7 @@ const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: nu
 const online = () => typeof Net !== "undefined" && Net.on;
 const guest = () => typeof Net !== "undefined" && Net.guest;
 // your seat (a tournament is always played from South); a spectator has no seat of their own (meSeat -1)
-const U = () => (guest() ? Net.st.seat : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
+const U = () => (guest() ? Net.st.seat : G && G.champ ? 2 : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
 const meSeat = () => (guest() && Net.st.watching ? -1 : G && G.watch ? -1 : U());
 const delay = () => G && G.watch ? 1700 : [1100, 650, 250][SET.speed];   // watching the robots: slowly, to follow every card
 const $ = id => document.getElementById(id);
@@ -9364,6 +9385,115 @@ const Field = {
   },
 };
 /* ---- checking the card play after the board (double dummy, in a background worker) ---- */
+/* ---- the championship: rounds of 8 boards, the same for everyone, played whenever you like (each round once, from
+   South). Every result is compared with all the other players' on that board, in IMPs and matchpoints; a board no one
+   else has played yet counts against the robot tables until someone does. The ranking is per board over all boards. ---- */
+const CH = { tree: null, at: 0, p: null };
+const champLive = () => !!(G && G.champ && (G.phase === 'bid' || G.phase === 'play'));
+function champDeal(r, b) {
+  E.seed(((Math.imul(r, 2654435761) ^ 0x5bd1e995) + Math.imul(b, 40503)) >>> 0 || 1);
+  const d = E.shuffle([...Array(52).keys()]); E.seed(null);
+  return [0, 1, 2, 3].map(k => d.slice(k * 13, k * 13 + 13));
+}
+// the championship from the database (read again after a minute, or when asked)
+function champLoad(force) {
+  if (typeof Net === 'undefined' || !Net.Cloud.on) return Promise.resolve(CH.tree);
+  if (!force && CH.tree && Date.now() - CH.at < 60000) return Promise.resolve(CH.tree);
+  if (CH.p) return CH.p;
+  return CH.p = Net.champGet().then(t => { CH.tree = t || {}; CH.at = Date.now(); return CH.tree; }).catch(() => CH.tree).finally(() => { CH.p = null; render(); });
+}
+/* the ranking: for every player, each board compared with every other player's result on it (IMP: the average of the
+   IMPs against each; MP: the share of them beaten, ties half); alone on a board: the robot tables' figures */
+function champRank(tree) {
+  const P = {};
+  for (const [r, R] of Object.entries(tree || {})) for (const [b, B] of Object.entries(R || {})) {
+    const L = Object.entries(B || {}).filter(([, x]) => x && typeof x.us === 'number');
+    for (const [k, x] of L) {
+      const p = P[k] || (P[k] = { k, name: x.n || k, n: 0, imp: 0, mp: 0, rounds: {}, last: 0 });
+      const o = L.filter(([j]) => j !== k).map(([, y]) => y.us);
+      let imp, mp;
+      if (o.length) { imp = o.reduce((a, v) => a + E.imps(x.us - v), 0) / o.length; mp = 100 * o.reduce((a, v) => a + (x.us > v ? 1 : x.us === v ? 0.5 : 0), 0) / o.length; }
+      else if (x.fi != null) { imp = x.fi; mp = x.fm != null ? x.fm : 50; }
+      else continue;
+      p.n++; p.imp += imp; p.mp += mp; p.rounds[r] = (p.rounds[r] || 0) + 1; p.last = Math.max(p.last, x.ts || 0);
+    }
+  }
+  return Object.values(P).filter(p => Object.values(p.rounds).some(n => n >= 8)).map(p => ({ ...p, ai: p.imp / p.n, am: p.mp / p.n }))
+    .sort((a, b) => b.ai - a.ai || b.am - a.am);
+}
+// where you are: the round you are in (a board or more played) or the next one open to you
+function champWhere(tree, myIp) {
+  const me = Net.fbKey(myNm()), R = tree || {}, max = Math.max(0, ...Object.keys(R).map(Number).filter(Boolean));
+  for (let r = 1; r <= max + 1; r++) {
+    const done = [1, 2, 3, 4, 5, 6, 7, 8].filter(b => R[r] && R[r][b] && R[r][b][me]);
+    if (done.length === 8) continue;
+    if (done.length) return { r, b: [1, 2, 3, 4, 5, 6, 7, 8].find(b => !done.includes(b)), n: done.length };
+    // a round someone else played from this internet connection is not yours (the same boards would be known)
+    const used = myIp && Object.values(R[r] || {}).some(B => Object.entries(B || {}).some(([k, x]) => k !== me && x && x.ip === myIp));
+    if (used) continue;
+    return { r, b: 1, n: 0 };
+  }
+  return { r: max + 1, b: 1, n: 0 };
+}
+async function startChamp() {
+  if (!myNm()) { flash(T('Sign in with your name first.'), 2500); return; }
+  if (typeof Net === 'undefined' || !Net.Cloud.on) { flash(T('The championship needs the online database.'), 2800); return; }
+  if (online()) { flash(T('Close the online table first'), 2000); return; }
+  flash('🏆 ' + T('Loading…'), 1200);
+  let [tree, ip] = await Promise.all([champLoad(true), Net.ipTag()]);
+  if (!tree) tree = await champLoad(true);   // a read already under way (from the home page) may have failed: once more
+  if (!tree) { flash(T('The championship needs the online database.'), 2800); return; }
+  // a board finished here but not in the database yet counts as played
+  const w = champWhere(tree, ip && ip.ip);
+  if (G && G.champ && G.champ.r === w.r && G.phase === 'done' && G.champ.b === w.b) w.b++;
+  if (w.b > 8) { flash(T('Round {0} finished', w.r), 2500); showChamp(); return; }
+  ui.saved = null; closeOv(); Net.st.soloPub = false;
+  ui.champNext = { r: w.r, b: w.b };
+  newBoard(champDeal(w.r, w.b), w.b);
+  Net.shareInfo();
+  flash('🏆 ' + T('Championship') + ' · ' + T('Round {0}', w.r) + ' · ' + w.b + '/8', 2400);
+}
+function champSend(e) {
+  const c = e.c ? [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl] : null;
+  const x = { us: e.us || 0, c, t: e.tricks ?? null, ...(e.imp != null ? { fi: e.imp, fm: e.mp } : {}) };
+  Net.champPut(e.champ.r, e.champ.b, x).then(() => { CH.at = 0; champLoad(true); }).catch(() => flash(T('Your championship result could not be sent — check the connection.'), 3500));
+}
+// the home page card: the leader, your place, start or go on
+function champCardHtml() {
+  if (typeof Net === 'undefined' || !Net.Cloud.on) return '';
+  if (!CH.tree || Date.now() - CH.at > 60000) champLoad();
+  const L = CH.tree ? champRank(CH.tree) : [], me = Net.fbKey(myNm() || ''), i = L.findIndex(p => p.k === me), lead = L[0];
+  const w = CH.tree && myNm() ? champWhere(CH.tree, null) : null;
+  return `<div class="h2chh"><span class="h2cht">🏆 ${T('Championship')}</span>${L.length ? `<small>${T('{0} players', L.length)}</small>` : ''}</div>
+    <div class="h2chl">${lead ? `👑 <b>${esc(lead.name)}</b> <small>${fmtSigned(Math.round(lead.ai * 100) / 100)} IMP · ${Math.round(lead.am)}%</small>` : `<small>${T('No leader yet — finish a round to be ranked.')}</small>`}</div>
+    <div class="h2chm">${i >= 0 ? T('You: place {0}', i + 1) : myNm() ? T('Not ranked yet — finish a round') : ''}</div>
+    <div class="h2chb"><button class="btn h2go" id="chGo">▶ ${w && w.n ? T('Continue round {0} ({1}/8)', w.r, w.n) : T('Round {0}', w ? w.r : 1)}</button><button class="btn h2chs" id="chShow">${T('Standings')}</button></div>`;
+}
+// the championship page: the standings (every player) and your rounds
+async function showChamp() {
+  if (ui.overlay !== 'champ') openOv('champ', `<h2>🏆 ${T('Championship')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  const tree = await champLoad(true); if (ui.overlay !== 'champ') return;
+  const L = champRank(tree), me = Net.fbKey(myNm() || ''), tab = ui.chTab || 'all';
+  let body;
+  if (tab === 'mine') {
+    const rows = [];
+    for (const [r, R] of Object.entries(tree || {}).sort((a, b) => b[0] - a[0])) for (let b = 1; b <= 8; b++) {
+      const B = (R || {})[b] || {}, x = B[me]; if (!x) continue;
+      const o = Object.entries(B).filter(([k, y]) => k !== me && y && typeof y.us === 'number').map(([, y]) => y.us);
+      const imp = o.length ? o.reduce((a, v) => a + E.imps(x.us - v), 0) / o.length : x.fi, mp = o.length ? 100 * o.reduce((a, v) => a + (x.us > v ? 1 : x.us === v ? 0.5 : 0), 0) / o.length : x.fm;
+      const con = x.c ? x.c[0] + STR[x.c[1]] + (x.c[2] === 1 ? 'X' : x.c[2] === 2 ? 'XX' : '') + ' ' + SEAT_AB[x.c[3]] : T('Pass');
+      rows.push(`<tr><td>${r}</td><td>${b}</td><td>${con}${x.c ? ' · ' + x.t : ''}</td><td class="n">${fmtSigned(x.us)}</td><td class="n">${o.length}</td><td class="n">${imp == null ? '—' : fmtSigned(Math.round(imp * 10) / 10)}</td><td class="n">${mp == null ? '—' : Math.round(mp) + '%'}</td></tr>`);
+    }
+    body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Round')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Score')}</th><th class="n">👥</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows.join('') || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
+  } else {
+    body = `<div class="resscroll"><table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th class="n">${T('Boards')}</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th></tr></thead><tbody>${L.map((p, i) => `<tr class="${p.k === me ? 'meRow' : ''}"><td>${i === 0 ? '👑' : i + 1}</td><td><b class="pname" data-who="${esc(p.name)}">${esc(p.name)}</b></td><td class="n">${p.n}</td><td class="n">${fmtSigned(Math.round(p.ai * 100) / 100)}</td><td class="n">${Math.round(p.am)}%</td></tr>`).join('') || `<tr><td colspan="5">${T('No leader yet — finish a round to be ranked.')}</td></tr>`}</tbody></table></div>`;
+  }
+  openOv('champ', `<h2>🏆 ${T('Championship')}</h2>
+    <div class="muted">${T('Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player\'s on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.')}</div>
+    <div class="seg" data-seg="chtab"><button data-v="all" class="${tab === 'all' ? 'on' : ''}">${T('Standings')}</button><button data-v="mine" class="${tab === 'mine' ? 'on' : ''}">${T('My rounds')}</button></div>
+    ${body}
+    <div class="row2"><button class="btn gold" id="chGo">▶ ${T('Play')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
 /* ---- the robots' bidding lessons: each robot table's contract against the best contract its side could make with
    all four hands open (double dummy); a lesson when it cost 4 IMPs or more: a missed game or slam, an overbid, a wrong
    contract. At most two per board (the costliest, one per auction). ---- */
@@ -9667,6 +9797,7 @@ function newBoard(replay, boardNo, tour) {
   const deal = replay ? replay.map(h => h.slice()) : freshDeal(dealerOf(bn));
   UNDO.length = 0;
   G = { id: Date.now().toString(36) + E.rnd(1e6).toString(36), board: bn, dealer: dealerOf(bn), deal, auction: [], phase: 'bid', play: null, result: null, claimed: false, field: null, tour: tour || null, cards: sideCards() };
+  if (ui.champNext) { G.champ = ui.champNext; ui.champNext = null; }   // a championship board (from South, a closed table)
   Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null, photoMsg: null, photoHands: null, signal: null, fixSeat: null, fixCard: null });
   $('ov').hidden = true;
   Field.start(G);
@@ -9814,8 +9945,9 @@ function finishBoard() {
   if (G.tour && G.tour.table == null && !guest()) { e.tour = G.tour; tourSend(e); }   // an individual board (also while someone watches)
   else if (G.tour && G.tour.table != null && online() && !guest()) { e.tour = G.tour; Net.tourTableResult(G.tour.id, G.tour.table, G.tour.b, e.ns, conTxt(e)); }
   // where it was played, for the Results list: a tournament (with its name), an online table, or alone with robots
-  e.kind = G.tour || G.tprac ? 't' : online() ? 'o' : 'r';
-  if (e.kind === 't') { const id = (G.tour || G.tprac).id, t = typeof Net !== 'undefined' && Net.st.tours && Net.st.tours[id]; if (t && t.name) e.tn = String(t.name).slice(0, 40); }
+  e.kind = G.tour || G.tprac || G.champ ? 't' : online() ? 'o' : 'r';
+  if (G.champ && !online()) { e.champ = { ...G.champ }; e.tn = T('Championship') + ' · ' + T('Round {0}', G.champ.r); champSend(e); }
+  if (e.kind === 't' && (G.tour || G.tprac)) { const id = (G.tour || G.tprac).id, t = typeof Net !== 'undefined' && Net.st.tours && Net.st.tours[id]; if (t && t.name) e.tn = String(t.name).slice(0, 40); }
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
   Store.saveRec(e);
   save(); render();
@@ -10293,6 +10425,7 @@ function renderDock() {
 }
 function dockSend(text) {
   text = String(text || '').trim(); if (!text) return;
+  if (champLive()) { flash(T('The lobby chat is closed while you play in the championship.'), 2600); return; }
   if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else lobbySend(text);
   // the panel stays open after sending; it is closed with ✕
   renderDock();
@@ -10480,10 +10613,11 @@ function homeShell2() {
   <div class="hgrid">
     <section class="hmain"><div class="h2cola">
       <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2chips" id="hMe"></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
-      <div class="h2play">
+      <div class="h2pr"><div class="h2play">
         <div class="h2fan" aria-hidden="true">${fan}</div>
         <div class="h2ptx"><h2>${T('Play offline')}</h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button></div>
       </div>
+      <div class="h2champ" id="hChamp"></div></div>
       <div class="h2tiles">
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('href="bridgegate/"', '🏆', T('Tournaments'), T('Club tournaments with movements and results.'))}
@@ -10535,6 +10669,7 @@ function renderHome() {
     if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name (the new page: your picture or initial), after a change on your card
   { const p = typeof Net !== 'undefined' ? Net.prof() : null, m = p && p.rtn ? measuredLvl(p) : '';   // the you strip: rating and the measured level
     set('hMe', p ? `<span class="h2chip"><small>${T('Rating')}</small><b>${p.rtn ? p.rt : '—'}</b></span>${m ? `<span class="h2chip"><small>${T('measured')}</small><span class="plvl l-${m}">${T(LEVEL_N[m])}</span></span>` : ''}` : ''); }
+  set('hChamp', champCardHtml());
   set('hGoSub', cont ? T('Your last board is waiting.') : T('Bid and play with three robots; every board counts for your rating.'));   // your name, after a change on your card
   { const hs = $('hSys'), v = SET.sys || 'twoone'; if (hs && hs.value !== v) hs.value = v; }   // also when it was changed on the convention card
 
@@ -10627,7 +10762,7 @@ function tableBoard() {
   Net.note(T('Tournament board {0} of {1}', b, t.n));
 }
 // the next deal after a board: tournaments go on with their own boards
-function nextDeal() { if (G && G.tour) nextTourBoard(); else if (G && G.tprac) practiceTour(G.tprac.id, G.tprac.b + 1); else if (!(ui.dealQ && nextFileDeal())) newBoard(); }
+function nextDeal() { if (G && G.champ) { startChamp(); return; } if (G && G.tour) nextTourBoard(); else if (G && G.tprac) practiceTour(G.tprac.id, G.tprac.b + 1); else if (!(ui.dealQ && nextFileDeal())) newBoard(); }
 /* practice a tournament's boards again (yours or one you did not play): nothing is recorded in the tournament;
    after each board your score is compared with everyone who played it there */
 function practiceTour(id, b) {
@@ -11722,6 +11857,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   if (t.id === 'hLearn') { showLearn(); return; }
+  if (t.id === 'chGo') { startChamp(); return; }
+  if (t.id === 'chShow') { showChamp(); return; }
   if (t.id === 'learnCopy') { const txt = JSON.stringify(ui.learnCopy || {}); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
   if (t.dataset.casys) { setSys(t.dataset.casys); Store.saveSettings(SET); save(); render(); showCardConv(); return; }
   if (t.id === 'caBack') { showCardSys(); return; }
@@ -11762,6 +11899,7 @@ document.addEventListener('click', ev_ => {
     }
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
     if (seg === 'learnd') { ui.learnDays = +v; showLearn(); return; }
+    if (seg === 'chtab') { ui.chTab = v; showChamp(); return; }
     if (seg === "stattab") { ui.statTab = v; showStats(); return; }
     if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
@@ -12005,6 +12143,7 @@ function pmTo(name) {
 }
 function lobbySend(text) {
   text = String(text || '').trim(); if (!text) return;
+  if (champLive()) { flash(T('The lobby chat is closed while you play in the championship.'), 2600); return; }
   if (ui.pmTo) Net.dmSend(ui.pmTo, text); else Net.lsend(text);
   // the new home page: the lobby panel closes once the message is sent (a reply lights the Lobby button)
   if (ui.hsec === 'chat' && document.body.classList.contains('homev2')) { ui.hsec = null; flash('✓ ' + T('Message sent'), 1500); }
@@ -12625,7 +12764,7 @@ const Net = (() => {
   // what the lobby sees of this table
   function tableInfo() {
     return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? (G.watch ? 'idle' : G.phase) : null, board: G ? G.board : 0,
-      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub, solo: !st.host && !st.guest, tplay: tplay(), pc: !st.host && !st.guest && typeof pracList === 'function' && pracList().length ? 1 : 0 };
+      prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub && !(G && G.champ), champ: G && G.champ && (G.phase === 'bid' || G.phase === 'play') ? 1 : 0, solo: !st.host && !st.guest, tplay: tplay(), pc: !st.host && !st.guest && typeof pracList === 'function' && pracList().length ? 1 : 0 };
   }
   // an individual tournament board played here: shown on this table in the lobby, and others can join the tournament
   function tplay() {
@@ -13055,9 +13194,9 @@ const Net = (() => {
       const tinfo = tp ? `<small class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</small>`
         : tt ? `<small class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</small>` : '';
       const open = t.online ? !t.priv : !!(t.pub || tp);
-      const state = `${t.online ? T('online') : t.pc ? T('practising conventions') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}`;
+      const state = `${t.online ? T('online') : t.champ ? '🏆 ' + T('in the championship') : t.pc ? T('practising conventions') : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}`;
       const people = (humans.length ? humans.map(pn).join(', ') : pn(t.host)) + (robots > 0 && humans.length ? ` + ${robots} ${T('Robot')}` : '');
-      const btns = (tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`) + (t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : '');
+      const btns = t.champ ? '' : (tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`) + (t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : '');
       return line(open, T("{0}'s table", esc(t.host)), state, people, tinfo, btns);
     }).join('');
     // the players the online list has at a board with robots, whose table the direct lines have not found
@@ -13181,7 +13320,7 @@ const Net = (() => {
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
       const name = myName(); if (st.out || !Cloud.on || !name || !SET.pinH) return;
-      const w = st.on ? 'table' : G && !G.watch && (G.phase === 'bid' || G.phase === 'play') ? 'robots' : 'lobby';   // watching the robots is not playing   // a finished board left on the screen counts as the lobby
+      const w = st.on ? 'table' : G && !G.watch && (G.phase === 'bid' || G.phase === 'play') ? (G.champ ? 'champ' : 'robots') : 'lobby';   // watching the robots is not playing   // a finished board left on the screen counts as the lobby
       try {
         // a name no longer in the database was removed by the administrator: this device signs out (it used to take
         // the name again, for names chosen before the database existed; they are all in it now)
@@ -13253,6 +13392,15 @@ const Net = (() => {
     if (!(await Cloud.session(name, SET.pinH))) return;
     await Cloud.put('roboterr/' + fbKey(name) + '/' + String(e.id).replace(/[.#$\[\]\/]/g, '_') + (user ? '_u' : ''), { ...(user ? { u: 1 } : {}), kim: name, ts: Date.now(), b: e.board, me: e.seat, sys: SET.sys || '',
       c: [e.c.level, e.c.strain, e.c.dbl || 0, e.c.decl], d: e.deal, a: e.auc || [], p: e.pl, er: list.slice(0, 20).map(x => [x.t, x.s, x.c, x.b, x.lost]) });
+  }
+  /* the championship: champ/<round>/<board>/<player> = that player's result (from South), written once; anyone signed
+     in reads the whole championship to rank it */
+  async function champGet() { if (!Cloud.on) return null; return (await Cloud.get('champ')) || {}; }
+  async function champPut(r, b, x) {
+    const name = myName(); if (!Cloud.on || !name || !SET.pinH) throw new Error('offline');
+    if (!(await Cloud.session(name, SET.pinH))) throw new Error('signin');
+    const ip = await ipTag();
+    await Cloud.put('champ/' + r + '/' + b + '/' + fbKey(name), { n: String(name).slice(0, 20), ts: Date.now(), ...(ip.ip ? { ip: ip.ip } : {}), ...x });
   }
   // a bidding lesson from the robot tables of a board (kept with the robot mistakes; only the administrator reads them)
   async function roboBid(id, i, deal, board, x) {
@@ -13489,6 +13637,7 @@ const Net = (() => {
   function statusOf(n) {
     const cloudOn = st.cloud && Cloud.on ? st.cloud.on : null;
     const w = whereIs(n), c = cloudOn && cloudOn.find(x => nameKey(x.name) === nameKey(n)), prac = c && c.pc;
+    if (c && c.at === 'champ') return { s: 'play', at: '🏆 ' + T('in the championship') };
     if (w && !w.lobby) return { s: 'play', at: w.online ? T("At {0}'s table", w.host) : prac ? T('practising conventions') : T('playing with robots') };
     if (c && c.at !== 'lobby') return { s: 'play', at: c.at === 'table' ? T('at a table') : prac ? T('practising conventions') : T('playing with robots') };
     return { s: 'lobby', at: T('waiting in the lobby') };
@@ -13767,6 +13916,7 @@ const Net = (() => {
   /* a join request opens its own window (with a sound), so it is not missed during play; when it is answered
      the next one, if any, is shown */
   function showReq() {
+    if (G && G.champ && (G.phase === 'bid' || G.phase === 'play')) { for (const id of Object.keys(st.pending || {})) decline(id); return; }
     const pend = Object.entries(st.pending || {}).filter(([, p]) => !p.quiet);
     if (!pend.length) { if (ui.overlay === 'req') closeOv(); return; }
     if (ui.overlay && ui.overlay !== 'req' && ui.overlay !== 'net' && ui.overlay !== 'lchat') { flash(String(pend[0][1].d.name || 'Guest').slice(0, 20) + ' — ' + T('Asking to join'), 3000); return; }
@@ -14351,7 +14501,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboBid, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>
