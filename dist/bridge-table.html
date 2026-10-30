@@ -9316,7 +9316,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 323;
+const APP_V = 324;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -14947,7 +14947,7 @@ const SB = (() => {
   }
   // the players of a board (the seating when it was entered)
   const seatsOf = r => { const p = (r && r.p) || {}; return { n: p.n || SEAT[0], e: p.e || SEAT[1], s: p.s || SEAT[2], w: p.w || SEAT[3] }; };
-  // each player's IMPs (their pair's on the boards they played) and each pair's
+  // each pair's IMPs (and each player's)
   function oneStand() {
     const P = {}, Q = {}, add = (O, k, name, v) => { const x = O[k] || (O[k] = { name, n: 0, imp: 0 }); x.n++; x.imp += v; };
     for (const b in (sb.g.r || {})) {
@@ -15285,9 +15285,9 @@ const SB = (() => {
       <div class="muted">${T('Each board counts when both rooms have entered it: the difference of the two North-South scores in IMPs. VPs on the WBF scale (20 to share).')} ${T('MP: a board won by the score is 100 %, an equal score 50 %.')}</div>`;
   }
   function oneRankHtml() {
-    const { P, Q } = oneStand(); if (!P.length) return `<div class="muted">${T('No scores yet.')}</div>`;
+    const { Q } = oneStand(); if (!Q.length) return `<div class="muted">${T('No scores yet.')}</div>`;
     const tab = (L, h) => `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th class="n">#</th><th>${h}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th></tr></thead><tbody>${L.map((r, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(r.name)}</b></td><td data-l="${T('Boards')}" class="n">${r.n}</td><td data-l="IMP" class="n"><b>${signed(r.imp)}</b></td></tr>`).join('')}</tbody></table></div>`;
-    return `<h3>${T('Players')}</h3>${tab(P, T('Player'))}<h3>${T('Pairs')}</h3>${tab(Q, T('Pair'))}<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
+    return `${tab(Q, T('Pair'))}<div class="row2"><button class="btn sbwa" id="sbWa">${ICON_WA} ${T('Send on WhatsApp')}</button></div>
       <div class="muted">${T('Each board: the score of the side with 21 or more points against the score expected of it (by its points and vulnerability), in IMPs; both partners get them. 38–40 points count as 37.')}</div>`;
   }
   function rankHtml() {
@@ -15303,8 +15303,8 @@ const SB = (() => {
   // the standings as a plain message (as on the screen: MP % and IMP)
   function standingsText() {
     if (isOne()) {
-      const m = sb.g.m, { P } = oneStand();
-      return [`🪑 ${m.n} — ${new Date(m.ts).toLocaleDateString()}`, ...P.map((r, i) => `${i + 1}. ${r.name} ${r.imp > 0 ? '+' : ''}${r.imp} IMP (${T('{0} boards', r.n)})`)].join('\n');
+      const m = sb.g.m, { Q } = oneStand();
+      return [`🪑 ${m.n} — ${new Date(m.ts).toLocaleDateString()}`, ...Q.map((r, i) => `${i + 1}. ${r.name} ${r.imp > 0 ? '+' : ''}${r.imp} IMP (${T('{0} boards', r.n)})`)].join('\n');
     }
     if (isTeam()) {
       const m = sb.g.m;
