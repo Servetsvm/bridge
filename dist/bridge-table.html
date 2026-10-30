@@ -4768,7 +4768,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
-    "Rank card": "Kart rütbesi", "Leader of the championship": "Şampiyonanın lideri", "The top card for a player: ♠A belongs to the leader of the championship.": "Bir oyuncunun ulaşabileceği en yüksek kart: ♠A şampiyonanın liderine aittir.", "{0} more boards to reach {1}": "{1} rengine geçmek için {0} el daha", "{0} rating points to {1}": "{1} için {0} puan daha",
+    "Rank card": "Kart rütbesi", "Leader of the championship": "Şampiyonanın lideri", "The top card for a player: ♠A belongs to the leader of the championship.": "Bir oyuncunun ulaşabileceği en yüksek kart: ♠A şampiyonanın liderine aittir.", "{0} more boards to reach {1}": "{1} için {0} el daha", "{0} rating points to {1}": "{1} için {0} puan daha",
     "Month": "Ay", "Honour roll": "Şeref listesi", "Trophy cabinet": "Kupa dolabı", "{0} · {1} champion": "{0} · {1} şampiyonu", "{0} · {1}, 2nd place": "{0} · {1}, 2.", "{0} · {1}, 3rd place": "{0} · {1}, 3.", "The champions of {0}: {1} (IMP) · {2} (MP)": "{0} şampiyonları: {1} (IMP) · {2} (MP)", "{0}: only this month's boards. At least {1} boards in the month to win it; the champions are known on the 1st.": "{0}: yalnızca bu ayın elleri. Ayı kazanmak için ay içinde en az {1} el; şampiyonlar ayın 1'inde belli olur.", "No champions yet: the first ones are known when the first month closes.": "Henüz şampiyon yok: ilkleri ilk ay kapanınca belli olur.",
     "Championship": "Şampiyona", "Round": "Tur", "Round {0}": "Tur {0}", "in the championship": "şampiyonada", "The lobby chat is closed while you play in the championship.": "Şampiyonada oynarken lobi sohbeti kapalıdır.", "Sign in with your name first.": "Önce isminle giriş yap.", "The championship needs the online database.": "Şampiyona için çevrimiçi veritabanı gerekiyor.", "Round {0} finished": "Tur {0} bitti", "Your championship result could not be sent — check the connection.": "Şampiyona sonucun gönderilemedi — bağlantını kontrol et.", "No leader yet — finish a round to be ranked.": "Henüz lider yok — sıralamaya girmek için bir tur bitir.", "You: place {0}": "Sen: {0}. sıra", "Not ranked yet — finish a round": "Henüz sıralamada değilsin — bir tur bitir", "Continue round {0} ({1}/8)": "Tur {0}'e devam ({1}/8)", "My rounds": "Turlarım", "Everyone plays the same boards, round by round, whenever they like (no time limit; each round once, from South). Each result is compared with every other player's on that board, in IMPs and matchpoints; the ranking is per board over all boards played. While you play in it your table is closed and the lobby chat is off.": "Herkes aynı elleri, tur tur, istediği zaman oynar (süre sınırı yok; her tur bir kez, Güney'den). Her sonuç o eli oynayan bütün diğer oyuncularınkiyle karşılaştırılır (IMP ve MP); sıralama oynanan bütün ellerin el başına ortalamasıdır. Oynarken masan kapalıdır ve lobi sohbeti kapanır.",
     "Learning report": "Öğrenme raporu", "Missed game": "Kaçırılan oyun", "Missed slam": "Kaçırılan şlem", "Overbid": "Fazla yükselme", "Wrong contract": "Yanlış kontrat", "Card play": "Kart oyunu", "Bidding": "Deklarasyon", "Opening lead": "Açılış atağı", "Declarer play": "Deklaran oyunu", "Defence": "Savunma", "tricks": "löve", "Last 7 days": "Son 7 gün", "Last 30 days": "Son 30 gün", "No bidding lessons yet.": "Henüz deklarasyon dersi yok.", "Costliest examples": "En pahalı örnekler", "best": "en iyisi", "Copy the report for Claude": "Raporu Claude için kopyala", "What the robots got wrong on the boards played by everyone, against double dummy: their cards, and the contracts the robot tables reached against the best contract with all hands open. Copy it for Claude: the robots are improved from it.": "Herkesin oynadığı ellerde robotların double dummy'ye göre yanlış yaptıkları: kartları ve robot masalarının vardığı kontratların, dört el açıkken en iyi kontratla karşılaştırması. Claude için kopyala: robotlar bundan geliştirilir.",
@@ -9206,7 +9206,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 308;
+const APP_V = 309;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9573,6 +9573,14 @@ function champMonthNote() {
 }
 /* ---- the rank card: ♣2 … ♠A ---- */
 const RK_S = '♣♦♥♠', RK_R = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'], RK_GATE = [0, 50, 200, 500];
+// the highest card the boards played allow: within each suit the 13 cards are spread over its boards (♣ 0-50, ♦ 50-200,
+// ♥ 200-500); from 500 boards every card up to ♠K
+function rankCap(boards) {
+  for (let s = 0; s < 3; s++) { const a = RK_GATE[s], z = RK_GATE[s + 1]; if (boards < z) return s * 13 + Math.min(12, Math.floor((boards - a) * 13 / (z - a))); }
+  return 50;
+}
+// the boards needed for a card (inverse of rankCap)
+const boardsFor = i => { const s = Math.floor(i / 13); if (s >= 3) return RK_GATE[3]; const a = RK_GATE[s], z = RK_GATE[s + 1]; return a + Math.ceil((i % 13) * (z - a) / 13); };
 const rankTxt = i => RK_S[Math.floor(i / 13)] + RK_R[i % 13];
 // a player's card from the profile (rating, boards) and the trophies; the championship's leader holds ♠A
 function cardRank(p, name) {
@@ -9580,7 +9588,7 @@ function cardRank(p, name) {
   const rt = p.rtn ? p.rt : 1350, boards = p.per && p.per[4] ? p.per[4][0] || 0 : p.n || 0;
   const tro = name ? trophiesOf(name) : [], bonus = tro.reduce((a, t) => a + (t.place === 1 ? 3 : 1), 0);
   const base = Math.max(0, Math.min(50, Math.round((rt - 1350) / 8)));
-  const cap = boards < RK_GATE[1] ? 12 : boards < RK_GATE[2] ? 25 : boards < RK_GATE[3] ? 38 : 50;
+  const cap = rankCap(boards);   // experience: every player starts at ♣2 and climbs with the boards played
   let i = Math.min(base + bonus, cap, 50);
   if (name && CH.leader && CH.leader === Net.fbKey(name)) i = 51;
   return { i, cap, boards, rt, bonus, base };
@@ -9593,7 +9601,7 @@ function rankBig(p, name) {
   let next;
   if (r.i === 51) next = '👑 ' + T('Leader of the championship');
   else if (r.i === 50) next = T('The top card for a player: ♠A belongs to the leader of the championship.');
-  else if (r.i >= r.cap) { const g = RK_GATE[Math.floor(r.cap / 13) + 1]; next = T('{0} more boards to reach {1}', g - r.boards, RK_S[Math.floor(r.cap / 13) + 1]); }
+  else if (r.i >= r.cap) next = T('{0} more boards to reach {1}', Math.max(1, boardsFor(r.i + 1) - r.boards), rankTxt(r.i + 1));
   else { const need = Math.max(1, Math.ceil(1350 + 8 * (r.i - r.bonus + 1) - 4 - r.rt)); next = T('{0} rating points to {1}', need, rankTxt(r.i + 1)); }
   return `<span class="rkbig s${Math.floor(r.i / 13)}">${rankTxt(r.i)}</span> <small class="muted">${next}</small>`;
 }

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 308;
+const APP_V = 309;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -375,6 +375,14 @@ function champMonthNote() {
 }
 /* ---- the rank card: ♣2 … ♠A ---- */
 const RK_S = '♣♦♥♠', RK_R = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'], RK_GATE = [0, 50, 200, 500];
+// the highest card the boards played allow: within each suit the 13 cards are spread over its boards (♣ 0-50, ♦ 50-200,
+// ♥ 200-500); from 500 boards every card up to ♠K
+function rankCap(boards) {
+  for (let s = 0; s < 3; s++) { const a = RK_GATE[s], z = RK_GATE[s + 1]; if (boards < z) return s * 13 + Math.min(12, Math.floor((boards - a) * 13 / (z - a))); }
+  return 50;
+}
+// the boards needed for a card (inverse of rankCap)
+const boardsFor = i => { const s = Math.floor(i / 13); if (s >= 3) return RK_GATE[3]; const a = RK_GATE[s], z = RK_GATE[s + 1]; return a + Math.ceil((i % 13) * (z - a) / 13); };
 const rankTxt = i => RK_S[Math.floor(i / 13)] + RK_R[i % 13];
 // a player's card from the profile (rating, boards) and the trophies; the championship's leader holds ♠A
 function cardRank(p, name) {
@@ -382,7 +390,7 @@ function cardRank(p, name) {
   const rt = p.rtn ? p.rt : 1350, boards = p.per && p.per[4] ? p.per[4][0] || 0 : p.n || 0;
   const tro = name ? trophiesOf(name) : [], bonus = tro.reduce((a, t) => a + (t.place === 1 ? 3 : 1), 0);
   const base = Math.max(0, Math.min(50, Math.round((rt - 1350) / 8)));
-  const cap = boards < RK_GATE[1] ? 12 : boards < RK_GATE[2] ? 25 : boards < RK_GATE[3] ? 38 : 50;
+  const cap = rankCap(boards);   // experience: every player starts at ♣2 and climbs with the boards played
   let i = Math.min(base + bonus, cap, 50);
   if (name && CH.leader && CH.leader === Net.fbKey(name)) i = 51;
   return { i, cap, boards, rt, bonus, base };
@@ -395,7 +403,7 @@ function rankBig(p, name) {
   let next;
   if (r.i === 51) next = '👑 ' + T('Leader of the championship');
   else if (r.i === 50) next = T('The top card for a player: ♠A belongs to the leader of the championship.');
-  else if (r.i >= r.cap) { const g = RK_GATE[Math.floor(r.cap / 13) + 1]; next = T('{0} more boards to reach {1}', g - r.boards, RK_S[Math.floor(r.cap / 13) + 1]); }
+  else if (r.i >= r.cap) next = T('{0} more boards to reach {1}', Math.max(1, boardsFor(r.i + 1) - r.boards), rankTxt(r.i + 1));
   else { const need = Math.max(1, Math.ceil(1350 + 8 * (r.i - r.bonus + 1) - 4 - r.rt)); next = T('{0} rating points to {1}', need, rankTxt(r.i + 1)); }
   return `<span class="rkbig s${Math.floor(r.i / 13)}">${rankTxt(r.i)}</span> <small class="muted">${next}</small>`;
 }
