@@ -53,6 +53,9 @@ function workerMain(E) {
       } else if (m.type === 'card') {
         // a robot's card, worked out here so the page stays smooth while it thinks
         self.postMessage({ type: 'card', id: m.id, c: E.aiPlay(m.g, m.seat, m.opt) });
+      } else if (m.type === 'ddtable') {
+        // every contract double dummy: the tricks for each declarer (N E S W) in each strain (♣ ♦ ♥ ♠ NT)
+        self.postMessage({ type: 'ddtable', id: m.id, t: [0, 1, 2, 3].map(d => [0, 1, 2, 3, 4].map(s => E.ddContract(m.deal, { level: 1, strain: s, dbl: 0, decl: d }, 3e6))) });
       } else if (m.type === 'dd') {
         self.postMessage({ type: 'dd', id: m.id, key: m.key, t: E.ddContract(m.deal, m.c, m.limit || 1.5e8) });
       }

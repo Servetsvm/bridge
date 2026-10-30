@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 303;
+const APP_V = 304;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -206,6 +206,8 @@ const Field = {
   },
   dd(id, key, deal, c) {
     if (this.ddBoard !== id || !this.dw) { if (this.dw) this.dw.terminate(); this.dw = this.mk(); this.ddBoard = id; if (this.dw) this.dw.onerror = () => this.onmsg({ type: 'dd', id, key, t: null }); }
+    if (this.dw && key === 'table') { this.dw.postMessage({ type: 'ddtable', id, deal }); return; }
+    if (key === 'table') return;   // without a worker: no lessons (too slow on the page)
     if (this.dw) this.dw.postMessage({ type: 'dd', id, key, deal, c, limit: 1.2e8 });   // most deals need a few million nodes; about one in forty needs 30-40 million
     else setTimeout(() => this.onmsg({ type: 'dd', id, key, t: E.ddContract(deal, c, 1.5e6) }), 50);
   },
@@ -228,16 +230,42 @@ const Field = {
       for (const t of f.tables) { if (t.passed) continue; const k = conId(t.c); cnt[k] = (cnt[k] || 0) + 1; if (!best || cnt[k] > cnt[conId(best)]) best = t.c; }
       f.normC = best;
       if (best) this.dd(m.id, 'norm', L.deal, best);
+      if (!online() && !f.ddt) { f.ddt = 1; this.dd(m.id, 'table', L.deal, null); }   // for the robots' bidding lessons
       { const r = RHIST.find(h => h.id === m.id); if (r) { applyField(r, f); r.normC = f.normC ? { ...f.normC } : null; saveRH(); scheduleSync(); } }
       const e = HIST.find(h => h.id === m.id);
       if (e) { applyField(e, f); Store.saveRec(e); scheduleSync(); if (e.tour && e.tour.table == null) tourSend(e); }
     }
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); scheduleSync(); } }
+    if (m.type === 'ddtable') { const les = bidLessons(L.deal, L.board, f.tables, m.t); if (les.length && typeof Net !== 'undefined') les.forEach((x, i) => Net.roboBid(m.id, i, L.deal, L.board, x).catch(() => {})); return; }
     if (m.type === 'error') this.partDone(m.id);
     if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
 };
 /* ---- checking the card play after the board (double dummy, in a background worker) ---- */
+/* ---- the robots' bidding lessons: each robot table's contract against the best contract its side could make with
+   all four hands open (double dummy); a lesson when it cost 4 IMPs or more: a missed game or slam, an overbid, a wrong
+   contract. At most two per board (the costliest, one per auction). ---- */
+const isGameC = (l, s) => s === 4 ? l >= 3 : s >= 2 ? l >= 4 : l >= 5;
+function bidLessons(deal, board, tables, T) {
+  if (!T || !tables) return [];
+  const out = [], seen = new Set();
+  for (const t of tables) {
+    if (!t || t.passed || !t.c || !t.auc) continue;
+    const c = t.c, side = sideOf(c.decl), vul = vulOf(board, c.decl), tr = T[c.decl] && T[c.decl][c.strain]; if (tr == null) continue;
+    const got = scoreOf(c.level, c.strain, c.dbl, vul, tr);
+    let best = null;
+    // the contracts a player would bid: the lowest level of a partscore, a game, a small slam or a grand slam
+    const gl = st => st === 4 ? 3 : st >= 2 ? 4 : 5;
+    for (const d of [0, 1, 2, 3]) if (sideOf(d) === side) for (let st = 0; st < 5; st++) { const k = T[d][st]; if (k == null || k < 7) continue;
+      for (const l of [1, gl(st), 6, 7]) { if (k < l + 6) continue; const sc = scoreOf(l, st, 0, vul, k); if (!best || sc > best.sc) best = { l, s: st, d, sc, tr: k }; } }
+    if (!best) continue;
+    const loss = E.imps(best.sc - got); if (loss < 4) continue;
+    const key = t.auc.map(a => a[1]).join(','); if (seen.has(key)) continue; seen.add(key);
+    const kind = tr < c.level + 6 ? (best.l < c.level || !isGameC(best.l, best.s) ? 'overbid' : 'wrong') : best.l >= 6 && c.level < 6 ? 'slam' : isGameC(best.l, best.s) && !isGameC(c.level, c.strain) ? 'game' : 'wrong';
+    out.push({ c, auc: t.auc, tr, best, loss, kind });
+  }
+  return out.sort((a, b) => b.loss - a.loss).slice(0, 2);
+}
 /* ---- the robots' chart: the deals given to the robots (watched), kept on this device apart from your Results ---- */
 const RH_KEY = 'bridge-robot-hist';
 let RHIST = (() => { try { return JSON.parse(localStorage.getItem(RH_KEY) || '[]') || []; } catch (e) { return []; } })();
@@ -1297,7 +1325,7 @@ function pracHtml() {
     <div class="prhintrow"><label class="prhintsw"><input type="checkbox" id="pdHint" ${SET.pracHint ? "checked" : ""}> 📚 ${T("Notify me")}</label><button class="btn hconv prconv" data-hsec="conv">📋 ${T('Convention card')}</button></div>
     ${pracWarnHtml()}
     ${pracProgHtml()}
-    <div class="praskrow"><button class="prask" id="hConvAsk">➕ <span class="lg">${T('Add a convention')}</span><span class="sh">${T('Convention')}</span></button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ <span class="lg">${T('Write to the administrator')}</span><span class="sh">${T('Admin')}</span></button>`}</div>`;
+    <div class="praskrow"><button class="prask" id="hConvAsk">➕ <span class="lg">${T('Add a convention')}</span><span class="sh">${T('Convention')}</span></button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="prask" id="hConvReq">📥 ${T('Convention requests')}</button><button class="prask" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="prask" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${Net.supNew ? ` <b class="supc">${Net.supNew}</b>` : ''}</button>` : `<button class="prask" id="hSup">✉️ <span class="lg">${T('Write to the administrator')}</span><span class="sh">${T('Admin')}</span></button>`}</div>`;
 }
 // tick or untick a convention to practise (it goes on the card; the one it replaces comes off)
 function togglePractice(k, add) {
@@ -2571,6 +2599,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
+  if (t.id === 'hLearn') { showLearn(); return; }
+  if (t.id === 'learnCopy') { const txt = JSON.stringify(ui.learnCopy || {}); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
   if (t.dataset.casys) { setSys(t.dataset.casys); Store.saveSettings(SET); save(); render(); showCardConv(); return; }
   if (t.id === 'caBack') { showCardSys(); return; }
   if (t.id === 'caDone') { closeOv(); render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); checkSharedDeal(); setTimeout(installAsk, 800); return; }
@@ -2609,6 +2639,7 @@ document.addEventListener('click', ev_ => {
       showTourSetup(ui.tsetId); return;
     }
     if (seg === 'restab') { ui.resTab = v; showResults(); return; }
+    if (seg === 'learnd') { ui.learnDays = +v; showLearn(); return; }
     if (seg === "stattab") { ui.statTab = v; showStats(); return; }
     if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
@@ -3085,6 +3116,7 @@ async function showRoboErrs() {
   if (ui.overlay !== 'roboerr') openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let L = []; try { L = await Net.roboErrs(); } catch (e) {}
   if (ui.overlay !== 'roboerr') return;
+  L = L.filter(r => r.kind !== 'bid');   // the bidding lessons are in the learning report
   ui.rbList = L;
   for (const r of L) r.er = (r.er || []).filter(x => x[0] > 0);   // a note has no card of its own
   const n = L.reduce((a, r) => a + (r.er || []).length, 0);
@@ -3106,6 +3138,43 @@ async function showRoboErrs() {
 }
 // the player tells what a robot did wrong on this board (the bidding too, which the card check cannot see)
 const rbNoteHtml = e => e && e.deal && !online() ? `<div class="grp"><span>🤖 ${T('Report a robot mistake')}</span><textarea id="rbNote" class="tok" rows="2" maxlength="500" placeholder="${T('What did the robot do wrong? The bidding, a card…')}"></textarea><div class="row2"><button class="btn" id="rbNoteSend" data-id="${esc(String(e.id))}">📨 ${T('Send to the robot mistakes')}</button></div></div>` : '';
+// the administrator sees on the report button how many new lessons came in since the report was last opened
+async function learnCheck() {
+  if (typeof Net === "undefined" || !Net.isAdmin()) return;
+  try { const L = await Net.roboErrs(); const n = L.filter(r => !r.u && r.ts > (SET.learnSeen || 0)).length; if (n !== ui.learnNew) { ui.learnNew = n; render(); } } catch (e) {}
+}
+setTimeout(learnCheck, 20000); setInterval(learnCheck, 15 * 60000);
+/* ---- the robots' learning report (the administrator only): what the robots got wrong on the boards played, from
+   every player — the cards (double dummy, as in Robot mistakes) and the bidding (the robot tables' contracts against
+   the best contract with all hands open) — by period, with the costliest examples, to copy for Claude ---- */
+async function showLearn() {
+  if (!Net.isAdmin()) return;
+  if (ui.overlay !== 'learn') openOv('learn', `<h2>📈 ${T('Learning report')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
+  let L = []; try { L = await Net.roboErrs(); } catch (e) {}
+  if (ui.overlay !== 'learn') return;
+  SET.learnSeen = Date.now(); Store.saveSettings(SET); save(); ui.learnNew = 0;
+  const days = ui.learnDays || 7, from = days ? Date.now() - days * 864e5 : 0, R = L.filter(r => r.ts >= from);
+  const bids = R.filter(r => r.kind === 'bid'), cards = R.filter(r => r.kind !== 'bid' && !r.u);
+  const SN = '♣♦♥♠', cn = (l, s) => l + (s === 4 ? 'NT' : SN[s]);
+  // the cards: opening lead, declarer, defence; how often and how many tricks
+  const cat = { lead: [0, 0], decl: [0, 0], def: [0, 0] };
+  for (const r of cards) for (const x of r.er || []) { if (!(x[0] > 0)) continue; const k = x[0] === 1 && x[1] === (r.c[3] + 1) % 4 ? 'lead' : sideOf(x[1]) === sideOf(r.c[3]) ? 'decl' : 'def'; cat[k][0]++; cat[k][1] += x[4] || 0; }
+  const KB = { game: T('Missed game'), slam: T('Missed slam'), overbid: T('Overbid'), wrong: T('Wrong contract') };
+  const bk = {}; for (const r of bids) { const b = bk[r.bk] || (bk[r.bk] = [0, 0]); b[0]++; b[1] += (r.er && r.er[0] && r.er[0][4]) || 0; }
+  const ex = bids.slice().sort((a, b) => (b.er[0][4] || 0) - (a.er[0][4] || 0)).slice(0, 8);
+  const aucTxt = a => (a || []).map(([s, c]) => typeof c === 'number' ? callTxt(c) : c === 'P' ? '–' : c).join(' ');
+  const row = (label, v, unit) => `<tr><td>${label}</td><td class="n">${v[0]}</td><td class="n">${v[1]} ${unit}</td></tr>`;
+  ui.learnCopy = { days, cards: { boards: cards.length, ...cat }, bidding: bk, examples: ex.map(r => ({ board: r.b, deal: r.d, auction: aucTxt(r.a), robots: cn(r.c[0], r.c[1]) + ' ' + SEAT_AB[r.c[3]], tricks: r.ddT, best: r.best ? cn(r.best[0], r.best[1]) + ' ' + SEAT_AB[r.best[2]] : '', imp: -(r.er[0][4] || 0), kind: r.bk })) };
+  openOv('learn', `<h2>📈 ${T('Learning report')}</h2>
+    <div class="muted">${T('What the robots got wrong on the boards played by everyone, against double dummy: their cards, and the contracts the robot tables reached against the best contract with all hands open. Copy it for Claude: the robots are improved from it.')}</div>
+    <div class="seg" data-seg="learnd">${[[7, T('Last 7 days')], [30, T('Last 30 days')], [0, T('All')]].map(([v, l]) => `<button data-v="${v}" class="${days === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <h3 class="sth">🃏 ${T('Card play')} <small>(${T('{0} boards', cards.length)})</small></h3>
+    <table class="res stats"><tbody>${row(T('Opening lead'), cat.lead, T('tricks'))}${row(T('Declarer play'), cat.decl, T('tricks'))}${row(T('Defence'), cat.def, T('tricks'))}</tbody></table>
+    <h3 class="sth">🗣 ${T('Bidding')} <small>(${T('{0} boards', bids.length)})</small></h3>
+    ${Object.keys(bk).length ? `<table class="res stats"><tbody>${Object.entries(bk).sort((a, b) => b[1][1] - a[1][1]).map(([k, v]) => row(KB[k] || k, v, 'IMP')).join('')}</tbody></table>` : `<div class="muted">${T('No bidding lessons yet.')}</div>`}
+    ${ex.length ? `<h3 class="sth">${T('Costliest examples')}</h3>${ex.map(r => `<div class="anarow">${T('Board')} ${r.b}: ${aucTxt(r.a)} → <b>${cn(r.c[0], r.c[1])} ${SEAT_AB[r.c[3]]}</b> (${T('{0} tricks', r.ddT)}) · ${T('best')}: <b>${r.best ? cn(r.best[0], r.best[1]) + ' ' + SEAT_AB[r.best[2]] : ''}</b> · <b class="neg">−${r.er[0][4]} IMP</b> · ${KB[r.bk] || ''}</div>`).join('')}` : ''}
+    <div class="row2"><button class="btn gold" id="learnCopy">📋 ${T('Copy the report for Claude')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
 /* the administrator's list of players: every registered name, when it was made and last signed in; tick the ones
    to remove (test names, for instance) and remove them with all their data */
 async function showPlayers() {
