@@ -516,7 +516,8 @@ const Net = (() => {
   const listed = t => (t.online || ((t.pub || t.tplay || t.solo) && inPlay(t)));   // every table in play shows (alone with robots: no joining)
   function tablesHtml() {
     // tables in play are listed: online tables, and players at a board with robots (not someone on the home page)
-    const L = st.tables && st.tables.filter(listed);
+    // not your own name at a board on another of your devices (it is you; you are here)
+    const L = st.tables && st.tables.filter(t => listed(t) && (t.online || nameKey(t.host || "") !== nameKey(myName() || "")));
     // each table is one line: open (🔓, an online table anyone may ask to join, or a player at the robots who chose
     // "open to others") or closed (🔒), whose table it is and what is played there, the players, and the buttons
     const pn = n => nameKey(n) === nameKey(myName()) ? `<b class="pname" data-who="${esc(n)}">${esc(n)}</b>` : `<b class="pname" data-pm="${esc(n)}" title="${T('Private message')}">${esc(n)}</b>`;
