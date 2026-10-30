@@ -1815,3 +1815,27 @@ body.homev2 .h2chnew{font-size:13.5px;padding:6px 10px;border-radius:10px;backgr
 .rkc.s0,.rkbig.s0{color:#1a7a2e}.rkc.s1,.rkbig.s1{color:#d06a00}.rkc.s2,.rkbig.s2{color:#c4122f}.rkc.s3,.rkbig.s3{color:#1b1b1b}
 .rkbig{font-size:22px;padding:6px 8px;min-width:48px;border-radius:7px;margin-right:4px}
 :root[data-theme="dark"] .rkc,:root[data-theme="dark"] .rkbig{background:#fffdf6}
+/* Play offline and the championship in one felt box, side by side on every screen (a thin line between them); on a
+   phone the fan of cards and the sentence give way so both fit on one row */
+body.homev2 .h2pr{position:relative;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;border-radius:16px;overflow:hidden;
+  background:radial-gradient(130% 120% at 0% 0%,#2e7c53 0%,#1d5e3d 45%,#123f29 100%);border:1px solid rgba(0,0,0,.35);box-shadow:var(--h2-shadow)}
+body.homev2 .h2pr::after{content:"";position:absolute;inset:8px;border:1px solid rgba(246,236,208,.18);border-radius:11px;pointer-events:none}
+body.homev2 .h2pr .h2play{background:none;border:0;box-shadow:none;border-radius:0}
+body.homev2 .h2pr .h2play::after{content:none}
+body.homev2 .h2pr .h2champ{background:none;border:0;box-shadow:none;border-radius:0;border-left:1px solid rgba(246,236,208,.22);color:#f6ecd0;justify-content:center;padding:clamp(10px,2.6vw,16px) clamp(12px,3vw,18px)}
+body.homev2 .h2pr .h2cht{color:#fff6dc;font-size:clamp(18px,4.8vw,23px)}
+body.homev2 .h2pr .h2champ small,body.homev2 .h2pr .h2chm{color:rgba(246,236,208,.8)}
+body.homev2 .h2pr .h2chl{color:#fff6dc}
+body.homev2 .h2pr .h2chb .h2chs{background:rgba(0,0,0,.22);color:#f6ecd0;border:1px solid rgba(246,236,208,.28)}
+body.homev2 .h2pr .h2chnew{background:rgba(242,201,76,.2);border-color:rgba(242,201,76,.45);color:#fff6dc}
+@media (max-width:640px){
+  body.homev2 .h2pr{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  body.homev2 .h2pr .h2play{grid-template-columns:minmax(0,1fr);padding:12px}
+  body.homev2 .h2pr .h2fan,body.homev2 .h2pr .h2ptx p,body.homev2 .h2pr .h2chh small,body.homev2 .h2pr .h2chm{display:none}
+  body.homev2 .h2pr .h2ptx h2,body.homev2 .h2pr .h2cht{font-size:17px}
+  body.homev2 .h2pr .h2champ{padding:12px;gap:5px}
+  body.homev2 .h2pr .h2chl{font-size:13px}
+  body.homev2 .h2pr .h2chb{gap:6px}
+  body.homev2 .h2pr .h2go,body.homev2 .h2pr .h2chb .h2go{padding:9px 10px;font-size:14px}
+  body.homev2 .h2pr .h2chb .h2chs{padding:7px 9px;font-size:13px}
+}
