@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 333;
+const APP_V = 334;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2115,6 +2115,7 @@ function showOpenChoice() {
   openOv('open', `<h2>🌐 ${T('Open an online table')}</h2>
     <button class="btn new choice" data-open="pub"><b>🌍 ${T('Public table')}</b><small>${T('Listed in the lobby: anyone can ask to join, you accept.')}</small></button>
     <button class="btn choice" data-open="priv"><b>🔒 ${T('Private table')}</b><small>${T('Shown in the lobby with 🔒: invited players sit at once, others must ask you, no spectators.')}</small></button>
+    <button class="btn choice" id="olTeam"><b>🏅 ${T('Online team match')}</b><small>${T('Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.')}</small></button>
     <div class="grp"><span>🏆 ${T('Online tournaments')}</span><div id="nTours">${toursHtml()}</div></div>
     <div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
 }
@@ -2854,6 +2855,13 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'rtOpen') { showRTeam(); return; }
+  // the online team match: a new tournament of the Team match type, set up at once
+  if (t.id === 'olTeam') {
+    const tt = Net.newTour(8), k = TOUR_KINDS.teams;
+    Object.assign(tt, { kind: 'teams', format: k.set.format, n: k.set.n, scoring: k.set.scoring, hours: k.set.hours, name: (T('Online team match') + ' · ' + new Date().toLocaleDateString()).slice(0, 40) });
+    while (tt.tables.length < 2) tt.tables.push(['', '', '', '']); tt.tables.length = 2;
+    ui.tsel = null; closeOv(); render(); showTourSetup(tt.id); return;
+  }
   if (t.dataset.rtn) { RT = { n: +t.dataset.rtn, ids: [], ts: Date.now() }; saveRT(); closeOv(); newBoard(); return; }
   if (t.id === 'rtGo') { closeOv(); if (!G || G.phase === 'done' || !G.rteam) newBoard(); return; }
   if (t.id === 'rtEnd') { askYes(T('Finish the team match now?'), () => { RT.end = Date.now(); saveRT(); showRTeam(); }); return; }

@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Online team match": "Online takım maçı", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "İki masada dörder kişilik iki takım; aynı eller masa masa IMP ile karşılaştırılır, boş yerlere robot oturur.",
     "Clubs": "Kulüpler",
     "The match is over": "Maç bitti", "The Closed room is still playing…": "Kapalı salon hâlâ oynuyor…", "You won the match!": "Maçı kazandınız!", "The robots won the match": "Maçı robotlar kazandı", "A draw": "Berabere",
     "Next board": "Sonraki el",
@@ -417,6 +418,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Online team match": "Lagkamp på nett", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "To lag på fire ved to bord; de samme spillene sammenlignes bord mot bord i IMP, roboter tar tomme plasser.",
     "Clubs": "Klubber",
     "The match is over": "Kampen er over", "The Closed room is still playing…": "Lukket rom spiller fortsatt…", "You won the match!": "Du vant kampen!", "The robots won the match": "Robotene vant kampen", "A draw": "Uavgjort",
     "Next board": "Neste spill",
@@ -829,6 +831,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Online team match": "Partido de equipos online", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Dos equipos de cuatro en dos mesas; las mismas manos se comparan mesa contra mesa en IMP, los robots ocupan los asientos libres.",
     "Clubs": "Clubes",
     "The match is over": "El partido ha terminado", "The Closed room is still playing…": "La sala cerrada sigue jugando…", "You won the match!": "¡Has ganado el partido!", "The robots won the match": "Los robots ganaron el partido", "A draw": "Empate",
     "Next board": "Siguiente mano",
@@ -1269,6 +1272,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Online team match": "Match par quatre en ligne", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Deux équipes de quatre à deux tables ; les mêmes donnes comparées table contre table en IMP, les robots prennent les places libres.",
     "Clubs": "Clubs",
     "The match is over": "Le match est terminé", "The Closed room is still playing…": "La salle fermée joue encore…", "You won the match!": "Vous avez gagné le match !", "The robots won the match": "Les robots ont gagné le match", "A draw": "Égalité",
     "Next board": "Donne suivante",
@@ -1709,6 +1713,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Online team match": "Incontro a squadre online", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Due squadre da quattro a due tavoli; le stesse smazzate confrontate tavolo contro tavolo a IMP, i robot occupano i posti liberi.",
     "Clubs": "Club",
     "The match is over": "L’incontro è finito", "The Closed room is still playing…": "La sala chiusa sta ancora giocando…", "You won the match!": "Hai vinto l’incontro!", "The robots won the match": "I robot hanno vinto l’incontro", "A draw": "Pareggio",
     "Next board": "Smazzata successiva",
@@ -2149,6 +2154,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Online team match": "Online-Teamkampf", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Zwei Vierer-Teams an zwei Tischen; dieselben Boards werden Tisch gegen Tisch in IMP verglichen, Roboter besetzen leere Plätze.",
     "Clubs": "Clubs",
     "The match is over": "Der Kampf ist vorbei", "The Closed room is still playing…": "Der geschlossene Raum spielt noch…", "You won the match!": "Du hast den Kampf gewonnen!", "The robots won the match": "Die Roboter haben gewonnen", "A draw": "Unentschieden",
     "Next board": "Nächstes Board",
@@ -2589,6 +2595,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Online team match": "Командный матч онлайн", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Две команды по четыре за двумя столами; одни и те же сдачи сравниваются стол против стола в IMP, свободные места занимают роботы.",
     "Clubs": "Клубы",
     "The match is over": "Матч окончен", "The Closed room is still playing…": "Закрытый зал ещё играет…", "You won the match!": "Вы выиграли матч!", "The robots won the match": "Матч выиграли роботы", "A draw": "Ничья",
     "Next board": "Следующая сдача",
@@ -3029,6 +3036,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Online team match": "Mecz drużynowy online", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Dwie czwórki przy dwóch stołach; te same rozdania porównywane stół przeciw stołowi w IMP, wolne miejsca zajmują roboty.",
     "Clubs": "Kluby",
     "The match is over": "Mecz zakończony", "The Closed room is still playing…": "Pokój zamknięty jeszcze gra…", "You won the match!": "Wygrałeś mecz!", "The robots won the match": "Mecz wygrały roboty", "A draw": "Remis",
     "Next board": "Następne rozdanie",
@@ -3469,6 +3477,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Online team match": "在线队式赛", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "两支四人队在两张桌;同样的牌逐桌按 IMP 比较,空位由机器人补上。",
     "Clubs": "俱乐部",
     "The match is over": "比赛结束", "The Closed room is still playing…": "闭室还在打牌…", "You won the match!": "你赢了比赛!", "The robots won the match": "机器人赢了比赛", "A draw": "平局",
     "Next board": "下一副",
