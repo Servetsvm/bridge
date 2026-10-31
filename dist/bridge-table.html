@@ -1929,6 +1929,12 @@ body.clubsopen{overflow:hidden}
 .clubnew{margin-top:12px}.clubnew #clubIdIn{flex:1;min-width:0}
 :root[data-theme="dark"] .clubrow{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15)}
 .clubrow.live{border-color:#2e7d4f;border-width:2px}
+/* Clubs: each club a yellow card (as the gold buttons); a running tournament keeps its green edge */
+.clubrow,:root[data-theme="dark"] .clubrow{background:linear-gradient(#ffe27a,#f2c230);border:1px solid #b8901a;color:#2a2108;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.clubrow .clubname small{opacity:.85}
+.clubrow.live,:root[data-theme="dark"] .clubrow.live{border:3px solid #2e7d4f}
+.clubrow .bm3-key{background:#fff;color:#1b1b1b}
+.clubrow .muted{color:#4a3d10}
 
 </style>
 
@@ -9399,7 +9405,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 347;
+const APP_V = 348;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};

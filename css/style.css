@@ -1898,3 +1898,9 @@ body.clubsopen{overflow:hidden}
 .clubnew{margin-top:12px}.clubnew #clubIdIn{flex:1;min-width:0}
 :root[data-theme="dark"] .clubrow{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15)}
 .clubrow.live{border-color:#2e7d4f;border-width:2px}
+/* Clubs: each club a yellow card (as the gold buttons); a running tournament keeps its green edge */
+.clubrow,:root[data-theme="dark"] .clubrow{background:linear-gradient(#ffe27a,#f2c230);border:1px solid #b8901a;color:#2a2108;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.clubrow .clubname small{opacity:.85}
+.clubrow.live,:root[data-theme="dark"] .clubrow.live{border:3px solid #2e7d4f}
+.clubrow .bm3-key{background:#fff;color:#1b1b1b}
+.clubrow .muted{color:#4a3d10}
