@@ -179,7 +179,9 @@ const SB = (() => {
     if (isTeam()) { const pl = a.filter(x => x && !SEAT.includes(x)).join(' – '); return teamName(dir === 'ns' ? t : partnerT(t)) + (pl ? ' (' + pl + ')' : ''); }
     return s || T('Table {0}', t) + ' ' + (dir === 'ns' ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]);
   }
-  const conTxt = r => !r.l ? T('Passed out') : `${r.l}${sym(r.s)}${r.x === 1 ? 'X' : r.x === 2 ? 'XX' : ''} ${SEAT_AB[r.d]}`;
+  // the declarer (at the single table: the side, N-S or E-W)
+  const declTxt = d => isOne() ? (E.sideOf(d) ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]) : SEAT_AB[d];
+  const conTxt = r => !r.l ? T('Passed out') : `${r.l}${sym(r.s)}${r.x === 1 ? 'X' : r.x === 2 ? 'XX' : ''} ${declTxt(r.d)}`;
   const resTxt = r => { if (!r.l) return ''; const d = r.k - (r.l + 6); return d === 0 ? '=' : signed(d); };
 
   /* ---- loading ---- */
@@ -386,16 +388,16 @@ const SB = (() => {
     const okb = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null), ok = okb && (!isOne() || validH(f.h));
     // the screen of a Bridgemate III: the contract and the N-S score on the display, then one row of large keys per step
     const ns = ok ? (f.l ? nsScore(b, f) : 0) : null;
-    const contract = f.l === 0 ? T('Pass') : f.l ? `${f.l}${f.s != null ? sym(f.s) : ''}${f.x === 1 ? ' X' : f.x === 2 ? ' XX' : ''}${f.d != null ? ' ' + SEAT_AB[f.d] : ''}` : '—';
+    const contract = f.l === 0 ? T('Pass') : f.l ? `${f.l}${f.s != null ? sym(f.s) : ''}${f.x === 1 ? ' X' : f.x === 2 ? ' XX' : ''}${f.d != null ? ' ' + declTxt(f.d) : ''}` : '—';
     const vul = [E.vulOf(b, 0), E.vulOf(b, 1)], vc = vul[0] && vul[1] ? 'both' : vul[0] ? 'ns' : vul[1] ? 'ew' : 'none';
     const vt = vul[0] && vul[1] ? T('All vulnerable') : vul[0] ? T('{0} vulnerable', SEAT_AB[0] + SEAT_AB[2]) : vul[1] ? T('{0} vulnerable', SEAT_AB[1] + SEAT_AB[3]) : T('None vulnerable');
     const keys = (name, cls, opts, cur) => `<div class="bm3-keys ${cls}" data-sbseg="${name}">${opts.map(([v, l, c]) => `<button data-v="${v}" class="bm3-key ${c || ''}${String(cur) === String(v) ? ' active' : ''}">${l}</button>`).join('')}</div>`;
     return `<div class="bm3"><div class="bm3-screen">
-      <div class="bm3-bar"><span class="td">🃏</span><div class="ev"><b>${esc(sb.g.m.n)}</b>${T('Table {0}', mt)}${isTeam() ? ' · ' + roomName(mt) : ''} · ${T('Dealer')}: ${SEAT[E.dealerOf(b)]}</div></div>
+      ${isOne() ? '' : `<div class="bm3-bar"><span class="td">🃏</span><div class="ev"><b>${esc(sb.g.m.n)}</b>${T('Table {0}', mt)}${isTeam() ? ' · ' + roomName(mt) : ''} · ${T('Dealer')}: ${SEAT[E.dealerOf(b)]}</div></div>`}
       <div class="bm3-head">
         <div class="bm3-board"><small>${T('Board')}</small><b>${b}</b><span class="bm3-vul ${vc}">${vt}</span></div>
         ${R[mt] ? `<div class="bm3-edit">✎</div>` : ''}
-        <div class="bm3-pairs"><div><i>${SEAT_AB[0] + SEAT_AB[2]}</i>${esc(pairName(mt, 'ns'))}</div><div><i>${SEAT_AB[1] + SEAT_AB[3]}</i>${esc(pairName(mt, 'ew'))}</div></div>
+        ${isOne() ? '' : `<div class="bm3-pairs"><div><i>${SEAT_AB[0] + SEAT_AB[2]}</i>${esc(pairName(mt, 'ns'))}</div><div><i>${SEAT_AB[1] + SEAT_AB[3]}</i>${esc(pairName(mt, 'ew'))}</div></div>`}
       </div>
       <div class="bm3-display">
         <div class="bm3-contract">${contract}</div>
@@ -407,7 +409,7 @@ const SB = (() => {
       ${f.l ? `${keys('s', 'k5', [0, 1, 2, 3, 4].map(i => [i, i === 4 ? 'NT' : SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.s)}
       ${keys('x', 'k3', [[0, '—'], [1, 'X', 'dbl'], [2, 'XX', 'dbl']], f.x)}
       <div class="bm3-step">${T('Declarer')}</div>
-      ${keys('d', 'k4', [0, 1, 2, 3].map(s => [s, SEAT_AB[s]]), f.d)}` : ''}
+      ${isOne() ? keys('d', 'k2', [[0, SEAT_AB[0] + SEAT_AB[2]], [1, SEAT_AB[1] + SEAT_AB[3]]], f.d == null ? null : E.sideOf(f.d)) : keys('d', 'k4', [0, 1, 2, 3].map(s => [s, SEAT_AB[s]]), f.d)}` : ''}
       ${f.l && f.s != null && f.d != null ? `<div class="bm3-step">${T('Result')}</div>
       ${keys('k', 'k7', res.map(([k, l]) => [k, l, 'res ' + (k - need === 0 ? 'made' : k > need ? 'over' : 'down')]), f.k)}` : ''}
       ${isOne() && (f.l === 0 || f.k != null) ? `<div class="bm3-step">${T('North-South’s points (0–40)')}</div><input class="bm3-hcp" id="sbHcp" type="number" inputmode="numeric" min="0" max="40" value="${f.h ?? ''}" placeholder="${T('High-card points')}" data-okb="${okb ? 1 : ''}">` : ''}

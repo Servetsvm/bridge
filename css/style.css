@@ -1904,3 +1904,4 @@ body.clubsopen{overflow:hidden}
 .clubrow.live,:root[data-theme="dark"] .clubrow.live{border:3px solid #2e7d4f}
 .clubrow .bm3-key{background:#fff;color:#1b1b1b}
 .clubrow .muted{color:#4a3d10}
+.bm3-keys.k2{grid-template-columns:repeat(2,1fr)}
