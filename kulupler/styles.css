@@ -473,3 +473,5 @@ html.embed .login-logo,html.embed .topbar-logo,html.embed .login-box a[href="../
 .bg-entry.open .bg-entry-name::after{content:'▾'}
 .bg-entry .bg-entry-body{display:none;margin-top:8px}
 .bg-entry.open .bg-entry-body{display:block}
+.bg-newtour{margin-top:16px;padding-top:10px;border-top:1px solid var(--border2);text-align:left}
+body.bg-device .bg-newtour{border-color:#d9dee3}

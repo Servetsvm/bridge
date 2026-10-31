@@ -21,6 +21,7 @@
     'Open another club':'Başka bir kulüp aç',
     'Open your club':'Kulübünü aç',
     'Club admin':'Kulüp yöneticisi',
+    'A club\'s admin signs in here to set up a new tournament.':'Kulüp yöneticisi yeni bir turnuva kurmak için buradan girer.',
     'Club password':'Kulüp şifresi',
     'Only the super admin opens clubs':'Kulübü sadece süper yönetici açar',
     'Club created':'Kulüp oluşturuldu',
