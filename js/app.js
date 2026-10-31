@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 345;
+const APP_V = 346;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3511,6 +3511,7 @@ async function showClubs() {
   if (ui.overlay !== 'clubs') ui.clubLive = null;
   draw();
   if (ui.clubLive == null) {
+    if (Net.isAdmin()) await clubListSync();   // the super admin: the list from every club, as it is now
     const [v, cl] = await Promise.all([Net.Cloud.get('gate/live').catch(() => null), Net.Cloud.get('gate/clubList').catch(() => null)]);
     const live = Object.entries(v || {}).map(([club, t]) => ({ club, ...t })).filter(t => t && /^\d{2}$/.test(t.p || '') && Date.now() - (t.ts || 0) < 24 * 3600e3).sort((a, b) => b.ts - a.ts);
     // the running tournaments first, then every other club (switched off ones are left out)
@@ -3518,6 +3519,15 @@ async function showClubs() {
     ui.clubLive = [...live, ...rest];
     if (ui.overlay === 'clubs') draw();
   }
+}
+// the clubs' list every player sees (gate/clubList): each club's name and whether it is on, from every club
+async function clubListSync() {
+  try {
+    const ids = Object.keys((await Net.Cloud.get('gate/clubs?shallow=true')) || {});
+    const infos = await Promise.all(ids.map(id => Net.Cloud.get('gate/clubs/' + id + '/info').catch(() => null)));
+    const L = {}; ids.forEach((id, i) => { const v = infos[i]; if (v && v.name) L[id] = { n: String(v.name).slice(0, 40), a: v.active !== false }; });
+    await Net.Cloud.put('gate/clubList', L);
+  } catch (e) {}
 }
 /* Clubs: the club tournaments (in kulupler/, once BridgeGate) open here, full screen above the home page, under a bar with
    Home; the phone's Back closes them too. q: the club address's query (?club=…&role=table…), or '' for the clubs' page */
