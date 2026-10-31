@@ -9399,7 +9399,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 346;
+const APP_V = 347;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12917,7 +12917,8 @@ async function clubListSync() {
     const ids = Object.keys((await Net.Cloud.get('gate/clubs?shallow=true')) || {});
     const infos = await Promise.all(ids.map(id => Net.Cloud.get('gate/clubs/' + id + '/info').catch(() => null)));
     const L = {}; ids.forEach((id, i) => { const v = infos[i]; if (v && v.name) L[id] = { n: String(v.name).slice(0, 40), a: v.active !== false }; });
-    await Net.Cloud.put('gate/clubList', L);
+    for (const id of Object.keys((await Net.Cloud.get('gate/clubList?shallow=true').catch(() => null)) || {})) if (!(id in L)) L[id] = null;   // a club gone
+    if (Object.keys(L).length) await Net.Cloud.patch('gate/clubList', L);   // club by club (the rules allow each club's entry)
   } catch (e) {}
 }
 /* Clubs: the club tournaments (in kulupler/, once BridgeGate) open here, full screen above the home page, under a bar with

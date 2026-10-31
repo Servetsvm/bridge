@@ -11,7 +11,12 @@ async function renderSuperAdminPanel(){
   catch(e){ c.innerHTML='<div class="card" style="color:var(--red);">Failed to load clubs.</div>'; return; }
   SA_CLUBS=clubs;
   // the list every player sees in Clubs: every club, as it is now
-  try{ await fetch(await fbRootUrl('/clubList.json'),{method:'PUT',body:JSON.stringify(Object.fromEntries(clubs.map(c=>[c.id,{n:String(c.name).slice(0,40),a:c.active}])))}); }catch(e){}
+  try{
+    const L=Object.fromEntries(clubs.map(c=>[c.id,{n:String(c.name).slice(0,40),a:c.active}]));
+    const u=await fbRootUrl('/clubList.json'), r=await fetch(u+(u.includes('?')?'&':'?')+'shallow=true'); const old=r.ok?await r.json():null;
+    for(const id of Object.keys(old||{})) if(!(id in L)) L[id]=null;   // a club gone
+    if(Object.keys(L).length) await fetch(await fbRootUrl('/clubList.json'),{method:'PATCH',body:JSON.stringify(L)});   // club by club (the rules allow each club's entry)
+  }catch(e){}
 
   const rows = clubs.length
     ? clubs.map((cl,i)=>`
