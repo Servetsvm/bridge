@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 335;
+const APP_V = 336;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1604,7 +1604,7 @@ function homeShell2() {
       <div class="h2champ" id="hChamp"></div></div>
       <div class="h2tiles">
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
-        ${tile('href="bridgegate/"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
+        ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Team match'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
       </div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>   <!-- the open tables right under the ways to play -->
@@ -1920,7 +1920,7 @@ function toursHtml() {
   }).join('');
   const table = rows ? `<div class="ttwrap"><table class="ttab"><thead><tr><th>${T('Tournament')}</th><th>${T('Format')}</th><th class="n">${T('Boards')}</th><th>${T('Ranking')}</th><th class="n">${T('Players')}</th><th>${T('Status')}</th><th>${T('Ends in')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`
     : `<div class="muted">${L.length ? T('No tournaments here.') : T('No tournaments yet. Create one and invite the players you want.')}</div>`;
-  // the online tournaments (shown in the online table window; Tournaments on the home page opens BridgeGate (bridgegate/))
+  // the online tournaments (shown in the online table window; Clubs on the home page opens the club tournaments)
   return `${tabs}${table}<div class="row2 tnew"><button class="btn gold" id="tNew">➕ ${T('New tournament')}</button></div>`;
 }
 // the action buttons of one tournament row (and a short note: an invitation, your table, how far you are)
@@ -2854,6 +2854,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'rtOpen') { showRTeam(); return; }
+  if (t.id === 'hClubs') { openClubs(''); return; }
   // the online team match: a new tournament of the Team match type, set up at once
   if (t.id === 'olTeam') {
     const tt = Net.newTour(8), k = TOUR_KINDS.teams;
@@ -3100,7 +3101,9 @@ function start(data) {
   // an unfinished board (bidding or play) waits for "Play with robots" to carry on
   ui.saved = G && G.id !== 'idle' && (G.phase === 'bid' || G.phase === 'play') ? G : null;
   G = idleG(); render();
-  { const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (needGate()) showGate(); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
+  { const kq = new URLSearchParams(location.search).get('kulup');
+    if (kq != null) { try { history.replaceState(null, '', location.pathname); } catch (e) {} openClubs(kq); }
+    const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (kq != null) return; if (needGate()) showGate(); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
   Store.initCloud(mergeCloud);
   syncNow(true);
   window.addEventListener("online", () => syncNow(true));
@@ -3489,6 +3492,24 @@ function showRTeam() {
     <div class="muted">${T('The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).')}</div>
     <div class="row2">${RT.end ? `<button class="btn new" id="rtNew">🤖 ${T('New match')}</button>` : `<button class="btn new" id="rtGo">▶ ${T('Continue')} (${Math.min(RT.ids.length + 1, RT.n)}/${RT.n})</button><button class="btn" id="rtEnd">${T('Finish the match')}</button>`}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+/* Clubs: the club tournaments (in kulupler/, once BridgeGate) open here, full screen above the home page, under a bar with
+   Home; the phone's Back closes them too. q: the club address's query (?club=…&role=table…), or '' for the clubs' page */
+function openClubs(q) {
+  let v = $('clubView');
+  if (!v) {
+    v = document.createElement('div'); v.id = 'clubView';
+    v.innerHTML = `<div class="cvbar"><button class="btn" id="cvHome">⌂ ${T('Home')}</button><b>🏛 ${T('Clubs')}</b></div><iframe id="cvFrame"></iframe>`;
+    document.body.appendChild(v);
+    v.querySelector('#cvHome').addEventListener('click', () => history.state && history.state.clubs ? history.back() : closeClubs());
+  }
+  const p = new URLSearchParams(String(q || '').replace(/^\?/, '')); p.set('embed', '1');
+  const fr = document.createElement('iframe'); fr.id = 'cvFrame'; fr.title = T('Clubs'); fr.src = 'kulupler/index.html?' + p.toString();   // a new frame: its first page adds no step to Back
+  $('cvFrame').replaceWith(fr);
+  v.hidden = false; document.body.classList.add('clubsopen');
+  try { if (!(history.state && history.state.clubs)) history.pushState({ clubs: 1 }, ''); } catch (e) {}
+}
+function closeClubs() { const v = $('clubView'); if (!v || v.hidden) return; v.hidden = true; $('cvFrame').replaceWith(Object.assign(document.createElement('iframe'), { id: 'cvFrame' })); document.body.classList.remove('clubsopen'); if (typeof needGate === 'function' && needGate()) showGate(); }
+window.addEventListener('popstate', () => { if (!(history.state && history.state.clubs)) closeClubs(); });
 /* the administrator deletes score history: the players listed (himself too), the ticked ones' boards removed */
 async function showWipe() {
   if (!Net.isAdmin()) return;

@@ -462,3 +462,6 @@ body.bg-device .btn-primary{background:#2a7de1;color:#fff}
 .bm3t .sbb.me{background:#e3f1e8;border-color:#1e5c3b}.bm3t .sbb.me small{color:#1e5c3b;font-weight:700}
 .bm3t .sbb.pend{background:#fff3d6;border-color:#f0c96a}
 .bm3t .sbb:disabled{cursor:default}
+
+/* inside Bridge Table (Clubs): its bar has the name and Home */
+html.embed .login-logo,html.embed .topbar-logo,html.embed .login-box a[href="../"]{display:none!important}

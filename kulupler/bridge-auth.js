@@ -4,11 +4,10 @@
    Servet is the super admin; the player who opens a club is its admin; a table signs in with its 4-digit code. */
 (function () {
   'use strict';
-  // any reload (refresh) goes back to Bridge Table's home page: the tournament is entered again from there
-  try {
-    const nav = performance.getEntriesByType('navigation')[0];
-    if (nav && nav.type === 'reload') { location.replace('../'); return; }
-  } catch (e) {}
+  // the club tournaments live inside Bridge Table (its Clubs): this page opened on its own goes there, with its address
+  const EMBED = window.top !== window;
+  if (!EMBED) { location.replace('../?kulup=' + encodeURIComponent(location.search)); return; }
+  document.documentElement.classList.add('embed');
   const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1] || (/^(localhost|127.0.0.1)$/.test(location.hostname) ? 'dev' : undefined);
   const ROOT = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');
   const API_KEY = 'AIzaSyDNugZ1tf4rXu7lDYzyZg9v1V3is7xz_Mc';

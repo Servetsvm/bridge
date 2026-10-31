@@ -582,7 +582,7 @@ const SB = (() => {
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
     const sj = e.target.closest('[data-sbjoin]'); if (sj) { sb.entry = false; return openLink(sj.dataset.sbjoin, 0); }
-    const bj = e.target.closest('[data-bgjoin]'); if (bj && lob.G && lob.G[+bj.dataset.bgjoin]) { const g = lob.G[+bj.dataset.bgjoin]; location.href = 'bridgegate/?club=' + encodeURIComponent(g.club) + '&role=table&p=' + g.p; return; }
+    const bj = e.target.closest('[data-bgjoin]'); if (bj && lob.G && lob.G[+bj.dataset.bgjoin]) { const g = lob.G[+bj.dataset.bgjoin]; openClubs('?club=' + encodeURIComponent(g.club) + '&role=table&p=' + g.p); return; }
     const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }
     if (ui.overlay !== 'sb') return;
     const el = e.target.closest('button'); if (!el) return;
