@@ -315,7 +315,8 @@ function cands(x) {
   if (oppOpened && my.length === 0 && pa.length === 0) {
     const ob = st.last, os = ST(ob);
     const bal4 = auc.length >= 3 && auc[auc.length - 1].call === 'P' && auc[auc.length - 2].call === 'P';
-    const d = bal4 ? 3 : 0;
+    // balancing lowers the values needed only at a low level: over a game (1♠–3♦–3♠–4♠ passed round) 9 HCP pass
+    const d = bal4 && LV(ob) <= 2 ? 3 : 0;
     const cheap = s => (ST(ob) < s ? LV(ob) : LV(ob) + 1);
     if (os === 4) {
       if (C.dont && !C.capp && ob === B(1, 4) && x.oppBids.length === 1 && !bal4) {
@@ -964,7 +965,12 @@ function generic(x, h) {
   else {
     const ls = h.longest;
     if (h.len[ls] >= 6) t = ls;
-    else { let ps = -1; for (let s = 0; s < 4; s++) if (P.len[s] >= 6 && h.len[s] >= 2) ps = s; if (ps >= 0) t = ps; else if (oppStops && !x.oppSuits.includes(ls)) t = 4; else t = h.len[ls] >= 5 ? ls : 4; }
+    else {
+      // no stopper in their suit: a suit partner has shown four of (with three of mine) before notrump
+      let ps = -1; for (let s = 0; s < 4; s++) if (P.len[s] >= 6 && h.len[s] >= 2) ps = s;
+      const oppShown = s => x.oppSuits.includes(s) || x.auc.some(e => sideOf(e.seat) !== sideOf(me) && e.m && e.m.len && e.m.len[s] >= 4);
+      if (ps < 0 && !oppStops && !pBidNT && h.len[ls] < 5) for (let s = 0; s < 4; s++) if (!oppShown(s) && P.len[s] >= 4 && h.len[s] >= 3 && (ps < 0 || h.len[s] + P.len[s] > h.len[ps] + P.len[ps])) ps = s;
+      if (ps >= 0) t = ps; else if (oppStops && !x.oppSuits.includes(ls)) t = 4; else t = h.len[ls] >= 5 ? ls : 4; }
   }
   const fitLen = t < 4 ? h.len[t] + P.len[t] : 0;
   const pEst = P.min + Math.min(2, Math.floor((P.max - P.min) / 2));
@@ -994,6 +1000,12 @@ function generic(x, h) {
   const agreed = t < 4 && (P.len[t] >= 3 || x.my.some(e => e.m && e.m.len && e.m.len[t] >= 4));
   const ownSuit = t < 4 && gf && h.len[t] >= 6 && h.top5(t) >= 3 && [0, 1, 2, 3].some(s => s !== t && P.len[s] >= 5);
   if (goal >= 6 && ownSuit && !agreed && !bwUsed && cl <= 4 && B(cl, t) < B(4, 4)) { call = B(cl, t); m = { t: 'Natural: ' + SUIT[t] + ' suit, slam interest', ...range, len: lenm, f: 1 }; }
+  // partner opened a strong 2♣ and named his minor: he is the captain, so raise it below 4NT and let him ask for key
+  // cards (2♣–2♠–3♣ with ♣42 and 9 HCP: 4♣, not 6♣; partner then finds the grand)
+  const pStrong = x.opening && x.opening.seat === x.p && x.opening.m && x.opening.m.cv === 'strong2c';
+  if (goal >= 6 && call === null && pStrong && t < 2 && st.lastSeat === x.p && ST(last) === t && P.len[t] >= 5 && h.len[t] >= 2 && !bwUsed && cl <= 4) {
+    call = B(cl, t); m = { t: 'Support for ' + SUIT[t] + ': slam interest, partner asks', ...range, len: { [t]: 2 }, f: 1 };
+  }
   if (goal >= 6 && call === null) {
     if (!bwUsed && last < B(4, 4) && t < 4 && (t !== 0 || h.aces >= 2)) { call = B(4, 4); m = { tag: 'bw', trump: t, rkc: x.C.rkc0314 ? 2 : x.C.rkc ? 1 : 0, cv: x.C.rkc0314 ? 'rkc0314' : x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc0314 || x.C.rkc ? (x.C.rkc0314 ? 'RKCB 0314' : 'RKCB 1430') + ': asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?', ...range }; }
     else if (B(goal, t) > last) { call = B(goal, t); m = { t: (goal === 7 ? 'Grand' : 'Small') + ' slam', ...range, len: lenm }; }

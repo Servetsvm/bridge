@@ -2467,7 +2467,8 @@ function cands(x) {
   if (oppOpened && my.length === 0 && pa.length === 0) {
     const ob = st.last, os = ST(ob);
     const bal4 = auc.length >= 3 && auc[auc.length - 1].call === 'P' && auc[auc.length - 2].call === 'P';
-    const d = bal4 ? 3 : 0;
+    // balancing lowers the values needed only at a low level: over a game (1♠–3♦–3♠–4♠ passed round) 9 HCP pass
+    const d = bal4 && LV(ob) <= 2 ? 3 : 0;
     const cheap = s => (ST(ob) < s ? LV(ob) : LV(ob) + 1);
     if (os === 4) {
       if (C.dont && !C.capp && ob === B(1, 4) && x.oppBids.length === 1 && !bal4) {
@@ -3116,7 +3117,12 @@ function generic(x, h) {
   else {
     const ls = h.longest;
     if (h.len[ls] >= 6) t = ls;
-    else { let ps = -1; for (let s = 0; s < 4; s++) if (P.len[s] >= 6 && h.len[s] >= 2) ps = s; if (ps >= 0) t = ps; else if (oppStops && !x.oppSuits.includes(ls)) t = 4; else t = h.len[ls] >= 5 ? ls : 4; }
+    else {
+      // no stopper in their suit: a suit partner has shown four of (with three of mine) before notrump
+      let ps = -1; for (let s = 0; s < 4; s++) if (P.len[s] >= 6 && h.len[s] >= 2) ps = s;
+      const oppShown = s => x.oppSuits.includes(s) || x.auc.some(e => sideOf(e.seat) !== sideOf(me) && e.m && e.m.len && e.m.len[s] >= 4);
+      if (ps < 0 && !oppStops && !pBidNT && h.len[ls] < 5) for (let s = 0; s < 4; s++) if (!oppShown(s) && P.len[s] >= 4 && h.len[s] >= 3 && (ps < 0 || h.len[s] + P.len[s] > h.len[ps] + P.len[ps])) ps = s;
+      if (ps >= 0) t = ps; else if (oppStops && !x.oppSuits.includes(ls)) t = 4; else t = h.len[ls] >= 5 ? ls : 4; }
   }
   const fitLen = t < 4 ? h.len[t] + P.len[t] : 0;
   const pEst = P.min + Math.min(2, Math.floor((P.max - P.min) / 2));
@@ -3146,6 +3152,12 @@ function generic(x, h) {
   const agreed = t < 4 && (P.len[t] >= 3 || x.my.some(e => e.m && e.m.len && e.m.len[t] >= 4));
   const ownSuit = t < 4 && gf && h.len[t] >= 6 && h.top5(t) >= 3 && [0, 1, 2, 3].some(s => s !== t && P.len[s] >= 5);
   if (goal >= 6 && ownSuit && !agreed && !bwUsed && cl <= 4 && B(cl, t) < B(4, 4)) { call = B(cl, t); m = { t: 'Natural: ' + SUIT[t] + ' suit, slam interest', ...range, len: lenm, f: 1 }; }
+  // partner opened a strong 2♣ and named his minor: he is the captain, so raise it below 4NT and let him ask for key
+  // cards (2♣–2♠–3♣ with ♣42 and 9 HCP: 4♣, not 6♣; partner then finds the grand)
+  const pStrong = x.opening && x.opening.seat === x.p && x.opening.m && x.opening.m.cv === 'strong2c';
+  if (goal >= 6 && call === null && pStrong && t < 2 && st.lastSeat === x.p && ST(last) === t && P.len[t] >= 5 && h.len[t] >= 2 && !bwUsed && cl <= 4) {
+    call = B(cl, t); m = { t: 'Support for ' + SUIT[t] + ': slam interest, partner asks', ...range, len: { [t]: 2 }, f: 1 };
+  }
   if (goal >= 6 && call === null) {
     if (!bwUsed && last < B(4, 4) && t < 4 && (t !== 0 || h.aces >= 2)) { call = B(4, 4); m = { tag: 'bw', trump: t, rkc: x.C.rkc0314 ? 2 : x.C.rkc ? 1 : 0, cv: x.C.rkc0314 ? 'rkc0314' : x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc0314 || x.C.rkc ? (x.C.rkc0314 ? 'RKCB 0314' : 'RKCB 1430') + ': asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?', ...range }; }
     else if (B(goal, t) > last) { call = B(goal, t); m = { t: (goal === 7 ? 'Grand' : 'Small') + ' slam', ...range, len: lenm }; }
@@ -3265,6 +3277,10 @@ function knownOurs(g, seat) {
 }
 function isMaster(g, c, seat) { const pl = playedSet(g), own = knownOurs(g, seat); for (let r = R(c) + 1; r < 13; r++) { const k = S(c) * 13 + r; if (!pl.has(k) && !own.has(k)) return false; } return true; }
 const asc = a => a.slice().sort((x, y) => R(x) - R(y)), desc = a => a.slice().sort((x, y) => R(y) - R(x));
+// the order in which equally good cards are tried, the first one kept: the lowest, but a discard before a ruff (a ruff
+// that gains nothing only wastes a trump, and ruffing partner's winner looks silly: ♣2 ruffing partner's ♥A in 4♣)
+const isRuff = (g, c) => g.trick.length > 0 && g.trump < 4 && S(c) === g.trump && S(g.trick[0].c) !== g.trump;
+const tieOrder = (g, leg) => { const a = asc(leg); return [...a.filter(c => !isRuff(g, c)), ...a.filter(c => isRuff(g, c))]; };
 const inSuit = (a, s) => a.filter(c => S(c) === s);
 
 /* ---- rule-based play ---- */
@@ -4106,7 +4122,13 @@ function ddChoose(g, seat, leg, opt) {
   }
   if (n === 0) return null;
   if (opt.dbg) { opt.dbg.n = n; opt.dbg.avg = [...tot].map(([c, v]) => [c, v / n]); }   // for tests: what the robot thought
-  let best = null, bv = -1; for (const c of asc(leg)) { const v = tot.get(c); if (v > bv + 1e-9) { bv = v; best = c; } }
+  let best = null, bv = -1; for (const c of tieOrder(g, leg)) { const v = tot.get(c); if (v > bv + 1e-9) { bv = v; best = c; } }
+  // the last to play, partner winning the trick: a ruff only when the samples say it gains clearly (it takes partner's
+  // trick and spends a trump; a near-equal sample count is noise)
+  if (isRuff(g, best) && g.trick.length === 3 && trickWinner(g.trick, g.trump) === pd(seat)) {
+    let alt = null, av = -1; for (const c of tieOrder(g, leg)) if (!isRuff(g, c) && tot.get(c) > av + 1e-9) { av = tot.get(c); alt = c; }
+    if (alt != null && av >= bv - SIG_NEAR * n) best = alt;
+  }
   // a defender following to partner's lead with the top touching honours of the suit (♠KQ6 under partner's ♠A): the
   // lower honour, which promises the higher one, when the samples rate it within SIG_NEAR tricks of the best card (the
   // lowest card would say "I do not want this suit"). Measured on 202 such Bermuda Bowl 2025 positions: it costs nothing
@@ -4127,9 +4149,9 @@ function aiPlay(g, seat, opt) {
   // (of the equally good cards the lowest)
   if (opt.open) {
     const v = DDSM ? ddsValues(g.hands, g.trick, seat, g.trump) : null;
-    if (v && leg.every(c => v.has(c))) { let best = null; for (const c of asc(leg)) if (best == null || v.get(c) > v.get(best)) best = c; return best; }
+    if (v && leg.every(c => v.has(c))) { let best = null; for (const c of tieOrder(g, leg)) if (best == null || v.get(c) > v.get(best)) best = c; return best; }
     DD.trump = g.trump; let best = null, bv = -1;
-    for (const c of asc(leg)) { let x; try { x = ddEval(g.hands, g.trick, seat, c, 2e7, bv >= 0 ? bv : null); } catch (e) { x = -1; } if (x > bv) { bv = x; best = c; } }
+    for (const c of tieOrder(g, leg)) { let x; try { x = ddEval(g.hands, g.trick, seat, c, 2e7, bv >= 0 ? bv : null); } catch (e) { x = -1; } if (x > bv) { bv = x; best = c; } }
     if (best != null) return best;
   }
   // declarer (and dummy) may look ahead from the first trick (ddDecl); the defence from ddTricks + 1 cards left (the
@@ -9451,7 +9473,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 360;
+const APP_V = 361;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};

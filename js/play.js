@@ -48,6 +48,10 @@ function knownOurs(g, seat) {
 }
 function isMaster(g, c, seat) { const pl = playedSet(g), own = knownOurs(g, seat); for (let r = R(c) + 1; r < 13; r++) { const k = S(c) * 13 + r; if (!pl.has(k) && !own.has(k)) return false; } return true; }
 const asc = a => a.slice().sort((x, y) => R(x) - R(y)), desc = a => a.slice().sort((x, y) => R(y) - R(x));
+// the order in which equally good cards are tried, the first one kept: the lowest, but a discard before a ruff (a ruff
+// that gains nothing only wastes a trump, and ruffing partner's winner looks silly: ♣2 ruffing partner's ♥A in 4♣)
+const isRuff = (g, c) => g.trick.length > 0 && g.trump < 4 && S(c) === g.trump && S(g.trick[0].c) !== g.trump;
+const tieOrder = (g, leg) => { const a = asc(leg); return [...a.filter(c => !isRuff(g, c)), ...a.filter(c => isRuff(g, c))]; };
 const inSuit = (a, s) => a.filter(c => S(c) === s);
 
 /* ---- rule-based play ---- */
@@ -889,7 +893,13 @@ function ddChoose(g, seat, leg, opt) {
   }
   if (n === 0) return null;
   if (opt.dbg) { opt.dbg.n = n; opt.dbg.avg = [...tot].map(([c, v]) => [c, v / n]); }   // for tests: what the robot thought
-  let best = null, bv = -1; for (const c of asc(leg)) { const v = tot.get(c); if (v > bv + 1e-9) { bv = v; best = c; } }
+  let best = null, bv = -1; for (const c of tieOrder(g, leg)) { const v = tot.get(c); if (v > bv + 1e-9) { bv = v; best = c; } }
+  // the last to play, partner winning the trick: a ruff only when the samples say it gains clearly (it takes partner's
+  // trick and spends a trump; a near-equal sample count is noise)
+  if (isRuff(g, best) && g.trick.length === 3 && trickWinner(g.trick, g.trump) === pd(seat)) {
+    let alt = null, av = -1; for (const c of tieOrder(g, leg)) if (!isRuff(g, c) && tot.get(c) > av + 1e-9) { av = tot.get(c); alt = c; }
+    if (alt != null && av >= bv - SIG_NEAR * n) best = alt;
+  }
   // a defender following to partner's lead with the top touching honours of the suit (♠KQ6 under partner's ♠A): the
   // lower honour, which promises the higher one, when the samples rate it within SIG_NEAR tricks of the best card (the
   // lowest card would say "I do not want this suit"). Measured on 202 such Bermuda Bowl 2025 positions: it costs nothing
@@ -910,9 +920,9 @@ function aiPlay(g, seat, opt) {
   // (of the equally good cards the lowest)
   if (opt.open) {
     const v = DDSM ? ddsValues(g.hands, g.trick, seat, g.trump) : null;
-    if (v && leg.every(c => v.has(c))) { let best = null; for (const c of asc(leg)) if (best == null || v.get(c) > v.get(best)) best = c; return best; }
+    if (v && leg.every(c => v.has(c))) { let best = null; for (const c of tieOrder(g, leg)) if (best == null || v.get(c) > v.get(best)) best = c; return best; }
     DD.trump = g.trump; let best = null, bv = -1;
-    for (const c of asc(leg)) { let x; try { x = ddEval(g.hands, g.trick, seat, c, 2e7, bv >= 0 ? bv : null); } catch (e) { x = -1; } if (x > bv) { bv = x; best = c; } }
+    for (const c of tieOrder(g, leg)) { let x; try { x = ddEval(g.hands, g.trick, seat, c, 2e7, bv >= 0 ? bv : null); } catch (e) { x = -1; } if (x > bv) { bv = x; best = c; } }
     if (best != null) return best;
   }
   // declarer (and dummy) may look ahead from the first trick (ddDecl); the defence from ddTricks + 1 cards left (the
