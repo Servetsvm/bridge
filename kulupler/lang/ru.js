@@ -79,7 +79,7 @@ window.BG_LANG["ru"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Ту
 "Number of Players":"Число игроков",
 "Boards per Round":"Сдач за тур",
 "Scoring":"Подсчёт",
-"Matchpoints (MP)":"Матчпойнты (MP)",
+"Matchpoints (MP)":"Матчпойнты (MP)","Matchpoints and IMPs (MP + IMP)":"Матчпойнты и IMP (MP + IMP)",
 "IMPs":"IMP",
 "Mitchell — NS fixed, EW moves":"Митчелл — СЮ на месте, ВЗ переходят",
 "Howell — all pairs move":"Хауэлл — переходят все пары",

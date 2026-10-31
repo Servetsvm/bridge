@@ -79,7 +79,7 @@ window.BG_LANG["zh"]={"d":{"BridgeGate · Tournament System":"BridgeGate · 比�
 "Number of Players":"选手人数",
 "Boards per Round":"每轮牌副数",
 "Scoring":"计分",
-"Matchpoints (MP)":"比赛分（MP）",
+"Matchpoints (MP)":"比赛分（MP）","Matchpoints and IMPs (MP + IMP)":"比赛分和 IMP (MP + IMP)",
 "IMPs":"IMP",
 "Mitchell — NS fixed, EW moves":"Mitchell — 南北固定，东西移位",
 "Howell — all pairs move":"Howell — 所有搭档都移位",

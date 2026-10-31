@@ -79,7 +79,7 @@ window.BG_LANG["es"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Sist
 "Number of Players":"Número de jugadores",
 "Boards per Round":"Manos por ronda",
 "Scoring":"Puntuación",
-"Matchpoints (MP)":"Matchpoints (MP)",
+"Matchpoints (MP)":"Matchpoints (MP)","Matchpoints and IMPs (MP + IMP)":"Matchpoints e IMP (MP + IMP)",
 "IMPs":"IMP",
 "Mitchell — NS fixed, EW moves":"Mitchell — NS fijos, EO se mueven",
 "Howell — all pairs move":"Howell — todas las parejas se mueven",

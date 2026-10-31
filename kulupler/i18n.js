@@ -90,6 +90,7 @@
     'Boards per Round':'Tur Başına Board',
     'Scoring':'Skorlama',
     'Matchpoints (MP)':'Maç Puanı (MP)',
+    'Matchpoints and IMPs (MP + IMP)':'Maç Puanı ve IMP (MP + IMP)',
     'IMPs':'IMP',
     'Mitchell — NS fixed, EW moves':'Mitchell — NS sabit, EW hareket eder',
     'Howell — all pairs move':'Howell — tüm çiftler hareket eder',

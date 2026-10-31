@@ -79,7 +79,7 @@ window.BG_LANG["no"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Turn
 "Number of Players":"Antall spillere",
 "Boards per Round":"Spill per runde",
 "Scoring":"Poengberegning",
-"Matchpoints (MP)":"Matchpoeng (MP)",
+"Matchpoints (MP)":"Matchpoeng (MP)","Matchpoints and IMPs (MP + IMP)":"Matchpoeng og IMP (MP + IMP)",
 "IMPs":"IMP",
 "Mitchell — NS fixed, EW moves":"Mitchell — NS står fast, ØV flytter",
 "Howell — all pairs move":"Howell — alle par flytter",
