@@ -559,13 +559,12 @@ const SB = (() => {
   }
 
   /* running games are listed with the open tables on the home page (the list is fetched at most once a minute) */
-  // the games running now, under Open tables: Social bridge games (sbi) and club tournaments in BridgeGate (gate/live)
-  const lob = { L: null, G: null, ts: 0, busy: false, html: '' };
+  // the games running now, under Open tables: the team matches (sbi); the club tournaments are in Clubs
+  const lob = { L: null, ts: 0, busy: false, html: '' };
   const running24 = g => g && g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3;
   async function loadLobby() {
-    const [L, G] = await Promise.all([C().get('sbi').catch(() => null), C().get('gate/live').catch(() => null)]);
+    const L = await C().get('sbi').catch(() => null);
     lob.L = Object.entries(L || {}).map(([id, v]) => ({ id, ...v })).filter(running24).sort((a, b) => b.ts - a.ts);
-    lob.G = Object.entries(G || {}).map(([club, v]) => ({ club, ...v })).filter(g => running24(g) && /^\d{2}$/.test(g.p || ''));
   }
   function lobbyHtml() {
     if (!lob.busy && Date.now() - lob.ts > 60e3 && C() && C().on) {
@@ -576,13 +575,11 @@ const SB = (() => {
     return lob.html = rowsHtml();
   }
   // the games running now, each with Join
-  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>${T('Clubs')} · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-bgjoin="${i}">${T('Join')}</button></div></div>`).join('')
-    + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Team match')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-sbjoin="${g.id}">${T('Join')}</button></div></div>`).join('');
+  const rowsHtml = () => (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Team match')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-sbjoin="${g.id}">${T('Join')}</button></div></div>`).join('');
 
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
     const sj = e.target.closest('[data-sbjoin]'); if (sj) { sb.entry = false; return openLink(sj.dataset.sbjoin, 0); }
-    const bj = e.target.closest('[data-bgjoin]'); if (bj && lob.G && lob.G[+bj.dataset.bgjoin]) { const g = lob.G[+bj.dataset.bgjoin]; openClubs('?club=' + encodeURIComponent(g.club) + '&role=table&p=' + g.p); return; }
     const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }
     if (ui.overlay !== 'sb') return;
     const el = e.target.closest('button'); if (!el) return;

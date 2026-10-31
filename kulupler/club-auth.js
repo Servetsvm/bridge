@@ -159,10 +159,12 @@ async function renderEntry(live){
   const box=document.getElementById('myClubsBox'); if(!box) return;
   const u=me(), go=(t,q)=>location.pathname+'?club='+encodeURIComponent(t.club)+q;
   const own=await Promise.all(live.map(async t=>{ if(isSuper()) return true; const i=await checkClubExists(t.club); return !!(i&&u&&i.owner===u.key); }));
-  box.innerHTML=live.map((t,k)=>`<div class="bg-entry"><div class="bg-entry-name">🏛 ${cleanData(t.c||'')}${t.n?' — '+cleanData(t.n):''}</div>
-    <div class="bg-entry-lbl">Table No</div>
+  // each club by its name; its table numbers (and Admin) open when it is tapped
+  const one=live.length===1;
+  box.innerHTML=live.map((t,k)=>`<div class="bg-entry${one?' open':''}"><button type="button" class="bg-entry-name" onclick="this.parentNode.classList.toggle('open')">🏛 ${cleanData(t.c||'')}${t.n?' <small>'+cleanData(t.n)+'</small>':''}</button>
+    <div class="bg-entry-body"><div class="bg-entry-lbl">Table No</div>
     <div class="bm3-keys k4" style="padding:0;">${Array.from({length:t.tb||0},(_,i)=>`<button class="bm3-key" onclick="location.replace('${go(t,'&role=table&p='+t.p+'&tn='+(i+1))}')">${i+1}</button>`).join('')}</div>
-    ${own[k]?`<button class="btn-primary" style="margin-top:10px;" onclick="location.replace('${go(t,'&admin=1')}')">⚙️ Admin</button>`:''}</div>`).join('')
+    ${own[k]?`<button class="btn-primary" style="margin-top:10px;" onclick="location.replace('${go(t,'&admin=1')}')">⚙️ Admin</button>`:''}</div></div>`).join('')
     +(isSuper()||Object.keys(await myClubs()).length?`<a href="${location.pathname}?admin=1" style="display:inline-block;margin-top:10px;font-size:0.75rem;color:var(--text3);">🏛 My clubs</a>`:'');
   document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');
 }

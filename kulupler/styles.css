@@ -465,3 +465,11 @@ body.bg-device .btn-primary{background:#2a7de1;color:#fff}
 
 /* inside Bridge Table (Clubs): its bar has the name and Home */
 html.embed .login-logo,html.embed .topbar-logo,html.embed .login-box a[href="../"]{display:none!important}
+
+/* the running tournaments: a club's name, its tables when it is tapped */
+.bg-entry .bg-entry-name{display:flex;align-items:center;gap:8px;width:100%;margin:0;padding:4px 0;background:none;border:0;color:inherit;font:inherit;font-weight:700;font-size:1.05rem;text-align:left;cursor:pointer}
+.bg-entry .bg-entry-name small{font-weight:400;opacity:.7;font-size:.8rem}
+.bg-entry .bg-entry-name::after{content:'▸';margin-left:auto;opacity:.6}
+.bg-entry.open .bg-entry-name::after{content:'▾'}
+.bg-entry .bg-entry-body{display:none;margin-top:8px}
+.bg-entry.open .bg-entry-body{display:block}
