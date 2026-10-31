@@ -139,6 +139,7 @@ const SB = (() => {
   /* ---- scores ---- */
   // the North-South score of one result
   function nsScore(b, r) {
+    if (r && r.m) return r.sc || 0;   // the single table: the score as it was typed
     if (!r || !r.l) return 0;
     const sc = E.scoreOf(r.l, r.s, r.x || 0, E.vulOf(b, r.d), r.k);
     return E.sideOf(r.d) === 0 ? sc : -sc;
@@ -181,7 +182,7 @@ const SB = (() => {
   }
   // the declarer (at the single table: the side, N-S or E-W)
   const declTxt = d => isOne() ? (E.sideOf(d) ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]) : SEAT_AB[d];
-  const conTxt = r => !r.l ? T('Passed out') : `${r.l}${sym(r.s)}${r.x === 1 ? 'X' : r.x === 2 ? 'XX' : ''} ${declTxt(r.d)}`;
+  const conTxt = r => r.m ? (r.pa ? T('Passed out') : `${declTxt(r.d)} ${signed(E.sideOf(r.d) ? -(r.sc || 0) : (r.sc || 0))}`) : !r.l ? T('Passed out') : `${r.l}${sym(r.s)}${r.x === 1 ? 'X' : r.x === 2 ? 'XX' : ''} ${declTxt(r.d)}`;
   const resTxt = r => { if (!r.l) return ''; const d = r.k - (r.l + 6); return d === 0 ? '=' : signed(d); };
 
   /* ---- loading ---- */
@@ -379,7 +380,31 @@ const SB = (() => {
   const oneTile = (b, r) => { const o = r && r.ok && oneOf(b, r); return !o ? (r ? '' : '—') : o.imp === 0 ? '0 IMP' : `${o.imp > 0 ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]} +${Math.abs(o.imp)}`; };
   const oneLine = (b, r) => { const o = oneOf(b, r); return o ? `<small>${T('N-S {0} points', r.h)} · ${o.side == null ? T('20–20: nothing expected') : T('{0} expected {1}', o.side ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2], o.exp)}</small>` : ''; };
   const scoreTxt = (b, r) => { const ns = nsScore(b, r), ew = r.l && E.sideOf(r.d) === 1; return `${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; };
+  // the single table's form: who played, the score they made, North-South's points
+  const oneOk = f => !!f && validH(f.h) && (f.od === 2 || ((f.od === 0 || f.od === 1) && Number.isInteger(f.score) && f.score >= 10 && f.score <= 7600));
+  function oneFormHtml(b) {
+    const mt = sb.formT || myTable(), R = (sb.g.r || {})[b] || {}, old = R[mt];
+    if (!sb.form) {   // a board entered before: its side and score (a contract kept before: worked out)
+      const ns = old ? nsScore(b, old) : 0, od = !old ? null : old.m ? (old.pa ? 2 : E.sideOf(old.d)) : !old.l ? 2 : E.sideOf(old.d), dsc = od === 1 ? -ns : ns;
+      sb.form = { od, score: old && od !== 2 ? Math.abs(dsc) : null, sg: dsc < 0 ? -1 : 1, h: old ? old.h : null };
+    }
+    const f = sb.form, ok = oneOk(f);
+    const vul = [E.vulOf(b, 0), E.vulOf(b, 1)], vc = vul[0] && vul[1] ? 'both' : vul[0] ? 'ns' : vul[1] ? 'ew' : 'none';
+    const vt = vul[0] && vul[1] ? T('All vulnerable') : vul[0] ? T('{0} vulnerable', SEAT_AB[0] + SEAT_AB[2]) : vul[1] ? T('{0} vulnerable', SEAT_AB[1] + SEAT_AB[3]) : T('None vulnerable');
+    const keys = (name, cls, opts, cur) => `<div class="bm3-keys ${cls}" data-sbseg="${name}">${opts.map(([v, l, c]) => `<button data-v="${v}" class="bm3-key ${c || ''}${String(cur) === String(v) ? ' active' : ''}">${l}</button>`).join('')}</div>`;
+    const side = f.od === 0 || f.od === 1;
+    return `<div class="bm3"><div class="bm3-screen">
+      <div class="bm3-head"><div class="bm3-board"><small>${T('Board')}</small><b>${b}</b><span class="bm3-vul ${vc}">${vt}</span></div>${old ? `<div class="bm3-edit">✎</div>` : ''}</div>
+      <div class="bm3-step">${T('Declarer')}</div>
+      ${keys('od', 'k3', [[0, SEAT_AB[0] + SEAT_AB[2]], [1, SEAT_AB[1] + SEAT_AB[3]], [2, T('Pass'), 'pass']], f.od)}
+      ${side ? `<div class="bm3-step">${T('Score')}</div>${keys('sg', 'k2', [[1, '＋ ' + T('Made it')], [-1, '− ' + T('Down')]], f.sg)}
+      <input class="bm3-hcp" id="sbScore" type="number" inputmode="numeric" min="10" max="7600" step="10" value="${f.score ?? ''}" placeholder="${T('e.g. 420')}">` : ''}
+      ${f.od != null ? `<div class="bm3-step">${T('North-South’s points (0–40)')}</div><input class="bm3-hcp" id="sbHcp" type="number" inputmode="numeric" min="0" max="40" value="${f.h ?? ''}" placeholder="${T('High-card points')}">` : ''}
+      <div class="bm3-actions"${old ? '' : ' style="grid-template-columns:1fr"'}>${old ? `<button class="bm3-cancel" id="sbCancel">✕ ${T('Cancel')}</button>` : ''}<button class="bm3-ok" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>✓ ${T('Save')}</button></div>
+    </div></div>`;
+  }
   function formHtml(b) {
+    if (isOne()) return oneFormHtml(b);
     const mt = sb.formT || myTable(), R = (sb.g.r || {})[b] || {};
     const f = sb.form || (sb.form = R[mt] ? { ...R[mt], ls: R[mt].ld ? SUITS.indexOf(R[mt].ld[0]) : null, lr: R[mt].ld ? RANKS.indexOf(R[mt].ld.slice(1)) : null } : { l: null, s: null, x: 0, d: null, k: null, ls: null, lr: null });
     const need = f.l ? f.l + 6 : 0;
@@ -493,9 +518,11 @@ const SB = (() => {
   });
   document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'sbSeatIn') $('sbSeatOk')?.click(); });
   document.addEventListener('input', e => {
-    if (!e.target || e.target.id !== 'sbHcp' || !sb.form) return;
-    const v = e.target.value.trim(), h = /^\d{1,2}$/.test(v) ? +v : null; sb.form.h = validH(h) ? h : null;
-    const b = $('sbSave'); if (b) b.disabled = !(e.target.dataset.okb && sb.form.h != null) || sb.busy;
+    if (!e.target || !sb.form || !['sbHcp', 'sbScore'].includes(e.target.id)) return;
+    const v = e.target.value.trim();
+    if (e.target.id === 'sbScore') sb.form.score = /^\d{1,4}$/.test(v) ? +v : null;
+    else { const h = /^\d{1,2}$/.test(v) ? +v : null; sb.form.h = validH(h) ? h : null; }
+    const b = $('sbSave'); if (b) b.disabled = !oneOk(sb.form) || sb.busy;
   });
   async function seatOk() {
     const inp = $('sbSeatIn'); if (!inp || !sb.seats || !sb.seatK) return;
@@ -551,9 +578,10 @@ const SB = (() => {
   async function save() {
     const b = sb.board, mt = myTable(), f = sb.form; if (!b || !mt || !f || sb.busy) return;
     const t = sb.formT || mt;
-    const r = f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
+    if (isOne() && !oneOk(f)) return;
+    const r = isOne() ? { l: 0, s: 0, x: 0, d: f.od === 1 ? 1 : 0, k: 0, m: 1, pa: f.od === 2 ? 1 : 0 } : f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
     if (f.l && f.ls != null && f.ls >= 0 && f.lr != null && f.lr >= 0) r.ld = SUITS[f.ls] + RANKS[f.lr];   // an opening lead entered before (it is no longer asked)
-    r.sc = nsScore(b, r); r.ts = Date.now();
+    r.sc = isOne() ? (f.od === 2 ? 0 : (f.od === 1 ? -1 : 1) * f.sg * f.score) : nsScore(b, r); r.ts = Date.now();
     if (isOne()) { if (!validH(f.h)) return; r.h = f.h; const p = (sb.g.t || {})[1] || {}; r.p = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }   // the points, and who sat where
     if (sb.formT) r.ok = true;   // the administrator's correction needs no confirmation
     sb.busy = true; show();

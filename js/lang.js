@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Made it": "Yaptı",
+    "Down": "Battı", "e.g. 420": "örn. 420",
     "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Davet edilecek kimse yok: masalara oyuncuların adını yazın (boş yerlere robot oturur). Sadece robotlarla oynayacaksanız Turnuvayı başlat'a basın.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Davetler gönderildi: {0}. Şu anda lobide olan oyuncular hemen görür; cevapları yukarıda (✓) görünür.",
     "Member numbers": "Üye numaraları",
     "No tournament at this club now.": "Bu kulüpte şu anda turnuva yok.", "No clubs yet.": "Henüz kulüp yok.",
@@ -422,6 +424,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Made it": "Gikk hjem",
+    "Down": "Beit", "e.g. 420": "f.eks. 420",
     "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Ingen å invitere: skriv spillernes navn ved bordene (roboter tar tomme plasser). For å spille bare med roboter, trykk Start turneringen.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Invitasjoner sendt: {0}. Spillere i lobbyen ser dem med en gang; svarene vises over (✓).",
     "Member numbers": "Medlemsnumre",
     "No tournament at this club now.": "Ingen turnering i denne klubben nå.", "No clubs yet.": "Ingen klubber ennå.",
@@ -839,6 +843,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Made it": "Cumplido",
+    "Down": "Multa", "e.g. 420": "p. ej. 420",
     "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Nadie a quien invitar: escribe los nombres de los jugadores en las mesas (los robots ocupan los asientos libres). Para jugar solo con robots, pulsa Empezar el torneo.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Invitaciones enviadas: {0}. Los jugadores del lobby las ven al momento; sus respuestas aparecen arriba (✓).",
     "Member numbers": "Números de socio",
     "No tournament at this club now.": "Ahora no hay torneo en este club.", "No clubs yet.": "Aún no hay clubes.",
@@ -1284,6 +1290,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Made it": "Réussi",
+    "Down": "Chute", "e.g. 420": "ex. 420",
     "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Personne à inviter : écrivez les noms des joueurs aux tables (les robots prennent les places libres). Pour jouer seulement avec des robots, touchez Démarrer le tournoi.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Invitations envoyées : {0}. Les joueurs du salon les voient tout de suite ; leurs réponses s’affichent au-dessus (✓).",
     "Member numbers": "Numéros de licence",
     "No tournament at this club now.": "Pas de tournoi dans ce club pour l’instant.", "No clubs yet.": "Pas encore de clubs.",
@@ -1729,6 +1737,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Made it": "Mantenuto",
+    "Down": "Sotto", "e.g. 420": "es. 420",
     "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Nessuno da invitare: scrivi i nomi dei giocatori ai tavoli (i robot occupano i posti liberi). Per giocare solo con i robot, tocca Avvia il torneo.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Inviti inviati: {0}. I giocatori nella lobby li vedono subito; le risposte compaiono sopra (✓).",
     "Member numbers": "Numeri di tessera",
     "No tournament at this club now.": "Nessun torneo in questo club ora.", "No clubs yet.": "Ancora nessun club.",
@@ -2174,6 +2184,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Made it": "Erfüllt",
+    "Down": "Faller", "e.g. 420": "z. B. 420",
     "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Niemand einzuladen: schreibe die Namen der Spieler an die Tische (Roboter besetzen leere Plätze). Nur mit Robotern spielen: Turnier starten antippen.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Einladungen gesendet: {0}. Spieler in der Lobby sehen sie sofort; ihre Antworten stehen oben (✓).",
     "Member numbers": "Mitgliedsnummern",
     "No tournament at this club now.": "Gerade kein Turnier in diesem Club.", "No clubs yet.": "Noch keine Clubs.",
@@ -2619,6 +2631,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Made it": "Выполнен",
+    "Down": "Без", "e.g. 420": "напр. 420",
     "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Некого приглашать: впишите имена игроков за столами (свободные места занимают роботы). Чтобы играть только с роботами, нажмите «Начать турнир».", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Приглашения отправлены: {0}. Игроки в лобби видят их сразу; ответы видны выше (✓).",
     "Member numbers": "Номера членов",
     "No tournament at this club now.": "Сейчас в этом клубе нет турнира.", "No clubs yet.": "Клубов пока нет.",
@@ -3064,6 +3078,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Made it": "Ugrany",
+    "Down": "Bez", "e.g. 420": "np. 420",
     "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Nie ma kogo zaprosić: wpisz imiona graczy przy stołach (wolne miejsca zajmują roboty). Aby grać tylko z robotami, dotknij Rozpocznij turniej.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Zaproszenia wysłane: {0}. Gracze w lobby widzą je od razu; odpowiedzi pojawiają się wyżej (✓).",
     "Member numbers": "Numery członkowskie",
     "No tournament at this club now.": "W tym klubie nie ma teraz turnieju.", "No clubs yet.": "Brak klubów.",
@@ -3509,6 +3525,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Made it": "完成",
+    "Down": "宕", "e.g. 420": "例如 420",
     "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "没有可邀请的人:在牌桌上写下玩家名字(空位由机器人补上)。只和机器人打,请点开始比赛。", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "邀请已发送:{0}。大厅里的玩家会立即看到;他们的回复显示在上方(✓)。",
     "Member numbers": "会员编号",
     "No tournament at this club now.": "该俱乐部现在没有比赛。", "No clubs yet.": "还没有俱乐部。",
