@@ -83,7 +83,8 @@ window.createMyClub=async function(inPanel){
   const id=slug+'-'+Math.random().toString(36).slice(2,6);
   const put=async(path,v)=>{ const r=await fetch(await fbRootUrl(path),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)}); if(!r.ok) throw new Error('Firebase '+r.status); };
   try{
-    await put('/clubs/'+id+'/info.json',{name,owner:u.key,ownerName:u.name,created:new Date().toISOString(),active:true});
+    const fed=inPanel&&document.getElementById('saNewClubFed')?.value==='tbf'?'tbf':'nbf';   // whose member list its tables use
+    await put('/clubs/'+id+'/info.json',{name,owner:u.key,ownerName:u.name,created:new Date().toISOString(),active:true,fed});
     var pw=newClubPw(); await put('/clubs/'+id+'/secret.json',{tprefix:'00',pw});
     await put('/owners/'+encodeURIComponent(u.key)+'/'+id+'.json',name);
     await put('/clubList/'+id+'.json',{n:name,a:true});   // the list every player sees in Clubs
@@ -194,6 +195,15 @@ async function renderClubGate(live){
 }
 initClubGate();
 
+// the super admin password as the database keeps it (its hash only)
+async function superHash(pw){ const b=new TextEncoder().encode('bridge-super:'+pw); return [...new Uint8Array(await crypto.subtle.digest('SHA-256',b))].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+// a new super admin password (the old one is needed: this session)
+async function setSuperPw(pw){
+  const token=await authToken(), uid=window._authUid, h=await superHash(pw);
+  const r=await fetch(FB_BASE+'/superpw.json?auth='+token,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({h})});
+  if(!r.ok) throw new Error('Firebase '+r.status);
+  await fetch(FB_BASE+'/ssess/'+uid+'.json?auth='+token,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({h})});
+}
 // ══════════════════════════════════════════════════════
 //  SESSIONS
 // ══════════════════════════════════════════════════════
@@ -203,7 +213,16 @@ async function startSession(r, club, code){
   const token=await authToken(); const uid=window._authUid;
   if(!token||!uid) throw new Error('No connection to the database');
   // the admin types their own Bridge Table PIN: the database accepts the session only with the right one
-  if(r==='superadmin') return isSuper() && /^\d{4}$/.test(String(code||'').trim()) && (await window.bridgeSession(code));
+  if(r==='superadmin'){
+    // his Bridge Table name (the PIN saved on this device) and the super admin password; the first time it is made
+    const pw=String(code||'');
+    if(!isSuper()||pw.length<6||!(await window.bridgeSession())) return false;
+    const h=await superHash(pw);
+    const made=await fetch(FB_BASE+'/superpw.json?auth='+token,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({h})});
+    if(made.ok) toast('🔑 Super admin password set');
+    const res=await fetch(FB_BASE+'/ssess/'+uid+'.json?auth='+token,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({h})});
+    return res.ok;
+  }
   if(r==='admin'){
     const c=String(code||'').trim();
     if(isClubAdmin()&&/^\d{4}$/.test(c)&&await window.bridgeSession(c)) return true;
@@ -224,10 +243,21 @@ async function startSession(r, club, code){
   return false;
 }
 async function endSession(){
-  try{ const token=await authToken(); const uid=window._authUid; if(token&&uid){ await fetch(FB_BASE+'/tsess/'+uid+'.json?auth='+token,{method:'DELETE'}); await fetch(FB_BASE+'/csess/'+uid+'.json?auth='+token,{method:'DELETE'}); } }catch(e){}
+  try{ const token=await authToken(); const uid=window._authUid; if(token&&uid){ for(const p of ['tsess','csess','ssess']) await fetch(FB_BASE+'/'+p+'/'+uid+'.json?auth='+token,{method:'DELETE'}); } }catch(e){}
 }
 
 // the tables' code prefix (2 digits): table N signs in with prefix + N (00 → 0001, 0002 …)
+// each table's own 4-digit code for this tournament (code → table number); kept while the number of tables is the same
+async function getTableCodes(){ try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/secret/tcodes.json'),{cache:'no-store'}); return r.ok?(await r.json()||{}):{}; }catch(e){ return {}; } }
+async function makeTableCodes(n,fresh){
+  const old=await getTableCodes();
+  if(!fresh&&Object.keys(old).length===n) return old;
+  const codes={}, used=new Set(); const rnd=new Uint32Array(1);
+  for(let t=1;t<=n;t++){ let c; do{ crypto.getRandomValues(rnd); c=String(1000+rnd[0]%9000); }while(used.has(c)); used.add(c); codes[c]=t; }
+  const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/secret/tcodes.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(codes)});
+  if(!r.ok) throw new Error('Firebase '+r.status);
+  return codes;
+}
 async function getTablePrefix(){
   try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/secret/tprefix.json'),{cache:'no-store'}); return r.ok?(await r.json()||'00'):'00'; }catch(e){ return '00'; }
 }
@@ -256,7 +286,7 @@ async function saListClubs(){
       const url = FB_BASE+'/clubs/'+id+'/info.json'+(token?'?auth='+token:'');
       const rr = await fetch(url,{cache:'no-store'});
       const v = rr.ok ? await rr.json() : null;
-      return {id, name:cleanData((v&&v.name)||id), owner:cleanData((v&&(v.ownerName||v.owner))||''), ownerKey:(v&&v.owner)||'', created:(v&&v.created)||null, active:(v&&v.active!==false)};
+      return {id, name:cleanData((v&&v.name)||id), owner:cleanData((v&&(v.ownerName||v.owner))||''), ownerKey:(v&&v.owner)||'', created:(v&&v.created)||null, active:(v&&v.active!==false), fed:(v&&v.fed)||'nbf'};
     }catch(e){ return {id, name:id, created:null, active:true}; }
   }));
   return infos.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
@@ -290,9 +320,9 @@ window.selRole=function(r){
   const inp=document.getElementById('pwInput'); inp.value='';
   // a table types its 4-digit code; the admin and the super admin their own Bridge Table PIN; the screen nothing
   document.getElementById('pwWrap').style.display=r==='screen'?'none':'block';
-  const pin=r==='superadmin'||(r==='admin'&&isClubAdmin());   // the admin's own PIN; anyone else the club's password
+  const pin=r==='admin'&&isClubAdmin();   // a club's owner: their PIN; anyone else the club's password; the super admin his password
   inp.type=r==='table'?'text':'password';
-  inp.placeholder=r==='table'?'Table code (4 digits)':pin?'Your Bridge Table PIN':'Club password'; inp.inputMode=r==='table'||pin?'numeric':'text'; inp.maxLength=r==='table'||pin?4:40;
+  inp.placeholder=r==='table'?(window._bgWantTable?'Your table\'s code (4 digits)':'Table code (4 digits)'):r==='superadmin'?'Super admin password (at least 6)':pin?'Your Bridge Table PIN':'Club password'; inp.inputMode=r==='table'||pin?'numeric':'text'; inp.maxLength=r==='table'||pin?4:40;
   const sw=document.getElementById('roleSwitch'); if(sw){ sw.style.display=r==='table'||r==='admin'?'':'none'; sw.textContent=r==='admin'?'🃏 Table':'⚙️ Club admin'; }
 };
 window.switchAdminRole=()=>selRole(role==='admin'?'table':'admin');
@@ -337,7 +367,7 @@ window.doLogin=async function(){
     try{ ok = await startSession('superadmin', null, pw); }
     catch(e){ if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';} err.textContent='❌ '+e.message; return; }
     if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
-    if(!ok){ err.textContent=isSuper()?'❌ Wrong PIN':'❌ Only the super admin can sign in here'; return; }
+    if(!ok){ err.textContent=!isSuper()?'❌ Only the super admin can sign in here':String(pw).length<6?'❌ At least 6 characters':'❌ Wrong password'; return; }
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('app').style.display='flex';
     document.getElementById('topbarRole').textContent='Super Admin';
@@ -372,7 +402,15 @@ window.doLogin=async function(){
   if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()&&/^\d{4}$/.test(String(pw).trim())?'❌ Wrong PIN':'❌ Wrong password';return;}
   // the code says which table this is: prefix + table number (0003 = table 3)
   document.body.classList.toggle('bg-device',role==='table');   // a table: the Bridgemate III look from here on
-  if(role==='table'){ window.bmCodeTable=parseInt(String(pw).trim().slice(2),10)||null; window.bmCodePrefix=String(pw).trim().slice(0,2); }   // the prefix: for Change table
+  if(role==='table'){
+    const c=String(pw).trim(); window.bmCodePrefix=c.slice(0,2);   // for Change table
+    // the table's number: from its own code (the tables' codes), or prefix + number (a club without codes yet)
+    let t=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/secret/tcodes/'+c+'.json'),{cache:'no-store'}); t=r.ok?await r.json():null; }catch(e){}
+    window.bmCodeTable=+t||parseInt(c.slice(2),10)||null;
+    // a player who chose a table: the code must be that table's
+    if(window._bgWantTable&&+t&&+t!==window._bgWantTable){ err.textContent='❌ This is not the code of the table you chose'; await endSession(); return; }
+    window._bgWantTable=null;
+  }
 
   // Preload all data from Firebase
   if(loginBtn){loginBtn.disabled=true;loginBtn.textContent='Loading...';}

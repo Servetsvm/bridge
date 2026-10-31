@@ -126,7 +126,16 @@ window.bgSeatLook=function(){
 window.bgSeatOk=async function(k){
   const e=window._bgEntry; if(!e) return;
   let v=(document.getElementById('peInput')?.value||'').trim();
-  if(/^\d{1,8}$/.test(v)){ const name=await memberName(v); if(!name){ bgSeatLook(); return; } v=name; }   // an unknown number: type the name instead
+  if(/^\d{1,8}$/.test(v)){
+    let name=await memberName(v);
+    if(!name){
+      // not in the list: the player's name, kept with the number for the next time
+      const nm=(document.getElementById('peName')?.value||'').trim();
+      if(!nm){ const out=document.getElementById('peFound'); if(out){ out.className='pe-found no'; out.innerHTML=`❓ ${v}<input id="peName" class="pe-input" maxlength="40" autocomplete="off" placeholder="${i18nText('Name and surname')}" style="margin-top:8px;" onkeydown="if(event.key==='Enter')bgSeatOk('${k}')">`; setTimeout(()=>document.getElementById('peName')?.focus(),50); } return; }
+      name=nm.slice(0,60); addMember(v,name);
+    }
+    v=name;
+  }
   e.seats[k]=v.slice(0,40);
   bgPlayerNames(e.prefix,e.n);
 };
@@ -137,11 +146,9 @@ window.bgPlayerSit=function(){
   window._bgEntry=null;
   document.getElementById('playerEntry')?.remove();
   document.getElementById('loginForm').style.display='block';
-  selRole('table');
-  document.getElementById('pwInput').value=e.prefix+String(e.n).padStart(2,'0');
-  // the code works in the background: the box and the club links stay out of sight while the table signs in
-  ['pwWrap','clubLinks'].forEach(id=>{const el=document.getElementById(id); if(el) el.style.display='none';});
-  doLogin();
+  window._bgWantTable=e.n; selRole('table');   // the code of the table chosen: the table's own (the admin gives it)
+  const cl=document.getElementById('clubLinks'); if(cl) cl.style.display='none';
+  setTimeout(()=>document.getElementById('pwInput')?.focus(),80);
 };
 
 // this phone moves to another table (its player changes tables after a round): the table number again, then the players

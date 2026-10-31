@@ -193,7 +193,7 @@ function renderSetup(){
       ${s.status==='running'&&s.currentRound<s.roundCount?`<button class="btn btn-gold" onclick="adminNextRound()">⏭ Next Round (${s.currentRound+1})</button>`:''}
       ${s.status==='running'&&s.currentRound>=s.roundCount?`<button class="btn btn-blue" onclick="adminFinish()">🏁 Finish Tournament</button>`:''}
     </div>
-    ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;"><button class="btn btn-green btn-full" onclick="showTableLinkModal()">📲 Send the players the link</button><a class="btn btn-blue btn-full" style="text-decoration:none;text-align:center;" href="${location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=screen'}" target="_blank" rel="noopener">📺 Screen</a></div></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
+    ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;"><button class="btn btn-green btn-full" onclick="showTableLinkModal()">📲 Send the players the link</button><a class="btn btn-blue btn-full" style="text-decoration:none;text-align:center;" href="${location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=screen'}" target="_blank" rel="noopener">📺 Screen</a></div><button class="btn btn-gold btn-full" style="margin-top:8px;" onclick="showTableCodes()">🔑 Table codes</button></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
   </div>
   <div class="card"><div class="card-title"><span>💾</span> Data</div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-blue" onclick="adminExport()">⬇ Export</button><button class="btn btn-purple" onclick="adminImportOpen()">⬆ Import</button><button class="btn btn-red" onclick="adminReset()">🗑 Reset</button></div></div>`;
 }
@@ -307,10 +307,19 @@ async function setLive(on){
   try{
     const s=getState(), url=await fbRootUrl('/live/'+CLUB_ID+'.json');
     const p=await getTablePrefix();
-    if(on){ try{ await saveTablePrefix(p); }catch(e){} await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p,ts:Date.now()})}); }
+    if(on){ try{ await saveTablePrefix(p); }catch(e){} try{ await makeTableCodes(s.tableCount||0); }catch(e){} await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p,ts:Date.now()})}); }
     else await fetch(url,{method:'DELETE'});
   }catch(e){}
 }
+// the tables' codes: each table's own; the admin gives each table its code (a player types it after choosing the table)
+window.showTableCodes=async function(fresh){
+  const s=getState(); let codes={};
+  try{ codes=await makeTableCodes(s.tableCount||0,!!fresh); }catch(e){ toast('❌ '+e.message); return; }
+  const L=Object.entries(codes).sort((a,b)=>a[1]-b[1]);
+  openModal('Table codes',`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">Give each table its code: the players choose their table and type it.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;" data-i18n-ignore>${L.map(([c,t])=>`<div class="card" style="margin:0;text-align:center;padding:10px;"><div style="font-size:0.75rem;color:var(--text3);">${i18nText('Table')} ${t}</div><div style="font-size:1.6rem;font-weight:800;letter-spacing:3px;">${c}</div></div>`).join('')}</div>`,
+    `<button class="btn btn-ghost" onclick="if(confirm(i18nText('New codes for every table?')))showTableCodes(true)">🎲 New codes</button><button class="btn btn-gold" onclick="closeModal()">OK</button>`);
+};
 window.showTableLinkModal=async function(){
   const s=getState(), link=await playersLink();
   const text=`🃏 ${CLUB_NAME||'BridgeGate'}${s.name?' — '+s.name:''}\n${link}`;

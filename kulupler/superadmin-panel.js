@@ -24,7 +24,7 @@ async function renderSuperAdminPanel(){
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
           <div>
             <div style="font-weight:700;font-size:0.95rem;">${cl.name}${cl.active?'':' <span style="color:var(--red);font-size:0.7rem;">(inactive)</span>'}</div>
-            <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">👤 ${cl.owner||'—'} · ID: ${cl.id}${cl.created?' · Created: '+new Date(cl.created).toLocaleDateString():''}</div>
+            <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">${cl.fed==='tbf'?'🇹🇷 TBF':'🇳🇴 NBF'} · 👤 ${cl.owner||'—'} · ID: ${cl.id}${cl.created?' · Created: '+new Date(cl.created).toLocaleDateString():''}</div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <button class="btn btn-gold btn-sm" onclick="saPwPrompt(${i})">🔑 Password</button>
@@ -38,26 +38,31 @@ async function renderSuperAdminPanel(){
 
   c.innerHTML = `
     <div class="card" style="margin-bottom:14px;">
-      <div class="card-title"><span>👥</span> Member list</div>
-      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">The federation's player file (Magic Contest .mcd, from Ruter): only the member number, first name and last name are kept. At the tables a player types their number and their name comes from here.</div>
-      <div id="saMembersInfo" style="font-size:0.78rem;color:var(--text3);margin-bottom:8px;">…</div>
-      <label class="btn btn-gold btn-full" style="text-align:center;">📥 Load member list (.mcd)<input type="file" accept=".mcd,.txt" style="display:none" onchange="saLoadMembers(this.files[0]);this.value=''"></label>
+      <div class="card-title"><span>👥</span> Member lists</div>
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">The federations' player files (Magic Contest .mcd): only the member number, first name and last name are kept. At a club's tables a player types their number and their name comes from its federation's list; a number not in it is kept with the name the player types.</div>
+      ${['nbf','tbf'].map(f=>`<div style="margin-top:10px;"><b>${f==='nbf'?'🇳🇴 NBF (Norway)':'🇹🇷 TBF (Turkey)'}</b><div id="saMembersInfo-${f}" style="font-size:0.78rem;color:var(--text3);margin:4px 0 6px;">…</div>
+      <label class="btn btn-gold btn-full" style="text-align:center;">📥 Load member list (.mcd)<input type="file" accept=".mcd,.txt" style="display:none" onchange="saLoadMembers(this.files[0],'${f}');this.value=''"></label></div>`).join('')}
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title"><span>🔑</span> Super admin password</div>
+      <button class="btn btn-ghost btn-full" onclick="saSuperPwPrompt()">🔑 Change the super admin password</button>
     </div>
     <div class="card" style="margin-bottom:14px;">
       <div class="card-title"><span>➕</span> New club</div>
       <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">Only you open clubs. The club gets a password: give it with the club ID to the club's admin.</div>
       <div class="pw-wrap"><input type="text" id="saNewClubName" maxlength="40" placeholder="Club name" onkeydown="if(event.key==='Enter')saNewClub()"></div>
+      <div class="pw-wrap"><select id="saNewClubFed" style="width:100%;padding:10px;border-radius:8px;background:var(--surface2);color:var(--text);border:1px solid var(--border);"><option value="nbf">🇳🇴 NBF (Norway)</option><option value="tbf">🇹🇷 TBF (Turkey)</option></select></div>
       <div class="login-err" id="saClubErr"></div>
       <button class="btn btn-gold btn-full" onclick="saNewClub()">➕ Create club</button>
     </div>
     <div class="card-title">🛡️ Super Admin — Clubs (${clubs.length})</div>
     ${rows}`;
-  saShowMembersInfo();
+  saShowMembersInfo('nbf'); saShowMembersInfo('tbf');
 }
 // how many members the list holds, and when it was loaded
-async function saShowMembersInfo(){
-  const el=document.getElementById('saMembersInfo'); if(!el) return;
-  try{ const r=await fetch(await fbRootUrl('/membersInfo.json')); const v=r.ok?await r.json():null;
+async function saShowMembersInfo(fed){
+  const el=document.getElementById('saMembersInfo-'+fed); if(!el) return;
+  try{ const r=await fetch(await fbRootUrl(fed==='tbf'?'/membersInfoTbf.json':'/membersInfo.json')); const v=r.ok?await r.json():null;
     el.textContent=v&&v.n?`${v.n} members · ${new Date(v.ts).toLocaleDateString(window.getLanguage?.()||'en')}`:'No member list yet';
   }catch(e){ el.textContent=''; }
 }
@@ -74,20 +79,32 @@ function parseMcd(text){
   flush();
   return out;
 }
-window.saLoadMembers=async function(file){
-  if(!file) return;
-  const text=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsText(file,'ISO-8859-1'); });
+window.saLoadMembers=async function(file,fed){
+  if(!file) return; fed=fed==='tbf'?'tbf':'nbf';
+  // the Norwegian file is Latin-1, the Turkish one Windows-1254 (ş ğ ı İ)
+  const text=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsText(file,fed==='tbf'?'windows-1254':'ISO-8859-1'); });
   if(!/Magic Contest|MCPlayer/.test(text.slice(0,200))){ toast('❌ Format not recognised'); return; }
   const list=parseMcd(text), n=Object.keys(list).length;
   if(!n){ toast('❌ File is empty'); return; }
-  const el=document.getElementById('saMembersInfo'); if(el) el.textContent=`⏳ ${n} members…`;
+  const el=document.getElementById('saMembersInfo-'+fed); if(el) el.textContent=`⏳ ${n} members…`;
   try{
-    const r=await fetch(await fbRootUrl('/members.json'),{method:'PUT',body:JSON.stringify(list)});
+    const r=await fetch(await fbRootUrl(fed==='tbf'?'/membersTbf.json':'/members.json'),{method:'PUT',body:JSON.stringify(list)});
     if(!r.ok) throw new Error('HTTP '+r.status);
-    await fetch(await fbRootUrl('/membersInfo.json'),{method:'PUT',body:JSON.stringify({n,ts:Date.now()})});
+    await fetch(await fbRootUrl(fed==='tbf'?'/membersInfoTbf.json':'/membersInfo.json'),{method:'PUT',body:JSON.stringify({n,ts:Date.now()})});
     toast(`✅ ${n} members loaded`);
   }catch(e){ toast('❌ Firebase error: '+e.message); }
-  saShowMembersInfo();
+  saShowMembersInfo(fed);
+};
+// the super admin password: a new one, at least 6 characters, typed twice
+window.saSuperPwPrompt=function(){
+  openModal('Super admin password',`<div class="pw-wrap"><input type="password" id="saSp1" maxlength="40" placeholder="New password (at least 6)" autocomplete="new-password"></div><div class="pw-wrap"><input type="password" id="saSp2" maxlength="40" placeholder="The new password again" autocomplete="new-password"></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-gold" onclick="saSuperPwSave()">Save</button>`);
+};
+window.saSuperPwSave=async function(){
+  const a=document.getElementById('saSp1')?.value||'', b=document.getElementById('saSp2')?.value||'';
+  if(a.length<6){ toast('❌ At least 6 characters'); return; }
+  if(a!==b){ toast('❌ The two passwords are not the same'); return; }
+  try{ await setSuperPw(a); closeModal(); toast('🔑 Password saved'); }catch(e){ toast('❌ Failed: '+e.message); }
 };
 
 window.saNewClub=async function(){ await createMyClub(true); if(!document.getElementById('saClubErr')?.textContent) renderSuperAdminPanel(); };
