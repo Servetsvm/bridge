@@ -1,8 +1,9 @@
 // ══════════════════════════════════════════════════════
 //  CLUB TOURNAMENTS IN BRIDGE TABLE — sign-in
 // ══════════════════════════════════════════════════════
-// The player signs in with their Bridge Table name and PIN (bridge-auth.js). Servet is the super admin; the player who
-// opens a club is its admin (no password); a table signs in with its 4-digit code: the club's 2-digit table prefix and
+// The player signs in with their Bridge Table name and PIN (bridge-auth.js). Servet is the super admin: only he opens
+// clubs and keeps their passwords; a club's admin signs in with the club's password (a club opened by a player before
+// keeps that player as its admin, with their PIN); a table signs in with its 4-digit code: the club's 2-digit table prefix and
 // the table number (prefix 00: table 1 = 0001, table 2 = 0002 …). The database rules check all of it.
 
 // ══════════════════════════════════════════════════════
@@ -68,10 +69,14 @@ async function myClubs(){
   try{ const r=await fetch(await fbRootUrl('/owners/'+encodeURIComponent(u.key)+'.json'),{cache:'no-store'}); return r.ok?cleanData(await r.json()||{}):{}; }catch(e){ return {}; }
 }
 // a new club: this player is its admin; the tables' prefix starts as 00 (table 1 = 0001)
-window.createMyClub=async function(){
-  const err=document.getElementById('clubErr');err.textContent='';
+// a club's password: 8 letters and digits (no look-alikes)
+const newClubPw=()=>{ const A='abcdefghjkmnpqrstuvwxyz23456789'; let s=''; const r=crypto.getRandomValues(new Uint32Array(8)); for(const x of r) s+=A[x%A.length]; return s; };
+// inPanel: from the super admin's panel (its own fields; he stays there)
+window.createMyClub=async function(inPanel){
+  const err=document.getElementById(inPanel?'saClubErr':'clubErr');err.textContent='';
   const u=me(); if(!u){ err.textContent='❌ Sign in to Bridge Table first'; return; }
-  const name=(document.getElementById('newClubName').value||'').trim().slice(0,40);
+  if(!isSuper()){ err.textContent='❌ Only the super admin opens clubs'; return; }
+  const name=(document.getElementById(inPanel?'saNewClubName':'newClubName').value||'').trim().slice(0,40);
   if(!name){ err.textContent='❌ Enter the club name'; return; }
   await window.bridgeSession();
   const slug=name.toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,20)||'club';
@@ -79,11 +84,12 @@ window.createMyClub=async function(){
   const put=async(path,v)=>{ const r=await fetch(await fbRootUrl(path),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)}); if(!r.ok) throw new Error('Firebase '+r.status); };
   try{
     await put('/clubs/'+id+'/info.json',{name,owner:u.key,ownerName:u.name,created:new Date().toISOString(),active:true});
-    await put('/clubs/'+id+'/secret.json',{tprefix:'00'});
+    var pw=newClubPw(); await put('/clubs/'+id+'/secret.json',{tprefix:'00',pw});
     await put('/owners/'+encodeURIComponent(u.key)+'/'+id+'.json',name);
   }catch(e){ err.textContent='❌ '+e.message; return; }
-  toast('✅ Club created');
-  await openClub(id, err);
+  // the password, to give the club's admin (the super admin sees and changes it in his panel)
+  openModal('Club created', `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:8px;">${cleanData(name)} · ID: <b>${id}</b></div><div style="font-size:0.85rem;color:var(--text2);">Club password (give it to the club's admin):</div><div style="font-size:1.4rem;font-weight:800;letter-spacing:2px;margin:8px 0;" data-i18n-ignore>${pw}</div>`, `<button class="btn btn-gold" onclick="closeModal()">OK</button>`);
+  if(!inPanel) await openClub(id, err);
 };
 
 // The club gate: the player's own clubs, a new club, or a club ID (a table device gets the club's link)
@@ -138,6 +144,14 @@ async function initClubGate(){
   }
   renderClubGate();
 }
+// a club's admin: the club's ID, then its password
+const clubAdminBox=()=>`<div style="font-size:0.72rem;color:var(--text3);margin:14px 0 4px;">⚙️ Club admin</div><div class="pw-wrap"><input type="text" id="adminClubId" maxlength="40" placeholder="Club ID" autocomplete="off" onkeydown="if(event.key==='Enter')clubAdminGo()"></div><button class="btn-primary" onclick="clubAdminGo()">Continue</button>`;
+window.clubAdminGo=async function(){
+  const id=(document.getElementById('adminClubId')?.value||'').trim().toLowerCase();
+  const err=document.getElementById('clubErr'); if(err) err.textContent='';
+  if(!id){ if(err) err.textContent='❌ Enter the club ID'; return; }
+  if(await openClub(id, err)){ selRole('admin'); setTimeout(()=>document.getElementById('pwInput')?.focus(),100); }
+};
 // the entry screen of the tournaments running now: each with its table number keys, and Admin for its club's admin
 async function renderEntry(live){
   document.body.classList.add('bg-device');   // the Bridgemate III look from the entry screen on
@@ -164,15 +178,15 @@ async function renderClubGate(live){
   const u=me(), box=document.getElementById('myClubsBox');
   document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');
   if(!box) return;
-  if(!u){ box.innerHTML=`<div class="login-err" style="color:var(--text2);">Sign in to Bridge Table first (name and PIN), then come back here.</div><a class="btn-primary" style="display:block;text-decoration:none;margin-top:8px;" href="../">← Bridge Table</a>`; return; }
+  if(!u){ box.innerHTML=`<div class="login-err" style="color:var(--text2);">Sign in to Bridge Table first (name and PIN), then come back here.</div>${clubAdminBox()}`; return; }
   const mine=await myClubs(), ids=Object.keys(mine);
   // the tournaments running now: a player chooses one and gives the table number
   const lv=(live||[]).map(t=>`<button class="btn-primary" style="margin-bottom:6px;" onclick="location.replace(location.pathname+'?club=${encodeURIComponent(t.club)}&role=table&p=${t.p}')">🃏 ${cleanData(t.c||'')}${t.n?' — '+cleanData(t.n):''}</button>`).join('');
   box.innerHTML=`<div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px;">👤 ${cleanData(u.name)}</div>${lv}
     ${ids.length?`<div style="font-size:0.72rem;color:var(--text3);margin:6px 0 4px;">My clubs</div>`+ids.map(i=>`<button class="btn-primary" style="margin-bottom:6px;" onclick="openMyClub('${i}')">🏛 ${mine[i]}</button>`).join(''):''}
-    <div style="font-size:0.72rem;color:var(--text3);margin:10px 0 4px;">${ids.length?'Open another club':'Open your club'}</div>
+    ${isSuper()?`<div style="font-size:0.72rem;color:var(--text3);margin:10px 0 4px;">${ids.length?'Open another club':'Open your club'}</div>
     <div class="pw-wrap"><input type="text" id="newClubName" maxlength="40" placeholder="Club name" onkeydown="if(event.key==='Enter')createMyClub()"></div>
-    <button class="btn-primary" onclick="createMyClub()">➕ Create club</button>`;
+    <button class="btn-primary" onclick="createMyClub()">➕ Create club</button>`:''}${clubAdminBox()}`;
 }
 initClubGate();
 
@@ -186,7 +200,15 @@ async function startSession(r, club, code){
   if(!token||!uid) throw new Error('No connection to the database');
   // the admin types their own Bridge Table PIN: the database accepts the session only with the right one
   if(r==='superadmin') return isSuper() && /^\d{4}$/.test(String(code||'').trim()) && (await window.bridgeSession(code));
-  if(r==='admin') return isClubAdmin() && /^\d{4}$/.test(String(code||'').trim()) && (await window.bridgeSession(code));
+  if(r==='admin'){
+    const c=String(code||'').trim();
+    if(isClubAdmin()&&/^\d{4}$/.test(c)&&await window.bridgeSession(c)) return true;
+    if(!c) return false;
+    const res=await fetch(FB_BASE+'/csess/'+uid+'.json?auth='+token,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({club:String(club),pw:c})});
+    if(res.ok) return true;
+    if(res.status!==401) throw new Error('Firebase error '+res.status);
+    return false;
+  }
   if(r==='table'){
     const c=String(code||'').trim();
     if(!/^\d{4}$/.test(c)) return false;
@@ -198,7 +220,7 @@ async function startSession(r, club, code){
   return false;
 }
 async function endSession(){
-  try{ const token=await authToken(); const uid=window._authUid; if(token&&uid) await fetch(FB_BASE+'/tsess/'+uid+'.json?auth='+token,{method:'DELETE'}); }catch(e){}
+  try{ const token=await authToken(); const uid=window._authUid; if(token&&uid){ await fetch(FB_BASE+'/tsess/'+uid+'.json?auth='+token,{method:'DELETE'}); await fetch(FB_BASE+'/csess/'+uid+'.json?auth='+token,{method:'DELETE'}); } }catch(e){}
 }
 
 // the tables' code prefix (2 digits): table N signs in with prefix + N (00 → 0001, 0002 …)
@@ -262,9 +284,12 @@ window.selRole=function(r){
   const inp=document.getElementById('pwInput'); inp.value='';
   // a table types its 4-digit code; the admin and the super admin their own Bridge Table PIN; the screen nothing
   document.getElementById('pwWrap').style.display=r==='screen'?'none':'block';
+  const pin=r==='superadmin'||(r==='admin'&&isClubAdmin());   // the admin's own PIN; anyone else the club's password
   inp.type=r==='table'?'text':'password';
-  inp.placeholder=r==='table'?'Table code (4 digits)':'Your Bridge Table PIN'; inp.inputMode='numeric'; inp.maxLength=4;
+  inp.placeholder=r==='table'?'Table code (4 digits)':pin?'Your Bridge Table PIN':'Club password'; inp.inputMode=r==='table'||pin?'numeric':'text'; inp.maxLength=r==='table'||pin?4:40;
+  const sw=document.getElementById('roleSwitch'); if(sw){ sw.style.display=r==='table'||r==='admin'?'':'none'; sw.textContent=r==='admin'?'🃏 Table':'⚙️ Club admin'; }
 };
+window.switchAdminRole=()=>selRole(role==='admin'?'table':'admin');
 selRole('table');
 
 // Entered from the club gate — Super Admin doesn't need a resolved club.
@@ -338,7 +363,7 @@ window.doLogin=async function(){
   try{ ok = await startSession(role, CLUB_ID, pw); }
   catch(e){ if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';} err.textContent='❌ '+e.message; return; }
   if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
-  if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()?'❌ Wrong PIN':'❌ You are not this club\'s admin';return;}
+  if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()&&/^\d{4}$/.test(String(pw).trim())?'❌ Wrong PIN':'❌ Wrong password';return;}
   // the code says which table this is: prefix + table number (0003 = table 3)
   document.body.classList.toggle('bg-device',role==='table');   // a table: the Bridgemate III look from here on
   if(role==='table'){ window.bmCodeTable=parseInt(String(pw).trim().slice(2),10)||null; window.bmCodePrefix=String(pw).trim().slice(0,2); }   // the prefix: for Change table

@@ -20,13 +20,14 @@ async function renderSuperAdminPanel(){
             <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">👤 ${cl.owner||'—'} · ID: ${cl.id}${cl.created?' · Created: '+new Date(cl.created).toLocaleDateString():''}</div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-gold btn-sm" onclick="saPwPrompt(${i})">🔑 Password</button>
             <a class="btn btn-ghost btn-sm" href="?club=${encodeURIComponent(cl.id)}" target="_blank" rel="noopener">Open</a>
             <button class="btn ${cl.active?'btn-ghost':'btn-green'} btn-sm" onclick="saToggleActive(${i})">${cl.active?'Deactivate':'Activate'}</button>
             <button class="btn btn-red btn-sm" onclick="saDeletePrompt(${i})">Delete</button>
           </div>
         </div>
       </div>`).join('')
-    : '<div class="card" style="text-align:center;color:var(--text2);">No clubs yet. A player opens a club from the club page.</div>';
+    : '<div class="card" style="text-align:center;color:var(--text2);">No clubs yet.</div>';
 
   c.innerHTML = `
     <div class="card" style="margin-bottom:14px;">
@@ -34,6 +35,13 @@ async function renderSuperAdminPanel(){
       <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">The federation's player file (Magic Contest .mcd, from Ruter): only the member number, first name and last name are kept. At the tables a player types their number and their name comes from here.</div>
       <div id="saMembersInfo" style="font-size:0.78rem;color:var(--text3);margin-bottom:8px;">…</div>
       <label class="btn btn-gold btn-full" style="text-align:center;">📥 Load member list (.mcd)<input type="file" accept=".mcd,.txt" style="display:none" onchange="saLoadMembers(this.files[0]);this.value=''"></label>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-title"><span>➕</span> New club</div>
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">Only you open clubs. The club gets a password: give it with the club ID to the club's admin.</div>
+      <div class="pw-wrap"><input type="text" id="saNewClubName" maxlength="40" placeholder="Club name" onkeydown="if(event.key==='Enter')saNewClub()"></div>
+      <div class="login-err" id="saClubErr"></div>
+      <button class="btn btn-gold btn-full" onclick="saNewClub()">➕ Create club</button>
     </div>
     <div class="card-title">🛡️ Super Admin — Clubs (${clubs.length})</div>
     ${rows}`;
@@ -75,6 +83,22 @@ window.saLoadMembers=async function(file){
   saShowMembersInfo();
 };
 
+window.saNewClub=async function(){ await createMyClub(true); if(!document.getElementById('saClubErr')?.textContent) renderSuperAdminPanel(); };
+// a club's password: shown, and changed (a new one, or one typed)
+window.saPwPrompt=async function(i){
+  const cl=SA_CLUBS[i]; if(!cl) return;
+  let cur=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+cl.id+'/secret/pw.json'),{cache:'no-store'}); cur=r.ok?await r.json():null; }catch(e){}
+  openModal('Club password', `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:6px;">${cl.name} · ID: <b>${cl.id}</b></div>
+    <div style="font-size:0.85rem;color:var(--text2);">Password now:</div><div style="font-size:1.3rem;font-weight:800;letter-spacing:2px;margin:6px 0 12px;" data-i18n-ignore>${cur?cleanData(cur):'—'}</div>
+    <div class="pw-wrap"><input type="text" id="saNewPw" maxlength="40" placeholder="New password (at least 4)" autocomplete="off"></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" onclick="document.getElementById('saNewPw').value=newClubPw()">🎲 New</button><button class="btn btn-gold" onclick="saPwSave(${i})">Save</button>`);
+};
+window.saPwSave=async function(i){
+  const cl=SA_CLUBS[i]; const pw=(document.getElementById('saNewPw')?.value||'').trim(); if(!cl) return;
+  if(pw.length<4){ toast('❌ At least 4 characters'); return; }
+  try{ const r=await fetch(await fbRootUrl('/clubs/'+cl.id+'/secret/pw.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(pw)}); if(!r.ok) throw new Error('HTTP '+r.status); closeModal(); toast('🔑 Password saved'); }
+  catch(e){ toast('❌ Failed: '+e.message); }
+};
 window.saToggleActive=async function(i){
   const cl=SA_CLUBS[i]; if(!cl) return;
   try{
