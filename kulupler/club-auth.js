@@ -307,6 +307,7 @@ async function saDeleteClub(id, ownerKey){
   if(!r.ok) throw new Error('Firebase delete failed: '+r.status);
   if(ownerKey) try{ await fetch(FB_BASE+'/owners/'+encodeURIComponent(ownerKey)+'/'+id+'.json'+q,{method:'DELETE'}); }catch(e){}
   try{ await fetch(FB_BASE+'/clubList/'+id+'.json'+q,{method:'DELETE'}); }catch(e){}
+  try{ await fetch(FB_BASE+'/live/'+id+'.json'+q,{method:'DELETE'}); }catch(e){}   // its running tournament's entry too
 }
 
 // ══════════════════════════════════════════════════════

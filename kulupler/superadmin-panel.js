@@ -15,6 +15,9 @@ async function renderSuperAdminPanel(){
     const L=Object.fromEntries(clubs.map(c=>[c.id,{n:String(c.name).slice(0,40),a:c.active}]));
     const u=await fbRootUrl('/clubList.json'), r=await fetch(u+(u.includes('?')?'&':'?')+'shallow=true'); const old=r.ok?await r.json():null;
     for(const id of Object.keys(old||{})) if(!(id in L)) L[id]=null;   // a club gone
+    // the running tournaments' entries of clubs that are gone
+    const lu=await fbRootUrl('/live.json'), lr=await fetch(lu+(lu.includes('?')?'&':'?')+'shallow=true'); const lv=lr.ok?await lr.json():null;
+    for(const id of Object.keys(lv||{})) if(!(id in L)||L[id]===null) try{ await fetch(await fbRootUrl('/live/'+id+'.json'),{method:'DELETE'}); }catch(e){}
     if(Object.keys(L).length) await fetch(await fbRootUrl('/clubList.json'),{method:'PATCH',body:JSON.stringify(L)});   // club by club (the rules allow each club's entry)
   }catch(e){}
 

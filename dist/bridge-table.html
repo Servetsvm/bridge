@@ -9405,7 +9405,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 349;
+const APP_V = 350;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12909,7 +12909,9 @@ async function showClubs() {
   draw();
   if (ui.clubLive == null) {
     const [v, cl] = await Promise.all([Net.Cloud.get('gate/live').catch(() => null), Net.Cloud.get('gate/clubList').catch(() => null)]);
-    const live = Object.entries(v || {}).map(([club, t]) => ({ club, ...t })).filter(t => t && /^\d{2}$/.test(t.p || '') && Date.now() - (t.ts || 0) < 24 * 3600e3).sort((a, b) => b.ts - a.ts);
+    // a club's running tournament: only a club in the list and switched on (a deleted club's entry may be left over); its name from the list
+    const known = id => !cl || (cl[id] && cl[id].a !== false);
+    const live = Object.entries(v || {}).map(([club, t]) => ({ club, ...t, c: (cl && cl[club] && cl[club].n) || t.c })).filter(t => t && known(t.club) && /^\d{2}$/.test(t.p || '') && Date.now() - (t.ts || 0) < 24 * 3600e3).sort((a, b) => b.ts - a.ts);
     // the running tournaments first, then every other club (switched off ones are left out)
     const rest = Object.entries(cl || {}).filter(([id, c]) => c && c.a !== false && !live.some(t => t.club === id)).map(([club, c]) => ({ club, c: c.n })).sort((a, b) => String(a.c).localeCompare(String(b.c)));
     ui.clubLive = [...live, ...rest];
