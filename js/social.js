@@ -86,13 +86,50 @@ const SB = (() => {
     return L;
   }
 
-  // a member number → the member's name, from the member list the federation file filled
+  // the game's federation: NBF (Norway, gate/members) or TBF (Turkey, gate/membersTbf)
+  const FED_KEY = 'bridge-sb-fed';
+  const curFed = () => (sb.setup && sb.setup.fed) || (sb.g && sb.g.m && sb.g.m.fed) || 'nbf';
+  const fedPath = () => curFed() === 'tbf' ? 'gate/membersTbf' : 'gate/members';
+  // the one offered first: this device's last choice, the language, the player's country, then NBF
+  async function fedDefault() {
+    try { const f = localStorage.getItem(FED_KEY); if (f === 'nbf' || f === 'tbf') return f; } catch (e) {}
+    if (SET.lang === 'tr') return 'tbf'; if (SET.lang === 'no') return 'nbf';
+    let c = SET.ctry || ''; if (!c) try { c = (await Net.country()) || ''; } catch (e) {}
+    return c === 'TR' ? 'tbf' : 'nbf';
+  }
+  // a member number → the member's name, from the game's federation list
   const members = {};
   async function memberName(num) {
-    if (num in members) return members[num];
-    try { const v = await C().get('gate/members/' + num); members[num] = typeof v === 'string' ? v : null; } catch (e) { return null; }
-    return members[num];
+    const k = fedPath() + '/' + num;
+    if (k in members) return members[k];
+    try { const v = await C().get(k); members[k] = typeof v === 'string' ? v : null; } catch (e) { return null; }
+    return members[k];
   }
+  // a name or surname → the members it fits (the whole list is fetched once per federation); letters without Turkish marks too
+  const allMembers = {};
+  const fold = s => String(s || '').toLocaleLowerCase('tr').replace(/ı/g, 'i').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  async function memberSearch(q) {
+    const words = fold(q).split(/\s+/).filter(Boolean); if (!words.length) return [];
+    const p = fedPath();
+    if (!allMembers[p]) { try { const v = await C().get(p); allMembers[p] = Object.entries(v || {}).filter(([, n]) => typeof n === 'string').map(([num, n]) => [num, n, fold(n)]); } catch (e) { return []; } }
+    const seen = new Set(), out = [];
+    for (const [num, n, f] of allMembers[p]) { const parts = f.split(/[\s-]+/); if (!words.every(w => parts.some(x => x.startsWith(w)))) continue; const key = num.replace(/^0+/, '') + '|' + f; if (seen.has(key)) continue; seen.add(key); out.push({ num, name: n }); if (out.length >= 8) break; }
+    return out;
+  }
+  // a name box (data-member): letters typed offer the members they fit, under the box
+  let memberLookT = 0;
+  document.addEventListener('input', e => {
+    const el = e.target; if (!el || !el.matches || !el.matches('#ov input[data-member]')) return;
+    clearTimeout(memberLookT);
+    memberLookT = setTimeout(async () => {
+      const v = el.value.trim(); let dl = document.getElementById('sbMembers');
+      if (!dl) { dl = document.createElement('datalist'); dl.id = 'sbMembers'; document.body.appendChild(dl); }
+      el.setAttribute('list', 'sbMembers');
+      if (v.length < 2 || /^\d+$/.test(v)) { dl.innerHTML = ''; return; }
+      const L = await memberSearch(v); if (el.value.trim() !== v) return;
+      dl.innerHTML = L.map(m => `<option value="${esc(m.name.slice(0, 20))}" label="${esc(m.num)}"></option>`).join('');
+    }, 250);
+  });
   document.addEventListener('change', async e => {
     const el = e.target; if (!el || !el.matches || !el.matches('#ov input[data-member]')) return;
     const v = el.value.trim(); if (!/^\d{1,8}$/.test(v)) return;
@@ -256,6 +293,8 @@ const SB = (() => {
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   const seg = (name, opts, cur) => `<div class="seg" data-sbseg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  // whose member list the players' numbers and names come from
+  const fedSeg = s => `<div class="grp"><span>${T('Member numbers')}</span>${seg('fed', [['nbf', '🇳🇴 NBF'], ['tbf', '🇹🇷 TBF']], s.fed || 'nbf')}</div>`;
   function setupHtml() {
     const s = sb.setup;
     if (s.one) { const p = s.names[1] || {};
@@ -264,6 +303,7 @@ const SB = (() => {
       <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
       <div class="grp"><span>${T('Players')}</span><div class="tsetrow sbrow">${['n', 's', 'e', 'w'].map(k => `<label><small>${SEAT[SEATK[k]]}</small><input class="tok" maxlength="20" data-sbpl="${k}" data-member placeholder="${SEAT[SEATK[k]]}" value="${esc(p[k] || '')}"></label>`).join('')}</div><div class="muted">${T('Not required: the directions are used.')}</div></div>
       <div class="grp"><span>${T('Boards')}</span>${seg('bd', [8, 12, 16, 20, 24, 28, 32].map(n => [n, n]), s.bd)}</div>
+      ${fedSeg(s)}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`; }
     return `<h2>🃏 ${T('New game')}</h2>
@@ -272,6 +312,7 @@ const SB = (() => {
       <div class="grp"><span>${T('Team names')}</span><div class="tmnames">${[...Array(s.tb / 2).keys()].map(i => `<div class="tmpair"><small>${T('Match {0}', i + 1)}</small><input class="tok" maxlength="20" data-sbteam="${2 * i}" placeholder="${T('Team {0}', 2 * i + 1)}" value="${esc(s.tm[2 * i] || '')}"><span>–</span><input class="tok" maxlength="20" data-sbteam="${2 * i + 1}" placeholder="${T('Team {0}', 2 * i + 2)}" value="${esc(s.tm[2 * i + 1] || '')}"></div>`).join('')}</div></div>
       <div class="muted">${T('{0} tables: in each match the first team sits North-South in the Open room, the second in the Closed room.', s.tb)}</div>
       <div class="grp"><span>${T('Boards')}</span>${seg('bd', [8, 12, 16, 20, 24, 28, 32, 36].map(n => [n, n]), s.bd)}</div>
+      ${fedSeg(s)}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`;
   }
@@ -491,8 +532,9 @@ const SB = (() => {
     try {
       const uid = await C().uid(), id = newCode(), ts = Date.now();
       const type = s.one ? 'one' : 'team', tm = s.one ? [] : [...Array(s.tb).keys()].map(i => s.tm[i] || T('Team {0}', i + 1));
-      const m = { n: s.n || T(s.one ? 'Single table' : 'Team match'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey(), type, tm };
-      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk, type, tm } };
+      const fed = s.fed === 'tbf' ? 'tbf' : 'nbf';
+      const m = { n: s.n || T(s.one ? 'Single table' : 'Team match'), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey(), type, tm, fed };
+      const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk, type, tm, fed } };
       for (let t = 1; t <= s.tb; t++) { const p = s.names[t] || {}; up['sb/' + id + '/t/' + t] = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }
       await C().patch('', up);
       sb.setup = null; sb.busy = false; await loadGame(id); sb.view = s.one ? 'boards' : 'tables'; sb.board = 0; if (s.one) setMyTable(1); show(); poll();
@@ -588,13 +630,18 @@ const SB = (() => {
     if (sg) {
       const k = sg.dataset.sbseg, v = el.dataset.v;
       if (k === 'tb' || k === 'bd') { readSetup(); sb.setup[k] = +v; }
+      else if (k === 'fed') { readSetup(); sb.setup.fed = v === 'tbf' ? 'tbf' : 'nbf'; try { localStorage.setItem(FED_KEY, sb.setup.fed); } catch (err) {} }
       else if (k === 'me') { setMyTable(+v); sb.form = null; }
       else if (k === 'rq') { sb.reqT = +v; }
       else if (sb.form) { sb.form[k] = +v; if (k === 'l') { if (+v === 0) { sb.form.s = sb.form.d = sb.form.k = null; } else if (sb.form.k == null || sb.form.k < 0) sb.form.k = null; } }
       return show();
     }
-    if (id === 'sbOne') { sb.setup = { one: true, n: T('Single table') + ' ' + new Date().toLocaleDateString(), tb: 1, bd: 8, names: {}, tm: [] }; sb.err = ''; return show(); }
-    if (id === 'sbNew') { sb.setup = { n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [] }; sb.err = ''; return show(); }
+    if (id === 'sbOne' || id === 'sbNew') {
+      sb.setup = id === 'sbOne' ? { one: true, n: T('Single table') + ' ' + new Date().toLocaleDateString(), tb: 1, bd: 8, names: {}, tm: [], fed: 'nbf' } : { n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [], fed: 'nbf' };
+      const s0 = sb.setup; sb.err = ''; show();
+      fedDefault().then(f => { if (sb.setup === s0 && f !== s0.fed) { readSetup(); s0.fed = f; show(); } });   // the federation offered first
+      return;
+    }
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
     if (d.sbopen) return openGame(d.sbopen);
