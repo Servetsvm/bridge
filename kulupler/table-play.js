@@ -155,15 +155,25 @@ window.bgSeatOk=async function(k){
   bgPlayerNames(e.prefix,e.n);
 };
 // sign this phone in at that table (prefix + number); its names go to the pairs sitting there
-window.bgPlayerSit=function(){
+window.bgPlayerSit=async function(){
   const e=window._bgEntry; if(!e) return;
   try{ sessionStorage.setItem(BG_PENDING,JSON.stringify({t:e.n,...e.seats})); }catch(err){}
   window._bgEntry=null;
   document.getElementById('playerEntry')?.remove();
   document.getElementById('loginForm').style.display='block';
-  window._bgWantTable=e.n; selRole('table');   // the code of the table chosen: the table's own (the admin gives it)
+  window._bgWantTable=e.n; selRole('table');
   const cl=document.getElementById('clubLinks'); if(cl) cl.style.display='none';
-  setTimeout(()=>document.getElementById('pwInput')?.focus(),80);
+  // the table's code from the running tournament (no code to type); a club without codes: prefix + table number
+  let lv=null; try{ const r=await fetch(await fbRootUrl('/live/'+CLUB_ID+'.json'),{cache:'no-store'}); lv=r.ok?await r.json():null; }catch(err){}
+  const code=lv&&lv.k?lv.k['t'+e.n]:lv?e.prefix+String(e.n).padStart(2,'0'):null;
+  if(code){
+    const inp=document.getElementById('pwInput'), w=document.getElementById('pwWrap'); inp.value=code; if(w) w.style.display='none';
+    await doLogin();
+    // not signed in (a tournament started before the codes went with it): the player types the code
+    if(document.getElementById('app').style.display!=='flex'){ if(w) w.style.display='block'; inp.value=''; inp.focus(); }
+    return;
+  }
+  setTimeout(()=>document.getElementById('pwInput')?.focus(),80);   // no code known: the player types it
 };
 
 // this phone moves to another table (its player changes tables after a round): the table number again, then the players

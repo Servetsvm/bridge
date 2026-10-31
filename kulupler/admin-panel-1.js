@@ -307,18 +307,38 @@ async function setLive(on){
   try{
     const s=getState(), url=await fbRootUrl('/live/'+CLUB_ID+'.json');
     const p=await getTablePrefix();
-    if(on){ try{ await saveTablePrefix(p); }catch(e){} try{ await makeTableCodes(s.tableCount||0); }catch(e){} await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p,ts:Date.now()})}); }
+    // the tables' codes go with it: a player's phone signs in at the table chosen without typing one
+    if(on){ try{ await saveTablePrefix(p); }catch(e){} let k={}; try{ k=tableKeys(await makeTableCodes(s.tableCount||0)); }catch(e){} await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p,ts:Date.now(),k})}); }
     else await fetch(url,{method:'DELETE'});
   }catch(e){}
 }
 // the tables' codes: each table's own; the admin gives each table its code (a player types it after choosing the table)
+// table number → code (the running tournament's entry carries them)
+const tableKeys=codes=>{ const k={}; for(const [c,t] of Object.entries(codes||{})) k['t'+t]=c; return k; };
+async function liveCodes(codes){ if(getState().status!=='running') return; try{ await fetch(await fbRootUrl('/live/'+CLUB_ID+'.json'),{method:'PATCH',body:JSON.stringify({k:tableKeys(codes)})}); }catch(e){} }
 window.showTableCodes=async function(fresh){
-  const s=getState(); let codes={};
-  try{ codes=await makeTableCodes(s.tableCount||0,!!fresh); }catch(e){ toast('❌ '+e.message); return; }
-  const L=Object.entries(codes).sort((a,b)=>a[1]-b[1]);
-  openModal('Table codes',`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">Give each table its code: the players choose their table and type it.</div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;" data-i18n-ignore>${L.map(([c,t])=>`<div class="card" style="margin:0;text-align:center;padding:10px;"><div style="font-size:0.75rem;color:var(--text3);">${i18nText('Table')} ${t}</div><div style="font-size:1.6rem;font-weight:800;letter-spacing:3px;">${c}</div></div>`).join('')}</div>`,
-    `<button class="btn btn-ghost" onclick="if(confirm(i18nText('New codes for every table?')))showTableCodes(true)">🎲 New codes</button><button class="btn btn-gold" onclick="closeModal()">OK</button>`);
+  const s=getState(), n=s.tableCount||0;
+  if(!n){ toast(i18nText('Set up the tournament first')); return; }
+  let codes={};
+  try{ codes=await makeTableCodes(n,!!fresh); }catch(e){ toast('❌ '+e.message); return; }
+  if(fresh) liveCodes(codes);
+  const byT={}; for(const [c,t] of Object.entries(codes)) byT[t]=c;
+  openModal('Table codes',`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">Type each table's code (4 digits, all different) and save: the players choose their table and type it.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${Array.from({length:n},(_,i)=>`<label class="card" style="margin:0;text-align:center;padding:10px;"><div style="font-size:0.75rem;color:var(--text3);">${i18nText('Table')} ${i+1}</div><input class="tcode-in" data-t="${i+1}" value="${byT[i+1]||''}" inputmode="numeric" maxlength="4" autocomplete="off" style="width:100%;box-sizing:border-box;font-size:1.5rem;font-weight:800;letter-spacing:3px;text-align:center;padding:6px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);"></label>`).join('')}</div>
+    <div class="login-err" id="tcodeErr"></div>`,
+    `<button class="btn btn-ghost" onclick="if(confirm(i18nText('New codes for every table?')))showTableCodes(true)">🎲 New codes</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-gold" onclick="saveTableCodes()">Save</button>`);
+};
+// the codes typed: 4 digits each, all different
+window.saveTableCodes=async function(){
+  const err=document.getElementById('tcodeErr'), codes={};
+  for(const i of document.querySelectorAll('.tcode-in')){
+    const c=i.value.trim(), t=+i.dataset.t;
+    if(!/^\d{4}$/.test(c)){ err.textContent='❌ '+i18nText('Table')+' '+t+': '+i18nText('4 digits'); i.focus(); return; }
+    if(codes[c]){ err.textContent='❌ '+i18nText('Table')+' '+t+': '+i18nText('the same code as table')+' '+codes[c]; i.focus(); return; }
+    codes[c]=t;
+  }
+  try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/secret/tcodes.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(codes)}); if(!r.ok) throw new Error('Firebase '+r.status); liveCodes(codes); closeModal(); toast('🔑 '+i18nText('Table codes saved')); }
+  catch(e){ err.textContent='❌ '+e.message; }
 };
 window.showTableLinkModal=async function(){
   const s=getState(), link=await playersLink();
