@@ -1890,3 +1890,10 @@ body.homev2 .home.v2 .prac .prask .supc{background:#c4122f;color:#fff;border-rad
 #clubView .cvbar b{font-size:16px}
 #clubView iframe{flex:1;width:100%;border:0;background:#0f0e0c}
 body.clubsopen{overflow:hidden}
+/* Clubs: the clubs playing now, a club's tables when its name is tapped */
+.clubrow{border:1px solid rgba(0,0,0,.12);border-radius:12px;margin:6px 0;padding:4px 10px;background:rgba(255,255,255,.6)}
+.clubrow .clubname{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:8px 0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.clubrow .clubname b{font-size:17px}.clubrow .clubname small{opacity:.7}
+.clubrow .clubarr{margin-left:auto;opacity:.6}
+.clubnew{margin-top:12px}.clubnew #clubIdIn{flex:1;min-width:0}
+:root[data-theme="dark"] .clubrow{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15)}

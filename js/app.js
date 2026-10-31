@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 343;
+const APP_V = 344;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2854,7 +2854,12 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'rtOpen') { showRTeam(); return; }
-  if (t.id === 'hClubs') { openClubs(''); return; }
+  if (t.id === 'hClubs') { ui.clubOpen = null; ui.clubNew = false; showClubs(); return; }
+  if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
+  if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
+  if (t.id === 'clubNew') { ui.clubNew = true; showClubs(); setTimeout(() => $('clubIdIn')?.focus(), 80); return; }
+  if (t.id === 'clubGo') { const id = ($('clubIdIn')?.value || '').trim().toLowerCase(); if (!id) return; closeOv(); openClubs('?club=' + encodeURIComponent(id) + '&role=admin'); return; }
+  if (t.id === 'clubSuper') { closeOv(); openClubs('?admin=1'); return; }
   // the online team match: a new tournament of the Team match type, set up at once
   if (t.id === 'olTeam') {
     const tt = Net.newTour(8), k = TOUR_KINDS.teams;
@@ -3492,6 +3497,26 @@ function showRTeam() {
     <div class="muted">${T('The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).')}</div>
     <div class="row2">${RT.end ? `<button class="btn new" id="rtNew">🤖 ${T('New match')}</button>` : `<button class="btn new" id="rtGo">▶ ${T('Continue')} (${Math.min(RT.ids.length + 1, RT.n)}/${RT.n})</button><button class="btn" id="rtEnd">${T('Finish the match')}</button>`}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+/* Clubs: the club tournaments running now, each by its club's name (tapped: its table numbers, and a number goes to
+   that table), and Set up a tournament for a club's admin (its ID: then its password, in the clubs program) */
+async function showClubs() {
+  const draw = () => {
+    const L = ui.clubLive || [];
+    const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.n ? `<small>${esc(t.n)}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` +
+      (ui.clubOpen === t.club ? `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(t.tb || 0).keys()].map(i => `<button class="bm3-key" data-clubtn="${esc(t.club)}|${t.p}|${i + 1}">${i + 1}</button>`).join('')}</div></div>` : '') + `</div>`).join('');
+    openOv('clubs', `<h2>🏛 ${T('Clubs')}</h2>
+      ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No club tournament is running now.')}</div>`}
+      <div class="clubnew">${ui.clubNew ? `<div class="grp"><span>➕ ${T('Set up a tournament')}</span><div class="muted">${T('Your club\'s ID, then its password.')}</div><div class="row2"><input class="tok" id="clubIdIn" maxlength="40" autocomplete="off" placeholder="${T('Club ID')}"><button class="btn new" id="clubGo">${T('Continue')}</button></div></div>` : `<button class="btn gold" id="clubNew">➕ ${T('Set up a tournament')}</button>`}</div>
+      <div class="row2">${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn" id="clubSuper">🛡️ ${T('Super admin')}</button>` : ''}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+  };
+  if (ui.overlay !== 'clubs') ui.clubLive = null;
+  draw();
+  if (ui.clubLive == null) {
+    let v = null; try { v = await Net.Cloud.get('gate/live'); } catch (e) {}
+    ui.clubLive = Object.entries(v || {}).map(([club, t]) => ({ club, ...t })).filter(t => t && /^\d{2}$/.test(t.p || '') && Date.now() - (t.ts || 0) < 24 * 3600e3).sort((a, b) => b.ts - a.ts);
+    if (ui.overlay === 'clubs') draw();
+  }
+}
 /* Clubs: the club tournaments (in kulupler/, once BridgeGate) open here, full screen above the home page, under a bar with
    Home; the phone's Back closes them too. q: the club address's query (?club=…&role=table…), or '' for the clubs' page */
 function openClubs(q) {
@@ -3510,6 +3535,7 @@ function openClubs(q) {
 }
 function closeClubs() { const v = $('clubView'); if (!v || v.hidden) return; v.hidden = true; $('cvFrame').replaceWith(Object.assign(document.createElement('iframe'), { id: 'cvFrame' })); document.body.classList.remove('clubsopen'); if (typeof needGate === 'function' && needGate()) showGate(); }
 window.addEventListener('popstate', () => { if (!(history.state && history.state.clubs)) closeClubs(); });
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'clubIdIn') $('clubGo')?.click(); });
 /* the administrator deletes score history: the players listed (himself too), the ticked ones' boards removed */
 async function showWipe() {
   if (!Net.isAdmin()) return;

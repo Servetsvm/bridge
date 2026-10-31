@@ -121,7 +121,8 @@ async function initClubGate(){
     if(info&&(info.active!==false||isSuper())&&(fromLink||ownClub)){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
       if(roleParam!=='table') document.body.classList.remove('bg-device');   // the admin's sign-in keeps the usual look
-      if(roleParam&&['table','screen'].includes(roleParam)) selRole(roleParam);
+      if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
+      if(roleParam==='admin') setTimeout(()=>document.getElementById('pwInput')?.focus(),100);
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(()=>doLogin(),50); }
       // a screen's link (from the admin panel) opens the results screen at once

@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Set up a tournament": "Turnuva kur", "No club tournament is running now.": "Şu anda açık kulüp turnuvası yok.", "Your club's ID, then its password.": "Kulübünüzün kimliğini, sonra şifresini yazın.", "Club ID": "Kulüp kimliği", "Super admin": "Süper yönetici",
     "Online team match": "Online takım maçı", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "İki masada dörder kişilik iki takım; aynı eller masa masa IMP ile karşılaştırılır, boş yerlere robot oturur.",
     "Clubs": "Kulüpler",
     "The match is over": "Maç bitti", "The Closed room is still playing…": "Kapalı salon hâlâ oynuyor…", "You won the match!": "Maçı kazandınız!", "The robots won the match": "Maçı robotlar kazandı", "A draw": "Berabere",
@@ -418,6 +419,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Set up a tournament": "Sett opp en turnering", "No club tournament is running now.": "Ingen klubbturnering pågår nå.", "Your club's ID, then its password.": "Klubbens ID, deretter passordet.", "Club ID": "Klubb-ID", "Super admin": "Superadministrator",
     "Online team match": "Lagkamp på nett", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "To lag på fire ved to bord; de samme spillene sammenlignes bord mot bord i IMP, roboter tar tomme plasser.",
     "Clubs": "Klubber",
     "The match is over": "Kampen er over", "The Closed room is still playing…": "Lukket rom spiller fortsatt…", "You won the match!": "Du vant kampen!", "The robots won the match": "Robotene vant kampen", "A draw": "Uavgjort",
@@ -831,6 +833,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Set up a tournament": "Organizar un torneo", "No club tournament is running now.": "Ahora no hay ningún torneo de club en curso.", "Your club's ID, then its password.": "El ID de tu club y luego su contraseña.", "Club ID": "ID del club", "Super admin": "Superadministrador",
     "Online team match": "Partido de equipos online", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Dos equipos de cuatro en dos mesas; las mismas manos se comparan mesa contra mesa en IMP, los robots ocupan los asientos libres.",
     "Clubs": "Clubes",
     "The match is over": "El partido ha terminado", "The Closed room is still playing…": "La sala cerrada sigue jugando…", "You won the match!": "¡Has ganado el partido!", "The robots won the match": "Los robots ganaron el partido", "A draw": "Empate",
@@ -1272,6 +1275,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Set up a tournament": "Organiser un tournoi", "No club tournament is running now.": "Aucun tournoi de club en cours.", "Your club's ID, then its password.": "L’identifiant du club, puis son mot de passe.", "Club ID": "Identifiant du club", "Super admin": "Super administrateur",
     "Online team match": "Match par quatre en ligne", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Deux équipes de quatre à deux tables ; les mêmes donnes comparées table contre table en IMP, les robots prennent les places libres.",
     "Clubs": "Clubs",
     "The match is over": "Le match est terminé", "The Closed room is still playing…": "La salle fermée joue encore…", "You won the match!": "Vous avez gagné le match !", "The robots won the match": "Les robots ont gagné le match", "A draw": "Égalité",
@@ -1713,6 +1717,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Set up a tournament": "Organizza un torneo", "No club tournament is running now.": "Nessun torneo di club in corso.", "Your club's ID, then its password.": "L’ID del tuo club, poi la password.", "Club ID": "ID del club", "Super admin": "Super amministratore",
     "Online team match": "Incontro a squadre online", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Due squadre da quattro a due tavoli; le stesse smazzate confrontate tavolo contro tavolo a IMP, i robot occupano i posti liberi.",
     "Clubs": "Club",
     "The match is over": "L’incontro è finito", "The Closed room is still playing…": "La sala chiusa sta ancora giocando…", "You won the match!": "Hai vinto l’incontro!", "The robots won the match": "I robot hanno vinto l’incontro", "A draw": "Pareggio",
@@ -2154,6 +2159,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Set up a tournament": "Turnier einrichten", "No club tournament is running now.": "Gerade läuft kein Clubturnier.", "Your club's ID, then its password.": "Die ID deines Clubs, dann sein Passwort.", "Club ID": "Club-ID", "Super admin": "Superadmin",
     "Online team match": "Online-Teamkampf", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Zwei Vierer-Teams an zwei Tischen; dieselben Boards werden Tisch gegen Tisch in IMP verglichen, Roboter besetzen leere Plätze.",
     "Clubs": "Clubs",
     "The match is over": "Der Kampf ist vorbei", "The Closed room is still playing…": "Der geschlossene Raum spielt noch…", "You won the match!": "Du hast den Kampf gewonnen!", "The robots won the match": "Die Roboter haben gewonnen", "A draw": "Unentschieden",
@@ -2595,6 +2601,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Set up a tournament": "Создать турнир", "No club tournament is running now.": "Сейчас нет клубных турниров.", "Your club's ID, then its password.": "ID вашего клуба, затем его пароль.", "Club ID": "ID клуба", "Super admin": "Суперадминистратор",
     "Online team match": "Командный матч онлайн", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Две команды по четыре за двумя столами; одни и те же сдачи сравниваются стол против стола в IMP, свободные места занимают роботы.",
     "Clubs": "Клубы",
     "The match is over": "Матч окончен", "The Closed room is still playing…": "Закрытый зал ещё играет…", "You won the match!": "Вы выиграли матч!", "The robots won the match": "Матч выиграли роботы", "A draw": "Ничья",
@@ -3036,6 +3043,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Set up a tournament": "Utwórz turniej", "No club tournament is running now.": "Teraz nie trwa żaden turniej klubowy.", "Your club's ID, then its password.": "ID klubu, potem jego hasło.", "Club ID": "ID klubu", "Super admin": "Superadministrator",
     "Online team match": "Mecz drużynowy online", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Dwie czwórki przy dwóch stołach; te same rozdania porównywane stół przeciw stołowi w IMP, wolne miejsca zajmują roboty.",
     "Clubs": "Kluby",
     "The match is over": "Mecz zakończony", "The Closed room is still playing…": "Pokój zamknięty jeszcze gra…", "You won the match!": "Wygrałeś mecz!", "The robots won the match": "Mecz wygrały roboty", "A draw": "Remis",
@@ -3477,6 +3485,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Set up a tournament": "创建比赛", "No club tournament is running now.": "现在没有进行中的俱乐部比赛。", "Your club's ID, then its password.": "输入俱乐部 ID,然后输入密码。", "Club ID": "俱乐部 ID", "Super admin": "超级管理员",
     "Online team match": "在线队式赛", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "两支四人队在两张桌;同样的牌逐桌按 IMP 比较,空位由机器人补上。",
     "Clubs": "俱乐部",
     "The match is over": "比赛结束", "The Closed room is still playing…": "闭室还在打牌…", "You won the match!": "你赢了比赛!", "The robots won the match": "机器人赢了比赛", "A draw": "平局",
