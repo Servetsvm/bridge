@@ -222,9 +222,9 @@ function scoreToIMP(diff){
 //  MATCHPOINT CALCULATION
 // ══════════════════════════════════════════════════════
 // every tournament is scored in MP and IMP together (a team match only in IMP)
-// the tournament's scoring: MP + IMP (BOTH, also older tournaments), MP or IMP; a team match is always IMPs
-const scoringShows=()=>{ const s=getState(), team=s.movement==='team', sc=team?'IMP':(s.scoring||'BOTH'); return { mp: sc!=='IMP', imp: sc!=='MP', byImp: sc==='IMP' }; };
-const scoringName=s=>s&&s.movement==='team'?'IMP':s&&s.scoring==='MP'?'MP':s&&s.scoring==='IMP'?'IMP':'MP + IMP';
+// every tournament is scored in both MP and IMP; a team match in IMPs
+const scoringShows=()=>{ const team=getState().movement==='team'; return { mp: !team, imp: true, byImp: team }; };
+const scoringName=s=>s&&s.movement==='team'?'IMP':'MP + IMP';
 const fmtImp=v=>{ const x=Math.round((v||0)*10)/10; return (x>0?'+':'')+x.toFixed(1); };
 function calcMP(){
   const boards=getBoards();const movements=getMovements();

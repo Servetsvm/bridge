@@ -141,16 +141,6 @@ function renderSetup(){
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="bprHint"></div>
       </div>
     </div>
-    <div class="field-row">
-      <div class="field">
-        <label>Scoring</label>
-        <select id="aScoring">
-          <option value="BOTH" ${!isTeam&&(s.scoring||'BOTH')==='BOTH'?'selected':''}>Matchpoints and IMPs (MP + IMP)</option>
-          <option value="MP" ${!isTeam&&s.scoring==='MP'?'selected':''}>Matchpoints (MP)</option>
-          <option value="IMP" ${isTeam||s.scoring==='IMP'?'selected':''}>IMPs</option>
-        </select>
-      </div>
-    </div>
     <div class="field">
       <label>Movement</label>
       <select id="aMovement" onchange="adminUpdateCalc()">
@@ -273,7 +263,7 @@ window.adminSetup=function(){
   setLive(false);   // a new tournament is listed when it starts
   const s=getState();
   s.name=name;s.tableCount=tables;s.boardsPerRound=bpr;s.totalBoards=totalBoards;s.roundCount=rounds;s.phantom=phantom;s.status='setup';s.currentRound=0;
-  s.movement=mov;s.scoring=mov==='team'?'IMP':(document.getElementById('aScoring')||{}).value||'BOTH';s._setupPlayers=players;s._setupSwissRounds=swissRounds||s._setupSwissRounds;
+  s.movement=mov;s.scoring=mov==='team'?'IMP':'BOTH';s._setupPlayers=players;s._setupSwissRounds=swissRounds||s._setupSwissRounds;
   if(mov==='team'){
     const tm=teamMatchSettingsFromUI();s.teams=teams;s._teamPairs=tm.pairsPerTeam;s._teamAName=tm.teamA;s._teamBName=tm.teamB;s._teamScoring='IMP';
   }else{delete s.teams;delete s._teamPairs;delete s._teamAName;delete s._teamBName;}
