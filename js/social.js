@@ -380,13 +380,14 @@ const SB = (() => {
   const oneTile = (b, r) => { const o = r && r.ok && oneOf(b, r); return !o ? (r ? '' : '—') : o.imp === 0 ? '0 IMP' : `${o.imp > 0 ? SEAT_AB[0] + SEAT_AB[2] : SEAT_AB[1] + SEAT_AB[3]} +${Math.abs(o.imp)}`; };
   const oneLine = (b, r) => { const o = oneOf(b, r); return o ? `<small>${T('N-S {0} points', r.h)} · ${o.side == null ? T('20–20: nothing expected') : T('{0} expected {1}', o.side ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2], o.exp)}</small>` : ''; };
   const scoreTxt = (b, r) => { const ns = nsScore(b, r), ew = r.l && E.sideOf(r.d) === 1; return `${ew ? SEAT_AB[1] + SEAT_AB[3] : SEAT_AB[0] + SEAT_AB[2]} ${signed(ew ? -ns : ns)}`; };
-  // the single table's form: who played, the score they made, North-South's points
+  // the single table's form: the side that scored and its points, North-South's points
   const oneOk = f => !!f && validH(f.h) && (f.od === 2 || ((f.od === 0 || f.od === 1) && Number.isInteger(f.score) && f.score >= 10 && f.score <= 7600));
   function oneFormHtml(b) {
     const mt = sb.formT || myTable(), R = (sb.g.r || {})[b] || {}, old = R[mt];
     if (!sb.form) {   // a board entered before: its side and score (a contract kept before: worked out)
-      const ns = old ? nsScore(b, old) : 0, od = !old ? null : old.m ? (old.pa ? 2 : E.sideOf(old.d)) : !old.l ? 2 : E.sideOf(old.d), dsc = od === 1 ? -ns : ns;
-      sb.form = { od, score: old && od !== 2 ? Math.abs(dsc) : null, sg: dsc < 0 ? -1 : 1, h: old ? old.h : null };
+      // the side that scored (N-S, E-W; passed out) and its points
+      const ns = old ? nsScore(b, old) : 0, od = !old ? null : (old.m ? old.pa : !old.l) || !ns ? 2 : ns > 0 ? 0 : 1;
+      sb.form = { od, score: old && od !== 2 ? Math.abs(ns) : null, h: old ? old.h : null };
     }
     const f = sb.form, ok = oneOk(f);
     const vul = [E.vulOf(b, 0), E.vulOf(b, 1)], vc = vul[0] && vul[1] ? 'both' : vul[0] ? 'ns' : vul[1] ? 'ew' : 'none';
@@ -395,9 +396,9 @@ const SB = (() => {
     const side = f.od === 0 || f.od === 1;
     return `<div class="bm3"><div class="bm3-screen">
       <div class="bm3-head"><div class="bm3-board"><small>${T('Board')}</small><b>${b}</b><span class="bm3-vul ${vc}">${vt}</span></div>${old ? `<div class="bm3-edit">✎</div>` : ''}</div>
-      <div class="bm3-step">${T('Declarer')}</div>
+      <div class="bm3-step">${T('Who scored')}</div>
       ${keys('od', 'k3', [[0, SEAT_AB[0] + SEAT_AB[2]], [1, SEAT_AB[1] + SEAT_AB[3]], [2, T('Pass'), 'pass']], f.od)}
-      ${side ? `<div class="bm3-step">${T('Score')}</div>${keys('sg', 'k2', [[1, '＋ ' + T('Made it')], [-1, '− ' + T('Down')]], f.sg)}
+      ${side ? `<div class="bm3-step">${T('Score')}</div>
       <input class="bm3-hcp" id="sbScore" type="number" inputmode="numeric" min="10" max="7600" step="10" value="${f.score ?? ''}" placeholder="${T('e.g. 420')}">` : ''}
       ${f.od != null ? `<div class="bm3-step">${T('North-South’s points (0–40)')}</div><input class="bm3-hcp" id="sbHcp" type="number" inputmode="numeric" min="0" max="40" value="${f.h ?? ''}" placeholder="${T('High-card points')}">` : ''}
       <div class="bm3-actions"${old ? '' : ' style="grid-template-columns:1fr"'}>${old ? `<button class="bm3-cancel" id="sbCancel">✕ ${T('Cancel')}</button>` : ''}<button class="bm3-ok" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>✓ ${T('Save')}</button></div>
@@ -581,7 +582,7 @@ const SB = (() => {
     if (isOne() && !oneOk(f)) return;
     const r = isOne() ? { l: 0, s: 0, x: 0, d: f.od === 1 ? 1 : 0, k: 0, m: 1, pa: f.od === 2 ? 1 : 0 } : f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
     if (f.l && f.ls != null && f.ls >= 0 && f.lr != null && f.lr >= 0) r.ld = SUITS[f.ls] + RANKS[f.lr];   // an opening lead entered before (it is no longer asked)
-    r.sc = isOne() ? (f.od === 2 ? 0 : (f.od === 1 ? -1 : 1) * f.sg * f.score) : nsScore(b, r); r.ts = Date.now();
+    r.sc = isOne() ? (f.od === 2 ? 0 : (f.od === 1 ? -1 : 1) * f.score) : nsScore(b, r); r.ts = Date.now();
     if (isOne()) { if (!validH(f.h)) return; r.h = f.h; const p = (sb.g.t || {})[1] || {}; r.p = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }   // the points, and who sat where
     if (sb.formT) r.ok = true;   // the administrator's correction needs no confirmation
     sb.busy = true; show();
@@ -629,28 +630,8 @@ const SB = (() => {
     show();
   }
 
-  /* running games are listed with the open tables on the home page (the list is fetched at most once a minute) */
-  // the games running now, under Open tables: the team matches (sbi); the club tournaments are in Clubs
-  const lob = { L: null, ts: 0, busy: false, html: '' };
-  const running24 = g => g && g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3;
-  async function loadLobby() {
-    const L = await C().get('sbi').catch(() => null);
-    lob.L = Object.entries(L || {}).map(([id, v]) => ({ id, ...v })).filter(running24).sort((a, b) => b.ts - a.ts);
-  }
-  function lobbyHtml() {
-    if (!lob.busy && Date.now() - lob.ts > 60e3 && C() && C().on) {
-      lob.busy = true;
-      loadLobby().then(() => { const h = rowsHtml(); if (h !== lob.html) { lob.html = h; if (typeof render === 'function') render(); } })
-        .catch(() => {}).finally(() => { lob.busy = false; lob.ts = Date.now(); });
-    }
-    return lob.html = rowsHtml();
-  }
-  // the games running now, each with Join
-  const rowsHtml = () => (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Team match')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-sbjoin="${g.id}">${T('Join')}</button></div></div>`).join('');
-
   document.addEventListener('click', e => {
     if (e.target.closest('#sbOpen')) return open();
-    const sj = e.target.closest('[data-sbjoin]'); if (sj) { sb.entry = false; return openLink(sj.dataset.sbjoin, 0); }
     const go = e.target.closest('[data-sbgo]'); if (go) { sb.setup = null; openOv('sb', `<div class="muted">${T('Loading…')}</div>`); return openGame(go.dataset.sbgo); }
     if (ui.overlay !== 'sb') return;
     const el = e.target.closest('button'); if (!el) return;
@@ -711,5 +692,5 @@ const SB = (() => {
     await openGame(id);
     if (t && sb.g && canManage(sb.g.m)) { setMyTable(t); sb.reqT = 0; show(); }   // the organiser sits at once
   }
-  return { open, openLink, lobbyHtml, locked, vpOf };
+  return { open, openLink, locked, vpOf };
 })();
