@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Davet edilecek kimse yok: masalara oyuncuların adını yazın (boş yerlere robot oturur). Sadece robotlarla oynayacaksanız Turnuvayı başlat'a basın.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Davetler gönderildi: {0}. Şu anda lobide olan oyuncular hemen görür; cevapları yukarıda (✓) görünür.",
     "Member numbers": "Üye numaraları",
     "No tournament at this club now.": "Bu kulüpte şu anda turnuva yok.", "No clubs yet.": "Henüz kulüp yok.",
     "Set up a tournament": "Turnuva kur", "No club tournament is running now.": "Şu anda açık kulüp turnuvası yok.", "Your club's ID, then its password.": "Kulübünüzün kimliğini, sonra şifresini yazın.", "Club ID": "Kulüp kimliği", "Super admin": "Süper yönetici",
@@ -421,6 +422,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Ingen å invitere: skriv spillernes navn ved bordene (roboter tar tomme plasser). For å spille bare med roboter, trykk Start turneringen.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Invitasjoner sendt: {0}. Spillere i lobbyen ser dem med en gang; svarene vises over (✓).",
     "Member numbers": "Medlemsnumre",
     "No tournament at this club now.": "Ingen turnering i denne klubben nå.", "No clubs yet.": "Ingen klubber ennå.",
     "Set up a tournament": "Sett opp en turnering", "No club tournament is running now.": "Ingen klubbturnering pågår nå.", "Your club's ID, then its password.": "Klubbens ID, deretter passordet.", "Club ID": "Klubb-ID", "Super admin": "Superadministrator",
@@ -837,6 +839,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Nadie a quien invitar: escribe los nombres de los jugadores en las mesas (los robots ocupan los asientos libres). Para jugar solo con robots, pulsa Empezar el torneo.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Invitaciones enviadas: {0}. Los jugadores del lobby las ven al momento; sus respuestas aparecen arriba (✓).",
     "Member numbers": "Números de socio",
     "No tournament at this club now.": "Ahora no hay torneo en este club.", "No clubs yet.": "Aún no hay clubes.",
     "Set up a tournament": "Organizar un torneo", "No club tournament is running now.": "Ahora no hay ningún torneo de club en curso.", "Your club's ID, then its password.": "El ID de tu club y luego su contraseña.", "Club ID": "ID del club", "Super admin": "Superadministrador",
@@ -1281,6 +1284,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Personne à inviter : écrivez les noms des joueurs aux tables (les robots prennent les places libres). Pour jouer seulement avec des robots, touchez Démarrer le tournoi.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Invitations envoyées : {0}. Les joueurs du salon les voient tout de suite ; leurs réponses s’affichent au-dessus (✓).",
     "Member numbers": "Numéros de licence",
     "No tournament at this club now.": "Pas de tournoi dans ce club pour l’instant.", "No clubs yet.": "Pas encore de clubs.",
     "Set up a tournament": "Organiser un tournoi", "No club tournament is running now.": "Aucun tournoi de club en cours.", "Your club's ID, then its password.": "L’identifiant du club, puis son mot de passe.", "Club ID": "Identifiant du club", "Super admin": "Super administrateur",
@@ -1725,6 +1729,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Nessuno da invitare: scrivi i nomi dei giocatori ai tavoli (i robot occupano i posti liberi). Per giocare solo con i robot, tocca Avvia il torneo.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Inviti inviati: {0}. I giocatori nella lobby li vedono subito; le risposte compaiono sopra (✓).",
     "Member numbers": "Numeri di tessera",
     "No tournament at this club now.": "Nessun torneo in questo club ora.", "No clubs yet.": "Ancora nessun club.",
     "Set up a tournament": "Organizza un torneo", "No club tournament is running now.": "Nessun torneo di club in corso.", "Your club's ID, then its password.": "L’ID del tuo club, poi la password.", "Club ID": "ID del club", "Super admin": "Super amministratore",
@@ -2169,6 +2174,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Niemand einzuladen: schreibe die Namen der Spieler an die Tische (Roboter besetzen leere Plätze). Nur mit Robotern spielen: Turnier starten antippen.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Einladungen gesendet: {0}. Spieler in der Lobby sehen sie sofort; ihre Antworten stehen oben (✓).",
     "Member numbers": "Mitgliedsnummern",
     "No tournament at this club now.": "Gerade kein Turnier in diesem Club.", "No clubs yet.": "Noch keine Clubs.",
     "Set up a tournament": "Turnier einrichten", "No club tournament is running now.": "Gerade läuft kein Clubturnier.", "Your club's ID, then its password.": "Die ID deines Clubs, dann sein Passwort.", "Club ID": "Club-ID", "Super admin": "Superadmin",
@@ -2613,6 +2619,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Некого приглашать: впишите имена игроков за столами (свободные места занимают роботы). Чтобы играть только с роботами, нажмите «Начать турнир».", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Приглашения отправлены: {0}. Игроки в лобби видят их сразу; ответы видны выше (✓).",
     "Member numbers": "Номера членов",
     "No tournament at this club now.": "Сейчас в этом клубе нет турнира.", "No clubs yet.": "Клубов пока нет.",
     "Set up a tournament": "Создать турнир", "No club tournament is running now.": "Сейчас нет клубных турниров.", "Your club's ID, then its password.": "ID вашего клуба, затем его пароль.", "Club ID": "ID клуба", "Super admin": "Суперадминистратор",
@@ -3057,6 +3064,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "Nie ma kogo zaprosić: wpisz imiona graczy przy stołach (wolne miejsca zajmują roboty). Aby grać tylko z robotami, dotknij Rozpocznij turniej.", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "Zaproszenia wysłane: {0}. Gracze w lobby widzą je od razu; odpowiedzi pojawiają się wyżej (✓).",
     "Member numbers": "Numery członkowskie",
     "No tournament at this club now.": "W tym klubie nie ma teraz turnieju.", "No clubs yet.": "Brak klubów.",
     "Set up a tournament": "Utwórz turniej", "No club tournament is running now.": "Teraz nie trwa żaden turniej klubowy.", "Your club's ID, then its password.": "ID klubu, potem jego hasło.", "Club ID": "ID klubu", "Super admin": "Superadministrator",
@@ -3501,6 +3509,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Nobody to invite: write the players' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.": "没有可邀请的人:在牌桌上写下玩家名字(空位由机器人补上)。只和机器人打,请点开始比赛。", "Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).": "邀请已发送:{0}。大厅里的玩家会立即看到;他们的回复显示在上方(✓)。",
     "Member numbers": "会员编号",
     "No tournament at this club now.": "该俱乐部现在没有比赛。", "No clubs yet.": "还没有俱乐部。",
     "Set up a tournament": "创建比赛", "No club tournament is running now.": "现在没有进行中的俱乐部比赛。", "Your club's ID, then its password.": "输入俱乐部 ID,然后输入密码。", "Club ID": "俱乐部 ID", "Super admin": "超级管理员",

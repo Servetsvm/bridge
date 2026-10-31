@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 354;
+const APP_V = 355;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1948,6 +1948,7 @@ function tourRowBtns(t, me) {
 function showTourSetup(id) {
   const t = Net.st.tours[id]; if (!t || !Net.isMine(t)) return;
   if (ui.overlay === 'tsetup' && ui.tsetId === id) readTourSeats();   // keep what was typed when the screen is redrawn
+  if (ui.tsetId !== id) ui.tsetMsg = null;
   ui.tsetId = id;
   const sel = ui.tsel && ui.tsel.id === id ? ui.tsel : (ui.tsel = { id, names: new Set(t.inv) });
   const known = [...new Set([...Net.knownNames(), ...sel.names])];
@@ -1975,6 +1976,7 @@ function showTourSetup(id) {
     ${SET.club && t.format !== 'tables' ? `<div class="grp"><span>${T('Who can play')}</span>${opt('tclub', [['', '🌍 ' + T('Everyone')], ['club', '🏛 ' + esc(SET.club)]], t.club ? 'club' : '')}<div class="muted">${T('A club tournament is shown only to the players who wrote the same club on their card.')}</div></div>` : ''}
     <div class="grp"><span>${T('Keep the tournament for')}</span>${opt('thours', [[3, T('{0} hours', 3)], [24, T('1 day')], [72, T('3 days')]], t.hours)}</div>
     <div class="grp"><span>${T('Answers')}</span><div>${esc(t.by)} <span class="ok">✓ ${T('organiser')}</span>${Object.values(t.joined).filter(n => n !== t.by).map(n => ` · ${esc(n)} <span class="ok">✓</span>`).join('')}${Object.values(t.declined).map(n => ` · ${esc(n)} <span class="no">✗</span>`).join('')}</div></div>
+    ${ui.tsetMsg ? `<div class="${ui.tsetMsg.no ? 'no' : 'okmsg'}">${esc(ui.tsetMsg.txt)}</div>` : ''}
     <div class="row2"><button class="btn gold" id="tSend">${T('Send the invitations')}</button><button class="btn new" id="tGo">${T('Start the tournament')}</button></div>
     <div class="row2"><button class="btn" id="tCancel">${T('Cancel the tournament')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
@@ -2992,7 +2994,8 @@ document.addEventListener('click', ev_ => {
     case "oNext": if (guest()) { Net.send({ t: "next" }); closeOv(); } else if (G && G.tour) { closeOv(); nextTourBoard(); } else newBoard(); break;
     case 'tNew': { const t = Net.newTour(8); ui.tsel = null; render(); showTourSetup(t.id); break; }
     case 'tAddBtn': { const i = $('tAdd'), v = i && i.value.trim().slice(0, 20); if (v && ui.tsel) { ui.tsel.names.add(v); showTourSetup(ui.tsetId); } break; }
-    case 'tSend': { readTourSeats(); const t = Net.st.tours[ui.tsetId]; const names = t && t.format === 'tables' ? [].concat(...t.tables).filter(n => n && n.toLowerCase() !== (myNm() || '').toLowerCase()) : [...((ui.tsel && ui.tsel.names) || [])]; if (!names.length) { flash(T('Pick at least one player'), 1800); break; } Net.tourInvite(ui.tsetId, names); flash(T('Invitations sent'), 1800); showTourSetup(ui.tsetId); break; }
+    case 'tSend': { readTourSeats(); const t = Net.st.tours[ui.tsetId]; const names = t && t.format === 'tables' ? [].concat(...t.tables).filter(n => n && n.toLowerCase() !== (myNm() || '').toLowerCase()) : [...((ui.tsel && ui.tsel.names) || [])]; if (!names.length) { ui.tsetMsg = { no: 1, txt: t && t.format === 'tables' ? T('Nobody to invite: write the players\' names at the tables (robots take the empty seats). To play with robots only, tap Start the tournament.') : T('Pick at least one player') }; showTourSetup(ui.tsetId); break; }
+      Net.tourInvite(ui.tsetId, names); ui.tsetMsg = { txt: '✉️ ' + T('Invitations sent: {0}. Players in the lobby now see them at once; their answers show above (✓).', names.join(', ')) }; showTourSetup(ui.tsetId); break; }
     case 'tGo': { readTourSeats(); const id = ui.tsetId, t = Net.st.tours[id]; Net.tourStart(id); closeOv(); flash(T('The tournament has started'), 2000); render();
       // you can start alone: robots take the empty seats; at tables, your own table opens at once
       if (t && t.format === 'tables') { const me = Net.myTourSeat(t); if (me && me.seat === me.hostSeat) Net.openTourTable(id); } else if (t) playTour(id);
