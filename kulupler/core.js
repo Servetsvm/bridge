@@ -94,6 +94,18 @@ const ICON_SMS='<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fi
 const _members={};
 // the member list of this club's federation: NBF (Norway, /members) or TBF (Turkey, /membersTbf)
 const memberList=()=>(typeof CLUB_INFO!=='undefined'&&CLUB_INFO&&CLUB_INFO.fed==='tbf')?'/membersTbf/':'/members/';
+// the whole member list of this club's federation (fetched once), for finding a member by name
+let _memberAll=null, _memberAllOf='';
+const foldName=s=>String(s||'').toLocaleLowerCase('tr').replace(/ı/g,'i').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+async function memberSearch(q){
+  const words=foldName(q).split(/\s+/).filter(Boolean); if(!words.length) return [];
+  const list=memberList();
+  if(!_memberAll||_memberAllOf!==list){ try{ const r=await fetch(await fbRootUrl(list.slice(0,-1)+'.json')); const v=r.ok?await r.json():null; _memberAll=Object.entries(v||{}).filter(([,n])=>typeof n==='string').map(([num,n])=>[num,n,foldName(n)]); _memberAllOf=list; }catch(e){ return []; } }
+  // every word the start of one of the name's words; the same person once (a number with and without its leading zero)
+  const seen=new Set(), out=[];
+  for(const [num,n,f] of _memberAll){ const parts=f.split(/[\s-]+/); if(!words.every(w=>parts.some(p=>p.startsWith(w)))) continue; const key=num.replace(/^0+/,'')+'|'+f; if(seen.has(key)) continue; seen.add(key); out.push({num,name:cleanData(n)}); if(out.length>=8) break; }
+  return out;
+}
 // a number not in the list, with the name the player typed: kept for the next time (only a new number)
 async function addMember(num,name){ _members[num]=name; try{ await fetch(await fbRootUrl(memberList()+num+'.json'),{method:'PUT',body:JSON.stringify(name)}); }catch(e){} }
 async function memberName(num){

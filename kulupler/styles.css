@@ -475,3 +475,9 @@ html.embed .login-logo,html.embed .topbar-logo,html.embed .login-box a[href="../
 .bg-entry.open .bg-entry-body{display:block}
 .bg-newtour{margin-top:16px;padding-top:10px;border-top:1px solid var(--border2);text-align:left}
 body.bg-device .bg-newtour{border-color:#d9dee3}
+
+/* a seat: the members a name fits */
+.pe-found.pe-list{display:flex;flex-direction:column;gap:6px;text-align:left}
+.pe-pick{display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:inherit;font-weight:700;cursor:pointer;text-align:left}
+.pe-pick small{margin-left:auto;opacity:.6;font-weight:400}
+body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}

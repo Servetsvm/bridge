@@ -104,6 +104,7 @@ window.bgPlayerNames=function(prefix,n){
 };
 // one seat: a member number (its name is shown at once) or a name; OK goes back to the table
 window.bgSeatEdit=function(k){
+  window._bgSeatK=k;
   const pe=document.getElementById('playerEntry'), e=window._bgEntry; if(!pe||!e) return;
   pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">Table ${e.n}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">${BG_SEATS[k]}</div></div>
     <input id="peInput" class="pe-input" maxlength="40" autocomplete="off" placeholder="Member number or name" value="${cleanData(e.seats[k]||'')}" oninput="bgSeatLook()" onkeydown="if(event.key==='Enter')bgSeatOk('${k}')">
@@ -117,11 +118,25 @@ window.bgSeatLook=function(){
   clearTimeout(_bgLookT);
   _bgLookT=setTimeout(async()=>{
     const v=(document.getElementById('peInput')?.value||'').trim(), out=document.getElementById('peFound'); if(!out) return;
-    if(!/^\d{1,8}$/.test(v)){ out.textContent=''; return; }
+    if(!/^\d{1,8}$/.test(v)){
+      // a name or surname: the members it fits, with their numbers
+      if(v.length<2){ out.textContent=''; return; }
+      const L=await memberSearch(v);
+      if((document.getElementById('peInput')?.value||'').trim()!==v) return;
+      out.className='pe-found pe-list';
+      out.innerHTML=L.map(m=>`<button type="button" class="pe-pick" onclick="bgSeatPick('${m.num}')">👤 ${m.name} <small>${m.num}</small></button>`).join('');
+      return;
+    }
     const name=await memberName(v);
     if((document.getElementById('peInput')?.value||'').trim()!==v) return;
     out.textContent=name?'👤 '+name:'❓ '+v; out.className='pe-found'+(name?' ok':' no');
   },250);
+};
+// a member chosen from the names found: seated at once
+window.bgSeatPick=async function(num){
+  const e=window._bgEntry, k=window._bgSeatK; if(!e||!k) return;
+  const name=await memberName(num); if(!name) return;
+  e.seats[k]=name.slice(0,40); bgPlayerNames(e.prefix,e.n);
 };
 window.bgSeatOk=async function(k){
   const e=window._bgEntry; if(!e) return;
