@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 334;
+const APP_V = 335;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2113,10 +2113,9 @@ function nextTourBoard() {
 function showOpenChoice() {
   if (online()) { Net.panel(); return; }
   openOv('open', `<h2>🌐 ${T('Open an online table')}</h2>
-    <button class="btn new choice" data-open="pub"><b>🌍 ${T('Public table')}</b><small>${T('Listed in the lobby: anyone can ask to join, you accept.')}</small></button>
-    <button class="btn choice" data-open="priv"><b>🔒 ${T('Private table')}</b><small>${T('Shown in the lobby with 🔒: invited players sit at once, others must ask you, no spectators.')}</small></button>
-    <button class="btn choice" id="olTeam"><b>🏅 ${T('Online team match')}</b><small>${T('Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.')}</small></button>
-    <div class="grp"><span>🏆 ${T('Online tournaments')}</span><div id="nTours">${toursHtml()}</div></div>
+    <button class="btn new choice" data-open="pub"><b>🌍 ${T('Open table')}</b></button>
+    <button class="btn choice" data-open="priv"><b>🔒 ${T('Private table')}</b></button>
+    <button class="btn choice" id="olTeam"><b>🏅 ${T('Team match')}</b></button>
     <div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`);
 }
 // back to the home page from a board played alone (the board is kept for Continue)
