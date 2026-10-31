@@ -9348,7 +9348,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 331;
+const APP_V = 332;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12194,13 +12194,6 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'rtOpen') { showRTeam(); return; }
-  // the team match online: a new tournament of the Team match type
-  if (t.id === 'sbOnline') {
-    const tt = Net.newTour(8), k = TOUR_KINDS.teams;
-    Object.assign(tt, { kind: 'teams', format: k.set.format, n: k.set.n, scoring: k.set.scoring, hours: k.set.hours, name: (T('Team match') + ' · ' + new Date().toLocaleDateString()).slice(0, 40) });
-    while (tt.tables.length < 2) tt.tables.push(['', '', '', '']); tt.tables.length = 2;
-    ui.tsel = null; closeOv(); render(); showTourSetup(tt.id); return;
-  }
   if (t.dataset.rtn) { RT = { n: +t.dataset.rtn, ids: [], ts: Date.now() }; saveRT(); closeOv(); newBoard(); return; }
   if (t.id === 'rtGo') { closeOv(); if (!G || G.phase === 'done' || !G.rteam) newBoard(); return; }
   if (t.id === 'rtEnd') { askYes(T('Finish the team match now?'), () => { RT.end = Date.now(); saveRT(); showRTeam(); }); return; }
@@ -15116,7 +15109,7 @@ const SB = (() => {
     return `<h2>🃏 ${T('Team match')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
       <div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>${legend(g)}
       ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
-      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
+      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   // a team match: the tables of each match and who sits North-South there
   const legend = m => !isTeam(m) ? '' : `<div class="tmleg">${[...Array(Math.floor(m.tb / 2)).keys()].map(i => { const a = teamName(2 * i + 1, m), b = teamName(2 * i + 2, m);
@@ -15180,10 +15173,9 @@ const SB = (() => {
       <td data-l="${T('Status')}">${g.st === 'done' ? `<span class="tst">${T('Finished')}</span>` : `<span class="tst run">${T('Running')}</span>`}</td>
       <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${canManage(g) ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
     return `<h2>🃏 ${T('Team match')}</h2>
-      <div class="muted">🌐 ${T('Online: played in the app with its cards; robots take the empty seats. 🃏 Real cards: played at real tables, the app keeps the scores.')}</div>
       <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')}</div>
       ${isAdm() ? `<div class="row2"><button class="btn gold" id="rtOpen">🤖 ${T('Team match with robots')}</button></div>` : ''}
-      <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Real cards')}</button><button class="btn new" id="sbOnline">🌐 ${T('Online')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button></div>
+      <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button></div>
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
@@ -15273,10 +15265,9 @@ const SB = (() => {
   function formHtml(b) {
     const mt = sb.formT || myTable(), R = (sb.g.r || {})[b] || {};
     const f = sb.form || (sb.form = R[mt] ? { ...R[mt], ls: R[mt].ld ? SUITS.indexOf(R[mt].ld[0]) : null, lr: R[mt].ld ? RANKS.indexOf(R[mt].ld.slice(1)) : null } : { l: null, s: null, x: 0, d: null, k: null, ls: null, lr: null });
-    const lead = f.ls != null && f.ls >= 0 && f.lr != null && f.lr >= 0;
     const need = f.l ? f.l + 6 : 0;
     const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
-    const okb = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null && lead), ok = okb && (!isOne() || validH(f.h));
+    const okb = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null), ok = okb && (!isOne() || validH(f.h));
     // the screen of a Bridgemate III: the contract and the N-S score on the display, then one row of large keys per step
     const ns = ok ? (f.l ? nsScore(b, f) : 0) : null;
     const contract = f.l === 0 ? T('Pass') : f.l ? `${f.l}${f.s != null ? sym(f.s) : ''}${f.x === 1 ? ' X' : f.x === 2 ? ' XX' : ''}${f.d != null ? ' ' + SEAT_AB[f.d] : ''}` : '—';
@@ -15292,7 +15283,7 @@ const SB = (() => {
       </div>
       <div class="bm3-display">
         <div class="bm3-contract">${contract}</div>
-        <div class="bm3-sub"><span>${T('Opening lead')}: ${lead ? leadHtml(SUITS[f.ls] + RANKS[f.lr]) : '—'}</span><span>${T('Result')}: ${f.l && f.k != null ? resTxt(f) : '—'}</span></div>
+        <div class="bm3-sub"><span>${T('Result')}: ${f.l && f.k != null ? resTxt(f) : '—'}</span></div>
         <div class="bm3-score"><small>${SEAT_AB[0] + SEAT_AB[2]}</small><b class="${ns > 0 ? 'pos' : ns < 0 ? 'neg' : ''}">${ns == null ? '—' : signed(ns)}</b></div>
       </div>
       <div class="bm3-step">${T('Contract')}</div>
@@ -15301,10 +15292,7 @@ const SB = (() => {
       ${keys('x', 'k3', [[0, '—'], [1, 'X', 'dbl'], [2, 'XX', 'dbl']], f.x)}
       <div class="bm3-step">${T('Declarer')}</div>
       ${keys('d', 'k4', [0, 1, 2, 3].map(s => [s, SEAT_AB[s]]), f.d)}` : ''}
-      ${f.l && f.s != null && f.d != null ? `<div class="bm3-step">${T('Opening lead')}</div>
-      ${keys('ls', 'k4', [0, 1, 2, 3].map(i => [i, SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.ls)}
-      ${keys('lr', 'k7 small', RANKS.map((r, i) => [i, r]), f.lr)}` : ''}
-      ${f.l && f.s != null && f.d != null && lead ? `<div class="bm3-step">${T('Result')}</div>
+      ${f.l && f.s != null && f.d != null ? `<div class="bm3-step">${T('Result')}</div>
       ${keys('k', 'k7', res.map(([k, l]) => [k, l, 'res ' + (k - need === 0 ? 'made' : k > need ? 'over' : 'down')]), f.k)}` : ''}
       ${isOne() && (f.l === 0 || f.k != null) ? `<div class="bm3-step">${T('North-South’s points (0–40)')}</div><input class="bm3-hcp" id="sbHcp" type="number" inputmode="numeric" min="0" max="40" value="${f.h ?? ''}" placeholder="${T('High-card points')}" data-okb="${okb ? 1 : ''}">` : ''}
       <div class="bm3-actions"${R[mt] ? '' : ' style="grid-template-columns:1fr"'}>${R[mt] ? `<button class="bm3-cancel" id="sbCancel">✕ ${T('Cancel')}</button>` : ''}<button class="bm3-ok" id="sbSave"${ok && !sb.busy ? '' : ' disabled'}>✓ ${T('Save')}</button></div>
@@ -15445,7 +15433,8 @@ const SB = (() => {
   async function save() {
     const b = sb.board, mt = myTable(), f = sb.form; if (!b || !mt || !f || sb.busy) return;
     const t = sb.formT || mt;
-    const r = f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k, ld: SUITS[f.ls] + RANKS[f.lr] } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
+    const r = f.l ? { l: f.l, s: f.s, x: f.x || 0, d: f.d, k: f.k } : { l: 0, s: 0, x: 0, d: 0, k: 0 };
+    if (f.l && f.ls != null && f.ls >= 0 && f.lr != null && f.lr >= 0) r.ld = SUITS[f.ls] + RANKS[f.lr];   // an opening lead entered before (it is no longer asked)
     r.sc = nsScore(b, r); r.ts = Date.now();
     if (isOne()) { if (!validH(f.h)) return; r.h = f.h; const p = (sb.g.t || {})[1] || {}; r.p = { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }   // the points, and who sat where
     if (sb.formT) r.ok = true;   // the administrator's correction needs no confirmation
