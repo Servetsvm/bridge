@@ -1897,3 +1897,4 @@ body.clubsopen{overflow:hidden}
 .clubrow .clubarr{margin-left:auto;opacity:.6}
 .clubnew{margin-top:12px}.clubnew #clubIdIn{flex:1;min-width:0}
 :root[data-theme="dark"] .clubrow{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15)}
+.clubrow.live{border-color:#2e7d4f;border-width:2px}

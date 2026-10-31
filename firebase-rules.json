@@ -262,6 +262,13 @@
               ".read": "auth != null && auth.uid === $uid",
               ".write": "auth != null && auth.uid === $uid && (!newData.exists() || (newData.child('club').isString() && newData.child('pw').isString() && root.child('test').child($ns).child('gate').child('clubs').child(newData.child('club').val()).child('info').child('active').val() !== false && newData.child('pw').val() === root.child('test').child($ns).child('gate').child('clubs').child(newData.child('club').val()).child('secret').child('pw').val()))"
             }
+          },
+          "clubList": {
+            ".read": "auth != null",
+            "$club": {
+              ".write": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet')",
+              ".validate": "newData.hasChildren(['n']) && newData.child('n').isString() && newData.child('n').val().length <= 40"
+            }
           }
         }
       }
@@ -374,6 +381,13 @@
         "$uid": {
           ".read": "auth != null && auth.uid === $uid",
           ".write": "auth != null && auth.uid === $uid && (!newData.exists() || (newData.child('club').isString() && newData.child('pw').isString() && root.child('gate').child('clubs').child(newData.child('club').val()).child('info').child('active').val() !== false && newData.child('pw').val() === root.child('gate').child('clubs').child(newData.child('club').val()).child('secret').child('pw').val()))"
+        }
+      },
+      "clubList": {
+        ".read": "auth != null",
+        "$club": {
+          ".write": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet')",
+          ".validate": "newData.hasChildren(['n']) && newData.child('n').isString() && newData.child('n').val().length <= 40"
         }
       }
     }

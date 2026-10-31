@@ -86,6 +86,7 @@ window.createMyClub=async function(inPanel){
     await put('/clubs/'+id+'/info.json',{name,owner:u.key,ownerName:u.name,created:new Date().toISOString(),active:true});
     var pw=newClubPw(); await put('/clubs/'+id+'/secret.json',{tprefix:'00',pw});
     await put('/owners/'+encodeURIComponent(u.key)+'/'+id+'.json',name);
+    await put('/clubList/'+id+'.json',{n:name,a:true});   // the list every player sees in Clubs
   }catch(e){ err.textContent='❌ '+e.message; return; }
   // the password, to give the club's admin (the super admin sees and changes it in his panel)
   openModal('Club created', `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:8px;">${cleanData(name)} · ID: <b>${id}</b></div><div style="font-size:0.85rem;color:var(--text2);">Club password (give it to the club's admin):</div><div style="font-size:1.4rem;font-weight:800;letter-spacing:2px;margin:8px 0;" data-i18n-ignore>${pw}</div>`, `<button class="btn btn-gold" onclick="closeModal()">OK</button>`);
@@ -266,6 +267,7 @@ async function saSetClubActive(id, active){
   const q = token?'?auth='+token:'';
   const r = await fetch(FB_BASE+'/clubs/'+id+'/info/active.json'+q,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(active)});
   if(!r.ok) throw new Error('Firebase write failed: '+r.status);
+  try{ await fetch(FB_BASE+'/clubList/'+id+'/a.json'+q,{method:'PUT',body:JSON.stringify(active)}); }catch(e){}
 }
 
 async function saDeleteClub(id, ownerKey){
@@ -274,6 +276,7 @@ async function saDeleteClub(id, ownerKey){
   const r = await fetch(FB_BASE+'/clubs/'+id+'.json'+q,{method:'DELETE'});
   if(!r.ok) throw new Error('Firebase delete failed: '+r.status);
   if(ownerKey) try{ await fetch(FB_BASE+'/owners/'+encodeURIComponent(ownerKey)+'/'+id+'.json'+q,{method:'DELETE'}); }catch(e){}
+  try{ await fetch(FB_BASE+'/clubList/'+id+'.json'+q,{method:'DELETE'}); }catch(e){}
 }
 
 // ══════════════════════════════════════════════════════

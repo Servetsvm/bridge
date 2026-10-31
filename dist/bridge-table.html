@@ -1928,6 +1928,7 @@ body.clubsopen{overflow:hidden}
 .clubrow .clubarr{margin-left:auto;opacity:.6}
 .clubnew{margin-top:12px}.clubnew #clubIdIn{flex:1;min-width:0}
 :root[data-theme="dark"] .clubrow{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.15)}
+.clubrow.live{border-color:#2e7d4f;border-width:2px}
 
 </style>
 
@@ -4842,6 +4843,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "No tournament at this club now.": "Bu kulüpte şu anda turnuva yok.", "No clubs yet.": "Henüz kulüp yok.",
     "Set up a tournament": "Turnuva kur", "No club tournament is running now.": "Şu anda açık kulüp turnuvası yok.", "Your club's ID, then its password.": "Kulübünüzün kimliğini, sonra şifresini yazın.", "Club ID": "Kulüp kimliği", "Super admin": "Süper yönetici",
     "Online team match": "Online takım maçı", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "İki masada dörder kişilik iki takım; aynı eller masa masa IMP ile karşılaştırılır, boş yerlere robot oturur.",
     "Clubs": "Kulüpler",
@@ -5258,6 +5260,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "No tournament at this club now.": "Ingen turnering i denne klubben nå.", "No clubs yet.": "Ingen klubber ennå.",
     "Set up a tournament": "Sett opp en turnering", "No club tournament is running now.": "Ingen klubbturnering pågår nå.", "Your club's ID, then its password.": "Klubbens ID, deretter passordet.", "Club ID": "Klubb-ID", "Super admin": "Superadministrator",
     "Online team match": "Lagkamp på nett", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "To lag på fire ved to bord; de samme spillene sammenlignes bord mot bord i IMP, roboter tar tomme plasser.",
     "Clubs": "Klubber",
@@ -5672,6 +5675,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "No tournament at this club now.": "Ahora no hay torneo en este club.", "No clubs yet.": "Aún no hay clubes.",
     "Set up a tournament": "Organizar un torneo", "No club tournament is running now.": "Ahora no hay ningún torneo de club en curso.", "Your club's ID, then its password.": "El ID de tu club y luego su contraseña.", "Club ID": "ID del club", "Super admin": "Superadministrador",
     "Online team match": "Partido de equipos online", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Dos equipos de cuatro en dos mesas; las mismas manos se comparan mesa contra mesa en IMP, los robots ocupan los asientos libres.",
     "Clubs": "Clubes",
@@ -6114,6 +6118,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "No tournament at this club now.": "Pas de tournoi dans ce club pour l’instant.", "No clubs yet.": "Pas encore de clubs.",
     "Set up a tournament": "Organiser un tournoi", "No club tournament is running now.": "Aucun tournoi de club en cours.", "Your club's ID, then its password.": "L’identifiant du club, puis son mot de passe.", "Club ID": "Identifiant du club", "Super admin": "Super administrateur",
     "Online team match": "Match par quatre en ligne", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Deux équipes de quatre à deux tables ; les mêmes donnes comparées table contre table en IMP, les robots prennent les places libres.",
     "Clubs": "Clubs",
@@ -6556,6 +6561,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "No tournament at this club now.": "Nessun torneo in questo club ora.", "No clubs yet.": "Ancora nessun club.",
     "Set up a tournament": "Organizza un torneo", "No club tournament is running now.": "Nessun torneo di club in corso.", "Your club's ID, then its password.": "L’ID del tuo club, poi la password.", "Club ID": "ID del club", "Super admin": "Super amministratore",
     "Online team match": "Incontro a squadre online", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Due squadre da quattro a due tavoli; le stesse smazzate confrontate tavolo contro tavolo a IMP, i robot occupano i posti liberi.",
     "Clubs": "Club",
@@ -6998,6 +7004,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "No tournament at this club now.": "Gerade kein Turnier in diesem Club.", "No clubs yet.": "Noch keine Clubs.",
     "Set up a tournament": "Turnier einrichten", "No club tournament is running now.": "Gerade läuft kein Clubturnier.", "Your club's ID, then its password.": "Die ID deines Clubs, dann sein Passwort.", "Club ID": "Club-ID", "Super admin": "Superadmin",
     "Online team match": "Online-Teamkampf", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Zwei Vierer-Teams an zwei Tischen; dieselben Boards werden Tisch gegen Tisch in IMP verglichen, Roboter besetzen leere Plätze.",
     "Clubs": "Clubs",
@@ -7440,6 +7447,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "No tournament at this club now.": "Сейчас в этом клубе нет турнира.", "No clubs yet.": "Клубов пока нет.",
     "Set up a tournament": "Создать турнир", "No club tournament is running now.": "Сейчас нет клубных турниров.", "Your club's ID, then its password.": "ID вашего клуба, затем его пароль.", "Club ID": "ID клуба", "Super admin": "Суперадминистратор",
     "Online team match": "Командный матч онлайн", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Две команды по четыре за двумя столами; одни и те же сдачи сравниваются стол против стола в IMP, свободные места занимают роботы.",
     "Clubs": "Клубы",
@@ -7882,6 +7890,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "No tournament at this club now.": "W tym klubie nie ma teraz turnieju.", "No clubs yet.": "Brak klubów.",
     "Set up a tournament": "Utwórz turniej", "No club tournament is running now.": "Teraz nie trwa żaden turniej klubowy.", "Your club's ID, then its password.": "ID klubu, potem jego hasło.", "Club ID": "ID klubu", "Super admin": "Superadministrator",
     "Online team match": "Mecz drużynowy online", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "Dwie czwórki przy dwóch stołach; te same rozdania porównywane stół przeciw stołowi w IMP, wolne miejsca zajmują roboty.",
     "Clubs": "Kluby",
@@ -8324,6 +8333,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "No tournament at this club now.": "该俱乐部现在没有比赛。", "No clubs yet.": "还没有俱乐部。",
     "Set up a tournament": "创建比赛", "No club tournament is running now.": "现在没有进行中的俱乐部比赛。", "Your club's ID, then its password.": "输入俱乐部 ID,然后输入密码。", "Club ID": "俱乐部 ID", "Super admin": "超级管理员",
     "Online team match": "在线队式赛", "Two teams of four at two tables, the same boards compared table against table in IMPs; robots take the empty seats.": "两支四人队在两张桌;同样的牌逐桌按 IMP 比较,空位由机器人补上。",
     "Clubs": "俱乐部",
@@ -9389,7 +9399,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 344;
+const APP_V = 345;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12235,11 +12245,10 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'rtOpen') { showRTeam(); return; }
-  if (t.id === 'hClubs') { ui.clubOpen = null; ui.clubNew = false; showClubs(); return; }
+  if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
   if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
+  if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
-  if (t.id === 'clubNew') { ui.clubNew = true; showClubs(); setTimeout(() => $('clubIdIn')?.focus(), 80); return; }
-  if (t.id === 'clubGo') { const id = ($('clubIdIn')?.value || '').trim().toLowerCase(); if (!id) return; closeOv(); openClubs('?club=' + encodeURIComponent(id) + '&role=admin'); return; }
   if (t.id === 'clubSuper') { closeOv(); openClubs('?admin=1'); return; }
   // the online team match: a new tournament of the Team match type, set up at once
   if (t.id === 'olTeam') {
@@ -12878,23 +12887,26 @@ function showRTeam() {
     <div class="muted">${T('The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).')}</div>
     <div class="row2">${RT.end ? `<button class="btn new" id="rtNew">🤖 ${T('New match')}</button>` : `<button class="btn new" id="rtGo">▶ ${T('Continue')} (${Math.min(RT.ids.length + 1, RT.n)}/${RT.n})</button><button class="btn" id="rtEnd">${T('Finish the match')}</button>`}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
-/* Clubs: the club tournaments running now, each by its club's name (tapped: its table numbers, and a number goes to
-   that table), and Set up a tournament for a club's admin (its ID: then its password, in the clubs program) */
+/* Clubs: every club by its name, those with a tournament running first (tapped: its table numbers, and a number goes
+   to that table); a club without one offers its admin Set up a tournament (then its password, in the clubs program) */
 async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];
-    const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.n ? `<small>${esc(t.n)}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` +
-      (ui.clubOpen === t.club ? `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(t.tb || 0).keys()].map(i => `<button class="bm3-key" data-clubtn="${esc(t.club)}|${t.p}|${i + 1}">${i + 1}</button>`).join('')}</div></div>` : '') + `</div>`).join('');
+    const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` +
+      (ui.clubOpen !== t.club ? '' : t.tb ? `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(t.tb).keys()].map(i => `<button class="bm3-key" data-clubtn="${esc(t.club)}|${t.p}|${i + 1}">${i + 1}</button>`).join('')}</div></div>`
+        : `<div class="muted">${T('No tournament at this club now.')}</div><div class="row2"><button class="btn gold" data-clubadmin="${esc(t.club)}">➕ ${T('Set up a tournament')}</button></div>`) + `</div>`).join('');
     openOv('clubs', `<h2>🏛 ${T('Clubs')}</h2>
-      ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No club tournament is running now.')}</div>`}
-      <div class="clubnew">${ui.clubNew ? `<div class="grp"><span>➕ ${T('Set up a tournament')}</span><div class="muted">${T('Your club\'s ID, then its password.')}</div><div class="row2"><input class="tok" id="clubIdIn" maxlength="40" autocomplete="off" placeholder="${T('Club ID')}"><button class="btn new" id="clubGo">${T('Continue')}</button></div></div>` : `<button class="btn gold" id="clubNew">➕ ${T('Set up a tournament')}</button>`}</div>
+      ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}
       <div class="row2">${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn" id="clubSuper">🛡️ ${T('Super admin')}</button>` : ''}<button class="btn" id="oClose">${T('Close')}</button></div>`);
   };
   if (ui.overlay !== 'clubs') ui.clubLive = null;
   draw();
   if (ui.clubLive == null) {
-    let v = null; try { v = await Net.Cloud.get('gate/live'); } catch (e) {}
-    ui.clubLive = Object.entries(v || {}).map(([club, t]) => ({ club, ...t })).filter(t => t && /^\d{2}$/.test(t.p || '') && Date.now() - (t.ts || 0) < 24 * 3600e3).sort((a, b) => b.ts - a.ts);
+    const [v, cl] = await Promise.all([Net.Cloud.get('gate/live').catch(() => null), Net.Cloud.get('gate/clubList').catch(() => null)]);
+    const live = Object.entries(v || {}).map(([club, t]) => ({ club, ...t })).filter(t => t && /^\d{2}$/.test(t.p || '') && Date.now() - (t.ts || 0) < 24 * 3600e3).sort((a, b) => b.ts - a.ts);
+    // the running tournaments first, then every other club (switched off ones are left out)
+    const rest = Object.entries(cl || {}).filter(([id, c]) => c && c.a !== false && !live.some(t => t.club === id)).map(([club, c]) => ({ club, c: c.n })).sort((a, b) => String(a.c).localeCompare(String(b.c)));
+    ui.clubLive = [...live, ...rest];
     if (ui.overlay === 'clubs') draw();
   }
 }
@@ -12916,7 +12928,6 @@ function openClubs(q) {
 }
 function closeClubs() { const v = $('clubView'); if (!v || v.hidden) return; v.hidden = true; $('cvFrame').replaceWith(Object.assign(document.createElement('iframe'), { id: 'cvFrame' })); document.body.classList.remove('clubsopen'); if (typeof needGate === 'function' && needGate()) showGate(); }
 window.addEventListener('popstate', () => { if (!(history.state && history.state.clubs)) closeClubs(); });
-document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target && e.target.id === 'clubIdIn') $('clubGo')?.click(); });
 /* the administrator deletes score history: the players listed (himself too), the ticked ones' boards removed */
 async function showWipe() {
   if (!Net.isAdmin()) return;

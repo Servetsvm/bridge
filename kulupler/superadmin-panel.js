@@ -10,6 +10,8 @@ async function renderSuperAdminPanel(){
   try{ clubs=await saListClubs(); }
   catch(e){ c.innerHTML='<div class="card" style="color:var(--red);">Failed to load clubs.</div>'; return; }
   SA_CLUBS=clubs;
+  // the list every player sees in Clubs: every club, as it is now
+  try{ await fetch(await fbRootUrl('/clubList.json'),{method:'PUT',body:JSON.stringify(Object.fromEntries(clubs.map(c=>[c.id,{n:String(c.name).slice(0,40),a:c.active}])))}); }catch(e){}
 
   const rows = clubs.length
     ? clubs.map((cl,i)=>`
