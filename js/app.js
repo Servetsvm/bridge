@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 353;
+const APP_V = 354;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1960,14 +1960,15 @@ function showTourSetup(id) {
   const seatGrid = tables.map((row, ti) => `<div class="tsetrow"><b>${T('Table {0}', ti + 1)}</b>${[0, 1, 2, 3].map(s => `<label><small>${SEAT[s]}</small><input class="tok" list="tNames" maxlength="20" data-tseat="${ti}:${s}" value="${esc(row[s])}" placeholder="${T('Robot')}">${row[s] ? st(row[s]) : ''}</label>`).join('')}</div>`).join('');
   const accepted = Object.keys(t.joined).length - 1;
   const kind = TOUR_KINDS[t.kind] ? t.kind : 'custom';
-  openOv('tsetup', `<h2>🏆 ${T('New tournament')}</h2>
-    <div class="grp"><span>${T('Type')}</span><div class="seg tkinds" data-seg="tkind">${Object.keys(TOUR_KINDS).filter(k => !TOUR_KINDS[k].old || k === kind).map(k => `<button data-v="${k}" class="${kind === k ? 'on' : ''}">${TOUR_KINDS[k].icon} ${T(TOUR_KINDS[k].n)}</button>`).join('')}</div>
-      <div class="muted">${T(TOUR_KINDS[kind].d)}</div></div>
+  const team = ui.tsetTeam === id && t.kind === 'teams';   // opened as a team match: no types, no format, two tables
+  openOv('tsetup', `<h2>${team ? '🏅 ' + T('Team match') : '🏆 ' + T('New tournament')}</h2>
+    ${team ? `<div class="muted">${T(TOUR_KINDS.teams.d)}</div>` : `<div class="grp"><span>${T('Type')}</span><div class="seg tkinds" data-seg="tkind">${Object.keys(TOUR_KINDS).filter(k => !TOUR_KINDS[k].old || k === kind).map(k => `<button data-v="${k}" class="${kind === k ? 'on' : ''}">${TOUR_KINDS[k].icon} ${T(TOUR_KINDS[k].n)}</button>`).join('')}</div>
+      <div class="muted">${T(TOUR_KINDS[kind].d)}</div></div>`}
     <div class="grp"><span>${T('Tournament name')}</span><input class="tok wide" id="tName" maxlength="40" value="${esc(t.name)}"></div>
     <div class="grp"><span>${T('Boards')}</span>${opt('tn', [4, 6, 8, 10, 12, 16, 20, 24].map(n => [n, n]), t.n)}</div>
-    <div class="grp"><span>${T('Format')}</span>${opt('tformat', [['ind', '👤 ' + T('individual')], ['tables', '🃏 ' + T('at tables')]], t.format)}
-      <div class="muted">${t.format === 'tables' ? T('Players sit together at tables; every table plays the same boards; robots fill empty seats. The first player named at a table opens it.') : T('Everyone plays the same deals at their own table, sitting South.')}</div></div>
-    ${t.format === 'tables' ? `<div class="grp"><span>${T('Tables')}</span>${opt('ttables', [1, 2, 3, 4, 5, 6].map(n => [n, n]), tables.length)}<datalist id="tNames">${known.map(n => `<option value="${esc(n)}">`).join('')}</datalist>${seatGrid}</div>`
+    ${team ? '' : `<div class="grp"><span>${T('Format')}</span>${opt('tformat', [['ind', '👤 ' + T('individual')], ['tables', '🃏 ' + T('at tables')]], t.format)}
+      <div class="muted">${t.format === 'tables' ? T('Players sit together at tables; every table plays the same boards; robots fill empty seats. The first player named at a table opens it.') : T('Everyone plays the same deals at their own table, sitting South.')}</div></div>`}
+    ${t.format === 'tables' ? `<div class="grp"><span>${T('Tables')}</span>${team ? '' : opt('ttables', [1, 2, 3, 4, 5, 6].map(n => [n, n]), tables.length)}<datalist id="tNames">${known.map(n => `<option value="${esc(n)}">`).join('')}</datalist>${seatGrid}</div>`
       : `<div class="grp"><span>${T('Players to invite')}</span>
       <div class="invlist">${known.length ? known.map(n => `<label class="invrow"><input type="checkbox" data-tinv="${esc(n)}" ${sel.names.has(n) ? 'checked' : ''}><b>${esc(n)}</b>${st(n)}</label>`).join('') : `<div class="muted">${T('Nobody else is in the lobby right now — type a name below.')}</div>`}</div>
       <div class="row2"><input class="tok" id="tAdd" maxlength="20" placeholder="${T('Add a player by name')}"><button class="btn" id="tAddBtn">${T('Add')}</button></div></div>`}
@@ -2864,7 +2865,7 @@ document.addEventListener('click', ev_ => {
     const tt = Net.newTour(8), k = TOUR_KINDS.teams;
     Object.assign(tt, { kind: 'teams', format: k.set.format, n: k.set.n, scoring: k.set.scoring, hours: k.set.hours, name: (T('Online team match') + ' · ' + new Date().toLocaleDateString()).slice(0, 40) });
     while (tt.tables.length < 2) tt.tables.push(['', '', '', '']); tt.tables.length = 2;
-    ui.tsel = null; closeOv(); render(); showTourSetup(tt.id); return;
+    ui.tsel = null; ui.tsetTeam = tt.id; closeOv(); render(); showTourSetup(tt.id); return;   // its own setup: a team match only
   }
   if (t.dataset.rtn) { RT = { n: +t.dataset.rtn, ids: [], ts: Date.now() }; saveRT(); closeOv(); newBoard(); return; }
   if (t.id === 'rtGo') { closeOv(); if (!G || G.phase === 'done' || !G.rteam) newBoard(); return; }
