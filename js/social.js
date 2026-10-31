@@ -305,7 +305,6 @@ const SB = (() => {
       <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
       <div class="grp"><span>${T('Players')}</span><div class="tsetrow sbrow">${['n', 's', 'e', 'w'].map(k => `<label><small>${SEAT[SEATK[k]]}</small><input class="tok" maxlength="20" data-sbpl="${k}" data-member placeholder="${SEAT[SEATK[k]]}" value="${esc(p[k] || '')}"></label>`).join('')}</div><div class="muted">${T('Not required: the directions are used.')}</div></div>
       <div class="grp"><span>${T('Boards')}</span>${seg('bd', [8, 12, 16, 20, 24, 28, 32].map(n => [n, n]), s.bd)}</div>
-      ${fedSeg(s)}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`; }
     return `<h2>🃏 ${T('New game')}</h2>
