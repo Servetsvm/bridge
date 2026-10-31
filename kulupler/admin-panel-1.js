@@ -311,7 +311,7 @@ window.saveStallMinutes=function(){
 /* after the start: the players get Bridge Table's link (with this club and its table code prefix); there they tap
    Table No, type their member numbers or names and choose their table */
 // the players get only Bridge Table's address: Table No there finds this tournament in the list of running ones
-const playersLink=async()=>location.origin+location.pathname.replace(/bridgegate\/[^/]*$/,'');
+const playersLink=async()=>location.origin+location.pathname.replace(/(bridgegate|kulupler)\/[^/]*$/,'');
 // the running tournament in that list (gate/live/<club>): its name, the club, the tables and the table code prefix
 async function setLive(on){
   try{

@@ -576,7 +576,7 @@ const SB = (() => {
     return lob.html = rowsHtml();
   }
   // the games running now, each with Join
-  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>BridgeGate · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-bgjoin="${i}">${T('Join')}</button></div></div>`).join('')
+  const rowsHtml = () => (lob.G || []).map((g, i) => `<div class="otour"><div><b>🏛 ${esc(g.c || '')}${g.n ? ' — ' + esc(g.n) : ''}</b><small>${T('Clubs')} · ${T('{0} tables', g.tb)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-bgjoin="${i}">${T('Join')}</button></div></div>`).join('')
     + (lob.L || []).map(g => `<div class="otour"><div><b>🃏 ${esc(g.n)}</b><small>${T('Team match')} · ${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)} · ${T('Running')}</small></div><div class="otb"><button class="btn new" data-sbjoin="${g.id}">${T('Join')}</button></div></div>`).join('');
 
   document.addEventListener('click', e => {
