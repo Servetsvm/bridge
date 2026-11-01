@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 372;
+const APP_V = 373;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2861,7 +2861,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
-  if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
+  if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; const c = ui.clubOpen; showClubs(); if (c) clubTaken(c).then(x => { (ui.clubTaken = ui.clubTaken || {})[c] = x.taken; if (ui.overlay === 'clubs') showClubs(); }); return; }
+  if (t.dataset.clubtt && typeof Net !== 'undefined' && Net.isAdmin()) { const [c, n] = t.dataset.clubtt.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&tn=' + n + '&test=1'); return; }
   if (t.dataset.clubtest && typeof Net !== 'undefined' && Net.isAdmin()) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubtest) + '&role=admin&test=1'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
@@ -3471,15 +3472,28 @@ async function showLearn() {
 try { localStorage.removeItem('bridge-rteam'); } catch (e) {}
 /* Clubs: every club by its name, those with a tournament running first (tapped: its table numbers, and a number goes
    to that table); a club without one offers its admin Set up a tournament (then its password, in the clubs program) */
+// a club tournament's tables taken in its current round (the real one, or the super admin's test one)
+async function clubTaken(club, test) {
+  const base = 'gate/clubs/' + club + '/bm' + (test ? '/test' : '');
+  try {
+    const [st, lk] = await Promise.all([Net.Cloud.get(base + '/state'), Net.Cloud.get(base + '/tableLocks')]);
+    const r = st && st.currentRound, out = new Set();
+    for (const [k, v] of Object.entries(lk || {})) if (r && k.startsWith(r + '_')) out.add(+k.split('_')[1] || (v && +v.tableNo));
+    return { st, taken: out };
+  } catch (e) { return { st: null, taken: new Set() }; }
+}
+// the clubs offered for a test tournament: Beykoz (all of them when there is none)
+const testClubs = L => { const b = L.filter(t => /beykoz/i.test(t.c || t.club)); return b.length ? b : L; };
 async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];
     const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` +
-      (ui.clubOpen !== t.club ? '' : t.tb ? `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(t.tb).keys()].map(i => `<button class="bm3-key" data-clubtn="${esc(t.club)}|${t.p}|${i + 1}">${i + 1}</button>`).join('')}</div></div>`
+      (ui.clubOpen !== t.club ? '' : t.tb ? (ui.clubTaken && ui.clubTaken[t.club] ? (L => L.length ? `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${L.map(n => `<button class="bm3-key" data-clubtn="${esc(t.club)}|${t.p}|${n}">${n}</button>`).join('')}</div></div>` : `<div class="muted">${T('Every table is taken.')}</div>`)([...Array(t.tb).keys()].map(i => i + 1).filter(n => !ui.clubTaken[t.club].has(n))) : `<div class="muted">${T('Loading…')}</div>`)
         : `<div class="muted">${T('No tournament at this club now.')}</div><div class="row2"><button class="btn gold" data-clubadmin="${esc(t.club)}">➕ ${T('Set up a tournament')}</button></div>`) + `</div>`).join('');
     openOv('clubs', `<h2>🏛 ${T('Clubs')}</h2>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}
-      ${typeof Net !== 'undefined' && Net.isAdmin() && L.length ? `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('A test tournament at a club: only you see it, the club\'s real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.')}</div><div class="sbme">${L.map(t => `<button class="btn" data-clubtest="${esc(t.club)}">🧪 ${esc(t.c || t.club)}</button>`).join('')}</div></div>` : ''}
+      ${typeof Net !== 'undefined' && Net.isAdmin() && L.length ? `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('A test tournament at a club: only you see it, the club\'s real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.')}</div>${testClubs(L).map(t => { const x = (ui.clubTest || {})[t.club], free = x && x.st && x.st.status === 'running' ? [...Array(x.st.tableCount || 0).keys()].map(i => i + 1).filter(n => !x.taken.has(n)) : null;
+        return `<div class="clubrow"><b>🧪 ${esc(t.c || t.club)}</b>${free ? ` <small>🟢 ${T('Round {0}', x.st.currentRound)}</small><div class="bm3-keys k4 sbpick">${free.map(n => `<button class="bm3-key" data-clubtt="${esc(t.club)}|${n}">${n}</button>`).join('')}</div>` : ''}<div class="row2"><button class="btn" data-clubtest="${esc(t.club)}">⚙️ ${T('Admin')}</button></div></div>`; }).join('')}</div>` : ''}
       <div class="row2">${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn" id="clubSuper">🛡️ ${T('Super admin')}</button>` : ''}<button class="btn" id="oClose">${T('Close')}</button></div>`);
   };
   if (ui.overlay !== 'clubs') ui.clubLive = null;
@@ -3493,6 +3507,7 @@ async function showClubs() {
     const rest = Object.entries(cl || {}).filter(([id, c]) => c && c.a !== false && !live.some(t => t.club === id)).map(([club, c]) => ({ club, c: c.n })).sort((a, b) => String(a.c).localeCompare(String(b.c)));
     ui.clubLive = [...live, ...rest];
     if (ui.overlay === 'clubs') draw();
+    if (Net.isAdmin()) { ui.clubTest = {}; await Promise.all(ui.clubLive.map(async t => { ui.clubTest[t.club] = await clubTaken(t.club, true); })); if (ui.overlay === 'clubs') draw(); }
   }
 }
 /* Clubs: the club tournaments (in kulupler/, once BridgeGate) open here, full screen above the home page, under a bar with

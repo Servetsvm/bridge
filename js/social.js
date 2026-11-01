@@ -289,7 +289,7 @@ const SB = (() => {
   // the super admin's Test column: his test games and a new one (every kind: matches, round robin, Howell, single table)
   const testHtml = () => !isAdm() ? '' : `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.')}</div>
     ${tests().map(g => `<div class="sbtrow"><b>${esc(g.n)}</b><small>${fmtDate(g.ts)} · ${g.st === 'done' ? T('Finished') : T('Running')}</small><button class="btn new mini-btn" data-sbopen="${g.id}">${T('Open')}</button><button class="btn tdel mini-btn" data-sbdel="${g.id}">✕</button></div>`).join('')}
-    <div class="row2"><button class="btn gold" id="sbNewTest">🧪 ${T('New test game')}</button><button class="btn" id="sbOneTest">🧪 🪑 ${T('Single table')}</button>${tests().length ? `<button class="btn tdel" id="sbDelTests">🗑 ${T('Delete all test games')}</button>` : ''}</div></div>`;
+    <div class="row2"><button class="btn gold" id="sbNewTest">🧪 ${T('New test game')}</button>${tests().length ? `<button class="btn tdel" id="sbDelTests">🗑 ${T('Delete all test games')}</button>` : ''}</div></div>`;
   const runningGames = () => (sb.list || []).filter(g => seen(g) && g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
   function entryHtml() {
     const R = runningGames();
@@ -385,7 +385,7 @@ const SB = (() => {
     const test = '';
     const head = `<h2>${s.test ? '🧪 ' + T('Test game') : '🃏 ' + T('New game')}</h2>
       <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
-      <div class="grp"><span>${T('How it is played')}</span>${seg('fmt', [['team', T('Matches')], ['rr', T('Round robin')], ['howell', T('Howell pairs')]], fmt)}</div>`;
+      <div class="grp"><span>${T('How it is played')}</span>${seg('fmt', [['team', T('Team match')], ['rr', T('Round robin')], ['howell', T('Howell pairs')]], fmt)}</div>`;
     const foot = `${fedSeg(s)}${test}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`;

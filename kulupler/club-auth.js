@@ -136,6 +136,7 @@ async function initClubGate(){
       // a player from Bridge Table's "Table No" (the club's table code prefix in the link): the players' names, then the table
       // a table number already chosen on the entry screen (&tn=3): straight to the players
       const pp=params.get('p'), tn=+params.get('tn')||0; if(roleParam==='table'&&!tc&&/^\d{2}$/.test(pp||'')){ if(tn) bgPlayerNames(pp,tn); else bgPlayerEntry(pp); }
+      if(roleParam==='table'&&tn&&bgTestOn()&&isSuper()){ window._bgTestTable=tn; setTimeout(()=>doLogin(),50); }
       return;
     }
     if(!info||(info.active===false&&!isSuper())){ try{ localStorage.removeItem('bg_clubId'); }catch(e){} }
@@ -166,10 +167,12 @@ async function renderEntry(live){
   const box=document.getElementById('myClubsBox'); if(!box) return;
   const u=me(), go=(t,q)=>location.pathname+'?club='+encodeURIComponent(t.club)+q;
   const own=await Promise.all(live.map(async t=>{ if(isSuper()) return true; const i=await checkClubExists(t.club); return !!(i&&u&&i.owner===u.key); }));
+  // the tables someone took this round are not offered
+  const taken=await Promise.all(live.map(async t=>{ try{ const [st,lk]=await Promise.all(['state','tableLocks'].map(async k=>{ const r=await fetch(await fbRootUrl('/clubs/'+t.club+'/bm/'+k+'.json'),{cache:'no-store'}); return r.ok?await r.json():null; })); const r=st&&st.currentRound; return new Set(Object.keys(lk||{}).filter(k=>r&&k.startsWith(r+'_')).map(k=>+k.split('_')[1])); }catch(e){ return new Set(); } }));
   // each club by its name; its table numbers (and Admin) open when it is tapped
   box.innerHTML=live.map((t,k)=>`<div class="bg-entry"><button type="button" class="bg-entry-name" onclick="this.parentNode.classList.toggle('open')">🏛 ${cleanData(t.c||'')}${t.n?' <small>'+cleanData(t.n)+'</small>':''}</button>
     <div class="bg-entry-body"><div class="bg-entry-lbl">Table No</div>
-    <div class="bm3-keys k4" style="padding:0;">${Array.from({length:t.tb||0},(_,i)=>`<button class="bm3-key" onclick="location.replace('${go(t,'&role=table&p='+t.p+'&tn='+(i+1))}')">${i+1}</button>`).join('')}</div>
+    <div class="bm3-keys k4" style="padding:0;">${Array.from({length:t.tb||0},(_,i)=>i+1).filter(n=>!taken[k].has(n)).map(n=>`<button class="bm3-key" onclick="location.replace('${go(t,'&role=table&p='+t.p+'&tn='+n)}')">${n}</button>`).join('')}</div>
     ${own[k]?`<button class="btn-primary" style="margin-top:10px;" onclick="location.replace('${go(t,'&admin=1')}')">⚙️ Admin</button>`:''}</div></div>`).join('')
     +(isSuper()||Object.keys(await myClubs()).length?`<a href="${location.pathname}?admin=1" style="display:inline-block;margin-top:10px;font-size:0.75rem;color:var(--text3);">🏛 My clubs</a>`:'')
     +`<div class="bg-newtour">${clubAdminBox()}<div style="font-size:0.72rem;color:var(--text3);margin-top:6px;">A club's admin signs in here to set up a new tournament.</div></div>`;
@@ -328,7 +331,7 @@ window.selRole=function(r){
   const pin=r==='admin'&&isClubAdmin();   // a club's owner: their PIN; anyone else the club's password; the super admin his password
   inp.type=r==='table'?'text':'password';
   inp.placeholder=r==='table'?(window._bgWantTable?'Your table\'s code (4 digits)':'Table code (4 digits)'):r==='superadmin'?'Super admin password (at least 6)':pin?'Your Bridge Table PIN':'Club password'; inp.inputMode=r==='table'||pin?'numeric':'text'; inp.maxLength=r==='table'||pin?4:40;
-  const sw=document.getElementById('roleSwitch'); if(sw){ sw.style.display=r==='table'||r==='admin'?'':'none'; sw.textContent=r==='admin'?'🃏 Table':'⚙️ Club admin'; }
+  const sw=document.getElementById('roleSwitch'); if(sw){ sw.style.display=r==='table'?'':'none'; sw.textContent=r==='admin'?'🃏 Table':'⚙️ Club admin'; }   // the admin's sign-in has no Table switch (the tables open from Bridge Table)
 };
 window.switchAdminRole=()=>selRole(role==='admin'?'table':'admin');
 selRole('table');
@@ -401,13 +404,15 @@ window.doLogin=async function(){
   // Check password
   if(loginBtn){loginBtn.disabled=true;loginBtn.textContent='Checking...';}
   let ok=false;
-  try{ ok = await startSession(role, CLUB_ID, pw); }
+  const testT=role==='table'&&bgTestOn()&&isSuper()&&window._bgTestTable;   // the super admin at a test table: no code
+  try{ ok = testT ? true : await startSession(role, CLUB_ID, pw); }
   catch(e){ if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';} err.textContent='❌ '+e.message; return; }
   if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
   if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()&&/^\d{4}$/.test(String(pw).trim())?'❌ Wrong PIN':'❌ Wrong password';return;}
   // the code says which table this is: prefix + table number (0003 = table 3)
   document.body.classList.toggle('bg-device',role==='table');   // a table: the Bridgemate III look from here on
-  if(role==='table'){
+  if(role==='table'&&testT){ window.bmCodeTable=testT; window._bgTestTable=null; try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(testT)); }catch(e){} }
+  else if(role==='table'){
     const c=String(pw).trim(); window.bmCodePrefix=c.slice(0,2);   // for Change table
     // the table's number: from its own code (the tables' codes), or prefix + number (a club without codes yet)
     let t=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/secret/tcodes/'+c+'.json'),{cache:'no-store'}); t=r.ok?await r.json():null; }catch(e){}

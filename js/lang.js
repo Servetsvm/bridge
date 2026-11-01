@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Every table is taken.": "Bütün masalar dolu.",
     "Delete all test games": "Tüm deneme oyunlarını sil", "Delete all {0} test games?": "{0} deneme oyununun hepsi silinsin mi?", "Choose your table: then the robots play the other tables by themselves.": "Masanı seç: sonra diğer masaları robotlar kendiliğinden oynar.",
     "Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.": "Sadece sen görürsün: oyuncu isimleri TBF listesinden gelir ve diğer masaları robotlar kendiliğinden oynar.", "New test game": "Yeni deneme oyunu", "The robots play the other tables by themselves.": "Diğer masaları robotlar kendiliğinden oynuyor.", "A test tournament at a club: only you see it, the club's real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.": "Bir kulüpte deneme turnuvası: sadece sen görürsün, kulübün gerçek turnuvasına dokunulmaz; oyuncu isimleri TBF listesinden gelir ve robotlar tur tur kendiliğinden oynar.",
     "A round robin of teams or a Howell pairs game can be chosen too.": "Takımlar arası lig usulü ya da Howell çift turnuvası da seçilebilir.",
@@ -430,6 +431,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Every table is taken.": "Alle bordene er tatt.",
     "Delete all test games": "Slett alle testspill", "Delete all {0} test games?": "Slette alle {0} testspill?", "Choose your table: then the robots play the other tables by themselves.": "Velg bordet ditt: så spiller robotene de andre bordene selv.",
     "Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.": "Bare du ser det: spillerne har navn fra TBF-listen, og robotene spiller de andre bordene selv.", "New test game": "Nytt testspill", "The robots play the other tables by themselves.": "Robotene spiller de andre bordene selv.", "A test tournament at a club: only you see it, the club's real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.": "En testturnering i en klubb: bare du ser den, klubbens ekte turnering røres ikke; spillerne har navn fra TBF-listen og robotene spiller selv, runde etter runde.",
     "A round robin of teams or a Howell pairs game can be chosen too.": "Du kan også velge serie for lag eller Howell for par.",
@@ -855,6 +857,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Every table is taken.": "Todas las mesas están ocupadas.",
     "Delete all test games": "Borrar todas las partidas de prueba", "Delete all {0} test games?": "¿Borrar las {0} partidas de prueba?", "Choose your table: then the robots play the other tables by themselves.": "Elige tu mesa: luego los robots juegan solos las otras mesas.",
     "Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.": "Solo tú lo ves: los jugadores tienen nombres de la lista de la TBF y los robots juegan solos las otras mesas.", "New test game": "Nueva partida de prueba", "The robots play the other tables by themselves.": "Los robots juegan solos las otras mesas.", "A test tournament at a club: only you see it, the club's real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.": "Un torneo de prueba en un club: solo tú lo ves, el torneo real del club no se toca; los jugadores tienen nombres de la lista de la TBF y los robots juegan solos, ronda tras ronda.",
     "A round robin of teams or a Howell pairs game can be chosen too.": "También se puede elegir una liguilla de equipos o un Howell de parejas.",
@@ -1308,6 +1311,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Every table is taken.": "Toutes les tables sont prises.",
     "Delete all test games": "Supprimer toutes les parties de test", "Delete all {0} test games?": "Supprimer les {0} parties de test ?", "Choose your table: then the robots play the other tables by themselves.": "Choisissez votre table : ensuite les robots jouent seuls les autres tables.",
     "Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.": "Vous seul le voyez : les joueurs ont des noms de la liste TBF et les robots jouent seuls les autres tables.", "New test game": "Nouvelle partie de test", "The robots play the other tables by themselves.": "Les robots jouent seuls les autres tables.", "A test tournament at a club: only you see it, the club's real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.": "Un tournoi de test dans un club : vous seul le voyez, le vrai tournoi du club n’est pas touché ; les joueurs ont des noms de la liste TBF et les robots jouent seuls, tour après tour.",
     "A round robin of teams or a Howell pairs game can be chosen too.": "On peut aussi choisir un toutes rondes par équipes ou un Howell par paires.",
@@ -1761,6 +1765,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Every table is taken.": "Tutti i tavoli sono occupati.",
     "Delete all test games": "Elimina tutte le partite di prova", "Delete all {0} test games?": "Eliminare tutte le {0} partite di prova?", "Choose your table: then the robots play the other tables by themselves.": "Scegli il tuo tavolo: poi i robot giocano da soli gli altri tavoli.",
     "Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.": "Lo vedi solo tu: i giocatori hanno nomi della lista TBF e i robot giocano da soli gli altri tavoli.", "New test game": "Nuova partita di prova", "The robots play the other tables by themselves.": "I robot giocano da soli gli altri tavoli.", "A test tournament at a club: only you see it, the club's real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.": "Un torneo di prova in un circolo: lo vedi solo tu, il torneo reale del circolo non viene toccato; i giocatori hanno nomi della lista TBF e i robot giocano da soli, turno dopo turno.",
     "A round robin of teams or a Howell pairs game can be chosen too.": "Si può scegliere anche un girone a squadre o un Howell a coppie.",
@@ -2214,6 +2219,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Every table is taken.": "Alle Tische sind besetzt.",
     "Delete all test games": "Alle Testspiele löschen", "Delete all {0} test games?": "Alle {0} Testspiele löschen?", "Choose your table: then the robots play the other tables by themselves.": "Wähle deinen Tisch: dann spielen die Roboter die anderen Tische selbst.",
     "Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.": "Nur du siehst es: die Spieler haben Namen aus der TBF-Liste und die Roboter spielen die anderen Tische selbst.", "New test game": "Neues Testspiel", "The robots play the other tables by themselves.": "Die Roboter spielen die anderen Tische selbst.", "A test tournament at a club: only you see it, the club's real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.": "Ein Testturnier in einem Club: nur du siehst es, das echte Turnier des Clubs bleibt unberührt; die Spieler haben Namen aus der TBF-Liste und die Roboter spielen selbst, Runde für Runde.",
     "A round robin of teams or a Howell pairs game can be chosen too.": "Auch ein Teamturnier jeder gegen jeden oder ein Howell für Paare ist möglich.",
@@ -2667,6 +2673,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Every table is taken.": "Все столы заняты.",
     "Delete all test games": "Удалить все тестовые игры", "Delete all {0} test games?": "Удалить все тестовые игры ({0})?", "Choose your table: then the robots play the other tables by themselves.": "Выберите свой стол: тогда роботы сами сыграют за другими столами.",
     "Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.": "Это видите только вы: имена игроков из списка TBF, а за другими столами сами играют роботы.", "New test game": "Новая тестовая игра", "The robots play the other tables by themselves.": "За другими столами сами играют роботы.", "A test tournament at a club: only you see it, the club's real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.": "Тестовый турнир в клубе: его видите только вы, настоящий турнир клуба не затрагивается; имена игроков из списка TBF, роботы играют сами, тур за туром.",
     "A round robin of teams or a Howell pairs game can be chosen too.": "Можно выбрать и круговой командный турнир или парный Хауэлл.",
@@ -3120,6 +3127,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Every table is taken.": "Wszystkie stoły są zajęte.",
     "Delete all test games": "Usuń wszystkie gry testowe", "Delete all {0} test games?": "Usunąć wszystkie gry testowe ({0})?", "Choose your table: then the robots play the other tables by themselves.": "Wybierz swój stół: wtedy roboty same zagrają przy pozostałych stołach.",
     "Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.": "Widzisz to tylko ty: gracze mają nazwiska z listy TBF, a przy pozostałych stołach roboty grają same.", "New test game": "Nowa gra testowa", "The robots play the other tables by themselves.": "Przy pozostałych stołach roboty grają same.", "A test tournament at a club: only you see it, the club's real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.": "Turniej testowy w klubie: widzisz go tylko ty, prawdziwy turniej klubu pozostaje nietknięty; gracze mają nazwiska z listy TBF, a roboty grają same, runda po rundzie.",
     "A round robin of teams or a Howell pairs game can be chosen too.": "Można też wybrać turniej drużyn każdy z każdym albo Howella dla par.",
@@ -3573,6 +3581,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Every table is taken.": "所有牌桌都已有人。",
     "Delete all test games": "删除所有测试比赛", "Delete all {0} test games?": "删除全部{0}个测试比赛?", "Choose your table: then the robots play the other tables by themselves.": "先选你的牌桌:然后其他牌桌由机器人自己打。",
     "Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.": "只有你能看到:牌手名字来自TBF名单,其他牌桌由机器人自己打。", "New test game": "新测试比赛", "The robots play the other tables by themselves.": "其他牌桌由机器人自己打。", "A test tournament at a club: only you see it, the club's real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.": "在俱乐部举行测试比赛:只有你能看到,俱乐部的真实比赛不受影响;牌手名字来自TBF名单,机器人一轮接一轮自己打。",
     "A round robin of teams or a Howell pairs game can be chosen too.": "也可以选择团体循环赛或双人豪威尔赛。",

@@ -478,12 +478,17 @@ window.bmShowRoundOver=function(tableNo){
           <div class="ro-move-label">📋 Next Round ${nextR} — Boards</div>
           <div class="ro-move-boards">B${nextM.boardStart||'?'} – B${nextM.boardEnd||'?'}</div>
         </div>
-        <button class="btn btn-gold btn-full" onclick="bmShowWaiting(${tableNo},${nextR})">OK — Show Waiting Screen →</button>
+        <button class="btn btn-gold btn-full" onclick="bgMoveTo(${(bmSide==='ew'?ewNextTable:nsNextTable)||tableNo},${nextR},${tableNo})">OK — ${(bmSide==='ew'?ewNextTable:nsNextTable)&&(bmSide==='ew'?ewNextTable:nsNextTable)!==tableNo?'→ Table '+(bmSide==='ew'?ewNextTable:nsNextTable):'Show Waiting Screen →'}</button>
         <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="bgChangeTable()">🔄 Change table</button>
       </div>
     </div>`;
 };
 
+// this device goes with its pair: the next round's table (the waiting screen there; the scores are entered there)
+window.bgMoveTo=function(t,nextR,from){
+  if(t!==from){ try{ unlockTable(from); }catch(e){} bmTableNo=t; window.bmCodeTable=t; try{ if(typeof bgTestOn==='function'&&bgTestOn()) sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(t)); }catch(e){} }
+  bmShowWaiting(t,nextR);
+};
 window.bmShowWaiting=function(tableNo,nextR){
   // nextR is passed explicitly — never computed from currentRound (which may already have advanced)
   const movements=getMovements();const pairs=getPairs();

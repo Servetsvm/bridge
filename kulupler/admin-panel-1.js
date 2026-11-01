@@ -108,6 +108,7 @@ async function bgTestTick(){
     for(const [k,v] of Object.entries(_cache['boards']||{})) if(v&&!v.sim) human.add(+k.split('_')[0]);
     for(const k of Object.keys(aps)) human.add(+k.split('_')[0]);
     const mov=getMovements(), pairs=getPairs(), bs=getBoards(), mine=+(sessionStorage.getItem('bgTestMine:'+CLUB_ID)||0);
+    if(!mine&&!human.size){ _bgTestBusy=false; return; }   // nobody sits yet: the tournament waits, as a real one
     let wrote=0, left=0;
     for(let t=1;t<=(s.tableCount||0);t++){
       const m=mov[s.currentRound+'_'+t]; if(!m) continue;
