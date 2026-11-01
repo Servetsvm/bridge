@@ -18,5 +18,5 @@ $html = $html.Replace('<link rel="manifest" href="manifest.webmanifest">', '')
 $html = $html.Replace('href="icons/icon-192.png"', "href=""data:image/png;base64,$icon""")
 
 New-Item -ItemType Directory -Force "$root\dist" | Out-Null
-[IO.File]::WriteAllText("$root\dist\bridge-table.html", "<!doctype html>`n" + $html, $utf8)
+[IO.File]::WriteAllText("$root\dist\bridge-table.html", $html, $utf8)   # index.html starts with its own doctype
 Write-Host "Built dist\bridge-table.html"

@@ -1,3 +1,4 @@
+<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Bridge Table — Free Online Bridge</title>
@@ -69,7 +70,6 @@
 <div id="ov" class="ov" hidden></div>
 
 <!-- engine modules (order matters): core, bidding, card play, virtual field -->
-<script src="js/dds.js"></script>
 <script src="js/core.js"></script>
 <script src="js/bidding.js"></script>
 <script src="js/play.js"></script>
@@ -81,3 +81,6 @@
 <script src="js/app.js"></script>
 <script src="js/net.js"></script>
 <script src="js/social.js"></script>
+<!-- the fast double-dummy solver (half a megabyte) comes last: the screen shows first, the robots take it up when it is in -->
+<script src="js/dds.js"></script>
+<script>if (typeof ddsReady === 'function') ddsReady();</script>

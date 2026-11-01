@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 365;
+const APP_V = 366;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2364,6 +2364,7 @@ const BOT_OPT = { budget: 2500, maxSamples: 150, ddTricks: 12, ddDecl: 13, evLim
 const Bot = {
   w: null, n: 0, wait: null,
   ask(g, seat, opt) {
+    if (this.w && this.stale && !this.wait) { this.w.terminate(); this.w = null; this.stale = false; }   // made before the fast solver was in
     if (!this.w) { this.w = Field.mk(); if (this.w) { this.w.onmessage = e => { const d = e.data || {}; if (d.type === 'engine') Bot.dds = d.dds; if (this.wait && d.id === this.wait.id) { const f = this.wait.f; this.wait = null; f(d.type === 'card' ? d.c : null); } }; this.w.onerror = () => { this.w = null; if (this.wait) { const f = this.wait.f; this.wait = null; f(null); } }; } }
     if (!this.w) return Promise.resolve(E.aiPlay(g, seat, opt));
     const id = ++this.n;
@@ -3110,6 +3111,12 @@ function checkSharedDeal() {
 }
 
 /* ================= boot ================= */
+// the fast solver (js/dds.js) is loaded after the app has started, so the first screen does not wait for it; once it is
+// in, the page uses it and every worker made from now on has it (the robots' worker, if it is not thinking, is made again)
+function ddsReady() {
+  Field.src = null; Field.init();
+  if (Bot.w && !Bot.wait) { Bot.w.terminate(); Bot.w = null; } else if (Bot.w) Bot.stale = true;
+}
 function start(data) {
   load(data && data.G ? data : null);
   Field.init();

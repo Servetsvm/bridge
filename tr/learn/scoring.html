@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Briçte Puanlama: Löve, Manş, Şlem, IMP ve MP · Briç Masası</title>
+<meta name="description" content="Briç skoru nasıl hesaplanır: löve puanları, kısmi oyun, manş, şlem, kontr, batık ve IMP ile MP'nin sonucunu diğer masalarla nasıl karşılaştırdığı.">
+<link rel="canonical" href="https://servetsvm.github.io/bridge/tr/learn/scoring.html">
+<link rel="alternate" hreflang="en" href="https://servetsvm.github.io/bridge/en/learn/scoring.html">
+<link rel="alternate" hreflang="tr" href="https://servetsvm.github.io/bridge/tr/learn/scoring.html">
+<link rel="alternate" hreflang="nb" href="https://servetsvm.github.io/bridge/no/learn/scoring.html">
+<link rel="alternate" hreflang="es" href="https://servetsvm.github.io/bridge/es/learn/scoring.html">
+<link rel="alternate" hreflang="fr" href="https://servetsvm.github.io/bridge/fr/learn/scoring.html">
+<link rel="alternate" hreflang="it" href="https://servetsvm.github.io/bridge/it/learn/scoring.html">
+<link rel="alternate" hreflang="de" href="https://servetsvm.github.io/bridge/de/learn/scoring.html">
+<link rel="alternate" hreflang="ru" href="https://servetsvm.github.io/bridge/ru/learn/scoring.html">
+<link rel="alternate" hreflang="pl" href="https://servetsvm.github.io/bridge/pl/learn/scoring.html">
+<link rel="alternate" hreflang="zh" href="https://servetsvm.github.io/bridge/zh/learn/scoring.html">
+<link rel="alternate" hreflang="x-default" href="https://servetsvm.github.io/bridge/en/learn/scoring.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Bridge Table">
+<meta property="og:url" content="https://servetsvm.github.io/bridge/tr/learn/scoring.html">
+<meta property="og:title" content="Briçte Puanlama: Löve, Manş, Şlem, IMP ve MP">
+<meta property="og:description" content="Briç skoru nasıl hesaplanır: löve puanları, kısmi oyun, manş, şlem, kontr, batık ve IMP ile MP'nin sonucunu diğer masalarla nasıl karşılaştırdığı.">
+<meta property="og:image" content="https://servetsvm.github.io/bridge/icons/og-tr.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0c1a14">
+<link rel="icon" href="../../icons/icon-192.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Briçte Puanlama: Löve, Manş, Şlem, IMP ve MP","description":"Briç skoru nasıl hesaplanır: löve puanları, kısmi oyun, manş, şlem, kontr, batık ve IMP ile MP'nin sonucunu diğer masalarla nasıl karşılaştırdığı.","inLanguage":"tr","image":"https://servetsvm.github.io/bridge/icons/og-tr.png","datePublished":"2026-11-01","dateModified":"2026-11-01","author":{"@type":"Organization","name":"Bridge Table","url":"https://servetsvm.github.io/bridge/"},"publisher":{"@type":"Organization","name":"Bridge Table","logo":{"@type":"ImageObject","url":"https://servetsvm.github.io/bridge/icons/icon-512.png"}},"mainEntityOfPage":"https://servetsvm.github.io/bridge/tr/learn/scoring.html"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Briç Masası","item":"https://servetsvm.github.io/bridge/tr/"},{"@type":"ListItem","position":2,"name":"Briçte Puanlama: Löve, Manş, Şlem, IMP ve MP","item":"https://servetsvm.github.io/bridge/tr/learn/scoring.html"}]}</script>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:17px/1.6 "Segoe UI",Roboto,Arial,sans-serif}
+  header{background:#0c1a14;color:#f4f1e6;padding:10px 16px}
+  header a{color:#f2c230;text-decoration:none;font-weight:700}
+  main{max-width:720px;margin:0 auto;padding:20px 16px 48px}
+  nav.crumb{font-size:14px;color:var(--muted);margin-bottom:6px}nav.crumb a{color:var(--felt)}
+  h1{font-size:30px;line-height:1.2;margin:4px 0 8px}
+  p.lead{color:var(--muted);margin:0 0 8px}
+  h2{font-size:21px;margin:28px 0 6px;padding-top:10px;border-top:2px solid var(--felt)}
+  p{margin:6px 0}ul{padding-left:22px}li{margin:4px 0}
+  .r{color:#c4122f}
+  .cta{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:16px;margin:30px 0;text-align:center}
+  .cta p{margin:0 0 10px;font-weight:600}
+  .cta a{display:inline-block;background:var(--gold);color:#1d1a0c;font-weight:700;text-decoration:none;padding:12px 26px;border-radius:10px;font-size:18px}
+  .more ul{padding-left:20px}.more a,.langs a{color:var(--felt)}
+  .langs{font-size:14px;color:var(--muted);margin-top:26px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-wrap:wrap;gap:6px 14px}
+</style>
+</head>
+<body>
+<header><a href="../">♠<span style="color:#ff6b6b">♥♦</span>♣ Briç Masası</a></header>
+<main>
+<nav class="crumb"><a href="../">Briç Masası</a> › Briç öğren</nav>
+<h1>Briçte Puanlama: Löve, Manş, Şlem, IMP ve MP</h1>
+<p class="lead">Briç skoru nasıl hesaplanır: löve puanları, kısmi oyun, manş, şlem, kontr, batık ve IMP ile MP'nin sonucunu diğer masalarla nasıl karşılaştırdığı.</p>
+<h2>Löve puanları</h2>
+<p>Deklare edilip yapılan, altının üzerindeki her löve için: sinek ve karoda <b>20</b>, kupa ve maçada <b>30</b>, sanzatuda ilk löve <b>40</b>, sonrakiler 30. Kontrlüde iki, sürkontrlüde dört katı sayılır.</p>
+<h2>Manş ve kısmi oyun</h2>
+<p>100 löve puanı ya da fazlası eden kontrat <b>manş</b>tır: 3SA, 4<span class="r">♥</span>, 4♠, 5♣, 5<span class="r">♦</span> ya da daha yükseği. Briç düplikatta yapılan manş zonsuz <b>300</b>, zonlu <b>500</b> prim alır; daha küçük kontrat (kısmi oyun) 50 alır.</p>
+<h2>Şlemler</h2>
+<p>Küçük şlem (12 löve) manş priminin üstüne <b>500</b> (zonlu 750), büyük şlem (13 löve) <b>1000</b> (zonlu 1500) ekler.</p>
+<h2>Batmak</h2>
+<p>Her eksik löve için savunma 50 (zonlu 100) yazar. Kontrlüde zonsuz: 100, 300, 500, sonra her löve için 300 daha; zonlu: 200, 500, 800, sonra her biri 300 daha.</p>
+<h2>Örnekler</h2>
+<ul><li>4♠ tam yapıldı: 120 + 300 = <b>420</b> (zonlu 620).</li><li>3SA yapıldı: 100 + 300 = <b>400</b> (zonlu 600).</li><li>2<span class="r">♥</span> bir fazlayla: 90 + 50 = <b>140</b>.</li><li>6<span class="r">♥</span> yapıldı: 180 + 300 + 500 = <b>980</b> (zonlu 1430).</li></ul>
+<h2>IMP ve MP</h2>
+<p>Briç düplikatta aynı eller birçok masada oynanır, böylece kart şansı ortadan kalkar. <b>MP (maç puanı)</b> skorunu diğer tüm masalarla karşılaştırır: geçtiğin her masa için bir puan, eşitlik için yarım; sonuç yüzde olarak gösterilir. <b>IMP</b> iki skor arasındaki farkı bir cetvelle sayıya çevirir: 20–40 puan 1 IMP, 50–80 2, 90–120 3, … 370–420 9, 430–490 10; 4000 ve üzeri fark 24 IMP.</p><p>Briç Masası her elde sonucunu diğer masalara göre hem IMP hem MP olarak gösterir.</p>
+<div class="cta"><p>Hemen dene: robotlara karşı ücretsiz oyna</p><a href="../../?lang=tr">▶ Hemen oyna</a></div>
+<div class="more"><h2>Diğer dersler</h2><ul><li><a href="how-to-play.html">Briç Nasıl Oynanır? Yeni Başlayanlar İçin Kurallar</a></li><li><a href="stayman.html">Stayman Konvansiyonu: Nasıl Çalışır? Örneklerle</a></li><li><a href="transfers.html">1SA Sonrası Jacoby Transfer: Kurallar ve Örnekler</a></li><li><a href="rkcb.html">Roman Key Card Blackwood (RKCB 1430): Cevaplar</a></li></ul></div>
+<nav class="langs"><span>Bu ders diğer dillerde:</span><a href="../../en/learn/scoring.html" hreflang="en">English</a><a href="../../no/learn/scoring.html" hreflang="nb">Norsk</a><a href="../../es/learn/scoring.html" hreflang="es">Español</a><a href="../../fr/learn/scoring.html" hreflang="fr">Français</a><a href="../../it/learn/scoring.html" hreflang="it">Italiano</a><a href="../../de/learn/scoring.html" hreflang="de">Deutsch</a><a href="../../ru/learn/scoring.html" hreflang="ru">Русский</a><a href="../../pl/learn/scoring.html" hreflang="pl">Polski</a><a href="../../zh/learn/scoring.html" hreflang="zh">中文</a></nav>
+</main>
+</body>
+</html>
