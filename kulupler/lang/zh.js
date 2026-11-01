@@ -1,6 +1,8 @@
 // BridgeGate interface in zh (loaded by i18n.js when this language is chosen): English text → zh, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["zh"]={"d":{"Take off the table":"请离牌桌",
+window.BG_LANG["zh"]={"d":{"The players’ link":"牌手链接",
+"It opens this tournament’s tables only: each player taps their table. They can also find it in Bridge Table under Clubs.":"只打开本比赛的牌桌:每位牌手点自己的牌桌。也可以在 Bridge Table 的俱乐部里找到。",
+"Take off the table":"请离牌桌",
 "Take the player off this table? The table becomes free again.":"把这位牌手请离这张牌桌?牌桌会重新空出。",
 "The director took you off the table.":"裁判已将你请离牌桌。",
 "Leave the table":"离开牌桌",

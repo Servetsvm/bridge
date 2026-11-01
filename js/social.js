@@ -418,7 +418,8 @@ const SB = (() => {
     const g = sb.g, m = g.m, mt = myTable();
     const tabs = `<div class="seg ttabs">${[['boards', T('Board list')], ['rank', T('Standings')], ...(isOne() ? [] : [['tables', T('Tables')]])].map(([v, l]) => `<button data-sbview="${v}" class="${sb.view === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
     // the organiser sends the players one link; a player chooses the table on a screen of its own
-    const links = done() || !canManage(m) || isOne() ? '' : `<div class="grp sblinks"><div class="muted">📲 ${T('Send the players the link: they open Bridge Table, tap Table No and choose their table.')}</div><div class="sblk"><span class="sblt all"><b>${T('The game’s link, for everyone')}</b>${sendBtns(0)}</span></div></div>`;
+    // this game's own link: it opens this game's tables (nothing else); the players can also come in through Team match
+    const links = done() || !canManage(m) || isOne() || m.test ? '' : `<div class="grp sblinks"><span>🔗 ${T('This game’s link')}</span><div class="muted">${T('It opens this game’s tables only; the players can also find it under Team match.')}</div><div class="row2">${sendBtns(0)}<button class="btn mini-btn" data-sbsend="copy:0">📋 ${T('Copy')}</button></div></div>`;
     let body = '';
     const pickTable = !moving() && !mt && !done() && !canManage(m), pickMe = moving() && !myMe() && !done() && !sb.board;
     const orgPick = !moving() && !mt && !done() && canManage(m) && !sb.board ? `<div class="grp"><span>${T('My table')}</span><div class="muted">${T('Playing too? Choose your table to enter its scores.')}</div><div class="bm3-keys k4 sbpick" data-sbseg="me">${[...Array(m.tb).keys()].map(i => `<button data-v="${i + 1}" class="bm3-key">${i + 1}</button>`).join('')}</div>${legend(m)}</div>` : '';
@@ -583,7 +584,8 @@ const SB = (() => {
   }
   // the players get only Bridge Table's address: the game is under Open tables, and Table No opens it (no code needed)
   const appLink = () => location.origin + location.pathname.replace(/index\.html$/, '');
-  const linkText = () => `🃏 ${sb.g.m.n}\n${appLink()}`;
+  const gameLink = () => appLink() + '#sb=' + sb.id;
+  const linkText = () => `🃏 ${sb.g.m.n}\n${gameLink()}`;
   const sendBtns = t => `<span class="sbsend"><button class="btn mini-btn sbwa" data-sbsend="wa:${t}" title="WhatsApp">${ICON_WA}</button><button class="btn mini-btn sbsms" data-sbsend="sms:${t}" title="SMS">${ICON_SMS}</button></span>`;
   // a table's players: a member number typed into a box becomes the member's name
   // the players at the table, drawn as the table; or the box for one seat
@@ -840,6 +842,7 @@ const SB = (() => {
     if (id === 'sbBack') { sb.setup = null; return show(); }
     if (id === 'sbCreate') return create();
     if (d.sbopen) return openGame(d.sbopen);
+    if (d.sbsend === 'copy:0') { const l = gameLink(); (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(() => flash('📋 ' + T('Copied'), 1800)).catch(() => prompt(T('Copy'), l)); return; }
     if (d.sbsend) { const [how, t] = d.sbsend.split(':'), txt = encodeURIComponent(linkText()); if (how === 'wa') window.open('https://wa.me/?text=' + txt, '_blank', 'noopener'); else location.href = 'sms:?&body=' + txt; return; }
     if (d.sbdel) { const g = (sb.list || []).find(x => x.id === d.sbdel), name = g ? g.n : sb.g && sb.g.m.n; askYes(T('Delete the game “{0}” and all its scores?', name || d.sbdel), () => { openOv('sb', `<div class="muted">${T('Loading…')}</div>`); del(d.sbdel); }); return; }
     if (d.sbent) { const [gid, t] = d.sbent.split(':'); sb.entry = false; return openLink(gid, +t); }   // that table: the organiser sits, a player asks for a seat there

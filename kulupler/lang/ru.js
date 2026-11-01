@@ -1,6 +1,8 @@
 // BridgeGate interface in ru (loaded by i18n.js when this language is chosen): English text → ru, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["ru"]={"d":{"Take off the table":"Снять со стола",
+window.BG_LANG["ru"]={"d":{"The players’ link":"Ссылка для игроков",
+"It opens this tournament’s tables only: each player taps their table. They can also find it in Bridge Table under Clubs.":"Она открывает только столы этого турнира: каждый игрок нажимает свой стол. Его можно найти и в Bridge Table в разделе «Клубы».",
+"Take off the table":"Снять со стола",
 "Take the player off this table? The table becomes free again.":"Снять игрока с этого стола? Стол снова станет свободным.",
 "The director took you off the table.":"Директор снял вас со стола.",
 "Leave the table":"Покинуть стол",

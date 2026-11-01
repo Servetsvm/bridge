@@ -37,6 +37,8 @@
     'New codes':'Yeni kodlar',
     'Type each table\'s code (4 digits, all different) and save: the players choose their table and type it.':'Her masanın kodunu yazın (4 hane, hepsi farklı) ve kaydedin: oyuncular masalarını seçip bu kodu yazar.',
     'Set up the tournament first':'Önce turnuvayı kurun',
+    'The players’ link':'Oyuncuların linki',
+    'It opens this tournament’s tables only: each player taps their table. They can also find it in Bridge Table under Clubs.':'Sadece bu turnuvanın masalarını açar: her oyuncu kendi masasına basar. Bridge Table’da Kulüpler altında da bulabilirler.',
     'Take off the table':'Masadan çıkar',
     'Take the player off this table? The table becomes free again.':'Oyuncu bu masadan çıkarılsın mı? Masa yeniden boşalır.',
     'The director took you off the table.':'Yönetici seni masadan çıkardı.',

@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 374;
+const APP_V = 375;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3089,7 +3089,7 @@ window.addEventListener('hashchange', () => { if (/[#&](bg|sb|d)=/.test(location
 function checkSharedDeal() {
   // an organiser's link from before (a club tournament #bg=club.prefix, or a Social bridge game #sb=CODE)
   const g = location.hash.match(/[#&]bg=([\w%-]+)\.(\d{2})/), sg = location.hash.match(/[#&]sb=([A-Z0-9]{4,12})(?:&t=(\d{1,2}))?/);
-  if (g || (sg && !sg[2])) {   // an older link with a code: Table No finds the game anyway
+  if (g) {   // an older club link with a code: Table No finds the game anyway
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     flash('🃏 ' + T('Table No'), 2500); return;
   }

@@ -1,6 +1,8 @@
 // BridgeGate interface in no (loaded by i18n.js when this language is chosen): English text → no, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["no"]={"d":{"Take off the table":"Fjern fra bordet",
+window.BG_LANG["no"]={"d":{"The players’ link":"Spillernes lenke",
+"It opens this tournament’s tables only: each player taps their table. They can also find it in Bridge Table under Clubs.":"Den åpner bare denne turneringens bord: hver spiller trykker på sitt bord. De finner den også i Bridge Table under Klubber.",
+"Take off the table":"Fjern fra bordet",
 "Take the player off this table? The table becomes free again.":"Fjerne spilleren fra dette bordet? Bordet blir ledig igjen.",
 "The director took you off the table.":"Turneringslederen fjernet deg fra bordet.",
 "Leave the table":"Forlat bordet",

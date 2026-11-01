@@ -414,6 +414,17 @@ async function setLive(on){
     else await fetch(url,{method:'DELETE'});
   }catch(e){}
 }
+// this tournament's link for the players: Bridge Table opens this club's running tournament, its free tables only
+// (the players can also find it under Clubs)
+window.bgShowPlayersLink=async function(){
+  const L=window.i18nText?i18nText:x=>x, p=await getTablePrefix();
+  const link=location.origin+location.pathname.replace(/kulupler\/[^/]*$/,'')+'?kulup='+encodeURIComponent('?club='+CLUB_ID+'&role=table&p='+p);
+  const msg=encodeURIComponent('🃏 '+(CLUB_NAME||'')+(getState().name?' — '+getState().name:'')+'\n'+link);
+  openModal('🔗 '+L('The players’ link'),`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${L('It opens this tournament’s tables only: each player taps their table. They can also find it in Bridge Table under Clubs.')}</div>
+    <input readonly value="${link}" onclick="this.select()" style="width:100%;font-size:0.76rem;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);box-sizing:border-box;">
+    <div style="display:flex;gap:8px;margin-top:10px;"><a class="btn btn-full" style="background:#25d366;color:#fff;text-decoration:none;text-align:center;" href="https://wa.me/?text=${msg}" target="_blank" rel="noopener">WhatsApp</a><a class="btn btn-full btn-ghost" style="text-decoration:none;text-align:center;" href="sms:?&body=${msg}">SMS</a><button class="btn btn-full btn-ghost" onclick="navigator.clipboard&&navigator.clipboard.writeText('${link}').then(()=>toast('📋'))">📋 ${L('Copy')}</button></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">${L('Close')}</button>`);
+};
 // the tables' codes: each table's own; the admin gives each table its code (a player types it after choosing the table)
 // table number → code (the running tournament's entry carries them)
 const tableKeys=codes=>{ const k={}; for(const [c,t] of Object.entries(codes||{})) k['t'+t]=c; return k; };

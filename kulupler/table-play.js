@@ -87,9 +87,11 @@ window.bgPlayerEntry=async function(prefix){
   let pe=document.getElementById('playerEntry');
   if(!pe){ pe=document.createElement('div'); pe.id='playerEntry'; box.appendChild(pe); }
   const s=await DB.get('state')||{};
+  // the tables taken this round are not offered
+  const lk=await DB.get('tableLocks')||{}, taken=new Set(Object.keys(lk).filter(k=>k.startsWith(s.currentRound+'_')).map(k=>+k.split('_')[1]));
   if(s.status!=='running'){ pe.innerHTML=`<div class="empty-state"><div class="empty-icon">⏳</div><div style="font-weight:600;margin-bottom:4px;">Tournament not started</div><div style="font-size:0.82rem;">Ask the director to start the tournament</div></div><button class="btn-primary" onclick="bgPlayerEntry('${prefix}')">↻</button>`; return; }
   pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">${s.name||'BridgeGate'}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">Select your table number</div></div>
-    <div class="bm3-keys k4" style="padding:0;">${Array.from({length:s.tableCount||0},(_,i)=>`<button class="bm3-key" onclick="bgPlayerNames('${prefix}',${i+1})">${i+1}</button>`).join('')}</div>`;
+    <div class="bm3-keys k4" style="padding:0;">${Array.from({length:s.tableCount||0},(_,i)=>i+1).filter(n=>!taken.has(n)).map(n=>`<button class="bm3-key" onclick="bgPlayerNames('${prefix}',${n})">${n}</button>`).join('')}</div>`;
 };
 // the four players at the chosen table, drawn as the table: North at the top, South at the bottom, West and East at the sides
 const BG_SEATS={N:'North',S:'South',E:'East',W:'West'};
