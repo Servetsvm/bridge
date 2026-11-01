@@ -37,24 +37,25 @@ function renderAdminTab(){
   if(adminTab==='setup') setTimeout(adminUpdateCalc, 0);
 }
 
-// ── the super admin's test mode: a tournament of its own, fake players, the robots enter the scores ──
+// ── the super admin's test tournament (opened as such from Bridge Table): the robots play it by themselves ──
 function testBarHtml(){
   const L=v=>window.i18nText?i18nText(v):v;
-  if(!bgTestOn()) return `<div style="text-align:right;margin-bottom:6px;"><button class="btn btn-ghost" onclick="bgTestToggle(true)">🧪 ${L('Test mode')}</button></div>`;
+  if(!bgTestOn()) return '';
   const s=getState(), mine=+(sessionStorage.getItem('bgTestMine:'+CLUB_ID)||0);
-  return `<div class="card" style="border:2px dashed var(--gold);"><div class="card-title"><span>🧪</span> ${L('Test mode')}</div>
-    <div style="font-size:.8rem;color:var(--text2);margin-bottom:8px;">${L('A tournament of its own: the club\'s real tournament is not touched and nobody else sees this one. Set it up and run it as a live one; the players are fake and the robots enter the tables\' scores. Nothing counts anywhere.')}</div>
-    ${s.status==='running'?`<div class="field"><label>${L('My table (the robots leave it to you)')}</label><select id="tMine" onchange="bgTestMine(this.value)"><option value="0">—</option>${Array.from({length:s.tableCount||0},(_,i)=>`<option value="${i+1}" ${mine===i+1?'selected':''}>${i+1}</option>`).join('')}</select></div>
-    <button class="btn btn-gold" onclick="bgTestFill()">🤖 ${L('Robots: enter this round\'s scores')} (${s.currentRound})</button>`:''}
-    <button class="btn btn-ghost" onclick="bgTestToggle(false)">✕ ${L('Leave test mode')}</button></div>`;
+  return `<div class="card" style="border:2px dashed var(--gold);"><div class="card-title"><span>🧪</span> ${L('Test tournament')}</div>
+    <div style="font-size:.8rem;color:var(--text2);margin-bottom:8px;">${L('Only you see it; the club\'s real tournament is not touched. The players\' names come from the TBF list; once the tournament starts the robots play every table by themselves, and each round starts when the last one ends.')}</div>
+    ${s.status==='running'?`<div class="field"><label>${L('My table (the robots leave it to you)')}</label><select id="tMine" onchange="bgTestMine(this.value)"><option value="0">—</option>${Array.from({length:s.tableCount||0},(_,i)=>`<option value="${i+1}" ${mine===i+1?'selected':''}>${i+1}</option>`).join('')}</select></div>`:''}</div>`;
 }
-window.bgTestToggle=async function(on){
-  try{ if(on) sessionStorage.setItem(bgTestKey(CLUB_ID),'1'); else sessionStorage.removeItem(bgTestKey(CLUB_ID)); }catch(e){}
-  setClub(CLUB_ID); for(const k of Object.keys(_cache)) delete _cache[k];
-  await preloadCache(); refreshTopbar(); adminTab='setup'; renderAdminPanel();
-  toast(on?'🧪 '+(window.i18nText?i18nText('Test mode'):'Test mode'):'✓');
-};
 window.bgTestMine=v=>{ try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(+v||0)); }catch(e){} };
+// the pairs' names: two TBF members each (the whole list once)
+let _tbfNames=null;
+async function bgTestNames(){
+  if(!_tbfNames){ try{ const r=await fetch(await fbRootUrl('/membersTbf.json')); const v=r.ok?await r.json():null; _tbfNames=Object.values(v||{}).filter(n=>typeof n==='string'&&n.trim()).map(n=>cleanData(n)); }catch(e){ _tbfNames=[]; } }
+  const P=getPairs(), pool=_tbfNames.slice(); let i=0;
+  const one=()=>pool.length?pool.splice(Math.floor(Math.random()*pool.length),1)[0]:(window.i18nText?i18nText('Test Player'):'Test Player')+' '+(++i);
+  for(const p of Object.values(P)) if(!p.isPhantom) p.name=joinPairName(one(),one());
+  setPairs(P); renderAdminPanel();
+}
 // a board's result at a table, as the robots would have it: the same contract at most tables (a board's own), now and
 // then another, made exactly, with an overtrick or down one or two
 function bgSimRnd(key){ let h=2166136261; for(const ch of key) h=Math.imul(h^ch.charCodeAt(0),16777619)>>>0; return ()=>{ h=(h+0x6D2B79F5)>>>0; let t=h; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
@@ -68,19 +69,42 @@ function bgSimResult(b,t,round){
   const ls=['♠','♥','♦','♣'][Math.floor(r()*4)], lr=['2','3','4','5','6','7','K','Q','J','10'][Math.floor(r()*10)];
   return {contract:level+suit+' '+d+(result>=0?' +'+(result||'='):result),level,suit,declarer:d,result,doubled:'',lead:ls+lr,leadSuit:ls,leadRank:lr,vuln,nsScore,ewScore:-nsScore,adjusted:false,status:'done',time:new Date().toISOString(),sim:1};
 }
-window.bgTestFill=function(){
-  if(!bgTestOn()) return;
-  const s=getState(); if(s.status!=='running'){ toast(i18nText('Start the tournament first')); return; }
-  const mov=getMovements(), pairs=getPairs(), bs=getBoards(), mine=+(sessionStorage.getItem('bgTestMine:'+CLUB_ID)||0); let n=0;
-  for(let t=1;t<=(s.tableCount||0);t++){
-    if(t===mine) continue;
-    const m=mov[s.currentRound+'_'+t]; if(!m) continue;
-    if((pairs[m.ns]||{}).isPhantom||(pairs[m.ew]||{}).isPhantom) continue;
-    for(let b=m.boardStart;b<=m.boardEnd;b++){ const k=t+'_'+s.currentRound+'_'+b; if(bs[k]&&bs[k].status==='done') continue; bs[k]=bgSimResult(b,t,s.currentRound); n++; }
-  }
-  setBoards(bs); addLog('ok','Test: robots entered scores',n+' boards');
-  toast('🤖 '+n); renderAdminPanel();
-};
+// every few seconds: each robot table plays its next board of the round; a round played everywhere (my table too)
+// starts the next one, the last one finishes the tournament
+let _bgTestBusy=false;
+async function bgTestTick(){
+  if(_bgTestBusy||!CLUB_ID||!bgTestOn()) return;
+  const s=_cache['state']; if(!s||s.status!=='running'||!s.currentRound) return;
+  _bgTestBusy=true;
+  try{
+    const mov=getMovements(), pairs=getPairs(), bs=getBoards(), mine=+(sessionStorage.getItem('bgTestMine:'+CLUB_ID)||0);
+    let wrote=0, left=0;
+    for(let t=1;t<=(s.tableCount||0);t++){
+      const m=mov[s.currentRound+'_'+t]; if(!m) continue;
+      if((pairs[m.ns]||{}).isPhantom||(pairs[m.ew]||{}).isPhantom) continue;
+      for(let b=m.boardStart;b<=m.boardEnd;b++){
+        const k=t+'_'+s.currentRound+'_'+b; if(bs[k]&&bs[k].status==='done') continue;
+        left++;
+        if(t!==mine&&!wrote_t(t)){ bs[k]=bgSimResult(b,t,s.currentRound); wroteT.add(t); wrote++; left--; }
+      }
+    }
+    wroteT.clear();
+    if(wrote){ setBoards(bs); if(typeof renderAdminTab==='function'&&document.getElementById('adminContent')) renderAdminTab(); }
+    else if(!left){
+      if(s.currentRound<s.roundCount){
+        if(s.movement==='swiss'&&!mov[(s.currentRound+1)+'_1']){ try{ await maybeAdvanceSwissRound(); }catch(e){} }
+        else { s.currentRound++; s._roundStartedAt=new Date().toISOString(); setState(s); addLog('ok','Round '+s.currentRound+' started','test'); toast('▶ '+(window.i18nText?i18nText('Round'):'Round')+' '+s.currentRound); refreshTopbar(); if(document.getElementById('adminContent')) renderAdminTab(); }
+      } else {
+        s.status='finished'; s._finishedAt=new Date().toISOString(); setState(s);
+        const arc=getArchives(); arc.unshift({state:{...s},boards:getBoards(),pairs:getPairs(),movements:getMovements(),hands:_cache['hands']||[],dd:_cache['dd']||{},finished:s._finishedAt}); setArchives(arc);
+        addLog('ok','Tournament finished & archived','test'); toast('🏁'); refreshTopbar(); if(document.getElementById('adminContent')) renderAdminTab();
+      }
+    }
+  }catch(e){}
+  _bgTestBusy=false;
+}
+const wroteT=new Set(), wrote_t=t=>wroteT.has(t);
+setInterval(bgTestTick,3000);
 // ── Team Match helpers (2 teams, 2+ pairs per team) ──
 function teamMatchPairCount(){
   const v=parseInt(document.getElementById('aTeamPairs')?.value||0);
@@ -304,7 +328,6 @@ window.adminSetup=function(){
     else result=generateSwissRound1(pairCount,bpr,rounds);
   }
   const totalBoards=rounds*bpr;
-  if(bgTestOn()){ let i=0; const P=n=>(window.i18nText?i18nText('Test Player'):'Test Player')+' '+n; for(const p of Object.values(result.pairs)) if(!p.isPhantom){ i++; p.name=joinPairName(P(2*i-1),P(2*i)); } }
   setMovements(result.movements);setPairs(result.pairs);setBoards({});setApprovals({});
   setLive(false);   // a new tournament is listed when it starts
   const s=getState();
@@ -317,6 +340,7 @@ window.adminSetup=function(){
   addLog('ok','Tournament created',`${players} players, ${tables} tables, ${result.rounds} rounds, ${mov}, ${scoringName(s)}`);
   toast(mov==='team'?`✅ Team Match created: ${s.teams.A.name} vs ${s.teams.B.name}`:'✅ Tournament created');
   adminTab='setup';refreshTopbar();renderAdminPanel();   // the names come from the tables after the start
+  if(bgTestOn()) bgTestNames();
 };
 
 window.adminForceUnlock=function(tableNo){
@@ -336,7 +360,7 @@ window.adminStart=async function(){
   addLog('ok','Round 1 started','Tournament begins');
   toast('▶ Round 1 started!');refreshTopbar();renderAdminTab();
   adminSetupAutoRefresh();
-  showTableLinkModal();
+  if(!bgTestOn()) showTableLinkModal();
 };
 window.saveStallMinutes=function(){
   const v=parseInt(document.getElementById('stallMinutesInput').value);
@@ -527,7 +551,7 @@ function checkRoundComplete(){
   if(allDone && s.movement==='swiss'){
     maybeAdvanceSwissRound(); // idempotent — safe to call repeatedly
   }
-  if(allDone && _lastRoundCompleteNotified !== s.currentRound){
+  if(allDone && _lastRoundCompleteNotified !== s.currentRound && !bgTestOn()){
     _lastRoundCompleteNotified = s.currentRound;
     showRoundCompleteAlert(s.currentRound, s.roundCount, done, total);
   }

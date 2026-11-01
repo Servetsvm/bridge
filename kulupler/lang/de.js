@@ -1,6 +1,8 @@
 // BridgeGate interface in de (loaded by i18n.js when this language is chosen): English text → de, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["de"]={"d":{"Test mode":"Testmodus",
+window.BG_LANG["de"]={"d":{"Test tournament":"Testturnier",
+"Only you see it; the club's real tournament is not touched. The players' names come from the TBF list; once the tournament starts the robots play every table by themselves, and each round starts when the last one ends.":"Nur du siehst es; das echte Turnier des Clubs bleibt unberührt. Die Spielernamen kommen aus der TBF-Liste; sobald das Turnier läuft, spielen die Roboter alle Tische selbst, und jede Runde beginnt, wenn die vorige zu Ende ist.",
+"Test mode":"Testmodus",
 "A tournament of its own: the club's real tournament is not touched and nobody else sees this one. Set it up and run it as a live one; the players are fake and the robots enter the tables' scores. Nothing counts anywhere.":"Ein eigenes Turnier: das echte Turnier des Clubs bleibt unberührt und niemand sonst sieht dieses. Richte es ein und leite es wie ein echtes; die Spieler sind erfunden und die Roboter tragen die Ergebnisse der Tische ein. Nichts zählt irgendwo.",
 "My table (the robots leave it to you)":"Mein Tisch (die Roboter lassen ihn dir)",
 "Robots: enter this round's scores":"Roboter: Ergebnisse dieser Runde eintragen",

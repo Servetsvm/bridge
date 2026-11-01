@@ -37,6 +37,8 @@
     'New codes':'Yeni kodlar',
     'Type each table\'s code (4 digits, all different) and save: the players choose their table and type it.':'Her masanın kodunu yazın (4 hane, hepsi farklı) ve kaydedin: oyuncular masalarını seçip bu kodu yazar.',
     'Set up the tournament first':'Önce turnuvayı kurun',
+    'Test tournament':'Deneme turnuvası',
+    'Only you see it; the club\'s real tournament is not touched. The players\' names come from the TBF list; once the tournament starts the robots play every table by themselves, and each round starts when the last one ends.':'Sadece sen görürsün; kulübün gerçek turnuvasına dokunulmaz. Oyuncu isimleri TBF listesinden gelir; turnuva başlayınca robotlar bütün masaları kendileri oynar ve bir tur bitince sonraki tur kendiliğinden başlar.',
     'Test mode':'Deneme modu',
     'A tournament of its own: the club\'s real tournament is not touched and nobody else sees this one. Set it up and run it as a live one; the players are fake and the robots enter the tables\' scores. Nothing counts anywhere.':'Ayrı bir turnuva: kulübün gerçek turnuvasına dokunulmaz ve bunu başka kimse görmez. Canlı turnuva gibi kur ve yönet; oyuncular sahtedir, masaların skorlarını robotlar girer. Hiçbir yerde sayılmaz.',
     'My table (the robots leave it to you)':'Benim masam (robotlar bu masayı sana bırakır)',

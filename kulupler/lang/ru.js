@@ -1,6 +1,8 @@
 // BridgeGate interface in ru (loaded by i18n.js when this language is chosen): English text → ru, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["ru"]={"d":{"Test mode":"Тестовый режим",
+window.BG_LANG["ru"]={"d":{"Test tournament":"Тестовый турнир",
+"Only you see it; the club's real tournament is not touched. The players' names come from the TBF list; once the tournament starts the robots play every table by themselves, and each round starts when the last one ends.":"Его видите только вы; настоящий турнир клуба не затрагивается. Имена игроков берутся из списка TBF; после старта роботы сами играют за всеми столами, а каждый тур начинается, когда закончился предыдущий.",
+"Test mode":"Тестовый режим",
 "A tournament of its own: the club's real tournament is not touched and nobody else sees this one. Set it up and run it as a live one; the players are fake and the robots enter the tables' scores. Nothing counts anywhere.":"Отдельный турнир: настоящий турнир клуба не затрагивается, и никто другой его не видит. Настройте и проводите его как настоящий; игроки вымышленные, результаты столов вносят роботы. Нигде не засчитывается.",
 "My table (the robots leave it to you)":"Мой стол (роботы оставляют его вам)",
 "Robots: enter this round's scores":"Роботы: внести результаты этого тура",

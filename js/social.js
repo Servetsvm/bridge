@@ -284,14 +284,19 @@ const SB = (() => {
     openOv('sb', `<div class="muted">${T('Loading…')}</div>`);
     await loadList(); if (ui.overlay === 'sb' && !sb.id && !sb.setup) show();
   }
-  const seen = g => !g.test || isAdm();
+  const seen = g => !g.test;
+  const tests = () => isAdm() ? (sb.list || []).filter(g => g.test).sort((a, b) => b.ts - a.ts) : [];
+  // the super admin's Test column: his test games and a new one (every kind: matches, round robin, Howell, single table)
+  const testHtml = () => !isAdm() ? '' : `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.')}</div>
+    ${tests().map(g => `<div class="sbtrow"><b>${esc(g.n)}</b><small>${fmtDate(g.ts)} · ${g.st === 'done' ? T('Finished') : T('Running')}</small><button class="btn new mini-btn" data-sbopen="${g.id}">${T('Open')}</button><button class="btn tdel mini-btn" data-sbdel="${g.id}">✕</button></div>`).join('')}
+    <div class="row2"><button class="btn gold" id="sbNewTest">🧪 ${T('New test game')}</button><button class="btn" id="sbOneTest">🧪 🪑 ${T('Single table')}</button></div></div>`;
   const runningGames = () => (sb.list || []).filter(g => seen(g) && g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
   function entryHtml() {
     const R = runningGames();
     return `<h2>🃏 ${T('Team match')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
       ${g.fmt === 'rr' || g.type === 'howell' ? `<div class="row2"><button class="btn new" data-sbent="${g.id}:0">▶ ${T('Open')}</button></div>` : `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>${legend(g)}`}
       ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
-      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
+      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>` + testHtml();
   }
   // a team match: the tables of each match and who sits North-South there
   const legend = m => !isTeam(m) || isRR(m) ? '' : `<div class="tmleg">${[...Array(Math.floor(m.tb / 2)).keys()].map(i => { const a = teamName(2 * i + 1, m), b = teamName(2 * i + 2, m);
@@ -357,6 +362,7 @@ const SB = (() => {
     return `<h2>🃏 ${T('Team match')}</h2>
       <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')} ${T('A round robin of teams or a Howell pairs game can be chosen too.')}</div>
       <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button></div>
+      ${testHtml()}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
@@ -367,7 +373,7 @@ const SB = (() => {
   function setupHtml() {
     const s = sb.setup;
     if (s.one) { const p = s.names[1] || {};
-      return `<h2>🪑 ${T('Single table')}</h2>
+      return `<h2>${s.test ? '🧪 ' : ''}🪑 ${T('Single table')}</h2>
       <div class="muted">${T('Four players, real cards. Each board is entered with its contract and North-South’s points: the side with 21 or more points is expected the score of the table, and the difference is counted in IMPs for both partners.')}</div>
       <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
       <div class="grp"><span>${T('Players')}</span><div class="tsetrow sbrow">${['n', 's', 'e', 'w'].map(k => `<label><small>${SEAT[SEATK[k]]}</small><input class="tok" maxlength="20" data-sbpl="${k}" data-member placeholder="${SEAT[SEATK[k]]}" value="${esc(p[k] || '')}"></label>`).join('')}</div><div class="muted">${T('Not required: the directions are used.')}</div></div>
@@ -376,8 +382,8 @@ const SB = (() => {
       <div class="row2"><button class="btn new" id="sbCreate"${sb.busy ? ' disabled' : ''}>${T('Start the game')}</button><button class="btn" id="sbBack">${T('Back')}</button></div>`; }
     const fmt = s.fmt || 'team', R = fmt === 'rr' ? rounds(s.nt).length : fmt === 'howell' ? rounds(s.np).length : 0;
     const bprs = [2, 3, 4, 5, 6, 7, 8, 10, 12].filter(n => R * n <= 36);
-    const test = isAdm() ? `<div class="grp"><span>🧪 ${T('Test')}</span>${seg('test', [[0, T('Off')], [1, T('Test game')]], s.test ? 1 : 0)}<div class="muted">${T('Only you see it: the players are fake (Test Player 1, 2…) and the robots enter the other tables\' scores. Nothing counts anywhere.')}</div></div>` : '';
-    const head = `<h2>🃏 ${T('New game')}</h2>
+    const test = '';
+    const head = `<h2>${s.test ? '🧪 ' + T('Test game') : '🃏 ' + T('New game')}</h2>
       <div class="grp"><span>${T('Name')}</span><input class="tok wide" id="sbName" maxlength="40" value="${esc(s.n)}"></div>
       <div class="grp"><span>${T('How it is played')}</span>${seg('fmt', [['team', T('Matches')], ['rr', T('Round robin')], ['howell', T('Howell pairs')]], fmt)}</div>`;
     const foot = `${fedSeg(s)}${test}
@@ -665,18 +671,20 @@ const SB = (() => {
     sb.busy = true; sb.err = ''; show();
     try {
       const uid = await C().uid(), id = newCode(), ts = Date.now();
-      const fmt = s.one ? '' : s.fmt || 'team', test = !!(s.test && isAdm()), fake = i => T('Test Player {0}', i);
+      const fmt = s.one ? '' : s.fmt || 'team', test = !!(s.test && isAdm());
+      let pool = []; if (test) { try { const v = await C().get('gate/membersTbf'); pool = Object.values(v || {}).filter(n => typeof n === 'string' && n.trim()).map(n => n.trim()); } catch (e) {} }
+      const fake = i => pool.length ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0].slice(0, 20) : T('Test Player {0}', i);
       const type = s.one ? 'one' : fmt === 'howell' ? 'howell' : 'team', nt = fmt === 'rr' ? s.nt : s.tb;
       const tm = s.one || fmt === 'howell' ? [] : [...Array(nt).keys()].map(i => (test ? '' : s.tm[i]) || (test ? T('Test team {0}', i + 1) : T('Team {0}', i + 1)));
       const fed = s.fed === 'tbf' ? 'tbf' : 'nbf';
       const m = { n: (test ? '🧪 ' : '') + (s.n || T(s.one ? 'Single table' : 'Team match')), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey(), type, tm, fed };
       if (fmt === 'rr') Object.assign(m, { fmt, nt: s.nt, bpr: s.bpr, tb: 2 * Math.floor(s.nt / 2), bd: rounds(s.nt).length * s.bpr });
-      if (fmt === 'howell') Object.assign(m, { fmt, np: s.np, bpr: s.bpr, tb: Math.floor(s.np / 2), bd: rounds(s.np).length * s.bpr, pn: [...Array(s.np).keys()].map(i => test ? fake(2 * i + 1) + ' – ' + fake(2 * i + 2) : (s.pn[i] || '')) });
+      if (fmt === 'howell') Object.assign(m, { fmt, np: s.np, bpr: s.bpr, tb: Math.floor(s.np / 2), bd: rounds(s.np).length * s.bpr, pn: [...Array(s.np).keys()].map(i => test ? (fake(2 * i + 1) + ' – ' + fake(2 * i + 2)).slice(0, 40) : (s.pn[i] || '')) });
       if (test) m.test = 1;
       m.n = m.n.slice(0, 40);
       const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk, type, tm, fed, ...(m.fmt ? { fmt: m.fmt } : {}), ...(test ? { test: 1 } : {}) } };
       // a test game's tables: fake players (a moving game's players are its pairs and teams)
-      for (let t = 1; t <= m.tb; t++) { const p = s.names[t] || {}, k = 4 * (t - 1); up['sb/' + id + '/t/' + t] = test && !m.fmt && type === 'team' ? { n: fake(k + 1), s: fake(k + 2), e: fake(k + 3), w: fake(k + 4) } : { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }
+      for (let t = 1; t <= m.tb; t++) { const p = s.names[t] || {}, k = 4 * (t - 1); up['sb/' + id + '/t/' + t] = test && !m.fmt && (type === 'team' || type === 'one') ? { n: fake(k + 1), s: fake(k + 2), e: fake(k + 3), w: fake(k + 4) } : { n: p.n || '', s: p.s || '', e: p.e || '', w: p.w || '' }; }
       await C().patch('', up);
       sb.setup = null; sb.busy = false; await loadGame(id); sb.view = s.one || moving(m) ? 'boards' : 'tables'; sb.board = 0; if (s.one) setMyTable(1); show(); poll();
     } catch (e) { sb.busy = false; sb.err = T('Could not save. Check the internet connection and try again.'); show(); }
@@ -721,6 +729,27 @@ const SB = (() => {
     k = Math.max(0, Math.min(13, k + [-1, 0, 0, 0, 1][Math.floor(r() * 5)]));
     return { l: E.LV(last.call), s: st, x, d, k };
   }
+  async function simTick() {
+    const g = sb.g, m = g && g.m;
+    if (ui.overlay !== 'sb' || !m || !m.test || !canManage(m) || done() || sb.busy || sb.simBusy) return;
+    if (sb.board || (document.activeElement && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName))) return;   // not while a score is being entered
+    sb.simBusy = true;
+    try {
+      const up = {}, upto = moving(m) && myMe() ? curRound() : Infinity;
+      for (let t = 1; t <= m.tb; t++) {
+        for (let b = 1; b <= m.bd; b++) {
+          if (moving(m) && roundOf(b) > upto) break;
+          if (t === myTable(b) || (moving(m) && !seatsAt(roundOf(b), t)) || (((g.r || {})[b] || {})[t])) continue;
+          if (isOne(m)) break;
+          const r = simResult(b, t, simDeal(b)); r.sc = nsScore(b, r); r.ts = Date.now(); r.ok = true; r.sim = 1;
+          up['sb/' + sb.id + '/r/' + b + '/' + t] = r; break;   // one board a table each time
+        }
+      }
+      if (Object.keys(up).length) { await signIn(); await C().patch('', up); await loadGame(sb.id); if (!sb.board) show(); }
+    } catch (e) {}
+    sb.simBusy = false;
+  }
+  setInterval(simTick, 3000);
   async function simFill() {
     const g = sb.g, m = g.m; if (!m.test || sb.busy) return;
     sb.busy = true; let up = {}, n = 0;
@@ -798,6 +827,7 @@ const SB = (() => {
       else if (sb.form) { sb.form[k] = +v; if (k === 'l') { if (+v === 0) { sb.form.s = sb.form.d = sb.form.k = null; } else if (sb.form.k == null || sb.form.k < 0) sb.form.k = null; } }
       return show();
     }
+    if (id === 'sbOneTest' || id === 'sbNewTest') { const one = id === 'sbOneTest'; sb.setup = one ? { one: true, test: true, n: T('Single table') + ' ' + new Date().toLocaleDateString(), tb: 1, bd: 8, names: {}, tm: [], fed: 'tbf' } : { test: true, n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [], fed: 'tbf', fmt: 'team', nt: 4, np: 8, bpr: 4, pn: [] }; sb.err = ''; return show(); }
     if (id === 'sbOne' || id === 'sbNew') {
       sb.setup = id === 'sbOne' ? { one: true, n: T('Single table') + ' ' + new Date().toLocaleDateString(), tb: 1, bd: 8, names: {}, tm: [], fed: 'nbf' } : { n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [], fed: 'nbf', fmt: 'team', nt: 4, np: 8, bpr: 4, pn: [] };
       const s0 = sb.setup; sb.err = ''; show();
@@ -836,7 +866,6 @@ const SB = (() => {
       setMyTable(0); setMe(''); sb.seats = null; sb.seatK = null; sb.board = 0; sb.form = null; sb.reqT = 0; return show();
     }
     if (d.sbme) { setMe(d.sbme); sb.board = 0; sb.form = null; sb.view = 'boards'; return show(); }
-    if (id === 'sbSim') return simFill();
     if (id === 'sbWa') { window.open('https://wa.me/?text=' + encodeURIComponent(standingsText()), '_blank', 'noopener'); return; }
   });
 

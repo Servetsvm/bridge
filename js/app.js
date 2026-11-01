@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 370;
+const APP_V = 371;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2862,6 +2862,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
   if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
+  if (t.dataset.clubtest && typeof Net !== 'undefined' && Net.isAdmin()) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubtest) + '&role=admin&test=1'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
   if (t.id === 'clubSuper') { closeOv(); openClubs('?admin=1'); return; }
@@ -3478,6 +3479,7 @@ async function showClubs() {
         : `<div class="muted">${T('No tournament at this club now.')}</div><div class="row2"><button class="btn gold" data-clubadmin="${esc(t.club)}">➕ ${T('Set up a tournament')}</button></div>`) + `</div>`).join('');
     openOv('clubs', `<h2>🏛 ${T('Clubs')}</h2>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}
+      ${typeof Net !== 'undefined' && Net.isAdmin() && L.length ? `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('A test tournament at a club: only you see it, the club\'s real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.')}</div><div class="sbme">${L.map(t => `<button class="btn" data-clubtest="${esc(t.club)}">🧪 ${esc(t.c || t.club)}</button>`).join('')}</div></div>` : ''}
       <div class="row2">${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn" id="clubSuper">🛡️ ${T('Super admin')}</button>` : ''}<button class="btn" id="oClose">${T('Close')}</button></div>`);
   };
   if (ui.overlay !== 'clubs') ui.clubLive = null;
