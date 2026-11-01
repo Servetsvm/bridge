@@ -288,7 +288,7 @@ function renderTableDetail(tableNo){
   }).join('');
   document.getElementById('panelContent').innerHTML=`
     <div class="bm3t">
-      <div class="sbchg"><span class="sbtno">Table ${tableNo}</span><button class="btn gold" onclick="bgChangeTable()">🔄 Change table</button></div>
+      <div class="sbchg"><span class="sbtno">Table ${tableNo}</span></div>
       <div class="bm3t-info">Round ${s.currentRound} · NS ${nsNum} – EW ${ewNum} · Boards ${m.boardStart||'?'} – ${m.boardEnd||'?'}</div>
       <div class="bm3t-names">${pN||pS?`<span><b>NS</b> ${[pN,pS].filter(Boolean).join(' – ')}</span>`:''}${pE||pW?`<span><b>EW</b> ${[pE,pW].filter(Boolean).join(' – ')}</span>`:''}</div>
       ${isPhantom?`<div class="bm3t-note">👻 Phantom pair — sit out</div>`:''}
@@ -480,7 +480,6 @@ window.bmShowRoundOver=function(tableNo){
         </div>
         ${bgStandingsHtml()}
         <button class="btn btn-gold btn-full" onclick="bgMoveTo(${(bmSide==='ew'?ewNextTable:nsNextTable)||tableNo},${nextR},${tableNo})">OK — ${(bmSide==='ew'?ewNextTable:nsNextTable)&&(bmSide==='ew'?ewNextTable:nsNextTable)!==tableNo?'→ Table '+(bmSide==='ew'?ewNextTable:nsNextTable):'Show Waiting Screen →'}</button>
-        <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="bgChangeTable()">🔄 Change table</button>
       </div>
     </div>`;
 };
@@ -520,7 +519,6 @@ window.bmShowWaiting=function(tableNo,nextR){
         <div class="waiting-sub">Please take your seats at Table ${tableNo}</div>
       </div>
       <button class="btn btn-gold btn-full" style="margin-top:16px;" onclick="bmShowNewPlayers(${tableNo},${nextR})">Players seated →</button>
-      <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="bgChangeTable()">🔄 Change table</button>
     </div>`;
 };
 
