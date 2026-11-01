@@ -44,9 +44,31 @@ function testBarHtml(){
   const s=getState(), mine=+(sessionStorage.getItem('bgTestMine:'+CLUB_ID)||0);
   return `<div class="card" style="border:2px dashed var(--gold);"><div class="card-title"><span>🧪</span> ${L('Test tournament')}</div>
     <div style="font-size:.8rem;color:var(--text2);margin-bottom:8px;">${L('Only you see it; the club\'s real tournament is not touched. The players\' names come from the TBF list; once the tournament starts the robots play every table by themselves, and each round starts when the last one ends.')}</div>
-    ${s.status==='running'?`<div class="field"><label>${L('My table (the robots leave it to you)')}</label><select id="tMine" onchange="bgTestMine(this.value)"><option value="0">—</option>${Array.from({length:s.tableCount||0},(_,i)=>`<option value="${i+1}" ${mine===i+1?'selected':''}>${i+1}</option>`).join('')}</select></div>`:''}</div>`;
+    ${s.status==='running'?`<div class="field"><label>${L('Sit at a table (the robots leave it to you)')}</label><div style="display:flex;flex-wrap:wrap;gap:6px;">${Array.from({length:s.tableCount||0},(_,i)=>`<button class="btn ${mine===i+1?'btn-gold':'btn-ghost'}" onclick="bgTestSit(${i+1})">🃏 ${i+1}</button>`).join('')}</div></div>`:''}
+    <button class="btn btn-ghost" onclick="bgTestDelete()">🗑 ${L('Delete the test tournament')}</button></div>`;
 }
 window.bgTestMine=v=>{ try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(+v||0)); }catch(e){} };
+// this device sits at a table of the test tournament, and comes back to the admin screen (no code: the director)
+window.bgTestSit=function(n){
+  bgTestMine(n); role='table'; window.bmCodeTable=n; bmTableNo=null;
+  document.body.classList.add('bg-device'); const r=document.getElementById('topbarRole'); if(r) r.textContent=(window.i18nText?i18nText('Table'):'Table')+' '+n;
+  renderPanel(); bgTestBack();
+};
+window.bgTestAdmin=function(){
+  role='admin'; window.bmCodeTable=null; bmTableNo=null; if(bmPollInterval){clearInterval(bmPollInterval);bmPollInterval=null;}
+  document.body.classList.remove('bg-device'); const r=document.getElementById('topbarRole'); if(r) r.textContent='Admin';
+  const b=document.getElementById('bgTestBack'); if(b) b.remove(); renderPanel();
+};
+function bgTestBack(){ if(document.getElementById('bgTestBack')) return; const b=document.createElement('button'); b.id='bgTestBack'; b.className='btn btn-gold'; b.style.cssText='position:fixed;right:10px;bottom:10px;z-index:50;'; b.textContent='⚙️ '+(window.i18nText?i18nText('Admin'):'Admin'); b.onclick=bgTestAdmin; document.body.appendChild(b); }
+// the whole test tournament away (the club's real one is elsewhere)
+window.bgTestDelete=async function(){
+  if(!bgTestOn()) return;
+  if(!await confirmDialog(window.i18nText?i18nText('Delete the test tournament?'):'Delete the test tournament?',{title:'🧪',confirmLabel:'🗑',danger:true})) return;
+  try{ await fetch(await fbUrl('.json'),{method:'DELETE'}); }catch(e){}
+  for(const k of Object.keys(_cache)) delete _cache[k];
+  try{ sessionStorage.removeItem('bgTestMine:'+CLUB_ID); }catch(e){}
+  toast('🗑'); adminTab='setup'; renderAdminPanel();
+};
 // the pairs' names: two TBF members each (the whole list once)
 let _tbfNames=null;
 async function bgTestNames(){
@@ -79,6 +101,12 @@ async function bgTestTick(){
   try{
     // my table: the one this device sits at (kept when I go back to the admin screen), or the one chosen there
     if(typeof bmTableNo!=='undefined'&&bmTableNo) try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(+bmTableNo)); }catch(e){}
+    // the scores as they are now (a table on another device may have entered one) and who sits where
+    await Promise.all(['boards','approvals','tableLocks'].map(k=>DB.get(k)));
+    const locks=_cache['tableLocks']||{}, aps=_cache['approvals']||{}, human=new Set();
+    for(const v of Object.values(locks)) if(v&&v.tableNo) human.add(+v.tableNo);
+    for(const [k,v] of Object.entries(_cache['boards']||{})) if(v&&!v.sim) human.add(+k.split('_')[0]);
+    for(const k of Object.keys(aps)) human.add(+k.split('_')[0]);
     const mov=getMovements(), pairs=getPairs(), bs=getBoards(), mine=+(sessionStorage.getItem('bgTestMine:'+CLUB_ID)||0);
     let wrote=0, left=0;
     for(let t=1;t<=(s.tableCount||0);t++){
@@ -87,7 +115,7 @@ async function bgTestTick(){
       for(let b=m.boardStart;b<=m.boardEnd;b++){
         const k=t+'_'+s.currentRound+'_'+b; if(bs[k]&&bs[k].status==='done') continue;
         left++;
-        if(t!==mine&&!wrote_t(t)){ bs[k]=bgSimResult(b,t,s.currentRound); wroteT.add(t); wrote++; left--; }
+        if(t!==mine&&!human.has(t)&&!wrote_t(t)){ bs[k]=bgSimResult(b,t,s.currentRound); wroteT.add(t); wrote++; left--; }
       }
     }
     wroteT.clear();
@@ -96,11 +124,7 @@ async function bgTestTick(){
       if(s.currentRound<s.roundCount){
         if(s.movement==='swiss'&&!mov[(s.currentRound+1)+'_1']){ try{ await maybeAdvanceSwissRound(); }catch(e){} }
         else { s.currentRound++; s._roundStartedAt=new Date().toISOString(); setState(s); addLog('ok','Round '+s.currentRound+' started','test'); toast('▶ '+(window.i18nText?i18nText('Round'):'Round')+' '+s.currentRound); refreshTopbar(); if(document.getElementById('adminContent')) renderAdminTab(); }
-      } else {
-        s.status='finished'; s._finishedAt=new Date().toISOString(); setState(s);
-        const arc=getArchives(); arc.unshift({state:{...s},boards:getBoards(),pairs:getPairs(),movements:getMovements(),hands:_cache['hands']||[],dd:_cache['dd']||{},finished:s._finishedAt}); setArchives(arc);
-        addLog('ok','Tournament finished & archived','test'); toast('🏁'); refreshTopbar(); if(document.getElementById('adminContent')) renderAdminTab();
-      }
+      }   // the last round played: the director finishes the tournament, as in a real one
     }
   }catch(e){}
   _bgTestBusy=false;
@@ -264,6 +288,7 @@ function renderSetup(){
       ${s.status==='running'&&s.currentRound<s.roundCount?`<button class="btn btn-gold" onclick="adminNextRound()">⏭ Next Round (${s.currentRound+1})</button>`:''}
       ${s.status==='running'&&s.currentRound>=s.roundCount?`<button class="btn btn-blue" onclick="adminFinish()">🏁 Finish Tournament</button>`:''}
     </div>
+    ${s.status==='finished'?`<div style="margin-top:12px;"><a class="btn btn-blue btn-full" style="text-decoration:none;text-align:center;" href="${location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=screen'+(bgTestOn()?'&test=1':'')}" target="_blank" rel="noopener">📺 Screen</a></div>`:''}
     ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;"><button class="btn btn-green btn-full" onclick="showTableLinkModal()">📲 Send the players the link</button><a class="btn btn-blue btn-full" style="text-decoration:none;text-align:center;" href="${location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=screen'+(bgTestOn()?'&test=1':'')}" target="_blank" rel="noopener">📺 Screen</a></div><button class="btn btn-gold btn-full" style="margin-top:8px;" onclick="showTableCodes()">🔑 Table codes</button></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
   </div>
   <div class="card"><div class="card-title"><span>💾</span> Data</div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-blue" onclick="adminExport()">⬇ Export</button><button class="btn btn-purple" onclick="adminImportOpen()">⬆ Import</button><button class="btn btn-red" onclick="adminReset()">🗑 Reset</button></div></div>`;

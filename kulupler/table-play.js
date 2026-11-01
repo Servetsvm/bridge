@@ -523,6 +523,7 @@ window.bmShowNewPlayers=function(tableNo,roundNo){
     if(pend.N||pend.S||pend.E||pend.W) addLog('ok','Player names entered',`T${tableNo} R${roundNo}: ${joinPairName(pend.N||'',pend.S||'')} vs ${joinPairName(pend.E||'',pend.W||'')}`);
     lockTable(tableNo); bmStartNewRound(tableNo,roundNo); return;
   }
+  if(typeof bgTestOn==='function'&&bgTestOn()&&m.ns&&pairs[m.ns]){ const u=window.bridgeUser&&window.bridgeUser(), nm=u&&(u.name||u.key); const [a,b]=splitPairName(pairs[m.ns].name); if(nm&&a!==nm){ pairs[m.ns].name=joinPairName(nm,b||a); setPairs(pairs); } }
   const nsPair=pairs[m.ns]||{name:'',isPhantom:false};
   const ewPair=pairs[m.ew]||{name:'',isPhantom:false};
   const [ns1,ns2]=splitPairName(nsPair.name);

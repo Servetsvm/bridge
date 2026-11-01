@@ -289,7 +289,7 @@ const SB = (() => {
   // the super admin's Test column: his test games and a new one (every kind: matches, round robin, Howell, single table)
   const testHtml = () => !isAdm() ? '' : `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.')}</div>
     ${tests().map(g => `<div class="sbtrow"><b>${esc(g.n)}</b><small>${fmtDate(g.ts)} · ${g.st === 'done' ? T('Finished') : T('Running')}</small><button class="btn new mini-btn" data-sbopen="${g.id}">${T('Open')}</button><button class="btn tdel mini-btn" data-sbdel="${g.id}">✕</button></div>`).join('')}
-    <div class="row2"><button class="btn gold" id="sbNewTest">🧪 ${T('New test game')}</button><button class="btn" id="sbOneTest">🧪 🪑 ${T('Single table')}</button></div></div>`;
+    <div class="row2"><button class="btn gold" id="sbNewTest">🧪 ${T('New test game')}</button><button class="btn" id="sbOneTest">🧪 🪑 ${T('Single table')}</button>${tests().length ? `<button class="btn tdel" id="sbDelTests">🗑 ${T('Delete all test games')}</button>` : ''}</div></div>`;
   const runningGames = () => (sb.list || []).filter(g => seen(g) && g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
   function entryHtml() {
     const R = runningGames();
@@ -431,7 +431,7 @@ const SB = (() => {
     // a player sees only the game (full screen, no title lines); the organiser keeps the game's details
     return `${canManage(m) ? '' : `<div class="sbbar"><span class="td">🃏</span><div class="ev"><b>${esc(m.n)}</b>${mt ? (moving() ? T('Round {0}', roundOf(sb.board) || curRound()) + ' · ' : '') + T('Table {0}', mt) + (isTeam() ? ' · ' + roomName(mt) : '') : T('Team match')}</div></div>`}${canManage(m) ? `<h2>${isOne() ? '🪑' : '🃏'} ${esc(m.n)}</h2>
       <div class="muted">${m.test ? '🧪 ' + T('Test game: only you see it') + ' · ' : ''}${isOne() ? T('Single table') : isHow() ? T('Howell') + ' · ' + T('{0} pairs', m.np) : isRR() ? T('Round robin') + ' · ' + T('{0} teams', m.nt) : isTeam() ? T('{0} teams', m.tb) : T('{0} tables', m.tb)} · ${T('{0} boards', m.bd)} · ${done() ? T('Finished') : T('Running')}${m.byn ? ' · 👤 ' + esc(m.byn) : ''}</div>` : ''}
-      ${sb.board || !canManage(m) || done() ? '' : reqListHtml()}${sb.board || m.test ? '' : links}${orgPick}${pickMe && canManage(m) ? meHtml() : ''}${m.test && canManage(m) && !done() && !sb.board ? `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('The robots play the boards of the other tables and enter their scores, as players would.')}</div><div class="row2"><button class="btn gold" id="sbSim"${sb.busy ? ' disabled' : ''}>🤖 ${sb.simMsg || T('Fill in the other tables')}</button></div></div>` : ''}${mt && !done() && !pending() && !sb.board && !isOne() ? `<div class="sbchg"><span class="sbtno">${moving() ? `<small>${T('Round {0}', curRound())}</small> ` : ''}${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable ? '' : tabs}${body}
+      ${sb.board || !canManage(m) || done() ? '' : reqListHtml()}${sb.board || m.test ? '' : links}${orgPick}${pickMe && canManage(m) ? meHtml() : ''}${m.test && canManage(m) && !done() && !sb.board ? `<div class="muted">🧪 ${(moving(m) ? myMe() : myTable()) ? T('The robots play the other tables by themselves.') : T('Choose your table: then the robots play the other tables by themselves.')}</div>` : ''}${mt && !done() && !pending() && !sb.board && !isOne() ? `<div class="sbchg"><span class="sbtno">${moving() ? `<small>${T('Round {0}', curRound())}</small> ` : ''}${T('Table {0}', mt)}${isTeam() ? ` <small>${roomName(mt)}</small>` : ''}</span><button class="btn gold" id="sbChangeT">🔄 ${T('Change table')}</button></div>` : ''}${sb.board || pickTable ? '' : tabs}${body}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       <div class="row2">${pending() ? '' : sb.board ? `<button class="btn gold" id="sbBoards">← ${T('Board list')}</button>` : canManage(m) ? `<button class="btn" id="sbList">← ${T('All games')}</button>` : ''}
         ${!sb.board && !done() && canManage(m) ? `<button class="btn" id="sbEnd">${T('Finish the game')}</button>` : ''}
@@ -735,11 +735,13 @@ const SB = (() => {
     if (sb.board || (document.activeElement && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName))) return;   // not while a score is being entered
     sb.simBusy = true;
     try {
+      if (!(moving(m) ? myMe() : myTable())) { sb.simBusy = false; return; }   // until I sit down, nobody plays
+      const human = new Set(); for (const b in (g.r || {})) for (const t in g.r[b]) if (g.r[b][t] && !g.r[b][t].sim) human.add(+t);
       const up = {}, upto = moving(m) && myMe() ? curRound() : Infinity;
       for (let t = 1; t <= m.tb; t++) {
         for (let b = 1; b <= m.bd; b++) {
           if (moving(m) && roundOf(b) > upto) break;
-          if (t === myTable(b) || (moving(m) && !seatsAt(roundOf(b), t)) || (((g.r || {})[b] || {})[t])) continue;
+          if (t === myTable(b) || (!moving(m) && human.has(t)) || (moving(m) && !seatsAt(roundOf(b), t)) || (((g.r || {})[b] || {})[t])) continue;
           if (isOne(m)) break;
           const r = simResult(b, t, simDeal(b)); r.sc = nsScore(b, r); r.ts = Date.now(); r.ok = true; r.sim = 1;
           up['sb/' + sb.id + '/r/' + b + '/' + t] = r; break;   // one board a table each time
@@ -827,6 +829,7 @@ const SB = (() => {
       else if (sb.form) { sb.form[k] = +v; if (k === 'l') { if (+v === 0) { sb.form.s = sb.form.d = sb.form.k = null; } else if (sb.form.k == null || sb.form.k < 0) sb.form.k = null; } }
       return show();
     }
+    if (id === 'sbDelTests') { const L = tests(); askYes(T('Delete all {0} test games?', L.length), async () => { await signIn(); const up = {}; for (const g of L) { up['sb/' + g.id] = null; up['sbi/' + g.id] = null; } try { await C().patch('', up); } catch (e) {} await loadList(); show(); }); return; }
     if (id === 'sbOneTest' || id === 'sbNewTest') { const one = id === 'sbOneTest'; sb.setup = one ? { one: true, test: true, n: T('Single table') + ' ' + new Date().toLocaleDateString(), tb: 1, bd: 8, names: {}, tm: [], fed: 'tbf' } : { test: true, n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [], fed: 'tbf', fmt: 'team', nt: 4, np: 8, bpr: 4, pn: [] }; sb.err = ''; return show(); }
     if (id === 'sbOne' || id === 'sbNew') {
       sb.setup = id === 'sbOne' ? { one: true, n: T('Single table') + ' ' + new Date().toLocaleDateString(), tb: 1, bd: 8, names: {}, tm: [], fed: 'nbf' } : { n: T('Team match') + ' ' + new Date().toLocaleDateString(), tb: 2, bd: 16, names: {}, tm: [], fed: 'nbf', fmt: 'team', nt: 4, np: 8, bpr: 4, pn: [] };
