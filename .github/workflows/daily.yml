@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  pages: write
 concurrency: daily
 jobs:
   daily:
@@ -27,6 +28,15 @@ jobs:
           if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
           git commit -m "Hand of the day: $(date -u +%F)"
           git push
+          echo pushed=1 >> $GITHUB_OUTPUT
+        id: pub
+      # a push made with the job's own token may not start a Pages build by itself: ask for one
+      - name: Build the site
+        if: steps.pub.outputs.pushed == '1'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X POST repos/${{ github.repository }}/pages/builds
       - name: Tell the search engines (IndexNow)
         continue-on-error: true
         run: |
