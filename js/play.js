@@ -912,6 +912,28 @@ function ddChoose(g, seat, leg, opt) {
   return best;
 }
 const SIG_NEAR = 0.15;
+// what a lead costs by the experts' rules, in tricks (taken off the samples' value): against a suit an unsupported ace
+// (no king) or a low card away from an ace; against notrump a short suit with an honour; a long suit against notrump
+// gains (setting it up is worth more than double-dummy samples show)
+function leadPen(g, seat, c) {
+  const s = S(c), mine = inSuit(g.hands[seat], s), n = mine.length, has = r => mine.some(k => R(k) === r);
+  if (g.trump >= 0) {
+    if (s === g.trump || n === 1) return 0;
+    if (R(c) === 12 && !has(11)) return 0.3;
+    if (R(c) < 12 && has(12)) return 0.4;
+    return 0;
+  }
+  if (n <= 2 && mine.some(k => R(k) >= 10)) return 0.3;
+  if (n <= 2) return 0.1;
+  return n >= 5 ? -0.25 : n === 4 ? -0.15 : 0;
+}
+// the card of the chosen suit an expert leads: the top of touching honours (the K from K Q J, the J from J T 7), else
+// the card the samples chose (a low card: fourth best)
+function leadCard(g, seat, c) {
+  const mine = desc(inSuit(g.hands[seat], S(c)));
+  let i = mine.indexOf(c); while (i > 0 && R(mine[i - 1]) === R(mine[i]) + 1) i--;
+  const top = mine[i]; return R(top) >= 8 && i < mine.length - 1 && R(mine[i + 1]) === R(top) - 1 ? top : c;
+}
 const PLAY_OPT = { budget: 900, maxSamples: 40, ddTricks: 9 };
 function aiPlay(g, seat, opt) {
   opt = opt || PLAY_OPT;
@@ -941,7 +963,12 @@ function aiPlay(g, seat, opt) {
       if (av.has(r) && av.has(h) && av.get(h) >= av.get(r) - near) return h;
       // a card the samples did not value separately (one of touching cards): its suit's value decides
       if (!av.has(h) && av.has(r)) { const same = [...av].filter(([k]) => S(k) === S(h)).map(([, v]) => v); if (same.length && Math.max(...same) >= av.get(r) - near) return h; }
-      return r;
+      // of leads the samples rate about the same, the one an expert would choose: the samples see the cards, so they
+      // do not mind an unsupported ace against a suit or a short honour against notrump, which a player never leads
+      // without a reason (4♥ with ♠A632: not the ♠A; 2NT with ♦AK ♥T543: a heart, not the ♦K)
+      const sc = c => av.get(c) - leadPen(g, seat, c);
+      let best = av.has(r) ? r : null; for (const c of av.keys()) if (best == null || sc(c) > sc(best) + 1e-9) best = c;
+      return leadCard(g, seat, best ?? r);
     }
   }
   if (g.hands[seat].length <= ddLim) { const r = ddChoose(g, seat, leg, opt); if (r != null) return r; }
