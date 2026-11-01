@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 364;
+const APP_V = 365;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2888,6 +2888,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'rbNoteSend') { const e = HIST.find(h => String(h.id) === t.dataset.id) || (G && G.result && String(G.result.id) === t.dataset.id ? G.result : null), txt = ($('rbNote') || {}).value || '';
     if (!e || txt.trim().length < 3) { flash(T('Write what the robot did wrong'), 2000); return; }
     t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
+  if (t.dataset.rbok) { Net.roboErrFixed(t.dataset.rbok, t.dataset.v === '1').then(showRoboErrs).catch(() => flash(T('Could not save'), 2000)); return; }
+  if (t.id === 'rbShowOk') { ui.rbShowOk = !ui.rbShowOk; showRoboErrs(); return; }
   if (t.dataset.rbdone) { Net.roboErrDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === 'rbCopy') { const txt = JSON.stringify(ui.rbList || []); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
   if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
@@ -3404,7 +3406,9 @@ async function showRoboErrs() {
   let L = []; try { L = await Net.roboErrs(); } catch (e) {}
   if (ui.overlay !== 'roboerr') return;
   L = L.filter(r => r.kind !== 'bid');   // the bidding lessons are in the learning report
-  ui.rbList = L;
+  // the records marked fixed are hidden (a toggle shows them) and never copied for Claude
+  const nOk = L.filter(r => r.ok).length; if (!ui.rbShowOk) L = L.filter(r => !r.ok);
+  ui.rbList = L.filter(r => !r.ok);
   for (const r of L) r.er = (r.er || []).filter(x => x[0] > 0);   // a note has no card of its own
   const n = L.reduce((a, r) => a + (r.er || []).length, 0);
   // who made it: the player's partner or an opponent (records from before the seat was kept: not known), declarer or defence
@@ -3416,11 +3420,12 @@ async function showRoboErrs() {
   const nd = L.reduce((a, r) => a + (r.er || []).filter(x => sideOf(x[1]) === sideOf(r.c[3])).length, 0);
   openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2>
     <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
+    ${nOk ? `<div class="row2"><button class="btn mini-btn" id="rbShowOk">${ui.rbShowOk ? T('Hide the fixed ones') : '✔ ' + T('Fixed: {0} (hidden) — show', nOk)}</button></div>` : ''}
     ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div>${split}<div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
-    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${r.c[0] ? conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] }) : T('Pass')}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small></div>
+    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${r.c[0] ? conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] }) : T('Pass')}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small>${r.ok ? ` <b class="pos">✔ ${T('Fixed')}</b>` : ''}</div>
       ${r.not ? `<div class="cvb">📝 ${esc(r.not)}</div>` : ''}
       ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} ${r.u ? `<b class="pos">✍️ ${T('player')}</b>` : `<b class="pos">+${x[4]}</b>`}</div>`).join('')}
-      <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}
+      <button class="btn mini-btn" data-rbok="${esc(r.path)}" data-v="${r.ok ? 0 : 1}">${r.ok ? '↩ ' + T('Not fixed') : '✔ ' + T('Fixed')}</button> <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 // the player tells what a robot did wrong on this board (the bidding too, which the card check cannot see)
@@ -3428,7 +3433,7 @@ const rbNoteHtml = e => e && e.deal && !online() ? `<div class="grp"><span>🤖 
 // the administrator sees on the report button how many new lessons came in since the report was last opened
 async function learnCheck() {
   if (typeof Net === "undefined" || !Net.isAdmin()) return;
-  try { const L = await Net.roboErrs(); const n = L.filter(r => !r.u && r.ts > (SET.learnSeen || 0)).length; if (n !== ui.learnNew) { ui.learnNew = n; render(); } } catch (e) {}
+  try { const L = await Net.roboErrs(); const n = L.filter(r => !r.u && !r.ok && r.ts > (SET.learnSeen || 0)).length; if (n !== ui.learnNew) { ui.learnNew = n; render(); } } catch (e) {}
 }
 setTimeout(learnCheck, 20000); setInterval(learnCheck, 15 * 60000);
 /* ---- the robots' learning report (the administrator only): what the robots got wrong on the boards played, from

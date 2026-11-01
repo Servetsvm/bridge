@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Fixed": "Düzeltildi", "Not fixed": "Düzeltilmedi", "Hide the fixed ones": "Düzeltilenleri gizle", "Fixed: {0} (hidden) — show": "Düzeltilen: {0} (gizli) — göster", "Could not save": "Kaydedilemedi",
     "Who scored": "Puanı alan",
     "Made it": "Yaptı",
     "Down": "Battı", "e.g. 420": "örn. 420",
@@ -425,6 +426,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Fixed": "Rettet", "Not fixed": "Ikke rettet", "Hide the fixed ones": "Skjul de rettede", "Fixed: {0} (hidden) — show": "Rettet: {0} (skjult) — vis", "Could not save": "Kunne ikke lagre",
     "Who scored": "Hvem fikk poengene",
     "Made it": "Gikk hjem",
     "Down": "Beit", "e.g. 420": "f.eks. 420",
@@ -845,6 +847,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Fixed": "Corregido", "Not fixed": "No corregido", "Hide the fixed ones": "Ocultar los corregidos", "Fixed: {0} (hidden) — show": "Corregidos: {0} (ocultos) — mostrar", "Could not save": "No se pudo guardar",
     "Who scored": "Quién puntuó",
     "Made it": "Cumplido",
     "Down": "Multa", "e.g. 420": "p. ej. 420",
@@ -1293,6 +1296,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Fixed": "Corrigé", "Not fixed": "Non corrigé", "Hide the fixed ones": "Masquer les corrigés", "Fixed: {0} (hidden) — show": "Corrigés : {0} (masqués) — afficher", "Could not save": "Échec de l’enregistrement",
     "Who scored": "Qui marque",
     "Made it": "Réussi",
     "Down": "Chute", "e.g. 420": "ex. 420",
@@ -1741,6 +1745,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Fixed": "Corretto", "Not fixed": "Non corretto", "Hide the fixed ones": "Nascondi i corretti", "Fixed: {0} (hidden) — show": "Corretti: {0} (nascosti) — mostra", "Could not save": "Impossibile salvare",
     "Who scored": "Chi ha segnato",
     "Made it": "Mantenuto",
     "Down": "Sotto", "e.g. 420": "es. 420",
@@ -2189,6 +2194,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Fixed": "Behoben", "Not fixed": "Nicht behoben", "Hide the fixed ones": "Behobene ausblenden", "Fixed: {0} (hidden) — show": "Behoben: {0} (ausgeblendet) — zeigen", "Could not save": "Speichern fehlgeschlagen",
     "Who scored": "Wer schreibt",
     "Made it": "Erfüllt",
     "Down": "Faller", "e.g. 420": "z. B. 420",
@@ -2637,6 +2643,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Fixed": "Исправлено", "Not fixed": "Не исправлено", "Hide the fixed ones": "Скрыть исправленные", "Fixed: {0} (hidden) — show": "Исправлено: {0} (скрыто) — показать", "Could not save": "Не удалось сохранить",
     "Who scored": "Кто записывает",
     "Made it": "Выполнен",
     "Down": "Без", "e.g. 420": "напр. 420",
@@ -3085,6 +3092,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Fixed": "Poprawione", "Not fixed": "Niepoprawione", "Hide the fixed ones": "Ukryj poprawione", "Fixed: {0} (hidden) — show": "Poprawione: {0} (ukryte) — pokaż", "Could not save": "Nie udało się zapisać",
     "Who scored": "Kto zapisuje",
     "Made it": "Ugrany",
     "Down": "Bez", "e.g. 420": "np. 420",
@@ -3533,6 +3541,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Fixed": "已修正", "Not fixed": "未修正", "Hide the fixed ones": "隐藏已修正的", "Fixed: {0} (hidden) — show": "已修正:{0}(已隐藏)— 显示", "Could not save": "无法保存",
     "Who scored": "得分方",
     "Made it": "完成",
     "Down": "宕", "e.g. 420": "例如 420",
