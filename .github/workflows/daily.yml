@@ -1,0 +1,38 @@
+# The hand of the day: every night at 00:05 Istanbul time a new deal is bid by the robots, solved and written as pages
+# in ten languages (.github/daily/daily.js); the pages are committed, so GitHub Pages publishes them, and the search
+# engines that take IndexNow are told.
+name: Hand of the day
+on:
+  schedule:
+    - cron: '5 21 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: daily
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Write the hand of the day
+        run: node .github/daily/daily.js
+      - name: Publish
+        run: |
+          git config user.name "Servetsvm"
+          git config user.email "39servet@gmail.com"
+          git add daily sitemap.xml */daily */index.html
+          if git diff --cached --quiet; then echo "nothing new"; exit 0; fi
+          git commit -m "Hand of the day: $(date -u +%F)"
+          git push
+      - name: Tell the search engines (IndexNow)
+        continue-on-error: true
+        run: |
+          D=$(ls daily/*.json | sort | tail -1 | xargs basename | cut -c1-10)
+          S=https://servetsvm.github.io/bridge/
+          U=""
+          for l in en tr no es fr it de ru pl zh; do U="$U\"${S}$l/daily/\",\"${S}$l/daily/$D.html\","; done
+          curl -s -o /dev/null -w "indexnow %{http_code}\n" -X POST https://api.indexnow.org/indexnow -H "Content-Type: application/json; charset=utf-8" \
+            -d "{\"host\":\"servetsvm.github.io\",\"key\":\"df3428f5f57693a7fe35066dfbc430e0\",\"keyLocation\":\"${S}df3428f5f57693a7fe35066dfbc430e0.txt\",\"urlList\":[${U%,}]}"
