@@ -37,6 +37,8 @@
     'New codes':'Yeni kodlar',
     'Type each table\'s code (4 digits, all different) and save: the players choose their table and type it.':'Her masanın kodunu yazın (4 hane, hepsi farklı) ve kaydedin: oyuncular masalarını seçip bu kodu yazar.',
     'Set up the tournament first':'Önce turnuvayı kurun',
+    'Leave the table':'Masadan çık',
+    'Leave this table? It becomes free again and you choose your table again.':'Bu masadan çıkılsın mı? Masa boşalır ve masanı yeniden seçersin.',
     'Standings':'Genel sıralama',
     'Sit at a table (the robots leave it to you)':'Bir masaya otur (robotlar o masayı sana bırakır)',
     'Delete the test tournament':'Deneme turnuvasını sil',

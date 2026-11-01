@@ -1,6 +1,8 @@
 // BridgeGate interface in ru (loaded by i18n.js when this language is chosen): English text → ru, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["ru"]={"d":{"Standings":"Положение",
+window.BG_LANG["ru"]={"d":{"Leave the table":"Покинуть стол",
+"Leave this table? It becomes free again and you choose your table again.":"Покинуть этот стол? Он снова станет свободным, и вы выберете стол заново.",
+"Standings":"Положение",
 "Sit at a table (the robots leave it to you)":"Сесть за стол (роботы оставляют его вам)",
 "Delete the test tournament":"Удалить тестовый турнир",
 "Delete the test tournament?":"Удалить тестовый турнир?",

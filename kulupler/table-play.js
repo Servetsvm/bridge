@@ -288,7 +288,7 @@ function renderTableDetail(tableNo){
   }).join('');
   document.getElementById('panelContent').innerHTML=`
     <div class="bm3t">
-      <div class="sbchg"><span class="sbtno">Table ${tableNo}</span></div>
+      <div class="sbchg"><span class="sbtno">Table ${tableNo}</span>${!doneCount&&!approvalPending?`<button class="btn" onclick="bgLeaveTable()">🚪 Leave the table</button>`:''}</div>
       <div class="bm3t-info">Round ${s.currentRound} · NS ${nsNum} – EW ${ewNum} · Boards ${m.boardStart||'?'} – ${m.boardEnd||'?'}</div>
       <div class="bm3t-names">${pN||pS?`<span><b>NS</b> ${[pN,pS].filter(Boolean).join(' – ')}</span>`:''}${pE||pW?`<span><b>EW</b> ${[pE,pW].filter(Boolean).join(' – ')}</span>`:''}</div>
       ${isPhantom?`<div class="bm3t-note">👻 Phantom pair — sit out</div>`:''}
@@ -491,6 +491,19 @@ function bgStandingsHtml(){
   if(!rows.length) return '';
   return `<div class="ro-move-card" style="margin-bottom:14px;text-align:left;"><div class="ro-move-label">🏆 ${L('Standings')}</div><table style="width:100%;font-size:0.8rem;border-collapse:collapse;">${rows.map((r,i)=>`<tr style="border-top:1px solid var(--border);"><td style="padding:3px 4px;">${i+1}</td><td style="padding:3px 4px;">${cleanData(r.name)}</td><td style="padding:3px 4px;text-align:right;">${r.pct}%</td><td style="padding:3px 4px;text-align:right;">${fmtImp(r.imp)}</td></tr>`).join('')}</table></div>`;
 }
+// the wrong table chosen: it is free again, and the player chooses again in Bridge Table's Clubs
+window.bgLeaveTable=async function(){
+  const L=window.i18nText?i18nText:x=>x;
+  if(!await confirmDialog(L('Leave this table? It becomes free again and you choose your table again.'),{title:'🚪',confirmLabel:L('Leave the table'),danger:false})) return;
+  const t=bmTableNo; if(bmPollInterval){clearInterval(bmPollInterval);bmPollInterval=null;}
+  try{ if(t){ const lk=getTableLocks(); delete lk[tableLockKey(t)]; await DB.set('tableLocks',lk); } }catch(e){}   // written before the page goes away
+  try{ if(typeof bgTestOn==='function'&&bgTestOn()) sessionStorage.removeItem('bgTestMine:'+CLUB_ID); }catch(e){}
+  bmTableNo=null; window.bmCodeTable=null;
+  try{ await endSession(); }catch(e){}
+  // inside Bridge Table: back to its Clubs, with the tables as they are now
+  try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ const U=P.eval('ui'), id=CLUB_ID; P.closeClubs(); if(typeof P.showClubs==='function'){ U.clubOpen=id; U.clubLive=null; P.showClubs(); if(P.clubTaken) P.clubTaken(id).then(x=>{ (U.clubTaken=U.clubTaken||{})[id]=x.taken; P.showClubs(); }); } return; } }catch(e){}
+  location.reload();
+};
 // this device goes with its pair: the next round's table (the waiting screen there; the scores are entered there)
 window.bgMoveTo=function(t,nextR,from){
   // a test tournament: this table has seen where to go; the next round may start
@@ -578,6 +591,7 @@ window.bmShowNewPlayers=function(tableNo,roundNo){
         </div>
 
         <button class="btn btn-green btn-full" onclick="bmConfirmPlayersAndStart(${tableNo},${roundNo},'${m.ns||''}','${m.ew||''}')">✅ Confirm — Start Playing</button>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="bgLeaveTable()">🚪 Leave the table</button>
       </div>
     </div>`;
 
