@@ -21,6 +21,8 @@ const T = {
   zh: { h: '每日一牌', home: '桥牌桌', seats: '北东南西', nt: 'NT', pass: '不叫', d: '{0}的每日桥牌:你坐南家会叫什么?机器人的叫牌、定约、双明手结果以及所有能做成的定约。', board: '第{0}副', dealer: '发牌', vul: '有局', none: '双无', all: '双有', q: '轮到南家的你:你叫什么?', you: '你的牌(南)', sofar: '到目前为止的叫牌', show: '查看答案', robot: '机器人叫了', full: '全副牌', auction: '叫牌', contract: '定约', passed: '四家不叫', lead: '首攻', ddr: '双明手庄家拿{0}墩:{1}。', made: '完成', over: '超{0}墩完成', down: '宕{0}', table: '能做成的定约(双明手)', tricks: '墩', play: '▶ 与机器人打这副牌', prev: '往日牌例', learn: '学桥牌' },
 };
 const LT = {"en":{"tl":"Opening lead problem","sn":["North","East","South","West"],"ql":"You are {0}: what do you lead?","ya":"Your hand ({0})","al":"Only a {0} lead beats the contract: the defence needs {1} tricks.","cs":"Lead","cd":"This deal","cm":"On average","cmn":"Tricks for the defence after each suit’s lead: on this deal (double dummy) and on average over {0} deals that fit the auction.","rl":"The lead by the book, {0}, lets the contract make.","dl":"Daily bridge problem for {0}: what do you lead? The auction, your hand, and the only lead that beats the contract."},"tr":{"tl":"İlk atak problemi","sn":["Kuzey","Doğu","Güney","Batı"],"ql":"{0} sensin: ne atarsın?","ya":"Elin ({0})","al":"Kontratı yalnızca {0} atağı batırır: savunmanın {1} löve alması gerekir.","cs":"Atak","cd":"Bu elde","cm":"Ortalama","cmn":"Her rengin atağından sonra savunmanın lövesi: bu elde (double dummy) ve deklarasyona uyan {0} elin ortalamasında.","rl":"Kitaba göre atak, {0}, kontratın yapılmasına izin verir.","dl":"{0} günün briç problemi: ne atarsın? Deklarasyon, elin ve kontratı batıran tek atak."},"no":{"tl":"Utspillsproblem","sn":["Nord","Øst","Syd","Vest"],"ql":"Du er {0}: hva spiller du ut?","ya":"Din hånd ({0})","al":"Bare utspill i {0} beiter kontrakten: forsvaret trenger {1} stikk.","cs":"Utspill","cd":"Dette spillet","cm":"I snitt","cmn":"Forsvarets stikk etter utspill i hver farge: i dette spillet (åpne kort) og i snitt over {0} spill som passer med meldingene.","rl":"Utspillet etter boka, {0}, lar kontrakten stå.","dl":"Dagens bridgeproblem {0}: hva spiller du ut? Meldingene, hånden din og det eneste utspillet som beiter kontrakten."},"es":{"tl":"Problema de salida","sn":["Norte","Este","Sur","Oeste"],"ql":"Eres {0}: ¿con qué sales?","ya":"Tu mano ({0})","al":"Solo una salida a {0} derrota el contrato: la defensa necesita {1} bazas.","cs":"Salida","cd":"En esta mano","cm":"De media","cmn":"Bazas de la defensa tras salir de cada palo: en esta mano (doble muerto) y de media en {0} manos que encajan con la subasta.","rl":"La salida de manual, {0}, deja cumplir el contrato.","dl":"Problema de bridge del día {0}: ¿con qué sales? La subasta, tu mano y la única salida que derrota el contrato."},"fr":{"tl":"Problème d’entame","sn":["Nord","Est","Sud","Ouest"],"ql":"Vous êtes {0} : quelle est votre entame ?","ya":"Votre main ({0})","al":"Seule une entame {0} fait chuter le contrat : la défense a besoin de {1} levées.","cs":"Entame","cd":"Sur cette donne","cm":"En moyenne","cmn":"Levées de la défense après l’entame de chaque couleur : sur cette donne (cartes ouvertes) et en moyenne sur {0} donnes compatibles avec les enchères.","rl":"L’entame de manuel, {0}, laisse gagner le contrat.","dl":"Problème de bridge du {0} : quelle est votre entame ? Les enchères, votre main et la seule entame qui fait chuter le contrat."},"it":{"tl":"Problema d’attacco","sn":["Nord","Est","Sud","Ovest"],"ql":"Sei {0}: con cosa attacchi?","ya":"La tua mano ({0})","al":"Solo un attacco a {0} batte il contratto: alla difesa servono {1} prese.","cs":"Attacco","cd":"In questa smazzata","cm":"In media","cmn":"Prese della difesa dopo l’attacco in ogni seme: in questa smazzata (carte viste) e in media su {0} smazzate coerenti con la licita.","rl":"L’attacco da manuale, {0}, lascia fare il contratto.","dl":"Problema di bridge del {0}: con cosa attacchi? La licita, la tua mano e l’unico attacco che batte il contratto."},"de":{"tl":"Ausspielproblem","sn":["Nord","Ost","Süd","West"],"ql":"Du bist {0}: was spielst du aus?","ya":"Dein Blatt ({0})","al":"Nur ein Ausspiel in {0} schlägt den Kontrakt: die Verteidigung braucht {1} Stiche.","cs":"Ausspiel","cd":"In diesem Board","cm":"Im Schnitt","cmn":"Stiche der Verteidigung nach dem Ausspiel jeder Farbe: in diesem Board (Double Dummy) und im Schnitt über {0} Verteilungen, die zur Reizung passen.","rl":"Das Ausspiel nach Lehrbuch, {0}, lässt den Kontrakt erfüllen.","dl":"Bridgeproblem des Tages vom {0}: was spielst du aus? Die Reizung, dein Blatt und das einzige Ausspiel, das den Kontrakt schlägt."},"ru":{"tl":"Задача на первый ход","sn":["Север","Восток","Юг","Запад"],"ql":"Вы — {0}: с чего вы пойдёте?","ya":"Ваша рука ({0})","al":"Контракт подсаживает только ход в {0}: защите нужно {1} взяток.","cs":"Ход","cd":"В этой сдаче","cm":"В среднем","cmn":"Взятки защиты после хода в каждую масть: в этой сдаче (в открытую) и в среднем по {0} раскладам, согласным с торговлей.","rl":"Ход по учебнику, {0}, позволяет выполнить контракт.","dl":"Бриджевая задача дня {0}: с чего вы пойдёте? Торговля, ваша рука и единственный ход, который подсаживает контракт."},"pl":{"tl":"Problem wistu","sn":["N","E","S","W"],"ql":"Jesteś {0}: czym wistujesz?","ya":"Twoja ręka ({0})","al":"Tylko wist w {0} obkłada kontrakt: obrona potrzebuje {1} lew.","cs":"Wist","cd":"W tym rozdaniu","cm":"Średnio","cmn":"Lewy obrony po wiście w każdy kolor: w tym rozdaniu (w widne karty) i średnio w {0} rozkładach zgodnych z licytacją.","rl":"Wist podręcznikowy, {0}, pozwala ugrać kontrakt.","dl":"Brydżowy problem dnia {0}: czym wistujesz? Licytacja, twoja ręka i jedyny wist, który obkłada kontrakt."},"zh":{"tl":"首攻题","sn":["北","东","南","西"],"ql":"你是{0}家:你首攻什么?","ya":"你的牌({0})","al":"只有首攻{0}才能击败定约:防守方需要{1}墩。","cs":"首攻","cd":"本副牌","cm":"平均","cmn":"首攻各花色后防守方的墩数:本副牌(双明手)以及与叫牌相符的{0}副牌的平均值。","rl":"按常规的首攻{0}会让定约完成。","dl":"{0}的每日桥牌题:你首攻什么?叫牌、你的牌,以及唯一能击败定约的首攻。"}};
+const PT = {"en":{"tp":"Declarer play problem","qp":"Trick one: {0} leads {1}. Which card do you play from dummy?","dmy":"Dummy ({0})","dcl":"You, declarer ({0})","ap":"Play {0} from dummy: the contract then makes against {1}% of the ways the defenders’ cards can lie.","np":"The natural {0} makes it only {1}% of the time.","ct":"From dummy","cp":"Makes","tn":"Each card tried against {0} deals of the defenders’ cards (the rest played double dummy).","dp":"Daily bridge problem for {0}: declarer play. The contract, dummy, your hand and the opening lead: which card from dummy at trick one?","act":"On this deal: {0}.","yes":"it makes","no":"it goes down"},"tr":{"tp":"Deklaran oyunu problemi","qp":"İlk löve: {0} {1} attı. Yerden hangi kartı oynarsın?","dmy":"Yer ({0})","dcl":"Sen, deklaran ({0})","ap":"Yerden {0} oyna: kontrat, rakip kartların dağılabileceği durumların %{1} kadarında yapılır.","np":"Akla gelen {0} ise sadece %{1} yapılır.","ct":"Yerden","cp":"Yapılır","tn":"Her kart, rakip kartların {0} farklı dağılımına karşı denendi (sonrası double dummy oynandı).","dp":"{0} günün briç problemi: deklaran oyunu. Kontrat, yer, senin elin ve ilk atak: ilk lövede yerden hangi kart?","act":"Bu elde: {0}.","yes":"yapılır","no":"batar"},"no":{"tp":"Spilleførerproblem","qp":"Første stikk: {0} spiller ut {1}. Hvilket kort tar du fra bordet?","dmy":"Blindemann ({0})","dcl":"Du, spillefører ({0})","ap":"Spill {0} fra bordet: da står kontrakten mot {1} % av måtene motspillernes kort kan sitte på.","np":"Det naturlige {0} står bare {1} % av gangene.","ct":"Fra bordet","cp":"Står","tn":"Hvert kort prøvd mot {0} fordelinger av motspillernes kort (resten spilt med åpne kort).","dp":"Dagens bridgeproblem {0}: spilleføring. Kontrakten, blindemann, hånden din og utspillet: hvilket kort fra bordet i første stikk?","act":"I dette spillet: {0}.","yes":"står","no":"går bet"},"es":{"tp":"Problema de carteo","qp":"Primera baza: {0} sale con {1}. ¿Qué carta juegas del muerto?","dmy":"Muerto ({0})","dcl":"Tú, declarante ({0})","ap":"Juega {0} del muerto: el contrato se cumple en el {1} % de las formas en que pueden estar las cartas de la defensa.","np":"La natural, {0}, solo lo cumple el {1} % de las veces.","ct":"Del muerto","cp":"Se cumple","tn":"Cada carta probada contra {0} repartos de las cartas de la defensa (el resto jugado a doble muerto).","dp":"Problema de bridge del día {0}: carteo. El contrato, el muerto, tu mano y la salida: ¿qué carta del muerto en la primera baza?","act":"En esta mano: {0}.","yes":"se cumple","no":"se multa"},"fr":{"tp":"Problème de jeu de la carte","qp":"Première levée : {0} entame {1}. Quelle carte jouez-vous du mort ?","dmy":"Le mort ({0})","dcl":"Vous, déclarant ({0})","ap":"Jouez {0} du mort : le contrat gagne alors contre {1} % des répartitions possibles des cartes adverses.","np":"La carte naturelle, {0}, ne gagne que {1} % des fois.","ct":"Du mort","cp":"Gagne","tn":"Chaque carte essayée contre {0} répartitions des cartes adverses (la suite jouée à cartes ouvertes).","dp":"Problème de bridge du {0} : jeu de la carte. Le contrat, le mort, votre main et l’entame : quelle carte du mort à la première levée ?","act":"Sur cette donne : {0}.","yes":"il gagne","no":"il chute"},"it":{"tp":"Problema di gioco col morto","qp":"Prima presa: {0} attacca {1}. Quale carta giochi dal morto?","dmy":"Morto ({0})","dcl":"Tu, giocante ({0})","ap":"Gioca {0} dal morto: il contratto si fa contro il {1}% delle possibili distribuzioni delle carte avversarie.","np":"La carta naturale, {0}, lo fa solo il {1}% delle volte.","ct":"Dal morto","cp":"Si fa","tn":"Ogni carta provata contro {0} distribuzioni delle carte avversarie (il resto giocato a carte viste).","dp":"Problema di bridge del {0}: gioco col morto. Il contratto, il morto, la tua mano e l’attacco: quale carta dal morto alla prima presa?","act":"In questa smazzata: {0}.","yes":"si fa","no":"va sotto"},"de":{"tp":"Alleinspielproblem","qp":"Erster Stich: {0} spielt {1} aus. Welche Karte spielst du vom Dummy?","dmy":"Dummy ({0})","dcl":"Du, Alleinspieler ({0})","ap":"Spiele {0} vom Dummy: dann gewinnt der Kontrakt gegen {1} % der möglichen Verteilungen der gegnerischen Karten.","np":"Die naheliegende {0} gewinnt nur in {1} % der Fälle.","ct":"Vom Dummy","cp":"Gewinnt","tn":"Jede Karte gegen {0} Verteilungen der gegnerischen Karten probiert (der Rest Double Dummy gespielt).","dp":"Bridgeproblem des Tages vom {0}: Alleinspiel. Der Kontrakt, der Dummy, dein Blatt und das Ausspiel: welche Karte vom Dummy im ersten Stich?","act":"In diesem Board: {0}.","yes":"er gewinnt","no":"er fällt"},"ru":{"tp":"Задача на розыгрыш","qp":"Первая взятка: {0} ходит {1}. Какую карту вы кладёте со стола?","dmy":"Болван ({0})","dcl":"Вы, разыгрывающий ({0})","ap":"Положите со стола {0}: тогда контракт выполняется при {1}% возможных раскладов карт защиты.","np":"Естественная карта, {0}, выполняет его лишь в {1}% случаев.","ct":"Со стола","cp":"Выполняется","tn":"Каждая карта проверена против {0} раскладов карт защиты (дальше розыгрыш в открытую).","dp":"Бриджевая задача дня {0}: розыгрыш. Контракт, болван, ваша рука и первый ход: какую карту со стола в первой взятке?","act":"В этой сдаче: {0}.","yes":"контракт выполнен","no":"контракт подсажен"},"pl":{"tp":"Problem rozgrywki","qp":"Pierwsza lewa: {0} wistuje {1}. Którą kartę dokładasz ze stołu?","dmy":"Dziadek ({0})","dcl":"Ty, rozgrywający ({0})","ap":"Dołóż ze stołu {0}: kontrakt wtedy wychodzi przy {1}% możliwych rozkładów kart obrońców.","np":"Naturalna karta, {0}, ugrywa go tylko w {1}% przypadków.","ct":"Ze stołu","cp":"Wychodzi","tn":"Każda karta sprawdzona na {0} rozkładach kart obrońców (dalej rozgrywka w widne karty).","dp":"Brydżowy problem dnia {0}: rozgrywka. Kontrakt, dziadek, twoja ręka i wist: którą kartę ze stołu w pierwszej lewie?","act":"W tym rozdaniu: {0}.","yes":"kontrakt wychodzi","no":"kontrakt pada"},"zh":{"tp":"坐庄题","qp":"第一墩:{0}首攻{1}。明手出哪张牌?","dmy":"明手({0})","dcl":"你,庄家({0})","ap":"明手出{0}:防守方牌型的各种可能中,有{1}%能完成定约。","np":"顺手的{0}只有{1}%能完成。","ct":"明手出","cp":"完成","tn":"每张牌都对防守方牌的{0}种分布试过(之后按双明手打)。","dp":"{0}的每日桥牌题:坐庄。定约、明手、你的牌和首攻:第一墩明手出哪张?","act":"本副牌:{0}。","yes":"定约完成","no":"定约宕了"}};
+for (const l in PT) Object.assign(T[l], PT[l]);
 for (const l in LT) Object.assign(T[l], LT[l], { sb: {"en":"The simulation of {0} deals that fit the auction finds the {1} lead best too.","tr":"Deklarasyona uyan {0} dağılımın simülasyonu da en iyi atak olarak {1} buluyor.","no":"Simuleringen av {0} spill som passer med meldingene finner også utspill i {1} best.","es":"La simulación de {0} manos que encajan con la subasta también encuentra mejor la salida a {1}.","fr":"La simulation de {0} donnes compatibles avec les enchères trouve aussi l’entame {1} la meilleure.","it":"Anche la simulazione di {0} smazzate coerenti con la licita trova migliore l’attacco a {1}.","de":"Auch die Simulation von {0} Verteilungen, die zur Reizung passen, findet das Ausspiel in {1} am besten.","ru":"Моделирование {0} раскладов, согласных с торговлей, тоже находит лучшим ход в {1}.","pl":"Symulacja {0} rozkładów zgodnych z licytacją również uznaje wist w {1} za najlepszy.","zh":"对{0}副与叫牌相符的牌进行模拟,同样认为首攻{1}最好。"}[l], dt: {"en":"Defence tricks","tr":"Savunma lövesi","no":"Forsvarets stikk","es":"Bazas de la defensa","fr":"Levées de la défense","it":"Prese della difesa","de":"Stiche der Verteidigung","ru":"Взятки защиты","pl":"Lewy obrony","zh":"防守墩数"}[l] });
 const f = (s, ...a) => s.replace(/\{(\d)\}/g, (m, i) => a[i]);
 const hl = l => l === 'no' ? 'nb' : l;
@@ -102,14 +104,58 @@ function leadProblem(deal, auc, keep) {
   { const top = simBest.filter(x => x != null).sort((a, b) => b - a); if (!keep && top.length > 1 && top[0] - top[1] < 0.2) return 'the simulation is not sure'; }
   return { L, need, beat, dd: suitBest, avg: simBest, n: dbg.n || 0, rule, sim, cards: [...v].filter(([, t]) => t >= need).map(([c]) => c) };
 }
+/* a declarer play problem: the robots' auction to a game or more, the opening lead by the book (declarer's left-hand
+   opponent), and the decision at trick one: the card from dummy. Each card of dummy (touching cards as one) is tried
+   on this deal and against SAMPLES deals of the defenders' cards (the 25 unseen cards dealt at random, the lead in the
+   leader's hand): after it, the rest is played double dummy. A problem: one choice makes in 95% of them or more, the
+   card a player plays without thinking (the robots' rules) clearly less often and goes down on this deal. */
+const SAMPLES = 200;
+function playProblem(deal, auc, keep) {
+  for (const e of auc) if (e.call !== 'P' && e.m) { const p = hcp(deal[e.seat]); if ((e.m.min != null && p < e.m.min - 1) || (e.m.max != null && p > e.m.max + 1)) return 'call off its meaning'; }
+  const con = contractOf(auc); if (!con || con.level < 3) return 'part score';
+  if (con.level < gameLv(con.strain) && con.level < 6) return 'not a game';
+  const D = con.decl, L = (D + 1) % 4, M = (D + 2) % 4, R = (D + 3) % 4, tr = con.strain < 4 ? con.strain : -1, need = con.level + 6;
+  const g = E.newPlayState(deal, con, auc, cards), lead = E.heurPlay(g, L); E.applyCard(g, L, lead); g.dummyShown = true;
+  const leg = E.legalFor(g, M), seen = new Set([...deal[D], ...deal[M], lead]);
+  // dummy's cards, touching ones (no unseen card between them) as one
+  const reps = []; for (const c of leg.slice().sort((a, b) => b - a)) { const p = reps[reps.length - 1]; let same = p != null && (p / 13 | 0) === (c / 13 | 0); if (same) for (let k = c + 1; k < p; k++) if (!seen.has(k)) { same = false; break; } if (same) reps[reps.length - 1] = c; else reps.push(c); }
+  if (reps.length < 2) return 'one card only';
+  const repOf = c => { const x = leg.slice().sort((a, b) => b - a).filter(k => (k / 13 | 0) === (c / 13 | 0)); let r = c; for (const k of reps) if ((k / 13 | 0) === (c / 13 | 0) && k <= c) { let ok = true; for (let j = k + 1; j < c; j++) if (!seen.has(j)) { ok = false; break; } if (ok) { r = k; break; } } return r; };
+  const nat = repOf(E.heurPlay(g, M));
+  const makes = (hands, c) => { const h = hands.map((x, i) => i === M ? x.filter(k => k !== c) : i === L ? x.filter(k => k !== lead) : x); const v = E.ddsValues(h, [{ s: L, c: lead }, { s: M, c }], R, tr); return v && v.size ? 13 - Math.max(...v.values()) >= need : null; };
+  // this deal first (cheap): the natural card must go down and another card make
+  const real = new Map(reps.map(c => [c, makes(deal, c)]));
+  if (!keep && real.get(nat) !== false) return 'the natural card makes it';
+  if (!keep && ![...real.values()].some(Boolean)) return 'nothing makes it';
+  // the defenders' cards dealt again and again
+  const unseen = [...Array(52).keys()].filter(c => !seen.has(c)), win = new Map(reps.map(c => [c, 0]));
+  let rs = 0; for (const ch of JSON.stringify(deal)) rs = (rs * 31 + ch.charCodeAt(0)) >>> 0;
+  const r = () => { rs = (rs + 0x6D2B79F5) >>> 0; let t = rs; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  for (let n = 0; n < SAMPLES; n++) {
+    const u = unseen.slice(); for (let i = u.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [u[i], u[j]] = [u[j], u[i]]; }
+    const hands = []; hands[D] = deal[D]; hands[M] = deal[M]; hands[L] = [lead, ...u.slice(0, 12)]; hands[R] = u.slice(12);
+    for (const c of reps) if (makes(hands, c)) win.set(c, win.get(c) + 1);
+  }
+  const pct = c => Math.round(win.get(c) / SAMPLES * 100), best = Math.max(...reps.map(pct)), good = reps.filter(c => pct(c) >= Math.max(95, best - 2));
+  if (!keep && best < 95) return 'no sure line';
+  if (!keep && (good.includes(nat) || pct(nat) > 80 || best - pct(nat) < 20)) return 'the natural card is good enough';
+  if (!keep && !good.some(c => real.get(c))) return 'the sure line fails here';
+  return { L, M, D, lead, need, nat, natPct: pct(nat), good, opts: reps.map(c => [c, pct(c), !!real.get(c)]), n: SAMPLES };
+}
 (async () => {
   const m = await vm.runInContext('ddsFactory', ctx)(); E.ddsUse(m);
   const ddTable = deal => [0, 1, 2, 3].map(d => [0, 1, 2, 3, 4].map(st => E.ddContract(deal, { level: 1, strain: st, decl: d, dbl: 0 })));
   let D = null; const why = {};
   // a day already written keeps its deal and its kind (written again after a change in the robots, the cards stay)
   const kept = path.join(root, 'daily', today + '.json'), old = fs.existsSync(kept) ? JSON.parse(fs.readFileSync(kept, 'utf8')) : null;
-  let kind = old ? old.kind || 'bid' : dayNo % 2 ? 'lead' : 'bid';
-  if (old) { const deal = old.deal; D = { deal, auc: bidAll(deal), table: ddTable(deal) }; if (kind === 'lead') D.lp = leadProblem(deal, D.auc, true); }
+  let kind = old ? old.kind || 'bid' : ['bid', 'play', 'lead'][dayNo % 3];
+  if (old) { const deal = old.deal; D = { deal, auc: bidAll(deal), table: ddTable(deal) }; if (kind === 'lead') D.lp = leadProblem(deal, D.auc, true); if (kind === 'play') D.pp = playProblem(deal, D.auc, true); }
+  for (let k = 0; k < 6000 && !D && kind === 'play'; k++) {
+    const p = [...Array(52).keys()]; for (let i = 51; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+    const deal = [0, 1, 2, 3].map(s => p.slice(s * 13, s * 13 + 13)), auc = bidAll(deal), pp = playProblem(deal, auc);
+    if (typeof pp === 'string') { why[pp] = (why[pp] || 0) + 1; continue; }
+    D = { deal, auc, table: ddTable(deal), pp };
+  }
   for (let k = 0; k < 4000 && !D && kind === 'lead'; k++) {
     const p = [...Array(52).keys()]; for (let i = 51; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
     const deal = [0, 1, 2, 3].map(s => p.slice(s * 13, s * 13 + 13)), auc = bidAll(deal), lp = leadProblem(deal, auc);
@@ -129,11 +175,12 @@ function leadProblem(deal, auc, keep) {
   const first = D.auc.findIndex(e => e.seat === 2), con = contractOf(D.auc), tricks = con ? D.table[con.decl][con.strain] : null;
   // the robot's opening lead
   let lead = null;
-  if (con && kind !== 'lead') { const g = E.newPlayState(D.deal, con, D.auc, cards); lead = E.aiPlay(g, (con.decl + 1) % 4, { budget: 3000, maxSamples: 100, ddTricks: 12, lead: { budget: 6000, maxSamples: 100, minSamples: 40, evLim: 3000000, cap: 12000 } }); }
+  if (con && kind === 'bid') { const g = E.newPlayState(D.deal, con, D.auc, cards); lead = E.aiPlay(g, (con.decl + 1) % 4, { budget: 3000, maxSamples: 100, ddTricks: 12, lead: { budget: 6000, maxSamples: 100, minSamples: 40, evLim: 3000000, cap: 12000 } }); }
   const code = (() => { const a = new Uint8Array(13); D.deal.forEach((h, s) => h.forEach(c => { a[c >> 2] |= s << ((c & 3) * 2); })); return Buffer.from(a).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); })();
   const expl = D.auc.map(e => (e.m && e.m.t) || '');
   const data = { date: today, kind, board, dealer, deal: D.deal, auc: D.auc.map(e => [e.seat, e.call]), expl, first, con, tricks, table: D.table, lead, code };
   if (kind === 'lead' && D.lp && typeof D.lp === 'object') { Object.assign(data, { lp: D.lp }); data.lead = D.lp.sim; }
+  if (kind === 'play' && D.pp && typeof D.pp === 'object') { Object.assign(data, { pp: D.pp }); data.lead = D.pp.lead; }
   fs.mkdirSync(root + 'daily', { recursive: true });
   fs.writeFileSync(root + 'daily/' + today + '.json', JSON.stringify(data));
   writeAll();
@@ -157,6 +204,7 @@ function aucTable(t, auc, dealer, upto) {
 }
 function page(l, d, days) {
   if (d.kind === 'lead' && d.lp) return leadPage(l, d, days);
+  if (d.kind === 'play' && d.pp) return playPage(l, d, days);
   const t = T[l], date = new Date(d.date + 'T12:00:00Z').toLocaleDateString(l === 'no' ? 'nb-NO' : l, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
   const title = `${t.h}: ${date}`, desc = f(t.d, date), url = `${SITE}${l}/daily/${d.date}.html`;
   const res = d.con && d.tricks != null ? (() => { const need = d.con.level + 6, k = d.tricks - need; return f(t.ddr, d.tricks, k === 0 ? t.made : k > 0 ? f(t.over, k) : f(t.down, -k)); })() : '';
@@ -275,6 +323,37 @@ ${handHtml(d.deal[p.L], f(t.ya, me)).replace('class="hand"', 'class="hand solo"'
     .replace(/<script type="application\/ld\+json">[^<]*<\/script>/, m => m.replace(/"headline":"[^"]*"/, () => '"headline":' + JSON.stringify(title)).replace(/"description":"[^"]*"/, () => '"description":' + JSON.stringify(desc)))
     .replace(/(<meta property="og:title" content=")[^"]*/, (m, a) => a + esc(title)).replace(/(<meta property="og:description" content=")[^"]*/, (m, a) => a + esc(desc))
     .replace('table.dd td.ok{', 'table.dd tr.okr td{background:#e6f4e8;font-weight:700}table.dd td.ok{');
+  return html;
+}
+// the page of a declarer play problem: the auction, dummy above your hand, the lead; which card from dummy
+function playPage(l, d, days) {
+  const t = T[l], p = d.pp, date = new Date(d.date + 'T12:00:00Z').toLocaleDateString(l === 'no' ? 'nb-NO' : l, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const card = c => sym(c / 13 | 0) + RANK[c % 13];
+  const rows = p.opts.slice().sort((a, b) => b[1] - a[1]).map(([c, q, ok]) => `<tr${p.good.includes(c) ? ' class="okr"' : ''}><td>${card(c)}</td><td>${l === 'tr' ? '%' + q : q + '%'}</td><td>${ok ? '✓' : '✗'}</td></tr>`).join('');
+  const pick = p.good.slice().sort((a, b) => b - a)[0], realOk = (p.opts.find(o => o[0] === pick) || [])[2];
+  let html = page(l, { ...d, kind: 'bid', pp: null, first: 0, expl: null }, days);
+  const body = `<h1>${esc(t.h)}</h1>
+<p class="lead">${esc(date)} · <b>${esc(t.tp)}</b></p>
+<div class="meta"><span>${f(t.board, d.board)}</span><span>${t.dealer}: <b>${t.seats[d.dealer]}</b></span><span>${t.vul}: <b>${vulTxt(t, d.board)}</b></span></div>
+<h2>${t.auction}</h2>
+${aucTable(t, d.auc, d.dealer, d.auc.length)}
+<p>${t.contract}: <b>${conTxt(t, d.con)}</b></p>
+<div class="pair">${handHtml(d.deal[p.M], f(t.dmy, t.sn[p.M]))}${handHtml(d.deal[p.D], f(t.dcl, t.sn[p.D]))}</div>
+<p class="ask">${f(t.qp, t.sn[p.L], card(p.lead))}</p>
+<details><summary>${t.show}</summary>
+<p class="big">${f(t.ap, p.good.slice().sort((a, b) => b - a).map(card).join(' / '), Math.max(...p.good.map(c => (p.opts.find(o => o[0] === c) || [])[1])))}</p>
+<p>${f(t.np, card(p.nat), p.natPct)}</p>
+<table class="dd"><tr><th>${t.ct}</th><th>${t.cp}</th><th>${t.cd}</th></tr>${rows}</table>
+<p class="ex">${f(t.tn, p.n)} ${f(t.act, realOk ? t.yes : t.no)}</p>
+<h2>${t.full}</h2>
+<div class="compass">${handHtml(d.deal[0], t.seats[0]).replace('class="hand"', 'class="hand n"')}${handHtml(d.deal[3], t.seats[3]).replace('class="hand"', 'class="hand w"')}<div class="mid">${f(t.board, d.board)}</div>${handHtml(d.deal[1], t.seats[1]).replace('class="hand"', 'class="hand e"')}${handHtml(d.deal[2], t.seats[2]).replace('class="hand"', 'class="hand s"')}</div>
+</details>`;
+  html = html.replace(/<h1>[\s\S]*?<\/details>/, () => body);
+  const title = `${t.h}: ${date} · ${t.tp}`, desc = f(t.dp, date);
+  html = html.replace(/<title>[^<]*<\/title>/, () => `<title>${esc(title)} · ${esc(t.home)}</title>`).replace(/(<meta name="description" content=")[^"]*/, (m, a) => a + esc(desc))
+    .replace(/<script type="application\/ld\+json">[^<]*<\/script>/, m => m.replace(/"headline":"[^"]*"/, () => '"headline":' + JSON.stringify(title)).replace(/"description":"[^"]*"/, () => '"description":' + JSON.stringify(desc)))
+    .replace(/(<meta property="og:title" content=")[^"]*/, (m, a) => a + esc(title)).replace(/(<meta property="og:description" content=")[^"]*/, (m, a) => a + esc(desc))
+    .replace('table.dd td.ok{', 'table.dd tr.okr td{background:#e6f4e8;font-weight:700}.pair{display:flex;flex-direction:column;gap:8px;max-width:260px}table.dd td.ok{');
   return html;
 }
 function writeAll() {
