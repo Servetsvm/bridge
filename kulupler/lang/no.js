@@ -1,6 +1,14 @@
 // BridgeGate interface in no (loaded by i18n.js when this language is chosen): English text → no, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["no"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Turneringssystem",
+window.BG_LANG["no"]={"d":{"Test mode":"Testmodus",
+"A tournament of its own: the club's real tournament is not touched and nobody else sees this one. Set it up and run it as a live one; the players are fake and the robots enter the tables' scores. Nothing counts anywhere.":"En egen turnering: klubbens ekte turnering røres ikke, og ingen andre ser denne. Sett den opp og kjør den som en ekte; spillerne er falske og robotene legger inn bordenes resultater. Ingenting teller noe sted.",
+"My table (the robots leave it to you)":"Mitt bord (robotene lar det være til deg)",
+"Robots: enter this round's scores":"Robotene: legg inn rundens resultater",
+"Leave test mode":"Gå ut av testmodus",
+"Start the tournament first":"Start turneringen først",
+"Test Player":"Testspiller",
+"Not in test mode: the table codes are the club's real ones":"Ikke i testmodus: bordkodene er klubbens ekte koder",
+"BridgeGate · Tournament System":"BridgeGate · Turneringssystem",
 "Tournament Control System":"Turneringskontroll",
 "Code":"Kode",
 "under a table: its link and its code in one message.":"under et bord: bordets lenke og kode i én melding.",

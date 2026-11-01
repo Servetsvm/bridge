@@ -107,7 +107,8 @@ async function memberSearch(q){
   return out;
 }
 // a number not in the list, with the name the player typed: kept for the next time (only a new number)
-async function addMember(num,name){ _members[num]=name; try{ await fetch(await fbRootUrl(memberList()+num+'.json'),{method:'PUT',body:JSON.stringify(name)}); }catch(e){} }
+async function addMember(num,name){ if(typeof bgTestOn==="function"&&bgTestOn()) return;   // a test tournament adds nobody to the real member list
+  _members[num]=name; try{ await fetch(await fbRootUrl(memberList()+num+'.json'),{method:'PUT',body:JSON.stringify(name)}); }catch(e){} }
 async function memberName(num){
   num=String(num||'').trim();
   if(!/^\d{1,8}$/.test(num)) return null;

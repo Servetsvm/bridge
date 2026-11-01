@@ -1,6 +1,14 @@
 // BridgeGate interface in it (loaded by i18n.js when this language is chosen): English text → it, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["it"]={"d":{"BridgeGate · Tournament System":"BridgeGate · Sistema tornei",
+window.BG_LANG["it"]={"d":{"Test mode":"Modalità prova",
+"A tournament of its own: the club's real tournament is not touched and nobody else sees this one. Set it up and run it as a live one; the players are fake and the robots enter the tables' scores. Nothing counts anywhere.":"Un torneo a parte: il torneo reale del circolo non viene toccato e nessun altro vede questo. Preparalo e dirigilo come uno reale; i giocatori sono fittizi e i robot inseriscono i risultati dei tavoli. Non conta da nessuna parte.",
+"My table (the robots leave it to you)":"Il mio tavolo (i robot lo lasciano a te)",
+"Robots: enter this round's scores":"Robot: inserisci i risultati di questo turno",
+"Leave test mode":"Esci dalla modalità prova",
+"Start the tournament first":"Prima avvia il torneo",
+"Test Player":"Giocatore di prova",
+"Not in test mode: the table codes are the club's real ones":"Non in modalità prova: i codici dei tavoli sono quelli reali del circolo",
+"BridgeGate · Tournament System":"BridgeGate · Sistema tornei",
 "Tournament Control System":"Gestione del torneo",
 "Code":"Codice",
 "under a table: its link and its code in one message.":"sotto un tavolo: il suo link e il suo codice in un unico messaggio.",

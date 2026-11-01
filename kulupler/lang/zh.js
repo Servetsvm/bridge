@@ -1,6 +1,14 @@
 // BridgeGate interface in zh (loaded by i18n.js when this language is chosen): English text → zh, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["zh"]={"d":{"BridgeGate · Tournament System":"BridgeGate · 比赛系统",
+window.BG_LANG["zh"]={"d":{"Test mode":"测试模式",
+"A tournament of its own: the club's real tournament is not touched and nobody else sees this one. Set it up and run it as a live one; the players are fake and the robots enter the tables' scores. Nothing counts anywhere.":"一个独立的比赛:俱乐部的真实比赛不受影响,其他人也看不到。像真实比赛一样设置和主持;牌手是虚构的,各桌成绩由机器人录入。不计入任何地方。",
+"My table (the robots leave it to you)":"我的牌桌(机器人留给你)",
+"Robots: enter this round's scores":"机器人:录入本轮成绩",
+"Leave test mode":"退出测试模式",
+"Start the tournament first":"请先开始比赛",
+"Test Player":"测试牌手",
+"Not in test mode: the table codes are the club's real ones":"测试模式下不可用:牌桌代码是俱乐部的真实代码",
+"BridgeGate · Tournament System":"BridgeGate · 比赛系统",
 "Tournament Control System":"比赛控制",
 "Code":"代码",
 "under a table: its link and its code in one message.":"在某张桌下：该桌的链接和代码放在一条消息里。",

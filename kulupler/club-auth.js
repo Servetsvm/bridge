@@ -23,9 +23,12 @@ let CLUB_INFO=null;   // the resolved club's info (name, owner)
 
 // Locks in the active club: sets CLUB_ID/FBURL, persists it, and reflects it in the URL
 // so the page stays a single shareable link (?club=CLUBID).
+// the super admin's test mode (this tab only): the tournament lives under bm/test, the club's real one is not touched
+const bgTestKey=id=>'bgTest:'+id;
+function bgTestOn(id){ try{ return !!(id||CLUB_ID)&&sessionStorage.getItem(bgTestKey(id||CLUB_ID))==='1'; }catch(e){ return false; } }
 function setClub(id){
   CLUB_ID=id;
-  FBURL=FB_BASE+'/clubs/'+id+'/bm';
+  FBURL=FB_BASE+'/clubs/'+id+'/bm'+(bgTestOn(id)?'/test':'');
   try{ localStorage.setItem('bg_clubId', id); }catch(e){}
   try{
     const u=new URL(location.href);
