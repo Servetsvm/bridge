@@ -583,7 +583,9 @@ function checkRoundComplete(){
   if(allDone && s.movement==='swiss'){
     maybeAdvanceSwissRound(); // idempotent — safe to call repeatedly
   }
-  if(allDone && _lastRoundCompleteNotified !== s.currentRound && !bgTestOn()){
+  // the round played everywhere: the next one starts by itself; the director is asked only to finish the last
+  if(!bgTestOn() && s.currentRound<s.roundCount) bgAutoNextRound();
+  if(allDone && _lastRoundCompleteNotified !== s.currentRound && !bgTestOn() && s.currentRound>=s.roundCount){
     _lastRoundCompleteNotified = s.currentRound;
     showRoundCompleteAlert(s.currentRound, s.roundCount, done, total);
   }

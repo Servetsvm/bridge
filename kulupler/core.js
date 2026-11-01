@@ -489,6 +489,32 @@ async function maybeAdvanceSwissRound(){
   _swissGenerating=false;
 }
 
+// every table has played the round (a sit-out table left out): the next round starts without the director's word;
+// read afresh, and only when the round is still the same one (two devices may try at once); the last round is not
+// finished by itself
+let _bgAutoNexting=false;
+async function bgAutoNextRound(){
+  if(_bgAutoNexting||(typeof bgTestOn==='function'&&bgTestOn())) return;
+  _bgAutoNexting=true;
+  try{
+    const s=await DB.get('state'); if(!s||s.status!=='running'||!(s.currentRound<s.roundCount)) return;
+    const boards=await DB.get('boards')||{}, movements=await DB.get('movements')||{}, pairs=await DB.get('pairs')||{};
+    let total=0,done=0;
+    for(let t=1;t<=s.tableCount;t++){
+      const m=movements[s.currentRound+'_'+t]; if(!m) continue;
+      if((pairs[m.ns]||{}).isPhantom||(pairs[m.ew]||{}).isPhantom) continue;
+      for(let b=m.boardStart||1;b<=(m.boardEnd||3);b++){ total++; if(boards[t+'_'+s.currentRound+'_'+b]?.status==='done') done++; }
+    }
+    if(!total||done<total) return;
+    const nextR=s.currentRound+1;
+    if(s.movement==='swiss'&&!movements[nextR+'_1']){ await maybeAdvanceSwissRound(); if(!((await DB.get('movements'))||{})[nextR+'_1']) return; }
+    const f=await DB.get('state'); if(!f||f.status!=='running'||f.currentRound!==s.currentRound) return;
+    f.currentRound=nextR; f._roundStartedAt=new Date().toISOString(); await setState(f);
+    addLog('ok','Round '+nextR+' started','');
+  }catch(e){ console.warn('auto next round',e); }
+  finally{ _bgAutoNexting=false; }
+}
+
 function getNextRoundInfo(tableNo,currentRound,state,movements,pairs){
   const nextR=currentRound+1;
   if(nextR>state.roundCount)return null;

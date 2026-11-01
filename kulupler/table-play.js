@@ -265,10 +265,12 @@ function renderTableDetail(tableNo){
 
   const allDone=doneCount===totalBoards&&totalBoards>0;
   if(allDone)unlockTable(tableNo); // Remove lock — table finished
+  window._bgEndOf=allDone&&s.currentRound<s.roundCount?s.currentRound:null;
+  if(allDone&&s.currentRound<s.roundCount) bgAutoNextRound();
   let actionHTML='';
   if(allDone){
     if(s.currentRound<s.roundCount){
-      actionHTML=`<button class="btn btn-gold btn-full" style="margin-top:10px;" onclick="bmShowRoundOver(${tableNo})">▶ Round Complete — Continue</button>`;
+      actionHTML=`<button class="btn btn-gold btn-full" style="margin-top:10px;" onclick="bmShowRoundOver(${tableNo},${s.currentRound})">▶ Round Complete — Continue</button>`;
     } else {
       actionHTML=`<div class="next-round-card">
         <div class="nr-title">🏁 Tournament Finished</div>
@@ -404,18 +406,19 @@ window.bmCancelApproval=function(apk){
   renderTableDetail(parseInt(tableNo));
 };
 
-window.bmShowRoundOver=function(tableNo){
+window.bmShowRoundOver=function(tableNo,rnd){
   if(bmPollInterval){clearInterval(bmPollInterval);bmPollInterval=null;}
-  const s=getState();
+  const s=getState(), cr=rnd||s.currentRound;
+  window._bgEndOf=cr;
   const movements=getMovements();const pairs=getPairs();
-  const nextR=s.currentRound+1;
+  const nextR=cr+1;
   if(nextR>s.roundCount){
     showTableFinalResults(tableNo);
     return;
   }
 
   // Current round info for who's playing right now at this table
-  const curM=movements[s.currentRound+'_'+tableNo]||{};
+  const curM=movements[cr+'_'+tableNo]||{};
   const curNS=pairs[curM.ns]||{name:'—'};
   const curEW=pairs[curM.ew]||{name:'—'};
 
@@ -427,7 +430,7 @@ window.bmShowRoundOver=function(tableNo){
       <div class="bm-device" style="max-width:360px;">
         <div class="round-over-screen">
           <div class="ro-badge">⏳</div>
-          <div class="ro-title">Round ${s.currentRound} Complete</div>
+          <div class="ro-title">Round ${cr} Complete</div>
           <div class="ro-sub">Waiting for other tables to finish so Round ${nextR}'s pairing can be calculated…</div>
         </div>
       </div>`;
@@ -436,7 +439,7 @@ window.bmShowRoundOver=function(tableNo){
       maybeAdvanceSwissRound(); // redundant trigger — safe/idempotent
       if(getMovements()[nextR+'_1']){
         clearInterval(bmPollInterval);bmPollInterval=null;
-        bmShowRoundOver(tableNo); // re-render now that pairing exists
+        bmShowRoundOver(tableNo,cr); // re-render now that pairing exists
       }
     },2000);
     return;
@@ -463,7 +466,7 @@ window.bmShowRoundOver=function(tableNo){
     <div class="bm-device" style="max-width:360px;">
       <div class="round-over-screen">
         <div class="ro-badge">🔔</div>
-        <div class="ro-title">Round ${s.currentRound} Complete</div>
+        <div class="ro-title">Round ${cr} Complete</div>
         <div class="ro-sub">Move instructions below</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;">
           <div class="ro-move-card">
@@ -523,6 +526,7 @@ window.bgLeaveTable=async function(){
 };
 // this device goes with its pair: the next round's table (the waiting screen there; the scores are entered there)
 window.bgMoveTo=function(t,nextR,from){
+  window._bgEndOf=null;
   // a test tournament: this table has seen where to go; the next round may start
   if(typeof bgTestOn==='function'&&bgTestOn()){ DB.get('ready').then(v=>{ const r=v||{}; r[(nextR-1)+'_'+from]=true; DB.set('ready',r); }).catch(()=>{}); }
   if(t!==from){ try{ unlockTable(from); }catch(e){} bmTableNo=t; window.bmCodeTable=t; try{ if(typeof bgTestOn==='function'&&bgTestOn()) sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(t)); }catch(e){} }

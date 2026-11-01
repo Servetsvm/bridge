@@ -462,7 +462,8 @@ window.doLogin=async function(){
     _cache['state']=val;
     refreshTopbar();
     if(role==='screen') renderScreenPanel();
-    else if(role==='table' && bmTableNo) renderTableDetail(bmTableNo);
+    // a table showing its round's end keeps it when the next round starts: its players press OK first
+    else if(role==='table' && bmTableNo){ if(!(window._bgEndOf&&val&&val.currentRound>window._bgEndOf)) renderTableDetail(bmTableNo); }
     else if(role==='table') renderTablePanel();   // the tournament has started: this table opens
     else if(role==='admin') {
       if(adminTab==='setup') { const c=document.getElementById('adminContent'); if(c)c.innerHTML=renderSetup(); }
