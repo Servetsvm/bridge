@@ -360,7 +360,7 @@ window.adminSetup=function(){
   }
   const totalBoards=rounds*bpr;
   setMovements(result.movements);setPairs(result.pairs);setBoards({});setApprovals({});
-  setTableLocks({}); DB.set('ready',{});   // no table taken in a new tournament
+  setTableLocks({}); DB.set('ready',{}); DB.set('kicks',{});   // no table taken in a new tournament
   setLive(false);   // a new tournament is listed when it starts
   const s=getState();
   s.name=name;s.tableCount=tables;s.boardsPerRound=bpr;s.totalBoards=totalBoards;s.roundCount=rounds;s.phantom=phantom;s.status='setup';s.currentRound=0;

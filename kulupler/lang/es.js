@@ -1,6 +1,9 @@
 // BridgeGate interface in es (loaded by i18n.js when this language is chosen): English text → es, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["es"]={"d":{"Leave the table":"Dejar la mesa",
+window.BG_LANG["es"]={"d":{"Take off the table":"Sacar de la mesa",
+"Take the player off this table? The table becomes free again.":"¿Sacar al jugador de esta mesa? La mesa queda libre otra vez.",
+"The director took you off the table.":"El director te sacó de la mesa.",
+"Leave the table":"Dejar la mesa",
 "Leave this table? It becomes free again and you choose your table again.":"¿Dejar esta mesa? Queda libre y eliges tu mesa de nuevo.",
 "Standings":"Clasificación",
 "Sit at a table (the robots leave it to you)":"Siéntate en una mesa (los robots te la dejan)",

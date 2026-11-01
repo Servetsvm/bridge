@@ -8,6 +8,7 @@ function tableLockKey(tableNo){
   return getState().currentRound+'_'+tableNo;
 }
 function lockTable(tableNo){
+  window._bgSatAt=window._bgSatAt||Date.now();
   const locks=getTableLocks();
   locks[tableLockKey(tableNo)]={lockedAt:Date.now(),tableNo};
   setTableLocks(locks);
@@ -496,6 +497,14 @@ window.bgLeaveEntry=function(prefix){
   window._bgEntry=null;
   try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ const U=P.eval('ui'), id=CLUB_ID; P.closeClubs(); if(typeof P.showClubs==='function'){ U.clubOpen=id; U.clubLive=null; P.showClubs(); if(P.clubTaken) P.clubTaken(id).then(x=>{ (U.clubTaken=U.clubTaken||{})[id]=x.taken; P.showClubs(); }); } return; } }catch(e){}
   bgPlayerEntry(prefix);
+};
+// the director took this device off its table: back to Bridge Table's Clubs (no question asked)
+window.bgKicked=async function(){
+  if(bmPollInterval){clearInterval(bmPollInterval);bmPollInterval=null;}
+  bmTableNo=null; window.bmCodeTable=null; window._bgSatAt=null;
+  try{ await endSession(); }catch(e){}
+  try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ P.closeClubs(); if(typeof P.flash==='function') P.flash('🚪 '+(window.i18nText?i18nText('The director took you off the table.'):'The director took you off the table.'),3500); return; } }catch(e){}
+  location.reload();
 };
 // the wrong table chosen: it is free again, and the player chooses again in Bridge Table's Clubs
 window.bgLeaveTable=async function(){

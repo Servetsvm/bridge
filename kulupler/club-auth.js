@@ -480,6 +480,8 @@ window.doLogin=async function(){
     if(role==='table'&&bmTableNo) bmPollApprovals(bmTableNo);
   });
   DB.subscribe('tableLocks',()=>{ _cache['tableLocks']=null; DB.get('tableLocks'); });
+  // a table taken off by the director (after this device sat down there): this device leaves it
+  DB.subscribe('kicks',v=>{ if(role!=='table'||!bmTableNo||!v) return; const at=v[getState().currentRound+'_'+bmTableNo]; if(at&&window._bgSatAt&&at>window._bgSatAt) bgKicked(); });
   DB.subscribe('playerdb',()=>{}); // keeps _cache fresh for autocomplete
 };
 window.sessionContinue=function(){renderAdminPanel();};

@@ -532,12 +532,22 @@ function renderTables(){
       <div class="tc-actions">
         <button class="btn btn-blue btn-sm" onclick="adminEditTable(${t})">✏️ Boards</button>
         <button class="btn btn-purple btn-sm" onclick="adminAdjScore(${t})">⚖️ ADJ</button>
+        ${isTableLocked(t)?`<button class="btn btn-red btn-sm" onclick="adminKickTable(${t})">🚪 ${window.i18nText?i18nText('Take off the table'):'Take off the table'}</button>`:''}
       </div>
     </div>`;
   }
   return html+'</div>';
 }
 
+// the director takes whoever sits at table t off it: the table is free again; that device leaves it by itself
+window.adminKickTable=async function(t){
+  const L=window.i18nText?i18nText:x=>x;
+  if(!await confirmDialog(L('Take the player off this table? The table becomes free again.'),{title:'🚪 '+L('Table')+' '+t,confirmLabel:L('Take off the table'),danger:true})) return;
+  const s=getState(), k=s.currentRound+'_'+t;
+  const lk=getTableLocks(); delete lk[k]; await DB.set('tableLocks',lk);
+  const kk=(await DB.get('kicks'))||{}; kk[k]=Date.now(); await DB.set('kicks',kk);
+  addLog('ok','Player taken off the table','Table '+t); toast('🚪 '+L('Table')+' '+t); renderAdminTab();
+};
 window.adminEditTable=function(t){
   const s=getState();const m=getMovements()[s.currentRound+'_'+t]||{};
   const boards=getBoards();let rows='';
