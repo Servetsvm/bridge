@@ -27,8 +27,21 @@ const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(
 // the engine, as in the page (the fast solver too)
 const ctx = { window: {}, console, performance, setTimeout, clearTimeout, WebAssembly, TextDecoder, TextEncoder, URL, crypto: globalThis.crypto, atob: globalThis.atob };
 ctx.window.window = ctx.window; ctx.self = ctx.window; vm.createContext(ctx);
-for (const file of ['dds.js', 'core.js', 'bidding.js', 'play.js']) vm.runInContext(fs.readFileSync(root + 'js/' + file, 'utf8'), ctx, { filename: file });
+for (const file of ['dds.js', 'core.js', 'bidding.js', 'play.js', 'lang.js']) vm.runInContext(fs.readFileSync(root + 'js/' + file, 'utf8'), ctx, { filename: file });
 const E = {}; for (const fn of ctx.window.BRIDGE) fn(E);
+// the meanings of the calls in each language, as the app shows them (app.js bidTxt)
+const BID_PH = vm.runInContext('BID_PH', ctx), BID_RE = {};
+function bidTxt(t, L) {
+  const col = LANGS.indexOf(L); if (col < 1 || !t) return t;
+  let r = BID_RE[L];
+  if (!r) {
+    const map = new Map(BID_PH.map(p => [p[0].toLowerCase(), p[col]]));
+    const keys = [...map.keys()].sort((a, b) => b.length - a.length).map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    r = BID_RE[L] = { map, re: new RegExp('(?<!\\p{L})(' + keys.join('|') + ')(?!\\p{L})', 'giu') };
+  }
+  const out = String(t).replace(r.re, w => { const v = r.map.get(w.toLowerCase()); if (v == null) return w; return w[0] !== w[0].toLowerCase() && v ? v[0].toUpperCase() + v.slice(1) : v; });
+  return out.replace(/ {2,}/g, ' ').replace(/ ([,:;)])/g, '$1').replace(/\( /g, '(').trim();
+}
 
 // the day (Istanbul time) and a deal of its own: the same date always gives the same deal
 const today = process.argv[2] || new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Istanbul' }).format(new Date());
@@ -38,44 +51,59 @@ const dayNo = Math.round((Date.parse(today) - Date.parse(today.slice(0, 4) + '-0
 const board = dayNo % 16 + 1, dealer = E.dealerOf(board);
 const cards = [0, 1].map(() => ({ conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }));
 const over = a => (a.length >= 4 && a.slice(-3).every(e => e.call === 'P') && a.some(e => e.call !== 'P')) || (a.length === 4 && a.every(e => e.call === 'P'));
-function tryDeal() {
-  const p = [...Array(52).keys()]; for (let k = 51; k > 0; k--) { const j = Math.floor(rnd() * (k + 1)); [p[k], p[j]] = [p[j], p[k]]; }
-  const deal = [0, 1, 2, 3].map(s => p.slice(s * 13, s * 13 + 13)); const auc = []; let t = dealer;
-  while (!over(auc) && auc.length < 60) { const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); t = (t + 1) % 4; }
-  return { deal, auc };
+const hcp = h => h.reduce((a, c) => a + Math.max(0, c % 13 - 8), 0);
+const bidAll = deal => { const auc = []; let t = dealer; while (!over(auc) && auc.length < 60) { const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); t = (t + 1) % 4; } return auc; };
+function contractOf(auc) {
+  const bids = auc.filter(e => typeof e.call === 'number'); if (!bids.length) return null;
+  const last = bids[bids.length - 1], strain = E.ST(last.call), side = last.seat & 1;
+  const decl = auc.find(e => typeof e.call === 'number' && E.ST(e.call) === strain && (e.seat & 1) === side).seat;
+  let dbl = 0; for (let i = auc.indexOf(last) + 1; i < auc.length; i++) { if (auc[i].call === 'X') dbl = 1; if (auc[i].call === 'XX') dbl = 2; }
+  return { level: E.LV(last.call), strain, decl, dbl };
 }
-// a deal worth looking at: South has a real decision (a bid, not a pass, at the first turn) and the contract is a game or more
-let D = null;
-// a day already written keeps its deal (written again after a change in the robots, the cards stay the same)
-const kept = path.join(root, 'daily', today + '.json');
-if (fs.existsSync(kept)) {
-  const deal = JSON.parse(fs.readFileSync(kept, 'utf8')).deal, auc = []; let t = dealer;
-  while (!over(auc) && auc.length < 60) { const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); t = (t + 1) % 4; }
-  D = { deal, auc, first: auc.findIndex(e => e.seat === 2) };
+const gameLv = s => s === 4 ? 3 : s >= 2 ? 4 : 5;
+/* a deal good enough to show (a page with a wrong answer is worse than none): South has a real decision (a bid at the
+   first turn), every robot call fits the meaning it is given (its points within a point of the range), the contract is
+   a game or more and makes double dummy, and the side misses no game or slam that makes double dummy */
+function check(deal, auc, table) {
+  const first = auc.findIndex(e => e.seat === 2);
+  if (first < 0 || auc[first].call === 'P') return 'south passes';
+  for (const e of auc) if (e.call !== 'P' && e.m) { const p = hcp(deal[e.seat]); if ((e.m.min != null && p < e.m.min - 1) || (e.m.max != null && p > e.m.max + 1)) return 'call off its meaning'; }
+  const con = contractOf(auc); if (!con || con.level < 3) return 'part score';
+  const side = con.decl & 1, best = s => Math.max(table[side][s], table[side + 2][s]);
+  if (table[con.decl][con.strain] < con.level + 6) return 'goes down';
+  for (let s = 0; s < 5; s++) {
+    if (best(s) >= 12 && con.level < 6) return 'slam missed';
+    if (best(s) >= gameLv(s) + 6 && con.level < gameLv(con.strain) && con.level < 6) return 'game missed';
+  }
+  return null;
 }
-for (let k = 0; k < 400 && !D; k++) {
-  const x = tryDeal(), first = x.auc.findIndex(e => e.seat === 2), bids = x.auc.filter(e => typeof e.call === 'number');
-  if (first >= 0 && x.auc[first].call !== 'P' && bids.length && E.LV(bids[bids.length - 1].call) >= 3) D = { ...x, first };
-}
-if (!D) throw new Error('no deal');
-const bids = D.auc.filter(e => typeof e.call === 'number'), last = bids[bids.length - 1];
-const strain = E.ST(last.call), side = last.seat & 1;
-const decl = D.auc.find(e => typeof e.call === 'number' && E.ST(e.call) === strain && (e.seat & 1) === side).seat;
-let dbl = 0; for (let i = D.auc.indexOf(last) + 1; i < D.auc.length; i++) { if (D.auc[i].call === 'X') dbl = 1; if (D.auc[i].call === 'XX') dbl = 2; }
-const con = { level: E.LV(last.call), strain, decl, dbl };
 (async () => {
   const m = await vm.runInContext('ddsFactory', ctx)(); E.ddsUse(m);
-  const tricks = E.ddContract(D.deal, con);
-  // every strain for every declarer
-  const table = [0, 1, 2, 3].map(d => [0, 1, 2, 3, 4].map(st => E.ddContract(D.deal, { level: 1, strain: st, decl: d, dbl: 0 })));
+  const ddTable = deal => [0, 1, 2, 3].map(d => [0, 1, 2, 3, 4].map(st => E.ddContract(deal, { level: 1, strain: st, decl: d, dbl: 0 })));
+  let D = null; const why = {};
+  // a day already written keeps its deal (written again after a change in the robots, the cards stay the same)
+  const kept = path.join(root, 'daily', today + '.json');
+  if (fs.existsSync(kept)) { const deal = JSON.parse(fs.readFileSync(kept, 'utf8')).deal; D = { deal, auc: bidAll(deal), table: ddTable(deal) }; }
+  for (let k = 0; k < 2000 && !D; k++) {
+    const p = [...Array(52).keys()]; for (let i = 51; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+    const deal = [0, 1, 2, 3].map(s => p.slice(s * 13, s * 13 + 13)), auc = bidAll(deal);
+    const f0 = auc.findIndex(e => e.seat === 2); if (f0 < 0 || auc[f0].call === 'P') { why['south passes'] = (why['south passes'] || 0) + 1; continue; }
+    const table = ddTable(deal), bad = check(deal, auc, table);
+    if (bad) { why[bad] = (why[bad] || 0) + 1; continue; }
+    D = { deal, auc, table };
+  }
+  if (!D) throw new Error('no deal good enough: ' + JSON.stringify(why));
+  const first = D.auc.findIndex(e => e.seat === 2), con = contractOf(D.auc), tricks = con ? D.table[con.decl][con.strain] : null;
   // the robot's opening lead
-  const g = E.newPlayState(D.deal, con, D.auc, cards); const lead = E.aiPlay(g, (decl + 1) % 4, { budget: 3000, maxSamples: 100, ddTricks: 12, lead: { budget: 6000, maxSamples: 100, minSamples: 40, evLim: 3000000, cap: 12000 } });
+  let lead = null;
+  if (con) { const g = E.newPlayState(D.deal, con, D.auc, cards); lead = E.aiPlay(g, (con.decl + 1) % 4, { budget: 3000, maxSamples: 100, ddTricks: 12, lead: { budget: 6000, maxSamples: 100, minSamples: 40, evLim: 3000000, cap: 12000 } }); }
   const code = (() => { const a = new Uint8Array(13); D.deal.forEach((h, s) => h.forEach(c => { a[c >> 2] |= s << ((c & 3) * 2); })); return Buffer.from(a).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); })();
-  const data = { date: today, board, dealer, deal: D.deal, auc: D.auc.map(e => [e.seat, e.call]), first: D.first, con, tricks, table, lead, code };
+  const expl = D.auc.map(e => (e.m && e.m.t) || '');
+  const data = { date: today, board, dealer, deal: D.deal, auc: D.auc.map(e => [e.seat, e.call]), expl, first, con, tricks, table: D.table, lead, code };
   fs.mkdirSync(root + 'daily', { recursive: true });
   fs.writeFileSync(root + 'daily/' + today + '.json', JSON.stringify(data));
   writeAll();
-  console.log(today, 'board', board, 'contract', con.level + 'CDHSN'[strain], 'by', 'NESW'[decl], 'dd', tricks);
+  console.log(today, 'board', board, con ? 'contract ' + con.level + 'CDHSN'[con.strain] + ' by ' + 'NESW'[con.decl] + ' dd ' + tricks : 'passed out', 'skipped', JSON.stringify(why));
 })().catch(e => { console.error(e); process.exit(1); });
 
 // ---- the pages, from the days kept in daily/*.json ----
@@ -144,7 +172,7 @@ ${LANGS.map(k => `<link rel="alternate" hreflang="${hl(k)}" href="${SITE}${k}/da
   .ask{font-size:20px;font-weight:700;color:var(--felt);margin:16px 0 6px}
   details{background:#fffdf3;border:1px solid #eadfae;border-radius:10px;padding:10px 14px;margin:14px 0}
   summary{cursor:pointer;font-weight:700;color:#8a6d00}
-  .big{font-size:24px;font-weight:700}
+  .big{font-size:24px;font-weight:700}.ex{color:var(--muted);margin-left:6px}
   .cta{text-align:center;margin:26px 0}.cta a{display:inline-block;background:var(--gold);color:#1d1a0c;font-weight:700;text-decoration:none;padding:12px 24px;border-radius:10px;font-size:18px}
   ul.days{columns:2;padding-left:18px}ul.days a,.langs a,.nav a{color:var(--felt)}
   .nav{display:flex;justify-content:space-between;margin:16px 0}
@@ -162,7 +190,7 @@ ${handHtml(d.deal[2], t.you).replace('class="hand"', 'class="hand solo"')}
 ${aucTable(t, d.auc, d.dealer, d.first)}
 <p class="ask">${t.q}</p>
 <details><summary>${t.show}</summary>
-<p>${t.robot}: <span class="big">${callTxt(t, d.auc[d.first][1])}</span></p>
+<p>${t.robot}: <span class="big">${callTxt(t, d.auc[d.first][1])}</span>${d.expl && d.expl[d.first] ? ` <span class="ex">${esc(bidTxt(d.expl[d.first], l)).replace(/[♥♦]/g, m => `<span class="r">${m}</span>`)}</span>` : ''}</p>
 <h2>${t.full}</h2>
 <div class="compass">${handHtml(d.deal[0], t.seats[0]).replace('class="hand"', 'class="hand n"')}${handHtml(d.deal[3], t.seats[3]).replace('class="hand"', 'class="hand w"')}<div class="mid">${f(t.board, d.board)}</div>${handHtml(d.deal[1], t.seats[1]).replace('class="hand"', 'class="hand e"')}${handHtml(d.deal[2], t.seats[2]).replace('class="hand"', 'class="hand s"')}</div>
 <h2>${t.auction}</h2>
