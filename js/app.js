@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 361;
+const APP_V = 362;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -134,6 +134,12 @@ function load(d) {
   seasonStart();
   SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) }; CARD_CK = cardCk(); fixedSet();
   if (!SET.lang) { SET.lang = detectLang(); SET.langAuto = true; }
+  // a language page's Play button (/bridge/no/ → ?lang=no) opens the app in that language, as if picked by hand
+  try {
+    const q = new URLSearchParams(location.search), ql = q.get('lang');
+    if (ql && LANGS.some(([v]) => v === ql)) { SET.lang = ql; SET.langAuto = false; }
+    if (q.has('lang')) { q.delete('lang'); history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); }
+  } catch (e) {}
   applyLang();
   // the player card's "joined" date (the first day this device played; from the oldest board for old players) and logins
   if (!SET.joined) { const t0 = Math.min(Date.now(), ...HIST.map(h => h.ts || Date.now())); SET.joined = new Date(t0).toISOString().slice(0, 10); }

@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://servetsvm.github.io/bridge/</loc><lastmod>2026-10-30</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide-en.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide-no.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide-es.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide-fr.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide-it.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide-de.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide-ru.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide-pl.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/guide-zh.html</loc><lastmod>2026-10-30</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/en/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/tr/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/no/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/es/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/fr/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/it/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/de/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/ru/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/pl/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/zh/</loc><lastmod>2026-11-01</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide-en.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide-no.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide-es.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide-fr.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide-it.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide-de.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide-ru.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide-pl.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/guide-zh.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>

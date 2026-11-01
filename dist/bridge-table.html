@@ -5,6 +5,17 @@
 <meta name="description" content="Ücretsiz online briç: robotlarla ya da arkadaşlarınla oyna, briç seviyeni ölç, herkesin aynı elleri oynadığı şampiyonada yarış, konvansiyon çalış. Free online bridge: play the robots or friends, measure your bridge level, compete on the same boards. Reklam yok · no ads.">
 <meta name="keywords" content="briç, online briç, ücretsiz briç, briç oyna, briç robot, briç seviyesi, briç turnuvası, bridge, online bridge, free bridge, bridge robots, bridge rating, bridge practice, SAYC, 2/1, bridgebord">
 <link rel="canonical" href="https://servetsvm.github.io/bridge/">
+<link rel="alternate" hreflang="en" href="https://servetsvm.github.io/bridge/en/">
+<link rel="alternate" hreflang="tr" href="https://servetsvm.github.io/bridge/tr/">
+<link rel="alternate" hreflang="nb" href="https://servetsvm.github.io/bridge/no/">
+<link rel="alternate" hreflang="es" href="https://servetsvm.github.io/bridge/es/">
+<link rel="alternate" hreflang="fr" href="https://servetsvm.github.io/bridge/fr/">
+<link rel="alternate" hreflang="it" href="https://servetsvm.github.io/bridge/it/">
+<link rel="alternate" hreflang="de" href="https://servetsvm.github.io/bridge/de/">
+<link rel="alternate" hreflang="ru" href="https://servetsvm.github.io/bridge/ru/">
+<link rel="alternate" hreflang="pl" href="https://servetsvm.github.io/bridge/pl/">
+<link rel="alternate" hreflang="zh" href="https://servetsvm.github.io/bridge/zh/">
+<link rel="alternate" hreflang="x-default" href="https://servetsvm.github.io/bridge/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Bridge Table">
 <meta property="og:url" content="https://servetsvm.github.io/bridge/">
@@ -9473,7 +9484,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 361;
+const APP_V = 362;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9599,6 +9610,12 @@ function load(d) {
   seasonStart();
   SET.conv = { ...E.ALL_ON, ...(SET.conv || {}) }; CARD_CK = cardCk(); fixedSet();
   if (!SET.lang) { SET.lang = detectLang(); SET.langAuto = true; }
+  // a language page's Play button (/bridge/no/ → ?lang=no) opens the app in that language, as if picked by hand
+  try {
+    const q = new URLSearchParams(location.search), ql = q.get('lang');
+    if (ql && LANGS.some(([v]) => v === ql)) { SET.lang = ql; SET.langAuto = false; }
+    if (q.has('lang')) { q.delete('lang'); history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); }
+  } catch (e) {}
   applyLang();
   // the player card's "joined" date (the first day this device played; from the oldest board for old players) and logins
   if (!SET.joined) { const t0 = Math.min(Date.now(), ...HIST.map(h => h.ts || Date.now())); SET.joined = new Date(t0).toISOString().slice(0, 10); }
