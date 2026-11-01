@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 368;
+const APP_V = 369;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -244,7 +244,6 @@ const Field = {
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); scheduleSync(); } }
     if (m.type === 'ddtable') { const les = bidLessons(L.deal, L.board, f.tables, m.t); if (les.length && typeof Net !== 'undefined') les.forEach((x, i) => Net.roboBid(m.id, i, L.deal, L.board, x).catch(() => {})); return; }
     if (m.type === 'error') this.partDone(m.id);
-    if (m.type === 'fieldDone' && ui.overlay === 'rteam') showRTeam();   // a Closed room result came in
     if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
 };
@@ -782,7 +781,6 @@ function newBoard(replay, boardNo, tour) {
   UNDO.length = 0;
   G = { id: Date.now().toString(36) + E.rnd(1e6).toString(36), board: bn, dealer: dealerOf(bn), deal, auction: [], phase: 'bid', play: null, result: null, claimed: false, field: null, tour: tour || null, cards: sideCards() };
   if (ui.champNext) { G.champ = ui.champNext; ui.champNext = null; }   // a championship board (from South, a closed table)
-  else if (!replay && !tour && rtOn()) G.rteam = { i: RT.ids.length + 1, n: RT.n };   // the next board of the team match with the robots
   Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null, photoMsg: null, photoHands: null, signal: null, fixSeat: null, fixCard: null });
   $('ov').hidden = true;
   Field.start(G);
@@ -932,7 +930,6 @@ function finishBoard() {
   else if (G.tour && G.tour.table != null && online() && !guest()) { e.tour = G.tour; Net.tourTableResult(G.tour.id, G.tour.table, G.tour.b, e.ns, conTxt(e)); }
   // where it was played, for the Results list: a tournament (with its name), an online table, or alone with robots
   e.kind = G.tour || G.tprac || G.champ ? 't' : online() ? 'o' : 'r';
-  if (G.rteam && !online() && RT && !RT.end && !RT.ids.includes(e.id)) { e.rteam = { ...G.rteam }; RT.ids.push(e.id); if (RT.ids.length >= RT.n) { RT.end = Date.now(); setTimeout(showRTeam, 900); } saveRT(); }   // the last board: the match's result
   if (G.champ && !online()) { e.champ = { ...G.champ }; e.tn = T('Championship') + ' · ' + T('Round {0}', G.champ.r); champSend(e); }
   if (e.kind === 't' && (G.tour || G.tprac)) { const id = (G.tour || G.tprac).id, t = typeof Net !== 'undefined' && Net.st.tours && Net.st.tours[id]; if (t && t.name) e.tn = String(t.name).slice(0, 40); }
   HIST = HIST.filter(h => h.id !== e.id); HIST.push(e);
@@ -1159,7 +1156,7 @@ function renderBar() {
   $('bar').innerHTML = `
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
    <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
-   ${G.rteam && RT ? (x => `<button class="box rtbox" id="rtOpen"><small>🤖 ${T('Team match')}</small><b>${T('Board {0} of {1}', G.rteam.i, G.rteam.n)}</b><span class="tr">${x.a} – ${x.b} IMP</span></button>`)(rtTotals()) : `<div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>`}
+   <div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>
    <div class="spacer"></div>
    <div class="tools">
      <button class="btn" id="bHome" title="${T('Home')}">⌂</button>
@@ -2341,7 +2338,7 @@ function showEnd() {
    ${dealHtml(G.deal, U())}
    ${anaHtml(HIST.find(h => h.id === e.id) || e)}
    ${rbNoteHtml(HIST.find(h => h.id === e.id) || e)}
-   ${e.rteam ? rtLine() : ''}<div class="row2"><button class="btn gold" id="oNext">${T('Next deal')}</button>${G.champ ? '' : `<button class="btn" id="oReplay">${T('Replay this deal')}</button>`}${G.tour ? "" : `<button class="btn" id="oShare">🔗 ${T("Share")}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+   <div class="row2"><button class="btn gold" id="oNext">${T('Next deal')}</button>${G.champ ? '' : `<button class="btn" id="oReplay">${T('Replay this deal')}</button>`}${G.tour ? "" : `<button class="btn" id="oShare">🔗 ${T("Share")}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 function showAuction() {
   if (!G.auction.length) return;
@@ -2863,7 +2860,6 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
-  if (t.id === 'rtOpen') { showRTeam(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
   if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
@@ -2876,10 +2872,6 @@ document.addEventListener('click', ev_ => {
     while (tt.tables.length < 2) tt.tables.push(['', '', '', '']); tt.tables.length = 2;
     ui.tsel = null; ui.tsetTeam = tt.id; closeOv(); render(); showTourSetup(tt.id); return;   // its own setup: a team match only
   }
-  if (t.dataset.rtn) { RT = { n: +t.dataset.rtn, ids: [], ts: Date.now() }; saveRT(); closeOv(); newBoard(); return; }
-  if (t.id === 'rtGo') { closeOv(); if (!G || G.phase === 'done' || !G.rteam) newBoard(); return; }
-  if (t.id === 'rtEnd') { askYes(T('Finish the team match now?'), () => { RT.end = Date.now(); saveRT(); showRTeam(); }); return; }
-  if (t.id === 'rtNew') { RT = null; saveRT(); showRTeam(); return; }
   if (t.id === 'wipeGo') { wipeGo(); return; }
   if (t.id === 'chShow') { showChamp(); return; }
   if (t.id === 'learnCopy') { const txt = JSON.stringify(ui.learnCopy || {}); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
@@ -3474,50 +3466,8 @@ async function showLearn() {
     ${ex.length ? `<h3 class="sth">${T('Costliest examples')}</h3>${ex.map(r => `<div class="anarow">${T('Board')} ${r.b}: ${aucTxt(r.a)} → <b>${cn(r.c[0], r.c[1])} ${SEAT_AB[r.c[3]]}</b> (${T('{0} tricks', r.ddT)}) · ${T('best')}: <b>${r.best ? cn(r.best[0], r.best[1]) + ' ' + SEAT_AB[r.best[2]] : ''}</b> · <b class="neg">−${r.er[0][4]} IMP</b> · ${KB[r.bk] || ''}</div>`).join('')}` : ''}
     <div class="row2"><button class="btn gold" id="learnCopy">📋 ${T('Copy the report for Claude')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
-/* the administrator's team match with the robots: you and a robot partner in the Open room; the Closed room is the
-   first robot table on the same deal (your robot team-mates sit the other way there). Each board in IMPs and MP
-   (the board won by the score), the match in IMPs and VPs. */
-let RT = (() => { try { return JSON.parse(localStorage.getItem('bridge-rteam')) || null; } catch (e) { return null; } })();
-function saveRT() { try { if (RT) localStorage.setItem('bridge-rteam', JSON.stringify(RT)); else localStorage.removeItem('bridge-rteam'); } catch (e) {} }
-const rtOn = () => !!(RT && !RT.end && RT.ids.length < RT.n && !online() && typeof Net !== 'undefined' && Net.isAdmin());
-// each board of the match: the Open room (you), the Closed room (the robots), the IMPs and matchpoints
-function rtBoards() {
-  return (RT ? RT.ids : []).map((id, j) => {
-    const e = HIST.find(h => h.id === id); if (!e) return null;
-    const t = e.fieldList && e.fieldList[0], cl = t ? (sideOf(e.seat) === 0 ? t.ns : -t.ns) : null, d = cl == null ? null : e.us - cl;
-    return { j: j + 1, e, t, cl, d, imp: d == null ? null : E.imps(d), mp: d == null ? null : d > 0 ? 1 : d === 0 ? 0.5 : 0 };
-  }).filter(Boolean);
-}
-function rtTotals() {
-  const L = rtBoards(), D = L.filter(x => x.d != null); let a = 0, b = 0, m = 0;
-  D.forEach(x => { if (x.imp > 0) a += x.imp; else b -= x.imp; m += x.mp; });
-  const vp = SB.vpOf(a - b, RT ? RT.n : 8);
-  return { L, n: D.length, a, b, vp, vo: Math.round((20 - vp) * 100) / 100, mp: D.length ? Math.round(m / D.length * 1000) / 10 : null };
-}
-// the line under a board of the match (on its result)
-function rtLine() {
-  if (!RT) return '';
-  const s = rtTotals();
-  return `<div class="grp"><span>🤖 ${T('Team match with robots')}</span><div class="rtline"><b>${T('Board {0} of {1}', Math.min(RT.ids.length, RT.n), RT.n)}</b> · ${s.a} – ${s.b} IMP · VP ${s.vp} · MP ${s.mp ?? '—'}%${RT.end ? ' · ' + T('Finished') : ''}</div><button class="btn" id="rtOpen">📋 ${T('Match score')}</button></div>`;
-}
-function showRTeam() {
-  if (typeof Net === 'undefined' || !Net.isAdmin()) return;
-  if (!RT) {
-    openOv('rteam', `<h2>🤖 ${T('Team match with robots')}</h2>
-      <div class="muted">${T('You and a robot partner play in the Open room; your robot team-mates play the same boards in the Closed room against robots. Each board is scored in IMPs and MP, the match in VPs.')}</div>
-      <div class="grp"><span>${T('Boards')}</span><div class="row2">${[4, 8, 12, 16, 24].map(n => `<button class="btn new" data-rtn="${n}">${n}</button>`).join('')}</div></div>
-      <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
-    return;
-  }
-  const s = rtTotals();
-  const rows = s.L.map(x => `<tr><td>${x.j}</td><td>${x.e.passed || !x.e.c ? T('Pass') : conKey(x.e.c) + ' · ' + T('{0} tricks', x.e.tricks)}<small>${fmtSigned(x.e.us)}</small></td><td>${x.t ? `${x.t.k}${x.t.t != null && x.t.k !== 'Pass' ? ' · ' + T('{0} tricks', x.t.t) : ''}<small>${fmtSigned(x.cl)}</small>` : '⏳'}</td><td class="n">${x.imp > 0 ? x.imp : ''}</td><td class="n">${x.imp < 0 ? -x.imp : ''}</td><td class="n">${x.mp == null ? '' : x.mp * 100}</td></tr>`).join('');
-  openOv('rteam', `<h2>🤖 ${T('Team match with robots')}</h2>
-    ${RT.end ? `<div class="rtover">🏁 ${T('The match is over')}<b>${s.n < s.L.length ? '⏳ ' + T('The Closed room is still playing…') : s.a > s.b ? '🏆 ' + T('You won the match!') : s.a < s.b ? '🤖 ' + T('The robots won the match') : '🤝 ' + T('A draw')}</b></div>` : ''}
-    <div class="teams"><div class="tmhead">${T('Board {0} of {1}', s.L.length, RT.n)}${RT.end ? ' · ' + T('Finished') : ''}</div><div class="tscore"><div><b>${esc(myNm() || T('You'))}</b><small>VP ${s.vp} · MP ${s.mp ?? '—'}%</small></div><div class="tsn">${s.a} – ${s.b}</div><div><b>🤖 ${T('Robots')}</b><small>VP ${s.vo} · MP ${s.mp == null ? '—' : Math.round((100 - s.mp) * 10) / 10}%</small></div></div>
-    ${rows ? `<div class="resscroll"><table class="res"><thead><tr><th>${T('Bd')}</th><th>${T('Open room')}</th><th>${T('Closed room')}</th><th class="n">IMP +</th><th class="n">IMP −</th><th class="n">MP</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No boards yet.')}</div>`}</div>
-    <div class="muted">${T('The Closed room is the first robot table on the same deal. MP: a board won by the score is 100 %, an equal score 50 %. VPs on the WBF scale (20 to share).')}</div>
-    <div class="row2">${RT.end ? `<button class="btn new" id="rtNew">🤖 ${T('New match')}</button>` : `<button class="btn new" id="rtGo">▶ ${T('Continue')} (${Math.min(RT.ids.length + 1, RT.n)}/${RT.n})</button><button class="btn" id="rtEnd">${T('Finish the match')}</button>`}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
-}
+// the team match with the robots is gone: its saved match on this device is forgotten
+try { localStorage.removeItem('bridge-rteam'); } catch (e) {}
 /* Clubs: every club by its name, those with a tournament running first (tapped: its table numbers, and a number goes
    to that table); a club without one offers its admin Set up a tournament (then its password, in the clubs program) */
 async function showClubs() {
