@@ -100,7 +100,7 @@ window.bgPlayerNames=function(prefix,n){
   const st=window._bgEntry.seats;
   const seat=k=>`<button class="pe-pos pe-${k}" onclick="bgSeatEdit('${k}')"><small>${BG_SEATS[k]}</small><b>${st[k]?cleanData(st[k]):'＋'}</b></button>`;
   pe.innerHTML=`<div class="pe-table">${seat('N')}${seat('W')}<div class="pe-mid">Table ${n}</div>${seat('E')}${seat('S')}</div>
-    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px;"><button class="btn btn-ghost" onclick="window._bgEntry=null;bgPlayerEntry('${prefix}')">← Back</button><button class="btn-primary" style="margin:0;" onclick="bgPlayerSit()">Continue →</button></div>`;
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px;"><button class="btn btn-ghost" onclick="bgLeaveEntry('${prefix}')">🚪 Leave the table</button><button class="btn-primary" style="margin:0;" onclick="bgPlayerSit()">Continue →</button></div>`;
 };
 // one seat: a member number (its name is shown at once) or a name; OK goes back to the table
 window.bgSeatEdit=function(k){
@@ -288,7 +288,7 @@ function renderTableDetail(tableNo){
   }).join('');
   document.getElementById('panelContent').innerHTML=`
     <div class="bm3t">
-      <div class="sbchg"><span class="sbtno">Table ${tableNo}</span>${!doneCount&&!approvalPending?`<button class="btn" onclick="bgLeaveTable()">🚪 Leave the table</button>`:''}</div>
+      <div class="sbchg"><span class="sbtno">Table ${tableNo}</span></div>
       <div class="bm3t-info">Round ${s.currentRound} · NS ${nsNum} – EW ${ewNum} · Boards ${m.boardStart||'?'} – ${m.boardEnd||'?'}</div>
       <div class="bm3t-names">${pN||pS?`<span><b>NS</b> ${[pN,pS].filter(Boolean).join(' – ')}</span>`:''}${pE||pW?`<span><b>EW</b> ${[pE,pW].filter(Boolean).join(' – ')}</span>`:''}</div>
       ${isPhantom?`<div class="bm3t-note">👻 Phantom pair — sit out</div>`:''}
@@ -491,6 +491,12 @@ function bgStandingsHtml(){
   if(!rows.length) return '';
   return `<div class="ro-move-card" style="margin-bottom:14px;text-align:left;"><div class="ro-move-label">🏆 ${L('Standings')}</div><table style="width:100%;font-size:0.8rem;border-collapse:collapse;">${rows.map((r,i)=>`<tr style="border-top:1px solid var(--border);"><td style="padding:3px 4px;">${i+1}</td><td style="padding:3px 4px;">${cleanData(r.name)}</td><td style="padding:3px 4px;text-align:right;">${r.pct}%</td><td style="padding:3px 4px;text-align:right;">${fmtImp(r.imp)}</td></tr>`).join('')}</table></div>`;
 }
+// the names of a table not sat at yet: back to Bridge Table's Clubs (or this program's table numbers) to choose again
+window.bgLeaveEntry=function(prefix){
+  window._bgEntry=null;
+  try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ const U=P.eval('ui'), id=CLUB_ID; P.closeClubs(); if(typeof P.showClubs==='function'){ U.clubOpen=id; U.clubLive=null; P.showClubs(); if(P.clubTaken) P.clubTaken(id).then(x=>{ (U.clubTaken=U.clubTaken||{})[id]=x.taken; P.showClubs(); }); } return; } }catch(e){}
+  bgPlayerEntry(prefix);
+};
 // the wrong table chosen: it is free again, and the player chooses again in Bridge Table's Clubs
 window.bgLeaveTable=async function(){
   const L=window.i18nText?i18nText:x=>x;
