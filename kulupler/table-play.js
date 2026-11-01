@@ -478,14 +478,24 @@ window.bmShowRoundOver=function(tableNo){
           <div class="ro-move-label">📋 Next Round ${nextR} — Boards</div>
           <div class="ro-move-boards">B${nextM.boardStart||'?'} – B${nextM.boardEnd||'?'}</div>
         </div>
+        ${bgStandingsHtml()}
         <button class="btn btn-gold btn-full" onclick="bgMoveTo(${(bmSide==='ew'?ewNextTable:nsNextTable)||tableNo},${nextR},${tableNo})">OK — ${(bmSide==='ew'?ewNextTable:nsNextTable)&&(bmSide==='ew'?ewNextTable:nsNextTable)!==tableNo?'→ Table '+(bmSide==='ew'?ewNextTable:nsNextTable):'Show Waiting Screen →'}</button>
         <button class="btn btn-ghost btn-full" style="margin-top:8px;" onclick="bgChangeTable()">🔄 Change table</button>
       </div>
     </div>`;
 };
 
+// the standings after this round: every pair's matchpoints (%) and IMPs so far, best first
+function bgStandingsHtml(){
+  const P=getPairs(), mp=calcMP(), L=(window.i18nText?i18nText:x=>x);
+  const rows=Object.entries(mp).filter(([id])=>P[id]&&!P[id].isPhantom).map(([id,x])=>({name:P[id].name||id,pct:x.top?Math.round(x.mp/x.top*1000)/10:0,imp:x.imp})).sort((a,b)=>b.pct-a.pct||b.imp-a.imp);
+  if(!rows.length) return '';
+  return `<div class="ro-move-card" style="margin-bottom:14px;text-align:left;"><div class="ro-move-label">🏆 ${L('Standings')}</div><table style="width:100%;font-size:0.8rem;border-collapse:collapse;">${rows.map((r,i)=>`<tr style="border-top:1px solid var(--border);"><td style="padding:3px 4px;">${i+1}</td><td style="padding:3px 4px;">${cleanData(r.name)}</td><td style="padding:3px 4px;text-align:right;">${r.pct}%</td><td style="padding:3px 4px;text-align:right;">${fmtImp(r.imp)}</td></tr>`).join('')}</table></div>`;
+}
 // this device goes with its pair: the next round's table (the waiting screen there; the scores are entered there)
 window.bgMoveTo=function(t,nextR,from){
+  // a test tournament: this table has seen where to go; the next round may start
+  if(typeof bgTestOn==='function'&&bgTestOn()){ DB.get('ready').then(v=>{ const r=v||{}; r[(nextR-1)+'_'+from]=true; DB.set('ready',r); }).catch(()=>{}); }
   if(t!==from){ try{ unlockTable(from); }catch(e){} bmTableNo=t; window.bmCodeTable=t; try{ if(typeof bgTestOn==='function'&&bgTestOn()) sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(t)); }catch(e){} }
   bmShowWaiting(t,nextR);
 };

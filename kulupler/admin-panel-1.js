@@ -116,12 +116,15 @@ async function bgTestTick(){
       for(let b=m.boardStart;b<=m.boardEnd;b++){
         const k=t+'_'+s.currentRound+'_'+b; if(bs[k]&&bs[k].status==='done') continue;
         left++;
-        if(t!==mine&&!human.has(t)&&!wrote_t(t)){ bs[k]=bgSimResult(b,t,s.currentRound); wroteT.add(t); wrote++; left--; }
+        if(t!==mine&&!human.has(t)&&!wrote_t(t)&&Math.random()<0.2){ bs[k]=bgSimResult(b,t,s.currentRound); wroteT.add(t); wrote++; left--; }   // a board in about 15 seconds, as people play
       }
     }
     wroteT.clear();
     if(wrote){ setBoards(bs); if(typeof renderAdminTab==='function'&&document.getElementById('adminContent')) renderAdminTab(); }
     else if(!left){
+      // the people at the tables have seen where they go next (OK at the round's end) before the round changes
+      const ready=(await DB.get('ready'))||{}, seated=[...human].filter(t=>mov[s.currentRound+'_'+t]);
+      if(seated.some(t=>!ready[s.currentRound+'_'+t])){ _bgTestBusy=false; return; }
       if(s.currentRound<s.roundCount){
         if(s.movement==='swiss'&&!mov[(s.currentRound+1)+'_1']){ try{ await maybeAdvanceSwissRound(); }catch(e){} }
         else { s.currentRound++; s._roundStartedAt=new Date().toISOString(); setState(s); addLog('ok','Round '+s.currentRound+' started','test'); toast('▶ '+(window.i18nText?i18nText('Round'):'Round')+' '+s.currentRound); refreshTopbar(); if(document.getElementById('adminContent')) renderAdminTab(); }

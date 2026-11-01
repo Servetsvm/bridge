@@ -1,6 +1,7 @@
 // BridgeGate interface in no (loaded by i18n.js when this language is chosen): English text → no, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["no"]={"d":{"Sit at a table (the robots leave it to you)":"Sett deg ved et bord (robotene lar det være til deg)",
+window.BG_LANG["no"]={"d":{"Standings":"Stilling",
+"Sit at a table (the robots leave it to you)":"Sett deg ved et bord (robotene lar det være til deg)",
 "Delete the test tournament":"Slett testturneringen",
 "Delete the test tournament?":"Slette testturneringen?",
 "Test tournament":"Testturnering",

@@ -1,6 +1,7 @@
 // BridgeGate interface in zh (loaded by i18n.js when this language is chosen): English text → zh, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["zh"]={"d":{"Sit at a table (the robots leave it to you)":"坐到一张牌桌(机器人把它留给你)",
+window.BG_LANG["zh"]={"d":{"Standings":"总排名",
+"Sit at a table (the robots leave it to you)":"坐到一张牌桌(机器人把它留给你)",
 "Delete the test tournament":"删除测试比赛",
 "Delete the test tournament?":"删除测试比赛?",
 "Test tournament":"测试比赛",
