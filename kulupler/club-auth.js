@@ -585,6 +585,9 @@ function refreshTopbar(){
     el.style.display='inline-flex';
     el.textContent='Round '+s.currentRound+'/'+s.roundCount+(s.name?' · '+s.name:'');
   } else el.style.display='none';
+  // the admin's Screen button, next to the club's name: the results screen of this tournament (a test one too)
+  const sc=document.getElementById('topbarScreen');
+  if(sc){ const on=role==='admin'&&!!CLUB_ID&&['setup','running','finished'].includes(s.status)&&s.tableCount>0; sc.style.display=on?'':'none'; if(on) sc.href=location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID)+'&role=screen'+(bgTestOn()?'&test=1':''); }
   // a table's device bar: the club and the tournament, the table and the round
   const bar=document.getElementById('bmDevBar');
   if(bar) bar.innerHTML=`<span class="td">🏛</span><div class="ev"><b>${cleanData(CLUB_NAME||'')}${s.name?' · '+cleanData(s.name):''}</b>${bmTableNo?'Table '+bmTableNo:''}${bmTableNo&&s.currentRound?' – ':''}${s.currentRound?'Round '+s.currentRound:''}</div>`;

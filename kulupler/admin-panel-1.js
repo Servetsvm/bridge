@@ -292,8 +292,7 @@ function renderSetup(){
       ${s.status==='running'&&s.currentRound<s.roundCount?`<button class="btn btn-gold" onclick="adminNextRound()">⏭ Next Round (${s.currentRound+1})</button>`:''}
       ${s.status==='running'&&s.currentRound>=s.roundCount?`<button class="btn btn-blue" onclick="adminFinish()">🏁 Finish Tournament</button>`:''}
     </div>
-    ${s.status==='finished'?`<div style="margin-top:12px;"><a class="btn btn-blue btn-full" style="text-decoration:none;text-align:center;" href="${location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=screen'+(bgTestOn()?'&test=1':'')}" target="_blank" rel="noopener">📺 Screen</a></div>`:''}
-    ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="display:grid;grid-template-columns:1fr;gap:8px;"><a class="btn btn-blue btn-full" style="text-decoration:none;text-align:center;" href="${location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID||'')+'&role=screen'+(bgTestOn()?'&test=1':'')}" target="_blank" rel="noopener">📺 Screen</a></div></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
+    ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
   </div>
   <div class="card"><div class="card-title"><span>💾</span> Data</div><div style="display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-blue" onclick="adminExport()">⬇ Export</button><button class="btn btn-purple" onclick="adminImportOpen()">⬆ Import</button><button class="btn btn-red" onclick="adminReset()">🗑 Reset</button></div></div>`;
 }
@@ -443,16 +442,6 @@ window.saveTableCodes=async function(){
   }
   try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/secret/tcodes.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(codes)}); if(!r.ok) throw new Error('Firebase '+r.status); liveCodes(codes); closeModal(); toast('🔑 '+i18nText('Table codes saved')); }
   catch(e){ err.textContent='❌ '+e.message; }
-};
-window.showTableLinkModal=async function(){
-  const s=getState(), link=await playersLink();
-  const text=`🃏 ${CLUB_NAME||'BridgeGate'}${s.name?' — '+s.name:''}\n${link}`;
-  window._playersMsg=encodeURIComponent(text);
-  openModal('Send the players the link', `
-    <div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">The players open Bridge Table with this link, tap Table No, type their member numbers (or names) and choose their table.</div>
-    <input readonly value="${link}" onclick="this.select()" style="width:100%;font-size:0.76rem;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);box-sizing:border-box;">
-    <div style="display:flex;gap:8px;margin-top:10px;"><a class="btn btn-full" style="background:#25d366;color:#fff;text-decoration:none;text-align:center;" href="https://wa.me/?text=${window._playersMsg}" target="_blank" rel="noopener">${ICON_WA} WhatsApp</a><a class="btn btn-ghost btn-full" style="text-decoration:none;text-align:center;" href="sms:?&body=${window._playersMsg}">${ICON_SMS} SMS</a></div>
-  `, `<button class="btn btn-ghost" onclick="closeModal()">Close</button>`);
 };
 window.adminNextRound=function(){
   const s=getState();
