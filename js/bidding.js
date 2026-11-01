@@ -1037,7 +1037,11 @@ function generic(x, h) {
 function aiBid(auc, seat, hand, cards) {
   const x = ctxOf(auc, seat, cards), h = ev(hand);
   for (const c of cands(x)) if (isLegal(auc, seat, c.call) && c.test(h)) return { call: c.call, m: c.m };
-  return generic(x, h);
+  const r = generic(x, h);
+  // a call the explanations read more narrowly (responder's invitational 2NT after a one-level reply: 11-12) carries
+  // that meaning, so partner reads a robot's call as a player's (1♣–1♦–1♠–2NT: opener with 12 passes, both times)
+  if (r.call === B(2, 4)) { const em = explainCall(auc, seat, r.call, cards); if (em && em.min != null && em.max != null) return { call: r.call, m: em }; }
+  return r;
 }
 function explainCall(auc, seat, call, cards) {
   const x = ctxOf(auc, seat, cards);

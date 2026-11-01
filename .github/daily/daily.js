@@ -46,6 +46,13 @@ function tryDeal() {
 }
 // a deal worth looking at: South has a real decision (a bid, not a pass, at the first turn) and the contract is a game or more
 let D = null;
+// a day already written keeps its deal (written again after a change in the robots, the cards stay the same)
+const kept = path.join(root, 'daily', today + '.json');
+if (fs.existsSync(kept)) {
+  const deal = JSON.parse(fs.readFileSync(kept, 'utf8')).deal, auc = []; let t = dealer;
+  while (!over(auc) && auc.length < 60) { const r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); t = (t + 1) % 4; }
+  D = { deal, auc, first: auc.findIndex(e => e.seat === 2) };
+}
 for (let k = 0; k < 400 && !D; k++) {
   const x = tryDeal(), first = x.auc.findIndex(e => e.seat === 2), bids = x.auc.filter(e => typeof e.call === 'number');
   if (first >= 0 && x.auc[first].call !== 'P' && bids.length && E.LV(bids[bids.length - 1].call) >= 3) D = { ...x, first };
