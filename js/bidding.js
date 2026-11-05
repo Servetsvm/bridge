@@ -22,7 +22,10 @@ function ctxOf(auc, seat, cards) {
     passed: auc.some(e => e.seat === seat && e.call === 'P'),
   };
 }
+// the robots see every hand (Servet's switch): partner's real values and lengths, not only what the calls showed
+let SEE = null;
 function pInfo(x) {
+  if (SEE && SEE[x.p] && SEE[x.p].length) { const h = ev(SEE[x.p]); return { min: h.hcp, max: h.hcp, len: h.len.slice() }; }
   let min = 0, max = 37; const len = [0, 0, 0, 0];
   for (const e of x.auc) {
     if (e.seat !== x.p || !e.m) continue; const m = e.m;
@@ -1092,5 +1095,5 @@ function explainCall(auc, seat, call, cards) {
   return s === 4 ? { t: 'Natural notrump' } : { t: 'Natural: ' + SUIT[s] + ' suit', len: { [s]: 4 } };
 }
 
-Object.assign(E, { ctxOf, pInfo, cands, generic, aiBid, explainCall });
+Object.assign(E, { ctxOf, pInfo, cands, generic, aiBid, explainCall, see: d => { SEE = d || null; } });
 });

@@ -2179,7 +2179,10 @@ function ctxOf(auc, seat, cards) {
     passed: auc.some(e => e.seat === seat && e.call === 'P'),
   };
 }
+// the robots see every hand (Servet's switch): partner's real values and lengths, not only what the calls showed
+let SEE = null;
 function pInfo(x) {
+  if (SEE && SEE[x.p] && SEE[x.p].length) { const h = ev(SEE[x.p]); return { min: h.hcp, max: h.hcp, len: h.len.slice() }; }
   let min = 0, max = 37; const len = [0, 0, 0, 0];
   for (const e of x.auc) {
     if (e.seat !== x.p || !e.m) continue; const m = e.m;
@@ -3249,7 +3252,7 @@ function explainCall(auc, seat, call, cards) {
   return s === 4 ? { t: 'Natural notrump' } : { t: 'Natural: ' + SUIT[s] + ' suit', len: { [s]: 4 } };
 }
 
-Object.assign(E, { ctxOf, pInfo, cands, generic, aiBid, explainCall });
+Object.assign(E, { ctxOf, pInfo, cands, generic, aiBid, explainCall, see: d => { SEE = d || null; } });
 });
 
 </script>
@@ -9590,7 +9593,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 378;
+const APP_V = 379;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10527,7 +10530,7 @@ function tick() {
   const robot = s => online() ? Net.owner(s) === "robot" : (G.phase === "bid" ? G.watch || s !== U() : !userControls(s));
   if (G.phase === "bid") {
     const t = bidTurn();
-    if (robot(t)) timer = setTimeout(() => { const r = E.aiBid(G.auction, t, G.deal[t], G.cards); makeCall(t, r.call, r.m); }, delay());
+    if (robot(t)) timer = setTimeout(() => { E.see(seeAll() ? G.deal : null); let r; try { r = E.aiBid(G.auction, t, G.deal[t], G.cards); } finally { E.see(null); } makeCall(t, r.call, r.m); }, delay());
   } else if (G.phase === 'play') {
     const g = G.play;
     if (g.trick.length === 4) timer = setTimeout(collectTrick, Math.max(700, delay() + 300));
@@ -11927,6 +11930,23 @@ function showAuction() {
   if (!G.auction.length) return;
   openOv('auc', `<h2>${T('Auction')}</h2><div class="auction">${auctionTable(G.auction, false)}</div><div class="expl">${explHtml(ui.lastExpl != null ? G.auction[ui.lastExpl] : null)}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+// Servet's switch (Settings, his alone): the robots see every hand, partners and opponents
+const seeAll = () => !!SET.robSee && typeof Net !== 'undefined' && Net.isAdmin();
+// what the robots have newly learned: Servet is told once, when he opens the app after the update
+const ROBOT_LEARNED = [
+  { v: 378, tr: 'Ortak Cappelletti, DONT, Michaels ya da Unusual 2SA ile girdikten sonra rakip araya deklare yaparsa artık renk seçmek zorunda değilim: fitim varsa deklare ediyorum, yoksa pas (1SA–2♦–4♦: ♥ tek kâğıtla 4♥ yok). Ortağın eski takeout kontrasını, arada deklareler olduysa cevaplamıyorum.', en: 'After partner\'s Cappelletti, DONT, Michaels or Unusual 2NT and an opponent\'s bid over it I no longer have to choose a suit: I bid with a fit, else pass. An old takeout double is not answered once other calls came in between.' },
+  { v: 378, tr: 'Stayman, transfer gibi yapay bir deklarenin kontrası takeout değil: o renkte iyi 5+ kâğıt, atak isteği. Ortağın böyle kontrasını takeout gibi cevaplamıyorum.', en: 'A double of an artificial bid (Stayman, a transfer) is lead-directing: a good 5+ suit, not takeout.' },
+  { v: 378, tr: 'Game forcing bir dizide fit ve iki as varsa 31 puandan itibaren şlem arıyorum (1♠–2♦–3♦, 17 puan ve üç asla: 4SA).', en: 'In a game force with a fit and two aces I look for slam from 31 points.' },
+  { v: 379, tr: 'Servet açınca (Ayarlar → Robotlar tüm elleri görsün) bütün elleri görüyorum: deklarede ortağımın gerçek elini, kart oyununda ve defansta dört eli (double dummy en iyi kart). Rakip robotlar için de geçerli.', en: 'With Servet\'s switch on I see every hand: partner\'s real hand in the bidding, all four in the play and defence (the double-dummy best card). The opponents too.' },
+];
+function learnedMsg() {
+  if (typeof Net === 'undefined' || !Net.isAdmin()) return;
+  const seen = SET.learnedSeen || 0, L = ROBOT_LEARNED.filter(x => x.v > seen);
+  if (!L.length || ui.overlay) return;
+  SET.learnedSeen = Math.max(...ROBOT_LEARNED.map(x => x.v)); Store.saveSettings(SET); save();
+  openOv('learned', `<h2>🤖 ${SET.lang === 'tr' ? 'Robot yeni öğrendi' : 'The robots have learned'}</h2>${L.map(x => `<div class="cvreq"><div class="cvb">${esc(SET.lang === 'tr' ? x.tr : x.en)}</div></div>`).join('')}<div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
+setTimeout(learnedMsg, 6000); setInterval(learnedMsg, 30000);   // shown when no other window is open
 /* opponent robots by level (only when you play alone with robots): a beginner looks less far ahead and sometimes plays a careless card */
 function robotCard(g, t) {
   const lv = SET.robotLvl || 'expert';
@@ -11964,7 +11984,7 @@ function robotCardAsync(g, t) {
 }
 async function robotCardFor(g, t) {
   const lv = SET.robotLvl || 'expert';
-  if (G.watch) return Bot.ask(g, t, { ...BOT_OPT, open: true });   // a deal given to the robots: played with every hand open
+  if (G.watch || seeAll()) return Bot.ask(g, t, { ...BOT_OPT, open: true });   // a deal given to the robots (or Servet's switch): played with every hand open
   if (lv === 'expert' || online() || G.tour || G.tprac || sideOf(t) === sideOf(U())) return Bot.ask(g, t, BOT_OPT);
   return robotCard(g, t);
 }
@@ -11977,6 +11997,7 @@ function showSettings() {
    <div class="grp"><span>${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
    <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
+   ${typeof Net !== 'undefined' && Net.isAdmin() ? `<div class="grp"><span>👁 ${SET.lang === 'tr' ? 'Robotlar tüm elleri görsün' : 'The robots see every hand'}</span>${seg('robsee', [[1, T('On')], [0, T('Off')]], SET.robSee ? 1 : 0)}<div class="muted">${SET.lang === 'tr' ? 'Yalnız sizde: robotlar (ortak ve rakip) deklarede ortağının gerçek elini, oyunda dört eli görür.' : 'Yours alone: the robots (partners and opponents) see partner\'s real hand in the bidding and all four in the play.'}</div></div>` : ''}
    <div class="grp"><span>${T('Correct the robots')}</span>${seg('fixbot', [[1, T('On')], [0, T('Off')]], SET.fixBot ? 1 : 0)}<div class="muted">${T("When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.")}</div></div>
    <div class="grp"><span>${T('Play a forced card automatically')}</span>${seg('auto', [[1, T('On')], [0, T('Off')]], SET.auto ? 1 : 0)}</div>
    <div class="grp"><span>${T('Sound and buzz when it is your turn')}</span>${seg('alert', [['online', T('At online tables')], ['always', T('Always')], ['off', T('Off')]], SET.alert || 'online')}</div>
@@ -12507,7 +12528,7 @@ document.addEventListener('click', ev_ => {
     if (seg === "gmode") { ui.gateMode = v; ui.gateErr = null; ui.gateSug = null; showGate(ui.gateRename); return; }
     if (seg === 'ddealer' || seg === 'dvul') { readDealForm(); ui.dealForm[seg === 'ddealer' ? 'dealer' : 'vul'] = +v; showDealEntry(); return; }
     if (seg === "seat" && online()) { flash("Close the online table before changing your seat", 2000); return; }
-    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'rlvl') SET.robotLvl = v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1'; if (seg === 'fixbot') SET.fixBot = v === '1';
+    if (seg === "seat") SET.seat = +v; if (seg === 'speed') SET.speed = +v; if (seg === 'rlvl') SET.robotLvl = v; if (seg === 'expl') SET.expl = v === '1'; if (seg === 'auto') SET.auto = v === '1'; if (seg === 'fixbot') SET.fixBot = v === '1'; if (seg === 'robsee') SET.robSee = v === '1';
     if (seg === 'alert') { SET.alert = v; if (v !== 'off') beep(); }
     if (seg === 'notify') { setNotify(v === '1'); return; }
     if (seg === 'four') SET.four = v === '1'; if (seg === 'felt') SET.felt = v; if (seg === 'back') SET.back = v;
