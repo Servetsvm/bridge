@@ -55,7 +55,8 @@ const SB = (() => {
   // round) or team (round robin: table 2k-1 the Open room, the first team North-South; 2k the Closed room)
   function seatsAt(r, t, m) {
     m = m || sb.g.m; const L = rounds(sidesOf(m))[r - 1] || [];
-    if (isHow(m)) { const x = L[t - 1]; if (!x) return null; return (r + t) % 2 ? { ns: x[1], ew: x[0] } : { ns: x[0], ew: x[1] }; }
+    // pair 1 stays at table 1, North-South, all the game (a game set up since then: fix1)
+    if (isHow(m)) { const x = L[t - 1]; if (!x) return null; if (m.fix1 && t === 1 && x[0] === 1) return { ns: 1, ew: x[1] }; return (r + t) % 2 ? { ns: x[1], ew: x[0] } : { ns: x[0], ew: x[1] }; }
     const x = L[Math.ceil(t / 2) - 1]; if (!x) return null; return t % 2 ? { ns: x[0], ew: x[1] } : { ns: x[1], ew: x[0] };
   }
   const pairLabel = (p, m) => (((m || sb.g.m).pn || [])[p - 1]) || T('Pair {0}', p);
@@ -681,7 +682,7 @@ const SB = (() => {
       const fed = s.fed === 'tbf' ? 'tbf' : 'nbf';
       const m = { n: (test ? '🧪 ' : '') + (s.n || T(s.one ? 'Single table' : 'Team match')), ts, tb: s.tb, bd: s.bd, st: 'open', by: uid, byn: myName(), bk: myKey(), type, tm, fed };
       if (fmt === 'rr') Object.assign(m, { fmt, nt: s.nt, bpr: s.bpr, tb: 2 * Math.floor(s.nt / 2), bd: rounds(s.nt).length * s.bpr });
-      if (fmt === 'howell') Object.assign(m, { fmt, np: s.np, bpr: s.bpr, tb: Math.floor(s.np / 2), bd: rounds(s.np).length * s.bpr, pn: [...Array(s.np).keys()].map(i => test ? (fake(2 * i + 1) + ' – ' + fake(2 * i + 2)).slice(0, 40) : (s.pn[i] || '')) });
+      if (fmt === 'howell') Object.assign(m, { fmt, fix1: 1, np: s.np, bpr: s.bpr, tb: Math.floor(s.np / 2), bd: rounds(s.np).length * s.bpr, pn: [...Array(s.np).keys()].map(i => test ? (fake(2 * i + 1) + ' – ' + fake(2 * i + 2)).slice(0, 40) : (s.pn[i] || '')) });
       if (test) m.test = 1;
       m.n = m.n.slice(0, 40);
       const up = { ['sb/' + id + '/m']: m, ['sbi/' + id]: { n: m.n, ts, tb: m.tb, bd: m.bd, st: 'open', by: uid, byn: m.byn, bk: m.bk, type, tm, fed, ...(m.fmt ? { fmt: m.fmt } : {}), ...(test ? { test: 1 } : {}) } };

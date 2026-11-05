@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 376;
+const APP_V = 377;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1353,7 +1353,8 @@ function render() {
   if (!G) return; document.body.classList.toggle("classic", SET.style !== "modern"); applyLook();
   const home = G.phase === 'idle';
   document.body.classList.toggle('athome', home); $('home').hidden = !home;
-  if (home) { renderHome(); renderDock(); return; }
+  // the open practice drop-down keeps where it was scrolled to (a tick, or the lobby's updates, draw it again)
+  if (home) { const pp = document.querySelector('.pdpanel'), top = pp ? pp.scrollTop : 0, win = window.scrollY; renderHome(); renderDock(); const np = document.querySelector('.pdpanel'); if (np && top) np.scrollTop = top; if (pp && Math.abs(window.scrollY - win) > 2) window.scrollTo(0, win); return; }
   renderBar(); renderTable(); renderBidbox(); renderStatus(); turnAlert(); renderDock();
 }
 /* ---- chat while playing: a column on the right on a wide screen; on a phone (or a narrow window) a panel that
