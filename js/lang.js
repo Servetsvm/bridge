@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Delete all": "Hepsini sil",
     "This game’s link": "Bu oyunun linki", "It opens this game’s tables only; the players can also find it under Team match.": "Sadece bu oyunun masalarını açar; oyuncular Takım maçı altında da bulabilir.", "Copy": "Kopyala", "Copied": "Kopyalandı",
     "Every table is taken.": "Bütün masalar dolu.",
     "Delete all test games": "Tüm deneme oyunlarını sil", "Delete all {0} test games?": "{0} deneme oyununun hepsi silinsin mi?", "Choose your table: then the robots play the other tables by themselves.": "Masanı seç: sonra diğer masaları robotlar kendiliğinden oynar.",
@@ -432,6 +433,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Delete all": "Slett alle",
     "This game’s link": "Lenken til dette spillet", "It opens this game’s tables only; the players can also find it under Team match.": "Den åpner bare dette spillets bord; spillerne finner det også under Lagkamp.", "Copy": "Kopier", "Copied": "Kopiert",
     "Every table is taken.": "Alle bordene er tatt.",
     "Delete all test games": "Slett alle testspill", "Delete all {0} test games?": "Slette alle {0} testspill?", "Choose your table: then the robots play the other tables by themselves.": "Velg bordet ditt: så spiller robotene de andre bordene selv.",
@@ -859,6 +861,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Delete all": "Borrar todo",
     "This game’s link": "El enlace de esta partida", "It opens this game’s tables only; the players can also find it under Team match.": "Solo abre las mesas de esta partida; los jugadores también la encuentran en Partido por equipos.", "Copy": "Copiar", "Copied": "Copiado",
     "Every table is taken.": "Todas las mesas están ocupadas.",
     "Delete all test games": "Borrar todas las partidas de prueba", "Delete all {0} test games?": "¿Borrar las {0} partidas de prueba?", "Choose your table: then the robots play the other tables by themselves.": "Elige tu mesa: luego los robots juegan solos las otras mesas.",
@@ -1314,6 +1317,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Delete all": "Tout supprimer",
     "This game’s link": "Le lien de cette partie", "It opens this game’s tables only; the players can also find it under Team match.": "Il n’ouvre que les tables de cette partie ; les joueurs la trouvent aussi sous Match par équipes.", "Copy": "Copier", "Copied": "Copié",
     "Every table is taken.": "Toutes les tables sont prises.",
     "Delete all test games": "Supprimer toutes les parties de test", "Delete all {0} test games?": "Supprimer les {0} parties de test ?", "Choose your table: then the robots play the other tables by themselves.": "Choisissez votre table : ensuite les robots jouent seuls les autres tables.",
@@ -1769,6 +1773,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Delete all": "Elimina tutto",
     "This game’s link": "Il link di questa partita", "It opens this game’s tables only; the players can also find it under Team match.": "Apre solo i tavoli di questa partita; i giocatori la trovano anche sotto Incontro a squadre.", "Copy": "Copia", "Copied": "Copiato",
     "Every table is taken.": "Tutti i tavoli sono occupati.",
     "Delete all test games": "Elimina tutte le partite di prova", "Delete all {0} test games?": "Eliminare tutte le {0} partite di prova?", "Choose your table: then the robots play the other tables by themselves.": "Scegli il tuo tavolo: poi i robot giocano da soli gli altri tavoli.",
@@ -2224,6 +2229,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Delete all": "Alle löschen",
     "This game’s link": "Der Link zu diesem Spiel", "It opens this game’s tables only; the players can also find it under Team match.": "Er öffnet nur die Tische dieses Spiels; die Spieler finden es auch unter Teamkampf.", "Copy": "Kopieren", "Copied": "Kopiert",
     "Every table is taken.": "Alle Tische sind besetzt.",
     "Delete all test games": "Alle Testspiele löschen", "Delete all {0} test games?": "Alle {0} Testspiele löschen?", "Choose your table: then the robots play the other tables by themselves.": "Wähle deinen Tisch: dann spielen die Roboter die anderen Tische selbst.",
@@ -2679,6 +2685,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Delete all": "Удалить всё",
     "This game’s link": "Ссылка на эту игру", "It opens this game’s tables only; the players can also find it under Team match.": "Она открывает только столы этой игры; игроки найдут её и в разделе «Командный матч».", "Copy": "Копировать", "Copied": "Скопировано",
     "Every table is taken.": "Все столы заняты.",
     "Delete all test games": "Удалить все тестовые игры", "Delete all {0} test games?": "Удалить все тестовые игры ({0})?", "Choose your table: then the robots play the other tables by themselves.": "Выберите свой стол: тогда роботы сами сыграют за другими столами.",
@@ -3134,6 +3141,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Delete all": "Usuń wszystko",
     "This game’s link": "Link do tej gry", "It opens this game’s tables only; the players can also find it under Team match.": "Otwiera tylko stoły tej gry; gracze znajdą ją też w Meczu drużynowym.", "Copy": "Kopiuj", "Copied": "Skopiowano",
     "Every table is taken.": "Wszystkie stoły są zajęte.",
     "Delete all test games": "Usuń wszystkie gry testowe", "Delete all {0} test games?": "Usunąć wszystkie gry testowe ({0})?", "Choose your table: then the robots play the other tables by themselves.": "Wybierz swój stół: wtedy roboty same zagrają przy pozostałych stołach.",
@@ -3589,6 +3597,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Delete all": "全部删除",
     "This game’s link": "本比赛的链接", "It opens this game’s tables only; the players can also find it under Team match.": "只打开本比赛的牌桌;牌手也可以在团体赛里找到。", "Copy": "复制", "Copied": "已复制",
     "Every table is taken.": "所有牌桌都已有人。",
     "Delete all test games": "删除所有测试比赛", "Delete all {0} test games?": "删除全部{0}个测试比赛?", "Choose your table: then the robots play the other tables by themselves.": "先选你的牌桌:然后其他牌桌由机器人自己打。",

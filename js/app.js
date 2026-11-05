@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 379;
+const APP_V = 380;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2346,12 +2346,14 @@ function showAuction() {
   openOv('auc', `<h2>${T('Auction')}</h2><div class="auction">${auctionTable(G.auction, false)}</div><div class="expl">${explHtml(ui.lastExpl != null ? G.auction[ui.lastExpl] : null)}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 // Servet's switch (Settings, his alone): the robots see every hand, partners and opponents
-const seeAll = () => !!SET.robSee && typeof Net !== 'undefined' && Net.isAdmin();
+// and for every player practising conventions alone with the robots
+const seeAll = () => (!!SET.robSee && typeof Net !== 'undefined' && Net.isAdmin()) || (pracList().length > 0 && !online() && !G.tour);
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
   { v: 378, tr: 'Ortak Cappelletti, DONT, Michaels ya da Unusual 2SA ile girdikten sonra rakip araya deklare yaparsa artık renk seçmek zorunda değilim: fitim varsa deklare ediyorum, yoksa pas (1SA–2♦–4♦: ♥ tek kâğıtla 4♥ yok). Ortağın eski takeout kontrasını, arada deklareler olduysa cevaplamıyorum.', en: 'After partner\'s Cappelletti, DONT, Michaels or Unusual 2NT and an opponent\'s bid over it I no longer have to choose a suit: I bid with a fit, else pass. An old takeout double is not answered once other calls came in between.' },
   { v: 378, tr: 'Stayman, transfer gibi yapay bir deklarenin kontrası takeout değil: o renkte iyi 5+ kâğıt, atak isteği. Ortağın böyle kontrasını takeout gibi cevaplamıyorum.', en: 'A double of an artificial bid (Stayman, a transfer) is lead-directing: a good 5+ suit, not takeout.' },
   { v: 378, tr: 'Game forcing bir dizide fit ve iki as varsa 31 puandan itibaren şlem arıyorum (1♠–2♦–3♦, 17 puan ve üç asla: 4SA).', en: 'In a game force with a fit and two aces I look for slam from 31 points.' },
+  { v: 380, tr: 'Konvansiyon çalışan her oyuncunun masasında da bütün elleri görüyorum (deklarede ortağın gerçek eli, oyunda dört el).', en: 'I also see every hand at the table of any player practising conventions.' },
   { v: 379, tr: 'Servet açınca (Ayarlar → Robotlar tüm elleri görsün) bütün elleri görüyorum: deklarede ortağımın gerçek elini, kart oyununda ve defansta dört eli (double dummy en iyi kart). Rakip robotlar için de geçerli.', en: 'With Servet\'s switch on I see every hand: partner\'s real hand in the bidding, all four in the play and defence (the double-dummy best card). The opponents too.' },
 ];
 function learnedMsg() {
@@ -2903,6 +2905,7 @@ document.addEventListener('click', ev_ => {
     if (!e || txt.trim().length < 3) { flash(T('Write what the robot did wrong'), 2000); return; }
     t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
   if (t.dataset.rbok) { Net.roboErrFixed(t.dataset.rbok, t.dataset.v === '1').then(showRoboErrs).catch(() => flash(T('Could not save'), 2000)); return; }
+  if (t.id === 'rbDelAll') { const P = (ui.rbAll || []).slice(); if (!P.length || !confirm(T('Delete all') + ' — ' + T('Robot mistakes') + ' (' + P.length + ')?')) return; Promise.all(P.map(x => Net.roboErrDone(x))).then(() => { flash('🗑 ' + P.length, 1800); showRoboErrs(); }).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === 'rbShowOk') { ui.rbShowOk = !ui.rbShowOk; showRoboErrs(); return; }
   if (t.dataset.rbdone) { Net.roboErrDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === 'rbCopy') { const txt = JSON.stringify(ui.rbList || []); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
@@ -3426,6 +3429,7 @@ async function showRoboErrs() {
   let L = []; try { L = await Net.roboErrs(); } catch (e) {}
   if (ui.overlay !== 'roboerr') return;
   L = L.filter(r => r.kind !== 'bid');   // the bidding lessons are in the learning report
+  ui.rbAll = L.map(r => r.path);
   // the records marked fixed are hidden (a toggle shows them) and never copied for Claude
   const nOk = L.filter(r => r.ok).length; if (!ui.rbShowOk) L = L.filter(r => !r.ok);
   ui.rbList = L.filter(r => !r.ok);
@@ -3442,6 +3446,7 @@ async function showRoboErrs() {
     <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
     ${nOk ? `<div class="row2"><button class="btn mini-btn" id="rbShowOk">${ui.rbShowOk ? T('Hide the fixed ones') : '✔ ' + T('Fixed: {0} (hidden) — show', nOk)}</button></div>` : ''}
     ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div>${split}<div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
+    ${ui.rbAll.length ? `<div class="row2"><button class="btn" id="rbDelAll">🗑 ${T('Delete all')} (${ui.rbAll.length})</button></div>` : ''}
     ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${r.c[0] ? conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] }) : T('Pass')}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small>${r.ok ? ` <b class="pos">✔ ${T('Fixed')}</b>` : ''}</div>
       ${r.not ? `<div class="cvb">📝 ${esc(r.not)}</div>` : ''}
       ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} ${r.u ? `<b class="pos">✍️ ${T('player')}</b>` : `<b class="pos">+${x[4]}</b>`}</div>`).join('')}
