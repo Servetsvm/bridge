@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 380;
+const APP_V = 381;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2347,7 +2347,8 @@ function showAuction() {
 }
 // Servet's switch (Settings, his alone): the robots see every hand, partners and opponents
 // and for every player practising conventions alone with the robots
-const seeAll = () => (!!SET.robSee && typeof Net !== 'undefined' && Net.isAdmin()) || (pracList().length > 0 && !online() && !G.tour);
+// never at online tables or in tournaments: there the robots bid and play only by the convention cards
+const seeAll = () => !online() && !(G && G.tour) && ((!!SET.robSee && typeof Net !== 'undefined' && Net.isAdmin()) || pracList().length > 0);
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
   { v: 378, tr: 'Ortak Cappelletti, DONT, Michaels ya da Unusual 2SA ile girdikten sonra rakip araya deklare yaparsa artık renk seçmek zorunda değilim: fitim varsa deklare ediyorum, yoksa pas (1SA–2♦–4♦: ♥ tek kâğıtla 4♥ yok). Ortağın eski takeout kontrasını, arada deklareler olduysa cevaplamıyorum.', en: 'After partner\'s Cappelletti, DONT, Michaels or Unusual 2NT and an opponent\'s bid over it I no longer have to choose a suit: I bid with a fit, else pass. An old takeout double is not answered once other calls came in between.' },
