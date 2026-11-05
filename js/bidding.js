@@ -151,6 +151,16 @@ function cands(x) {
     add(B(3, 0), () => true, { min: 5, max: 7, cv: 'ogust', t: 'Ogust: minimum, bad suit' });
     return L;
   }
+  /* ---- partner's conventional overcall (Cappelletti, DONT, Michaels, Unusual 2NT) and the next opponent bid over it:
+     no longer forced to choose; one of partner's suits only with a fit, else pass (1NT–2♦–4♦: not 4♥ with ♥2) ---- */
+  if (my.length === 0 && pJust && isNum(x.rhoCall) && ['capp', 'dont', 'michaels'].includes(pm.cv) && pm.tag && !['cappX', 'dontX'].includes(pm.tag)) {
+    const cheap = s => (ST(st.last) < s ? LV(st.last) : LV(st.last) + 1);
+    const ps = Object.keys(pm.len || {}).map(Number).filter(s => s < 4).sort((a, b) => b - a);
+    for (const s of ps) { const l = cheap(s); if (l <= 4) add(B(l, s), h => h.len[s] >= 4 && (l <= 3 || h.len[s] >= 5 || Math.min(...h.len) <= 1), { len: { [s]: 4 }, t: 'Competing in partner\'s ' + SUIT[s] + ': a fit' }); }
+    add('P', () => true, { t: 'Pass: no fit for partner' });
+    return L;
+  }
+
   /* DONT follow-ups */
   if (my.length === 0 && pJust && pm.cv === 'dont') {
     const cheap = s => (ST(st.last) < s ? LV(st.last) : LV(st.last) + 1);
@@ -344,6 +354,11 @@ function cands(x) {
       return L;
     }
     const unbid = [0, 1, 2, 3].filter(s => !x.oppSuits.includes(s));
+    // their last bid is artificial (Stayman, a transfer, a relay…): a double of it shows that suit, good, for the lead;
+    // no takeout double (1NT–2♣ Stayman–X with ♣AT: pass)
+    const oe = auc.slice().reverse().find(e => e.call === ob);
+    const art = !!(oe && oe !== opening && os < 4 && oe.m && (oe.m.cv || oe.m.tag) && !(oe.m.len && oe.m.len[os] >= 3));
+    if (art) add('X', h => h.len[os] >= 5 && h.top5(os) >= 3 && h.hcp >= 8, { min: 8, len: { [os]: 5 }, tag: 'ldx', t: 'Lead-directing double: a good ' + SUIT[os] + ' suit (their bid is artificial)' });
     if (C.michaels && LV(ob) === 1 && x.oppBids.length === 1 && !bal4) {
       if (os < 2) add(B(2, os), h => h.len[2] >= 5 && h.len[3] >= 5 && h.hcp >= 7, { min: 7, len: { 2: 5, 3: 5 }, tag: 'mich', cv: 'michaels', t: 'Michaels cue bid: both majors (5-5)' });
       else { const M = otherMajor(os); add(B(2, os), h => h.len[M] >= 5 && Math.max(h.len[0], h.len[1]) >= 5 && h.hcp >= 7, { min: 7, len: { [M]: 5 }, tag: 'mich', major: M, cv: 'michaels', t: 'Michaels cue bid: 5+ ' + SUIT[M] + ' and a 5+ minor' }); }
@@ -351,7 +366,7 @@ function cands(x) {
       add(B(2, 4), h => h.len[lw[0]] >= 5 && h.len[lw[1]] >= 5 && h.hcp >= 7, { min: 7, len: { [lw[0]]: 5, [lw[1]]: 5 }, tag: 'unusual', suits: lw, cv: 'michaels', t: 'Unusual 2NT: ' + SUIT[lw[0]] + ' and ' + SUIT[lw[1]] + ' (5-5)' });
     }
     if (LV(ob) === 1) add(B(1, 4), h => h.bal && h.hcp >= 15 - d && h.hcp <= 18 && h.stop(os), { min: 15 - d, max: 18, len: BAL, t: 'Balanced 15-18 HCP with a stopper in their suit', tag: 'nt1' });
-    add('X', h => h.hcp >= 17, { min: 17, cv: 'takeout', t: 'Strong hand: 17+ HCP' });
+    if (!art) add('X', h => h.hcp >= 17, { min: 17, cv: 'takeout', t: 'Strong hand: 17+ HCP' });
     for (const s of [3, 2, 1, 0]) {
       if (x.oppSuits.includes(s)) continue; const l = cheap(s);
       if (l + 1 <= 3) add(B(l + 1, s), h => !bal4 && h.len[s] >= 6 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2, { min: 5, max: 10, len: { [s]: 6 }, t: 'Weak jump overcall: 6+ ' + SUIT[s] + ', 5-10 HCP' });
@@ -361,7 +376,7 @@ function cands(x) {
       const mn = (l === 1 ? 8 : l === 2 ? 11 : 13) - d;
       add(B(l, s), h => h.len[s] >= (l === 3 ? 6 : 5) && h.hcp >= mn && h.hcp <= 16 && (l === 1 || h.top5(s) >= 2) && h.len[s] >= Math.max(...unbid.map(u => h.len[u])), { min: mn, max: 16, len: { [s]: 5 }, t: 'Overcall: 5+ ' + SUIT[s] + ', ' + mn + '-16 HCP' });
     }
-    add('X', h => h.hcp >= 12 - d && h.len[os] <= 2 && unbid.every(u => h.len[u] >= 3 || (h.len[u] >= 2 && h.hcp >= 15)), { min: 12 - d, len: Object.fromEntries(unbid.map(u => [u, 3])), cv: 'takeout', t: 'Takeout double: 12+ HCP, support for the unbid suits' });
+    if (!art) add('X', h => h.hcp >= 12 - d && h.len[os] <= 2 && unbid.every(u => h.len[u] >= 3 || (h.len[u] >= 2 && h.hcp >= 15)), { min: 12 - d, len: Object.fromEntries(unbid.map(u => [u, 3])), cv: 'takeout', t: 'Takeout double: 12+ HCP, support for the unbid suits' });
     add('P', () => true, { t: 'Pass' });
     return L;
   }
@@ -460,7 +475,9 @@ function cands(x) {
       const ub = [0, 1, 2, 3].filter(s => !x.oppSuits.includes(s));
       add('X', h => h.hcp >= 8 && ub.filter(s => h.len[s] >= 4).length >= 2, { min: 8, len: Object.fromEntries(ub.map(s => [s, 3])), cv: 'respx', t: 'Responsive double: 8+ points, both unbid suits' });
     }
-    if (pc.call === 'X' && rhoPass && os >= 0) {
+    // answering partner's takeout double: only right after it (not an old double, other calls since, 1NT–2♣–X–…–3NT–4♥),
+    // and not a lead-directing one
+    if (pc.call === 'X' && rhoPass && pJust && !(pc.m && pc.m.tag === 'ldx') && os >= 0) {
       const ub = [3, 2, 1, 0].filter(s => !x.oppSuits.includes(s));
       const best = h => { let b = ub[0]; for (const s of ub) { if (h.len[s] + (s >= 2 ? 0.5 : 0) > h.len[b] + (b >= 2 ? 0.5 : 0)) b = s; } return b; };
       add('P', h => h.len[os] >= 5 && h.top5(os) >= 3 && h.hcp >= 8, { t: 'Penalty pass: strong holding in their suit' });
@@ -980,7 +997,8 @@ function generic(x, h) {
   const gameL = t === 4 ? 3 : t >= 2 ? 4 : 5;
   let goal;
   if (est >= 37 && lo >= 35) goal = 7;
-  else if (est >= 33) goal = 6;
+  // a game force with a fit and two aces: a little less is enough to look for slam (1♠–2♦–3♦ with 17 and three aces)
+  else if (est >= 33 || (gf && fitLen >= 8 && est >= 31 && h.aces >= 2)) goal = 6;
   else if (t < 2) { goal = est >= 29 ? 5 : (est >= 26 ? 4 : 0); if (minorFit >= 0 && est >= 25 && oppStops && est < 29) { t = 4; goal = 3; } }
   else if (lo >= 25 || est >= 26) goal = gameL;
   else if (hi >= 25 && est >= 23) goal = -1;
