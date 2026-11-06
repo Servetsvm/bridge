@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 402;
+const APP_V = 403;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -228,6 +228,8 @@ const Field = {
     };
     setTimeout(step, 500);
   },
+  // the robots' bidding lessons of a board: its double-dummy table against the field's contracts
+  lessons(id, L, f, tab) { const les = bidLessons(L.deal, L.board, f.tables, tab); if (les.length && typeof Net !== 'undefined') les.forEach((x, i) => Net.roboBid(id, i, L.deal, L.board, x).catch(() => {})); },
   onmsg(m) {
     const L = this.live[m.id]; if (!L) return; const f = L.f;
     if (m.type === 'table') f.tables.push(m.r);
@@ -238,13 +240,19 @@ const Field = {
       for (const t of f.tables) { if (t.passed) continue; const k = conId(t.c); cnt[k] = (cnt[k] || 0) + 1; if (!best || cnt[k] > cnt[conId(best)]) best = t.c; }
       f.normC = best;
       if (best) this.dd(m.id, 'norm', L.deal, best);
-      if (!online() && !f.ddt) { f.ddt = 1; this.dd(m.id, 'table', L.deal, null); }   // for the robots' bidding lessons
+      if (!f.ddt) { f.ddt = 1; this.dd(m.id, 'table', L.deal, null); }   // the double-dummy table (and the robots' bidding lessons)
+      else if (f.dd.tab && !online() && !f.les) { f.les = 1; this.lessons(m.id, L, f, f.dd.tab); }   // the table came first: the lessons now
       { const r = RHIST.find(h => h.id === m.id); if (r) { applyField(r, f); r.normC = f.normC ? { ...f.normC } : null; saveRH(); scheduleSync(); } }
       const e = HIST.find(h => h.id === m.id);
       if (e) { applyField(e, f); Store.saveRec(e); scheduleSync(); if (e.tour && e.tour.table == null) tourSend(e); }
     }
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); scheduleSync(); } }
-    if (m.type === 'ddtable') { const les = bidLessons(L.deal, L.board, f.tables, m.t); if (les.length && typeof Net !== 'undefined') les.forEach((x, i) => Net.roboBid(m.id, i, L.deal, L.board, x).catch(() => {})); return; }
+    if (m.type === 'ddtable') {
+      f.dd.tab = m.t; const e = HIST.find(h => h.id === m.id); if (e) { e.dd = { ...f.dd }; Store.saveRec(e); } const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); }
+      if (f.done && !online() && !f.les) { f.les = 1; this.lessons(m.id, L, f, m.t); }
+      if (G && G.id === m.id && G.phase === 'done') render();
+      return;
+    }
     if (m.type === 'error') this.partDone(m.id);
     if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
@@ -841,6 +849,7 @@ function makeCall(seat, call, m, al) {
     G.play.rb = [0, 1, 2, 3].filter(s => actor(s) === 'robot');   // the seats whose calls the robots made (their hands are checked against them)
     G.phase = 'play';
     Field.dd(G.id, 'you', G.deal, c);
+    { const L = Field.live[G.id]; if (L && !L.f.ddt) { L.f.ddt = 1; Field.dd(G.id, 'table', G.deal, null); } }   // the double-dummy table for the end of the board
     const us = sideOf(c.decl) === sideOf(U());
     flash(T(us ? (c.decl === U() ? "You are declarer" : "Partner is declarer — you play both hands") : "You are defending"), 1800);
   }
@@ -1280,7 +1289,8 @@ function renderTable() {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
     { const first = ui.doneSeen !== G.id; if (first) setTimeout(() => { ui.doneSeen = G.id; }, 0); var doneCls = first ? (e && e.us > 0 ? " good" : e && e.us < 0 ? " bad" : "") : ""; }
-    C.innerHTML = e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}${e.prv ? `<small class="prvsum">${prvSum(e.prv)}</small>` : ""}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
+    const tab = (e && e.dd && e.dd.tab) || (G.field && G.field.dd && G.field.dd.tab);
+    C.innerHTML = e && tab ? `<button class="rtdone ddend" id="oShow"><span class="rtres">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : ''}</span>${ddTabHtml(tab)}<span class="ddtap">👆 ${T('Tap for the details')}</span></button>` : e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}${e.prv ? `<small class="prvsum">${prvSum(e.prv)}</small>` : ""}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans(); fitTable(); updateRcpt();
@@ -2565,8 +2575,9 @@ function rtOpen(k) {
   }, 500);
 }
 // the double-dummy table of a board: the tricks each declarer takes in each strain (a game or more marked)
-function rtDdHtml(b) {
-  if (!b.dd) return '';
+function rtDdHtml(b) { return b.dd ? ddTabHtml(b.dd) : ''; }
+function ddTabHtml(dd) {
+  const b = { dd };
   const st = [4, 3, 2, 1, 0], gm = (t, s) => t - 6 >= (s === 4 ? 3 : s >= 2 ? 4 : 5);
   return `<table class="rtdd"><tr><th>🎯</th>${st.map(s => `<th>${symHtml(s)}</th>`).join('')}</tr>${[0, 2, 1, 3].map(d => `<tr><th>${SEAT[d]}</th>${st.map(s => { const t = b.dd[d][s]; return `<td class="${t >= 7 ? (gm(t, s) ? 'gm' : 'ok') : ''}">${t >= 7 ? t - 6 : '–'}</td>`; }).join('')}</tr>`).join('')}</table>`;
 }

@@ -2011,6 +2011,16 @@ body.homev2 button.h2fango{display:block;background:none;border:0;padding:0;marg
 #center .rtdd th,#center .rtdd td{padding:5px 11px}
 #center .rtend{margin:0}
 @media (max-width:420px){#center .rtdd{font-size:15px}#center .rtdd th,#center .rtdd td{padding:4px 7px}}
+/* the end of a board in every game: the result and the double-dummy table in the middle; a tap: the details */
+#center .ddend{background:none;border:0;color:inherit;font:inherit;cursor:pointer;width:100%}
+#center .ddend .rtres{display:block}
+#center .ddtap{font-size:13px;color:#f4e3a6;opacity:.9}
+#center .ddend{gap:3px;padding:2px}
+#center .ddend .rtres{font-size:13px;padding:4px 8px}
+#center .ddend .rtres small{font-size:11px}
+#center .ddend .rtdd{font-size:13px}
+#center .ddend .rtdd th,#center .ddend .rtdd td{padding:2px 6px}
+@media (max-width:420px){#center .ddend .rtdd{font-size:11px}#center .ddend .rtdd th,#center .ddend .rtdd td{padding:1px 4px}#center .ddend .ddtap{font-size:11px}}
 
 </style>
 
@@ -4994,6 +5004,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Tap for the details": "Ayrıntılar için dokun",
     "Watch again": "Tekrar seyret",
     "Watch on the table": "Masada izle",
     "System table — live": "Sistem masası — canlı",
@@ -5429,6 +5440,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Tap for the details": "Trykk for detaljer",
     "Watch again": "Se igjen",
     "Watch on the table": "Se på bordet",
     "System table — live": "Systembordet — direkte",
@@ -5862,6 +5874,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Tap for the details": "Toca para ver los detalles",
     "Watch again": "Ver otra vez",
     "Watch on the table": "Ver en la mesa",
     "System table — live": "Mesa de sistemas — en directo",
@@ -6323,6 +6336,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Tap for the details": "Touchez pour les détails",
     "Watch again": "Revoir",
     "Watch on the table": "Regarder sur la table",
     "System table — live": "Table des systèmes — en direct",
@@ -6784,6 +6798,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Tap for the details": "Tocca per i dettagli",
     "Watch again": "Guarda di nuovo",
     "Watch on the table": "Guarda al tavolo",
     "System table — live": "Tavolo dei sistemi — in diretta",
@@ -7245,6 +7260,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Tap for the details": "Für Details tippen",
     "Watch again": "Nochmal ansehen",
     "Watch on the table": "Am Tisch zusehen",
     "System table — live": "Systemtisch — live",
@@ -7706,6 +7722,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Tap for the details": "Нажмите для подробностей",
     "Watch again": "Смотреть снова",
     "Watch on the table": "Смотреть за столом",
     "System table — live": "Стол систем — в эфире",
@@ -8167,6 +8184,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Tap for the details": "Dotknij, aby zobaczyć szczegóły",
     "Watch again": "Obejrzyj ponownie",
     "Watch on the table": "Oglądaj przy stole",
     "System table — live": "Stół systemów — na żywo",
@@ -8628,6 +8646,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Tap for the details": "点击查看详情",
     "Watch again": "再看一遍",
     "Watch on the table": "在牌桌上观看",
     "System table — live": "体系牌桌 — 直播",
@@ -9714,7 +9733,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 402;
+const APP_V = 403;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -9932,6 +9951,8 @@ const Field = {
     };
     setTimeout(step, 500);
   },
+  // the robots' bidding lessons of a board: its double-dummy table against the field's contracts
+  lessons(id, L, f, tab) { const les = bidLessons(L.deal, L.board, f.tables, tab); if (les.length && typeof Net !== 'undefined') les.forEach((x, i) => Net.roboBid(id, i, L.deal, L.board, x).catch(() => {})); },
   onmsg(m) {
     const L = this.live[m.id]; if (!L) return; const f = L.f;
     if (m.type === 'table') f.tables.push(m.r);
@@ -9942,13 +9963,19 @@ const Field = {
       for (const t of f.tables) { if (t.passed) continue; const k = conId(t.c); cnt[k] = (cnt[k] || 0) + 1; if (!best || cnt[k] > cnt[conId(best)]) best = t.c; }
       f.normC = best;
       if (best) this.dd(m.id, 'norm', L.deal, best);
-      if (!online() && !f.ddt) { f.ddt = 1; this.dd(m.id, 'table', L.deal, null); }   // for the robots' bidding lessons
+      if (!f.ddt) { f.ddt = 1; this.dd(m.id, 'table', L.deal, null); }   // the double-dummy table (and the robots' bidding lessons)
+      else if (f.dd.tab && !online() && !f.les) { f.les = 1; this.lessons(m.id, L, f, f.dd.tab); }   // the table came first: the lessons now
       { const r = RHIST.find(h => h.id === m.id); if (r) { applyField(r, f); r.normC = f.normC ? { ...f.normC } : null; saveRH(); scheduleSync(); } }
       const e = HIST.find(h => h.id === m.id);
       if (e) { applyField(e, f); Store.saveRec(e); scheduleSync(); if (e.tour && e.tour.table == null) tourSend(e); }
     }
     if (m.type === 'dd') { f.dd[m.key] = m.t; const e = HIST.find(h => h.id === m.id); if (e) e.dd = { ...f.dd }; const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); scheduleSync(); } }
-    if (m.type === 'ddtable') { const les = bidLessons(L.deal, L.board, f.tables, m.t); if (les.length && typeof Net !== 'undefined') les.forEach((x, i) => Net.roboBid(m.id, i, L.deal, L.board, x).catch(() => {})); return; }
+    if (m.type === 'ddtable') {
+      f.dd.tab = m.t; const e = HIST.find(h => h.id === m.id); if (e) { e.dd = { ...f.dd }; Store.saveRec(e); } const r = RHIST.find(h => h.id === m.id); if (r) { r.dd = { ...f.dd }; saveRH(); }
+      if (f.done && !online() && !f.les) { f.les = 1; this.lessons(m.id, L, f, m.t); }
+      if (G && G.id === m.id && G.phase === 'done') render();
+      return;
+    }
     if (m.type === 'error') this.partDone(m.id);
     if (G && G.id === m.id) { save(); if (ui.overlay === 'end') showEnd(); if (G.phase === 'done') render(); else renderBar(); }
   },
@@ -10545,6 +10572,7 @@ function makeCall(seat, call, m, al) {
     G.play.rb = [0, 1, 2, 3].filter(s => actor(s) === 'robot');   // the seats whose calls the robots made (their hands are checked against them)
     G.phase = 'play';
     Field.dd(G.id, 'you', G.deal, c);
+    { const L = Field.live[G.id]; if (L && !L.f.ddt) { L.f.ddt = 1; Field.dd(G.id, 'table', G.deal, null); } }   // the double-dummy table for the end of the board
     const us = sideOf(c.decl) === sideOf(U());
     flash(T(us ? (c.decl === U() ? "You are declarer" : "Partner is declarer — you play both hands") : "You are defending"), 1800);
   }
@@ -10984,7 +11012,8 @@ function renderTable() {
     // end of board: all four hands stay open on the table, the result sits in a banner in the middle
     const e = G.result;
     { const first = ui.doneSeen !== G.id; if (first) setTimeout(() => { ui.doneSeen = G.id; }, 0); var doneCls = first ? (e && e.us > 0 ? " good" : e && e.us < 0 ? " bad" : "") : ""; }
-    C.innerHTML = e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}${e.prv ? `<small class="prvsum">${prvSum(e.prv)}</small>` : ""}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
+    const tab = (e && e.dd && e.dd.tab) || (G.field && G.field.dd && G.field.dd.tab);
+    C.innerHTML = e && tab ? `<button class="rtdone ddend" id="oShow"><span class="rtres">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : ''}</span>${ddTabHtml(tab)}<span class="ddtap">👆 ${T('Tap for the details')}</span></button>` : e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}${e.prv ? `<small class="prvsum">${prvSum(e.prv)}</small>` : ""}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans(); fitTable(); updateRcpt();
@@ -12269,8 +12298,9 @@ function rtOpen(k) {
   }, 500);
 }
 // the double-dummy table of a board: the tricks each declarer takes in each strain (a game or more marked)
-function rtDdHtml(b) {
-  if (!b.dd) return '';
+function rtDdHtml(b) { return b.dd ? ddTabHtml(b.dd) : ''; }
+function ddTabHtml(dd) {
+  const b = { dd };
   const st = [4, 3, 2, 1, 0], gm = (t, s) => t - 6 >= (s === 4 ? 3 : s >= 2 ? 4 : 5);
   return `<table class="rtdd"><tr><th>🎯</th>${st.map(s => `<th>${symHtml(s)}</th>`).join('')}</tr>${[0, 2, 1, 3].map(d => `<tr><th>${SEAT[d]}</th>${st.map(s => { const t = b.dd[d][s]; return `<td class="${t >= 7 ? (gm(t, s) ? 'gm' : 'ok') : ''}">${t >= 7 ? t - 6 : '–'}</td>`; }).join('')}</tr>`).join('')}</table>`;
 }

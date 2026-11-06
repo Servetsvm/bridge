@@ -1959,3 +1959,13 @@ body.homev2 button.h2fango{display:block;background:none;border:0;padding:0;marg
 #center .rtdd th,#center .rtdd td{padding:5px 11px}
 #center .rtend{margin:0}
 @media (max-width:420px){#center .rtdd{font-size:15px}#center .rtdd th,#center .rtdd td{padding:4px 7px}}
+/* the end of a board in every game: the result and the double-dummy table in the middle; a tap: the details */
+#center .ddend{background:none;border:0;color:inherit;font:inherit;cursor:pointer;width:100%}
+#center .ddend .rtres{display:block}
+#center .ddtap{font-size:13px;color:#f4e3a6;opacity:.9}
+#center .ddend{gap:3px;padding:2px}
+#center .ddend .rtres{font-size:13px;padding:4px 8px}
+#center .ddend .rtres small{font-size:11px}
+#center .ddend .rtdd{font-size:13px}
+#center .ddend .rtdd th,#center .ddend .rtdd td{padding:2px 6px}
+@media (max-width:420px){#center .ddend .rtdd{font-size:11px}#center .ddend .rtdd th,#center .ddend .rtdd td{padding:1px 4px}#center .ddend .ddtap{font-size:11px}}

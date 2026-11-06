@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Tap for the details": "Ayrıntılar için dokun",
     "Watch again": "Tekrar seyret",
     "Watch on the table": "Masada izle",
     "System table — live": "Sistem masası — canlı",
@@ -438,6 +439,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Tap for the details": "Trykk for detaljer",
     "Watch again": "Se igjen",
     "Watch on the table": "Se på bordet",
     "System table — live": "Systembordet — direkte",
@@ -871,6 +873,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Tap for the details": "Toca para ver los detalles",
     "Watch again": "Ver otra vez",
     "Watch on the table": "Ver en la mesa",
     "System table — live": "Mesa de sistemas — en directo",
@@ -1332,6 +1335,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Tap for the details": "Touchez pour les détails",
     "Watch again": "Revoir",
     "Watch on the table": "Regarder sur la table",
     "System table — live": "Table des systèmes — en direct",
@@ -1793,6 +1797,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Tap for the details": "Tocca per i dettagli",
     "Watch again": "Guarda di nuovo",
     "Watch on the table": "Guarda al tavolo",
     "System table — live": "Tavolo dei sistemi — in diretta",
@@ -2254,6 +2259,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Tap for the details": "Für Details tippen",
     "Watch again": "Nochmal ansehen",
     "Watch on the table": "Am Tisch zusehen",
     "System table — live": "Systemtisch — live",
@@ -2715,6 +2721,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Tap for the details": "Нажмите для подробностей",
     "Watch again": "Смотреть снова",
     "Watch on the table": "Смотреть за столом",
     "System table — live": "Стол систем — в эфире",
@@ -3176,6 +3183,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Tap for the details": "Dotknij, aby zobaczyć szczegóły",
     "Watch again": "Obejrzyj ponownie",
     "Watch on the table": "Oglądaj przy stole",
     "System table — live": "Stół systemów — na żywo",
@@ -3637,6 +3645,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Tap for the details": "点击查看详情",
     "Watch again": "再看一遍",
     "Watch on the table": "在牌桌上观看",
     "System table — live": "体系牌桌 — 直播",
