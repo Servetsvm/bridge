@@ -9672,7 +9672,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 390;
+const APP_V = 391;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10814,10 +10814,10 @@ function renderBar() {
   const dst = ['bottom:-1px;left:50%;transform:translateX(-50%)', 'left:1px;top:50%;transform:translateY(-50%)', 'top:-1px;left:50%;transform:translateX(-50%)', 'right:1px;top:50%;transform:translateY(-50%)'][rel(G.dealer)];
   let con = '—', tr = '';
   if (G.play) { const c = G.play.contract; con = `${callHtml(B(c.level, c.strain))}${c.dbl === 1 ? ' X' : c.dbl === 2 ? ' XX' : ''} <span class="sm">${SEAT[c.decl]}</span>`; const us = sideOf(u); tr = `${T('Us')} <b class="tk">${G.play.tricks[us]}</b> · ${T('Them')} <b class="tk">${G.play.tricks[1 - us]}</b>`; }
-  if (G.rtv) { const b = G.rtv.b, D = RT.all[G.rtv.k];
+  if (G.rtv) { const b = G.rtv.b;
     $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
      <button class="box" id="bAuc"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
-     <div class="box"><small>🔴 ${esc(RT_SYS[b.sys] || b.sys)}</small><b>${esc(rtConv(b))}</b><span class="tr">${b.k}/${b.of} · NS ${rtR(D, 0) ? Math.round(rtR(D, 0).r) : ''} · EW ${rtR(D, 1) ? Math.round(rtR(D, 1).r) : ''}</span></div>
+     <div class="box"><b>🔴 ${esc(RT_SYS[b.sys] || b.sys)}</b></div>
      <div class="spacer"></div><div class="tools"><button class="btn" id="bHome" title="${T('Home')}">⌂</button><button class="btn gold" id="bRtList">📊 ${T('Tables')}</button></div>`;
     return; }
   const g = G.play;
