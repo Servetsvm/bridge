@@ -9646,7 +9646,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 384;
+const APP_V = 385;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10760,7 +10760,7 @@ function vHand(seat) {
 function seatName(seat) {
   if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
   // a robots' table's seat taken: the robots keep their names (while the system stays that table's)
-  if (!online() && ui.rtNames && ui.rtNames.sys === SET.sys && ui.rtNames.n[seat]) return ui.rtNames.n[seat];
+  if (!online() && SET.rtNames && SET.rtNames.sys === SET.sys && SET.rtNames.n[seat]) return SET.rtNames.n[seat];
   return online() && Net.st.names[seat] ? Net.st.names[seat] : T('Robot');
 }
 function seatLabel(seat) {
@@ -10772,7 +10772,7 @@ function seatLabel(seat) {
   // your own seat shows your name (the one you use at online tables), other seats the player's name or "Robot"
   let myNm = ""; try { myNm = localStorage.getItem("bridge-table-name") || ""; } catch (e) {}
   const mine = (online() && Net.st.names[U()]) || myNm;
-  let who = seat === meSeat() ? (mine || T("You")) : nm ? nm + (Net.st.away && Net.st.away[seat] ? " (" + T("away · robot plays") + ")" : g && userControls(seat) ? " (" + T("you play") + ")" : "") : (g && userControls(seat) ? T("You play") : T("Robot"));
+  let who = seat === meSeat() ? (mine || T("You")) : nm ? nm + (Net.st.away && Net.st.away[seat] ? " (" + T("away · robot plays") + ")" : g && userControls(seat) ? " (" + T("you play") + ")" : "") : (g && userControls(seat) ? T("You play") : esc(seatName(seat)));   // a robots' table's robot: its name
   // the host can tap a player's name to remove them from the table (a robot takes the seat)
   if (online() && !guest() && nm && seat !== meSeat()) who = `<b class="pname" data-kickask="${seat}" title="${T('Remove')}">${esc(who)}</b><button class="kickx" data-kickask="${seat}" title="${T('Remove')}">✕</button>`;
   else if (seat === meSeat()) who = `<b class="pname" data-who="${esc(mine || T('You'))}">${esc(who)}</b>`;   // your own label opens your card (to change what the others see)
@@ -12186,7 +12186,7 @@ function rtOpen(k) {
 function rtSit(s) {
   const x = rtCur(Date.now()), b = x && (x.b || x.wait); if (!b) return;
   askYes(T('Take {0}\'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.', rtName(s), SEAT[s], RT_SYS[b.sys] + (b.conv ? ' · ' + pracName(b.conv) : '')), () => {
-    ui.rtNames = { sys: b.sys, n: [0, 1, 2, 3].map(q => rtName(q)) };
+    SET.rtNames = { sys: b.sys, n: [0, 1, 2, 3].map(q => rtName(q)) };
     SET.seat = s; setSys(b.sys); if (b.conv && pracKnown(b.conv)) togglePractice(b.conv, true);
     Store.saveSettings(SET); save();
     closeOv(); ui.saved = null; Net.st.soloPub = true; resume();
