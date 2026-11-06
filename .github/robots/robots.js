@@ -1,10 +1,12 @@
-// The robots' table (Bridge Table's home page: 🤖 Robot table — live): four robots with made-up names play each other
-// all day, one system after another (SAYC first, then 2/1, Acol, French Standard, Precision, Polish Club) and in each
-// system every convention, ten boards each, on deals where the convention comes up. There is no server: this script
-// plays the boards ahead of time and gives each one its start time; the page shows every call and card at its time, so
-// everyone watching sees the same card at the same moment. Each board is compared with the double-dummy best contract
-// (the robots' and the systems' league) and checked card by card (the robots' mistakes, for Servet's report).
-// Run by .github/workflows/robots.yml every two hours: node .github/robots/robots.js <dir> (the dir holds live.json).
+// The robots' tables (Bridge Table's home page: 🤖 Robot table — live): six tables, one per system (SAYC, 2/1, Acol,
+// French Standard, Precision, Polish Club), where four robots with made-up names play each other all day: the system
+// on its own, then each of its conventions, ten boards each, on deals where the convention comes up. There is no
+// server: this script plays the boards ahead of time and gives each one its start time; the page shows every call and
+// card at its time, so everyone watching sees the same card at the same moment. Each board is compared with the
+// double-dummy best contract (the robots' and the systems' league) and checked card by card (the robots' mistakes, for
+// Servet's report).
+// Six tables, one per system, side by side: run by .github/workflows/robots.yml every two hours, one job per table:
+// node .github/robots/robots.js <dir> <system> (the dir holds live-<system>.json and errors-<system>.json).
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.resolve(__dirname, '../..') + '/';
 const OUT = path.resolve(process.argv[2] || root + 'robots-out') + '/';
@@ -21,15 +23,24 @@ ctx.window.window = ctx.window; ctx.self = ctx.window; vm.createContext(ctx);
 for (const file of ['dds.js', 'core.js', 'bidding.js', 'play.js']) vm.runInContext(fs.readFileSync(root + 'js/' + file, 'utf8'), ctx, { filename: file });
 const E = {}; for (const fn of ctx.window.BRIDGE) fn(E);
 
-// the robots: made-up names from many countries, in eight pairs; two pairs sit down for each system / convention
-const PAIRS = [['Astrid Halvorsen', 'Mateo Ferrari'], ['Leila Haddad', 'Jonas Becker'], ['Yuki Tanaka', 'Rafael Moreno'], ['Ingrid Novak', 'Omar Benali'],
-  ['Chloé Laurent', 'Viktor Petrov'], ['Ananya Rao', 'Lukas Kowalski'], ['Sofia Lindgren', 'Kenji Mori'], ['Elif Aydın', 'Daniel Okafor']];
 const SYS = ['sayc', 'twoone', 'acol', 'sef', 'precision', 'polish'];
+const TABLE = process.argv[3] || 'sayc';
+if (!SYS.includes(TABLE)) throw new Error('no such system: ' + TABLE);
+// each table's two pairs (made-up names from many countries): North-South and East-West all the time
+const NAMES = {
+  sayc: [['Astrid Halvorsen', 'Mateo Ferrari'], ['Leila Haddad', 'Jonas Becker']],
+  twoone: [['Yuki Tanaka', 'Rafael Moreno'], ['Ingrid Novak', 'Omar Benali']],
+  acol: [['Chloé Laurent', 'Viktor Petrov'], ['Ananya Rao', 'Lukas Kowalski']],
+  sef: [['Sofia Lindgren', 'Kenji Mori'], ['Elif Aydın', 'Daniel Okafor']],
+  precision: [['Mei Lin Zhou', 'Tomás Silva'], ['Hanna Virtanen', 'Karim Mansour']],
+  polish: [['Isabel Duarte', 'Pavel Horák'], ['Amara Nwosu', 'Felix Brandt']],
+};
+const PAIRS = NAMES[TABLE];
 const CARD_KEYS = ['lav', 'roman'];   // ways of discarding, not bids
 const BASICS = ['jtr', 'strong2c', 'weak2', 'nego', 'takeout', 'bw', 'cue', 'pre', 'runout'];
 // the program: each system on its own first, then each of its conventions
 const BLOCKS = [];
-for (const k of SYS) {
+for (const k of [TABLE]) {
   const on = E.sysOf(k).conv;
   BLOCKS.push({ sys: k, conv: '' });
   for (const c of E.CONVS) if (on[c.k] && !CARD_KEYS.includes(c.k)) BLOCKS.push({ sys: k, conv: c.k });
@@ -69,10 +80,10 @@ function best(deal, bn) {
 // a board's length on the page (as the page counts it)
 const dur = b => TM.call * b.a.length + (b.p.length ? TM.lead + TM.card * (b.p.length - 1) + TM.trick * 13 : 0) + TM.end;
 
-let prev = null; try { prev = JSON.parse(fs.readFileSync(OUT + 'live.json', 'utf8')); } catch (e) {}
+let prev = null; try { prev = JSON.parse(fs.readFileSync(OUT + 'live-' + TABLE + '.json', 'utf8')); } catch (e) {}
 const st = prev && prev.st ? prev.st : { blk: 0, k: 0, n: 0, end: 0, skip: {} };
 const league = prev && prev.league ? prev.league : { pairs: PAIRS.map((n, i) => ({ i, n, r: 1500, b: 0 })), sys: {}, conv: {} };
-let boards = prev && prev.boards ? prev.boards : [], errs = []; try { errs = JSON.parse(fs.readFileSync(OUT + 'errors.json', 'utf8')); } catch (e) {}
+let boards = prev && prev.boards ? prev.boards : [], errs = []; try { errs = JSON.parse(fs.readFileSync(OUT + 'errors-' + TABLE + '.json', 'utf8')); } catch (e) {}
 const now = Date.now();
 if (!st.end || st.end < now) st.end = now + 20e3;   // nothing ahead (the first run, or a long stop): start now
 const t0 = performance.now();
@@ -92,7 +103,7 @@ async function main() {
     const pl = g.history.map(t => t.cards.map(x => [x.s, x.c])), tricks = g.tricks[E.sideOf(c.decl)];
     const sd = E.scoreOf(c.level, c.strain, c.dbl, E.vulOf(bn, c.decl), tricks), ns = E.sideOf(c.decl) === 0 ? sd : -sd;
     const bp = best(deal, bn), imp = E.imps(ns - bp.par);
-    const pi = (2 * st.blk) % PAIRS.length, pj = (2 * st.blk + 1) % PAIRS.length;
+    const pi = 0, pj = 1;
     const b = { n: st.n, t0: st.end, sys: blk.sys, conv: blk.conv, k: st.k + 1, of: PER, bn, dealer, ns: pi, ew: pj, d: deal,
       a: auc.map(e => [e.seat, e.call, (e.m && e.m.t) || '', (e.m && e.m.cv) || '']), p: pl.flat().map(x => x[1]), lead: (c.decl + 1) % 4,
       c: [c.level, c.strain, c.dbl, c.decl], tr: tricks, sc: ns, par: bp.par, pc: bp.c, imp };
@@ -113,8 +124,8 @@ async function main() {
   }
   const played = boards.filter(b => b.t1 <= now); boards = played.slice(-KEEP).concat(boards.filter(b => b.t1 > now));
   fs.mkdirSync(OUT, { recursive: true });
-  fs.writeFileSync(OUT + 'live.json', JSON.stringify({ v: 1, at: now, tm: TM, pairs: PAIRS, st, league, boards }));
-  fs.writeFileSync(OUT + 'errors.json', JSON.stringify(errs.slice(0, ERRS)));
+  fs.writeFileSync(OUT + 'live-' + TABLE + '.json', JSON.stringify({ v: 2, sys: TABLE, at: now, tm: TM, pairs: PAIRS, st, league, boards }));
+  fs.writeFileSync(OUT + 'errors-' + TABLE + '.json', JSON.stringify(errs.slice(0, ERRS)));
   console.log('made', made, 'boards; ahead until', new Date(st.end).toISOString());
 }
 main().catch(e => { console.error(e); process.exit(1); });

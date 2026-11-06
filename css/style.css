@@ -1925,3 +1925,11 @@ body.clubsopen{overflow:hidden}
 .rttab{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 12px}
 .rttab td,.rttab th{padding:4px 6px;border-bottom:1px solid rgba(127,127,127,.25);text-align:left}
 .auction td button.c{background:transparent;border:0;color:inherit;font:inherit;padding:0 2px;cursor:pointer}
+.rtchips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.rtchip{padding:5px 10px;border-radius:999px;border:1px solid rgba(127,127,127,.35);background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.rtchip.on{background:var(--brass,#c9a227);border-color:transparent;color:#1f2a22;font-weight:700}
+.rtrows{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;padding:0 14px 14px}
+.rtrow2{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;border-radius:8px;border:1px solid rgba(127,127,127,.3);background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.rtrow2 small{opacity:.8;font-size:12px}
+.rtsit{padding:0 5px;margin-left:4px;font-size:13px;line-height:1.4}
+.rtcard .rtgo{cursor:default}

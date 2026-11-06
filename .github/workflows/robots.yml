@@ -1,6 +1,7 @@
-# The robots' table: every two hours the robots play the boards of the next hours (.github/robots/robots.js), each with
-# its start time; the file goes to the robots-data branch (one commit, replaced each time, so the history does not
-# grow), which the page reads from raw.githubusercontent.com and shows card by card at each board's time.
+# The robots' tables: every two hours the robots of each of the six tables (one per system, side by side) play the
+# boards of the next hours (.github/robots/robots.js), each with its start time; the files go to the robots-data
+# branch (one commit, replaced each time, so the history does not grow), which the page reads from
+# raw.githubusercontent.com and shows card by card at each board's time.
 name: Robot table
 on:
   schedule:
@@ -17,6 +18,10 @@ jobs:
   play:
     runs-on: ubuntu-latest
     timeout-minutes: 110
+    strategy:
+      fail-fast: false
+      matrix:
+        sys: [sayc, twoone, acol, sef, precision, polish]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,16 +30,37 @@ jobs:
       - name: The table so far
         run: |
           mkdir -p out
-          for f in live.json errors.json; do curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/$f?$(date +%s)" -o out/$f || rm -f out/$f; done
+          for f in live-${{ matrix.sys }}.json errors-${{ matrix.sys }}.json; do curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/$f?$(date +%s)" -o out/$f || rm -f out/$f; done
       - name: Play the next boards
-        run: node .github/robots/robots.js out
+        run: node .github/robots/robots.js out ${{ matrix.sys }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: table-${{ matrix.sys }}
+          path: out/
+          retention-days: 1
+  publish:
+    needs: play
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      # the tables as they were (a table whose job failed keeps its boards), then the new ones
+      - name: The tables so far
+        run: |
+          mkdir -p out
+          for s in sayc twoone acol sef precision polish; do for f in live-$s.json errors-$s.json; do curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/$f?$(date +%s)" -o out/$f || rm -f out/$f; done; done
+      - uses: actions/download-artifact@v4
+        with:
+          path: new
+          pattern: table-*
+          merge-multiple: true
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          cp -f new/*.json out/ 2>/dev/null || true
           cd out
           git init -q
           git checkout -q -b robots-data
-          git add live.json errors.json
-          git -c user.name="Servetsvm" -c user.email="39servet@gmail.com" commit -qm "Robot table: $(date -u +%FT%TZ)"
+          git add *.json
+          git -c user.name="Servetsvm" -c user.email="39servet@gmail.com" commit -qm "Robot tables: $(date -u +%FT%TZ)"
           git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" robots-data

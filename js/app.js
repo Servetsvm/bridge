@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 383;
+const APP_V = 384;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1121,6 +1121,8 @@ function vHand(seat) {
 // the name of the player at a seat (you, a player at an online table, or a robot)
 function seatName(seat) {
   if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
+  // a robots' table's seat taken: the robots keep their names (while the system stays that table's)
+  if (!online() && ui.rtNames && ui.rtNames.sys === SET.sys && ui.rtNames.n[seat]) return ui.rtNames.n[seat];
   return online() && Net.st.names[seat] ? Net.st.names[seat] : T('Robot');
 }
 function seatLabel(seat) {
@@ -2408,23 +2410,29 @@ async function robotCardFor(g, t) {
   if (lv === 'expert' || online() || G.tour || G.tprac || sideOf(t) === sideOf(U())) return Bot.ask(g, t, BOT_OPT);
   return robotCard(g, t);
 }
-/* ---- the robots' table (🤖 Robot table — live): four robots with made-up names play each other all day, one system
-   and convention after another (.github/robots/robots.js plays the boards ahead of time, each with its start time,
-   on the robots-data branch); every watcher sees each call and card at its time, so all see the same moment ---- */
-const RT_URL = 'https://raw.githubusercontent.com/Servetsvm/bridge/robots-data/live.json';
-const RT = { data: null, at: 0, busy: null, tab: 'live', sel: null, view: null, timer: null };
+/* ---- the robots' tables (🤖 Robot table — live): six tables, one per system, where four robots with made-up names
+   play each other all day, each of the system's conventions in turn (.github/robots/robots.js plays the boards ahead of
+   time, each with its start time, on the robots-data branch); every watcher sees each call and card at its time, so
+   all see the same moment. A player can take a robot's seat: the next boards with those robots, on their device ---- */
+const RT_URL = 'https://raw.githubusercontent.com/Servetsvm/bridge/robots-data/';
+const RT_KEYS = ['sayc', 'twoone', 'acol', 'sef', 'precision', 'polish'];
+const RT = { all: {}, data: null, cur: 'sayc', at: 0, busy: null, tab: 'live', sel: null, view: null, timer: null };
 const RT_SYS = { twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' };
+const rtGet = f => fetch(RT_URL + f + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null);
 function rtLoad(force) {
   if (RT.busy) return RT.busy;
-  if (!force && RT.data && Date.now() - RT.at < 10 * 60e3) return Promise.resolve(RT.data);
-  return RT.busy = fetch(RT_URL + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }).then(r => r.ok ? r.json() : null)
-    .then(d => { if (d && d.boards) { RT.data = d; RT.at = Date.now(); } return RT.data; }).catch(() => RT.data).finally(() => { RT.busy = null; });
+  if (!force && RT.at && Date.now() - RT.at < 10 * 60e3) return Promise.resolve(RT.data);
+  return RT.busy = Promise.all(RT_KEYS.map(k => rtGet('live-' + k + '.json'))).then(L => {
+    L.forEach((d, i) => { if (d && d.boards) RT.all[RT_KEYS[i]] = d; });
+    RT.data = RT.all[RT.cur] || null; RT.at = Date.now(); return RT.data;
+  }).finally(() => { RT.busy = null; });
 }
+function rtPick(k) { RT.cur = k; RT.data = RT.all[k] || null; RT.sel = null; RT.view = null; }
 const rtConv = b => b.conv ? pracName(b.conv) : T('The system itself');
-const rtPair = i => { const D = RT.data, p = D && D.league && D.league.pairs[i]; return p ? p.n.join(' & ') : ''; };
-const rtRating = i => { const D = RT.data, p = D && D.league && D.league.pairs[i]; return p ? Math.round(p.r) : ''; };
-function rtCur(t) {
-  const B = (RT.data && RT.data.boards) || [];
+const rtPair = i => { const p = RT.data && RT.data.league && RT.data.league.pairs[i]; return p ? p.n.join(' & ') : ''; };
+const rtRating = i => { const p = RT.data && RT.data.league && RT.data.league.pairs[i]; return p ? Math.round(p.r) : ''; };
+function rtCur(t, D) {
+  const B = ((D || RT.data) && (D || RT.data).boards) || [];
   const b = B.find(x => x.t0 <= t && t < x.t1); if (b) return { b };
   const w = B.find(x => x.t0 > t); return w ? { wait: w } : null;
 }
@@ -2464,15 +2472,17 @@ function rtExpl(b, i) {
   const ci = e[3] ? E.convInfo(e[3]) : null;
   return `<b>${SEAT[e[0]]}: ${callHtml(e[1])}</b> — ${symText(bidTxt(e[2] || 'Pass'))}${ci ? `<div class="cv"><span>${ci.n}</span>${symText(ci.d)}</div>` : ''}`;
 }
-// the four hands (the cards still held) round the trick on the table
-function rtTable(b, P) {
+// the robot in a seat: North-South the first pair (North its first name), East-West the second
+const rtName = (s, D) => { const P = ((D || RT.data).league || {}).pairs || [], n = (P[sideOf(s)] || { n: ['', ''] }).n; return n[s < 2 ? 0 : 1]; };
+// the four hands (the cards still held) round the trick on the table; live: a seat to take (🪑)
+function rtTable(b, P, live) {
   const gone = new Set(P.seq.slice(0, P.m).map(x => x.c)), pos = { 0: 'n', 1: 'e', 2: 's', 3: 'w' };
-  const nm = s => { const p = sideOf(s) ? b.ew : b.ns, n = (RT.data.league.pairs[p] || { n: ['', ''] }).n; return n[s < 2 ? 0 : 1]; };
-  const hand = s => `<div class="h ${pos[s]}"><b>${SEAT[s]} · ${esc(nm(s))}</b>${ORDER.map(su => suitLine(b.d[s].filter(c => !gone.has(c)), su)).join('<br>')}</div>`;
+  const hand = s => `<div class="h ${pos[s]}"><b>${SEAT[s]} · ${esc(rtName(s))}${live ? ` <button class="btn mini-btn rtsit" data-rtsit="${s}" title="${T('Take this seat')}">🪑</button>` : ''}</b>${ORDER.map(su => suitLine(b.d[s].filter(c => !gone.has(c)), su)).join('<br>')}</div>`;
   const tr = [0, 1, 2, 3].map(s => { const x = P.trick.find(y => y.s === s); return `<span class="rt${pos[s]}">${x ? RTXT[R(x.c)] + symHtml(S(x.c)) : ''}</span>`; }).join('');
   return `<div class="deal rtdeal">${[0, 1, 2, 3].map(hand).join('')}<div class="rttrick">${tr}</div></div>`;
 }
 function rtLive() {
+  if (!RT.data) return `<div class="muted">${T('The robots will be back soon.')}</div>`;
   const t = Date.now(), x = rtCur(t);
   if (!x) return `<div class="muted">${T('The robots will be back soon.')}</div>`;
   if (x.wait) return `<div class="muted">⏳ ${T('The next board starts in {0} s', Math.ceil((x.wait.t0 - t) / 1000))}</div>`;
@@ -2482,8 +2492,9 @@ function rtLive() {
   return `<div class="rthd"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b><small>${T('Board {0} of {1}', b.k, b.of)}</small></div>
     <div class="rtpairs"><span>NS: ${esc(rtPair(b.ns))} <small>${rtRating(b.ns)}</small></span><span>EW: ${esc(rtPair(b.ew))} <small>${rtRating(b.ew)}</small></span></div>
     ${aucDone ? `<div class="rtcon">${T('Contract')} <b>${rtCon(b.c)}</b> · NS ${P.won[0]} – EW ${P.won[1]}</div>` : ''}
-    ${rtTable(b, P)}${res}
-    <div class="auction">${rtAuction(b, P.calls, sel)}</div><div class="expl">${rtExpl(b, sel)}</div>`;
+    ${rtTable(b, P, true)}${res}
+    <div class="auction">${rtAuction(b, P.calls, sel)}</div><div class="expl">${rtExpl(b, sel)}</div>
+    <div class="muted">🪑 ${T('Tap 🪑 to take a robot\'s seat: you play the next boards with these robots, in this system.')}</div>`;
 }
 function rtBoards() {
   const t = Date.now(), B = ((RT.data && RT.data.boards) || []).filter(b => b.t1 <= t).reverse();
@@ -2493,44 +2504,62 @@ function rtBoards() {
         ${rtTable(b, { seq: [], m: 0, trick: [] })}<div class="auction">${rtAuction(b, b.a.length, sel)}</div><div class="expl">${rtExpl(b, sel)}</div>
         <div class="okmsg">${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS <b>${fmtSigned(b.sc)}</b> · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} ${fmtSigned(b.par)} · <b>${fmtSigned(b.imp)} IMP</b></div>`; }
   }
-  return B.length ? B.map(b => `<button class="rtrow" data-rtb="${b.n}"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b> <small>${b.k}/${b.of}</small><span>${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${fmtSigned(b.imp)} IMP</span></button>`).join('') : `<div class="muted">${T('No boards yet.')}</div>`;
+  return B.length ? B.map(b => `<button class="rtrow" data-rtb="${b.n}"><b>${esc(rtConv(b))}</b> <small>${b.k}/${b.of}</small><span>${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${fmtSigned(b.imp)} IMP</span></button>`).join('') : `<div class="muted">${T('No boards yet.')}</div>`;
 }
+// the league of all six tables: the pairs, the systems, the conventions (of the table on view)
 function rtLeague() {
-  const L = RT.data && RT.data.league; if (!L) return '';
-  const pr = L.pairs.slice().sort((a, b) => b.r - a.r).map((p, i) => `<tr><td>${i + 1}</td><td>${esc(p.n.join(' & '))}</td><td><b>${Math.round(p.r)}</b></td><td>${p.b}</td></tr>`).join('');
+  const T6 = RT_KEYS.filter(k => RT.all[k] && RT.all[k].league);
+  if (!T6.length) return `<div class="muted">${T('No boards yet.')}</div>`;
+  const pairs = T6.flatMap(k => RT.all[k].league.pairs.map(p => ({ ...p, k })));
+  const pr = pairs.sort((a, b) => b.r - a.r).map((p, i) => `<tr><td>${i + 1}</td><td>${esc(p.n.join(' & '))}<br><small>${esc(RT_SYS[p.k])}</small></td><td><b>${Math.round(p.r)}</b></td><td>${p.b}</td></tr>`).join('');
   const row = (n, x) => `<tr><td>${esc(n)}</td><td>${x.b}</td><td>${(x.abs / x.b).toFixed(1)}</td><td>${Math.round(100 * x.hit / x.b)}%</td></tr>`;
-  const sy = Object.entries(L.sys).filter(([, x]) => x.b).sort((a, b) => a[1].abs / a[1].b - b[1].abs / b[1].b).map(([k, x]) => row(RT_SYS[k] || k, x)).join('');
-  const cv = Object.entries(L.conv).filter(([k, x]) => x.b && k !== '-').sort((a, b) => b[1].b - a[1].b).slice(0, 30).map(([k, x]) => row(pracName(k), x)).join('');
+  const sy = T6.map(k => [k, RT.all[k].league.sys[k]]).filter(([, x]) => x && x.b).sort((a, b) => a[1].abs / a[1].b - b[1].abs / b[1].b).map(([k, x]) => row(RT_SYS[k] || k, x)).join('');
+  const L = RT.data && RT.data.league;
+  const cv = L ? Object.entries(L.conv).filter(([k, x]) => x.b && k !== '-').sort((a, b) => b[1].b - a[1].b).slice(0, 30).map(([k, x]) => row(pracName(k), x)).join('') : '';
   const head = `<tr><th></th><th>${T('Boards')}</th><th>${T('IMPs from the best')}</th><th>${T('Best reached')}</th></tr>`;
   return `<h3>🏆 ${T('Robot league')}</h3><div class="muted">${T('A pair\'s rating moves with its IMPs against the double-dummy best contract.')}</div>
     <table class="rttab"><tr><th>#</th><th></th><th>${T('Rating')}</th><th>${T('Boards')}</th></tr>${pr}</table>
     <h3>${T('Systems')}</h3><div class="muted">${T('How close the robots come to the best contract with each system (fewer IMPs is better).')}</div><table class="rttab">${head}${sy}</table>
-    ${cv ? `<h3>${T('Conventions')}</h3><table class="rttab">${head}${cv}</table>` : ''}`;
+    ${cv ? `<h3>${T('Conventions')} · ${esc(RT_SYS[RT.cur])}</h3><table class="rttab">${head}${cv}</table>` : ''}`;
 }
 function rtBody() {
-  if (!RT.data) return `<div class="muted">⏳ ${T('Loading…')}</div>`;
+  if (!RT.at) return `<div class="muted">⏳ ${T('Loading…')}</div>`;
   const tab = (k, l) => `<button class="${RT.tab === k ? 'on' : ''}" data-rtt="${k}">${l}</button>`;
-  return `<div class="seg rtseg">${tab('live', '🔴 ' + T('Live'))}${tab('boards', T('Boards'))}${tab('league', T('League'))}</div>
+  const tables = `<div class="rtchips">${RT_KEYS.map(k => `<button class="rtchip${RT.cur === k ? ' on' : ''}" data-rtk="${k}">${esc(RT_SYS[k])}</button>`).join('')}</div>`;
+  return `${tables}<div class="seg rtseg">${tab('live', '🔴 ' + T('Live'))}${tab('boards', T('Boards'))}${tab('league', T('League'))}</div>
     ${RT.tab === 'live' ? rtLive() : RT.tab === 'boards' ? rtBoards() : rtLeague()}`;
 }
 function rtDraw() { const el = $('rtBody'); if (!el) return; const h = rtBody(); if (el.innerHTML !== h) el.innerHTML = h; }
-function rtOpen() {
-  RT.tab = 'live'; RT.sel = null; RT.view = null;
-  openOv('rt', `<h2>🤖 ${T('Robot table — live')}</h2><div class="muted">${T('Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.')}</div><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
-  rtLoad().then(rtDraw);
+function rtOpen(k) {
+  RT.tab = 'live'; rtPick(k || RT.cur);
+  openOv('rt', `<h2>🤖 ${T('Robot table — live')}</h2><div class="muted">${T('Six tables, one for each system: four robots play each other all day, each of the system\'s conventions ten boards at a time. Every hand is shown.')}</div><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  rtLoad().then(() => { rtPick(RT.cur); rtDraw(); });
   if (RT.timer) clearInterval(RT.timer);
   RT.timer = setInterval(() => {
     if (ui.overlay !== 'rt') { clearInterval(RT.timer); RT.timer = null; return; }
-    // the boards ahead running short: read the file again (it is written every two hours)
+    // the boards ahead running short: read the files again (they are written every two hours)
     const B = (RT.data && RT.data.boards) || [], last = B.length ? B[B.length - 1].t1 : 0;
-    if (RT.data && last - Date.now() < 40 * 60e3 && Date.now() - RT.at > 5 * 60e3) rtLoad(true);
+    if (RT.at && last - Date.now() < 40 * 60e3 && Date.now() - RT.at > 5 * 60e3) rtLoad(true).then(() => { RT.data = RT.all[RT.cur] || null; });
     if (RT.tab === 'live') { const x = rtCur(Date.now()); if (x && x.b && RT.sel != null && x.b.n !== RT.lastN) RT.sel = null; RT.lastN = x && x.b ? x.b.n : null; rtDraw(); }
   }, 500);
 }
-// the home page's card: what the robots are playing now
+// a player takes a robot's seat: the next boards at their own table, in this system (and convention), with these
+// robots (their names) in the other seats
+function rtSit(s) {
+  const x = rtCur(Date.now()), b = x && (x.b || x.wait); if (!b) return;
+  askYes(T('Take {0}\'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.', rtName(s), SEAT[s], RT_SYS[b.sys] + (b.conv ? ' · ' + pracName(b.conv) : '')), () => {
+    ui.rtNames = { sys: b.sys, n: [0, 1, 2, 3].map(q => rtName(q)) };
+    SET.seat = s; setSys(b.sys); if (b.conv && pracKnown(b.conv)) togglePractice(b.conv, true);
+    Store.saveSettings(SET); save();
+    closeOv(); ui.saved = null; Net.st.soloPub = true; resume();
+  });
+}
+// the home page's card: the six tables and what each plays now
 function rtCardHtml() {
-  const x = RT.data ? rtCur(Date.now()) : null, b = x && (x.b || x.wait);
-  return `<button class="rtgo" id="hRobotGo" type="button"><span class="rtlive">🔴 ${T('Live')}</span><b>🤖 ${T('Robot table — live')}</b><small>${b ? esc((RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b)) + ' · ' + T('Board {0} of {1}', b.k, b.of) : T('Four robots play each other all day.')}</small><span class="rtwatch">👁 ${T('Watch')}</span></button>`;
+  const t = Date.now();
+  const rows = RT_KEYS.map(k => { const D = RT.all[k], x = D ? rtCur(t, D) : null, b = x && (x.b || x.wait);
+    return `<button class="rtrow2" data-rtk="${k}" data-rtopen="1"><b>${esc(RT_SYS[k])}</b><small>${b ? esc(b.conv ? pracName(b.conv) : T('The system itself')) + ' · ' + b.k + '/' + b.of : '—'}</small></button>`; }).join('');
+  return `<div class="rtgo"><span class="rtlive">🔴 ${T('Live')}</span><b>🤖 ${T('Robot table — live')}</b><small>${T('Six tables, one for each system. Tap one to watch.')}</small></div><div class="rtrows">${rows}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
@@ -3009,7 +3038,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   // the robots' table: open it, its tabs, a call's meaning, a board played before
-  if (t.id === 'hRobotGo') { rtOpen(); return; }
+  if (t.dataset.rtk) { if (t.dataset.rtopen) rtOpen(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
+  if (t.dataset.rtsit != null) { rtSit(+t.dataset.rtsit); return; }
   if (t.dataset.rtt) { RT.tab = t.dataset.rtt; RT.view = null; RT.sel = null; rtDraw(); return; }
   if (t.dataset.rti != null) { RT.sel = +t.dataset.rti; rtDraw(); return; }
   if (t.dataset.rtb != null) { RT.view = +t.dataset.rtb < 0 ? null : +t.dataset.rtb; RT.sel = null; rtDraw(); return; }
@@ -3595,9 +3625,9 @@ const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {
   try {
-    const r = await fetch(RT_URL.replace('live.json', 'errors.json') + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }); if (!r.ok) return [];
+    const L = (await Promise.all(RT_KEYS.map(k => rtGet('errors-' + k + '.json')))).flat().filter(Boolean);
     const h = rtHidden();
-    return (await r.json()).map(x => ({ ...x, er: (x.er || []).map(e => Array.isArray(e) ? e : [e.t, e.s, e.c, e.b, e.lost]), path: 'rt:' + x.n, kim: '🤖 ' + T('Robot table — live') + ' · ' + (RT_SYS[x.sys] || x.sys) + (x.conv ? ' · ' + pracName(x.conv) : '') })).filter(x => !h.has(x.path));
+    return L.map(x => ({ ...x, er: (x.er || []).map(e => Array.isArray(e) ? e : [e.t, e.s, e.c, e.b, e.lost]), path: 'rt:' + x.sys + ':' + x.n, kim: '🤖 ' + T('Robot table — live') + ' · ' + (RT_SYS[x.sys] || x.sys) + (x.conv ? ' · ' + pracName(x.conv) : '') })).filter(x => !h.has(x.path));
   } catch (e) { return []; }
 }
 const rbDone = path => String(path).startsWith('rt:') ? rtHide(path) : Net.roboErrDone(path);
