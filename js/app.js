@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 387;
+const APP_V = 388;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2536,7 +2536,7 @@ function rtBody() {
 function rtDraw() { const el = $('rtBody'); if (!el) return; const h = rtBody(); if (el.innerHTML !== h) el.innerHTML = h; }
 function rtOpen(k) {
   RT.tab = 'live'; rtPick(k || RT.cur);
-  openOv('rt', `<h2>🤖 ${T('Robot table — live')}</h2><div class="muted">${T('Six tables, one for each system: four robots play each other all day, each of the system\'s conventions ten boards at a time. Every hand is shown.')}</div><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  openOv('rt', `<h2>🤖 ${T('System table — live')}</h2><div class="muted">${T('Six tables, one for each system: four robots play each other all day, each of the system\'s conventions ten boards at a time. Every hand is shown.')}</div><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
   rtLoad().then(() => { rtPick(RT.cur); rtDraw(); });
   if (RT.timer) clearInterval(RT.timer);
   RT.timer = setInterval(() => {
@@ -2563,7 +2563,7 @@ function rtCardHtml() {
   const t = Date.now();
   const rows = RT_KEYS.map(k => { const D = RT.all[k], x = D ? rtCur(t, D) : null, b = x && (x.b || x.wait);
     return `<button class="rtrow2" data-rtk="${k}" data-rtopen="1"><b>${esc(RT_SYS[k])}</b><small>${b ? esc(b.conv ? pracName(b.conv) : T('The system itself')) + ' · ' + b.k + '/' + b.of : '—'}</small></button>`; }).join('');
-  return `<div class="rtgo"><span class="rtlive">🔴 ${T('Live')}</span><b>🤖 ${T('Robot table — live')}</b><small>${T('Six tables, one for each system. Tap one to watch.')}</small></div><div class="rtrows">${rows}</div>`;
+  return `<div class="rtgo"><span class="rtlive">🔴 ${T('Live')}</span><b>🤖 ${T('System table — live')}</b><small>${T('Six tables, one for each system. Tap one to watch.')}</small></div><div class="rtrows">${rows}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
@@ -3631,7 +3631,7 @@ async function rtErrs() {
   try {
     const L = (await Promise.all(RT_KEYS.map(k => rtGet('errors-' + k + '.json')))).flat().filter(Boolean);
     const h = rtHidden();
-    return L.map(x => ({ ...x, er: (x.er || []).map(e => Array.isArray(e) ? e : [e.t, e.s, e.c, e.b, e.lost]), path: 'rt:' + x.sys + ':' + x.n, kim: '🤖 ' + T('Robot table — live') + ' · ' + (RT_SYS[x.sys] || x.sys) + (x.conv ? ' · ' + pracName(x.conv) : '') })).filter(x => !h.has(x.path));
+    return L.map(x => ({ ...x, er: (x.er || []).map(e => Array.isArray(e) ? e : [e.t, e.s, e.c, e.b, e.lost]), path: 'rt:' + x.sys + ':' + x.n, kim: '🤖 ' + T('System table — live') + ' · ' + (RT_SYS[x.sys] || x.sys) + (x.conv ? ' · ' + pracName(x.conv) : '') })).filter(x => !h.has(x.path));
   } catch (e) { return []; }
 }
 const rbDone = path => String(path).startsWith('rt:') ? rtHide(path) : Net.roboErrDone(path);
