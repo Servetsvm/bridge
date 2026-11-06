@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: '17 */2 * * *'
   workflow_dispatch:
+  # a change to the robots' program starts it at once
+  push:
+    branches: [main]
+    paths: ['.github/robots/**', '.github/workflows/robots.yml']
 permissions:
   contents: write
 concurrency: robots
