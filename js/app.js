@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 382;
+const APP_V = 383;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3038,10 +3038,10 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'rbNoteSend') { const e = HIST.find(h => String(h.id) === t.dataset.id) || (G && G.result && String(G.result.id) === t.dataset.id ? G.result : null), txt = ($('rbNote') || {}).value || '';
     if (!e || txt.trim().length < 3) { flash(T('Write what the robot did wrong'), 2000); return; }
     t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
-  if (t.dataset.rbok) { Net.roboErrFixed(t.dataset.rbok, t.dataset.v === '1').then(showRoboErrs).catch(() => flash(T('Could not save'), 2000)); return; }
-  if (t.id === 'rbDelAll') { const P = (ui.rbAll || []).slice(); if (!P.length || !confirm(T('Delete all') + ' — ' + T('Robot mistakes') + ' (' + P.length + ')?')) return; Promise.all(P.map(x => Net.roboErrDone(x))).then(() => { flash('🗑 ' + P.length, 1800); showRoboErrs(); }).catch(() => flash(T('Could not remove'), 2000)); return; }
+  if (t.dataset.rbok) { rbFixed(t.dataset.rbok, t.dataset.v === '1').then(showRoboErrs).catch(() => flash(T('Could not save'), 2000)); return; }
+  if (t.id === 'rbDelAll') { const P = (ui.rbAll || []).slice(); if (!P.length || !confirm(T('Delete all') + ' — ' + T('Robot mistakes') + ' (' + P.length + ')?')) return; Promise.all(P.map(x => rbDone(x))).then(() => { flash('🗑 ' + P.length, 1800); showRoboErrs(); }).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === 'rbShowOk') { ui.rbShowOk = !ui.rbShowOk; showRoboErrs(); return; }
-  if (t.dataset.rbdone) { Net.roboErrDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
+  if (t.dataset.rbdone) { rbDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === 'rbCopy') { const txt = JSON.stringify(ui.rbList || []); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
   if (t.dataset.cvdone) { Net.convDone(t.dataset.cvdone).then(showConvRequests).catch(() => flash(T('Could not remove'), 2000)); return; }
   const sol = ev_.target.closest("[data-solo]"); if (sol) { Net.st.soloPub = sol.dataset.solo === "pub"; closeOv(); resume(); return; }
@@ -3561,6 +3561,7 @@ async function showRoboErrs() {
   // read again after a removal: the list stays where it was (no "Loading…" in between, which sent it to the top)
   if (ui.overlay !== 'roboerr') openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let L = []; try { L = await Net.roboErrs(); } catch (e) {}
+  L = L.concat(await rtErrs()).sort((a, b) => b.ts - a.ts);   // the robots' table's too
   if (ui.overlay !== 'roboerr') return;
   L = L.filter(r => r.kind !== 'bid');   // the bidding lessons are in the learning report
   ui.rbAll = L.map(r => r.path);
@@ -3587,6 +3588,20 @@ async function showRoboErrs() {
       <button class="btn mini-btn" data-rbok="${esc(r.path)}" data-v="${r.ok ? 0 : 1}">${r.ok ? '↩ ' + T('Not fixed') : '✔ ' + T('Fixed')}</button> <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
+// the robots' table's mistakes (every card of its boards checked double dummy by the job): shown with the players'
+// ones; Remove, Fixed and Delete all hide them on this device
+const RT_HIDE = 'bridge-rt-hide';
+const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
+function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
+async function rtErrs() {
+  try {
+    const r = await fetch(RT_URL.replace('live.json', 'errors.json') + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }); if (!r.ok) return [];
+    const h = rtHidden();
+    return (await r.json()).map(x => ({ ...x, er: (x.er || []).map(e => Array.isArray(e) ? e : [e.t, e.s, e.c, e.b, e.lost]), path: 'rt:' + x.n, kim: '🤖 ' + T('Robot table — live') + ' · ' + (RT_SYS[x.sys] || x.sys) + (x.conv ? ' · ' + pracName(x.conv) : '') })).filter(x => !h.has(x.path));
+  } catch (e) { return []; }
+}
+const rbDone = path => String(path).startsWith('rt:') ? rtHide(path) : Net.roboErrDone(path);
+const rbFixed = (path, on) => String(path).startsWith('rt:') ? rtHide(path) : Net.roboErrFixed(path, on);
 // the player tells what a robot did wrong on this board (the bidding too, which the card check cannot see)
 const rbNoteHtml = e => e && e.deal && !online() ? `<div class="grp"><span>🤖 ${T('Report a robot mistake')}</span><textarea id="rbNote" class="tok" rows="2" maxlength="500" placeholder="${T('What did the robot do wrong? The bidding, a card…')}"></textarea><div class="row2"><button class="btn" id="rbNoteSend" data-id="${esc(String(e.id))}">📨 ${T('Send to the robot mistakes')}</button></div></div>` : '';
 // the administrator sees on the report button how many new lessons came in since the report was last opened
