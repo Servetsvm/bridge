@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 395;
+const APP_V = 396;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1347,7 +1347,7 @@ function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
-  if (G.rtv) { const b = G.rtv.b; s = G.rtv.done ? `${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} (${fmtSigned(b.imp)} IMP)<div class="row2 rtend"><button class="btn" id="bRtAgain">🔁 ${T('Watch again')}</button><button class="btn gold" id="bRtNext">▶ ${T('Continue')}</button></div>` : '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }
+  if (G.rtv) { const b = G.rtv.b; s = G.rtv.done ? `${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} (${fmtSigned(b.imp)} IMP)${rtDdHtml(b)}<div class="row2 rtend"><button class="btn" id="bRtAgain">🔁 ${T('Watch again')}</button><button class="btn gold" id="bRtNext">▶ ${T('Continue')}</button></div>` : '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }
   else if (G.watch && (G.phase === 'bid' || G.phase === 'play')) s = '🤖 ' + T('The robots are playing this deal — watch');
   else if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
   else if (G.phase === "play" && ui.ask) s = T("Do you agree?");
@@ -2559,6 +2559,12 @@ function rtOpen(k) {
     if (RT.at && last - Date.now() < 40 * 60e3 && Date.now() - RT.at > 5 * 60e3) rtLoad(true).then(() => { RT.data = RT.all[RT.cur] || null; });
     if (RT.tab === 'live') { const x = rtCur(Date.now()); if (x && x.b && RT.sel != null && x.b.n !== RT.lastN) RT.sel = null; RT.lastN = x && x.b ? x.b.n : null; rtDraw(); }
   }, 500);
+}
+// the double-dummy table of a board: the tricks each declarer takes in each strain (a game or more marked)
+function rtDdHtml(b) {
+  if (!b.dd) return '';
+  const st = [4, 3, 2, 1, 0], gm = (t, s) => t - 6 >= (s === 4 ? 3 : s >= 2 ? 4 : 5);
+  return `<table class="rtdd"><tr><th>🎯</th>${st.map(s => `<th>${symHtml(s)}</th>`).join('')}</tr>${[0, 2, 1, 3].map(d => `<tr><th>${SEAT[d]}</th>${st.map(s => { const t = b.dd[d][s]; return `<td class="${t >= 7 ? (gm(t, s) ? 'gm' : 'ok') : ''}">${t >= 7 ? t - 6 : '–'}</td>`; }).join('')}</tr>`).join('')}</table>`;
 }
 // the system table on the game's own table: the board as it stands at time t (every hand open; the robots act, not us)
 function rtGameOf(b, t) {

@@ -1943,3 +1943,7 @@ body.homev2 .h2ptx .h2conv{margin:8px 0 0;background:transparent;color:inherit;b
 /* the system table's six systems on the home card: gold buttons, as Start */
 body.homev2 .rtcard .rtchip{background:linear-gradient(180deg,#ecc874,var(--h2-brass,#c9a227) 55%,var(--h2-brass-2,#a8841c));color:var(--h2-brass-ink,#2a1f05);border:1px solid #8a6a1c;border-radius:10px;font:700 14px/1 var(--f-ui);padding:9px 12px;box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 4px 10px rgba(0,0,0,.3);cursor:pointer}
 body.homev2 .rtcard .rtchip:hover{filter:brightness(1.05)}
+/* the system table's double-dummy table at the end of a board: the level each declarer makes in each strain */
+.rtdd{margin:6px auto 2px;border-collapse:collapse;font-size:13px;background:rgba(255,255,255,.9);color:#1f2a22;border-radius:6px;overflow:hidden}
+.rtdd th,.rtdd td{padding:3px 8px;text-align:center;border:1px solid rgba(0,0,0,.08)}
+.rtdd td.ok{font-weight:700}.rtdd td.gm{font-weight:700;background:#f4e3a6}

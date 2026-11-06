@@ -1995,6 +1995,10 @@ body.homev2 .h2ptx .h2conv{margin:8px 0 0;background:transparent;color:inherit;b
 /* the system table's six systems on the home card: gold buttons, as Start */
 body.homev2 .rtcard .rtchip{background:linear-gradient(180deg,#ecc874,var(--h2-brass,#c9a227) 55%,var(--h2-brass-2,#a8841c));color:var(--h2-brass-ink,#2a1f05);border:1px solid #8a6a1c;border-radius:10px;font:700 14px/1 var(--f-ui);padding:9px 12px;box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 4px 10px rgba(0,0,0,.3);cursor:pointer}
 body.homev2 .rtcard .rtchip:hover{filter:brightness(1.05)}
+/* the system table's double-dummy table at the end of a board: the level each declarer makes in each strain */
+.rtdd{margin:6px auto 2px;border-collapse:collapse;font-size:13px;background:rgba(255,255,255,.9);color:#1f2a22;border-radius:6px;overflow:hidden}
+.rtdd th,.rtdd td{padding:3px 8px;text-align:center;border:1px solid rgba(0,0,0,.08)}
+.rtdd td.ok{font-weight:700}.rtdd td.gm{font-weight:700;background:#f4e3a6}
 
 </style>
 
@@ -9688,7 +9692,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 395;
+const APP_V = 396;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11027,7 +11031,7 @@ function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
-  if (G.rtv) { const b = G.rtv.b; s = G.rtv.done ? `${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} (${fmtSigned(b.imp)} IMP)<div class="row2 rtend"><button class="btn" id="bRtAgain">🔁 ${T('Watch again')}</button><button class="btn gold" id="bRtNext">▶ ${T('Continue')}</button></div>` : '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }
+  if (G.rtv) { const b = G.rtv.b; s = G.rtv.done ? `${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} (${fmtSigned(b.imp)} IMP)${rtDdHtml(b)}<div class="row2 rtend"><button class="btn" id="bRtAgain">🔁 ${T('Watch again')}</button><button class="btn gold" id="bRtNext">▶ ${T('Continue')}</button></div>` : '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }
   else if (G.watch && (G.phase === 'bid' || G.phase === 'play')) s = '🤖 ' + T('The robots are playing this deal — watch');
   else if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
   else if (G.phase === "play" && ui.ask) s = T("Do you agree?");
@@ -12239,6 +12243,12 @@ function rtOpen(k) {
     if (RT.at && last - Date.now() < 40 * 60e3 && Date.now() - RT.at > 5 * 60e3) rtLoad(true).then(() => { RT.data = RT.all[RT.cur] || null; });
     if (RT.tab === 'live') { const x = rtCur(Date.now()); if (x && x.b && RT.sel != null && x.b.n !== RT.lastN) RT.sel = null; RT.lastN = x && x.b ? x.b.n : null; rtDraw(); }
   }, 500);
+}
+// the double-dummy table of a board: the tricks each declarer takes in each strain (a game or more marked)
+function rtDdHtml(b) {
+  if (!b.dd) return '';
+  const st = [4, 3, 2, 1, 0], gm = (t, s) => t - 6 >= (s === 4 ? 3 : s >= 2 ? 4 : 5);
+  return `<table class="rtdd"><tr><th>🎯</th>${st.map(s => `<th>${symHtml(s)}</th>`).join('')}</tr>${[0, 2, 1, 3].map(d => `<tr><th>${SEAT[d]}</th>${st.map(s => { const t = b.dd[d][s]; return `<td class="${t >= 7 ? (gm(t, s) ? 'gm' : 'ok') : ''}">${t >= 7 ? t - 6 : '–'}</td>`; }).join('')}</tr>`).join('')}</table>`;
 }
 // the system table on the game's own table: the board as it stands at time t (every hand open; the robots act, not us)
 function rtGameOf(b, t) {

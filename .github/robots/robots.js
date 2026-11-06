@@ -76,7 +76,7 @@ function best(deal, bn) {
     for (let l = 1; l <= tr - 6; l++) { const s = E.scoreOf(l, st, 0, E.vulOf(bn, d), tr), sd = E.sideOf(d); if (!top[sd] || s > top[sd].s) top[sd] = { s, c: [l, st, 0, d] }; }
   }
   const ns = top[0] ? top[0].s : 0, ew = top[1] ? top[1].s : 0;
-  return ns >= ew ? { par: ns, c: top[0] ? top[0].c : null } : { par: -ew, c: top[1].c };
+  return ns >= ew ? { par: ns, c: top[0] ? top[0].c : null, tab } : { par: -ew, c: top[1].c, tab };
 }
 // a board's length on the page (as the page counts it)
 const dur = b => TM.call * b.a.length + (b.p.length ? TM.lead + TM.card * (b.p.length - 1) + TM.trick * 13 : 0) + TM.end;
@@ -93,6 +93,8 @@ const t0 = performance.now();
 
 async function main() {
   try { const m = await vm.runInContext('ddsFactory', ctx)(); E.ddsUse(m); } catch (e) { console.log('no DDS', e.message); }
+  // boards made before the double-dummy table was kept: theirs now
+  for (const b of boards) if (!b.dd) { try { b.dd = best(b.d, b.bn).tab; } catch (e) {} }
   let made = 0;
   while (st.end < now + AHEAD && performance.now() - t0 < 80 * 60e3) {
     const blk = BLOCKS[st.blk % BLOCKS.length], key = blk.sys + ':' + blk.conv;
@@ -109,7 +111,7 @@ async function main() {
     const pi = 0, pj = 1;
     const b = { n: st.n, t0: st.end, sys: blk.sys, conv: blk.conv, k: st.k + 1, of: PER, bn, dealer, ns: pi, ew: pj, d: deal,
       a: auc.map(e => [e.seat, e.call, (e.m && e.m.t) || '', (e.m && e.m.cv) || '']), p: pl.flat().map(x => x[1]), lead: (c.decl + 1) % 4,
-      c: [c.level, c.strain, c.dbl, c.decl], tr: tricks, sc: ns, par: bp.par, pc: bp.c, imp };
+      c: [c.level, c.strain, c.dbl, c.decl], tr: tricks, sc: ns, par: bp.par, pc: bp.c, imp, dd: bp.tab };
     b.t1 = b.t0 + dur(b);
     boards.push(b); made++;
     // the league: each pair's rating moves with its IMPs against the best contract; each system / convention: how
