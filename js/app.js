@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 389;
+const APP_V = 390;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -40,8 +40,8 @@ function applyLang() {
 const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, confirmNew: 0, overlay: null, resTab: 'list' };
 const online = () => typeof Net !== "undefined" && Net.on;
 const guest = () => typeof Net !== "undefined" && Net.guest;
-// your seat (a tournament is always played from South); a spectator has no seat of their own (meSeat -1)
-const U = () => (guest() ? Net.st.seat : G && G.champ ? 2 : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
+// your seat (a tournament, and the system table watched, always from South); a spectator has no seat of their own (meSeat -1)
+const U = () => (guest() ? Net.st.seat : G && (G.champ || G.rtv) ? 2 : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
 const meSeat = () => (guest() && Net.st.watching ? -1 : G && G.watch ? -1 : U());
 const delay = () => G && G.watch ? 1700 : [1100, 650, 250][SET.speed];   // watching the robots: slowly, to follow every card
 const $ = id => document.getElementById(id);
@@ -79,7 +79,7 @@ function save() {
   { const ck = cardCk(); if (CARD_CK !== null && ck !== CARD_CK) SET.cardTs = Date.now(); CARD_CK = ck; }
   if (online() && Net.host) Net.broadcast();
   const slim = HIST.map((h, i) => (i < HIST.length - 60 ? { ...h, deal: undefined, fieldList: undefined, auc: undefined, pl: undefined } : h));
-  Store.saveLocal({ SET, G: guest() ? Net.st.savedG : (G && G.phase === "idle" ? ui.saved || null : G), HIST: slim, BOARD });
+  Store.saveLocal({ SET, G: guest() ? Net.st.savedG : (G && (G.phase === "idle" || G.rtv) ? ui.saved || null : G), HIST: slim, BOARD });
 }
 // a first visit opens in the visitor's language: the first of the browser's languages we have, else the
 // language of the country the device's time zone is in, else English (nothing is sent anywhere to find it)
@@ -941,7 +941,7 @@ function finishBoard() {
   if (g && G.fixes && G.fixes.length && !online()) { e.fx = G.fixes.slice(); Net.roboErr(e, G.fixes.map(([t, s, c, b]) => ({ t, s, c, b, lost: 0 })), true).then(() => flash('🤖 ' + T('Your corrections were sent to improve the robots'), 2600)).catch(() => {}); }
 }
 function tick() {
-  clearTimeout(timer); if (!G || guest()) return; // when you are a guest, the host runs the table
+  clearTimeout(timer); if (!G || guest() || G.rtv) return;   // the system table: the file plays it // when you are a guest, the host runs the table
   const robot = s => online() ? Net.owner(s) === "robot" : (G.phase === "bid" ? G.watch || s !== U() : !userControls(s));
   if (G.phase === "bid") {
     const t = bidTurn();
@@ -1120,6 +1120,7 @@ function vHand(seat) {
 }
 // the name of the player at a seat (you, a player at an online table, or a robot)
 function seatName(seat) {
+  if (G && G.rtv) return rtName(seat, RT.all[G.rtv.k]);
   if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
   // a robots' table's seat taken: the robots keep their names (while the system stays that table's)
   if (!online() && SET.rtNames && SET.rtNames.sys === SET.sys && SET.rtNames.n[seat]) return SET.rtNames.n[seat];
@@ -1149,6 +1150,12 @@ function renderBar() {
   const dst = ['bottom:-1px;left:50%;transform:translateX(-50%)', 'left:1px;top:50%;transform:translateY(-50%)', 'top:-1px;left:50%;transform:translateX(-50%)', 'right:1px;top:50%;transform:translateY(-50%)'][rel(G.dealer)];
   let con = '—', tr = '';
   if (G.play) { const c = G.play.contract; con = `${callHtml(B(c.level, c.strain))}${c.dbl === 1 ? ' X' : c.dbl === 2 ? ' XX' : ''} <span class="sm">${SEAT[c.decl]}</span>`; const us = sideOf(u); tr = `${T('Us')} <b class="tk">${G.play.tricks[us]}</b> · ${T('Them')} <b class="tk">${G.play.tricks[1 - us]}</b>`; }
+  if (G.rtv) { const b = G.rtv.b, D = RT.all[G.rtv.k];
+    $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
+     <button class="box" id="bAuc"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
+     <div class="box"><small>🔴 ${esc(RT_SYS[b.sys] || b.sys)}</small><b>${esc(rtConv(b))}</b><span class="tr">${b.k}/${b.of} · NS ${rtR(D, 0) ? Math.round(rtR(D, 0).r) : ''} · EW ${rtR(D, 1) ? Math.round(rtR(D, 1).r) : ''}</span></div>
+     <div class="spacer"></div><div class="tools"><button class="btn" id="bHome" title="${T('Home')}">⌂</button><button class="btn gold" id="bRtList">📊 ${T('Tables')}</button></div>`;
+    return; }
   const g = G.play;
   const canClaim = G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
   const last = HIST.length ? HIST[HIST.length - 1] : null;
@@ -1340,7 +1347,8 @@ function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
-  if (G.watch && (G.phase === 'bid' || G.phase === 'play')) s = '🤖 ' + T('The robots are playing this deal — watch');
+  if (G.rtv) { const b = G.rtv.b; s = G.rtv.done ? `${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} (${fmtSigned(b.imp)} IMP)` : '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }
+  else if (G.watch && (G.phase === 'bid' || G.phase === 'play')) s = '🤖 ' + T('The robots are playing this deal — watch');
   else if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
   else if (G.phase === "play" && ui.ask) s = T("Do you agree?");
   else if (G.phase === 'play') { const g = G.play; if (g.trick.length === 4) s = T('Gathering the trick…'); else if (userControls(g.turn)) s = g.turn === U() ? T('Your turn: play a card') : T("Play from {0}'s hand", SEAT[g.turn]); else s = T('{0} is playing…', nameOf(g.turn)); }
@@ -2133,7 +2141,7 @@ function showOpenChoice() {
 function goHome() {
   if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
   // an unfinished board is kept: "Play with robots" carries on from where it was
-  clearTimeout(timer); ui.saved = G && (G.phase === 'bid' || G.phase === 'play') ? G : null;
+  clearTimeout(timer); ui.saved = G && !G.rtv && (G.phase === 'bid' || G.phase === 'play') ? G : G && G.rtv ? ui.saved : null;
   G = idleG(); closeOv(); save(); render();
   if (typeof Net !== "undefined" && Net.shareInfo) Net.shareInfo();   // the lobby sees you are back on the home page
 }
@@ -2503,7 +2511,7 @@ function rtLive() {
     ${aucDone ? `<div class="rtcon">${T('Contract')} <b>${rtCon(b.c)}</b> · NS ${P.won[0]} – EW ${P.won[1]}</div>` : ''}
     ${rtTable(b, P, true)}${res}
     <div class="auction">${rtAuction(b, P.calls, sel)}</div><div class="expl">${rtExpl(b, sel)}</div>
-    <div class="muted">🪑 ${T('Tap 🪑 to take a robot\'s seat: you play the next boards with these robots, in this system.')}</div>`;
+    <div class="row2"><button class="btn gold" data-rtwatch="1">🃏 ${T('Watch on the table')}</button></div>`;
 }
 function rtBoards() {
   const t = Date.now(), B = ((RT.data && RT.data.boards) || []).filter(b => b.t1 <= t).reverse();
@@ -2541,7 +2549,7 @@ function rtBody() {
 function rtDraw() { const el = $('rtBody'); if (!el) return; const h = rtBody(); if (el.innerHTML !== h) el.innerHTML = h; }
 function rtOpen(k) {
   RT.tab = 'live'; rtPick(k || RT.cur);
-  openOv('rt', `<h2>🤖 ${T('System table — live')}</h2><div class="muted">${T('Six tables, one for each system: four robots play each other all day, each of the system\'s conventions ten boards at a time. Every hand is shown.')}</div><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  openOv('rt', `<h2>🤖 ${T('System table — live')}</h2><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
   rtLoad().then(() => { rtPick(RT.cur); rtDraw(); });
   if (RT.timer) clearInterval(RT.timer);
   RT.timer = setInterval(() => {
@@ -2551,6 +2559,42 @@ function rtOpen(k) {
     if (RT.at && last - Date.now() < 40 * 60e3 && Date.now() - RT.at > 5 * 60e3) rtLoad(true).then(() => { RT.data = RT.all[RT.cur] || null; });
     if (RT.tab === 'live') { const x = rtCur(Date.now()); if (x && x.b && RT.sel != null && x.b.n !== RT.lastN) RT.sel = null; RT.lastN = x && x.b ? x.b.n : null; rtDraw(); }
   }, 500);
+}
+// the system table on the game's own table: the board as it stands at time t (every hand open; the robots act, not us)
+function rtGameOf(b, t) {
+  const P = rtPos(b, t), c = { level: b.c[0], strain: b.c[1], dbl: b.c[2], decl: b.c[3] };
+  const auction = b.a.slice(0, P.calls).map(([seat, call, tx, cv]) => ({ seat, call, m: { t: tx, cv } }));
+  const cards = [0, 1].map(() => ({ conv: { ...E.sysOf(b.sys).conv }, agg: 0, sys: b.sys }));
+  const bidding = P.calls < b.a.length;
+  let play = null;
+  if (!bidding) {
+    play = E.newPlayState(b.d, c, auction, cards);
+    const keepLast = P.trick.length === 4;   // a full trick stays on the table a moment before it is gathered
+    for (let i = 0; i < P.m; i++) { const x = P.seq[i]; E.applyCard(play, x.s, x.c); if (play.trick.length === 4 && !(keepLast && i === P.m - 1)) E.collect(play); }
+  }
+  return { id: 'rt-' + b.sys + '-' + b.n, board: b.bn, dealer: b.dealer, deal: b.d, auction, phase: bidding ? 'bid' : 'play', play, result: null, claimed: false, field: null, tour: null, cards, watch: true, rtv: { k: b.sys, b, done: P.done } };
+}
+function rtWatch(k) {
+  if (online()) { flash(T('Online') + ' ●', 1500); return; }
+  if (k) rtPick(k);
+  rtLoad().then(() => {
+    rtPick(RT.cur);
+    const x = rtCur(Date.now()); if (!x || !x.b) { flash(x && x.wait ? T('The next board starts in {0} s', Math.ceil((x.wait.t0 - Date.now()) / 1000)) : T('The robots will be back soon.'), 2500); if (!x) return; }
+    // an unfinished board of your own is kept (Play offline carries on with it)
+    if (G && !G.rtv && (G.phase === 'bid' || G.phase === 'play')) ui.saved = G;
+    clearTimeout(timer); closeOv(); RT.wkey = null;
+    G = rtGameOf((x.b || x.wait), Math.max(Date.now(), (x.b || x.wait).t0)); render();
+    clearInterval(RT.wt);
+    RT.wt = setInterval(() => {
+      if (!G || !G.rtv) { clearInterval(RT.wt); RT.wt = null; return; }
+      const B = (RT.data && RT.data.boards) || [], last = B.length ? B[B.length - 1].t1 : 0;
+      if (RT.at && last - Date.now() < 40 * 60e3 && Date.now() - RT.at > 5 * 60e3) rtLoad(true).then(() => { RT.data = RT.all[RT.cur] || null; });
+      const t = Date.now(), y = rtCur(t); if (!y || !y.b) return;   // between two boards: the last one stays
+      const P = rtPos(y.b, t), key = y.b.sys + y.b.n + ':' + P.calls + ':' + P.m + ':' + P.trick.length + ':' + (P.done ? 1 : 0);
+      if (key === RT.wkey) return; RT.wkey = key;
+      G = rtGameOf(y.b, t); if (!ui.overlay) render();
+    }, 300);
+  });
 }
 // a player takes a robot's seat: the next boards at their own table, in this system (and convention), with these
 // robots (their names) in the other seats
@@ -3047,7 +3091,9 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   // the robots' table: open it, its tabs, a call's meaning, a board played before
-  if (t.dataset.rtk) { if (t.dataset.rtopen) rtOpen(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
+  if (t.dataset.rtk) { if (t.dataset.rtopen) rtWatch(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
+  if (t.dataset.rtwatch) { rtWatch(RT.cur); return; }
+  if (t.id === 'bRtList') { rtOpen(G && G.rtv ? G.rtv.k : RT.cur); return; }
   if (t.dataset.rtsit != null) { rtSit(+t.dataset.rtsit); return; }
   if (t.dataset.rtt) { RT.tab = t.dataset.rtt; RT.view = null; RT.sel = null; rtDraw(); return; }
   if (t.dataset.rti != null) { RT.sel = +t.dataset.rti; rtDraw(); return; }
