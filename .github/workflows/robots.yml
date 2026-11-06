@@ -1,0 +1,36 @@
+# The robots' table: every two hours the robots play the boards of the next hours (.github/robots/robots.js), each with
+# its start time; the file goes to the robots-data branch (one commit, replaced each time, so the history does not
+# grow), which the page reads from raw.githubusercontent.com and shows card by card at each board's time.
+name: Robot table
+on:
+  schedule:
+    - cron: '17 */2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: robots
+jobs:
+  play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: The table so far
+        run: |
+          mkdir -p out
+          for f in live.json errors.json; do curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/$f?$(date +%s)" -o out/$f || rm -f out/$f; done
+      - name: Play the next boards
+        run: node .github/robots/robots.js out
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd out
+          git init -q
+          git checkout -q -b robots-data
+          git add live.json errors.json
+          git -c user.name="Servetsvm" -c user.email="39servet@gmail.com" commit -qm "Robot table: $(date -u +%FT%TZ)"
+          git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" robots-data

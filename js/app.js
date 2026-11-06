@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 381;
+const APP_V = 382;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1611,6 +1611,7 @@ function homeShell2() {
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Team match'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
       </div>
+      <div class="hcard rtcard" id="hRobot"></div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>   <!-- the open tables right under the ways to play -->
       </div><div class="h2colb"><div id="hPend"></div>
       <div class="hcard prac" id="hPrac"></div>
@@ -1651,6 +1652,7 @@ function renderHome() {
   const cont = ui.saved && ui.saved.phase !== 'done';
   set('hGo', $('hGoSub') ? '▶ ' + T(cont ? 'Continue' : 'Start') : cont ? T('Continue') : '🤖 ' + T('Play offline'));   // the new page names the card "Play offline"; its button starts
   set('hPrac', pracHtml());   // practise a convention (the heart of the page)
+  set('hRobot', rtCardHtml());   // the robots' table, live
   set('hInst', instHtml());
   { const b = $('hNameBtn'), v2 = b && b.classList.contains('h2name'), nm = myNm(), p = typeof Net !== 'undefined' ? Net.prof() : null;
     const h = v2 ? `<span class="h2av">${p && p.av ? p.av : esc(((nm || '?').trim()[0] || '?').toUpperCase())}</span>` : (nm ? esc(nm) : `<i>${T('Name')}</i>`) + ' ✏️';
@@ -2406,6 +2408,132 @@ async function robotCardFor(g, t) {
   if (lv === 'expert' || online() || G.tour || G.tprac || sideOf(t) === sideOf(U())) return Bot.ask(g, t, BOT_OPT);
   return robotCard(g, t);
 }
+/* ---- the robots' table (🤖 Robot table — live): four robots with made-up names play each other all day, one system
+   and convention after another (.github/robots/robots.js plays the boards ahead of time, each with its start time,
+   on the robots-data branch); every watcher sees each call and card at its time, so all see the same moment ---- */
+const RT_URL = 'https://raw.githubusercontent.com/Servetsvm/bridge/robots-data/live.json';
+const RT = { data: null, at: 0, busy: null, tab: 'live', sel: null, view: null, timer: null };
+const RT_SYS = { twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' };
+function rtLoad(force) {
+  if (RT.busy) return RT.busy;
+  if (!force && RT.data && Date.now() - RT.at < 10 * 60e3) return Promise.resolve(RT.data);
+  return RT.busy = fetch(RT_URL + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }).then(r => r.ok ? r.json() : null)
+    .then(d => { if (d && d.boards) { RT.data = d; RT.at = Date.now(); } return RT.data; }).catch(() => RT.data).finally(() => { RT.busy = null; });
+}
+const rtConv = b => b.conv ? pracName(b.conv) : T('The system itself');
+const rtPair = i => { const D = RT.data, p = D && D.league && D.league.pairs[i]; return p ? p.n.join(' & ') : ''; };
+const rtRating = i => { const D = RT.data, p = D && D.league && D.league.pairs[i]; return p ? Math.round(p.r) : ''; };
+function rtCur(t) {
+  const B = (RT.data && RT.data.boards) || [];
+  const b = B.find(x => x.t0 <= t && t < x.t1); if (b) return { b };
+  const w = B.find(x => x.t0 > t); return w ? { wait: w } : null;
+}
+// who played each card (the leader and the trick winners worked out once)
+function rtSeq(b) {
+  if (b._seq) return b._seq;
+  const trump = b.c[1] < 4 ? b.c[1] : -1, out = []; let lead = b.lead;
+  for (let i = 0; i < b.p.length; i += 4) {
+    const tr = b.p.slice(i, i + 4).map((c, j) => ({ s: (lead + j) % 4, c }));
+    out.push(...tr); if (tr.length === 4) lead = E.trickWinner(tr, trump);
+  }
+  return b._seq = out;
+}
+// where the board is at time t: the calls made, the cards played, the trick on the table, the tricks won
+function rtPos(b, t) {
+  const tm = RT.data.tm, calls = Math.max(0, Math.min(b.a.length, Math.floor((t - b.t0) / tm.call) + 1));
+  const A = b.t0 + tm.call * b.a.length, seq = rtSeq(b);
+  let m = 0, at = 0;
+  if (t >= A) { let tc = A + tm.lead; while (m < seq.length && t >= tc) { at = tc; m++; tc += tm.card + (m % 4 === 0 ? tm.trick : 0); } }
+  const full = m && m % 4 === 0 && t < at + tm.trick;
+  const trick = full ? seq.slice(m - 4, m) : seq.slice(m - (m % 4), m);
+  const won = [0, 0], trump = b.c[1] < 4 ? b.c[1] : -1;
+  for (let i = 0; i + 4 <= m; i += 4) won[sideOf(E.trickWinner(seq.slice(i, i + 4), trump))]++;
+  const done = m === seq.length && t >= at + tm.trick;
+  return { calls, m, trick, won, done, seq };
+}
+const rtCon = c => c ? conKey({ level: c[0], strain: c[1], dbl: c[2], decl: c[3] }) : T('Pass');
+function rtAuction(b, n, sel) {
+  const cols = [3, 0, 1, 2];
+  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(b.bn, s) ? 'v' : ''}">${SEAT[s]}</th>`).join('') + '</tr></thead><tbody><tr>';
+  let col = cols.indexOf(b.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
+  b.a.slice(0, n).forEach(([s, call, , cv], i) => { o += `<td><button class="c${i === sel ? ' sel' : ''}${cv ? ' cvb' : ''}" data-rti="${i}">${callHtml(call)}</button></td>`; if (++col === 4 && i < n - 1) { o += '</tr><tr>'; col = 0; } });
+  return o + '</tr></tbody></table>';
+}
+function rtExpl(b, i) {
+  const e = b.a[i]; if (!e) return T('Tap any call to see what it means.');
+  const ci = e[3] ? E.convInfo(e[3]) : null;
+  return `<b>${SEAT[e[0]]}: ${callHtml(e[1])}</b> — ${symText(bidTxt(e[2] || 'Pass'))}${ci ? `<div class="cv"><span>${ci.n}</span>${symText(ci.d)}</div>` : ''}`;
+}
+// the four hands (the cards still held) round the trick on the table
+function rtTable(b, P) {
+  const gone = new Set(P.seq.slice(0, P.m).map(x => x.c)), pos = { 0: 'n', 1: 'e', 2: 's', 3: 'w' };
+  const nm = s => { const p = sideOf(s) ? b.ew : b.ns, n = (RT.data.league.pairs[p] || { n: ['', ''] }).n; return n[s < 2 ? 0 : 1]; };
+  const hand = s => `<div class="h ${pos[s]}"><b>${SEAT[s]} · ${esc(nm(s))}</b>${ORDER.map(su => suitLine(b.d[s].filter(c => !gone.has(c)), su)).join('<br>')}</div>`;
+  const tr = [0, 1, 2, 3].map(s => { const x = P.trick.find(y => y.s === s); return `<span class="rt${pos[s]}">${x ? RTXT[R(x.c)] + symHtml(S(x.c)) : ''}</span>`; }).join('');
+  return `<div class="deal rtdeal">${[0, 1, 2, 3].map(hand).join('')}<div class="rttrick">${tr}</div></div>`;
+}
+function rtLive() {
+  const t = Date.now(), x = rtCur(t);
+  if (!x) return `<div class="muted">${T('The robots will be back soon.')}</div>`;
+  if (x.wait) return `<div class="muted">⏳ ${T('The next board starts in {0} s', Math.ceil((x.wait.t0 - t) / 1000))}</div>`;
+  const b = x.b, P = rtPos(b, t), aucDone = P.calls >= b.a.length;
+  const sel = RT.sel != null && RT.sel < P.calls ? RT.sel : P.calls - 1;
+  const res = P.done ? `<div class="okmsg">${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS <b>${fmtSigned(b.sc)}</b><br>${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} ${fmtSigned(b.par)} · <b>${fmtSigned(b.imp)} IMP</b></div>` : '';
+  return `<div class="rthd"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b><small>${T('Board {0} of {1}', b.k, b.of)}</small></div>
+    <div class="rtpairs"><span>NS: ${esc(rtPair(b.ns))} <small>${rtRating(b.ns)}</small></span><span>EW: ${esc(rtPair(b.ew))} <small>${rtRating(b.ew)}</small></span></div>
+    ${aucDone ? `<div class="rtcon">${T('Contract')} <b>${rtCon(b.c)}</b> · NS ${P.won[0]} – EW ${P.won[1]}</div>` : ''}
+    ${rtTable(b, P)}${res}
+    <div class="auction">${rtAuction(b, P.calls, sel)}</div><div class="expl">${rtExpl(b, sel)}</div>`;
+}
+function rtBoards() {
+  const t = Date.now(), B = ((RT.data && RT.data.boards) || []).filter(b => b.t1 <= t).reverse();
+  if (RT.view != null) {
+    const b = B.find(x => x.n === RT.view); if (b) { const sel = RT.sel != null ? RT.sel : b.a.length - 1;
+      return `<div class="row2"><button class="btn mini-btn" data-rtb="-1">← ${T('Boards')}</button></div><div class="rthd"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b><small>${T('Board {0} of {1}', b.k, b.of)}</small></div>
+        ${rtTable(b, { seq: [], m: 0, trick: [] })}<div class="auction">${rtAuction(b, b.a.length, sel)}</div><div class="expl">${rtExpl(b, sel)}</div>
+        <div class="okmsg">${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS <b>${fmtSigned(b.sc)}</b> · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} ${fmtSigned(b.par)} · <b>${fmtSigned(b.imp)} IMP</b></div>`; }
+  }
+  return B.length ? B.map(b => `<button class="rtrow" data-rtb="${b.n}"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b> <small>${b.k}/${b.of}</small><span>${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${fmtSigned(b.imp)} IMP</span></button>`).join('') : `<div class="muted">${T('No boards yet.')}</div>`;
+}
+function rtLeague() {
+  const L = RT.data && RT.data.league; if (!L) return '';
+  const pr = L.pairs.slice().sort((a, b) => b.r - a.r).map((p, i) => `<tr><td>${i + 1}</td><td>${esc(p.n.join(' & '))}</td><td><b>${Math.round(p.r)}</b></td><td>${p.b}</td></tr>`).join('');
+  const row = (n, x) => `<tr><td>${esc(n)}</td><td>${x.b}</td><td>${(x.abs / x.b).toFixed(1)}</td><td>${Math.round(100 * x.hit / x.b)}%</td></tr>`;
+  const sy = Object.entries(L.sys).filter(([, x]) => x.b).sort((a, b) => a[1].abs / a[1].b - b[1].abs / b[1].b).map(([k, x]) => row(RT_SYS[k] || k, x)).join('');
+  const cv = Object.entries(L.conv).filter(([k, x]) => x.b && k !== '-').sort((a, b) => b[1].b - a[1].b).slice(0, 30).map(([k, x]) => row(pracName(k), x)).join('');
+  const head = `<tr><th></th><th>${T('Boards')}</th><th>${T('IMPs from the best')}</th><th>${T('Best reached')}</th></tr>`;
+  return `<h3>🏆 ${T('Robot league')}</h3><div class="muted">${T('A pair\'s rating moves with its IMPs against the double-dummy best contract.')}</div>
+    <table class="rttab"><tr><th>#</th><th></th><th>${T('Rating')}</th><th>${T('Boards')}</th></tr>${pr}</table>
+    <h3>${T('Systems')}</h3><div class="muted">${T('How close the robots come to the best contract with each system (fewer IMPs is better).')}</div><table class="rttab">${head}${sy}</table>
+    ${cv ? `<h3>${T('Conventions')}</h3><table class="rttab">${head}${cv}</table>` : ''}`;
+}
+function rtBody() {
+  if (!RT.data) return `<div class="muted">⏳ ${T('Loading…')}</div>`;
+  const tab = (k, l) => `<button class="${RT.tab === k ? 'on' : ''}" data-rtt="${k}">${l}</button>`;
+  return `<div class="seg rtseg">${tab('live', '🔴 ' + T('Live'))}${tab('boards', T('Boards'))}${tab('league', T('League'))}</div>
+    ${RT.tab === 'live' ? rtLive() : RT.tab === 'boards' ? rtBoards() : rtLeague()}`;
+}
+function rtDraw() { const el = $('rtBody'); if (!el) return; const h = rtBody(); if (el.innerHTML !== h) el.innerHTML = h; }
+function rtOpen() {
+  RT.tab = 'live'; RT.sel = null; RT.view = null;
+  openOv('rt', `<h2>🤖 ${T('Robot table — live')}</h2><div class="muted">${T('Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.')}</div><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  rtLoad().then(rtDraw);
+  if (RT.timer) clearInterval(RT.timer);
+  RT.timer = setInterval(() => {
+    if (ui.overlay !== 'rt') { clearInterval(RT.timer); RT.timer = null; return; }
+    // the boards ahead running short: read the file again (it is written every two hours)
+    const B = (RT.data && RT.data.boards) || [], last = B.length ? B[B.length - 1].t1 : 0;
+    if (RT.data && last - Date.now() < 40 * 60e3 && Date.now() - RT.at > 5 * 60e3) rtLoad(true);
+    if (RT.tab === 'live') { const x = rtCur(Date.now()); if (x && x.b && RT.sel != null && x.b.n !== RT.lastN) RT.sel = null; RT.lastN = x && x.b ? x.b.n : null; rtDraw(); }
+  }, 500);
+}
+// the home page's card: what the robots are playing now
+function rtCardHtml() {
+  const x = RT.data ? rtCur(Date.now()) : null, b = x && (x.b || x.wait);
+  return `<button class="rtgo" id="hRobotGo" type="button"><span class="rtlive">🔴 ${T('Live')}</span><b>🤖 ${T('Robot table — live')}</b><small>${b ? esc((RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b)) + ' · ' + T('Board {0} of {1}', b.k, b.of) : T('Four robots play each other all day.')}</small><span class="rtwatch">👁 ${T('Watch')}</span></button>`;
+}
+setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
+setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
 function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
@@ -2880,6 +3008,11 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
+  // the robots' table: open it, its tabs, a call's meaning, a board played before
+  if (t.id === 'hRobotGo') { rtOpen(); return; }
+  if (t.dataset.rtt) { RT.tab = t.dataset.rtt; RT.view = null; RT.sel = null; rtDraw(); return; }
+  if (t.dataset.rti != null) { RT.sel = +t.dataset.rti; rtDraw(); return; }
+  if (t.dataset.rtb != null) { RT.view = +t.dataset.rtb < 0 ? null : +t.dataset.rtb; RT.sel = null; rtDraw(); return; }
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }

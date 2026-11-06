@@ -1960,6 +1960,24 @@ body.clubsopen{overflow:hidden}
 .sbme{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.sbme .btn{flex:1 1 140px}
 .sbtest{border:2px dashed #e2a50b;border-radius:10px;padding:8px}
 
+/* the robots' table: the home card and the watching window */
+.rtcard{padding:0;overflow:hidden}
+.rtgo{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;width:100%;padding:12px 14px;text-align:left;background:transparent;border:0;color:inherit;font:inherit;cursor:pointer}
+.rtgo b{font-size:15px}.rtgo small{flex-basis:100%;opacity:.8}
+.rtlive{color:#e5484d;font-weight:700;font-size:12px;letter-spacing:.03em}
+.rtwatch{margin-left:auto;font-weight:700}
+.rtseg{margin:8px 0}
+.rthd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:8px 0 4px}
+.rtpairs{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:13px}.rtpairs small{opacity:.7}
+.rtcon{margin:6px 0;font-size:14px}
+.rttrick{grid-column:2;grid-row:2;display:grid;grid-template-areas:". n ." "w . e" ". s .";place-items:center;font-size:17px;font-weight:700;min-height:84px}
+.rttrick .rtn{grid-area:n}.rttrick .rte{grid-area:e}.rttrick .rts{grid-area:s}.rttrick .rtw{grid-area:w}
+.rtrow{display:block;width:100%;text-align:left;padding:8px 10px;margin:4px 0;border-radius:8px;border:1px solid rgba(127,127,127,.3);background:transparent;color:inherit;font:inherit;cursor:pointer}
+.rtrow span{display:block;font-size:13px;margin-top:2px}
+.rttab{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0 12px}
+.rttab td,.rttab th{padding:4px 6px;border-bottom:1px solid rgba(127,127,127,.25);text-align:left}
+.auction td button.c{background:transparent;border:0;color:inherit;font:inherit;padding:0 2px;cursor:pointer}
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -4929,6 +4947,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "The system itself": "Temel sistem", "Best contract (double dummy)": "En iyi kontrat (double dummy)", "The robots will be back soon.": "Robotlar birazdan dönecek.", "The next board starts in {0} s": "Sonraki el {0} sn sonra başlıyor", "Robot league": "Robot ligi", "A pair's rating moves with its IMPs against the double-dummy best contract.": "Bir çiftin raytingi, double dummy en iyi kontrata göre aldığı IMP'lerle değişir.", "Systems": "Sistemler", "How close the robots come to the best contract with each system (fewer IMPs is better).": "Robotların her sistemle en iyi kontrata ne kadar yaklaştığı (daha az IMP daha iyi).", "IMPs from the best": "En iyiden IMP", "Best reached": "En iyiye ulaşma", "Live": "Canlı", "League": "Lig", "Robot table — live": "Robot masası — canlı", "Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.": "Dört robot gün boyu birbiriyle oynar: her sistem ve içindeki her konvansiyon, onar el. Bütün eller açık gösterilir.", "Four robots play each other all day.": "Dört robot gün boyu birbiriyle oynar.",
     "Delete all": "Hepsini sil",
     "This game’s link": "Bu oyunun linki", "It opens this game’s tables only; the players can also find it under Team match.": "Sadece bu oyunun masalarını açar; oyuncular Takım maçı altında da bulabilir.", "Copy": "Kopyala", "Copied": "Kopyalandı",
     "Every table is taken.": "Bütün masalar dolu.",
@@ -5359,6 +5378,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "The system itself": "Selve systemet", "Best contract (double dummy)": "Beste kontrakt (åpne kort)", "The robots will be back soon.": "Robotene er snart tilbake.", "The next board starts in {0} s": "Neste spill starter om {0} s", "Robot league": "Robotligaen", "A pair's rating moves with its IMPs against the double-dummy best contract.": "Et pars rating endres med IMP mot beste kontrakt med åpne kort.", "Systems": "Systemer", "How close the robots come to the best contract with each system (fewer IMPs is better).": "Hvor nær robotene kommer beste kontrakt med hvert system (færre IMP er bedre).", "IMPs from the best": "IMP fra beste", "Best reached": "Beste nådd", "Live": "Direkte", "League": "Liga", "Robot table — live": "Robotbordet — direkte", "Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.": "Fire roboter spiller mot hverandre hele dagen: hvert system og hver av konvensjonene, ti spill om gangen. Alle hender vises.", "Four robots play each other all day.": "Fire roboter spiller mot hverandre hele dagen.",
     "Delete all": "Slett alle",
     "This game’s link": "Lenken til dette spillet", "It opens this game’s tables only; the players can also find it under Team match.": "Den åpner bare dette spillets bord; spillerne finner det også under Lagkamp.", "Copy": "Kopier", "Copied": "Kopiert",
     "Every table is taken.": "Alle bordene er tatt.",
@@ -5787,6 +5807,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "The system itself": "El sistema en sí", "Best contract (double dummy)": "Mejor contrato (doble muerto)", "The robots will be back soon.": "Los robots vuelven pronto.", "The next board starts in {0} s": "La próxima mano empieza en {0} s", "Robot league": "Liga de robots", "A pair's rating moves with its IMPs against the double-dummy best contract.": "La puntuación de una pareja cambia con sus IMPs frente al mejor contrato a doble muerto.", "Systems": "Sistemas", "How close the robots come to the best contract with each system (fewer IMPs is better).": "Cuánto se acercan los robots al mejor contrato con cada sistema (menos IMPs es mejor).", "IMPs from the best": "IMPs del mejor", "Best reached": "Mejor alcanzado", "Live": "En directo", "League": "Liga", "Robot table — live": "Mesa de robots — en directo", "Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.": "Cuatro robots juegan entre sí todo el día: cada sistema y cada una de sus convenciones, diez manos cada vez. Se muestran todas las manos.", "Four robots play each other all day.": "Cuatro robots juegan entre sí todo el día.",
     "Delete all": "Borrar todo",
     "This game’s link": "El enlace de esta partida", "It opens this game’s tables only; the players can also find it under Team match.": "Solo abre las mesas de esta partida; los jugadores también la encuentran en Partido por equipos.", "Copy": "Copiar", "Copied": "Copiado",
     "Every table is taken.": "Todas las mesas están ocupadas.",
@@ -6243,6 +6264,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "The system itself": "Le système lui-même", "Best contract (double dummy)": "Meilleur contrat (cartes ouvertes)", "The robots will be back soon.": "Les robots reviennent bientôt.", "The next board starts in {0} s": "La donne suivante commence dans {0} s", "Robot league": "Ligue des robots", "A pair's rating moves with its IMPs against the double-dummy best contract.": "Le classement d’une paire varie avec ses IMP face au meilleur contrat à cartes ouvertes.", "Systems": "Systèmes", "How close the robots come to the best contract with each system (fewer IMPs is better).": "À quel point les robots approchent le meilleur contrat avec chaque système (moins d’IMP, c’est mieux).", "IMPs from the best": "IMP du meilleur", "Best reached": "Meilleur atteint", "Live": "En direct", "League": "Ligue", "Robot table — live": "Table des robots — en direct", "Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.": "Quatre robots jouent entre eux toute la journée : chaque système et chacune de ses conventions, dix donnes à la fois. Toutes les mains sont visibles.", "Four robots play each other all day.": "Quatre robots jouent entre eux toute la journée.",
     "Delete all": "Tout supprimer",
     "This game’s link": "Le lien de cette partie", "It opens this game’s tables only; the players can also find it under Team match.": "Il n’ouvre que les tables de cette partie ; les joueurs la trouvent aussi sous Match par équipes.", "Copy": "Copier", "Copied": "Copié",
     "Every table is taken.": "Toutes les tables sont prises.",
@@ -6699,6 +6721,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "The system itself": "Il sistema in sé", "Best contract (double dummy)": "Miglior contratto (carte viste)", "The robots will be back soon.": "I robot tornano presto.", "The next board starts in {0} s": "La prossima smazzata inizia tra {0} s", "Robot league": "Lega dei robot", "A pair's rating moves with its IMPs against the double-dummy best contract.": "Il punteggio di una coppia cambia con i suoi IMP rispetto al miglior contratto a carte viste.", "Systems": "Sistemi", "How close the robots come to the best contract with each system (fewer IMPs is better).": "Quanto i robot si avvicinano al miglior contratto con ogni sistema (meno IMP è meglio).", "IMPs from the best": "IMP dal migliore", "Best reached": "Migliore raggiunto", "Live": "In diretta", "League": "Lega", "Robot table — live": "Tavolo dei robot — in diretta", "Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.": "Quattro robot giocano tra loro tutto il giorno: ogni sistema e ciascuna delle sue convenzioni, dieci smazzate alla volta. Tutte le mani sono visibili.", "Four robots play each other all day.": "Quattro robot giocano tra loro tutto il giorno.",
     "Delete all": "Elimina tutto",
     "This game’s link": "Il link di questa partita", "It opens this game’s tables only; the players can also find it under Team match.": "Apre solo i tavoli di questa partita; i giocatori la trovano anche sotto Incontro a squadre.", "Copy": "Copia", "Copied": "Copiato",
     "Every table is taken.": "Tutti i tavoli sono occupati.",
@@ -7155,6 +7178,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "The system itself": "Das System selbst", "Best contract (double dummy)": "Bester Kontrakt (Double Dummy)", "The robots will be back soon.": "Die Roboter sind gleich zurück.", "The next board starts in {0} s": "Das nächste Board beginnt in {0} s", "Robot league": "Roboterliga", "A pair's rating moves with its IMPs against the double-dummy best contract.": "Die Wertung eines Paares ändert sich mit seinen IMPs gegenüber dem besten Kontrakt (Double Dummy).", "Systems": "Systeme", "How close the robots come to the best contract with each system (fewer IMPs is better).": "Wie nah die Roboter mit jedem System dem besten Kontrakt kommen (weniger IMPs ist besser).", "IMPs from the best": "IMPs vom besten", "Best reached": "Bester erreicht", "Live": "Live", "League": "Liga", "Robot table — live": "Robotertisch — live", "Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.": "Vier Roboter spielen den ganzen Tag gegeneinander: jedes System und jede seiner Konventionen, jeweils zehn Boards. Alle Hände sind sichtbar.", "Four robots play each other all day.": "Vier Roboter spielen den ganzen Tag gegeneinander.",
     "Delete all": "Alle löschen",
     "This game’s link": "Der Link zu diesem Spiel", "It opens this game’s tables only; the players can also find it under Team match.": "Er öffnet nur die Tische dieses Spiels; die Spieler finden es auch unter Teamkampf.", "Copy": "Kopieren", "Copied": "Kopiert",
     "Every table is taken.": "Alle Tische sind besetzt.",
@@ -7611,6 +7635,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "The system itself": "Сама система", "Best contract (double dummy)": "Лучший контракт (в открытую)", "The robots will be back soon.": "Роботы скоро вернутся.", "The next board starts in {0} s": "Следующая сдача через {0} с", "Robot league": "Лига роботов", "A pair's rating moves with its IMPs against the double-dummy best contract.": "Рейтинг пары меняется по её IMP против лучшего контракта в открытую.", "Systems": "Системы", "How close the robots come to the best contract with each system (fewer IMPs is better).": "Насколько роботы приближаются к лучшему контракту в каждой системе (меньше IMP — лучше).", "IMPs from the best": "IMP от лучшего", "Best reached": "Лучший достигнут", "Live": "В эфире", "League": "Лига", "Robot table — live": "Стол роботов — в эфире", "Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.": "Четыре робота весь день играют друг с другом: каждая система и каждая её конвенция, по десять сдач. Все руки открыты.", "Four robots play each other all day.": "Четыре робота весь день играют друг с другом.",
     "Delete all": "Удалить всё",
     "This game’s link": "Ссылка на эту игру", "It opens this game’s tables only; the players can also find it under Team match.": "Она открывает только столы этой игры; игроки найдут её и в разделе «Командный матч».", "Copy": "Копировать", "Copied": "Скопировано",
     "Every table is taken.": "Все столы заняты.",
@@ -8067,6 +8092,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "The system itself": "Sam system", "Best contract (double dummy)": "Najlepszy kontrakt (w widne karty)", "The robots will be back soon.": "Roboty zaraz wrócą.", "The next board starts in {0} s": "Następne rozdanie za {0} s", "Robot league": "Liga robotów", "A pair's rating moves with its IMPs against the double-dummy best contract.": "Ranking pary zmienia się z jej IMP-ami względem najlepszego kontraktu w widne karty.", "Systems": "Systemy", "How close the robots come to the best contract with each system (fewer IMPs is better).": "Jak blisko najlepszego kontraktu dochodzą roboty w każdym systemie (mniej IMP-ów jest lepiej).", "IMPs from the best": "IMP od najlepszego", "Best reached": "Najlepszy osiągnięty", "Live": "Na żywo", "League": "Liga", "Robot table — live": "Stół robotów — na żywo", "Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.": "Cztery roboty grają ze sobą cały dzień: każdy system i każda z jego konwencji, po dziesięć rozdań. Wszystkie ręce są widoczne.", "Four robots play each other all day.": "Cztery roboty grają ze sobą cały dzień.",
     "Delete all": "Usuń wszystko",
     "This game’s link": "Link do tej gry", "It opens this game’s tables only; the players can also find it under Team match.": "Otwiera tylko stoły tej gry; gracze znajdą ją też w Meczu drużynowym.", "Copy": "Kopiuj", "Copied": "Skopiowano",
     "Every table is taken.": "Wszystkie stoły są zajęte.",
@@ -8523,6 +8549,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "The system itself": "体系本身", "Best contract (double dummy)": "最佳定约(双明手)", "The robots will be back soon.": "机器人马上回来。", "The next board starts in {0} s": "下一副牌 {0} 秒后开始", "Robot league": "机器人联赛", "A pair's rating moves with its IMPs against the double-dummy best contract.": "搭档的积分随其相对双明手最佳定约的IMP变化。", "Systems": "体系", "How close the robots come to the best contract with each system (fewer IMPs is better).": "机器人用每个体系离最佳定约有多近(IMP越少越好)。", "IMPs from the best": "离最佳的IMP", "Best reached": "达到最佳", "Live": "直播", "League": "联赛", "Robot table — live": "机器人牌桌 — 直播", "Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.": "四个机器人整天互相对打:每个体系及其每个约定叫,每次十副。所有牌都公开。", "Four robots play each other all day.": "四个机器人整天互相对打。",
     "Delete all": "全部删除",
     "This game’s link": "本比赛的链接", "It opens this game’s tables only; the players can also find it under Team match.": "只打开本比赛的牌桌;牌手也可以在团体赛里找到。", "Copy": "复制", "Copied": "已复制",
     "Every table is taken.": "所有牌桌都已有人。",
@@ -9602,7 +9629,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 381;
+const APP_V = 382;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11205,6 +11232,7 @@ function homeShell2() {
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Team match'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
       </div>
+      <div class="hcard rtcard" id="hRobot"></div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>   <!-- the open tables right under the ways to play -->
       </div><div class="h2colb"><div id="hPend"></div>
       <div class="hcard prac" id="hPrac"></div>
@@ -11245,6 +11273,7 @@ function renderHome() {
   const cont = ui.saved && ui.saved.phase !== 'done';
   set('hGo', $('hGoSub') ? '▶ ' + T(cont ? 'Continue' : 'Start') : cont ? T('Continue') : '🤖 ' + T('Play offline'));   // the new page names the card "Play offline"; its button starts
   set('hPrac', pracHtml());   // practise a convention (the heart of the page)
+  set('hRobot', rtCardHtml());   // the robots' table, live
   set('hInst', instHtml());
   { const b = $('hNameBtn'), v2 = b && b.classList.contains('h2name'), nm = myNm(), p = typeof Net !== 'undefined' ? Net.prof() : null;
     const h = v2 ? `<span class="h2av">${p && p.av ? p.av : esc(((nm || '?').trim()[0] || '?').toUpperCase())}</span>` : (nm ? esc(nm) : `<i>${T('Name')}</i>`) + ' ✏️';
@@ -12000,6 +12029,132 @@ async function robotCardFor(g, t) {
   if (lv === 'expert' || online() || G.tour || G.tprac || sideOf(t) === sideOf(U())) return Bot.ask(g, t, BOT_OPT);
   return robotCard(g, t);
 }
+/* ---- the robots' table (🤖 Robot table — live): four robots with made-up names play each other all day, one system
+   and convention after another (.github/robots/robots.js plays the boards ahead of time, each with its start time,
+   on the robots-data branch); every watcher sees each call and card at its time, so all see the same moment ---- */
+const RT_URL = 'https://raw.githubusercontent.com/Servetsvm/bridge/robots-data/live.json';
+const RT = { data: null, at: 0, busy: null, tab: 'live', sel: null, view: null, timer: null };
+const RT_SYS = { twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' };
+function rtLoad(force) {
+  if (RT.busy) return RT.busy;
+  if (!force && RT.data && Date.now() - RT.at < 10 * 60e3) return Promise.resolve(RT.data);
+  return RT.busy = fetch(RT_URL + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }).then(r => r.ok ? r.json() : null)
+    .then(d => { if (d && d.boards) { RT.data = d; RT.at = Date.now(); } return RT.data; }).catch(() => RT.data).finally(() => { RT.busy = null; });
+}
+const rtConv = b => b.conv ? pracName(b.conv) : T('The system itself');
+const rtPair = i => { const D = RT.data, p = D && D.league && D.league.pairs[i]; return p ? p.n.join(' & ') : ''; };
+const rtRating = i => { const D = RT.data, p = D && D.league && D.league.pairs[i]; return p ? Math.round(p.r) : ''; };
+function rtCur(t) {
+  const B = (RT.data && RT.data.boards) || [];
+  const b = B.find(x => x.t0 <= t && t < x.t1); if (b) return { b };
+  const w = B.find(x => x.t0 > t); return w ? { wait: w } : null;
+}
+// who played each card (the leader and the trick winners worked out once)
+function rtSeq(b) {
+  if (b._seq) return b._seq;
+  const trump = b.c[1] < 4 ? b.c[1] : -1, out = []; let lead = b.lead;
+  for (let i = 0; i < b.p.length; i += 4) {
+    const tr = b.p.slice(i, i + 4).map((c, j) => ({ s: (lead + j) % 4, c }));
+    out.push(...tr); if (tr.length === 4) lead = E.trickWinner(tr, trump);
+  }
+  return b._seq = out;
+}
+// where the board is at time t: the calls made, the cards played, the trick on the table, the tricks won
+function rtPos(b, t) {
+  const tm = RT.data.tm, calls = Math.max(0, Math.min(b.a.length, Math.floor((t - b.t0) / tm.call) + 1));
+  const A = b.t0 + tm.call * b.a.length, seq = rtSeq(b);
+  let m = 0, at = 0;
+  if (t >= A) { let tc = A + tm.lead; while (m < seq.length && t >= tc) { at = tc; m++; tc += tm.card + (m % 4 === 0 ? tm.trick : 0); } }
+  const full = m && m % 4 === 0 && t < at + tm.trick;
+  const trick = full ? seq.slice(m - 4, m) : seq.slice(m - (m % 4), m);
+  const won = [0, 0], trump = b.c[1] < 4 ? b.c[1] : -1;
+  for (let i = 0; i + 4 <= m; i += 4) won[sideOf(E.trickWinner(seq.slice(i, i + 4), trump))]++;
+  const done = m === seq.length && t >= at + tm.trick;
+  return { calls, m, trick, won, done, seq };
+}
+const rtCon = c => c ? conKey({ level: c[0], strain: c[1], dbl: c[2], decl: c[3] }) : T('Pass');
+function rtAuction(b, n, sel) {
+  const cols = [3, 0, 1, 2];
+  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(b.bn, s) ? 'v' : ''}">${SEAT[s]}</th>`).join('') + '</tr></thead><tbody><tr>';
+  let col = cols.indexOf(b.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
+  b.a.slice(0, n).forEach(([s, call, , cv], i) => { o += `<td><button class="c${i === sel ? ' sel' : ''}${cv ? ' cvb' : ''}" data-rti="${i}">${callHtml(call)}</button></td>`; if (++col === 4 && i < n - 1) { o += '</tr><tr>'; col = 0; } });
+  return o + '</tr></tbody></table>';
+}
+function rtExpl(b, i) {
+  const e = b.a[i]; if (!e) return T('Tap any call to see what it means.');
+  const ci = e[3] ? E.convInfo(e[3]) : null;
+  return `<b>${SEAT[e[0]]}: ${callHtml(e[1])}</b> — ${symText(bidTxt(e[2] || 'Pass'))}${ci ? `<div class="cv"><span>${ci.n}</span>${symText(ci.d)}</div>` : ''}`;
+}
+// the four hands (the cards still held) round the trick on the table
+function rtTable(b, P) {
+  const gone = new Set(P.seq.slice(0, P.m).map(x => x.c)), pos = { 0: 'n', 1: 'e', 2: 's', 3: 'w' };
+  const nm = s => { const p = sideOf(s) ? b.ew : b.ns, n = (RT.data.league.pairs[p] || { n: ['', ''] }).n; return n[s < 2 ? 0 : 1]; };
+  const hand = s => `<div class="h ${pos[s]}"><b>${SEAT[s]} · ${esc(nm(s))}</b>${ORDER.map(su => suitLine(b.d[s].filter(c => !gone.has(c)), su)).join('<br>')}</div>`;
+  const tr = [0, 1, 2, 3].map(s => { const x = P.trick.find(y => y.s === s); return `<span class="rt${pos[s]}">${x ? RTXT[R(x.c)] + symHtml(S(x.c)) : ''}</span>`; }).join('');
+  return `<div class="deal rtdeal">${[0, 1, 2, 3].map(hand).join('')}<div class="rttrick">${tr}</div></div>`;
+}
+function rtLive() {
+  const t = Date.now(), x = rtCur(t);
+  if (!x) return `<div class="muted">${T('The robots will be back soon.')}</div>`;
+  if (x.wait) return `<div class="muted">⏳ ${T('The next board starts in {0} s', Math.ceil((x.wait.t0 - t) / 1000))}</div>`;
+  const b = x.b, P = rtPos(b, t), aucDone = P.calls >= b.a.length;
+  const sel = RT.sel != null && RT.sel < P.calls ? RT.sel : P.calls - 1;
+  const res = P.done ? `<div class="okmsg">${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS <b>${fmtSigned(b.sc)}</b><br>${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} ${fmtSigned(b.par)} · <b>${fmtSigned(b.imp)} IMP</b></div>` : '';
+  return `<div class="rthd"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b><small>${T('Board {0} of {1}', b.k, b.of)}</small></div>
+    <div class="rtpairs"><span>NS: ${esc(rtPair(b.ns))} <small>${rtRating(b.ns)}</small></span><span>EW: ${esc(rtPair(b.ew))} <small>${rtRating(b.ew)}</small></span></div>
+    ${aucDone ? `<div class="rtcon">${T('Contract')} <b>${rtCon(b.c)}</b> · NS ${P.won[0]} – EW ${P.won[1]}</div>` : ''}
+    ${rtTable(b, P)}${res}
+    <div class="auction">${rtAuction(b, P.calls, sel)}</div><div class="expl">${rtExpl(b, sel)}</div>`;
+}
+function rtBoards() {
+  const t = Date.now(), B = ((RT.data && RT.data.boards) || []).filter(b => b.t1 <= t).reverse();
+  if (RT.view != null) {
+    const b = B.find(x => x.n === RT.view); if (b) { const sel = RT.sel != null ? RT.sel : b.a.length - 1;
+      return `<div class="row2"><button class="btn mini-btn" data-rtb="-1">← ${T('Boards')}</button></div><div class="rthd"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b><small>${T('Board {0} of {1}', b.k, b.of)}</small></div>
+        ${rtTable(b, { seq: [], m: 0, trick: [] })}<div class="auction">${rtAuction(b, b.a.length, sel)}</div><div class="expl">${rtExpl(b, sel)}</div>
+        <div class="okmsg">${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS <b>${fmtSigned(b.sc)}</b> · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} ${fmtSigned(b.par)} · <b>${fmtSigned(b.imp)} IMP</b></div>`; }
+  }
+  return B.length ? B.map(b => `<button class="rtrow" data-rtb="${b.n}"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b> <small>${b.k}/${b.of}</small><span>${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${fmtSigned(b.imp)} IMP</span></button>`).join('') : `<div class="muted">${T('No boards yet.')}</div>`;
+}
+function rtLeague() {
+  const L = RT.data && RT.data.league; if (!L) return '';
+  const pr = L.pairs.slice().sort((a, b) => b.r - a.r).map((p, i) => `<tr><td>${i + 1}</td><td>${esc(p.n.join(' & '))}</td><td><b>${Math.round(p.r)}</b></td><td>${p.b}</td></tr>`).join('');
+  const row = (n, x) => `<tr><td>${esc(n)}</td><td>${x.b}</td><td>${(x.abs / x.b).toFixed(1)}</td><td>${Math.round(100 * x.hit / x.b)}%</td></tr>`;
+  const sy = Object.entries(L.sys).filter(([, x]) => x.b).sort((a, b) => a[1].abs / a[1].b - b[1].abs / b[1].b).map(([k, x]) => row(RT_SYS[k] || k, x)).join('');
+  const cv = Object.entries(L.conv).filter(([k, x]) => x.b && k !== '-').sort((a, b) => b[1].b - a[1].b).slice(0, 30).map(([k, x]) => row(pracName(k), x)).join('');
+  const head = `<tr><th></th><th>${T('Boards')}</th><th>${T('IMPs from the best')}</th><th>${T('Best reached')}</th></tr>`;
+  return `<h3>🏆 ${T('Robot league')}</h3><div class="muted">${T('A pair\'s rating moves with its IMPs against the double-dummy best contract.')}</div>
+    <table class="rttab"><tr><th>#</th><th></th><th>${T('Rating')}</th><th>${T('Boards')}</th></tr>${pr}</table>
+    <h3>${T('Systems')}</h3><div class="muted">${T('How close the robots come to the best contract with each system (fewer IMPs is better).')}</div><table class="rttab">${head}${sy}</table>
+    ${cv ? `<h3>${T('Conventions')}</h3><table class="rttab">${head}${cv}</table>` : ''}`;
+}
+function rtBody() {
+  if (!RT.data) return `<div class="muted">⏳ ${T('Loading…')}</div>`;
+  const tab = (k, l) => `<button class="${RT.tab === k ? 'on' : ''}" data-rtt="${k}">${l}</button>`;
+  return `<div class="seg rtseg">${tab('live', '🔴 ' + T('Live'))}${tab('boards', T('Boards'))}${tab('league', T('League'))}</div>
+    ${RT.tab === 'live' ? rtLive() : RT.tab === 'boards' ? rtBoards() : rtLeague()}`;
+}
+function rtDraw() { const el = $('rtBody'); if (!el) return; const h = rtBody(); if (el.innerHTML !== h) el.innerHTML = h; }
+function rtOpen() {
+  RT.tab = 'live'; RT.sel = null; RT.view = null;
+  openOv('rt', `<h2>🤖 ${T('Robot table — live')}</h2><div class="muted">${T('Four robots play each other all day: each system, and each of its conventions, ten boards at a time. Every hand is shown.')}</div><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  rtLoad().then(rtDraw);
+  if (RT.timer) clearInterval(RT.timer);
+  RT.timer = setInterval(() => {
+    if (ui.overlay !== 'rt') { clearInterval(RT.timer); RT.timer = null; return; }
+    // the boards ahead running short: read the file again (it is written every two hours)
+    const B = (RT.data && RT.data.boards) || [], last = B.length ? B[B.length - 1].t1 : 0;
+    if (RT.data && last - Date.now() < 40 * 60e3 && Date.now() - RT.at > 5 * 60e3) rtLoad(true);
+    if (RT.tab === 'live') { const x = rtCur(Date.now()); if (x && x.b && RT.sel != null && x.b.n !== RT.lastN) RT.sel = null; RT.lastN = x && x.b ? x.b.n : null; rtDraw(); }
+  }, 500);
+}
+// the home page's card: what the robots are playing now
+function rtCardHtml() {
+  const x = RT.data ? rtCur(Date.now()) : null, b = x && (x.b || x.wait);
+  return `<button class="rtgo" id="hRobotGo" type="button"><span class="rtlive">🔴 ${T('Live')}</span><b>🤖 ${T('Robot table — live')}</b><small>${b ? esc((RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b)) + ' · ' + T('Board {0} of {1}', b.k, b.of) : T('Four robots play each other all day.')}</small><span class="rtwatch">👁 ${T('Watch')}</span></button>`;
+}
+setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
+setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
 function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
@@ -12474,6 +12629,11 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
+  // the robots' table: open it, its tabs, a call's meaning, a board played before
+  if (t.id === 'hRobotGo') { rtOpen(); return; }
+  if (t.dataset.rtt) { RT.tab = t.dataset.rtt; RT.view = null; RT.sel = null; rtDraw(); return; }
+  if (t.dataset.rti != null) { RT.sel = +t.dataset.rti; rtDraw(); return; }
+  if (t.dataset.rtb != null) { RT.view = +t.dataset.rtb < 0 ? null : +t.dataset.rtb; RT.sel = null; rtDraw(); return; }
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
