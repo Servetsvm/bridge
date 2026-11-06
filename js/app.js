@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 391;
+const APP_V = 392;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1347,7 +1347,7 @@ function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
-  if (G.rtv) { const b = G.rtv.b; s = G.rtv.done ? `${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} (${fmtSigned(b.imp)} IMP)` : '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }
+  if (G.rtv) { const b = G.rtv.b; s = G.rtv.done ? `${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} (${fmtSigned(b.imp)} IMP)<div class="row2 rtend"><button class="btn" id="bRtAgain">🔁 ${T('Watch again')}</button><button class="btn gold" id="bRtNext">▶ ${T('Continue')}</button></div>` : '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }
   else if (G.watch && (G.phase === 'bid' || G.phase === 'play')) s = '🤖 ' + T('The robots are playing this deal — watch');
   else if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
   else if (G.phase === "play" && ui.ask) s = T("Do you agree?");
@@ -2579,22 +2579,33 @@ function rtWatch(k) {
   if (k) rtPick(k);
   rtLoad().then(() => {
     rtPick(RT.cur);
-    const x = rtCur(Date.now()); if (!x || !x.b) { flash(x && x.wait ? T('The next board starts in {0} s', Math.ceil((x.wait.t0 - Date.now()) / 1000)) : T('The robots will be back soon.'), 2500); if (!x) return; }
+    const now = Date.now(), x = rtCur(now); if (!x) { flash(T('The robots will be back soon.'), 2500); return; }
     // an unfinished board of your own is kept (Play offline carries on with it)
     if (G && !G.rtv && (G.phase === 'bid' || G.phase === 'play')) ui.saved = G;
-    clearTimeout(timer); closeOv(); RT.wkey = null;
-    G = rtGameOf((x.b || x.wait), Math.max(Date.now(), (x.b || x.wait).t0)); render();
+    clearTimeout(timer); closeOv();
+    // the board on the table now, from where it is (the next one: from its start)
+    rtShow(x.b || x.wait, x.b ? 0 : now - x.wait.t0);
     clearInterval(RT.wt);
     RT.wt = setInterval(() => {
       if (!G || !G.rtv) { clearInterval(RT.wt); RT.wt = null; return; }
-      const B = (RT.data && RT.data.boards) || [], last = B.length ? B[B.length - 1].t1 : 0;
+      const B = (RT.all[G.rtv.k] || {}).boards || [], last = B.length ? B[B.length - 1].t1 : 0;
       if (RT.at && last - Date.now() < 40 * 60e3 && Date.now() - RT.at > 5 * 60e3) rtLoad(true).then(() => { RT.data = RT.all[RT.cur] || null; });
-      const t = Date.now(), y = rtCur(t); if (!y || !y.b) return;   // between two boards: the last one stays
-      const P = rtPos(y.b, t), key = y.b.sys + y.b.n + ':' + P.calls + ':' + P.m + ':' + P.trick.length + ':' + (P.done ? 1 : 0);
-      if (key === RT.wkey) return; RT.wkey = key;
-      G = rtGameOf(y.b, t); if (!ui.overlay) render();
+      const b = RT.pb, t = Date.now() - RT.off, P = rtPos(b, t);
+      const key = b.sys + b.n + ':' + P.calls + ':' + P.m + ':' + P.trick.length + ':' + (P.done ? 1 : 0);
+      if (key === RT.wkey) return; RT.wkey = key;   // a finished board stays until Continue
+      G = rtGameOf(b, t); if (!ui.overlay) render();
     }, 300);
   });
+}
+// watch board b, its clock off ms behind the real one
+function rtShow(b, off) { RT.pb = b; RT.off = off; RT.wkey = null; G = rtGameOf(b, Date.now() - off); render(); }
+// 🔁 the same board again from its start; ▶ the table's next board, from its start
+function rtAgain() { if (G && G.rtv) rtShow(RT.pb, Date.now() - RT.pb.t0); }
+function rtNext() {
+  if (!G || !G.rtv) return;
+  const find = () => ((RT.all[G.rtv.k] || {}).boards || []).find(x => x.n > RT.pb.n);
+  const go = n => { if (n) rtShow(n, Date.now() - n.t0); else flash(T('The robots will be back soon.'), 2500); };
+  const n = find(); if (n) go(n); else rtLoad(true).then(() => go(find()));
 }
 // a player takes a robot's seat: the next boards at their own table, in this system (and convention), with these
 // robots (their names) in the other seats
@@ -3093,6 +3104,8 @@ document.addEventListener('click', ev_ => {
   // the robots' table: open it, its tabs, a call's meaning, a board played before
   if (t.dataset.rtk) { if (t.dataset.rtopen) rtWatch(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
   if (t.dataset.rtwatch) { rtWatch(RT.cur); return; }
+  if (t.id === 'bRtAgain') { rtAgain(); return; }
+  if (t.id === 'bRtNext') { rtNext(); return; }
   if (t.id === 'bRtList') { rtOpen(G && G.rtv ? G.rtv.k : RT.cur); return; }
   if (t.dataset.rtsit != null) { rtSit(+t.dataset.rtsit); return; }
   if (t.dataset.rtt) { RT.tab = t.dataset.rtt; RT.view = null; RT.sel = null; rtDraw(); return; }

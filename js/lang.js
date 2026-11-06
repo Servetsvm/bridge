@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Watch again": "Tekrar seyret",
     "Watch on the table": "Masada izle",
     "System table — live": "Sistem masası — canlı",
     "Take this seat": "Bu koltuğa otur", "Tap 🪑 to take a robot's seat: you play the next boards with these robots, in this system.": "Bir robotun yerine oturmak için 🪑'ya dokun: sonraki elleri bu robotlarla, bu sistemle oynarsın.", "Take {0}'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.": "{0} adlı robotun yerine oturulsun mu? Sonraki elleri {1} olarak bu robotlarla, {2} ile oynarsın. Oturduğun yön ve sistemin bunlara geçer.", "Six tables, one for each system: four robots play each other all day, each of the system's conventions ten boards at a time. Every hand is shown.": "Her sistem için bir masa, toplam altı masa: dört robot gün boyu birbiriyle oynar, sistemin her konvansiyonu onar el. Bütün eller açık gösterilir.", "Six tables, one for each system. Tap one to watch.": "Her sistem için bir masa. Seyretmek için birine dokun.",
@@ -437,6 +438,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Watch again": "Se igjen",
     "Watch on the table": "Se på bordet",
     "System table — live": "Systembordet — direkte",
     "Take this seat": "Ta denne plassen", "Tap 🪑 to take a robot's seat: you play the next boards with these robots, in this system.": "Trykk 🪑 for å ta en robots plass: du spiller de neste spillene med disse robotene, i dette systemet.", "Take {0}'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.": "Ta plassen til {0}? Du spiller de neste spillene som {1} med disse robotene, i {2}. Plassen og systemet ditt endres til disse.", "Six tables, one for each system: four robots play each other all day, each of the system's conventions ten boards at a time. Every hand is shown.": "Seks bord, ett for hvert system: fire roboter spiller mot hverandre hele dagen, hver av systemets konvensjoner ti spill om gangen. Alle hender vises.", "Six tables, one for each system. Tap one to watch.": "Seks bord, ett for hvert system. Trykk på et for å se på.",
@@ -869,6 +871,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Watch again": "Ver otra vez",
     "Watch on the table": "Ver en la mesa",
     "System table — live": "Mesa de sistemas — en directo",
     "Take this seat": "Sentarse aquí", "Tap 🪑 to take a robot's seat: you play the next boards with these robots, in this system.": "Toca 🪑 para ocupar el sitio de un robot: juegas las próximas manos con estos robots, en este sistema.", "Take {0}'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.": "¿Ocupar el sitio de {0}? Juegas las próximas manos como {1} con estos robots, en {2}. Tu posición y tu sistema cambian a estos.", "Six tables, one for each system: four robots play each other all day, each of the system's conventions ten boards at a time. Every hand is shown.": "Seis mesas, una por sistema: cuatro robots juegan entre sí todo el día, cada convención del sistema diez manos cada vez. Se muestran todas las manos.", "Six tables, one for each system. Tap one to watch.": "Seis mesas, una por sistema. Toca una para mirar.",
@@ -1329,6 +1332,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Watch again": "Revoir",
     "Watch on the table": "Regarder sur la table",
     "System table — live": "Table des systèmes — en direct",
     "Take this seat": "Prendre cette place", "Tap 🪑 to take a robot's seat: you play the next boards with these robots, in this system.": "Touchez 🪑 pour prendre la place d’un robot : vous jouez les donnes suivantes avec ces robots, dans ce système.", "Take {0}'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.": "Prendre la place de {0} ? Vous jouez les donnes suivantes en {1} avec ces robots, en {2}. Votre place et votre système deviennent ceux-ci.", "Six tables, one for each system: four robots play each other all day, each of the system's conventions ten boards at a time. Every hand is shown.": "Six tables, une par système : quatre robots jouent entre eux toute la journée, chaque convention du système dix donnes à la fois. Toutes les mains sont visibles.", "Six tables, one for each system. Tap one to watch.": "Six tables, une par système. Touchez-en une pour regarder.",
@@ -1789,6 +1793,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Watch again": "Guarda di nuovo",
     "Watch on the table": "Guarda al tavolo",
     "System table — live": "Tavolo dei sistemi — in diretta",
     "Take this seat": "Siediti qui", "Tap 🪑 to take a robot's seat: you play the next boards with these robots, in this system.": "Tocca 🪑 per prendere il posto di un robot: giochi le prossime smazzate con questi robot, in questo sistema.", "Take {0}'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.": "Prendere il posto di {0}? Giochi le prossime smazzate come {1} con questi robot, in {2}. Il tuo posto e il tuo sistema diventano questi.", "Six tables, one for each system: four robots play each other all day, each of the system's conventions ten boards at a time. Every hand is shown.": "Sei tavoli, uno per sistema: quattro robot giocano tra loro tutto il giorno, ogni convenzione del sistema dieci smazzate alla volta. Tutte le mani sono visibili.", "Six tables, one for each system. Tap one to watch.": "Sei tavoli, uno per sistema. Toccane uno per guardare.",
@@ -2249,6 +2254,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Watch again": "Nochmal ansehen",
     "Watch on the table": "Am Tisch zusehen",
     "System table — live": "Systemtisch — live",
     "Take this seat": "Diesen Platz nehmen", "Tap 🪑 to take a robot's seat: you play the next boards with these robots, in this system.": "Tippe auf 🪑, um den Platz eines Roboters zu nehmen: Du spielst die nächsten Boards mit diesen Robotern, in diesem System.", "Take {0}'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.": "Den Platz von {0} nehmen? Du spielst die nächsten Boards als {1} mit diesen Robotern, in {2}. Dein Platz und dein System wechseln dazu.", "Six tables, one for each system: four robots play each other all day, each of the system's conventions ten boards at a time. Every hand is shown.": "Sechs Tische, einer pro System: Vier Roboter spielen den ganzen Tag gegeneinander, jede Konvention des Systems jeweils zehn Boards. Alle Hände sind sichtbar.", "Six tables, one for each system. Tap one to watch.": "Sechs Tische, einer pro System. Tippe auf einen, um zuzusehen.",
@@ -2709,6 +2715,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Watch again": "Смотреть снова",
     "Watch on the table": "Смотреть за столом",
     "System table — live": "Стол систем — в эфире",
     "Take this seat": "Занять это место", "Tap 🪑 to take a robot's seat: you play the next boards with these robots, in this system.": "Нажмите 🪑, чтобы занять место робота: следующие сдачи вы играете с этими роботами в этой системе.", "Take {0}'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.": "Занять место {0}? Следующие сдачи вы играете за {1} с этими роботами, в {2}. Ваше место и система меняются на эти.", "Six tables, one for each system: four robots play each other all day, each of the system's conventions ten boards at a time. Every hand is shown.": "Шесть столов, по одному на систему: четыре робота весь день играют друг с другом, каждая конвенция системы по десять сдач. Все руки открыты.", "Six tables, one for each system. Tap one to watch.": "Шесть столов, по одному на систему. Нажмите, чтобы смотреть.",
@@ -3169,6 +3176,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Watch again": "Obejrzyj ponownie",
     "Watch on the table": "Oglądaj przy stole",
     "System table — live": "Stół systemów — na żywo",
     "Take this seat": "Zajmij to miejsce", "Tap 🪑 to take a robot's seat: you play the next boards with these robots, in this system.": "Dotknij 🪑, aby zająć miejsce robota: kolejne rozdania grasz z tymi robotami, w tym systemie.", "Take {0}'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.": "Zająć miejsce {0}? Kolejne rozdania grasz jako {1} z tymi robotami, w {2}. Twoje miejsce i system zmienią się na te.", "Six tables, one for each system: four robots play each other all day, each of the system's conventions ten boards at a time. Every hand is shown.": "Sześć stołów, po jednym na system: cztery roboty grają ze sobą cały dzień, każda konwencja systemu po dziesięć rozdań. Wszystkie ręce są widoczne.", "Six tables, one for each system. Tap one to watch.": "Sześć stołów, po jednym na system. Dotknij jednego, aby oglądać.",
@@ -3629,6 +3637,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Watch again": "再看一遍",
     "Watch on the table": "在牌桌上观看",
     "System table — live": "体系牌桌 — 直播",
     "Take this seat": "坐这个座位", "Tap 🪑 to take a robot's seat: you play the next boards with these robots, in this system.": "点 🪑 可取代一个机器人:接下来几副牌你和这些机器人用这个体系打。", "Take {0}'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.": "取代{0}的座位?接下来几副牌你坐{1},和这些机器人用{2}打。你的座位和体系会改成这些。", "Six tables, one for each system: four robots play each other all day, each of the system's conventions ten boards at a time. Every hand is shown.": "六张牌桌,每个体系一张:四个机器人整天互相对打,体系的每个约定叫每次十副。所有牌都公开。", "Six tables, one for each system. Tap one to watch.": "六张牌桌,每个体系一张。点一张观看。",

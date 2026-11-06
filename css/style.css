@@ -1936,3 +1936,4 @@ body.clubsopen{overflow:hidden}
 .rttrick .rtbid{font-size:15px;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.85);color:#1f2a22;min-width:30px;text-align:center}
 .rttrick .rtbid:empty{background:transparent}
 .rttrick .rtbid.new{box-shadow:0 0 0 2px var(--brass,#c9a227)}
+.rtend{justify-content:center;margin-top:6px}
