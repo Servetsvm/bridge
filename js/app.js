@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 400;
+const APP_V = 401;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3147,6 +3147,7 @@ document.addEventListener('click', ev_ => {
     t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
   if (t.dataset.rbok) { rbFixed(t.dataset.rbok, t.dataset.v === '1').then(showRoboErrs).catch(() => flash(T('Could not save'), 2000)); return; }
   if (t.id === 'rbDelAll') { const P = (ui.rbAll || []).slice(); if (!P.length || !confirm(T('Delete all') + ' — ' + T('Robot mistakes') + ' (' + P.length + ')?')) return; Promise.all(P.map(x => rbDone(x))).then(() => { flash('🗑 ' + P.length, 1800); showRoboErrs(); }).catch(() => flash(T('Could not remove'), 2000)); return; }
+  if (t.id === 'rbOld') { ui.rbOld = !ui.rbOld; showRoboErrs(); return; }
   if (t.id === 'rbSmall') { ui.rbSmall = !ui.rbSmall; showRoboErrs(); return; }
   if (t.id === 'rbShowOk') { ui.rbShowOk = !ui.rbShowOk; showRoboErrs(); return; }
   if (t.dataset.rbdone) { rbDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
@@ -3673,6 +3674,10 @@ async function showRoboErrs0() {
   L = L.concat(await rtErrs()).sort((a, b) => b.ts - a.ts);   // the robots' table's too
   if (ui.overlay !== 'roboerr') return;
   L = L.filter(r => r.kind !== 'bid');   // the bidding lessons are in the learning report
+  // the mistakes from before the last robot fix (a system table's: played by the robots of then) leave the list
+  // (a system table's mistake without the time it was played: from before that time was kept, so from before the fix)
+  const when = r => String(r.path).startsWith('rt:') ? (r.g || 0) : r.ts;
+  const nOld = L.filter(r => when(r) < ROBOT_FIX_AT).length; if (!ui.rbOld) L = L.filter(r => when(r) >= ROBOT_FIX_AT);
   ui.rbAll = L.map(r => r.path);
   // the records marked fixed are hidden (a toggle shows them) and never copied for Claude
   const nOk = L.filter(r => r.ok).length; if (!ui.rbShowOk) L = L.filter(r => !r.ok);
@@ -3694,6 +3699,7 @@ async function showRoboErrs0() {
   const summary = all.length ? `<div class="okmsg">📊 Özet · ilk atak <b>${gLead.length}</b> (${tk(gLead)} levée) · deklaran <b>${gDecl.length}</b> (${tk(gDecl)}) · savunma <b>${gDef.length}</b> (${tk(gDef)})</div>` : '';
   openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2>
     <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
+    ${nOld ? `<div class="row2"><button class="btn mini-btn" id="rbOld">${ui.rbOld ? 'Son düzeltmeden öncekileri gizle' : `Son düzeltmeden (${new Date(ROBOT_FIX_AT).toLocaleDateString()}) önceki ${nOld} el gizli — göster`}</button></div>` : ''}
     <div class="row2"><button class="btn mini-btn" id="rbSmall">${ui.rbSmall ? 'Sadece 2+ levée kaybettirenler' : 'Hepsini göster (1 levée dahil)'}</button></div>
     ${summary}
     ${nOk ? `<div class="row2"><button class="btn mini-btn" id="rbShowOk">${ui.rbShowOk ? T('Hide the fixed ones') : '✔ ' + T('Fixed: {0} (hidden) — show', nOk)}</button></div>` : ''}
@@ -3709,6 +3715,8 @@ async function showRoboErrs0() {
 // the robots' table's mistakes (every card of its boards checked double dummy by the job): shown with the players'
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
+// the last robot fix (set with each one): the mistakes played before it leave the list by themselves
+const ROBOT_FIX_AT = Date.parse('2026-11-06T17:31:53+01:00');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {

@@ -123,7 +123,7 @@ async function main() {
     // the robots' mistakes: every card checked double dummy (for Servet's report)
     try {
       const er = E.analysePlay(deal, c, pl, [0, 1, 2, 3], 1e6);
-      if (er.length) errs.unshift({ n: b.n, ts: b.t0, b: bn, sys: blk.sys, conv: blk.conv, c: b.c, d: deal, a: auc.map(e => [e.seat, e.call]), p: pl, er: er.map(x => [x.t, x.s, x.c, x.b, x.lost]) });
+      if (er.length) errs.unshift({ n: b.n, ts: b.t0, g: now, b: bn, sys: blk.sys, conv: blk.conv, c: b.c, d: deal, a: auc.map(e => [e.seat, e.call]), p: pl, er: er.map(x => [x.t, x.s, x.c, x.b, x.lost]) });
     } catch (e) {}
     st.end = b.t1; st.n++; st.k++;
     if (st.k >= PER) { st.blk++; st.k = 0; }
