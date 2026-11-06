@@ -14,6 +14,7 @@ const AHEAD = (+process.env.AHEAD_MIN || 300) * 60e3;   // boards are ready this
 const KEEP = 40;            // boards already played kept for the page's list
 const ERRS = 300;           // the robots' mistakes kept
 const PER = 10;             // boards of each system / convention
+const RK = 0.5;             // rating points a pair wins (the other loses) for each IMP against the best contract
 // the pace the page shows them at (it reads these from the file)
 const TM = { call: 2500, lead: 3000, card: 2200, trick: 1800, end: 15000 };
 
@@ -82,7 +83,9 @@ const dur = b => TM.call * b.a.length + (b.p.length ? TM.lead + TM.card * (b.p.l
 
 let prev = null; try { prev = JSON.parse(fs.readFileSync(OUT + 'live-' + TABLE + '.json', 'utf8')); } catch (e) {}
 const st = prev && prev.st ? prev.st : { blk: 0, k: 0, n: 0, end: 0, skip: {} };
-const league = prev && prev.league ? prev.league : { pairs: PAIRS.map((n, i) => ({ i, n, r: 1500, b: 0 })), sys: {}, conv: {} };
+const league = prev && prev.league ? prev.league : { pairs: PAIRS.map((n, i) => ({ i, n, r: 1500, b: 0 })), sys: {}, conv: {}, k: RK };
+// ratings made at two points an IMP: scaled down to the slower pace
+if (league.k !== RK) { for (const p of league.pairs) p.r = 1500 + (p.r - 1500) * RK / 2; league.k = RK; }
 let boards = prev && prev.boards ? prev.boards : [], errs = []; try { errs = JSON.parse(fs.readFileSync(OUT + 'errors-' + TABLE + '.json', 'utf8')); } catch (e) {}
 const now = Date.now();
 if (!st.end || st.end < now) st.end = now + 20e3;   // nothing ahead (the first run, or a long stop): start now
@@ -111,8 +114,9 @@ async function main() {
     boards.push(b); made++;
     // the league: each pair's rating moves with its IMPs against the best contract; each system / convention: how
     // close to it the robots come (both pairs play the same system, so the IMPs themselves add up to nothing there)
-    const P = league.pairs; P[pi].r += 2 * imp; P[pj].r -= 2 * imp; P[pi].b++; P[pj].b++;
+    const P = league.pairs; P[pi].r += RK * imp; P[pj].r -= RK * imp; P[pi].b++; P[pj].b++;
     for (const [m, k] of [[league.sys, blk.sys], [league.conv, blk.conv || '-']]) { const x = m[k] || (m[k] = { b: 0, abs: 0, hit: 0 }); x.b++; x.abs += Math.abs(imp); if (!imp) x.hit++; }
+    b.rt = P.map(p => Math.round(p.r * 10) / 10); b.pb = P.map(p => p.b); b.sy = { ...league.sys[blk.sys] };   // as they stand after this board
     // the robots' mistakes: every card checked double dummy (for Servet's report)
     try {
       const er = E.analysePlay(deal, c, pl, [0, 1, 2, 3], 1e6);

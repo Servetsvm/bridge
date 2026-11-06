@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 385;
+const APP_V = 386;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2430,7 +2430,10 @@ function rtLoad(force) {
 function rtPick(k) { RT.cur = k; RT.data = RT.all[k] || null; RT.sel = null; RT.view = null; }
 const rtConv = b => b.conv ? pracName(b.conv) : T('The system itself');
 const rtPair = i => { const p = RT.data && RT.data.league && RT.data.league.pairs[i]; return p ? p.n.join(' & ') : ''; };
-const rtRating = i => { const p = RT.data && RT.data.league && RT.data.league.pairs[i]; return p ? Math.round(p.r) : ''; };
+// the league as it stands after the last board played (the file has the boards still to come too)
+const rtLast = D => { const t = Date.now(); let b = null; for (const x of (D && D.boards) || []) if (x.t1 <= t && x.rt) b = x; return b; };
+const rtR = (D, i) => { const b = rtLast(D); if (b) return { r: b.rt[i], b: b.pb[i] }; const p = D && D.league && D.league.pairs[i]; return p ? { r: p.r, b: p.b } : null; };
+const rtRating = i => { const p = rtR(RT.data, i); return p ? Math.round(p.r) : ''; };
 function rtCur(t, D) {
   const B = ((D || RT.data) && (D || RT.data).boards) || [];
   const b = B.find(x => x.t0 <= t && t < x.t1); if (b) return { b };
@@ -2510,10 +2513,10 @@ function rtBoards() {
 function rtLeague() {
   const T6 = RT_KEYS.filter(k => RT.all[k] && RT.all[k].league);
   if (!T6.length) return `<div class="muted">${T('No boards yet.')}</div>`;
-  const pairs = T6.flatMap(k => RT.all[k].league.pairs.map(p => ({ ...p, k })));
+  const pairs = T6.flatMap(k => RT.all[k].league.pairs.map((p, i) => ({ ...p, ...(rtR(RT.all[k], i) || {}), k })));
   const pr = pairs.sort((a, b) => b.r - a.r).map((p, i) => `<tr><td>${i + 1}</td><td>${esc(p.n.join(' & '))}<br><small>${esc(RT_SYS[p.k])}</small></td><td><b>${Math.round(p.r)}</b></td><td>${p.b}</td></tr>`).join('');
   const row = (n, x) => `<tr><td>${esc(n)}</td><td>${x.b}</td><td>${(x.abs / x.b).toFixed(1)}</td><td>${Math.round(100 * x.hit / x.b)}%</td></tr>`;
-  const sy = T6.map(k => [k, RT.all[k].league.sys[k]]).filter(([, x]) => x && x.b).sort((a, b) => a[1].abs / a[1].b - b[1].abs / b[1].b).map(([k, x]) => row(RT_SYS[k] || k, x)).join('');
+  const sy = T6.map(k => { const b = rtLast(RT.all[k]); return [k, b && b.sy ? b.sy : RT.all[k].league.sys[k]]; }).filter(([, x]) => x && x.b).sort((a, b) => a[1].abs / a[1].b - b[1].abs / b[1].b).map(([k, x]) => row(RT_SYS[k] || k, x)).join('');
   const L = RT.data && RT.data.league;
   const cv = L ? Object.entries(L.conv).filter(([k, x]) => x.b && k !== '-').sort((a, b) => b[1].b - a[1].b).slice(0, 30).map(([k, x]) => row(pracName(k), x)).join('') : '';
   const head = `<tr><th></th><th>${T('Boards')}</th><th>${T('IMPs from the best')}</th><th>${T('Best reached')}</th></tr>`;
