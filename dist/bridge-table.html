@@ -9698,7 +9698,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 398;
+const APP_V = 399;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12834,6 +12834,7 @@ document.addEventListener('click', ev_ => {
     t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
   if (t.dataset.rbok) { rbFixed(t.dataset.rbok, t.dataset.v === '1').then(showRoboErrs).catch(() => flash(T('Could not save'), 2000)); return; }
   if (t.id === 'rbDelAll') { const P = (ui.rbAll || []).slice(); if (!P.length || !confirm(T('Delete all') + ' — ' + T('Robot mistakes') + ' (' + P.length + ')?')) return; Promise.all(P.map(x => rbDone(x))).then(() => { flash('🗑 ' + P.length, 1800); showRoboErrs(); }).catch(() => flash(T('Could not remove'), 2000)); return; }
+  if (t.id === 'rbSmall') { ui.rbSmall = !ui.rbSmall; showRoboErrs(); return; }
   if (t.id === 'rbShowOk') { ui.rbShowOk = !ui.rbShowOk; showRoboErrs(); return; }
   if (t.dataset.rbdone) { rbDone(t.dataset.rbdone).then(showRoboErrs).catch(() => flash(T('Could not remove'), 2000)); return; }
   if (t.id === 'rbCopy') { const txt = JSON.stringify(ui.rbList || []); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash(T('Copied — paste it into your message'), 2200)).catch(() => prompt(T('Copy'), txt)); return; }
@@ -13364,6 +13365,8 @@ async function showRoboErrs0() {
   const nOk = L.filter(r => r.ok).length; if (!ui.rbShowOk) L = L.filter(r => !r.ok);
   ui.rbList = L.filter(r => !r.ok);
   for (const r of L) r.er = (r.er || []).filter(x => x[0] > 0);   // a note has no card of its own
+  // only the cards that cost two tricks or more (a toggle shows every one); a board left with none drops out (a note stays)
+  if (!ui.rbSmall) { for (const r of L) r.er = r.er.filter(x => x[4] >= 2); L = L.filter(r => r.er.length || r.not); ui.rbList = ui.rbList.filter(r => L.includes(r)); }
   const n = L.reduce((a, r) => a + (r.er || []).length, 0);
   // who made it: the player's partner or an opponent (records from before the seat was kept: not known), declarer or defence
   const mine = (r, x) => r.me != null && sideOf(x[1]) === sideOf(r.me), theirs = (r, x) => r.me != null && sideOf(x[1]) !== sideOf(r.me);
@@ -13372,12 +13375,19 @@ async function showRoboErrs0() {
   const sum = p => { const m = all.filter(([r, x]) => p(r, x)); return `${m.length} (${T('{0} tricks', m.reduce((a, [, x]) => a + x[4], 0))})`; };
   const split = all.some(([r]) => r.me != null) ? `<div class="okmsg">🤝 ${T('partner')}: ${sum(mine)} · ⚔️ ${T('opponent')}: ${sum(theirs)}</div>` : '';
   const nd = L.reduce((a, r) => a + (r.er || []).filter(x => sideOf(x[1]) === sideOf(r.c[3])).length, 0);
+  // the summary: the opening lead, the declarer's side, the defence (after the lead): how many cards, how many tricks
+  const isLead = (r, x) => x[0] === 1 && x[1] === (r.c[3] + 1) % 4, tk = a => a.reduce((t, [, x]) => t + x[4], 0);
+  const gLead = all.filter(([r, x]) => isLead(r, x)), gDecl = all.filter(([r, x]) => sideOf(x[1]) === sideOf(r.c[3])), gDef = all.filter(([r, x]) => sideOf(x[1]) !== sideOf(r.c[3]) && !isLead(r, x));
+  const summary = all.length ? `<div class="okmsg">📊 Özet · ilk atak <b>${gLead.length}</b> (${tk(gLead)} levée) · deklaran <b>${gDecl.length}</b> (${tk(gDecl)}) · savunma <b>${gDef.length}</b> (${tk(gDef)})</div>` : '';
   openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2>
     <div class="muted">${T('Cards the robots played that gave away tricks (double dummy). Copy them for Claude to improve the robots; then remove them.')}</div>
+    <div class="row2"><button class="btn mini-btn" id="rbSmall">${ui.rbSmall ? 'Sadece 2+ levée kaybettirenler' : 'Hepsini göster (1 levée dahil)'}</button></div>
+    ${summary}
     ${nOk ? `<div class="row2"><button class="btn mini-btn" id="rbShowOk">${ui.rbShowOk ? T('Hide the fixed ones') : '✔ ' + T('Fixed: {0} (hidden) — show', nOk)}</button></div>` : ''}
     ${L.length ? `<div class="okmsg">${T('{0} boards', L.length)} · ${T('declarer')} ${nd} · ${T('defence')} ${n - nd}</div>${split}<div class="row2"><button class="btn gold" id="rbCopy">📋 ${T('Copy all for Claude')}</button></div>` : ''}
     ${ui.rbAll.length ? `<div class="row2"><button class="btn" id="rbDelAll">🗑 ${T('Delete all')} (${ui.rbAll.length})</button></div>` : ''}
-    ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${r.c[0] ? conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] }) : T('Pass')}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small>${r.ok ? ` <b class="pos">✔ ${T('Fixed')}</b>` : ''}</div>
+    ${L.length > 150 ? `<div class="muted">İlk 150 el gösteriliyor (toplam ${L.length}); kopyalama hepsini alır.</div>` : ''}
+    ${L.length ? L.slice(0, 150).map(r => `<div class="cvreq"><div class="cvh"><b>${T('Board')} ${r.b} · ${r.c[0] ? conKey({ level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] }) : T('Pass')}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleString()}</small>${r.ok ? ` <b class="pos">✔ ${T('Fixed')}</b>` : ''}</div>
       ${r.not ? `<div class="cvb">📝 ${esc(r.not)}</div>` : ''}
       ${(r.er || []).map(x => `<div class="anarow">${T('Trick {0}', x[0])} · ${SEAT[x[1]]} (${role(r, x)}): ${cardH(x[2])} → ${cardH(x[3])} ${r.u ? `<b class="pos">✍️ ${T('player')}</b>` : `<b class="pos">+${x[4]}</b>`}</div>`).join('')}
       <button class="btn mini-btn" data-rbok="${esc(r.path)}" data-v="${r.ok ? 0 : 1}">${r.ok ? '↩ ' + T('Not fixed') : '✔ ' + T('Fixed')}</button> <button class="btn mini-btn" data-rbdone="${esc(r.path)}">✓ ${T('Remove')}</button></div>`).join('') : `<div class="muted">${T('No mistakes recorded yet.')}</div>`}
