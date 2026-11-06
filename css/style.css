@@ -1940,3 +1940,6 @@ body.clubsopen{overflow:hidden}
 body.homev2 .h2ptx .h2conv{margin:8px 0 0;background:transparent;color:inherit;border:1px solid var(--h2-brass)}
 @media (min-width:600px){body.homev2 .h2ptx .h2conv{margin-left:8px}}
 .rtcard .rtgo{padding:10px 14px 6px}.rtcard .rtrows{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 12px}
+/* the system table's six systems on the home card: gold buttons, as Start */
+body.homev2 .rtcard .rtchip{background:linear-gradient(180deg,#ecc874,var(--h2-brass,#c9a227) 55%,var(--h2-brass-2,#a8841c));color:var(--h2-brass-ink,#2a1f05);border:1px solid #8a6a1c;border-radius:10px;font:700 14px/1 var(--f-ui);padding:9px 12px;box-shadow:0 1px 0 rgba(255,255,255,.55) inset,0 4px 10px rgba(0,0,0,.3);cursor:pointer}
+body.homev2 .rtcard .rtchip:hover{filter:brightness(1.05)}
