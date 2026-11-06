@@ -1985,6 +1985,9 @@ body.clubsopen{overflow:hidden}
 .rtrow2 small{opacity:.8;font-size:12px}
 .rtsit{padding:0 5px;margin-left:4px;font-size:13px;line-height:1.4}
 .rtcard .rtgo{cursor:default}
+.rttrick .rtbid{font-size:15px;padding:1px 6px;border-radius:6px;background:rgba(255,255,255,.85);color:#1f2a22;min-width:30px;text-align:center}
+.rttrick .rtbid:empty{background:transparent}
+.rttrick .rtbid.new{box-shadow:0 0 0 2px var(--brass,#c9a227)}
 
 </style>
 
@@ -9660,7 +9663,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 388;
+const APP_V = 389;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12134,7 +12137,12 @@ const rtName = (s, D) => { const P = ((D || RT.data).league || {}).pairs || [], 
 function rtTable(b, P, live) {
   const gone = new Set(P.seq.slice(0, P.m).map(x => x.c)), pos = { 0: 'n', 1: 'e', 2: 's', 3: 'w' };
   const hand = s => `<div class="h ${pos[s]}"><b>${SEAT[s]} · ${esc(rtName(s))}${live ? ` <button class="btn mini-btn rtsit" data-rtsit="${s}" title="${T('Take this seat')}">🪑</button>` : ''}</b>${ORDER.map(su => suitLine(b.d[s].filter(c => !gone.has(c)), su)).join('<br>')}</div>`;
-  const tr = [0, 1, 2, 3].map(s => { const x = P.trick.find(y => y.s === s); return `<span class="rt${pos[s]}">${x ? RTXT[R(x.c)] + symHtml(S(x.c)) : ''}</span>`; }).join('');
+  // the auction (until the opening lead): each robot's last call in the middle, in front of its hand (the newest marked)
+  const bidding = live && P.calls && !P.m, calls = bidding ? b.a.slice(0, P.calls) : [];
+  const tr = [0, 1, 2, 3].map(s => {
+    if (bidding) { const i = calls.map(e => e[0]).lastIndexOf(s); return `<span class="rt${pos[s]} rtbid${i === calls.length - 1 ? ' new' : ''}">${i >= 0 ? callHtml(calls[i][1]) : ''}</span>`; }
+    const x = P.trick.find(y => y.s === s); return `<span class="rt${pos[s]}">${x ? RTXT[R(x.c)] + symHtml(S(x.c)) : ''}</span>`;
+  }).join('');
   return `<div class="deal rtdeal">${[0, 1, 2, 3].map(hand).join('')}<div class="rttrick">${tr}</div></div>`;
 }
 function rtLive() {
