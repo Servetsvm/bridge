@@ -9693,15 +9693,17 @@ const { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealer
 
 let SET = { style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } };
 let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
-function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
+// T_FORCE: a language for a moment (Servet's robot reports are always Turkish)
+let T_FORCE = null;
+function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 397;
+const APP_V = 398;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
 function bidTxt(t) {
-  const L = SET.lang || "en", col = ["en", "tr", "no", "es", "fr", "it", "de", "ru", "pl", "zh"].indexOf(L);
+  const L = T_FORCE || SET.lang || "en", col = ["en", "tr", "no", "es", "fr", "it", "de", "ru", "pl", "zh"].indexOf(L);
   if (col < 1 || !t || typeof BID_PH === "undefined") return t;
   let r = BID_RE[L];
   if (!r) {
@@ -12063,7 +12065,7 @@ function learnedMsg() {
   const seen = SET.learnedSeen || 0, L = ROBOT_LEARNED.filter(x => x.v > seen);
   if (!L.length || ui.overlay) return;
   SET.learnedSeen = Math.max(...ROBOT_LEARNED.map(x => x.v)); Store.saveSettings(SET); save();
-  openOv('learned', `<h2>🤖 ${SET.lang === 'tr' ? 'Robot yeni öğrendi' : 'The robots have learned'}</h2>${L.map(x => `<div class="cvreq"><div class="cvb">${esc(SET.lang === 'tr' ? x.tr : x.en)}</div></div>`).join('')}<div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  openOv('learned', `<h2>🤖 Robot yeni öğrendi</h2>${L.map(x => `<div class="cvreq"><div class="cvb">${esc(x.tr)}</div></div>`).join('')}<div class="row2"><button class="btn gold" id="oClose">Kapat</button></div>`);
 }
 setTimeout(learnedMsg, 6000); setInterval(learnedMsg, 30000);   // shown when no other window is open
 /* opponent robots by level (only when you play alone with robots): a beginner looks less far ahead and sometimes plays a careless card */
@@ -13348,7 +13350,8 @@ async function showConvRequests() {
 }
 /* the robots' mistakes (administrator): each board where a robot's card gave away tricks double dummy, with the
    cards; copied for Claude, who improves the robots, and then removed */
-async function showRoboErrs() {
+async function showRoboErrs() { return inTurkish(showRoboErrs0); }
+async function showRoboErrs0() {
   if (!Net.isAdmin()) return;
   // read again after a removal: the list stays where it was (no "Loading…" in between, which sent it to the top)
   if (ui.overlay !== 'roboerr') openOv('roboerr', `<h2>🤖 ${T('Robot mistakes')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
@@ -13394,6 +13397,11 @@ async function rtErrs() {
 }
 const rbDone = path => String(path).startsWith('rt:') ? rtHide(path) : Net.roboErrDone(path);
 const rbFixed = (path, on) => String(path).startsWith('rt:') ? rtHide(path) : Net.roboErrFixed(path, on);
+// a report of Servet's drawn in Turkish (the words, the bid meanings, the seats), then the app's language again
+async function inTurkish(f) {
+  const seats = SEAT.slice(), ab = SEAT_AB; T_FORCE = 'tr'; SEAT.splice(0, 4, ...(SEAT_T.tr || seats)); SEAT_AB = SEAT_AB_T.tr || ab;
+  try { return await f(); } finally { T_FORCE = null; SEAT.splice(0, 4, ...seats); SEAT_AB = ab; }
+}
 // the player tells what a robot did wrong on this board (the bidding too, which the card check cannot see)
 const rbNoteHtml = e => e && e.deal && !online() ? `<div class="grp"><span>🤖 ${T('Report a robot mistake')}</span><textarea id="rbNote" class="tok" rows="2" maxlength="500" placeholder="${T('What did the robot do wrong? The bidding, a card…')}"></textarea><div class="row2"><button class="btn" id="rbNoteSend" data-id="${esc(String(e.id))}">📨 ${T('Send to the robot mistakes')}</button></div></div>` : '';
 // the administrator sees on the report button how many new lessons came in since the report was last opened
@@ -13405,7 +13413,8 @@ setTimeout(learnCheck, 20000); setInterval(learnCheck, 15 * 60000);
 /* ---- the robots' learning report (the administrator only): what the robots got wrong on the boards played, from
    every player — the cards (double dummy, as in Robot mistakes) and the bidding (the robot tables' contracts against
    the best contract with all hands open) — by period, with the costliest examples, to copy for Claude ---- */
-async function showLearn() {
+async function showLearn() { return inTurkish(showLearn0); }
+async function showLearn0() {
   if (!Net.isAdmin()) return;
   if (ui.overlay !== 'learn') openOv('learn', `<h2>📈 ${T('Learning report')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let L = []; try { L = await Net.roboErrs(); } catch (e) {}
