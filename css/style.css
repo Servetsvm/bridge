@@ -1937,3 +1937,5 @@ body.clubsopen{overflow:hidden}
 .rttrick .rtbid:empty{background:transparent}
 .rttrick .rtbid.new{box-shadow:0 0 0 2px var(--brass,#c9a227)}
 .rtend{justify-content:center;margin-top:6px}
+body.homev2 .h2ptx .h2conv{margin:8px 0 0;background:transparent;color:inherit;border:1px solid var(--h2-brass)}
+@media (min-width:600px){body.homev2 .h2ptx .h2conv{margin-left:8px}}

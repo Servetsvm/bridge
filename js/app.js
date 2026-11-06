@@ -8,7 +8,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 392;
+const APP_V = 393;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1613,7 +1613,7 @@ function homeShell2() {
       <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2chips" id="hMe"></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
       <div class="h2pr"><div class="h2play">
         <div class="h2fan" aria-hidden="true">${fan}</div>
-        <div class="h2ptx"><h2>${T('Play offline')}</h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button></div>
+        <div class="h2ptx"><h2>${T('Play offline')}</h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📚 ${T('Practise conventions')}</button></div>
       </div>
       <div class="h2champ" id="hChamp"></div></div>
       <div class="h2tiles">
@@ -3100,6 +3100,8 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.supk) { showSupThread(t.dataset.supk); return; }
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
+  // beside Play offline: the conventions to practise open (the drop-down of the practice card, scrolled to)
+  if (t.id === 'bConvGo') { ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   // the robots' table: open it, its tabs, a call's meaning, a board played before
   if (t.dataset.rtk) { if (t.dataset.rtopen) rtWatch(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
