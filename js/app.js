@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 399;
+const APP_V = 400;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2368,6 +2368,7 @@ const ROBOT_LEARNED = [
   { v: 378, tr: 'Ortak Cappelletti, DONT, Michaels ya da Unusual 2SA ile girdikten sonra rakip araya deklare yaparsa artık renk seçmek zorunda değilim: fitim varsa deklare ediyorum, yoksa pas (1SA–2♦–4♦: ♥ tek kâğıtla 4♥ yok). Ortağın eski takeout kontrasını, arada deklareler olduysa cevaplamıyorum.', en: 'After partner\'s Cappelletti, DONT, Michaels or Unusual 2NT and an opponent\'s bid over it I no longer have to choose a suit: I bid with a fit, else pass. An old takeout double is not answered once other calls came in between.' },
   { v: 378, tr: 'Stayman, transfer gibi yapay bir deklarenin kontrası takeout değil: o renkte iyi 5+ kâğıt, atak isteği. Ortağın böyle kontrasını takeout gibi cevaplamıyorum.', en: 'A double of an artificial bid (Stayman, a transfer) is lead-directing: a good 5+ suit, not takeout.' },
   { v: 378, tr: 'Game forcing bir dizide fit ve iki as varsa 31 puandan itibaren şlem arıyorum (1♠–2♦–3♦, 17 puan ve üç asla: 4SA).', en: 'In a game force with a fit and two aces I look for slam from 31 points.' },
+  { v: 400, tr: 'Rakip levéeyi zaten almışsa ve elimdeki o renkteki kartların hepsi onunkinden küçükse, boşuna büyük kart vermiyorum, en küçüğünü veriyorum (3SA, deklaran ♦A çekti, bende ♦K9: Papaz değil 9). Sistem masalarında robotlar da artık uygulamadaki kadar uzun düşünüyor.', en: 'When an opponent has already won the trick beyond my reach, I follow with my lowest card, not an honour.' },
   { v: 387, tr: 'Rakibin zayıf ikili açışına (ör. 2♥) karşı 15+ puanla, onların renginde üç kâğıdım olsa da takeout kontra veriyorum; dengeli ve durdurucuyla 2SA diyorum (Board 512: ♠AJ ♥J82 ♦AQ73 ♣AT65 ile pas değil kontra, ortak 4♠ der).', en: 'Over their weak two I double for takeout with 15+ even with three of their suit, and bid 2NT with 15-18 balanced and a stopper.' },
   { v: 380, tr: 'Konvansiyon çalışan her oyuncunun masasında da bütün elleri görüyorum (deklarede ortağın gerçek eli, oyunda dört el).', en: 'I also see every hand at the table of any player practising conventions.' },
   { v: 379, tr: 'Servet açınca (Ayarlar → Robotlar tüm elleri görsün) bütün elleri görüyorum: deklarede ortağımın gerçek elini, kart oyununda ve defansta dört eli (double dummy en iyi kart). Rakip robotlar için de geçerli.', en: 'With Servet\'s switch on I see every hand: partner\'s real hand in the bidding, all four in the play and defence (the double-dummy best card). The opponents too.' },

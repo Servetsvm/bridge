@@ -900,6 +900,14 @@ function ddChoose(g, seat, leg, opt) {
     let alt = null, av = -1; for (const c of tieOrder(g, leg)) if (!isRuff(g, c) && tot.get(c) > av + 1e-9) { av = tot.get(c); alt = c; }
     if (alt != null && av >= bv - SIG_NEAR * n) best = alt;
   }
+  // following to a trick an opponent has already won beyond reach (every card of mine in the suit lower than theirs):
+  // the lowest card when the samples rate it about the same — an honour thrown under their ace is a trick given
+  // (3NT, ♦A led from ♦AQJ2 with ♦K9: the 9, not the king)
+  if (g.trick.length && S(best) === S(g.trick[0].c)) {
+    const w = g.trick.reduce((a, x) => (S(x.c) === S(a.c) && R(x.c) > R(a.c)) || (g.trump >= 0 && S(x.c) === g.trump && S(a.c) !== g.trump) ? x : a);
+    const low = leg.filter(c => S(c) === S(best)).reduce((a, c) => a == null || R(c) < R(a) ? c : a, null);
+    if (sideOf(w.s) !== side && S(w.c) === S(best) && inSuit(g.hands[seat], S(best)).every(c => R(c) < R(w.c)) && low !== best && tot.get(low) >= bv - SIG_NEAR * n) best = low;
+  }
   // a defender following to partner's lead with the top touching honours of the suit (♠KQ6 under partner's ♠A): the
   // lower honour, which promises the higher one, when the samples rate it within SIG_NEAR tricks of the best card (the
   // lowest card would say "I do not want this suit"). Measured on 202 such Bermuda Bowl 2025 positions: it costs nothing

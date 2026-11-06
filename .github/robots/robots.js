@@ -47,8 +47,9 @@ for (const k of [TABLE]) {
   for (const c of E.CONVS) if (on[c.k] && !CARD_KEYS.includes(c.k)) BLOCKS.push({ sys: k, conv: c.k });
   for (const b of BASICS) BLOCKS.push({ sys: k, conv: b });
 }
-const OPT = { budget: 500, maxSamples: 40, ddTricks: 12, ddDecl: 13, evLim: 800000, minSamples: 16, cap: 2000,
-  lead: { budget: 1500, maxSamples: 60, minSamples: 30, evLim: 1500000, cap: 4000 } };
+// the robots think nearly as long as the app's own (a lighter setting made a third of the declarer's mistakes)
+const OPT = { budget: 2000, maxSamples: 120, ddTricks: 12, ddDecl: 13, evLim: 1500000, minSamples: 40, cap: 6000,
+  lead: { budget: 4000, maxSamples: 100, minSamples: 40, evLim: 3000000, cap: 8000 } };
 
 const over = a => (a.length >= 4 && a.slice(-3).every(e => e.call === 'P') && a.some(e => e.call !== 'P')) || (a.length === 4 && a.every(e => e.call === 'P'));
 function bidAll(deal, dealer, cards) {
