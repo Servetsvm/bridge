@@ -1939,3 +1939,4 @@ body.clubsopen{overflow:hidden}
 .rtend{justify-content:center;margin-top:6px}
 body.homev2 .h2ptx .h2conv{margin:8px 0 0;background:transparent;color:inherit;border:1px solid var(--h2-brass)}
 @media (min-width:600px){body.homev2 .h2ptx .h2conv{margin-left:8px}}
+.rtcard .rtgo{padding:10px 14px 6px}.rtcard .rtrows{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 12px}

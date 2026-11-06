@@ -1991,6 +1991,7 @@ body.clubsopen{overflow:hidden}
 .rtend{justify-content:center;margin-top:6px}
 body.homev2 .h2ptx .h2conv{margin:8px 0 0;background:transparent;color:inherit;border:1px solid var(--h2-brass)}
 @media (min-width:600px){body.homev2 .h2ptx .h2conv{margin-left:8px}}
+.rtcard .rtgo{padding:10px 14px 6px}.rtcard .rtrows{display:flex;flex-wrap:wrap;gap:6px;padding:0 14px 12px}
 
 </style>
 
@@ -9684,7 +9685,7 @@ let G = null, HIST = [], BOARD = 0, timer = null, wdog = null;
 function T(s, ...a) { let r = (I18N[SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 393;
+const APP_V = 394;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12294,12 +12295,9 @@ function rtSit(s) {
     closeOv(); ui.saved = null; Net.st.soloPub = true; resume();
   });
 }
-// the home page's card: the six tables and what each plays now
+// the home page's card: the six tables (their systems' names)
 function rtCardHtml() {
-  const t = Date.now();
-  const rows = RT_KEYS.map(k => { const D = RT.all[k], x = D ? rtCur(t, D) : null, b = x && (x.b || x.wait);
-    return `<button class="rtrow2" data-rtk="${k}" data-rtopen="1"><b>${esc(RT_SYS[k])}</b><small>${b ? esc(b.conv ? pracName(b.conv) : T('The system itself')) + ' · ' + b.k + '/' + b.of : '—'}</small></button>`; }).join('');
-  return `<div class="rtgo"><span class="rtlive">🔴 ${T('Live')}</span><b>🤖 ${T('System table — live')}</b><small>${T('Six tables, one for each system. Tap one to watch.')}</small></div><div class="rtrows">${rows}</div>`;
+  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(RT_SYS[k])}</button>`).join('')}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
