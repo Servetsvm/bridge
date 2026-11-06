@@ -379,6 +379,11 @@ function cands(x) {
       const mn = (l === 1 ? 8 : l === 2 ? 11 : 13) - d;
       add(B(l, s), h => h.len[s] >= (l === 3 ? 6 : 5) && h.hcp >= mn && h.hcp <= 16 && (l === 1 || h.top5(s) >= 2) && h.len[s] >= Math.max(...unbid.map(u => h.len[u])), { min: mn, max: 16, len: { [s]: 5 }, t: 'Overcall: 5+ ' + SUIT[s] + ', ' + mn + '-16 HCP' });
     }
+    // over their weak two: 2NT with 15-18 balanced and a stopper; with 15+ and no stopper a takeout double, three of
+    // their suit or not (2♥ with ♠AJ ♥J82 ♦AQ73 ♣AT65: X, not pass — partner has the spades)
+    const weak2 = LV(ob) === 2 && os < 4 && x.oppBids.length === 1 && opening.m && opening.m.tag === 'weak';
+    if (weak2) add(B(2, 4), h => h.bal && h.hcp >= 15 && h.hcp <= 18 && h.stop(os), { min: 15, max: 18, len: BAL, t: 'Balanced 15-18 HCP with a stopper in their suit' });
+    if (weak2 && !art) add('X', h => h.hcp >= 15 && h.len[os] <= 3 && unbid.every(u => h.len[u] >= 2) && unbid.filter(u => h.len[u] >= 4).length >= 2, { min: 15, len: Object.fromEntries(unbid.map(u => [u, 3])), cv: 'takeout', t: 'Takeout double: 15+ HCP over a weak two' });
     if (!art) add('X', h => h.hcp >= 12 - d && h.len[os] <= 2 && unbid.every(u => h.len[u] >= 3 || (h.len[u] >= 2 && h.hcp >= 15)), { min: 12 - d, len: Object.fromEntries(unbid.map(u => [u, 3])), cv: 'takeout', t: 'Takeout double: 12+ HCP, support for the unbid suits' });
     add('P', () => true, { t: 'Pass' });
     return L;
