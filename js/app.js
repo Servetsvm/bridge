@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 401;
+const APP_V = 402;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1267,6 +1267,7 @@ function renderTable() {
   $("table").classList.toggle("lobby", G.phase === "lobby" || G.phase === "idle"); document.body.classList.toggle("inlobby", G.phase === "lobby" || G.phase === "idle");
   if (G.phase === "lobby" || G.phase === "idle") { C.innerHTML = G.phase === "idle" ? idleHtml() : lobbyHtml(); return; }
   if (G.phase === 'bid') C.innerHTML = auctionPanel();
+  else if (G.phase === 'play' && G.rtv && G.rtv.done) C.innerHTML = rtDoneHtml(G.rtv.b);   // a system table's board over: the result and the double-dummy table in the middle
   else if (G.phase === 'play' && ui.ask) C.innerHTML = `<div class="askbox"><div>❓ ${esc(askText(ui.ask.a))}</div><div class="row2"><button class="btn new" data-askr="1">${T('Accept')}</button><button class="btn" data-askr="0">${T('Decline')}</button></div></div>`;   // a claim: the hands are open, the question sits in the middle
   else if (G.phase === 'play') {
     // tap the table to look at the last finished trick; tap again (or wait) to come back
@@ -1349,7 +1350,7 @@ function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
-  if (G.rtv) { const b = G.rtv.b; s = G.rtv.done ? `${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS ${fmtSigned(b.sc)} · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} (${fmtSigned(b.imp)} IMP)${rtDdHtml(b)}<div class="row2 rtend"><button class="btn" id="bRtAgain">🔁 ${T('Watch again')}</button><button class="btn gold" id="bRtNext">▶ ${T('Continue')}</button></div>` : '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }
+  if (G.rtv) { const b = G.rtv.b; s = '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }   // the end of a board: in the middle of the table (rtDoneHtml)
   else if (G.watch && (G.phase === 'bid' || G.phase === 'play')) s = '🤖 ' + T('The robots are playing this deal — watch');
   else if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
   else if (G.phase === "play" && ui.ask) s = T("Do you agree?");
@@ -2568,6 +2569,10 @@ function rtDdHtml(b) {
   if (!b.dd) return '';
   const st = [4, 3, 2, 1, 0], gm = (t, s) => t - 6 >= (s === 4 ? 3 : s >= 2 ? 4 : 5);
   return `<table class="rtdd"><tr><th>🎯</th>${st.map(s => `<th>${symHtml(s)}</th>`).join('')}</tr>${[0, 2, 1, 3].map(d => `<tr><th>${SEAT[d]}</th>${st.map(s => { const t = b.dd[d][s]; return `<td class="${t >= 7 ? (gm(t, s) ? 'gm' : 'ok') : ''}">${t >= 7 ? t - 6 : '–'}</td>`; }).join('')}</tr>`).join('')}</table>`;
+}
+// a system table's board over, in the middle of the table: the result, the double-dummy table, watch again / continue
+function rtDoneHtml(b) {
+  return `<div class="rtdone"><div class="rtres">${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS <b>${fmtSigned(b.sc)}</b><small>${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} (${fmtSigned(b.imp)} IMP)</small></div>${rtDdHtml(b)}<div class="row2 rtend"><button class="btn" id="bRtAgain">🔁 ${T('Watch again')}</button><button class="btn gold" id="bRtNext">▶ ${T('Continue')}</button></div></div>`;
 }
 // the system table on the game's own table: the board as it stands at time t (every hand open; the robots act, not us)
 function rtGameOf(b, t) {

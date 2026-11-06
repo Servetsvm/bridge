@@ -1951,3 +1951,11 @@ body.homev2 .rtcard .rtchip:hover{filter:brightness(1.05)}
 body.homev2 .h2ptitle{background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;cursor:pointer;text-align:left}
 body.homev2 .h2ptitle:hover{text-decoration:underline}
 body.homev2 button.h2fango{display:block;background:none;border:0;padding:0;margin:0;color:inherit;font:inherit;cursor:pointer}
+/* a system table board over: the result and the double-dummy table in the middle of the table, larger */
+#center .rtdone{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:100%;padding:4px;text-align:center}
+#center .rtres{background:rgba(255,255,255,.92);color:#1f2a22;border-radius:8px;padding:6px 12px;font-size:15px;line-height:1.3}
+#center .rtres small{display:block;font-size:13px;opacity:.85}
+#center .rtdd{font-size:17px;margin:0}
+#center .rtdd th,#center .rtdd td{padding:5px 11px}
+#center .rtend{margin:0}
+@media (max-width:420px){#center .rtdd{font-size:15px}#center .rtdd th,#center .rtdd td{padding:4px 7px}}
