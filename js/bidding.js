@@ -83,6 +83,9 @@ function cands(x) {
     }
     return L;
   }
+  // I answered partner's key-card ask and partner has now named the contract (not 5NT, the king ask): partner is the
+  // captain, so pass (1♦–1♥–3♦–4NT–5♣–6♥: not 6NT)
+  if (pJust && myLast && mm.tag === 'bwr' && isNum(pLast.call) && pLast.call !== B(5, 4)) { add('P', () => true, { t: 'Partner, who asked for key cards, has chosen the contract' }); return L; }
   if (myLast && mm.tag === 'bw' && pLast && pm.tag === 'bwr') {
     const t = mm.trump, P = pInfo(x), total = mm.rkc ? 5 : 4;
     const count = h => {
@@ -92,7 +95,14 @@ function cands(x) {
       return mine + k;
     };
     const est = h => h.sup(t) + P.min + 2;
-    add(B(7, t), h => count(h) === total && est(h) >= 36, { t: 'Grand slam: we hold every key card' });
+    // a grand slam: every key card, the trump queen known (RKCB) and the points for thirteen tricks (33+ HCP together);
+    // without them the small slam (1♦–1♥–3♦–4NT–5♥ with ♦A7 and the queen missing: 6♦, not 7♦)
+    const queen = h => !mm.rkc || t >= 4 || h.has(t, 10) || !!pm.q;
+    // a grand slam needs a trump suit worth the name: eight cards together, or a solid seven of my own (♥AKQJ87 opposite
+    // a void: not 7♥); a small slam a six-card suit at least, else it is played in notrump
+    const fitOK = h => t >= 4 || h.len[t] + P.len[t] >= 8 || (h.len[t] >= 7 && h.top5(t) >= 4), fit6 = h => t >= 4 || h.len[t] + P.len[t] >= 8 || h.len[t] >= 6;
+    add(B(7, t), h => count(h) === total && est(h) >= 36 && h.hcp + P.min >= 33 && queen(h) && fitOK(h), { t: 'Grand slam: we hold every key card' });
+    if (t < 4) add(B(6, 4), h => count(h) >= total - 1 && !fit6(h), { t: 'Small slam in notrump: no trump fit' });
     add(B(6, t), h => count(h) >= total - 1, { t: 'Small slam: at most one key card missing' });
     add('P', () => pLast.call === B(5, t), { t: 'Two key cards missing: stop at the five level' });
     add(B(5, t), () => true, { t: 'Two key cards missing: sign off at the five level', tag: 'stop' });
@@ -984,7 +994,11 @@ function generic(x, h) {
   const oppStops = x.oppSuits.every(s => h.stop(s));
   const pBidNT = x.pa.some(e => isNum(e.call) && ST(e.call) === 4);
   let t;
+  // no major fit, but a solid six-card major of my own (four of the top five honours): it is trumps, not a minor fit
+  // (♠AKQJT6 ♥– ♦75 ♣KJT73 after 1♦–1♠–2♦: spades, not 5♦)
+  const solidM = [3, 2].find(s => h.len[s] >= 6 && h.top5(s) >= 4);
   if (majorFit >= 0) t = majorFit;
+  else if (solidM != null) t = solidM;
   else if ((pBidNT && oppStops) || ((h.bal || h.semi) && oppStops && minorFit < 0)) t = 4;
   else if (minorFit >= 0) t = minorFit;
   else {

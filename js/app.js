@@ -2379,6 +2379,7 @@ const ROBOT_LEARNED = [
   { v: 378, tr: 'Ortak Cappelletti, DONT, Michaels ya da Unusual 2SA ile girdikten sonra rakip araya deklare yaparsa artık renk seçmek zorunda değilim: fitim varsa deklare ediyorum, yoksa pas (1SA–2♦–4♦: ♥ tek kâğıtla 4♥ yok). Ortağın eski takeout kontrasını, arada deklareler olduysa cevaplamıyorum.', en: 'After partner\'s Cappelletti, DONT, Michaels or Unusual 2NT and an opponent\'s bid over it I no longer have to choose a suit: I bid with a fit, else pass. An old takeout double is not answered once other calls came in between.' },
   { v: 378, tr: 'Stayman, transfer gibi yapay bir deklarenin kontrası takeout değil: o renkte iyi 5+ kâğıt, atak isteği. Ortağın böyle kontrasını takeout gibi cevaplamıyorum.', en: 'A double of an artificial bid (Stayman, a transfer) is lead-directing: a good 5+ suit, not takeout.' },
   { v: 378, tr: 'Game forcing bir dizide fit ve iki as varsa 31 puandan itibaren şlem arıyorum (1♠–2♦–3♦, 17 puan ve üç asla: 4SA).', en: 'In a game force with a fit and two aces I look for slam from 31 points.' },
+  { v: 405, tr: 'Büyük şlemi artık sadece koz damesi de bizdeyse, en az 8 kartlık koz fitiyle ve 13 levée için yeterli puanla (birlikte 33+) söylüyorum; değilse küçük şlemde kalıyorum, koz fiti yoksa 6SA diyorum. Ortağım anahtar kart sorup kontratı seçince pas geçiyorum. Elimde sağlam 6'lı majör (ilk 5 onörden 4'ü) varken minör fit yerine o rengi koz seçiyorum (♠AKQJT6 ile 5♦ değil ♠).', en: 'A grand slam only with the trump queen, an 8-card fit and 33+ points together; a solid six-card major chosen over a minor fit.' },
   { v: 404, tr: 'Artık kendi hatalarımdan öğreniyorum: sistem masalarında her el bir de kapalı kartla oynanıyor, hatalarım double dummy ile bulunup bir ders defterine yazılıyor. Defterdeki dersler önce denemeye giriyor (ellerin yarısı derslerle, yarısı derssiz); sadece kaybedilen levéeyi gerçekten azaltan dersler kabul ediliyor ve oyunlarınızdaki robotlar onları kullanıyor. Her kabul edilen defteri size yazacağım. Sistem masalarında gösterilen oyunda ise dört eli de görüyorum.', en: 'I now learn from my own mistakes: a lesson book is tried on the system tables and used only when it loses fewer tricks.' },
   { v: 400, tr: 'Rakip levéeyi zaten almışsa ve elimdeki o renkteki kartların hepsi onunkinden küçükse, boşuna büyük kart vermiyorum, en küçüğünü veriyorum (3SA, deklaran ♦A çekti, bende ♦K9: Papaz değil 9). Sistem masalarında robotlar da artık uygulamadaki kadar uzun düşünüyor.', en: 'When an opponent has already won the trick beyond my reach, I follow with my lowest card, not an honour.' },
   { v: 387, tr: 'Rakibin zayıf ikili açışına (ör. 2♥) karşı 15+ puanla, onların renginde üç kâğıdım olsa da takeout kontra veriyorum; dengeli ve durdurucuyla 2SA diyorum (Board 512: ♠AJ ♥J82 ♦AQ73 ♣AT65 ile pas değil kontra, ortak 4♠ der).', en: 'Over their weak two I double for takeout with 15+ even with three of their suit, and bid 2NT with 15-18 balanced and a stopper.' },
@@ -3739,7 +3740,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-06T17:31:53+01:00');
+const ROBOT_FIX_AT = Date.parse('2026-11-07T21:48:39Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {
@@ -3772,6 +3773,8 @@ async function showLearn0() {
   if (!Net.isAdmin()) return;
   if (ui.overlay !== 'learn') openOv('learn', `<h2>📈 ${T('Learning report')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let L = []; try { L = await Net.roboErrs(); } catch (e) {}
+  // the lesson book and the six tables' trial of it
+  const LB = await rtGet('lessons.json'); await rtLoad();
   if (ui.overlay !== 'learn') return;
   SET.learnSeen = Date.now(); Store.saveSettings(SET); save(); ui.learnNew = 0;
   const days = ui.learnDays || 7, from = days ? Date.now() - days * 864e5 : 0, R = L.filter(r => r.ts >= from);
@@ -3794,7 +3797,21 @@ async function showLearn0() {
     <h3 class="sth">🗣 ${T('Bidding')} <small>(${T('{0} boards', bids.length)})</small></h3>
     ${Object.keys(bk).length ? `<table class="res stats"><tbody>${Object.entries(bk).sort((a, b) => b[1][1] - a[1][1]).map(([k, v]) => row(KB[k] || k, v, 'IMP')).join('')}</tbody></table>` : `<div class="muted">${T('No bidding lessons yet.')}</div>`}
     ${ex.length ? `<h3 class="sth">${T('Costliest examples')}</h3>${ex.map(r => `<div class="anarow">${T('Board')} ${r.b}: ${aucTxt(r.a)} → <b>${cn(r.c[0], r.c[1])} ${SEAT_AB[r.c[3]]}</b> (${T('{0} tricks', r.ddT)}) · ${T('best')}: <b>${r.best ? cn(r.best[0], r.best[1]) + ' ' + SEAT_AB[r.best[2]] : ''}</b> · <b class="neg">−${r.er[0][4]} IMP</b> · ${KB[r.bk] || ''}</div>`).join('')}` : ''}
+    ${lessonBookHtml(LB)}
     <div class="row2"><button class="btn gold" id="learnCopy">📋 ${T('Copy the report for Claude')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+// the lesson book in the learning report (Servet's, so Turkish): the trial of the candidate, the accepted lessons
+function lessonBookHtml(LB) {
+  if (!LB || !LB.cand) return '<h3 class="sth">📒 Ders defteri</h3><div class="muted">Henüz oluşmadı: sistem masalarının ilk çalışması bitince dolacak.</div>';
+  const n = b => Object.values(b || {}).reduce((t, m) => t + Object.keys(m).length, 0), ab = { L: { b: 0, lost: 0 }, B: { b: 0, lost: 0 } };
+  for (const k of RT_KEYS) { const a = RT.all[k] && RT.all[k].league && RT.all[k].league.ab; if (a && a.v === LB.cand.v) for (const x of ['L', 'B']) { ab[x].b += a[x].b; ab[x].lost += a[x].lost; } }
+  const per = a => a.b ? (a.lost / a.b).toFixed(2) : '—', counted = Object.values(LB.raw || {}).reduce((t, m) => t + Object.values(m).reduce((u, v) => u + v, 0), 0);
+  return `<h3 class="sth">📒 Ders defteri</h3>
+    <div class="anarow">Sayılan hatalar (kaybedilen levée): <b>${counted}</b> · denemedeki defter ${LB.cand.v}: <b>${n(LB.cand.book)}</b> ders</div>
+    <table class="res stats"><tbody><tr><td>Derslerle</td><td class="n">${ab.L.b} el</td><td class="n">${per(ab.L)} levée/el</td></tr><tr><td>Derssiz</td><td class="n">${ab.B.b} el</td><td class="n">${per(ab.B)} levée/el</td></tr></tbody></table>
+    <div class="muted">Her iki tarafta 300 el olunca karar verilir: dersler kaybı en az %5 azaltırsa kabul edilir.</div>
+    ${LB.acc ? `<div class="okmsg">✅ Kabul edilen defter ${LB.acc.v} (${new Date(LB.acc.at).toLocaleDateString()}): kayıp %${LB.acc.gain} azaldı. Robotlarınız bunu kullanıyor.</div>${(LB.acc.tr || []).map(t => `<div class="anarow">${esc(t)}</div>`).join('')}` : '<div class="muted">Henüz kabul edilmiş ders yok.</div>'}
+    ${(LB.hist || []).length ? `<div class="muted">Son denemeler: ${LB.hist.slice(-5).map(h => `${h.v} ${h.ok ? '✅' : '✖'}`).join(' · ')}</div>` : ''}`;
 }
 // the team match with the robots is gone: its saved match on this device is forgotten
 try { localStorage.removeItem('bridge-rteam'); } catch (e) {}
