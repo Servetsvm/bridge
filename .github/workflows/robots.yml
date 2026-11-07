@@ -68,9 +68,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          cp .github/robots/README.md out/README.md   # what the files hold
           cd out
           git init -q
           git checkout -q -b robots-data
-          git add *.json
+          git add *.json README.md
           git -c user.name="Servetsvm" -c user.email="39servet@gmail.com" commit -qm "Robot tables: $(date -u +%FT%TZ)"
           git push -qf "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" robots-data
