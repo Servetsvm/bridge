@@ -1,5 +1,5 @@
 // The robots' lesson book (run by .github/workflows/robots.yml after the six tables: node .github/robots/learn.js <dir>).
-// From the mistakes of the robots' closed-hand play on the six tables (errors-<system>.json: each mistake's context and
+// From every mistake of the robots' closed-hand play on the six tables, old and new (the counts add up run after run) (errors-<system>.json: each mistake's context and
 // the kinds of the card played and of the better one, double dummy) it writes the candidate lessons: for each kind of
 // position, how often one kind of card was played where another was better (net). The tables then play every other
 // board with the candidate lessons (league.ab in live-<system>.json counts the tricks lost by each arm); once both arms
@@ -15,18 +15,42 @@ const GAIN = 0.95;      // the candidate is accepted when its arm loses at most 
 const read = f => { try { return JSON.parse(fs.readFileSync(DIR + f, 'utf8')); } catch (e) { return null; } };
 let L = read('lessons.json') || { cand: null, acc: null, hist: [] };
 
-// the book from the mistakes kept (the last ones of each table): the net count of each "played kind > better kind"
+// the engine (the card kinds of the mistakes kept from before they were written down)
+const vm = require('vm'), ROOT = path.resolve(__dirname, '../..') + '/';
+const ctx = { window: {}, console, performance, setTimeout, clearTimeout, URL };
+ctx.window.window = ctx.window; ctx.self = ctx.window; vm.createContext(ctx);
+for (const file of ['core.js', 'play.js']) vm.runInContext(fs.readFileSync(ROOT + 'js/' + file, 'utf8'), ctx, { filename: file });
+const E = {}; for (const fn of ctx.window.BRIDGE) fn(E);
+function kindsOf(r, x) {
+  const c = { level: r.c[0], strain: r.c[1], dbl: r.c[2], decl: r.c[3] }, g = E.newPlayState(r.d, c, [], null);
+  for (let ti = 0; ti < x[0] - 1; ti++) { for (const [s, k] of r.p[ti]) E.applyCard(g, s, k); E.collect(g); }
+  for (const [s, k] of r.p[x[0] - 1]) { if (s === x[1]) break; E.applyCard(g, s, k); }
+  return [E.cardCtx(g, x[1]), E.cardKind(g, x[1], x[2]), E.cardKind(g, x[1], x[3])];
+}
+// every mistake of the six tables not counted yet goes into the counts (weighted by the tricks it lost); then the book:
+// for each context the kinds better clearly more often than the reverse (net)
 function makeBook() {
-  const raw = {};
-  for (const k of SYS) for (const r of read('errors-' + k + '.json') || []) for (const x of r.er || []) {
-    if (!Array.isArray(x) || x.length < 8) continue;
-    const [, , , , lost, ctx, kp, kb] = x; if (kp === kb) continue;
-    const m = raw[ctx] || (raw[ctx] = {}); m[kp + '>' + kb] = (m[kp + '>' + kb] || 0) + lost;
+  const raw = L.raw || (L.raw = {}), seen = L.seen || (L.seen = {});
+  let added = 0;
+  for (const k of SYS) {
+    const list = read('errors-' + k + '.json') || [], was = new Set(seen[k] || []);
+    for (const r of list) {
+      if (was.has(r.n) || !r.p || !r.d) continue;
+      for (const e of r.er || []) {
+        const x = Array.isArray(e) ? e : [e.t, e.s, e.c, e.b, e.lost];
+        let kk = x.length >= 8 ? x.slice(5, 8) : null;
+        if (!kk) { try { kk = kindsOf(r, x); } catch (er) { continue; } }
+        const [cx, kp, kb] = kk; if (kp === kb) continue;
+        const m = raw[cx] || (raw[cx] = {}); m[kp + '>' + kb] = (m[kp + '>' + kb] || 0) + x[4]; added++;
+      }
+    }
+    seen[k] = list.map(r => r.n);   // what this table's file holds now: counted
   }
+  console.log('mistakes added to the counts', added);
   const book = {};
-  for (const [ctx, m] of Object.entries(raw)) for (const [k, v] of Object.entries(m)) {
-    const [a, b] = k.split('>'), net = v - (m[b + '>' + a] || 0);
-    if (net >= MIN) (book[ctx] || (book[ctx] = {}))[k] = net;
+  for (const [cx, m] of Object.entries(raw)) for (const [k, v] of Object.entries(m)) {
+    const [pa, pb] = k.split('>'), net = v - (m[pb + '>' + pa] || 0);
+    if (net >= MIN) (book[cx] || (book[cx] = {}))[k] = net;
   }
   return book;
 }
@@ -38,6 +62,7 @@ for (const k of SYS) { const d = read('live-' + k + '.json'), a = d && d.league 
 const per = a => a.b ? a.lost / a.b : 0;
 console.log('candidate', L.cand && L.cand.v, 'lessons', size(L.cand && L.cand.book), 'with', JSON.stringify(ab.L), 'without', JSON.stringify(ab.B));
 
+const book = makeBook();   // the counts brought up to date every run
 let fresh = false;
 if (!L.cand || !size(L.cand.book)) fresh = true;   // none yet, or an empty one (the mistakes had no kinds yet)
 else if (ab.L.b >= TRIAL && ab.B.b >= TRIAL) {
@@ -47,7 +72,7 @@ else if (ab.L.b >= TRIAL && ab.B.b >= TRIAL) {
   console.log(ok ? 'accepted' : 'dropped', per(ab.L).toFixed(3), 'against', per(ab.B).toFixed(3));
   fresh = true;
 }
-if (fresh) { const book = makeBook(); L.cand = { v: ((L.cand && L.cand.v) || 0) + 1, at: Date.now(), book }; console.log('new candidate', L.cand.v, 'lessons', size(book)); }
+if (fresh) { L.cand = { v: ((L.cand && L.cand.v) || 0) + 1, at: Date.now(), book }; console.log('new candidate', L.cand.v, 'lessons', size(book)); }
 fs.writeFileSync(DIR + 'lessons.json', JSON.stringify(L));
 
 // the lessons in Turkish, for Servet (the strongest first)
