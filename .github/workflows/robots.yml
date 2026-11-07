@@ -30,7 +30,7 @@ jobs:
       - name: The table so far
         run: |
           mkdir -p out
-          for f in live-${{ matrix.sys }}.json errors-${{ matrix.sys }}.json; do curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/$f?$(date +%s)" -o out/$f || rm -f out/$f; done
+          for f in live-${{ matrix.sys }}.json errors-${{ matrix.sys }}.json lessons.json; do curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/$f?$(date +%s)" -o out/$f || rm -f out/$f; done
       - name: Play the next boards
         run: node .github/robots/robots.js out ${{ matrix.sys }}
       - uses: actions/upload-artifact@v4
@@ -43,21 +43,31 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
       # the tables as they were (a table whose job failed keeps its boards), then the new ones
       - name: The tables so far
         run: |
           mkdir -p out
           for s in sayc twoone acol sef precision polish; do for f in live-$s.json errors-$s.json; do curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/$f?$(date +%s)" -o out/$f || rm -f out/$f; done; done
+          curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/lessons.json?$(date +%s)" -o out/lessons.json || rm -f out/lessons.json
       - uses: actions/download-artifact@v4
         with:
           path: new
           pattern: table-*
           merge-multiple: true
+      - name: The tables' new boards
+        run: cp -f new/live-*.json new/errors-*.json out/ 2>/dev/null || true
+      # the lesson book: the candidate judged on the tables' trial, a new one made from their mistakes
+      - name: The robots' lessons
+        continue-on-error: true
+        run: node .github/robots/learn.js out
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp -f new/*.json out/ 2>/dev/null || true
           cd out
           git init -q
           git checkout -q -b robots-data

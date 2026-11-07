@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 403;
+const APP_V = 404;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2379,16 +2379,23 @@ const ROBOT_LEARNED = [
   { v: 378, tr: 'Ortak Cappelletti, DONT, Michaels ya da Unusual 2SA ile girdikten sonra rakip araya deklare yaparsa artık renk seçmek zorunda değilim: fitim varsa deklare ediyorum, yoksa pas (1SA–2♦–4♦: ♥ tek kâğıtla 4♥ yok). Ortağın eski takeout kontrasını, arada deklareler olduysa cevaplamıyorum.', en: 'After partner\'s Cappelletti, DONT, Michaels or Unusual 2NT and an opponent\'s bid over it I no longer have to choose a suit: I bid with a fit, else pass. An old takeout double is not answered once other calls came in between.' },
   { v: 378, tr: 'Stayman, transfer gibi yapay bir deklarenin kontrası takeout değil: o renkte iyi 5+ kâğıt, atak isteği. Ortağın böyle kontrasını takeout gibi cevaplamıyorum.', en: 'A double of an artificial bid (Stayman, a transfer) is lead-directing: a good 5+ suit, not takeout.' },
   { v: 378, tr: 'Game forcing bir dizide fit ve iki as varsa 31 puandan itibaren şlem arıyorum (1♠–2♦–3♦, 17 puan ve üç asla: 4SA).', en: 'In a game force with a fit and two aces I look for slam from 31 points.' },
+  { v: 404, tr: 'Artık kendi hatalarımdan öğreniyorum: sistem masalarında her el bir de kapalı kartla oynanıyor, hatalarım double dummy ile bulunup bir ders defterine yazılıyor. Defterdeki dersler önce denemeye giriyor (ellerin yarısı derslerle, yarısı derssiz); sadece kaybedilen levéeyi gerçekten azaltan dersler kabul ediliyor ve oyunlarınızdaki robotlar onları kullanıyor. Her kabul edilen defteri size yazacağım. Sistem masalarında gösterilen oyunda ise dört eli de görüyorum.', en: 'I now learn from my own mistakes: a lesson book is tried on the system tables and used only when it loses fewer tricks.' },
   { v: 400, tr: 'Rakip levéeyi zaten almışsa ve elimdeki o renkteki kartların hepsi onunkinden küçükse, boşuna büyük kart vermiyorum, en küçüğünü veriyorum (3SA, deklaran ♦A çekti, bende ♦K9: Papaz değil 9). Sistem masalarında robotlar da artık uygulamadaki kadar uzun düşünüyor.', en: 'When an opponent has already won the trick beyond my reach, I follow with my lowest card, not an honour.' },
   { v: 387, tr: 'Rakibin zayıf ikili açışına (ör. 2♥) karşı 15+ puanla, onların renginde üç kâğıdım olsa da takeout kontra veriyorum; dengeli ve durdurucuyla 2SA diyorum (Board 512: ♠AJ ♥J82 ♦AQ73 ♣AT65 ile pas değil kontra, ortak 4♠ der).', en: 'Over their weak two I double for takeout with 15+ even with three of their suit, and bid 2NT with 15-18 balanced and a stopper.' },
   { v: 380, tr: 'Konvansiyon çalışan her oyuncunun masasında da bütün elleri görüyorum (deklarede ortağın gerçek eli, oyunda dört el).', en: 'I also see every hand at the table of any player practising conventions.' },
   { v: 379, tr: 'Servet açınca (Ayarlar → Robotlar tüm elleri görsün) bütün elleri görüyorum: deklarede ortağımın gerçek elini, kart oyununda ve defansta dört eli (double dummy en iyi kart). Rakip robotlar için de geçerli.', en: 'With Servet\'s switch on I see every hand: partner\'s real hand in the bidding, all four in the play and defence (the double-dummy best card). The opponents too.' },
 ];
+// the lesson book the robots learned by themselves (accepted on the system tables): our games' robots use it
+let LESSONS = null;
+fetch('https://raw.githubusercontent.com/Servetsvm/bridge/robots-data/lessons.json?t=' + Math.floor(Date.now() / 600e3), { cache: 'no-store' }).then(r => r.ok ? r.json() : null)
+  .then(d => { if (d && d.acc && d.acc.book) { LESSONS = d.acc; BOT_OPT.lessons = d.acc.book; } }).catch(() => {});
 function learnedMsg() {
   if (typeof Net === 'undefined' || !Net.isAdmin()) return;
   const seen = SET.learnedSeen || 0, L = ROBOT_LEARNED.filter(x => x.v > seen);
+  // what the robots learned by themselves since Servet last looked
+  if (LESSONS && LESSONS.v > (SET.lessonSeen || 0) && LESSONS.tr) L.push({ tr: `Robotlar kendi hatalarından öğrendi (ders defteri ${LESSONS.v}): kaybedilen levée %${LESSONS.gain} azaldı. ` + LESSONS.tr.join(' · ') });
   if (!L.length || ui.overlay) return;
-  SET.learnedSeen = Math.max(...ROBOT_LEARNED.map(x => x.v)); Store.saveSettings(SET); save();
+  SET.learnedSeen = Math.max(...ROBOT_LEARNED.map(x => x.v)); if (LESSONS) SET.lessonSeen = LESSONS.v; Store.saveSettings(SET); save();
   openOv('learned', `<h2>🤖 Robot yeni öğrendi</h2>${L.map(x => `<div class="cvreq"><div class="cvb">${esc(x.tr)}</div></div>`).join('')}<div class="row2"><button class="btn gold" id="oClose">Kapat</button></div>`);
 }
 setTimeout(learnedMsg, 6000); setInterval(learnedMsg, 30000);   // shown when no other window is open

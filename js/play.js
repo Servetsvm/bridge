@@ -917,9 +917,40 @@ function ddChoose(g, seat, leg, opt) {
     const q = all[1], rep = q != null && leg.find(r => S(r) === S(q) && sameAs(q, r));
     if (all.length >= 2 && R(all[0]) >= 10 && R(q) === R(all[0]) - 1 && isMaster(g, all[0], seat) && rep != null && tot.get(rep) >= bv - SIG_NEAR * n) return q;
   }
+  // the lesson book (opt.lessons, learned from the robots' own mistakes, double dummy): of the cards the samples rate
+  // about the same, the kind the book says does better in this kind of position
+  if (opt.lessons) best = lessonPick(g, seat, leg, tot, n, bv, best, opt.lessons);
   return best;
 }
 const SIG_NEAR = 0.15;
+/* ---- the lesson book. A position's context: declarer's side (D) or the defence (F), notrump (N) or a suit (S), the
+   card's place in the trick (0-3). A card's kind there: leading — trumps (T), or a long (L, 4+), three-card (M) or short
+   (S) suit, an honour (h) or a low card (x); following — winning the trick (W), the lowest card (l), a card in between
+   (m); void — a ruff (R), or a discard, honour (dh) or low (dx). The book holds for each context how often one kind was
+   played where another was better (net, "A>B": B better than A); the robots' own job writes it (.github/robots/learn.js)
+   and keeps only lessons that measurably lose fewer tricks ---- */
+const cardCtx = (g, seat) => (sideOf(seat) === sideOf(g.contract.decl) ? 'D' : 'F') + (g.trump < 0 ? 'N' : 'S') + g.trick.length;
+function cardKind(g, seat, c) {
+  const s = S(c), mine = inSuit(g.hands[seat], s);
+  if (!g.trick.length) { if (s === g.trump) return 'T'; const n = mine.length; return (n >= 4 ? 'L' : n === 3 ? 'M' : 'S') + (R(c) >= 9 ? 'h' : 'x'); }
+  if (s === S(g.trick[0].c)) {
+    const ws = trickWinner(g.trick, g.trump), w = g.trick.find(x => x.s === ws).c;
+    return beats(c, w, g.trump) ? 'W' : R(c) === Math.min(...mine.map(R)) ? 'l' : 'm';
+  }
+  return s === g.trump ? 'R' : R(c) >= 9 ? 'dh' : 'dx';
+}
+// a near-equal card (within LESSON_NEAR tricks of the samples' best) of the kind the book prefers, by LESSON_MIN or more
+const LESSON_NEAR = 0.25, LESSON_MIN = 3;
+function lessonPick(g, seat, leg, tot, n, bv, best, book) {
+  const P = book[cardCtx(g, seat)]; if (!P) return best;
+  const kb = cardKind(g, seat, best); let pick = best, ps = 0;
+  for (const c of leg) {
+    if (c === best || tot.get(c) < bv - LESSON_NEAR * n) continue;
+    const v = P[kb + '>' + cardKind(g, seat, c)] || 0;
+    if (v >= LESSON_MIN && v > ps) { ps = v; pick = c; }
+  }
+  return pick;
+}
 // what a lead costs by the experts' rules, in tricks (taken off the samples' value): against a suit an unsupported ace
 // (no king) or a low card away from an ace; against notrump a short suit with an honour; a long suit against notrump
 // gains (setting it up is worth more than double-dummy samples show)
@@ -1059,5 +1090,5 @@ function signalOf(g, seat, c) {
   return -1;
 }
 const cardMethod = (g, seat) => romanOn(g, seat) ? 'roman' : lavOn(g, seat) ? 'lav' : '';
-Object.assign(E, { ddsUse, ddsValues, DD, DDF, discardFor, signalOf, cardMethod, analysePlay, leadValues, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
+Object.assign(E, { cardCtx, cardKind, lessonPick, ddsUse, ddsValues, DD, DDF, discardFor, signalOf, cardMethod, analysePlay, leadValues, ddEval, DEFF, signalText, readSignals, newPlayState, trickWinner, legalFor, applyCard, collect, handsEmpty, aiPlay, heurPlay, ddFull, ddContract, PLAY_OPT, asc, desc, inSuit });
 });

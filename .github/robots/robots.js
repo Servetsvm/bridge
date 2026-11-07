@@ -79,6 +79,13 @@ function best(deal, bn) {
   const ns = top[0] ? top[0].s : 0, ew = top[1] ? top[1].s : 0;
   return ns >= ew ? { par: ns, c: top[0] ? top[0].c : null, tab } : { par: -ew, c: top[1].c, tab };
 }
+// a mistake's context and the kinds of the card played and of the better one (the position replayed up to it)
+function kinds(deal, c, auc, cards, pl, x) {
+  const g = E.newPlayState(deal, { level: c.level, strain: c.strain, dbl: c.dbl, decl: c.decl }, auc, cards);
+  for (let ti = 0; ti < x.t - 1; ti++) { for (const [s, k] of pl[ti]) E.applyCard(g, s, k); E.collect(g); }
+  for (const [s, k] of pl[x.t - 1]) { if (s === x.s) break; E.applyCard(g, s, k); }
+  return [E.cardCtx(g, x.s), E.cardKind(g, x.s, x.c), E.cardKind(g, x.s, x.b)];
+}
 // a board's length on the page (as the page counts it)
 const dur = b => TM.call * b.a.length + (b.p.length ? TM.lead + TM.card * (b.p.length - 1) + TM.trick * 13 : 0) + TM.end;
 
@@ -87,6 +94,10 @@ const st = prev && prev.st ? prev.st : { blk: 0, k: 0, n: 0, end: 0, skip: {} };
 const league = prev && prev.league ? prev.league : { pairs: PAIRS.map((n, i) => ({ i, n, r: 1500, b: 0 })), sys: {}, conv: {}, k: RK };
 // ratings made at two points an IMP: scaled down to the slower pace
 if (league.k !== RK) { for (const p of league.pairs) p.r = 1500 + (p.r - 1500) * RK / 2; league.k = RK; }
+// the lesson book: the candidate lessons on trial (learn.js writes them), the boards of each arm counted against them
+let LES = null; try { LES = JSON.parse(fs.readFileSync(OUT + 'lessons.json', 'utf8')); } catch (e) {}
+const cand = LES && LES.cand && LES.cand.book && Object.keys(LES.cand.book).length ? LES.cand : null;   // an empty book: no trial
+if (cand && (!league.ab || league.ab.v !== cand.v)) league.ab = { v: cand.v, L: { b: 0, lost: 0 }, B: { b: 0, lost: 0 } };
 let boards = prev && prev.boards ? prev.boards : [], errs = []; try { errs = JSON.parse(fs.readFileSync(OUT + 'errors-' + TABLE + '.json', 'utf8')); } catch (e) {}
 const now = Date.now();
 if (!st.end || st.end < now) st.end = now + 20e3;   // nothing ahead (the first run, or a long stop): start now
@@ -105,7 +116,8 @@ async function main() {
     if (!f) { st.skip[key] = 1; st.blk++; st.k = 0; console.log('no deal for', key); continue; }
     const { deal, auc, c } = f;
     const g = E.newPlayState(deal, { level: c.level, strain: c.strain, dbl: c.dbl, decl: c.decl }, auc, cards);
-    while (g.history.length < 13) { if (g.trick.length === 4) { E.collect(g); continue; } const s = g.turn, x = E.aiPlay(g, s, OPT); if (E.applyCard(g, s, x)) E.collect(g); }
+    // the board shown: every hand open, the double-dummy best card
+    while (g.history.length < 13) { if (g.trick.length === 4) { E.collect(g); continue; } const s = g.turn, x = E.aiPlay(g, s, { ...OPT, open: true }); if (E.applyCard(g, s, x)) E.collect(g); }
     const pl = g.history.map(t => t.cards.map(x => [x.s, x.c])), tricks = g.tricks[E.sideOf(c.decl)];
     const sd = E.scoreOf(c.level, c.strain, c.dbl, E.vulOf(bn, c.decl), tricks), ns = E.sideOf(c.decl) === 0 ? sd : -sd;
     const bp = best(deal, bn), imp = E.imps(ns - bp.par);
@@ -120,11 +132,18 @@ async function main() {
     const P = league.pairs; P[pi].r += RK * imp; P[pj].r -= RK * imp; P[pi].b++; P[pj].b++;
     for (const [m, k] of [[league.sys, blk.sys], [league.conv, blk.conv || '-']]) { const x = m[k] || (m[k] = { b: 0, abs: 0, hit: 0 }); x.b++; x.abs += Math.abs(imp); if (!imp) x.hit++; }
     b.rt = P.map(p => Math.round(p.r * 10) / 10); b.pb = P.map(p => p.b); b.sy = { ...league.sys[blk.sys] };   // as they stand after this board
-    // the robots' mistakes: every card checked double dummy (for Servet's report)
+    // the same deal played as in our games (the hands closed), for the lessons: every other board with the candidate
+    // lessons; every card checked double dummy, each mistake with its context and the kinds of the card played and the
+    // better one (for Servet's report and the lesson book)
     try {
-      const er = E.analysePlay(deal, c, pl, [0, 1, 2, 3], 1e6);
-      if (er.length) errs.unshift({ n: b.n, ts: b.t0, g: now, b: bn, sys: blk.sys, conv: blk.conv, c: b.c, d: deal, a: auc.map(e => [e.seat, e.call]), p: pl, er: er.map(x => [x.t, x.s, x.c, x.b, x.lost]) });
-    } catch (e) {}
+      const arm = cand && st.n % 2 ? 'L' : 'B', o = arm === 'L' ? { ...OPT, lessons: cand.book } : OPT;
+      const h = E.newPlayState(deal, { level: c.level, strain: c.strain, dbl: c.dbl, decl: c.decl }, auc, cards);
+      while (h.history.length < 13) { if (h.trick.length === 4) { E.collect(h); continue; } const s = h.turn, x = E.aiPlay(h, s, o); if (E.applyCard(h, s, x)) E.collect(h); }
+      const pl2 = h.history.map(t => t.cards.map(x => [x.s, x.c]));
+      const er = E.analysePlay(deal, c, pl2, [0, 1, 2, 3], 1e6);
+      if (league.ab) { const a = league.ab[arm]; a.b++; a.lost += er.reduce((t, x) => t + x.lost, 0); }
+      if (er.length) errs.unshift({ n: b.n, ts: b.t0, g: now, b: bn, sys: blk.sys, conv: blk.conv, c: b.c, d: deal, a: auc.map(e => [e.seat, e.call]), p: pl2, arm, er: er.map(x => [x.t, x.s, x.c, x.b, x.lost, ...kinds(deal, c, auc, cards, pl2, x)]) });
+    } catch (e) { console.log('closed play', e.message); }
     st.end = b.t1; st.n++; st.k++;
     if (st.k >= PER) { st.blk++; st.k = 0; }
     console.log(key, 'board', b.n, c.level + 'CDHSN'[c.strain] + ['', 'X', 'XX'][c.dbl], 'NESW'[c.decl], tricks, ns, 'par', bp.par, 'imp', imp, Math.round(performance.now() - t0) / 1000 + 's');
