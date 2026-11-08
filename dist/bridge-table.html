@@ -3304,16 +3304,17 @@ function aiBid(auc, seat, hand, cards) {
 }
 function explainCall(auc, seat, call, cards) {
   const x = ctxOf(auc, seat, cards);
-  for (const c of cands(x)) if (c.call === call) return c.m;
-  if (call === 'P') return { t: 'Pass' };
+  const known = cands(x).find(c => c.call === call);
   // 4♣ right after partner's natural 1NT, 2NT or 3NT, no suit agreed: asks for aces, on any card, in any
   // sequence (1♣–1♥–2NT–3NT–4♣). The robots only answer it: they start Gerber in the cases cands() lists
-  if (call === B(4, 0)) {
+  if (call === B(4, 0) && !(known && (known.m.tag || known.m.cv))) {   // a convention of the list keeps its meaning; a plain natural 4♣ does not
     const ours = auc.filter(e => sideOf(e.seat) === sideOf(seat) && isNum(e.call)), pl = ours.filter(e => e.seat !== seat), last = pl[pl.length - 1];
     const natural = e => ST(e.call) < 4 && !(e.m && (e.m.cv || e.m.tag === 'trm' || e.m.tag === 'splinter' || e.m.tag === 'drury'));
     const agreed = ours.some(a => a.seat === seat && natural(a) && pl.some(b => natural(b) && ST(b.call) === ST(a.call)));
-    if (last && last === auc[auc.length - 2] && ST(last.call) === 4 && LV(last.call) <= 3 && !(last.m && last.m.cv && last.m.cv !== 'leb') && !agreed) return { tag: 'gerb', cv: 'gerber', t: 'Gerber: asking for aces (slam interest)' };
+    if (last && last === auc[auc.length - 2] && ST(last.call) === 4 && LV(last.call) <= 3 && !(last.m && last.m.cv && !['leb', 'nt1', 'nt2'].includes(last.m.cv)) && !agreed) return { tag: 'gerb', cv: 'gerber', t: 'Gerber: asking for aces (slam interest)' };
   }
+  if (known) return known.m;
+  if (call === 'P') return { t: 'Pass' };
   // 4NT after our side has bid a suit (and not notrump last) asks for key cards, whoever bids it
   if (call === B(4, 4)) {
     const ours = auc.filter(e => sideOf(e.seat) === sideOf(seat) && isNum(e.call));
@@ -9786,7 +9787,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 411;
+const APP_V = 412;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -13518,7 +13519,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-08T21:08:09Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-08T21:09:39Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {
