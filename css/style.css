@@ -1969,3 +1969,5 @@ body.homev2 button.h2fango{display:block;background:none;border:0;padding:0;marg
 #center .ddend .rtdd{font-size:13px}
 #center .ddend .rtdd th,#center .ddend .rtdd td{padding:2px 6px}
 @media (max-width:420px){#center .ddend .rtdd{font-size:11px}#center .ddend .rtdd th,#center .ddend .rtdd td{padding:1px 4px}#center .ddend .ddtap{font-size:11px}}
+.hpz{color:#7a5a00;font-weight:700;cursor:pointer;white-space:nowrap}
+:root[data-theme="dark"] .hpz{color:#f3d36b}

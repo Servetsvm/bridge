@@ -2021,6 +2021,8 @@ body.homev2 button.h2fango{display:block;background:none;border:0;padding:0;marg
 #center .ddend .rtdd{font-size:13px}
 #center .ddend .rtdd th,#center .ddend .rtdd td{padding:2px 6px}
 @media (max-width:420px){#center .ddend .rtdd{font-size:11px}#center .ddend .rtdd th,#center .ddend .rtdd td{padding:1px 4px}#center .ddend .ddtap{font-size:11px}}
+.hpz{color:#7a5a00;font-weight:700;cursor:pointer;white-space:nowrap}
+:root[data-theme="dark"] .hpz{color:#f3d36b}
 
 </style>
 
@@ -5380,7 +5382,7 @@ const I18N = {
     "Partner opened. What do you answer?": "Ortağın açtı. Ne cevap verirsin?",
     "What do you lead?": "Hangi kartla atak yaparsın?",
     "Your answer": "Cevabın",
-    "Problem of the day": "Günün problemi",
+    "Puzzle": "Bulmaca", "Problem of the day": "Günün problemi",
     "A new question every day": "Her gün yeni bir soru",
     "Days in a row: {0}": "Üst üste gün: {0}",
     "No problem today — try again later": "Bugün problem yok — sonra yine dene",
@@ -5814,7 +5816,7 @@ const I18N = {
     "Partner opened. What do you answer?": "Makker åpnet. Hva svarer du?",
     "What do you lead?": "Hva spiller du ut?",
     "Your answer": "Ditt svar",
-    "Problem of the day": "Dagens oppgave",
+    "Puzzle": "Nøtt", "Problem of the day": "Dagens oppgave",
     "A new question every day": "Et nytt spørsmål hver dag",
     "Days in a row: {0}": "Dager på rad: {0}",
     "No problem today — try again later": "Ingen oppgave i dag — prøv igjen senere",
@@ -6248,7 +6250,7 @@ const I18N = {
     "Partner opened. What do you answer?": "Tu compañero abrió. ¿Qué respondes?",
     "What do you lead?": "¿Qué sales?",
     "Your answer": "Tu respuesta",
-    "Problem of the day": "Problema del día",
+    "Puzzle": "Problema", "Problem of the day": "Problema del día",
     "A new question every day": "Una pregunta nueva cada día",
     "Days in a row: {0}": "Días seguidos: {0}",
     "No problem today — try again later": "Hoy no hay problema — inténtalo más tarde",
@@ -6710,7 +6712,7 @@ const I18N = {
     "Partner opened. What do you answer?": "Votre partenaire a ouvert. Que répondez-vous ?",
     "What do you lead?": "Qu'entamez-vous ?",
     "Your answer": "Votre réponse",
-    "Problem of the day": "Problème du jour",
+    "Puzzle": "Problème", "Problem of the day": "Problème du jour",
     "A new question every day": "Une nouvelle question chaque jour",
     "Days in a row: {0}": "Jours d'affilée : {0}",
     "No problem today — try again later": "Pas de problème aujourd'hui — réessayez plus tard",
@@ -7172,7 +7174,7 @@ const I18N = {
     "Partner opened. What do you answer?": "Il compagno ha aperto. Che cosa rispondi?",
     "What do you lead?": "Che cosa attacchi?",
     "Your answer": "La tua risposta",
-    "Problem of the day": "Problema del giorno",
+    "Puzzle": "Problema", "Problem of the day": "Problema del giorno",
     "A new question every day": "Una domanda nuova ogni giorno",
     "Days in a row: {0}": "Giorni di fila: {0}",
     "No problem today — try again later": "Oggi nessun problema — riprova più tardi",
@@ -7634,7 +7636,7 @@ const I18N = {
     "Partner opened. What do you answer?": "Partner hat eröffnet. Was antwortest du?",
     "What do you lead?": "Was spielst du aus?",
     "Your answer": "Deine Antwort",
-    "Problem of the day": "Problem des Tages",
+    "Puzzle": "Rätsel", "Problem of the day": "Problem des Tages",
     "A new question every day": "Jeden Tag eine neue Frage",
     "Days in a row: {0}": "Tage in Folge: {0}",
     "No problem today — try again later": "Heute kein Problem — später noch einmal",
@@ -8096,7 +8098,7 @@ const I18N = {
     "Partner opened. What do you answer?": "Партнёр открыл. Что вы отвечаете?",
     "What do you lead?": "С какой карты вы ходите?",
     "Your answer": "Ваш ответ",
-    "Problem of the day": "Задача дня",
+    "Puzzle": "Задача", "Problem of the day": "Задача дня",
     "A new question every day": "Каждый день новый вопрос",
     "Days in a row: {0}": "Дней подряд: {0}",
     "No problem today — try again later": "Сегодня задачи нет — попробуйте позже",
@@ -8558,7 +8560,7 @@ const I18N = {
     "Partner opened. What do you answer?": "Partner otworzył. Co odpowiadasz?",
     "What do you lead?": "Co wistujesz?",
     "Your answer": "Twoja odpowiedź",
-    "Problem of the day": "Problem dnia",
+    "Puzzle": "Zagadka", "Problem of the day": "Problem dnia",
     "A new question every day": "Codziennie nowe pytanie",
     "Days in a row: {0}": "Dni z rzędu: {0}",
     "No problem today — try again later": "Dziś brak problemu — spróbuj później",
@@ -9020,7 +9022,7 @@ const I18N = {
     "Partner opened. What do you answer?": "同伴开叫了。你怎么应叫?",
     "What do you lead?": "你首攻哪张牌?",
     "Your answer": "你的回答",
-    "Problem of the day": "每日一题",
+    "Puzzle": "谜题", "Problem of the day": "每日一题",
     "A new question every day": "每天一道新题",
     "Days in a row: {0}": "连续天数:{0}",
     "No problem today — try again later": "今天没有题目——稍后再试",
@@ -9787,7 +9789,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 413;
+const APP_V = 414;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11471,12 +11473,12 @@ function renderHome() {
       set("hDaily", `🗓 <b>${T("Daily tournament")}</b> · ${done >= t.n ? T("finished") : done ? T("{0} of {1} boards", done, t.n) : T("{0} boards — play now", t.n)}${i >= 0 && rows.length > 1 ? " · " + T("place {0} of {1}", i + 1, rows.length) : rows.length ? " · " + T("{0} players", rows.length) : ""} ›`);
     } else set("hDaily", "");
   }
-  { const p = pzState(), today = new Date().toISOString().slice(0, 10), done = p.day === today;   // the problem of the day
-    set("hPuzzle", done ? `${p.ok ? "✅" : "❌"} <b>${T("Problem of the day")}</b> · ${T("Days in a row: {0}", p.streak || 0)} ›` : `🧩 <b>${T("Problem of the day")}</b> · ${T("A new question every day")} ›`); }
+  const pzS = pzState(), pzDone = pzS.day === new Date().toISOString().slice(0, 10);   // the problem of the day: on the Today line
+  const pzLink = `<span class="hpz" id="hPuzzle">${pzDone ? (pzS.ok ? "✅" : "❌") : "🧩"} ${T("Puzzle")}${pzDone && pzS.streak ? " " + pzS.streak : ""}</span>`;
 
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
-  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
+  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''} · ${pzLink}`);
   // the open section is rebuilt only when it changes (so typing in it is not lost); its contents are refreshed
   // the chat opens as a panel at the bottom of the screen (phones and narrow windows); the others under the buttons
   const hs = $('hSec'), want = ui.hsec || '', top = want === 'chat' ? '' : want;
@@ -12864,7 +12866,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest('#hNameBtn')) { showPlayer(myNm() || T('You')); return; }   // your name on the home page opens your card, where you change it
   { const an = ev_.target.closest("[data-ana]"); if (an) { const e = HIST.find(h => String(h.id) === an.dataset.ana); if (e) Ana.run(e); return; } }
   if (ev_.target.closest("#hDaily")) { const id = Net.dailyId(), t = Net.st.tours[id]; if (t && Object.keys(myTour(id)).length >= t.n) showStandings(id); else playTour(id); return; }
-  if (ev_.target.closest('#hStats')) { showPlayer(myNm() || T('You')); return; }   // your own rating (the Results of this device)
+  if (ev_.target.closest('#hStats') && !ev_.target.closest('#hPuzzle')) { showPlayer(myNm() || T('You')); return; }   // your own rating (the Results of this device)
   const dmb = ev_.target.closest('[data-dm]'); if (dmb) { showDm(dmb.dataset.dm); return; }
   const tq = ev_.target.closest('[data-tset],[data-tyes],[data-tno]'); if (tq) { if (tq.dataset.tset) { ui.tsel = null; showTourSetup(tq.dataset.tset); } else Net.tourAnswer(tq.dataset.tyes || tq.dataset.tno, !!tq.dataset.tyes); return; }
   // ✕ on a tournament (shown to its organiser only): cancel it for everyone

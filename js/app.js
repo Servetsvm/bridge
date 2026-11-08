@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 413;
+const APP_V = 414;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1694,12 +1694,12 @@ function renderHome() {
       set("hDaily", `🗓 <b>${T("Daily tournament")}</b> · ${done >= t.n ? T("finished") : done ? T("{0} of {1} boards", done, t.n) : T("{0} boards — play now", t.n)}${i >= 0 && rows.length > 1 ? " · " + T("place {0} of {1}", i + 1, rows.length) : rows.length ? " · " + T("{0} players", rows.length) : ""} ›`);
     } else set("hDaily", "");
   }
-  { const p = pzState(), today = new Date().toISOString().slice(0, 10), done = p.day === today;   // the problem of the day
-    set("hPuzzle", done ? `${p.ok ? "✅" : "❌"} <b>${T("Problem of the day")}</b> · ${T("Days in a row: {0}", p.streak || 0)} ›` : `🧩 <b>${T("Problem of the day")}</b> · ${T("A new question every day")} ›`); }
+  const pzS = pzState(), pzDone = pzS.day === new Date().toISOString().slice(0, 10);   // the problem of the day: on the Today line
+  const pzLink = `<span class="hpz" id="hPuzzle">${pzDone ? (pzS.ok ? "✅" : "❌") : "🧩"} ${T("Puzzle")}${pzDone && pzS.streak ? " " + pzS.streak : ""}</span>`;
 
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
-  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
+  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''} · ${pzLink}`);
   // the open section is rebuilt only when it changes (so typing in it is not lost); its contents are refreshed
   // the chat opens as a panel at the bottom of the screen (phones and narrow windows); the others under the buttons
   const hs = $('hSec'), want = ui.hsec || '', top = want === 'chat' ? '' : want;
@@ -3087,7 +3087,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest('#hNameBtn')) { showPlayer(myNm() || T('You')); return; }   // your name on the home page opens your card, where you change it
   { const an = ev_.target.closest("[data-ana]"); if (an) { const e = HIST.find(h => String(h.id) === an.dataset.ana); if (e) Ana.run(e); return; } }
   if (ev_.target.closest("#hDaily")) { const id = Net.dailyId(), t = Net.st.tours[id]; if (t && Object.keys(myTour(id)).length >= t.n) showStandings(id); else playTour(id); return; }
-  if (ev_.target.closest('#hStats')) { showPlayer(myNm() || T('You')); return; }   // your own rating (the Results of this device)
+  if (ev_.target.closest('#hStats') && !ev_.target.closest('#hPuzzle')) { showPlayer(myNm() || T('You')); return; }   // your own rating (the Results of this device)
   const dmb = ev_.target.closest('[data-dm]'); if (dmb) { showDm(dmb.dataset.dm); return; }
   const tq = ev_.target.closest('[data-tset],[data-tyes],[data-tno]'); if (tq) { if (tq.dataset.tset) { ui.tsel = null; showTourSetup(tq.dataset.tset); } else Net.tourAnswer(tq.dataset.tyes || tq.dataset.tno, !!tq.dataset.tyes); return; }
   // ✕ on a tournament (shown to its organiser only): cancel it for everyone
