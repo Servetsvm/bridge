@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 415;
+const APP_V = 416;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2271,6 +2271,7 @@ function showPuzzle() {
         ${ok ? '' : `<div>${T('Robot')}: <b>${callHtml(pz.best)}</b> — ${ex(pz.best)}</div>`}
         <div class="muted">${T('With your system ({0}).', esc(E.sysOf(SET.sys).n))}</div>`;
     }
+    if (done.dd) res += `<div class="pzdd"><b>Double dummy</b>${ddTabHtml(done.dd)}</div>`; else if (ui.pzDdFail !== pz.day) { pzDD(pz); res += `<div class="muted">⏳ Double dummy…</div>`; }
     if (done.ok != null) res += `<details class="pzdeal"><summary>${T('Show all four hands')}</summary>${dealHtml(pz.deal, 2)}</details>`;
     if (done.ok != null) res += `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
   }
@@ -2292,6 +2293,15 @@ function pzFinish(s, ok) {
   pzSave(s); if (ui.overlay === 'puzzle') showPuzzle(); render();
 }
 /* the leads are worked out in the background; each value shows as it comes */
+// after the answer: the double-dummy table of the deal, worked out once and kept with the day's answer
+function pzDD(pz) {
+  if (ui.pzDdRun === pz.day) return; const w = Field.mk(); if (!w) { ui.pzDdFail = pz.day; return; }
+  ui.pzDdRun = pz.day;
+  const end = t => { w.terminate(); ui.pzDdRun = null; if (t) { const s = pzState(); if (s.day === pz.day) { s.dd = t; pzSave(s); } } else ui.pzDdFail = pz.day; if (ui.overlay === 'puzzle') showPuzzle(); };
+  w.onerror = () => end(null);
+  w.onmessage = m => { const d = m.data || {}; if (d.type === 'ddtable') end(d.t); if (d.type === 'error') end(null); };
+  w.postMessage({ type: 'ddtable', id: 'pzdd', deal: pz.deal });
+}
 function pzLeads() {
   const pz = pzToday(); if (!pz || ui.pzRun === pz.day) return; ui.pzRun = pz.day;
   const got = (x, v) => { const s = pzState(); if (s.day !== pz.day) return; s.vals = s.vals || {}; s.vals[x] = v; pzSave(s); if (ui.overlay === 'puzzle') showPuzzle(); };

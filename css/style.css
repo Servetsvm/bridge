@@ -1972,3 +1972,4 @@ body.homev2 button.h2fango{display:block;background:none;border:0;padding:0;marg
 body.homev2 .h2mid{grid-area:chips;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
 .hpz{flex:none;background:linear-gradient(180deg,#ecc874,#d4a017 55%,#b8860b);color:#2a2108;border:1px solid #8a6a1c;border-radius:10px;padding:7px 12px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 2px 5px rgba(0,0,0,.25)}
 .hpz:hover{filter:brightness(1.05)}
+.pzdd{text-align:center;margin-top:8px}
