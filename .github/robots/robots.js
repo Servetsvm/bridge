@@ -58,8 +58,42 @@ function bidAll(deal, dealer, cards) {
   return auc;
 }
 const cardsFor = (sys, conv) => [0, 1].map(() => { const c = { conv: { ...E.sysOf(sys).conv }, agg: 0, sys }; if (conv) c.conv[conv] = true; return c; });
+// the conventions a random deal almost never calls for: the hands that do, built (the opener deals; the responder is
+// the opener's partner, lho the next to speak)
+const lensOf = h => { const l = [0, 0, 0, 0]; h.forEach(c => l[E.S(c)]++); return l; };
+const hcpOf = h => h.reduce((a, c) => a + Math.max(0, E.R(c) - 8), 0);
+const balOf = l => ['4333', '4432', '5332'].includes([...l].sort((a, b) => b - a).join(''));
+const ntOpen = h => { const l = lensOf(h), p = hcpOf(h); return p >= 15 && p <= 17 && balOf(l) && l[0] <= 5 && l[1] <= 5; };
+const gerberResp = h => { const l = lensOf(h), p = hcpOf(h); return p >= 18 && p <= 20 && l.every(x => x >= 2) && l[2] < 4 && l[3] < 4; };
+const sjsOpen = h => { const l = lensOf(h), p = hcpOf(h); return p >= 12 && p <= 14 && (l[0] >= 5 || l[1] >= 5) && l[2] <= 3 && l[3] <= 3; };
+const sjsResp = h => { const l = lensOf(h), p = hcpOf(h); return p >= 19 && p <= 21 && [2, 3].some(s => l[s] >= 5 && h.filter(c => E.S(c) === s && E.R(c) >= 8).length >= 3); };
+const tiLho = h => { const l = lensOf(h), p = hcpOf(h); return p >= 9 && p <= 14 && (l[0] >= 6 || l[1] >= 6) && l[2] <= 2 && l[3] <= 2; };
+const tiResp = h => { const l = lensOf(h), p = hcpOf(h); return p >= 8 && p <= 13 && (l[2] >= 6 || l[3] >= 6); };
+const GEN = {
+  'sayc:gerber': [['open', ntOpen], ['resp', gerberResp]], 'twoone:gerber': [['open', ntOpen], ['resp', gerberResp]],
+  'sayc:sjs': [['open', sjsOpen], ['resp', sjsResp]], 'twoone:texasInt': [['open', ntOpen], ['lho', tiLho], ['resp', tiResp]],
+};
+function buildDeal(roles, dealer) {
+  const at = { open: dealer, lho: (dealer + 1) % 4, resp: (dealer + 2) % 4 }, deal = [null, null, null, null];
+  let left = [...Array(52).keys()];
+  for (const [role, ok] of roles) {
+    let h = null;
+    for (let i = 0; i < 200000 && !h; i++) { const c = E.shuffle(left.slice()).slice(0, 13); if (ok(c)) h = c; }
+    if (!h) return null;
+    deal[at[role]] = h; left = left.filter(c => !h.includes(c));
+  }
+  E.shuffle(left);
+  for (let k = 0; k < 4; k++) if (!deal[k]) deal[k] = left.splice(0, 13);
+  return deal;
+}
 // a deal for the block: the convention is used in the auction (either side); the system's own block: any played deal
 function findDeal(blk, dealer, cards) {
+  const roles = GEN[blk.sys + ':' + blk.conv];
+  if (roles) for (let i = 0; i < 300; i++) {
+    const deal = buildDeal(roles, dealer); if (!deal) break;
+    const auc = bidAll(deal, dealer, cards), c = E.contractOf(auc);
+    if (c && auc.some(e => e.m && e.m.cv === blk.conv)) return { deal, auc, c };
+  }
   for (let i = 0; i < 3000; i++) {
     const d = E.shuffle([...Array(52).keys()]), deal = [0, 1, 2, 3].map(k => d.slice(k * 13, k * 13 + 13));
     const auc = bidAll(deal, dealer, cards), c = E.contractOf(auc);
@@ -99,6 +133,7 @@ let LES = null; try { LES = JSON.parse(fs.readFileSync(OUT + 'lessons.json', 'ut
 const cand = LES && LES.cand && LES.cand.book && Object.keys(LES.cand.book).length ? LES.cand : null;   // an empty book: no trial
 if (cand && (!league.ab || league.ab.v !== cand.v)) league.ab = { v: cand.v, L: { b: 0, lost: 0 }, B: { b: 0, lost: 0 } };
 let boards = prev && prev.boards ? prev.boards : [], errs = []; try { errs = JSON.parse(fs.readFileSync(OUT + 'errors-' + TABLE + '.json', 'utf8')); } catch (e) {}
+for (const k of Object.keys(GEN)) delete st.skip[k];   // skipped before their deals were built
 const now = Date.now();
 if (!st.end || st.end < now) st.end = now + 20e3;   // nothing ahead (the first run, or a long stop): start now
 const t0 = performance.now();
