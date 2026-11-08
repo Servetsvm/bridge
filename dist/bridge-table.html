@@ -2021,8 +2021,9 @@ body.homev2 button.h2fango{display:block;background:none;border:0;padding:0;marg
 #center .ddend .rtdd{font-size:13px}
 #center .ddend .rtdd th,#center .ddend .rtdd td{padding:2px 6px}
 @media (max-width:420px){#center .ddend .rtdd{font-size:11px}#center .ddend .rtdd th,#center .ddend .rtdd td{padding:1px 4px}#center .ddend .ddtap{font-size:11px}}
-.hpz{color:#7a5a00;font-weight:700;cursor:pointer;white-space:nowrap}
-:root[data-theme="dark"] .hpz{color:#f3d36b}
+body.homev2 .h2mid{grid-area:chips;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.hpz{flex:none;background:linear-gradient(180deg,#ecc874,#d4a017 55%,#b8860b);color:#2a2108;border:1px solid #8a6a1c;border-radius:10px;padding:7px 12px;font:inherit;font-size:15px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+.hpz:hover{filter:brightness(1.05)}
 
 </style>
 
@@ -9789,7 +9790,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 414;
+const APP_V = 415;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11402,7 +11403,7 @@ function homeShell2() {
       <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico hwa" id="bShareApp" title="${T('Send the app')}" aria-label="${T('Send the app')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
   <div class="hgrid">
     <section class="hmain"><div class="h2cola">
-      <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2chips" id="hMe"></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
+      <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2mid"><div class="h2chips" id="hMe"></div><button class="hpz" id="hPuzzle"></button></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
       <div class="h2pr"><div class="h2play">
         <button class="h2fan h2fango" id="bGoFan" aria-hidden="true" tabindex="-1">${fan}</button>
         <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📚 ${T('Practise conventions')}</button></div>
@@ -11474,11 +11475,11 @@ function renderHome() {
     } else set("hDaily", "");
   }
   const pzS = pzState(), pzDone = pzS.day === new Date().toISOString().slice(0, 10);   // the problem of the day: on the Today line
-  const pzLink = `<span class="hpz" id="hPuzzle">${pzDone ? (pzS.ok ? "✅" : "❌") : "🧩"} ${T("Puzzle")}${pzDone && pzS.streak ? " " + pzS.streak : ""}</span>`;
+  set("hPuzzle", `${pzDone ? (pzS.ok ? "✅" : "❌") : "🧩"} ${T("Puzzle")}${pzDone && pzS.streak ? " " + pzS.streak : ""}`);
 
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
-  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''} · ${pzLink}`);
+  set('hStats', `${N && N.isAdmin && N.isAdmin() ? `<span class="hadm" data-stats="1" title="${T("Visitor statistics")}">👑 ${T("Logins today")}: ${N.loginsToday()} 📊</span> · ` : ""}${T('Today')}: ${per.n} ${T('boards')}${per.scored ? ' · ' + fmtSigned(per.impSum) + ' IMP' : ''}${per.mpAvg != null ? ' · ' + per.mpAvg + '% MP' : ''}${cont ? ' · ' + T('Your last board is waiting.') : ''}`);
   // the open section is rebuilt only when it changes (so typing in it is not lost); its contents are refreshed
   // the chat opens as a panel at the bottom of the screen (phones and narrow windows); the others under the buttons
   const hs = $('hSec'), want = ui.hsec || '', top = want === 'chat' ? '' : want;
@@ -12021,7 +12022,7 @@ function pzHand(h) { return `<div class="pzhand">${[3, 2, 1, 0].map(s => `<div>$
 function showPuzzle() {
   const pz = pzToday(); if (!pz) { flash(T('No problem today — try again later'), 2000); return; }
   const st = pzState(), done = st.day === pz.day ? st : null;
-  const auc = pz.auction.length || pz.kind !== 'open' ? `<div class="auction">${auctionTable(pz.auction, pz.kind !== 'lead' && !done, { board: 1, dealer: pz.dealer, seat: 2, sel: ui.pzSel ?? null }).replace(/data-ri=/g, "data-pzi=")}${ui.pzSel != null && pz.auction[ui.pzSel] ? `<div class="expl">${explHtml(pz.auction[ui.pzSel])}</div>` : ''}</div>` : `<div class="muted">${T('You are the dealer. Nobody is vulnerable.')}</div>`;
+  const auc = pz.auction.length || pz.kind !== 'open' ? `<div class="auction">${auctionTable(pz.auction, pz.kind !== 'lead' && !done, { board: 1, dealer: pz.dealer, seat: 2, sel: done ? ui.pzSel ?? null : null }).replace(/data-ri=/g, "data-pzi=")}${done && ui.pzSel != null && pz.auction[ui.pzSel] ? `<div class="expl">${explHtml(pz.auction[ui.pzSel])}</div>` : ''}</div>` : `<div class="muted">${T('You are the dealer. Nobody is vulnerable.')}</div>`;
   let ctl = '';
   if (!done) {
     if (pz.kind === 'lead') ctl = `<div class="pzcards">${pz.deal[2].slice().sort((a, b) => S(b) - S(a) || R(b) - R(a)).map(c => `<button class="pzc s${S(c)}${red(S(c)) ? ' rd' : ''}" data-pzc="${c}">${RTXT[R(c)]}${STR[S(c)]}</button>`).join('')}</div>`;
@@ -12866,7 +12867,7 @@ document.addEventListener('click', ev_ => {
   if (ev_.target.closest('#hNameBtn')) { showPlayer(myNm() || T('You')); return; }   // your name on the home page opens your card, where you change it
   { const an = ev_.target.closest("[data-ana]"); if (an) { const e = HIST.find(h => String(h.id) === an.dataset.ana); if (e) Ana.run(e); return; } }
   if (ev_.target.closest("#hDaily")) { const id = Net.dailyId(), t = Net.st.tours[id]; if (t && Object.keys(myTour(id)).length >= t.n) showStandings(id); else playTour(id); return; }
-  if (ev_.target.closest('#hStats') && !ev_.target.closest('#hPuzzle')) { showPlayer(myNm() || T('You')); return; }   // your own rating (the Results of this device)
+  if (ev_.target.closest('#hStats')) { showPlayer(myNm() || T('You')); return; }   // your own rating (the Results of this device)
   const dmb = ev_.target.closest('[data-dm]'); if (dmb) { showDm(dmb.dataset.dm); return; }
   const tq = ev_.target.closest('[data-tset],[data-tyes],[data-tno]'); if (tq) { if (tq.dataset.tset) { ui.tsel = null; showTourSetup(tq.dataset.tset); } else Net.tourAnswer(tq.dataset.tyes || tq.dataset.tno, !!tq.dataset.tyes); return; }
   // ✕ on a tournament (shown to its organiser only): cancel it for everyone
