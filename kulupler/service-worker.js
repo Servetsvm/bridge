@@ -4,7 +4,7 @@
 // any .js/.css file). Otherwise returning users may keep loading a stale
 // cached version instead of your update. Suggested pattern:
 // 'bridgegate-v' + YYYYMMDD, e.g. 'bridgegate-v20260709'.
-const CACHE_NAME = 'kulup-v31';
+const CACHE_NAME = 'kulup-v32';
 
 const APP_SHELL = [
   './',
@@ -28,24 +28,33 @@ const APP_SHELL = [
   './icons/icon-512-maskable.png'
 ];
 
+// the cache may hang (seen in one Chrome: every file then stayed loading for ever), so nothing waits for it for long
+const soon = (p, ms) => Promise.race([p, new Promise((res) => setTimeout(res, ms))]).catch(() => {});
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).catch(() => {
-      // Non-fatal — e.g. an icon path is missing. Don't block install.
-    })
-  );
+  // Non-fatal — e.g. an icon path is missing. Don't block install.
+  event.waitUntil(soon(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)), 15000));
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((names) =>
+    soon(caches.keys().then((names) =>
       // only this program's old caches: Bridge Table and other apps on this address keep theirs
       Promise.all(names.filter((n) => n !== CACHE_NAME && n.startsWith('kulup-')).map((n) => caches.delete(n)))
-    )
+    ), 5000)
   );
   self.clients.claim();
 });
+
+// network first: the file is read whole and the page gets its own copy, so a cache write that hangs cannot hold it up
+const fromNet = (req, key) => fetch(req, { cache: 'no-cache' }).then(async (res) => {
+  if (!res.ok) return res;
+  const body = await res.arrayBuffer(), make = () => new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
+  caches.open(CACHE_NAME).then((cache) => cache.put(key, make())).catch(() => {});
+  return make();
+});
+const fromCache = (key, opt) => soon(caches.match(key, opt), 3000).then((m) => m || Response.error());
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
@@ -62,22 +71,10 @@ self.addEventListener('fetch', (event) => {
   // users online always get the latest deployed index.html. Falls back
   // to the cached shell only when there's no network.
   if (req.mode === 'navigate') {
-    event.respondWith(
-      fetch(req, { cache: 'no-cache' })
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', copy));
-          return res;
-        })
-        .catch(() => caches.match('./index.html'))
-    );
+    event.respondWith(fromNet(req, './index.html').catch(() => fromCache('./index.html')));
     return;
   }
 
   // Everything else: network first too (an update arrives at once), the cache when offline
-  event.respondWith(
-    fetch(req, { cache: 'no-cache' })
-      .then((res) => { if (res.ok) { const copy = res.clone(); caches.open(CACHE_NAME).then((cache) => cache.put(req, copy)); } return res; })
-      .catch(() => caches.match(req, { ignoreSearch: true }))
-  );
+  event.respondWith(fromNet(req, req).catch(() => fromCache(req, { ignoreSearch: true })));
 });
