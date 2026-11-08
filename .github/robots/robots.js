@@ -10,7 +10,7 @@
 const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.resolve(__dirname, '../..') + '/';
 const OUT = path.resolve(process.argv[2] || root + 'robots-out') + '/';
-const AHEAD = (+process.env.AHEAD_MIN || 300) * 60e3;   // boards are ready this far ahead of now (the run every two hours may start late)
+const AHEAD = (+process.env.AHEAD_MIN || 840) * 60e3;   // boards are ready this far ahead of now (the run every two hours may start late)
 const KEEP = 40;            // boards already played kept for the page's list
 const ERRS = 300;           // the robots' mistakes kept
 const PER = 10;             // boards of each system / convention

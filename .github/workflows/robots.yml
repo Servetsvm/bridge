@@ -6,6 +6,7 @@ name: Robot table
 on:
   schedule:
     - cron: '17 */2 * * *'
+    - cron: '47 1-23/2 * * *'   # GitHub often drops a scheduled run: a second chance every hour
   workflow_dispatch:
   # a change to the robots' program starts it at once
   push:

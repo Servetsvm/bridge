@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 405;
+const APP_V = 406;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2452,7 +2452,7 @@ const RT_SYS = { twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'Fre
 const rtGet = f => fetch(RT_URL + f + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null);
 function rtLoad(force) {
   if (RT.busy) return RT.busy;
-  if (!force && RT.at && Date.now() - RT.at < 10 * 60e3) return Promise.resolve(RT.data);
+  if (!force && RT.at && Date.now() - RT.at < 60 * 60e3) return Promise.resolve(RT.data);
   return RT.busy = Promise.all(RT_KEYS.map(k => rtGet('live-' + k + '.json'))).then(L => {
     L.forEach((d, i) => { if (d && d.boards) RT.all[RT_KEYS[i]] = d; });
     RT.data = RT.all[RT.cur] || null; RT.at = Date.now(); return RT.data;
