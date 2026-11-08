@@ -1087,9 +1087,9 @@ function explainCall(auc, seat, call, cards) {
   const x = ctxOf(auc, seat, cards);
   for (const c of cands(x)) if (c.call === call) return c.m;
   if (call === 'P') return { t: 'Pass' };
-  // 4♣ right after partner's natural 1NT, 2NT or 3NT, no suit agreed, with Gerber on the card: asks for aces, in any
+  // 4♣ right after partner's natural 1NT, 2NT or 3NT, no suit agreed: asks for aces, on any card, in any
   // sequence (1♣–1♥–2NT–3NT–4♣). The robots only answer it: they start Gerber in the cases cands() lists
-  if (call === B(4, 0) && x.C.gerber) {
+  if (call === B(4, 0)) {
     const ours = auc.filter(e => sideOf(e.seat) === sideOf(seat) && isNum(e.call)), pl = ours.filter(e => e.seat !== seat), last = pl[pl.length - 1];
     const natural = e => ST(e.call) < 4 && !(e.m && (e.m.cv || e.m.tag === 'trm' || e.m.tag === 'splinter' || e.m.tag === 'drury'));
     const agreed = ours.some(a => a.seat === seat && natural(a) && pl.some(b => natural(b) && ST(b.call) === ST(a.call)));
