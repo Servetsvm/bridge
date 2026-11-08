@@ -1087,6 +1087,14 @@ function explainCall(auc, seat, call, cards) {
   const x = ctxOf(auc, seat, cards);
   for (const c of cands(x)) if (c.call === call) return c.m;
   if (call === 'P') return { t: 'Pass' };
+  // 4♣ right after partner's natural 1NT, 2NT or 3NT, no suit agreed, with Gerber on the card: asks for aces, in any
+  // sequence (1♣–1♥–2NT–3NT–4♣). The robots only answer it: they start Gerber in the cases cands() lists
+  if (call === B(4, 0) && x.C.gerber) {
+    const ours = auc.filter(e => sideOf(e.seat) === sideOf(seat) && isNum(e.call)), pl = ours.filter(e => e.seat !== seat), last = pl[pl.length - 1];
+    const natural = e => ST(e.call) < 4 && !(e.m && (e.m.cv || e.m.tag === 'trm' || e.m.tag === 'splinter' || e.m.tag === 'drury'));
+    const agreed = ours.some(a => a.seat === seat && natural(a) && pl.some(b => natural(b) && ST(b.call) === ST(a.call)));
+    if (last && last === auc[auc.length - 2] && ST(last.call) === 4 && LV(last.call) <= 3 && !(last.m && last.m.cv && last.m.cv !== 'leb') && !agreed) return { tag: 'gerb', cv: 'gerber', t: 'Gerber: asking for aces (slam interest)' };
+  }
   // 4NT after our side has bid a suit (and not notrump last) asks for key cards, whoever bids it
   if (call === B(4, 4)) {
     const ours = auc.filter(e => sideOf(e.seat) === sideOf(seat) && isNum(e.call));

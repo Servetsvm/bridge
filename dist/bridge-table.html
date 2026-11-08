@@ -2141,7 +2141,7 @@ const CONVS = [
   { k: 'twoOverOne', n: '2/1 Game Force', d: 'By an unpassed hand, a new suit at the two level over partner\'s one-level opening (1♣–2♦ excepted, 1♠–2♥ shows five hearts) is forcing to game, 12+ HCP. Over 1♥/1♠, 1NT is forcing for one round (6-12 HCP): opener rebids a 3-card minor if he has nothing else; responder\'s later jump to 3 of the major shows a 3-card limit raise. A passed hand\'s 2-level response is not forcing.' },
   { k: 'rkc', n: 'RKCB 1430', d: '4NT asks for five key cards (four aces + trump king). 5♣ = 1 or 4, 5♦ = 3 or 0, 5♥ = 2 without the trump queen, 5♠ = 2 with the trump queen.' },
   { k: 'rkc0314', n: 'RKCB 0314', off: 1, x: 'rkc', d: '4NT asks for five key cards (four aces + trump king). 5♣ = 0 or 3, 5♦ = 1 or 4, 5♥ = 2 without the trump queen, 5♠ = 2 with the trump queen. Replaces RKCB 1430.' },
-  { k: 'gerber', n: 'Gerber', d: 'Directly over 1NT/2NT, 4♣ asks for aces. 4♦ = 0 or 4, 4♥ = 1, 4♠ = 2, 4NT = 3. The asker can sign off in 4NT.' },
+  { k: 'gerber', n: 'Gerber', d: 'Over partner’s 1NT, 2NT or 3NT with no suit agreed, 4♣ asks for aces. 4♦ = 0 or 4, 4♥ = 1, 4♠ = 2, 4NT = 3. The asker can sign off in 4NT.' },
   { k: 'bergen', n: 'Bergen Raises', d: 'Over 1♥/1♠ (not after a double or overcall): 3♣ = 4-card support, 7-9 points; 3♦ = 4-card support, 10-12 (limit raise); 3 of the major = 4-card support, 0-6 (preemptive). With 4-card support and 13+, use Jacoby 2NT or a splinter. A single raise shows 3-card support, 6-9; a 3-card limit raise goes through the forcing 1NT.' },
   { k: 'capp', n: 'Cappelletti', d: 'Over the opponents\' 1NT (direct seat): X = penalty, 15+ HCP. 2♣ = a one-suiter (6+ cards): advancer bids 2♦ to ask, overcaller passes with diamonds or names the suit. 2♦ = both majors (5-4 or longer): advancer chooses a major (a jump is invitational, 10-12). 2♥/2♠ = 5+ in that major and a 4+ minor: advancer passes, raises, or bids 2NT to ask for the minor. 2NT = both minors (5-5): advancer chooses.' },
   { k: 'j2nt', n: 'Jacoby 2NT', d: '2NT over a major opening = 4+ card support, 13+ points, game forcing. Opener: 3 of a new suit = singleton or void; 4 of a new suit = a good 5-card side suit; 3 of the major = 18+ no shortness; 3NT = 15-17 no shortness; 4 of the major = minimum.' },
@@ -3306,6 +3306,14 @@ function explainCall(auc, seat, call, cards) {
   const x = ctxOf(auc, seat, cards);
   for (const c of cands(x)) if (c.call === call) return c.m;
   if (call === 'P') return { t: 'Pass' };
+  // 4♣ right after partner's natural 1NT, 2NT or 3NT, no suit agreed, with Gerber on the card: asks for aces, in any
+  // sequence (1♣–1♥–2NT–3NT–4♣). The robots only answer it: they start Gerber in the cases cands() lists
+  if (call === B(4, 0) && x.C.gerber) {
+    const ours = auc.filter(e => sideOf(e.seat) === sideOf(seat) && isNum(e.call)), pl = ours.filter(e => e.seat !== seat), last = pl[pl.length - 1];
+    const natural = e => ST(e.call) < 4 && !(e.m && (e.m.cv || e.m.tag === 'trm' || e.m.tag === 'splinter' || e.m.tag === 'drury'));
+    const agreed = ours.some(a => a.seat === seat && natural(a) && pl.some(b => natural(b) && ST(b.call) === ST(a.call)));
+    if (last && last === auc[auc.length - 2] && ST(last.call) === 4 && LV(last.call) <= 3 && !(last.m && last.m.cv && last.m.cv !== 'leb') && !agreed) return { tag: 'gerb', cv: 'gerber', t: 'Gerber: asking for aces (slam interest)' };
+  }
   // 4NT after our side has bid a suit (and not notrump last) asks for key cards, whoever bids it
   if (call === B(4, 4)) {
     const ours = auc.filter(e => sideOf(e.seat) === sideOf(seat) && isNum(e.call));
@@ -9165,7 +9173,7 @@ const CONV_T = {
     twoOverOne: ['2/1 Oyun Forsu', 'Pas geçmemiş el, partnerin bir seviyesindeki açışına iki seviyesinde yeni renk verirse (1♣–2♦ hariç; 1♠–2♥ beş kupa gösterir) oyuna forsingdir, 12+ HCP. 1♥/1♠ üzerine 1NT bir tur forsingdir (6-12 HCP): açan başka bir şeyi yoksa 3 kartlık minörünü söyler; cevaplayanın sonra majörde 3’e atlaması 3 kartlı limit artırmadır. Pas geçmiş elin iki seviyesi cevabı forsing değildir.'],
     rkc: ['RKCB 1430', '4NT beş anahtar kartı sorar (dört as + koz papazı). 5♣ = 1 ya da 4, 5♦ = 3 ya da 0, 5♥ = koz kızı olmadan 2, 5♠ = koz kızıyla 2.'],
     rkc0314: ['RKCB 0314', '4NT beş anahtar kartı sorar (dört as + koz papazı). 5♣ = 0 ya da 3, 5♦ = 1 ya da 4, 5♥ = koz kızı olmadan 2, 5♠ = koz kızıyla 2. RKCB 1430 yerine.'],
-    gerber: ['Gerber', 'Doğrudan 1NT/2NT üzerine 4♣ asları sorar. 4♦ = 0 ya da 4, 4♥ = 1, 4♠ = 2, 4NT = 3. Soran 4NT’de durabilir.'],
+    gerber: ['Gerber', 'Ortağın 1NT, 2NT veya 3NT’sinin üzerine, renk anlaşması yoksa 4♣ asları sorar. 4♦ = 0 ya da 4, 4♥ = 1, 4♠ = 2, 4NT = 3. Soran 4NT’de durabilir.'],
     bergen: ['Bergen artırmaları', '1♥/1♠ üzerine (kontr ya da araya girişten sonra değil): 3♣ = 4 kartlı destek, 7-9 puan; 3♦ = 4 kartlı destek, 10-12 (limit artırma); majörde 3 = 4 kartlı destek, 0-6 (engelleyici). 4 kartlı destek ve 13+ ile Jacoby 2NT ya da splinter kullanılır. Basit artırma 3 kartlı destek, 6-9 gösterir; 3 kartlı limit artırma forsing 1NT üzerinden gider.'],
     capp: ['Cappelletti', 'Rakiplerin 1NT’sine (doğrudan pozisyonda): X = ceza, 15+ HCP. 2♣ = tek renkli el (6+ kart): partner sormak için 2♦ der, araya giren karoysa pas geçer ya da rengini söyler. 2♦ = iki majör (5-4 ya da daha uzun): partner bir majör seçer (atlama davettir, 10-12). 2♥/2♠ = o majörde 5+ ve 4+ bir minör: partner pas geçer, artırır ya da minörü sormak için 2NT der. 2NT = iki minör (5-5): partner seçer.'],
     j2nt: ['Jacoby 2NT', 'Majör açışa 2NT = 4+ kartlı destek, 13+ puan, oyun forsing. Açan: yeni renkte 3 = tekli ya da renksizlik; yeni renkte 4 = iyi 5 kartlı yan renk; majörde 3 = 18+ kısalık yok; 3NT = 15-17 kısalık yok; majörde 4 = minimum.'],
@@ -9206,7 +9214,7 @@ const CONV_T = {
     twoOverOne: ['2/1 utgangskrav', 'Fra en hånd som ikke har passet er en ny farge på totrinnet over makkers åpning på ett (unntatt 1♣–2♦; 1♠–2♥ viser fem hjerter) krav til utgang, 12+ HP. Over 1♥/1♠ er 1NT krav i én runde (6-12 HP): åpner melder en trekorts minor om han ikke har noe annet; svarers senere hopp til 3 i majoren viser en invitt med trekorts støtte. Totrinnssvar fra en passet hånd er ikke krav.'],
     rkc: ['RKCB 1430', '4NT spør etter fem nøkkelkort (fire ess + trumfkongen). 5♣ = 1 eller 4, 5♦ = 3 eller 0, 5♥ = 2 uten trumfdamen, 5♠ = 2 med trumfdamen.'],
     rkc0314: ['RKCB 0314', '4NT spør etter fem nøkkelkort (fire ess + trumfkongen). 5♣ = 0 eller 3, 5♦ = 1 eller 4, 5♥ = 2 uten trumfdamen, 5♠ = 2 med trumfdamen. Erstatter RKCB 1430.'],
-    gerber: ['Gerber', 'Rett over 1NT/2NT spør 4♣ etter ess. 4♦ = 0 eller 4, 4♥ = 1, 4♠ = 2, 4NT = 3. Den som spør kan stoppe i 4NT.'],
+    gerber: ['Gerber', 'Over makkers 1NT, 2NT eller 3NT uten avtalt farge spør 4♣ etter ess. 4♦ = 0 eller 4, 4♥ = 1, 4♠ = 2, 4NT = 3. Den som spør kan stoppe i 4NT.'],
     bergen: ['Bergen-høyninger', 'Over 1♥/1♠ (ikke etter dobling eller innmelding): 3♣ = firekorts støtte, 7-9 poeng; 3♦ = firekorts støtte, 10-12 (invitt); 3 i majoren = firekorts støtte, 0-6 (sperre). Med firekorts støtte og 13+ brukes Jacoby 2NT eller splinter. Enkel høyning viser trekorts støtte, 6-9; trekorts invitt går via krav-1NT.'],
     capp: ['Cappelletti', 'Over motpartens 1NT (direkte): X = straff, 15+ HP. 2♣ = enfarget (6+ kort): makker melder 2♦ for å spørre, innmelder passer med ruter eller viser fargen. 2♦ = begge majorer (5-4 eller lengre): makker velger major (hopp er invitt, 10-12). 2♥/2♠ = 5+ i den majoren og en 4+ minor: makker passer, høyer eller melder 2NT for å spørre om minoren. 2NT = begge minorer (5-5): makker velger.'],
     j2nt: ['Jacoby 2NT', '2NT over majoråpning = 4+ korts støtte, 13+ poeng, krav til utgang. Åpner: 3 i ny farge = singelton eller renons; 4 i ny farge = god femkorts sidefarge; 3 i majoren = 18+ uten korthet; 3NT = 15-17 uten korthet; 4 i majoren = minimum.'],
@@ -9247,7 +9255,7 @@ const CONV_T = {
     twoOverOne: ['2/1 forcing a manga', 'Desde una mano que no ha pasado, un palo nuevo a nivel de dos sobre la apertura de uno del compañero (salvo 1♣–2♦; 1♠–2♥ muestra cinco corazones) es forcing a manga, 12+ PH. Sobre 1♥/1♠, 1SA es forcing una vuelta (6-12 PH): el abridor redeclara un menor de tres cartas si no tiene otra cosa; el salto posterior del respondedor a 3 del mayor muestra un apoyo límite de tres cartas. La respuesta a nivel de dos de una mano pasada no es forcing.'],
     rkc: ['RKCB 1430', '4SA pregunta por cinco cartas clave (cuatro ases + rey de triunfo). 5♣ = 1 o 4, 5♦ = 3 o 0, 5♥ = 2 sin la dama de triunfo, 5♠ = 2 con la dama de triunfo.'],
     rkc0314: ['RKCB 0314', '4SA pregunta por cinco cartas clave (cuatro ases + rey de triunfo). 5♣ = 0 o 3, 5♦ = 1 o 4, 5♥ = 2 sin la dama de triunfo, 5♠ = 2 con la dama de triunfo. Sustituye a RKCB 1430.'],
-    gerber: ['Gerber', 'Directamente sobre 1SA/2SA, 4♣ pregunta por ases. 4♦ = 0 o 4, 4♥ = 1, 4♠ = 2, 4SA = 3. El que pregunta puede pararse en 4SA.'],
+    gerber: ['Gerber', 'Sobre 1SA, 2SA o 3SA del compañero, sin palo acordado, 4♣ pregunta por ases. 4♦ = 0 o 4, 4♥ = 1, 4♠ = 2, 4SA = 3. El que pregunta puede pararse en 4SA.'],
     bergen: ['Apoyos Bergen', 'Sobre 1♥/1♠ (no tras doblo o intervención): 3♣ = apoyo de cuatro cartas, 7-9 puntos; 3♦ = apoyo de cuatro cartas, 10-12 (apoyo límite); 3 del mayor = apoyo de cuatro cartas, 0-6 (preventivo). Con apoyo de cuatro y 13+, se usa Jacoby 2SA o un splinter. El apoyo simple muestra tres cartas, 6-9; el apoyo límite de tres cartas pasa por el 1SA forcing.'],
     capp: ['Cappelletti', 'Sobre el 1SA rival (en directa): X = castigo, 15+ PH. 2♣ = monocolor (6+ cartas): el compañero dice 2♦ para preguntar y el interventor pasa con diamantes o nombra su palo. 2♦ = ambos mayores (5-4 o más): el compañero elige mayor (un salto es invitación, 10-12). 2♥/2♠ = 5+ en ese mayor y un menor de 4+: el compañero pasa, apoya o dice 2SA para preguntar el menor. 2SA = ambos menores (5-5): el compañero elige.'],
     j2nt: ['Jacoby 2SA', '2SA sobre apertura de mayor = apoyo de 4+ cartas, 13+ puntos, forcing a manga. Abridor: 3 de un palo nuevo = semifallo o fallo; 4 de un palo nuevo = buen palo lateral de cinco; 3 del mayor = 18+ sin cortos; 3SA = 15-17 sin cortos; 4 del mayor = mínimo.'],
@@ -9288,7 +9296,7 @@ const CONV_T = {
     twoOverOne: ['2/1 forcing de manche', 'D’une main non passée, une couleur nouvelle au palier de deux sur l’ouverture d’un du partenaire (sauf 1♣–2♦ ; 1♠–2♥ montre cinq cœurs) est forcing de manche, 12+ H. Sur 1♥/1♠, 1SA est forcing un tour (6-12 H) : l’ouvreur annonce une mineure de trois cartes s’il n’a rien d’autre ; le saut ultérieur du répondant à 3 dans la majeure montre un soutien limite de trois cartes. La réponse au palier de deux d’une main passée n’est pas forcing.'],
     rkc: ['RKCB 1430', '4SA demande cinq clés (quatre as + roi d’atout). 5♣ = 1 ou 4, 5♦ = 3 ou 0, 5♥ = 2 sans la dame d’atout, 5♠ = 2 avec la dame d’atout.'],
     rkc0314: ['RKCB 0314', '4SA demande cinq clés (quatre as + roi d’atout). 5♣ = 0 ou 3, 5♦ = 1 ou 4, 5♥ = 2 sans la dame d’atout, 5♠ = 2 avec la dame d’atout. Remplace RKCB 1430.'],
-    gerber: ['Gerber', 'Directement sur 1SA/2SA, 4♣ demande les as. 4♦ = 0 ou 4, 4♥ = 1, 4♠ = 2, 4SA = 3. Celui qui demande peut s’arrêter à 4SA.'],
+    gerber: ['Gerber', 'Sur 1SA, 2SA ou 3SA du partenaire, sans couleur fixée, 4♣ demande les as. 4♦ = 0 ou 4, 4♥ = 1, 4♠ = 2, 4SA = 3. Celui qui demande peut s’arrêter à 4SA.'],
     bergen: ['Soutiens Bergen', 'Sur 1♥/1♠ (pas après un contre ou une intervention) : 3♣ = soutien de quatre cartes, 7-9 points ; 3♦ = soutien de quatre cartes, 10-12 (soutien limite) ; 3 dans la majeure = soutien de quatre cartes, 0-6 (barrage). Avec quatre cartes et 13+, on utilise Jacoby 2SA ou un splinter. Le soutien simple montre trois cartes, 6-9 ; le soutien limite à trois cartes passe par le 1SA forcing.'],
     capp: ['Cappelletti', 'Sur le 1SA adverse (en direct) : X = punitif, 15+ H. 2♣ = unicolore (6+ cartes) : le partenaire dit 2♦ pour demander, l’intervenant passe avec les carreaux ou nomme sa couleur. 2♦ = les deux majeures (5-4 ou plus) : le partenaire choisit une majeure (un saut est invitationnel, 10-12). 2♥/2♠ = 5+ dans cette majeure et une mineure de 4+ : le partenaire passe, soutient ou dit 2SA pour demander la mineure. 2SA = les deux mineures (5-5) : le partenaire choisit.'],
     j2nt: ['Jacoby 2SA', '2SA sur une ouverture en majeure = soutien de 4+ cartes, 13+ points, forcing de manche. Ouvreur : 3 dans une couleur nouvelle = singleton ou chicane ; 4 dans une couleur nouvelle = belle couleur annexe de cinq ; 3 dans la majeure = 18+ sans courte ; 3SA = 15-17 sans courte ; 4 dans la majeure = minimum.'],
@@ -9329,7 +9337,7 @@ const CONV_T = {
     twoOverOne: ['2/1 forzante manche', 'Da una mano non passata, un colore nuovo a livello di due sull’apertura a livello di uno del compagno (tranne 1♣–2♦; 1♠–2♥ mostra cinque cuori) è forzante manche, 12+ PO. Su 1♥/1♠, 1SA è forzante per un giro (6-12 PO): l’apritore ridichiara una minore di tre carte se non ha altro; il successivo salto del rispondente a 3 nella maggiore mostra un appoggio limite di tre carte. La risposta a livello di due di una mano passata non è forzante.'],
     rkc: ['RKCB 1430', '4SA chiede cinque carte chiave (quattro assi + re di atout). 5♣ = 1 o 4, 5♦ = 3 o 0, 5♥ = 2 senza la donna di atout, 5♠ = 2 con la donna di atout.'],
     rkc0314: ['RKCB 0314', '4SA chiede cinque carte chiave (quattro assi + re di atout). 5♣ = 0 o 3, 5♦ = 1 o 4, 5♥ = 2 senza la donna di atout, 5♠ = 2 con la donna di atout. Sostituisce RKCB 1430.'],
-    gerber: ['Gerber', 'Direttamente su 1SA/2SA, 4♣ chiede gli assi. 4♦ = 0 o 4, 4♥ = 1, 4♠ = 2, 4SA = 3. Chi chiede può fermarsi a 4SA.'],
+    gerber: ['Gerber', 'Su 1SA, 2SA o 3SA del compagno, senza colore concordato, 4♣ chiede gli assi. 4♦ = 0 o 4, 4♥ = 1, 4♠ = 2, 4SA = 3. Chi chiede può fermarsi a 4SA.'],
     bergen: ['Appoggi Bergen', 'Su 1♥/1♠ (non dopo contro o intervento): 3♣ = appoggio di quattro carte, 7-9 punti; 3♦ = appoggio di quattro, 10-12 (appoggio limite); 3 nella maggiore = appoggio di quattro, 0-6 (sbarramento). Con quattro carte e 13+ si usa Jacoby 2SA o uno splinter. L’appoggio semplice mostra tre carte, 6-9; l’appoggio limite con tre carte passa dall’1SA forzante.'],
     capp: ['Cappelletti', 'Sull’1SA avversario (in diretta): X = punitivo, 15+ PO. 2♣ = monocolore (6+ carte): il compagno dice 2♦ per chiedere, l’interveniente passa con i quadri o nomina il colore. 2♦ = entrambe le maggiori (5-4 o più): il compagno sceglie una maggiore (un salto è invitante, 10-12). 2♥/2♠ = 5+ in quella maggiore e una minore di 4+: il compagno passa, appoggia o dice 2SA per chiedere la minore. 2SA = entrambe le minori (5-5): il compagno sceglie.'],
     j2nt: ['Jacoby 2SA', '2SA su un’apertura di maggiore = appoggio di 4+ carte, 13+ punti, forzante manche. Apritore: 3 in un colore nuovo = singolo o vuoto; 4 in un colore nuovo = buon colore laterale di cinque; 3 nella maggiore = 18+ senza corte; 3SA = 15-17 senza corte; 4 nella maggiore = minimo.'],
@@ -9370,7 +9378,7 @@ const CONV_T = {
     twoOverOne: ['2/1 Partieforcing', 'Aus nicht gepasster Hand ist eine neue Farbe auf Zweierstufe nach Partners Eröffnung auf Einerstufe (außer 1♣–2♦; 1♠–2♥ zeigt fünf Coeur) partieforcierend, 12+ FP. Über 1♥/1♠ ist 1SA für eine Runde forcierend (6-12 FP): der Eröffner reizt mangels anderer Wahl eine Dreierfarbe in Unterfarbe; der spätere Sprung des Antwortenden auf 3 in der Oberfarbe zeigt eine Limit-Hebung mit drei Karten. Eine Zweierantwort aus gepasster Hand ist nicht forcierend.'],
     rkc: ['RKCB 1430', '4SA fragt nach fünf Schlüsselkarten (vier Asse + Trumpfkönig). 5♣ = 1 oder 4, 5♦ = 3 oder 0, 5♥ = 2 ohne Trumpfdame, 5♠ = 2 mit Trumpfdame.'],
     rkc0314: ['RKCB 0314', '4SA fragt nach fünf Schlüsselkarten (vier Asse + Trumpfkönig). 5♣ = 0 oder 3, 5♦ = 1 oder 4, 5♥ = 2 ohne Trumpfdame, 5♠ = 2 mit Trumpfdame. Ersetzt RKCB 1430.'],
-    gerber: ['Gerber', 'Direkt über 1SA/2SA fragt 4♣ nach Assen. 4♦ = 0 oder 4, 4♥ = 1, 4♠ = 2, 4SA = 3. Der Fragende kann in 4SA stoppen.'],
+    gerber: ['Gerber', 'Über 1SA, 2SA oder 3SA des Partners, ohne vereinbarte Farbe, fragt 4♣ nach Assen. 4♦ = 0 oder 4, 4♥ = 1, 4♠ = 2, 4SA = 3. Der Fragende kann in 4SA stoppen.'],
     bergen: ['Bergen-Hebungen', 'Über 1♥/1♠ (nicht nach Kontra oder Gegenreizung): 3♣ = Vierer-Unterstützung, 7-9 Punkte; 3♦ = Vierer-Unterstützung, 10-12 (Limit-Hebung); 3 in der Oberfarbe = Vierer-Unterstützung, 0-6 (präemptiv). Mit vier Karten und 13+ nimmt man Jacoby 2SA oder einen Splinter. Die einfache Hebung zeigt drei Karten, 6-9; eine Limit-Hebung mit drei Karten geht über das forcierende 1SA.'],
     capp: ['Cappelletti', 'Über das gegnerische 1SA (direkt): X = Strafe, 15+ FP. 2♣ = Einfärber (6+ Karten): Partner fragt mit 2♦, der Gegenreizer passt mit Karo oder nennt die Farbe. 2♦ = beide Oberfarben (5-4 oder länger): Partner wählt eine Oberfarbe (ein Sprung ist einladend, 10-12). 2♥/2♠ = 5+ in dieser Oberfarbe und eine 4+ Unterfarbe: Partner passt, hebt oder fragt mit 2SA nach der Unterfarbe. 2SA = beide Unterfarben (5-5): Partner wählt.'],
     j2nt: ['Jacoby 2SA', '2SA über eine Oberfarberöffnung = 4+ Unterstützung, 13+ Punkte, partieforcierend. Eröffner: 3 in neuer Farbe = Single oder Chicane; 4 in neuer Farbe = gute Fünfer-Nebenfarbe; 3 in der Oberfarbe = 18+ ohne Kürze; 3SA = 15-17 ohne Kürze; 4 in der Oberfarbe = Minimum.'],
@@ -9411,7 +9419,7 @@ const CONV_T = {
     twoOverOne: ['2/1 форсинг до гейма', 'Из непасовавшей руки новая масть на уровне двух после открытия партнёра на уровне одного (кроме 1♣–2♦; 1♠–2♥ показывает пять червей) — форсинг до гейма, 12+ О. На 1♥/1♠ ответ 1БК — форсинг на круг (6-12 О): открывший при отсутствии иного называет третью младшую; последующий прыжок отвечающего на 3 в мажоре показывает инвитную поддержку из трёх карт. Ответ на уровне двух из пасовавшей руки не форсирующий.'],
     rkc: ['RKCB 1430', '4БК спрашивает пять ключевых карт (четыре туза + король козыря). 5♣ = 1 или 4, 5♦ = 3 или 0, 5♥ = 2 без дамы козыря, 5♠ = 2 с дамой козыря.'],
     rkc0314: ['RKCB 0314', '4БК спрашивает пять ключевых карт (четыре туза + король козыря). 5♣ = 0 или 3, 5♦ = 1 или 4, 5♥ = 2 без дамы козыря, 5♠ = 2 с дамой козыря. Вместо RKCB 1430.'],
-    gerber: ['Гербер', 'Сразу после 1БК/2БК 4♣ спрашивает тузы. 4♦ = 0 или 4, 4♥ = 1, 4♠ = 2, 4БК = 3. Спрашивающий может остановиться в 4БК.'],
+    gerber: ['Гербер', 'После 1БК, 2БК или 3БК партнёра, без согласованной масти, 4♣ спрашивает тузы. 4♦ = 0 или 4, 4♥ = 1, 4♠ = 2, 4БК = 3. Спрашивающий может остановиться в 4БК.'],
     bergen: ['Повышения Бергена', 'На 1♥/1♠ (не после контры или вмешательства): 3♣ = поддержка из четырёх карт, 7-9 очков; 3♦ = четыре карты, 10-12 (инвит); 3 в мажоре = четыре карты, 0-6 (блок). С четырьмя картами и 13+ — Якоби 2БК или сплинтер. Простое повышение показывает три карты, 6-9; инвит с тремя картами идёт через форсирующие 1БК.'],
     capp: ['Каппеллетти', 'Против 1БК соперников (в прямой позиции): X = штрафная, 15+ О. 2♣ = одномастка (6+ карт): партнёр спрашивает 2♦, вмешавшийся пасует с бубнами или называет масть. 2♦ = обе старшие (5-4 и длиннее): партнёр выбирает мажор (прыжок — инвит, 10-12). 2♥/2♠ = 5+ в этом мажоре и младшая из 4+: партнёр пасует, повышает или спрашивает младшую через 2БК. 2БК = обе младшие (5-5): партнёр выбирает.'],
     j2nt: ['Якоби 2БК', '2БК на открытие в мажоре = поддержка из 4+ карт, 13+ очков, форсинг до гейма. Открывший: 3 в новой масти = синглет или ренонс; 4 в новой масти = хорошая боковая пятёрка; 3 в мажоре = 18+ без коротких; 3БК = 15-17 без коротких; 4 в мажоре = минимум.'],
@@ -9452,7 +9460,7 @@ const CONV_T = {
     twoOverOne: ['2/1 forsujące do końcówki', 'Z ręki niespasowanej nowy kolor na poziomie dwóch po otwarciu partnera na poziomie jednego (poza 1♣–2♦; 1♠–2♥ pokazuje pięć kierów) forsuje do końcówki, 12+ PC. Na 1♥/1♠ odpowiedź 1BA jest forsująca na jedno okrążenie (6-12 PC): otwierający bez innej odzywki powtarza trzykartowy młodszy; późniejszy skok odpowiadającego na 3 w starszym pokazuje inwitujące poparcie z trzema kartami. Odpowiedź na poziomie dwóch z ręki spasowanej nie forsuje.'],
     rkc: ['RKCB 1430', '4BA pyta o pięć kart kluczowych (cztery asy + król atutowy). 5♣ = 1 lub 4, 5♦ = 3 lub 0, 5♥ = 2 bez damy atutowej, 5♠ = 2 z damą atutową.'],
     rkc0314: ['RKCB 0314', '4BA pyta o pięć kart kluczowych (cztery asy + król atutowy). 5♣ = 0 lub 3, 5♦ = 1 lub 4, 5♥ = 2 bez damy atutowej, 5♠ = 2 z damą atutową. Zamiast RKCB 1430.'],
-    gerber: ['Gerber', 'Bezpośrednio po 1BA/2BA 4♣ pyta o asy. 4♦ = 0 lub 4, 4♥ = 1, 4♠ = 2, 4BA = 3. Pytający może zatrzymać się na 4BA.'],
+    gerber: ['Gerber', 'Po 1BA, 2BA lub 3BA partnera, bez uzgodnionego koloru, 4♣ pyta o asy. 4♦ = 0 lub 4, 4♥ = 1, 4♠ = 2, 4BA = 3. Pytający może zatrzymać się na 4BA.'],
     bergen: ['Podniesienia Bergena', 'Na 1♥/1♠ (nie po kontrze ani wejściu): 3♣ = poparcie czterokartowe, 7-9 punktów; 3♦ = cztery karty, 10-12 (inwit); 3 w starszym = cztery karty, 0-6 (blok). Z czterema kartami i 13+ używa się Jacoby 2BA lub splintra. Proste podniesienie pokazuje trzy karty, 6-9; inwit z trzema kartami idzie przez forsujące 1BA.'],
     capp: ['Cappelletti', 'Na 1BA przeciwników (na pozycji bezpośredniej): X = karna, 15+ PC. 2♣ = jednokolorówka (6+ kart): partner pyta 2♦, wchodzący pasuje z karami lub nazywa kolor. 2♦ = oba starsze (5-4 lub dłużej): partner wybiera starszy (skok jest inwitem, 10-12). 2♥/2♠ = 5+ w tym starszym i młodszy 4+: partner pasuje, podnosi lub pyta o młodszy przez 2BA. 2BA = oba młodsze (5-5): partner wybiera.'],
     j2nt: ['Jacoby 2BA', '2BA na otwarcie w starszym = poparcie 4+ kart, 13+ punktów, forsuje do końcówki. Otwierający: 3 w nowym kolorze = singel lub renons; 4 w nowym kolorze = dobra boczna piątka; 3 w starszym = 18+ bez krótkości; 3BA = 15-17 bez krótkości; 4 w starszym = minimum.'],
@@ -9493,7 +9501,7 @@ const CONV_T = {
     twoOverOne: ['2/1 逼局', '未曾不叫的应叫人在同伴一阶开叫后于二阶叫新花色(1♣–2♦ 除外;1♠–2♥ 表示五张红心)为逼局,12+ 大牌点。1♥/1♠ 后应叫 1NT 逼叫一轮(6-12 点):开叫人没有其他叫品时叫三张低花;应叫人随后跳叫 3 阶高花表示三张支持的邀叫。已不叫过的一方二阶应叫不逼叫。'],
     rkc: ['RKCB 1430', '4NT 问五张关键张(四张 A + 将牌 K)。5♣ = 1 或 4,5♦ = 3 或 0,5♥ = 2 张且无将牌 Q,5♠ = 2 张且有将牌 Q。'],
     rkc0314: ['RKCB 0314', '4NT 问五张关键张(四张 A + 将牌 K)。5♣ = 0 或 3,5♦ = 1 或 4,5♥ = 2 张且无将牌 Q,5♠ = 2 张且有将牌 Q。取代 RKCB 1430。'],
-    gerber: ['格伯', '直接在 1NT/2NT 之后,4♣ 问 A。4♦ = 0 或 4,4♥ = 1,4♠ = 2,4NT = 3。问叫者可停在 4NT。'],
+    gerber: ['格伯', '同伴叫 1NT、2NT 或 3NT 之后,未确定将牌时,4♣ 问 A。4♦ = 0 或 4,4♥ = 1,4♠ = 2,4NT = 3。问叫者可停在 4NT。'],
     bergen: ['伯根加叫', '在 1♥/1♠ 后(不是在加倍或争叫之后):3♣ = 四张支持,7-9 点;3♦ = 四张支持,10-12(邀叫);3 阶高花 = 四张支持,0-6(阻击)。四张支持且 13+ 用雅可比 2NT 或爆裂叫。简单加叫表示三张支持,6-9;三张支持的邀叫经由逼叫性 1NT。'],
     capp: ['卡佩莱蒂', '对方开叫 1NT 后(直接位置):X = 惩罚,15+ 点。2♣ = 单套(6+ 张):同伴叫 2♦ 询问,争叫者有方块就不叫,否则叫出花色。2♦ = 两高花(5-4 或更长):同伴选高花(跳叫为邀叫,10-12)。2♥/2♠ = 该高花 5+ 加一个 4+ 低花:同伴不叫、加叫或叫 2NT 询问低花。2NT = 两低花(5-5):同伴选择。'],
     j2nt: ['雅可比 2NT', '高花开叫后应叫 2NT = 4+ 张支持,13+ 点,逼局。开叫人:3 阶新花 = 单张或缺门;4 阶新花 = 好的五张旁套;3 阶高花 = 18+ 无短门;3NT = 15-17 无短门;4 阶高花 = 低限。'],
@@ -9778,7 +9786,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 409;
+const APP_V = 410;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -12144,6 +12152,7 @@ function showAuction() {
 const seeAll = () => !online() && !(G && G.tour) && ((!!SET.robSee && typeof Net !== 'undefined' && Net.isAdmin()) || pracList().length > 0);
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 410, tr: 'Kartta Gerber varsa, ortağın 1NT, 2NT veya 3NT’sinin hemen üzerine, renk anlaşması yokken gelen 4♣ artık her dizide as sorusu: pas geçmiyorum, 4♦/4♥/4♠/4NT ile as sayımı veriyorum (1♣–1♥–2NT–3NT–4♣).', en: 'With Gerber on the card, 4♣ straight after partner’s 1NT, 2NT or 3NT with no suit agreed now asks for aces in every sequence: I answer instead of passing.' },
   { v: 378, tr: 'Ortak Cappelletti, DONT, Michaels ya da Unusual 2SA ile girdikten sonra rakip araya deklare yaparsa artık renk seçmek zorunda değilim: fitim varsa deklare ediyorum, yoksa pas (1SA–2♦–4♦: ♥ tek kâğıtla 4♥ yok). Ortağın eski takeout kontrasını, arada deklareler olduysa cevaplamıyorum.', en: 'After partner\'s Cappelletti, DONT, Michaels or Unusual 2NT and an opponent\'s bid over it I no longer have to choose a suit: I bid with a fit, else pass. An old takeout double is not answered once other calls came in between.' },
   { v: 378, tr: 'Stayman, transfer gibi yapay bir deklarenin kontrası takeout değil: o renkte iyi 5+ kâğıt, atak isteği. Ortağın böyle kontrasını takeout gibi cevaplamıyorum.', en: 'A double of an artificial bid (Stayman, a transfer) is lead-directing: a good 5+ suit, not takeout.' },
   { v: 378, tr: 'Game forcing bir dizide fit ve iki as varsa 31 puandan itibaren şlem arıyorum (1♠–2♦–3♦, 17 puan ve üç asla: 4SA).', en: 'In a game force with a fit and two aces I look for slam from 31 points.' },
@@ -13508,7 +13517,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-07T21:48:39Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-08T20:57:22Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {

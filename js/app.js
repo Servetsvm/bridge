@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 409;
+const APP_V = 410;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2376,6 +2376,7 @@ function showAuction() {
 const seeAll = () => !online() && !(G && G.tour) && ((!!SET.robSee && typeof Net !== 'undefined' && Net.isAdmin()) || pracList().length > 0);
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 410, tr: 'Kartta Gerber varsa, ortağın 1NT, 2NT veya 3NT’sinin hemen üzerine, renk anlaşması yokken gelen 4♣ artık her dizide as sorusu: pas geçmiyorum, 4♦/4♥/4♠/4NT ile as sayımı veriyorum (1♣–1♥–2NT–3NT–4♣).', en: 'With Gerber on the card, 4♣ straight after partner’s 1NT, 2NT or 3NT with no suit agreed now asks for aces in every sequence: I answer instead of passing.' },
   { v: 378, tr: 'Ortak Cappelletti, DONT, Michaels ya da Unusual 2SA ile girdikten sonra rakip araya deklare yaparsa artık renk seçmek zorunda değilim: fitim varsa deklare ediyorum, yoksa pas (1SA–2♦–4♦: ♥ tek kâğıtla 4♥ yok). Ortağın eski takeout kontrasını, arada deklareler olduysa cevaplamıyorum.', en: 'After partner\'s Cappelletti, DONT, Michaels or Unusual 2NT and an opponent\'s bid over it I no longer have to choose a suit: I bid with a fit, else pass. An old takeout double is not answered once other calls came in between.' },
   { v: 378, tr: 'Stayman, transfer gibi yapay bir deklarenin kontrası takeout değil: o renkte iyi 5+ kâğıt, atak isteği. Ortağın böyle kontrasını takeout gibi cevaplamıyorum.', en: 'A double of an artificial bid (Stayman, a transfer) is lead-directing: a good 5+ suit, not takeout.' },
   { v: 378, tr: 'Game forcing bir dizide fit ve iki as varsa 31 puandan itibaren şlem arıyorum (1♠–2♦–3♦, 17 puan ve üç asla: 4SA).', en: 'In a game force with a fit and two aces I look for slam from 31 points.' },
@@ -3740,7 +3741,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-07T21:48:39Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-08T20:57:22Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {
