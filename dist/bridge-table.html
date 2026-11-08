@@ -9778,7 +9778,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 408;
+const APP_V = 409;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -13570,16 +13570,10 @@ async function showLearn0() {
 }
 // the lesson book in the learning report (Servet's, so Turkish): the trial of the candidate, the accepted lessons
 function lessonBookHtml(LB) {
-  if (!LB || !LB.cand) return '<h3 class="sth">📒 Ders defteri</h3><div class="muted">Henüz oluşmadı: sistem masalarının ilk çalışması bitince dolacak.</div>';
-  const n = b => Object.values(b || {}).reduce((t, m) => t + Object.keys(m).length, 0), ab = { L: { b: 0, lost: 0 }, B: { b: 0, lost: 0 } };
-  for (const k of RT_KEYS) { const a = RT.all[k] && RT.all[k].league && RT.all[k].league.ab; if (a && a.v === LB.cand.v) for (const x of ['L', 'B']) { ab[x].b += a[x].b; ab[x].lost += a[x].lost; } }
-  const per = a => a.b ? (a.lost / a.b).toFixed(2) : '—', counted = Object.values(LB.raw || {}).reduce((t, m) => t + Object.values(m).reduce((u, v) => u + v, 0), 0);
+  const H = (LB && LB.hist) || [], per = a => a.b ? (a.lost / a.b).toFixed(2) : '—';
   return `<h3 class="sth">📒 Ders defteri</h3>
-    <div class="anarow">Sayılan hatalar (kaybedilen levée): <b>${counted}</b> · denemedeki defter ${LB.cand.v}: <b>${n(LB.cand.book)}</b> ders</div>
-    <table class="res stats"><tbody><tr><td>Derslerle</td><td class="n">${ab.L.b} el</td><td class="n">${per(ab.L)} levée/el</td></tr><tr><td>Derssiz</td><td class="n">${ab.B.b} el</td><td class="n">${per(ab.B)} levée/el</td></tr></tbody></table>
-    <div class="muted">Her iki tarafta 300 el olunca karar verilir: dersler kaybı en az %5 azaltırsa kabul edilir.</div>
-    ${LB.acc ? `<div class="okmsg">✅ Kabul edilen defter ${LB.acc.v} (${new Date(LB.acc.at).toLocaleDateString()}): kayıp %${LB.acc.gain} azaldı. Robotlarınız bunu kullanıyor.</div>${(LB.acc.tr || []).map(t => `<div class="anarow">${esc(t)}</div>`).join('')}` : '<div class="muted">Henüz kabul edilmiş ders yok.</div>'}
-    ${(LB.hist || []).length ? `<div class="muted">Son denemeler: ${LB.hist.slice(-5).map(h => `${h.v} ${h.ok ? '✅' : '✖'}`).join(' · ')}</div>` : ''}`;
+    <div class="muted">Durduruldu: denenen defterlerin hiçbiri kaybı azaltmadı. Robotlar ders kullanmadan oynuyor.</div>
+    ${H.length ? `<table class="res stats"><tbody><tr><td>Defter</td><td class="n">Derslerle</td><td class="n">Derssiz</td></tr>${H.map(h => `<tr><td>${h.v}</td><td class="n">${per(h.L)} levée/el</td><td class="n">${per(h.B)} levée/el</td></tr>`).join('')}</tbody></table>` : ''}`;
 }
 // the team match with the robots is gone: its saved match on this device is forgotten
 try { localStorage.removeItem('bridge-rteam'); } catch (e) {}

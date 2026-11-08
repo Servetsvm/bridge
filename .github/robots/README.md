@@ -22,6 +22,8 @@ auction, contract, the play `p` (tricks of `[seat, card]`), `arm` (`L` with the 
 
 ## lessons.json
 
+STOPPED on 2026-11-08 (four books, each lost more tricks than no book): the file is kept but no longer changes.
+
 The lesson book. `raw`: every mistake ever counted, by context and `played kind>better kind` (weighted by the tricks
 lost). `cand`: the lessons on trial; `acc`: the accepted ones (the app's robots use them), with how many fewer tricks
 they lost (`gain`, %) and a Turkish summary; `hist`: the trials.

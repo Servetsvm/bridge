@@ -61,10 +61,6 @@ jobs:
           merge-multiple: true
       - name: The tables' new boards
         run: cp -f new/live-*.json new/errors-*.json out/ 2>/dev/null || true
-      # the lesson book: the candidate judged on the tables' trial, a new one made from their mistakes
-      - name: The robots' lessons
-        continue-on-error: true
-        run: node .github/robots/learn.js out
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}

@@ -1,4 +1,5 @@
-// The robots' lesson book (run by .github/workflows/robots.yml after the six tables: node .github/robots/learn.js <dir>).
+// STOPPED (2026-11-08), no longer run by the workflow: all four books lost more tricks than no book. Kept to read.
+// The robots' lesson book (was run by .github/workflows/robots.yml after the six tables: node .github/robots/learn.js <dir>).
 // From every mistake of the robots' closed-hand play on the six tables, old and new (the counts add up run after run) (errors-<system>.json: each mistake's context and
 // the kinds of the card played and of the better one, double dummy) it writes the candidate lessons: for each kind of
 // position, how often one kind of card was played where another was better (net). The tables then play every other

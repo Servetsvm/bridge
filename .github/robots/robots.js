@@ -130,7 +130,9 @@ const league = prev && prev.league ? prev.league : { pairs: PAIRS.map((n, i) => 
 if (league.k !== RK) { for (const p of league.pairs) p.r = 1500 + (p.r - 1500) * RK / 2; league.k = RK; }
 // the lesson book: the candidate lessons on trial (learn.js writes them), the boards of each arm counted against them
 let LES = null; try { LES = JSON.parse(fs.readFileSync(OUT + 'lessons.json', 'utf8')); } catch (e) {}
-const cand = LES && LES.cand && LES.cand.book && Object.keys(LES.cand.book).length ? LES.cand : null;   // an empty book: no trial
+// STOPPED (2026-11-08): four books, each lost more tricks than no book (learn.js is no longer run): no trial, no lessons
+const LESSON_TRIALS = false;
+const cand = LESSON_TRIALS && LES && LES.cand && LES.cand.book && Object.keys(LES.cand.book).length ? LES.cand : null;   // an empty book: no trial
 if (cand && (!league.ab || league.ab.v !== cand.v)) league.ab = { v: cand.v, L: { b: 0, lost: 0 }, B: { b: 0, lost: 0 } };
 let boards = prev && prev.boards ? prev.boards : [], errs = []; try { errs = JSON.parse(fs.readFileSync(OUT + 'errors-' + TABLE + '.json', 'utf8')); } catch (e) {}
 for (const k of Object.keys(GEN)) delete st.skip[k];   // skipped before their deals were built
@@ -176,7 +178,7 @@ async function main() {
       while (h.history.length < 13) { if (h.trick.length === 4) { E.collect(h); continue; } const s = h.turn, x = E.aiPlay(h, s, o); if (E.applyCard(h, s, x)) E.collect(h); }
       const pl2 = h.history.map(t => t.cards.map(x => [x.s, x.c]));
       const er = E.analysePlay(deal, c, pl2, [0, 1, 2, 3], 1e6);
-      if (league.ab) { const a = league.ab[arm]; a.b++; a.lost += er.reduce((t, x) => t + x.lost, 0); }
+      if (cand && league.ab) { const a = league.ab[arm]; a.b++; a.lost += er.reduce((t, x) => t + x.lost, 0); }
       if (er.length) errs.unshift({ n: b.n, ts: b.t0, g: now, b: bn, sys: blk.sys, conv: blk.conv, c: b.c, d: deal, a: auc.map(e => [e.seat, e.call]), p: pl2, arm, er: er.map(x => [x.t, x.s, x.c, x.b, x.lost, ...kinds(deal, c, auc, cards, pl2, x)]) });
     } catch (e) { console.log('closed play', e.message); }
     st.end = b.t1; st.n++; st.k++;
