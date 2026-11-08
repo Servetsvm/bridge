@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 416;
+const APP_V = 417;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2210,12 +2210,14 @@ function pzToday() {
   const day = new Date().toISOString().slice(0, 10);
   if (ui.pz && ui.pz.day === day && ui.pz.sys === (SET.sys || 'twoone')) return ui.pz;
   let seed = 2166136261; for (const ch of 'puzzle-' + day) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
-  const kind = ['open', 'answer', 'lead'][Math.floor(Date.parse(day) / 864e5) % 3], cards = sideCards();
+  const hard = day >= '2026-11-09', nDay = Math.floor(Date.parse(day) / 864e5), cards = sideCards();
+  const kind = hard ? ['answer', 'rebid', 'compete', 'lead'][nDay % 4] : ['open', 'answer', 'lead'][nDay % 3];
   let pz = null;
-  for (let k = 0; k < 400 && !pz; k++) {
+  for (let k = 0; k < (hard ? 3000 : 400) && !pz; k++) {
     E.seed(((seed >>> 0) + k * 7919) >>> 0 || 1);
     const d = E.shuffle([...Array(52).keys()]), deal = [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13));
     const hcp = ev(deal[2]).hcp;
+    if (hard) { pz = pzHard(kind, deal, hcp, k, cards); continue; }
     if (kind === 'open') { if (hcp >= 11 && hcp <= 21) pz = { kind, deal, dealer: 2, auction: [] }; }
     else if (kind === 'answer') {
       if (hcp < 6) continue;
@@ -2237,7 +2239,44 @@ function pzToday() {
   if (pz.kind !== 'lead') { const r = E.aiBid(pz.auction, 2, pz.deal[2], cards); pz.best = r.call; pz.bestM = r.m; }
   ui.pz = pz; return pz;
 }
-function pzQuestion(k) { return T(k === 'open' ? 'What do you open?' : k === 'answer' ? 'Partner opened. What do you answer?' : 'What do you lead?'); }
+/* a hard problem: a hand and an auction with a real decision. A bidding problem needs a call the robots can explain and
+   that is not a pass; a lead has no sequence or singleton to reach for and no suit partner has bid */
+function pzHard(kind, deal, hcp, k, cards) {
+  const len = [0, 1, 2, 3].map(s => deal[2].filter(c => S(c) === s).length), sorted = [...len].sort((a, b) => b - a);
+  const say = (auc, seat) => { const r = E.aiBid(auc, seat, deal[seat], cards); auc.push({ seat, call: r.call, m: r.m }); return r.call; };
+  const problem = (dealer, auc) => {
+    const r = E.aiBid(auc, 2, deal[2], cards);
+    if (r.call === 'P' || !r.m || !r.m.t) return null;
+    // the answer has to fit what it says it shows, and not be a forced or memorised reply
+    if ((r.m.min != null && hcp < r.m.min) || (r.m.max != null && hcp > r.m.max)) return null;
+    if (r.m.len && Object.entries(r.m.len).some(([s, n]) => len[+s] < n)) return null;
+    if (/stayman|jtr|texas/.test(r.m.cv || '') || /reply|relay|forced/i.test(r.m.t)) return null;
+    if (kind === 'answer' && typeof r.call === 'number' && r.call < 5) return null;   // a one-level reply: no decision
+    return { kind, deal, dealer, auction: auc };
+  };
+  if (kind === 'answer' || kind === 'compete') {
+    if (hcp < (kind === 'answer' ? 11 : 8)) return null;
+    const auc = []; const op = say(auc, 0); if (op === 'P' || ST(op) === 4) return null;
+    const rho = say(auc, 1); if (kind === 'answer' ? rho !== 'P' : typeof rho !== 'number') return null;
+    return problem(0, auc);
+  }
+  if (kind === 'rebid') {
+    if (hcp < 15 && sorted[0] < 6 && !(sorted[0] === 5 && sorted[1] === 5)) return null;
+    const auc = [], op = say(auc, 2); if (op === 'P' || LV(op) !== 1 || ST(op) === 4 || say(auc, 3) !== 'P') return null;
+    const re = say(auc, 0); if (re === 'P' || (auc[2].m && auc[2].m.cv) || say(auc, 1) !== 'P') return null;
+    return problem(2, auc);
+  }
+  // the lead: a game or higher, nothing obvious to lead
+  if (sorted[3] < 2) return null;
+  for (let s = 0; s < 4; s++) { const rk = deal[2].filter(c => S(c) === s).map(R).sort((a, b) => b - a); if (rk.length > 1 && rk[0] >= 9 && rk[0] - rk[1] === 1) return null; }
+  const dealer = k % 4, auc = [];
+  while (!auctionOver(auc) && auc.length < 40) say(auc, (dealer + auc.length) % 4);
+  const c = contractOf(auc);
+  if (!c || c.decl !== 1 || c.dbl || !(c.level >= 4 || (c.level === 3 && c.strain === 4))) return null;
+  if (auc.some(e => e.seat === 0 && typeof e.call === 'number' && e.call % 5 < 4)) return null;   // partner named a suit
+  return { kind, deal, dealer, auction: auc, c };
+}
+function pzQuestion(k) { return T(k === 'open' ? 'What do you open?' : k === 'answer' ? 'Partner opened. What do you answer?' : k === 'lead' ? 'What do you lead?' : 'What do you bid?'); }
 function pzHand(h) { return `<div class="pzhand">${[3, 2, 1, 0].map(s => `<div>${symHtml(s)} ${E.desc(E.inSuit(h, s)).map(c => RTXT[R(c)]).join(' ') || '—'}</div>`).join('')}<small>${ev(h).hcp} HCP</small></div>`; }
 function showPuzzle() {
   const pz = pzToday(); if (!pz) { flash(T('No problem today — try again later'), 2000); return; }
