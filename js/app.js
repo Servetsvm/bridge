@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 417;
+const APP_V = 418;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2206,9 +2206,20 @@ function closeOv() { if (ui.overlay === "gate" && needGate()) return;   // no wa
    (with its meaning), or for a lead the cards that give the defence the most tricks (double dummy). ---- */
 function pzState() { const PZ_KEY = 'bridge-puzzle'; try { return JSON.parse(localStorage.getItem(PZ_KEY) || '{}') || {}; } catch (e) { return {}; } }
 function pzSave(s) { const PZ_KEY = 'bridge-puzzle'; try { localStorage.setItem(PZ_KEY, JSON.stringify(s)); } catch (e) {} }
+// the bank of leads that alone beat the contract, double dummy (.github/puzzles/make.js): one for each day from PZB_FROM
+const PZB_FROM = '2026-11-10';
+let PZB;   // undefined: not read yet; null: could not be read (the generated problems are used)
+const pzWait = () => PZB === undefined && new Date().toISOString().slice(0, 10) >= PZB_FROM;
+function pzLoad() { if (ui.pzLoading) return; ui.pzLoading = 1; fetch('js/puzzles.json').then(r => r.ok ? r.json() : null).catch(() => null).then(j => { PZB = j && j.length ? j : null; ui.pzLoading = 0; ui.pz = null; showPuzzle(); }); }
+function pzBank(day) {
+  const e = PZB[(Math.round((Date.parse(day) - Date.parse(PZB_FROM)) / 864e5)) % PZB.length], cfg = { conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }, cards = [cfg, cfg], auction = [];
+  e.a.forEach((call, i) => { const seat = (e.l + i) % 4; auction.push({ seat, call, m: E.explainCall(auction, seat, call, cards) }); });
+  return { kind: 'lead', deal: e.d, dealer: e.l, auction, c: { level: e.c[0], strain: e.c[1], dbl: 0, decl: 1 }, vals: Object.fromEntries(e.v) };
+}
 function pzToday() {
   const day = new Date().toISOString().slice(0, 10);
   if (ui.pz && ui.pz.day === day && ui.pz.sys === (SET.sys || 'twoone')) return ui.pz;
+  if (day >= PZB_FROM && PZB) { const b = pzBank(day); b.day = day; b.sys = SET.sys || 'twoone'; ui.pz = b; return b; }
   let seed = 2166136261; for (const ch of 'puzzle-' + day) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
   const hard = day >= '2026-11-09', nDay = Math.floor(Date.parse(day) / 864e5), cards = sideCards();
   const kind = hard ? ['answer', 'rebid', 'compete', 'lead'][nDay % 4] : ['open', 'answer', 'lead'][nDay % 3];
@@ -2279,6 +2290,7 @@ function pzHard(kind, deal, hcp, k, cards) {
 function pzQuestion(k) { return T(k === 'open' ? 'What do you open?' : k === 'answer' ? 'Partner opened. What do you answer?' : k === 'lead' ? 'What do you lead?' : 'What do you bid?'); }
 function pzHand(h) { return `<div class="pzhand">${[3, 2, 1, 0].map(s => `<div>${symHtml(s)} ${E.desc(E.inSuit(h, s)).map(c => RTXT[R(c)]).join(' ') || '—'}</div>`).join('')}<small>${ev(h).hcp} HCP</small></div>`; }
 function showPuzzle() {
+  if (pzWait()) { pzLoad(); return; }
   const pz = pzToday(); if (!pz) { flash(T('No problem today — try again later'), 2000); return; }
   const st = pzState(), done = st.day === pz.day ? st : null;
   const auc = pz.auction.length || pz.kind !== 'open' ? `<div class="auction">${auctionTable(pz.auction, pz.kind !== 'lead' && !done, { board: 1, dealer: pz.dealer, seat: 2, sel: done ? ui.pzSel ?? null : null }).replace(/data-ri=/g, "data-pzi=")}${done && ui.pzSel != null && pz.auction[ui.pzSel] ? `<div class="expl">${explHtml(pz.auction[ui.pzSel])}</div>` : ''}</div>` : `<div class="muted">${T('You are the dealer. Nobody is vulnerable.')}</div>`;
@@ -2297,7 +2309,7 @@ function showPuzzle() {
       if (!done.full) { pzLeads(); const n = Object.keys(done.vals || {}).length; res = `<div class="muted">⏳ ${T('Working out every lead…')} ${n}/${pz.deal[2].length}</div>`; }
       else {
         const v = done.vals, best = Math.max(...Object.values(v).filter(x => x != null)), mine = v[done.ans];
-        res = `<div class="${mine === best ? 'okmsg' : 'err'}">${mine === best ? '✅ ' + T('Well done! That is a best lead.') : '❌ ' + T('Not the best lead.')}</div>
+        res = `<div class="${mine === best ? 'okmsg' : 'err'}">${mine === best ? '✅ ' + T(pz.vals ? 'Only one lead beats this contract.' : 'Well done! That is a best lead.') : '❌ ' + T('Not the best lead.')}</div>
           <div>${T('Your lead')} <b>${RTXT[R(done.ans)]}${symHtml(S(done.ans))}</b>: ${T('the defence takes {0} tricks', mine)}. </div>
           <div class="pzvals">${[...new Set(Object.values(v))].sort((a, b) => (b ?? -1) - (a ?? -1)).map(n => `<div${n === best ? ' class="best"' : ''}><b>${n == null ? '?' : T('{0} tricks', n)}</b> ${Object.keys(v).filter(c => v[c] === n).map(Number).sort((a, b) => S(b) - S(a) || R(b) - R(a)).map(c => RTXT[R(c)] + symHtml(S(c))).join(' ')}</div>`).join('')}</div>
           <div class="muted">${T('Contract')} ${conKey(pz.c)} · ${T('double dummy: every hand open, best play on both sides.')}</div>`;
@@ -2314,7 +2326,7 @@ function showPuzzle() {
     if (done.ok != null) res += `<details class="pzdeal"><summary>${T('Show all four hands')}</summary>${dealHtml(pz.deal, 2)}</details>`;
     if (done.ok != null) res += `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
   }
-  openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2><div class="big">${pzQuestion(pz.kind)}</div>
+  openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2><div class="big">${pzQuestion(pz.kind)}</div>${pz.vals ? `<div class="muted">${T('Only one lead beats this contract.')} · ${esc(E.sysOf('twoone').n)}</div>` : ''}
     <div class="pzbox">${pzHand(pz.deal[2])}${auc}</div>${ctl}${res}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
@@ -2322,6 +2334,7 @@ function pzAnswer(ans) {
   const pz = pzToday(); if (!pz) return;
   const st = pzState(); if (st.day === pz.day) return;
   const next = { day: pz.day, ans: pz.kind === 'lead' ? +ans : String(ans), streak: st.streak || 0, lastOk: st.lastOk, prev: st.lastOk, prevStreak: st.streak || 0 };
+  if (pz.vals) { next.vals = pz.vals; next.full = true; pzFinish(next, pz.vals[next.ans] === Math.max(...Object.values(pz.vals))); return; }
   if (pz.kind === 'lead') { next.vals = {}; pzSave(next); pzLeads(); showPuzzle(); return; }
   pzFinish(next, String(ans) === String(pz.best));
 }
