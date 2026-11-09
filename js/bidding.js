@@ -515,6 +515,8 @@ function cands(x) {
       if (ps >= 2) add(B(4, ps), h => h.len[ps] >= 3 && h.sup(ps) >= 14, { min: 12, len: { [ps]: 3 }, t: 'Game: support, 14+ points' });
       if (cheap(os) <= 3) add(B(cheap(os), os), h => h.len[ps] >= 3 && h.sup(ps) >= 11, { min: 11, len: { [ps]: 3 }, cv: 'cue', t: 'Cue bid: support, 11+ points', f: 1 });
       if (cheap(ps) <= 3) add(B(cheap(ps), ps), h => h.len[ps] >= 3 && h.sup(ps) >= 6 && h.sup(ps) <= 10, { min: 6, max: 10, len: { [ps]: 3 }, t: 'Raise: 6-10 points' });
+      // no fit for partner: a five-card major comes before notrump, or a fit there is never found (1♥–2♣–P with ♠K10943 ♥Q73 ♦AJ98 ♣8: 2♠, not 2NT)
+      for (const s of [3, 2]) { if (s === ps || x.oppSuits.includes(s)) continue; const l = cheap(s); if (l > 3) continue; add(B(l, s), h => h.len[s] >= 5 && h.hcp >= 8 && h.len[ps] <= 2, { min: 8, len: { [s]: 5 }, t: 'Natural: 5+ ' + SUIT[s] + ', 8+ HCP' }); }
       const nl = cheap(4);
       if (nl <= 2) add(B(nl, 4), h => h.stop(os) && h.hcp >= 8 && h.hcp <= 11, { min: 8, max: 11, t: '8-11 HCP with a stopper' });
       add(B(3, 4), h => h.stop(os) && h.hcp >= 15, { min: 15, t: 'Game: 15+ HCP with a stopper' });

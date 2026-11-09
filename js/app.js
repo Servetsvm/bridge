@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 419;
+const APP_V = 420;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2437,6 +2437,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 420, tr: 'Ortak araya girdikten sonra fitim yoksa ve 5 kartlı majörüm varsa önce majörü söylüyorum, 2SA’yı ondan sonra düşünüyorum (1♥–2♣–pas, ♠K10943 ♥Q73 ♦AJ98 ♣8: 2♠).', en: 'After partner’s overcall, with no fit and a five-card major, I bid the major before notrump.' },
   { v: 411, tr: 'Kartta Gerber kapalı olsa bile, ortağın 1NT, 2NT veya 3NT’sinin hemen üzerine, renk anlaşması yokken gelen 4♣ as sorusu: 4♦/4♥/4♠/4NT ile cevap veriyorum.', en: 'Even with Gerber off the card, 4♣ straight after partner’s 1NT, 2NT or 3NT with no suit agreed asks for aces, and I answer it.' },
   { v: 410, tr: 'Kartta Gerber varsa, ortağın 1NT, 2NT veya 3NT’sinin hemen üzerine, renk anlaşması yokken gelen 4♣ artık her dizide as sorusu: pas geçmiyorum, 4♦/4♥/4♠/4NT ile as sayımı veriyorum (1♣–1♥–2NT–3NT–4♣).', en: 'With Gerber on the card, 4♣ straight after partner’s 1NT, 2NT or 3NT with no suit agreed now asks for aces in every sequence: I answer instead of passing.' },
   { v: 378, tr: 'Ortak Cappelletti, DONT, Michaels ya da Unusual 2SA ile girdikten sonra rakip araya deklare yaparsa artık renk seçmek zorunda değilim: fitim varsa deklare ediyorum, yoksa pas (1SA–2♦–4♦: ♥ tek kâğıtla 4♥ yok). Ortağın eski takeout kontrasını, arada deklareler olduysa cevaplamıyorum.', en: 'After partner\'s Cappelletti, DONT, Michaels or Unusual 2NT and an opponent\'s bid over it I no longer have to choose a suit: I bid with a fit, else pass. An old takeout double is not answered once other calls came in between.' },
@@ -3802,7 +3803,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-08T21:09:39Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-09T15:08:04Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {
