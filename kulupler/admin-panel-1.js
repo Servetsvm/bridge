@@ -68,7 +68,11 @@ window.bgTestDelete=async function(){
   try{ const r=await fetch(await fbUrl('.json'),{method:'DELETE'}); if(!r.ok) throw new Error(String(r.status)); }catch(e){ toast('❌ '+(window.i18nText?i18nText('Not deleted — please log in again'):'Not deleted — please log in again')); return; }
   for(const k of Object.keys(_cache)) delete _cache[k];
   try{ sessionStorage.removeItem('bgTestMine:'+CLUB_ID); }catch(e){}
-  toast('🗑'); adminTab='setup'; renderAdminPanel();
+  // the robots of another open page may have written once more: deleted again, then checked
+  await new Promise(r=>setTimeout(r,3500));
+  try{ const u=await fbUrl('/state.json'), r=await fetch(u,{cache:'no-store'}), v=r.ok?await r.json():null; if(v){ await fetch(await fbUrl('.json'),{method:'DELETE'}); } }catch(e){}
+  for(const k of Object.keys(_cache)) delete _cache[k];
+  toast('🗑 '+(window.i18nText?i18nText('No test tournament now.'):'No test tournament now.')); adminTab='setup'; renderAdminPanel();
 };
 // the pairs' names: two TBF members each (the whole list once)
 let _tbfNames=null;
@@ -103,7 +107,8 @@ async function bgTestTick(){
     // my table: the one this device sits at (kept when I go back to the admin screen), or the one chosen there
     if(typeof bmTableNo!=='undefined'&&bmTableNo) try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(+bmTableNo)); }catch(e){}
     // the scores as they are now (a table on another device may have entered one) and who sits where
-    await Promise.all(['boards','approvals','tableLocks'].map(k=>DB.get(k)));
+    await Promise.all(['state','boards','approvals','tableLocks'].map(k=>DB.get(k)));
+    if(!_cache['state']||_cache['state'].status!=='running'){ _bgTestBusy=false; return; }   // deleted meanwhile (here or on another device): nothing is written back
     const locks=_cache['tableLocks']||{}, aps=_cache['approvals']||{}, human=new Set();
     for(const v of Object.values(locks)) if(v&&v.tableNo) human.add(+v.tableNo);
     for(const [k,v] of Object.entries(_cache['boards']||{})) if(v&&!v.sim) human.add(+k.split('_')[0]);
