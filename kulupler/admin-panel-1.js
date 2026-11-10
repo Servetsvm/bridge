@@ -45,7 +45,7 @@ function testBarHtml(){
   return `<div class="card" style="border:2px dashed var(--gold);"><div class="card-title"><span>🧪</span> ${L('Test tournament')}</div>
     <div style="font-size:.8rem;color:var(--text2);margin-bottom:8px;">${L('Only you see it; the club\'s real tournament is not touched. The players\' names come from the TBF list; once the tournament starts the robots play every table by themselves, and each round starts when the last one ends.')}</div>
     ${s.status==='running'?`<div class="field"><label>${L('Sit at a table (the robots leave it to you)')}</label><div style="display:flex;flex-wrap:wrap;gap:6px;">${Array.from({length:s.tableCount||0},(_,i)=>`<button class="btn ${mine===i+1?'btn-gold':'btn-ghost'}" onclick="bgTestSit(${i+1})">🃏 ${i+1}</button>`).join('')}</div></div>`:''}
-    <button class="btn btn-ghost" onclick="bgTestDelete()">🗑 ${L('Delete the test tournament')}</button></div>`;
+    ${s.status?`<button class="btn btn-ghost" onclick="bgTestDelete()">🗑 ${L('Delete the test tournament')}</button>`:`<div style="font-size:.8rem;color:var(--text3);">${L('No test tournament now.')}</div>`}</div>`;
 }
 window.bgTestMine=v=>{ try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(+v||0)); }catch(e){} };
 // this device sits at a table of the test tournament, and comes back to the admin screen (no code: the director)
@@ -64,7 +64,8 @@ function bgTestBack(){ if(document.getElementById('bgTestBack')) return; const b
 window.bgTestDelete=async function(){
   if(!bgTestOn()) return;
   if(!await confirmDialog(window.i18nText?i18nText('Delete the test tournament?'):'Delete the test tournament?',{title:'🧪',confirmLabel:'🗑',danger:true})) return;
-  try{ await fetch(await fbUrl('.json'),{method:'DELETE'}); }catch(e){}
+  // a delete the database refused is said, not shown as done
+  try{ const r=await fetch(await fbUrl('.json'),{method:'DELETE'}); if(!r.ok) throw new Error(String(r.status)); }catch(e){ toast('❌ '+(window.i18nText?i18nText('Not deleted — please log in again'):'Not deleted — please log in again')); return; }
   for(const k of Object.keys(_cache)) delete _cache[k];
   try{ sessionStorage.removeItem('bgTestMine:'+CLUB_ID); }catch(e){}
   toast('🗑'); adminTab='setup'; renderAdminPanel();

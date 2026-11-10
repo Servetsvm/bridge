@@ -48,6 +48,8 @@
     'Sit at a table (the robots leave it to you)':'Bir masaya otur (robotlar o masayı sana bırakır)',
     'Delete the test tournament':'Deneme turnuvasını sil',
     'Delete the test tournament?':'Deneme turnuvası silinsin mi?',
+    'No test tournament now.':'Şu an deneme turnuvası yok.',
+    'Not deleted — please log in again':'Silinemedi — lütfen yeniden giriş yap',
     'Test tournament':'Deneme turnuvası',
     'Only you see it; the club\'s real tournament is not touched. The players\' names come from the TBF list; once the tournament starts the robots play every table by themselves, and each round starts when the last one ends.':'Sadece sen görürsün; kulübün gerçek turnuvasına dokunulmaz. Oyuncu isimleri TBF listesinden gelir; turnuva başlayınca robotlar bütün masaları kendileri oynar ve bir tur bitince sonraki tur kendiliğinden başlar.',
     'Test mode':'Deneme modu',
