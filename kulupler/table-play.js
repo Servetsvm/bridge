@@ -656,9 +656,10 @@ window.bmConfirmPlayersAndStart=async function(tableNo,roundNo,nsId,ewId){
 window.bmStartNewRound=function(tableNo,roundNo){
   const s=getState();
   if(s.currentRound<roundNo){
-    toast('⏳ The director has not started Round '+roundNo+' yet. Please wait...');
+    toast('⏳ Round '+roundNo+' starts when every table has finished this round');
     if(bmPollInterval)clearInterval(bmPollInterval);
     bmPollInterval=setInterval(()=>{
+      if(typeof bgAutoNextRound==='function') bgAutoNextRound();
       const s2=getState();
       if(s2.currentRound>=roundNo){
         clearInterval(bmPollInterval);bmPollInterval=null;

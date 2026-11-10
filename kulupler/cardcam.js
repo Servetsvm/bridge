@@ -196,7 +196,7 @@ function recDraw(){
   } else {
     body=`<div class="cc-note">Three players lay their cards face up in front of them. Choose whose hand you photograph; the fourth hand is worked out.</div>
       <div class="cc-step"><span>Photo</span> ${n+1} / 3</div>
-      <div class="cc-seats">${[0,1,2,3].map(s=>H.hands[s]?`<button class="btn btn-ghost" disabled>✓ ${seatWord(s)}</button>`:`<button class="btn" style="background:${SEAT_COL[s]};color:#fff" onclick="ccRecSeat(${s})">📷 ${seatWord(s)}</button>`).join('')}</div>
+      <div class="cc-seats">${[0,1,2,3].map(s=>H.hands[s]?`<button class="btn btn-ghost cc-s${s}" disabled>✓ ${seatWord(s)}</button>`:`<button class="btn cc-s${s}" style="background:${SEAT_COL[s]};color:#fff" onclick="ccRecSeat(${s})">📷 ${seatWord(s)}</button>`).join('')}<div class="cc-smid">🃏</div></div>
       ${n?`<div class="cc-acts">${[0,1,2,3].filter(s=>H.hands[s]).map(s=>`<button class="btn btn-ghost btn-sm" onclick="ccRecRedo(${s})">↺ ${seatWord(s)}</button>`).join('')}</div>`:''}`;
   }
   layer(`<div class="cc-wrap"><div class="cc-top"><button class="btn btn-ghost btn-sm" onclick="ccClose()">✕</button><b class="cc-title">Board <span>${esc(b)}</span></b><span></span></div>
@@ -221,12 +221,23 @@ window.ccShowDD=function(board){
   const a=ddOf(board);
   if(!a){ layer(`<div class="cc-wrap"><div class="cc-top"><button class="btn btn-ghost btn-sm" onclick="ccClose()">✕</button><b class="cc-title">Board <span>${esc(board)}</span></b><span></span></div><div class="cc-hint">⏳ <span>Double dummy…</span></div></div>`); ccAnalyse(board,h,()=>{ if(ddOf(board)) ccShowDD(board); }); return; }
   layer(`<div class="cc-wrap"><div class="cc-top"><button class="btn btn-ghost btn-sm" onclick="ccClose()">✕</button><b class="cc-title">Board <span>${esc(board)}</span></b><span></span></div>
-    <div class="cc-sub">Double dummy</div>
-    ${typeof ddDiagram==='function'?ddDiagram(h.deal):''}
-    <div class="dd-parline">Par: <b>${esc(a.par&&a.par.text||'')}</b></div>
-    ${typeof ddTableHtml==='function'?ddTableHtml(a.t):''}
+    ${ddBoardHtml(h,a,board)}
     <button class="btn btn-gold btn-full" onclick="ccClose()">OK</button></div>`);
 };
+// a board as it lay on the table: the four hands (white cards, red ♥ ♦) round a compass with the dealer and the
+// vulnerability, the par, and for each seat and strain the level it makes (games and slams marked)
+function ddBoardHtml(h,a,board){
+  const hands=dealCards(h.deal)||[[],[],[],[]], v=String(h.vulnerable||'').toLowerCase(), dealer='NESW'.indexOf(String(h.dealer||'').toUpperCase()[0]);
+  const vul=s=>v==='all'||v==='both'||(v==='ns'&&s%2===0)||(v==='ew'&&s%2===1);
+  const hand=s=>`<div class="ccd-h ccd-h${s}"><div class="ccd-who" style="background:${SEAT_COL[s]}">${seatWord(s)}${s===dealer?' · D':''}</div>${[3,2,1,0].map(su=>{ const rs=hands[s].filter(c=>((c/13)|0)===su).sort((x,y)=>y-x).map(c=>RK[c%13]==='T'?'10':RK[c%13]); return `<div class="ccd-l"><span class="ccd-sym${su===1||su===2?' cc-red':''}">${SYM[su]}</span><span class="ccd-r">${rs.length?rs.join(' '):'—'}</span></div>`; }).join('')}</div>`;
+  const mid=`<div class="ccd-mid"><div class="ccd-comp">${['N','E','S','W'].map((L,s)=>`<span class="ccd-c${s}${vul(s)?' vul':''}${s===dealer?' dl':''}">${L}</span>`).join('')}<b>${esc(board)}</b></div></div>`;
+  const game=(n,st)=>n-6>=(st===4?3:st>=2?4:5), slam=n=>n>=12;
+  const row=d=>`<tr><th style="color:${SEAT_COL[d]}">${seatWord(d)}</th>${[4,3,2,1,0].map(st=>{ const n=a.t&&a.t[d]?a.t[d][st]:null; return `<td class="${n>=7?(slam(n)?'sl':game(n,st)?'gm':'ok'):''}">${n>=7?n-6:'–'}</td>`; }).join('')}</tr>`;
+  return `<div class="ccd"><div class="ccd-tbl">${hand(0)}${hand(3)}${mid}${hand(1)}${hand(2)}</div>
+    <div class="ccd-par">Par <b>${esc(a.par&&a.par.text||'')}</b></div>
+    <table class="ccd-dd"><thead><tr><th></th>${['NT','♠','♥','♦','♣'].map((x,i)=>`<th class="${i===2||i===3?'cc-red':''}">${x}</th>`).join('')}</tr></thead><tbody>${[0,2,1,3].map(row).join('')}</tbody></table>
+    <div class="ccd-key"><span class="gm">■</span> <span>Game</span> <span class="sl">■</span> <span>Slam</span> · <span>– = not even 1</span></div></div>`;
+}
 
 // the table's screen: for each board played in this round, its double dummy or a button to record its hands; the
 // board just finished opens its double dummy once by itself
