@@ -553,7 +553,32 @@
     'The players open Bridge Table with this link, tap Table No, type their member numbers (or names) and choose their table.':'Oyuncular Bridge Table’ı bu linkle açar, Masa No’ya basar, üye numaralarını (ya da isimlerini) yazar ve masalarını seçer.',
     'The names come from the tables: the players enter them when they sit down.':'İsimler masalardan gelir: oyuncular oturunca kendileri girer.',
     'Change table':'Masa değiştir',
-    'Table No':'Masa No'
+    'Table No':'Masa No',
+    "Deal with the camera":"Kamerayla dağıt",
+    "📷 Deal with the camera":"📷 Kamerayla dağıt",
+    "Next board":"Sonraki board",
+    "Board complete":"Board tamam",
+    "Show a card to the camera, its corner in view":"Kartı kameraya göster, köşesi görünsün",
+    "📷 Camera":"📷 Kamera",
+    "👆 Tap the cards":"👆 Kartlara dokun",
+    "Reading the cards…":"Kartlar okunuyor…",
+    "Check the cards: tap a card to add or remove it.":"Kartları kontrol et: eklemek ya da çıkarmak için karta dokun.",
+    "Photo again":"Yeniden çek",
+    "This hand is right":"Bu el doğru",
+    "All four hands":"Dört elin hepsi",
+    "Save the board":"Board’u kaydet",
+    "Three players lay their cards face up in front of them. Choose whose hand you photograph; the fourth hand is worked out.":"Üç oyuncu kartlarını önüne açık koysun. Kimin elini çektiğini seç; dördüncü el kendiliğinden bulunur.",
+    "Photo":"Fotoğraf",
+    "Record the hands":"Elleri kaydet",
+    "Double dummy…":"Double dummy…",
+    "Double dummy":"Double dummy",
+    "The hands of this board are not recorded yet.":"Bu board’un elleri henüz kaydedilmedi.",
+    "❌ Load the hand file first":"❌ Önce el dosyasını yükle",
+    "❌ The card reader is not loaded":"❌ Kart okuyucu yüklenemedi",
+    "📷 The camera could not be opened: tap the cards":"📷 Kamera açılamadı: kartlara dokun",
+    "❌ Not saved — check the connection and try again":"❌ Kaydedilemedi — bağlantıyı kontrol edip tekrar dene",
+    "✅ Saved":"✅ Kaydedildi",
+    "Hands recorded by photo":"Eller fotoğrafla kaydedildi"
   };
 
   const PATTERNS=[

@@ -352,6 +352,76 @@ const Photo = (() => {
     out.vul = (ns ? 1 : 0) + (ew ? 2 : 0);
     return out;
   }
+  /* ---- 3. real playing cards: the corner index (rank above suit) of each card, in a photo or a camera frame ---- */
+  /* templates from the tournament cards with the Duplimate barcode (Jannersten), 12x16 bitmaps (hex) : width/height */
+  const CARD = {"R":{"T":["1f030c404402402c02c02c02c02802c024064046043f80e0:0.440"],"3":["7b8f3c80c00600601c0380bc01e006006002806c06fbc3b0:0.400","3f871c40c00400401c03807801e006006006c06c0e7fc1f0:0.440"],"5":["3fe3fe2006006007f87fc60e003003003403e076067fc0f0:0.480","3fe7fc6006006007f8fbce0e006003003c06c06e0c7fc1f0:0.480"],"7":["ffe7fe00e00c0180300700600e00c00c0080180180180100:0.458","ffeffe01e0180380300600600c00c0080180180300300300:0.458"],"9":["3f871ce06c06c07c07c07e0f7ff1f3006006c0e61c7f8040:0.462","1f879c606c06c02c03c076077ff3f3002006c0e60c7f80e0:0.462"],"K":["e1ee3cc30c30ce0cc0fc0fc0fe0c60c20c38c18c1ce1fe0e:0.538","f1ee3c4384304e0ec0fc0fe0fe0e30c30c1841ce0ef0fe0e:0.538"],"Q":["7fce1ec06807803803803803803803803fe7cfee3e7ff003:0.500","3f871ee06c06c07c03c03c03c03c03c06fe6e7e73c3ff003:0.538"],"A":["0600600e00e00b01b01901181183f83fc30c604604e0fe07:0.615","0400e00e00e01a01b01301103183f83f820c60c604e0ff0f:0.640","0400e00e00e01a01b01301301183f83fc60c60c604f0f60f:0.615","0400600e00e00b00901901901183f83f820c20c604f0fe0f:0.654"]},"S":{"♥":["30879efffffffffffffff000ffe7fc3fc1f80f80f0060000:1.071","30cfbefffffffffffffff000fffffe7fc3f81f00e0060000:1.000","61cfbefffffffffffffff000ffeffc7fc3f81e00e0040000:1.000","708fbeffefffffffffffe000ffe7fc3f81f81f00e00c0000:1.071"],"♣":["0600f00f00000f00f0060000220ffefff000f9fd1f60e000:1.167","0601f01f00001f00f0060000060ffffff000f9f30f606000:1.083","0e01f01f80001f00f0060000046fffffe000f1f50fe0e000:1.083"],"♠":["0400e01e03f07f8ffeffeffefffffeffe65c0400600e0000:0.933","0400400e01f07f8ffcffefffffffffffee5c0400c00e0000:0.933","0600e01e03f87fcffefff000ffffffffef7e0400600e0000:1.000"],"♦":["0700f01f83fc7fe7feffffff7ff7fe3fc1f80f80f0060000:0.800"]}};
+  const CT = { R: {}, S: {} };
+  for (const g of ['R', 'S']) for (const k in CARD[g]) CT[g][k] = CARD[g][k].map(t => { const [h, ar] = t.split(':'); return { b: unhex(h), ar: +ar }; });
+  const RANKS13 = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+  /* every card index in the picture: { rank, suit, x, y, h, d } (d: how far from the templates; lower is surer). A rank
+     glyph with a suit glyph of the same colour just below it, about half its height: the corner of a card. Upside-down
+     corners and the pips in the middle of the card do not look like that, or do not look like a rank, and are left out. */
+  function readCards(im, maxD, soft) {
+    const W = im.W, X = textTemplates(), lim = maxD || 70;
+    const raw = glyphs(im, !!soft).filter(o => o.h >= 8 && o.w >= 2);
+    const M = tidy(raw, 6);
+    const ranksOf = o => {
+      if (o.ten) return { k: 'T', d: 0 };
+      const b = bits(o.px, W, o.x0, o.y0, o.w, o.h), ar = o.w / o.h;
+      const a = nearest(CT.R, Object.keys(CT.R), b, ar), t = nearest(X.R, RANKS13.concat(['0']), b, ar);
+      const best = a.d <= t.d ? a : t;
+      return best.k === '0' ? { k: 'T', d: best.d } : best;
+    };
+    const out = [];
+    for (const r of M) {
+      if (r.h < 10) continue;
+      const s = M.find(o => o !== r && o.c === r.c && o.y0 > r.y1 - 3 && o.y0 - r.y1 < 0.6 * r.h && Math.abs((o.x0 + o.x1) / 2 - (r.x0 + r.x1) / 2) < Math.max(r.w, o.w) * 0.8 && o.h > r.h * 0.3 && o.h < r.h * 0.85);
+      if (!s) continue;
+      const rk = ranksOf(r); if (!RANKS13.includes(rk.k) || rk.d > lim) continue;
+      const b = bits(s.px, W, s.x0, s.y0, s.w, s.h), keys = r.c === 3 ? ['♥', '♦'] : ['♠', '♣'], ar = s.w / s.h;
+      const su = [nearest(CT.S, keys, b, ar), nearest(X.S, keys, b, ar), nearest(T.S, keys, b, null)].sort((p, q) => p.d - q.d)[0];
+      if (su.d > lim * 1.3) continue;
+      if (r.c !== 3) { const k = blackSuit(s, W); if (k) su.k = k; }
+      out.push({ rank: rk.k === 'T' ? '10' : rk.k, suit: su.k, x: r.x0, y: r.y0, h: r.h, d: rk.d + su.d });
+    }
+    return out;
+  }
+  /* read twice, with strict and with soft ink (blurred or dim pictures): at each corner the surer reading; then a card
+     seen twice (both upper corners) once */
+  function readCardsBest(im) {
+    const all = readCards(im, 70, false).concat(readCards(im, 70, true)), spots = [];
+    for (const c of all.sort((a, b) => a.d - b.d)) if (!spots.some(o => Math.abs(o.x - c.x) < c.h * 0.6 && Math.abs(o.y - c.y) < c.h * 0.6)) spots.push(c);
+    const by = new Map(); for (const c of spots) { const k = c.rank + c.suit; if (!by.has(k) || by.get(k).d > c.d) by.set(k, c); }
+    return [...by.values()];
+  }
+  /* ♠ or ♣ by the outline, which small blurred symbols keep better than their inside: a spade widens steadily from its
+     point (at a third of its height it is already over half its width); a club has a round top lobe, then a narrow neck
+     above the side lobes */
+  function blackSuit(s, W) {
+    if (s.h < 7) return null;
+    const rows = new Array(s.h).fill(0).map(() => [1e9, -1]);
+    for (const p of s.px) { const x = p % W - s.x0, y = ((p / W) | 0) - s.y0; if (x < rows[y][0]) rows[y][0] = x; if (x > rows[y][1]) rows[y][1] = x; }
+    const wd = q => { const y = Math.min(s.h - 1, Math.round(q * (s.h - 1))), w = rows[y]; return w[1] < 0 ? 0 : (w[1] - w[0] + 1) / s.w; };
+    const top = (wd(0.2) + wd(0.3)) / 2, neck = Math.min(wd(0.35), wd(0.4), wd(0.45), wd(0.5));
+    if (top >= 0.55 && wd(0.4) >= 0.75) return '♠';
+    if (top < 0.55 && neck < 0.5) return '♣';
+    return null;
+  }
+  /* a camera frame (a canvas) as a picture to read */
+  function fromCanvas(cv) {
+    const W = cv.width, H = cv.height, d = cv.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, W, H).data;
+    return { W, H, d, img: null, s: 1, flat: flatten(d, W, H, 1), deep: 1 };
+  }
+  /* a photo of cards (a file) → [card 0-51 …] with how sure each one is */
+  async function readCardsFile(file) {
+    const im = await loadImage(file);
+    try { return readCardsBest(im).map(c => ({ c: SI[c.suit] * 13 + RI[c.rank], d: c.d, x: c.x, y: c.y })); } finally { im.d = null; if (im.img) { im.img.removeAttribute('src'); im.img = null; } }
+  }
+  function readCardsCanvas(cv) {
+    const im = fromCanvas(cv);
+    return readCardsBest(im).map(c => ({ c: SI[c.suit] * 13 + RI[c.rank], d: c.d, x: c.x, y: c.y }));
+  }
+
   /* ---- result → card numbers (0-51) and a PBN code ---- */
   const RI = { '2': 0, '3': 1, '4': 2, '5': 3, '6': 4, '7': 5, '8': 6, '9': 7, '10': 8, J: 9, Q: 10, K: 11, A: 12 }, SI = { '♣': 0, '♦': 1, '♥': 2, '♠': 3 };
   function toCards(res) { return res.hands.map(h => h ? h.filter(c => c.rank in RI && c.suit in SI).map(c => SI[c.suit] * 13 + RI[c.rank]) : null); }
@@ -392,5 +462,5 @@ const Photo = (() => {
     const hands = toCards(res);
     return { kind: res.kind, hands, pbn: pbn(hands), dealer: res.dealer, vul: res.vul };
   }
-  return { read, _internals: { loadImage, glyphs, readTiles, readRecord, toCards, pbn } };
+  return { read, readCardsFile, readCardsCanvas, _internals: { loadImage, glyphs, readTiles, readRecord, readCards, toCards, pbn } };
 })();

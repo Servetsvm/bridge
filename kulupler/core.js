@@ -129,7 +129,7 @@ const DB={
   async get(k){
     try{const url=await fbUrl('/'+k+'.json');const r=await fetch(url,{cache:'no-store'});
       if(!r.ok)return _cache[k]||null;
-      const v=cleanData(await r.json());_cache[k]=v;return v;
+      let v=cleanData(await r.json());if(k==='hands'&&v)v=(Array.isArray(v)?v:Object.values(v)).filter(Boolean);_cache[k]=v;return v;
     }catch(e){return _cache[k]||null;}
   },
   async set(k,v){
@@ -159,7 +159,7 @@ const DB={
     let last=undefined;
     const poll=async()=>{
       try{const url=await fbUrl('/'+k+'.json');const r=await fetch(url,{cache:'no-store'});
-        if(r.ok){const v=cleanData(await r.json());const s=JSON.stringify(v);
+        if(r.ok){let v=cleanData(await r.json());if(k==='hands'&&v)v=(Array.isArray(v)?v:Object.values(v)).filter(Boolean);const s=JSON.stringify(v);
           if(s!==last){last=s;_cache[k]=v;cb(v);}
         }
       }catch(e){}

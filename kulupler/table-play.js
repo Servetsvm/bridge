@@ -299,6 +299,7 @@ function renderTableDetail(tableNo){
       ${isPhantom?`<div class="bm3t-note">👻 Phantom pair — sit out</div>`:''}
       ${allDone?`<div class="bm3-step">All Boards Complete ✓</div>`:''}
       <div class="sbgrid">${tiles}</div>
+      <div id="ccTable"></div>
       ${approvalPending?`<div class="bm3t-pendrow">${boardsHTML}</div>`:''}
       <div id="boardsSection">${actionHTML}</div>
     </div>`;
@@ -353,6 +354,8 @@ function renderTableDetail(tableNo){
   }
 
   document.getElementById('panelContent').querySelector('#boardsSection')?.insertAdjacentHTML('beforeend',buildDetailOtherHTML());
+  // the boards played: their double dummy, or a button to photograph their hands (cardcam.js)
+  if(typeof ccTableSection==='function') ccTableSection(tableNo,boardList.filter(bl=>bl.data&&bl.data.status==='done').map(bl=>String(bl.boardNo)));
 
   // Auto-poll for approvals
   if(bmPollInterval)clearInterval(bmPollInterval);
