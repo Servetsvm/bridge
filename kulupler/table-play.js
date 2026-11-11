@@ -683,7 +683,7 @@ window.bmConfirmPlayersAndStart=async function(tableNo,roundNo,nsId,ewId){
 window.bmStartNewRound=function(tableNo,roundNo){
   const s=getState();
   if(s.currentRound<roundNo){
-    toast('⏳ Round '+roundNo+' starts when every table has finished this round');
+    toast('⏳ The next round starts when every table has finished this round');
     if(bmPollInterval)clearInterval(bmPollInterval);
     bmPollInterval=setInterval(()=>{
       if(typeof bgAutoNextRound==='function') bgAutoNextRound();

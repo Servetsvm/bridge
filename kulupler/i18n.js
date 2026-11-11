@@ -10,6 +10,7 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "⏳ The next round starts when every table has finished this round":"⏳ Sonraki tur, bütün masalar bu turu bitirince başlar",
     'BridgeGate · Tournament System':'BridgeGate · Turnuva Sistemi',
     'Tournament Control System':'Turnuva Kontrol Sistemi',
     'Code':'Kod',
@@ -735,7 +736,8 @@
     [/^(\d+) members loaded$/,(_,g1)=>`${g1} üye yüklendi`]
   ];
 
-  let currentLanguage=readSavedLanguage()||'en';
+  // opened from Bridge Table: its language first (and kept), so the two never differ
+  let currentLanguage=(()=>{ try{ const q=new URLSearchParams(location.search).get('lang'); if(SUPPORTED.includes(q)){ localStorage.setItem(STORAGE_KEY,q); return q; } }catch(e){} return null; })()||readSavedLanguage()||'en';
   let languageSwitching=false;
   const originalText=new WeakMap();
   const originalAttrs=new WeakMap();
