@@ -97,7 +97,7 @@ function pageHtml(withBar){
     }).join('')}</table>`:'';
     return `<div class="bd" id="b${esc(bn)}"><h3>${L('Board')} ${esc(bn)}</h3><div class="top">${hd?diagram(hd,bn):''}<div class="ddbox">${a?`<h4 style="margin:0 0 6px;color:#1f4e79">Double Dummy</h4>${ddHtml(a)}`:''}</div></div>${res}</div>`;
   }).join('');
-  const bar=withBar?`<div class="bar"><button class="btn btn-gold" onclick="ccResultsDownload()">⬇ ${L('Save as a page')}</button><button class="btn btn-ghost" onclick="window.print()">🖨 ${L('Print')}</button><button class="btn btn-ghost" onclick="ccClose&&ccClose()">✕ ${L('Close')}</button></div>`:'';
+  const bar=withBar?`<div class="bar"><button class="btn btn-gold" onclick="ccResultsDownload()">⬇ ${L('Save as a page')}</button><button class="btn" style="background:#25d366;color:#fff" onclick="ccResultsShare('wa')">💬 WhatsApp</button><button class="btn btn-blue" onclick="ccResultsShare('sms')">✉️ SMS</button>${navigator.canShare?`<button class="btn btn-ghost" onclick="ccResultsShare('file')">📤 ${L('Share the page')}</button>`:''}<button class="btn btn-ghost" onclick="window.print()">🖨 ${L('Print')}</button><button class="btn btn-ghost" onclick="ccClose&&ccClose()">✕ ${L('Close')}</button></div>`:'';
   return `<div class="ccr">${bar}<h1>${esc(s.name||L('Tournament'))} ${esc(date)}</h1>
     <div class="meta"><div>${L('Date')}: ${esc(date)}</div><div>${L('Club')}: ${esc(CLUB_NAME||'')}</div><div>${L('Boards')}: ${nums.length}, ${L('rounds')}: ${rounds}, ${L('pairs')}: ${ranking.length}</div></div>
     ${rank}<h2>${L('Boards')}</h2><div class="nav">${nums.map(b=>`<a href="#b${esc(b)}" onclick="var e=document.getElementById('b${esc(b)}');if(e){e.scrollIntoView();return false;}">${esc(b)}</a>`).join('')}</div>${boardsHtml}</div>`;
@@ -108,6 +108,22 @@ window.ccResultsPage=async function(){
   el.style.background='#fff'; el.hidden=false;
   el.innerHTML=`<style>${CSS}</style>${pageHtml(true)}`;
   el.scrollTop=0;
+};
+// the ranking as a short message (WhatsApp, SMS), or the whole page as a file to the phone's share menu
+function shareText(){
+  const L=v=>window.i18nText?i18nText(v):v, {s,sh,ranking}=collect(), date=(s._finishedAt||new Date().toISOString()).slice(0,10);
+  return [(CLUB_NAME?CLUB_NAME+' — ':'')+(s.name||L('Tournament'))+' '+date, ...ranking.map((p,i)=>(i+1)+'. '+p.name+' — '+(sh.byImp?fmt(p.imp)+' IMP':fmt(p.pct,1)+'%'))].join('\n');
+}
+function pageFile(){
+  const s=getState(), html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(s.name||'Results')}</title><style>body{margin:0;background:#fff}${CSS}</style></head><body>${pageHtml(false)}</body></html>`;
+  return new File([html],(String(s.name||'results').replace(/[^\w\-]+/g,'_')||'results')+'.html',{type:'text/html'});
+}
+window.ccResultsShare=async function(how){
+  const text=shareText();
+  if(how==='wa'){ window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank'); return; }
+  if(how==='sms'){ location.href='sms:?&body='+encodeURIComponent(text); return; }
+  try{ const f=pageFile(); if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],text}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
+  ccResultsDownload();
 };
 window.ccResultsDownload=function(){
   const s=getState(), html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(s.name||'Results')}</title><style>body{margin:0;background:#fff}${CSS}</style></head><body>${pageHtml(false)}</body></html>`;

@@ -55,6 +55,7 @@
     "Points":"Puan",
     "Save as a page":"Sayfa olarak kaydet",
     "Print":"Yazdır",
+    "Share the page":"Sayfayı paylaş",
     "Date":"Tarih",
     "Club":"Kulüp",
     "rounds":"tur",
