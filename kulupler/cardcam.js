@@ -224,6 +224,19 @@ window.ccShowDD=function(board){
     ${ddBoardHtml(h,a,board)}
     <button class="btn btn-gold btn-full" onclick="ccClose()">OK</button></div>`);
 };
+// what this table played on the board: the contract and result, the score, the opening lead, against double dummy
+let ccTableNo=null;
+function playedHtml(board,a){
+  try{
+    const t=(typeof bmTableNo!=='undefined'&&bmTableNo)||ccTableNo; if(!t) return '';
+    const bs=getBoards(), s=getState(), d=bs[t+'_'+s.currentRound+'_'+board]||Object.entries(bs).filter(([k,v])=>k.startsWith(t+'_')&&k.endsWith('_'+board)&&v&&v.status==='done').map(x=>x[1])[0];
+    if(!d||d.status!=='done') return '';
+    const ns=typeof d.nsScore==='number'?(d.nsScore>0?'+':'')+d.nsScore:'0', ld=String(d.lead||'');
+    const lead=ld?`<b class="${/[♥♦]/.test(ld)?'cc-red':''}">${esc(ld)}</b>`:'—';
+    const cmp=typeof ddCompare==='function'?ddCompare(d,a):'';
+    return `<div class="ccd-play"><div><span>This table</span>: <b>${esc(d.contract||'PASS')}</b> · NS <b>${ns}</b></div><div><span>Lead</span>: ${lead}${cmp?' · '+cmp:''}</div></div>`;
+  }catch(e){ return ''; }
+}
 // a board as it lay on the table: the four hands (white cards, red ♥ ♦) round a compass with the dealer and the
 // vulnerability, the par, and for each seat and strain the level it makes (games and slams marked)
 function ddBoardHtml(h,a,board){
@@ -234,7 +247,7 @@ function ddBoardHtml(h,a,board){
   const game=(n,st)=>n-6>=(st===4?3:st>=2?4:5), slam=n=>n>=12;
   const row=d=>`<tr><th style="color:${SEAT_COL[d]}">${seatWord(d)}</th>${[4,3,2,1,0].map(st=>{ const n=a.t&&a.t[d]?a.t[d][st]:null; return `<td class="${n>=7?(slam(n)?'sl':game(n,st)?'gm':'ok'):''}">${n>=7?n-6:'–'}</td>`; }).join('')}</tr>`;
   return `<div class="ccd"><div class="ccd-tbl">${hand(0)}${hand(3)}${mid}${hand(1)}${hand(2)}</div>
-    <div class="ccd-par">Par <b>${esc(a.par&&a.par.text||'')}</b></div>
+    <div class="ccd-par">Par <b>${esc(a.par&&a.par.text||'')}</b></div>${playedHtml(board,a)}
     <table class="ccd-dd"><thead><tr><th></th>${['NT','♠','♥','♦','♣'].map((x,i)=>`<th class="${i===2||i===3?'cc-red':''}">${x}</th>`).join('')}</tr></thead><tbody>${[0,2,1,3].map(row).join('')}</tbody></table>
     <div class="ccd-key"><span class="gm">■</span> <span>Game</span> <span class="sl">■</span> <span>Slam</span> · <span>– = not even 1</span></div></div>`;
 }
@@ -243,6 +256,7 @@ function ddBoardHtml(h,a,board){
 // board just finished opens its double dummy once by itself
 let lastFetch=0;
 window.ccTableSection=function(tableNo,doneBoards){
+  ccTableNo=tableNo;
   const box=document.getElementById('ccTable'); if(!box) return;
   const draw=()=>{
     const el=document.getElementById('ccTable'); if(!el) return;

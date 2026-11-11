@@ -50,6 +50,7 @@
     'Delete the test tournament?':'Deneme turnuvası silinsin mi?',
     'No test tournament now.':'Şu an deneme turnuvası yok.',
     'Game':'Oyun',
+    'This table':'Bu masa',
     'Slam':'Şlem',
     '– = not even 1':'– = 1 bile yapılamaz',
     'Not deleted — please log in again':'Silinemedi — lütfen yeniden giriş yap',
