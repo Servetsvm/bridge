@@ -1981,3 +1981,11 @@ body.homev2 .h2mid{grid-area:chips;display:flex;align-items:center;justify-conte
 .plday small{opacity:.75}
 .pzline{margin:6px 0;font-size:.95rem}
 .pzpair{display:flex;flex-direction:column;gap:2px}.pzpair small{opacity:.75;font-weight:700}
+
+/* the practice box opens with 📚 Practise conventions; the robots' live table sits beside Play offline */
+body.homev2 .hcard.prac:empty{display:none}
+.prhd .prx{margin-left:6px}
+body.homev2 .h2pr .h2rt{justify-content:flex-start;gap:8px}
+body.homev2 .h2pr .h2rt .rtgo{padding:0;color:#f6ecd0}
+body.homev2 .h2pr .h2rt .rtrows{display:flex;flex-wrap:wrap;gap:6px;padding:0}
+body.homev2 .h2pr .h2rt .rtchip{padding:8px 10px;font-size:13px}

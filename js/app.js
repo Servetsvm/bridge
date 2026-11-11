@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 430;
+const APP_V = 431;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1584,7 +1584,7 @@ function pracHtml() {
       ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       <div class="pdh">${T('On defence: discards')}</div>${CARD_KEYS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
-  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Deal practice')}</button></div></div>
+  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Deal practice')}</button><button class="btn mini-btn prx" id="pdClose" title="${T('Close')}">✕</button></div></div>
     <div class="prrow2">
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${SET.sys === 'none' ? '—' : esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
@@ -1629,13 +1629,12 @@ function homeShell2() {
         <button class="h2fan h2fango" id="bGoFan" aria-hidden="true" tabindex="-1">${fan}</button>
         <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📚 ${T('Practise conventions')}</button></div>
       </div>
-      <div class="h2champ" id="hChamp"></div></div>
+      <div class="h2champ rtcard h2rt" id="hRobot"></div></div>
       <div class="h2tiles">
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Team match'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
       </div>
-      <div class="hcard rtcard" id="hRobot"></div>
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>   <!-- the open tables right under the ways to play -->
       </div><div class="h2colb"><div id="hPend"></div>
       <div class="hcard prac" id="hPrac"></div>
@@ -1675,7 +1674,7 @@ function renderHome() {
   const set = (id, html) => { const el = $(id); if (el && el.innerHTML !== html) { el.innerHTML = html; return true; } return false; };
   const cont = ui.saved && ui.saved.phase !== 'done';
   set('hGo', $('hGoSub') ? '▶ ' + T(cont ? 'Continue' : 'Start') : cont ? T('Continue') : '🤖 ' + T('Play offline'));   // the new page names the card "Play offline"; its button starts
-  set('hPrac', pracHtml());   // practise a convention (the heart of the page)
+  set('hPrac', ui.pracOpen ? pracHtml() : '');   // practise a convention: opened with 📚 Practise conventions
   set('hRobot', rtCardHtml());   // the robots' table, live
   set('hInst', instHtml());
   { const b = $('hNameBtn'), v2 = b && b.classList.contains('h2name'), nm = myNm(), p = typeof Net !== 'undefined' ? Net.prof() : null;
@@ -1683,7 +1682,6 @@ function renderHome() {
     if (b && b.innerHTML !== h) b.innerHTML = h; }   // your name (the new page: your picture or initial), after a change on your card
   { const p = typeof Net !== 'undefined' ? Net.prof() : null, m = p && p.rtn ? measuredLvl(p) : '';   // the you strip: rating and the measured level
     set('hMe', p ? `${rankOf(p, myNm())}<span class="h2chip"><small>${T('Rating')}</small><b>${p.rtn ? p.rt : '—'}</b></span>${m ? `<span class="h2chip"><small>${T('measured')}</small><span class="plvl l-${m}">${T(LEVEL_N[m])}</span></span>` : ''}` : ''); }
-  set('hChamp', champCardHtml());
   set('hGoSub', cont ? T('Your last board is waiting.') : T('Bid and play with three robots; every board counts for your rating.'));   // your name, after a change on your card
   { const hs = $('hSys'), v = SET.sys || 'twoone'; if (hs && hs.value !== v) hs.value = v; }   // also when it was changed on the convention card
 
@@ -3258,7 +3256,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
   // beside Play offline: the conventions to practise open (the drop-down of the practice card, scrolled to)
-  if (t.id === 'bConvGo') { ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  if (t.id === 'pdClose') { ui.pracOpen = 0; ui.pracDrop = null; render(); return; }
+  if (t.id === 'bConvGo') { ui.pracOpen = 1; ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   // the robots' table: open it, its tabs, a call's meaning, a board played before
   if (t.dataset.rtk) { if (t.dataset.rtopen) rtWatch(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
@@ -3482,20 +3481,18 @@ function shareDeal(deal, board) {
   (navigator.clipboard ? navigator.clipboard.writeText(text + ' ' + url) : Promise.reject()).then(() => flash(T('Link copied'), 1500)).catch(() => prompt(T('Copy link'), url));
 }
 // the app was opened from a shared deal: offer to play it (the link is taken out of the address)
-/* the welcome: what the site is for, in a few lines. Shown on a player's first three visits (once per visit, after
-   the name and PIN) unless they tick "do not show again"; not over a shared deal, an invitation or a board in play. */
+/* the welcome: what the site is for, in a few lines. Shown once, on a player's first visit (after the name and PIN); not over a shared deal, an invitation or a board in play. */
 function welcome() {
-  if (SET.welNo || (SET.welN || 0) >= 3 || ui.welDone || ui.overlay || (G && G.phase !== 'idle')) return;
+  if (SET.welNo || (SET.welN || 0) >= 1 || ui.welDone || ui.overlay || (G && G.phase !== 'idle')) return;
   ui.welDone = 1; SET.welN = (SET.welN || 0) + 1; Store.saveSettings(SET);
   openOv('welcome', `<h2 class="welh">♠<i>♥</i><i>♦</i>♣ ${T('Welcome to Bridge Table')}</h2>
     <div class="welmain"><span>📚</span><div><b>${T('Practise conventions')}</b><small>${T('Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.')}</small></div></div>
-    <label class="welno"><input type="checkbox" id="welNo"> ${T('Do not show this again')}</label>
     <div class="row2"><button class="btn new" id="welGo">📚 ${T('Choose conventions')}</button><button class="btn" id="welClose">${T('Close')}</button></div>`);
 }
 function welcomeClose(go) {
   if ($('welNo') && $('welNo').checked) { SET.welNo = 1; Store.saveSettings(SET); }
   closeOv();
-  if (go) { ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  if (go) { ui.pracOpen = 1; ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
 }
 // the WhatsApp logo and an SMS speech bubble for the buttons that send a message
 const ICON_WA = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.88 9.88zm8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41z"/></svg>';
