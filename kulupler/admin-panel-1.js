@@ -32,7 +32,8 @@ window.setAdminTab=function(tab,btn){
 function renderAdminTab(){
   const c=document.getElementById('adminContent');if(!c)return;
   const m={setup:renderSetup,players:renderPlayersAdmin,movement:renderMovement,tables:renderTables,boards:renderBoards,history:renderHistory,log:renderLog};
-  c.innerHTML=(m[adminTab]||renderSetup)();
+  const fin=getState().status==='finished';
+  c.innerHTML=(fin?`<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;"><b>🏁 <span>Tournament Finished</span></b><button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button></div>`:'')+(m[adminTab]||renderSetup)();
   if(adminTab==='setup') setTimeout(adminUpdateCalc, 0);
 }
 

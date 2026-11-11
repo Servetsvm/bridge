@@ -119,7 +119,7 @@ function pageHtml(withBar){
     }).join('')}</table></div>`:'';
     return `<div class="bd" id="b${esc(bn)}"><h3>${L('Board')} ${esc(bn)}</h3>${hd?diagram(hd,bn):''}${a?`<div class="ddbox"><h4>Double Dummy</h4>${ddHtml(a)}</div>`:''}${L2.length?`<h4>${L('Results')}</h4>`:''}${res}</div>`;
   }).join('');
-  const bar=withBar?`<div class="bar"><button class="btn btn-gold" onclick="ccResultsDownload()">⬇ ${L('Save as a page')}</button><button class="btn" style="background:#25d366;color:#fff" onclick="ccResultsShare('wa')">💬 WhatsApp</button><button class="btn btn-blue" onclick="ccResultsShare('sms')">✉️ SMS</button>${navigator.canShare?`<button class="btn btn-ghost" onclick="ccResultsShare('file')">📤 ${L('Share the page')}</button>`:''}<button class="btn btn-ghost" onclick="window.print()">🖨 ${L('Print')}</button><button class="btn btn-ghost" onclick="ccClose&&ccClose()">✕ ${L('Close')}</button></div>`:'';
+  const bar=withBar?`<div class="bar"><button class="btn btn-gold" onclick="ccResultsDownload()">⬇ ${L('Save as a page')}</button><button class="btn" style="background:#25d366;color:#fff" onclick="ccResultsShare('wa')">💬 WhatsApp</button><button class="btn btn-blue" onclick="ccResultsShare('sms')">✉️ SMS</button>${navigator.canShare?`<button class="btn btn-ghost" onclick="ccResultsShare('file')">📤 ${L('Share the page')}</button>`:''}<button class="btn btn-ghost" onclick="window.print()">🖨 ${L('Print')}</button><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>`:'';
   return `<div class="ccr">${bar}<h1>${esc(s.name||L('Tournament'))} ${esc(date)}</h1>
     <div class="meta"><div>${L('Date')}: ${esc(date)}</div><div>${L('Club')}: ${esc(CLUB_NAME||'')}</div><div>${L('Boards')}: ${nums.length}, ${L('rounds')}: ${rounds}, ${L('pairs')}: ${ranking.length}</div></div>
     ${rank}<h2>${L('Boards')}</h2><div class="pgn" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div><div class="bds">${boardsHtml}</div><div class="pgn pgn2" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div>`;
@@ -143,20 +143,40 @@ function pager(){
   var w=per(); window.addEventListener('resize',function(){ if(per()!==w){ w=per(); show(cur); } });
   show(0);
 }
-window.ccResultsPage=async function(){
-  try{ await Promise.all(['hands','dd','boards','pairs','movements','state'].map(k=>DB.get(k))); }catch(e){}
+window.ccResultsClose=function(){ if(window._ccResultsOnly){ try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ P.closeClubs(); return; } }catch(e){} history.back(); return; } ccClose&&ccClose(); };
+// which tournament the page shows: null = the current one, a number = that archive (0 = the last one finished)
+let SRC=null;
+const KEYS=['state','pairs','boards','movements','hands','dd'];
+function withSrc(fn){
+  const a=SRC==null?null:(getArchives()||[])[SRC]; if(!a) return fn();
+  const keep={}; KEYS.forEach(k=>{ keep[k]=_cache[k]; }); _cache.state=a.state; _cache.pairs=a.pairs; _cache.boards=a.boards; _cache.movements=a.movements; _cache.hands=a.hands||[]; _cache.dd=a.dd||{};
+  try{ return fn(); } finally { KEYS.forEach(k=>{ _cache[k]=keep[k]; }); }
+}
+window.ccResultsPick=function(v){ SRC=v===''?null:+v; ccResultsDraw(); };
+function ccResultsDraw(){
+  const el=document.getElementById('ccLayer'); if(!el) return;
+  const L=v=>window.i18nText?i18nText(v):v, arc=getArchives()||[], cur=getState();
+  const opts=(cur.status==='finished'?[`<option value=""${SRC==null?' selected':''}>${esc(cur.name||L('Tournament'))} · ${esc(String(cur._finishedAt||'').slice(0,10))}</option>`]:[])
+    .concat(arc.map((a,i)=>`<option value="${i}"${SRC===i?' selected':''}>${esc(a.state&&a.state.name||L('Tournament'))} · ${esc(String(a.finished||'').slice(0,10))}</option>`));
+  const pick=opts.length>1?`<div class="bar"><select class="pick" onchange="ccResultsPick(this.value)">${opts.join('')}</select></div>`:'';
+  el.innerHTML=`<style>${CSS}.ccr .pick{font-size:1rem;padding:6px 8px;border-radius:8px;border:1px solid #c9d3de;max-width:100%}</style>${withSrc(()=>pageHtml(true)).replace('<div class="ccr">','<div class="ccr">'+pick)}`;
+  el.scrollTop=0; pager();
+}
+window.ccResultsPage=async function(i){
+  try{ await Promise.all(['hands','dd','boards','pairs','movements','state','archives'].map(k=>DB.get(k))); }catch(e){}
+  // nothing said: the tournament just finished, else the last one archived
+  SRC=i!=null?i:(getState().status==='finished'||!(getArchives()||[]).length?null:0);
   let el=document.getElementById('ccLayer'); if(!el){ el=document.createElement('div'); el.id='ccLayer'; document.body.appendChild(el); }
   el.style.background='#fff'; el.hidden=false;
-  el.innerHTML=`<style>${CSS}</style>${pageHtml(true)}`;
-  el.scrollTop=0; pager();
+  ccResultsDraw();
 };
 // the ranking as a short message (WhatsApp, SMS), or the whole page as a file to the phone's share menu
 function shareText(){
-  const L=v=>window.i18nText?i18nText(v):v, {s,sh,ranking}=collect(), date=(s._finishedAt||new Date().toISOString()).slice(0,10);
+  const L=v=>window.i18nText?i18nText(v):v, {s,sh,ranking}=withSrc(collect), date=(s._finishedAt||new Date().toISOString()).slice(0,10);
   return [(CLUB_NAME?CLUB_NAME+' — ':'')+(s.name||L('Tournament'))+' '+date, ...ranking.map((p,i)=>(i+1)+'. '+p.name+' — '+(sh.byImp?fmt(p.imp)+' IMP':fmt(p.pct,1)+'%'))].join('\n');
 }
 function pageFile(){
-  const s=getState(), html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(s.name||'Results')}</title><style>body{margin:0;background:#fff}${CSS}</style></head><body>${pageHtml(false)}<script>(${pager.toString()})();</script></body></html>`;
+  const s=withSrc(getState), html=withSrc(()=>`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(s.name||'Results')}</title><style>body{margin:0;background:#fff}${CSS}</style></head><body>${pageHtml(false)}<script>(${pager.toString()})();</script></body></html>`);
   return new File([html],(String(s.name||'results').replace(/[^\w\-]+/g,'_')||'results')+'.html',{type:'text/html'});
 }
 window.ccResultsShare=async function(how){
@@ -167,7 +187,7 @@ window.ccResultsShare=async function(how){
   ccResultsDownload();
 };
 window.ccResultsDownload=function(){
-  const s=getState(), html=`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(s.name||'Results')}</title><style>body{margin:0;background:#fff}${CSS}</style></head><body>${pageHtml(false)}<script>(${pager.toString()})();</script></body></html>`;
+  const s=withSrc(getState), html=withSrc(()=>`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(s.name||'Results')}</title><style>body{margin:0;background:#fff}${CSS}</style></head><body>${pageHtml(false)}<script>(${pager.toString()})();</script></body></html>`);
   const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
   a.download=(String(s.name||'results').replace(/[^\w\-]+/g,'_')||'results')+'.html'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
 };

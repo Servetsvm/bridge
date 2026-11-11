@@ -673,7 +673,7 @@ function renderHistory(){
         <span class="rc-num">${a.state.name}</span>
         <span class="rc-stat">${a.state.tableCount} tables · ${a.state.roundCount} rounds · ${new Date(a.finished).toLocaleDateString()}</span>
       </div>
-      <button class="btn btn-blue btn-sm" onclick="viewArchive(${i})">View Results</button>
+      <button class="btn btn-blue btn-sm" onclick="viewArchive(${i})">View Results</button> <button class="btn btn-gold btn-sm" onclick="ccResultsPage(${i})">📄 Results page</button>
     </div>`).join('')}
   </div>`;
 }

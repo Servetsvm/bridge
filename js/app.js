@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 423;
+const APP_V = 424;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3211,6 +3211,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
   if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; const c = ui.clubOpen; showClubs(); if (c) clubTaken(c).then(x => { (ui.clubTaken = ui.clubTaken || {})[c] = x.taken; if (ui.overlay === 'clubs') showClubs(); }); return; }
+  if (t.dataset.clubres) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubres) + '&results=1'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
   // the online team match: a new tournament of the Team match type, set up at once
@@ -3886,7 +3887,7 @@ async function showClubs() {
     const L = ui.clubLive || [];
     const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` +
       (ui.clubOpen !== t.club ? '' : t.tb ? (ui.clubTaken && ui.clubTaken[t.club] ? (L => L.length ? `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${L.map(n => `<button class="bm3-key" data-clubtn="${esc(t.club)}|${t.p}|${n}">${n}</button>`).join('')}</div></div>` : `<div class="muted">${T('Every table is taken.')}</div>`)([...Array(t.tb).keys()].map(i => i + 1).filter(n => !ui.clubTaken[t.club].has(n))) : `<div class="muted">${T('Loading…')}</div>`) + `<div class="row2"><button class="btn" data-clubadmin="${esc(t.club)}">⚙️ ${T('Admin')}</button></div>`
-        : `<div class="muted">${T('No tournament at this club now.')}</div><div class="row2"><button class="btn gold" data-clubadmin="${esc(t.club)}">➕ ${T('Set up a tournament')}</button></div>`) + `</div>`).join('');
+        : `<div class="muted">${T('No tournament at this club now.')}</div><div class="row2"><button class="btn gold" data-clubadmin="${esc(t.club)}">➕ ${T('Set up a tournament')}</button></div>`) + (ui.clubOpen === t.club ? `<div class="row2"><button class="btn" data-clubres="${esc(t.club)}">📄 ${T('Results')}</button></div>` : '') + `</div>`).join('');
     openOv('clubs', `<h2>🏛 ${T('Clubs')}</h2>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);

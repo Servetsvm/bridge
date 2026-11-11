@@ -106,6 +106,9 @@ async function initClubGate(){
   // a table (or the entry screen of a running tournament) is shown as a Bridgemate III from the first moment
   if(params.get('admin')!=='1'&&(roleParam==='table'||!params.get('club'))) document.body.classList.add('bg-device');
   const fromLink=!!id;
+  if(id&&params.get('results')==='1'&&me()){
+    await window.bridgeSession(); const info=await checkClubExists(id); if(info){ CLUB_INFO=info; setClub(id); CLUB_NAME=info.name||CLUB_NAME; window._ccResultsOnly=true; document.getElementById('loginScreen').style.display='none'; await ccResultsPage(); return; }
+  }
   if(!id){ try{ id=localStorage.getItem('bg_clubId'); }catch(e){} }
   const u=me();
   if(u) await window.bridgeSession();
