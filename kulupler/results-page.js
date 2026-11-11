@@ -64,20 +64,20 @@ function collect(){
 }
 
 const CSS=`.ccr{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1d2733;background:#fff;max-width:1100px;margin:0 auto;padding:14px 14px 40px}
-.ccr h1{color:#1f4e79;font-size:1.6rem;margin:4px 0 8px}.ccr h2{color:#1f4e79;font-size:1.25rem;margin:22px 0 8px}
+.ccr h1{color:#1d5534;font-size:1.6rem;margin:4px 0 8px}.ccr h2{color:#1d5534;font-size:1.25rem;margin:22px 0 8px}
 .ccr .meta div{margin:3px 0}.ccr .r{color:#d32f2f}
 .ccr table{border-collapse:collapse;width:100%}
-.ccr .rank th,.ccr .res th,.ccr .dd th{background:#24476b;color:#fff;padding:7px 6px;font-weight:700}
+.ccr .rank th,.ccr .res th,.ccr .dd th{background:#1d5534;color:#fff;padding:7px 6px;font-weight:700}
 .ccr .rank td,.ccr .res td{padding:7px 6px;border-bottom:1px solid #e3e7ec;text-align:center}
 .ccr .rank td.nm{text-align:left}.ccr .rank tr:nth-child(even) td,.ccr .res tr:nth-child(even) td{background:#f4f6f8}
 .ccr .rank td.n{text-align:right;font-variant-numeric:tabular-nums}
-.ccr .rank tr.pr{cursor:pointer}.ccr .rank tr.pr:hover td{background:#e6eef7}.ccr .rank tr.pr.open td{background:#dbe7f3;font-weight:700}
-.ccr .rank tr.pd>td{padding:4px 0 10px;background:#fff!important;text-align:left}.ccr .pb{margin:4px 0 0;font-size:.88rem}.ccr .pb th{background:#cfe0f3!important;color:#1f3550!important}.ccr .rank tr.pd>td{max-width:0}.ccr .pbw{overflow-x:auto;width:100%}.ccr .pb a{color:#1f4e79;font-weight:700}.ccr .pb td.sp{background:#f7fafd}.ccr .pb tr.tot td{font-weight:800;border-top:2px solid #24476b;background:#fff}
-.ccr .pgn{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px;margin:6px 0 10px}.ccr .pgn a{color:#1f4e79;font-weight:700;text-decoration:none;min-width:30px;height:30px;line-height:30px;text-align:center;padding:0 6px;border-radius:15px}.ccr .pgn a.on{background:#24476b;color:#fff}.ccr .pgn a.pv{padding:0 10px}.ccr .pgn a.off{color:#b8c2cc;pointer-events:none}.ccr .pgn i{color:#7a8794;font-style:normal}
+.ccr .rank tr.pr{cursor:pointer}.ccr .rank tr.pr:hover td{background:#eef6f0}.ccr .rank tr.pr.open td{background:#e7f1ea;font-weight:700}
+.ccr .rank tr.pd>td{padding:4px 0 10px;background:#fff!important;text-align:left}.ccr .pb{margin:4px 0 0;font-size:.88rem}.ccr .pb th{background:#e2eee5!important;color:#173f28!important}.ccr .rank tr.pd>td{max-width:0}.ccr .pbw{overflow-x:auto;width:100%}.ccr .pb a{color:#1d5534;font-weight:700}.ccr .pb td.sp{background:#f6faf7}.ccr .pb tr.tot td{font-weight:800;border-top:2px solid #1d5534;background:#fff}
+.ccr .pgn{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px;margin:6px 0 10px}.ccr .pgn a{color:#1d5534;font-weight:700;text-decoration:none;min-width:30px;height:30px;line-height:30px;text-align:center;padding:0 6px;border-radius:15px}.ccr .pgn a.on{background:#1d5534;color:#fff}.ccr .pgn a.pv{padding:0 10px}.ccr .pgn a.off{color:#b8c2cc;pointer-events:none}.ccr .pgn i{color:#7a8794;font-style:normal}
 .ccr .bds{display:grid;grid-template-columns:1fr;gap:16px}
 @media (min-width:900px){.ccr .bds{grid-template-columns:1fr 1fr}}
 .ccr .bd{min-width:0;border:1px solid #dfe5ec;border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);background:#fff}
-.ccr .bd h3{margin:0 0 8px;color:#1f4e79}.ccr .bd h4{margin:14px 0 6px;color:#1f4e79;font-size:1.15rem}
+.ccr .bd h3{margin:0 0 8px;color:#1d5534}.ccr .bd h4{margin:14px 0 6px;color:#1d5534;font-size:1.15rem}
 .ccr .dg{display:grid;grid-template-columns:1fr auto 1fr;grid-template-areas:". n ." "w c e" ". s .";gap:6px 12px;align-items:center;font-size:1.05rem;margin:0 auto;max-width:420px}.ccr .dg .w{justify-self:end}.ccr .dg .e{justify-self:start}.ccr .dg .n,.ccr .dg .s{justify-self:center}
 .ccr .dg .n{grid-area:n}.ccr .dg .s{grid-area:s}.ccr .dg .w{grid-area:w}.ccr .dg .e{grid-area:e}.ccr .dg .h div{white-space:nowrap;line-height:1.35}
 .ccr .cp{grid-area:c;width:110px;height:110px;justify-self:center;display:block}
@@ -91,18 +91,34 @@ const CSS=`.ccr{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif
 .ccr .rt{font-size:2.6rem;font-weight:500;color:#222;margin:0;line-height:1.1}
 .ccr .back{display:inline-block;margin-top:6px;color:#2e7d32;font-size:1.2rem;text-decoration:none}
 .ccr .rtools{display:flex;gap:6px}.ccr .rtools .ic{width:40px;height:40px;border-radius:50%;border:1px solid #d5dbe1;background:#fff;font-size:1.05rem;cursor:pointer}
-.ccr .tt{color:#1f6fa8;font-size:1.7rem;font-weight:500;margin:6px 0 10px}
+.ccr .tt{color:#1d5534;font-size:1.7rem;font-weight:500;margin:6px 0 10px}
 .ccr .meta{font-size:1.05rem;margin:0 0 16px}.ccr .meta div{margin:6px 0}
-.ccr .rank{font-size:1.05rem}.ccr .rank td:nth-child(2),.ccr .rank td.n{white-space:nowrap}.ccr .rank th{background:#2b4a70}.ccr .rank td{padding:9px 8px}
-.ccr .rank .ar{color:#8aa0b8;font-size:.8rem;display:inline-block;transition:transform .15s}.ccr .rank tr.open .ar{transform:rotate(90deg)}
-.ccr .res th{background:#2b4a70}.ccr .pb th{background:#d6e6f8!important;color:#22364f!important;font-weight:600}
+.ccr .rank{font-size:1.05rem}.ccr .rank td:nth-child(2),.ccr .rank td.n{white-space:nowrap}.ccr .rank th{background:#1d5534}.ccr .rank td{padding:9px 8px}
+.ccr .rank .ar{color:#7fa48b;font-size:.8rem;display:inline-block;transition:transform .15s}.ccr .rank tr.open .ar{transform:rotate(90deg)}
+.ccr .res th{background:#1d5534}.ccr .pb th{background:#e2eee5!important;color:#173f28!important;font-weight:600}
 .ccr .res td.n{text-align:right;font-variant-numeric:tabular-nums}.ccr .res td.l{text-align:left}
-.ccr .bhead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:26px}.ccr .bhead h2{margin:0;color:#1f6fa8;font-weight:600}
+.ccr .bhead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:26px}.ccr .bhead h2{margin:0;color:#1d5534;font-weight:600}
 .ccr .bhead .pgn{margin:0}
 .ccr .bd{border:1px solid #e3e7ec;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.ccr .bd h3{display:none}.ccr .bd h4{color:#1f6fa8}
+.ccr .bd h3{display:none}.ccr .bd h4{color:#1d5534}
 .ccr .dg .h div{font-size:1.1rem;letter-spacing:.5px}.ccr .dg .sy{display:inline-block;width:20px}
-@media (max-width:640px){.ccr .rt{font-size:1.9rem}.ccr .tt{font-size:1.3rem}.ccr .meta{font-size:.95rem}.ccr .rank{font-size:.9rem}.ccr .rank td{padding:7px 4px}.ccr .dg .h div{font-size:1rem}.ccr .bhead{justify-content:center}}`;
+@media (max-width:640px){.ccr .rt{font-size:1.9rem}.ccr .tt{font-size:1.3rem}.ccr .meta{font-size:.95rem}.ccr .rank{font-size:.9rem}.ccr .rank td{padding:7px 4px}.ccr .dg .h div{font-size:1rem}.ccr .bhead{justify-content:center}}
+/* Bridge Table's own look */
+.ccr .rhead{background:linear-gradient(135deg,#1d5534,#2f7a4a);border-radius:14px;padding:16px 18px;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+.ccr .rt{color:#f3d36b;font-family:Georgia,"Times New Roman",serif;letter-spacing:.5px}
+.ccr .back{background:rgba(255,255,255,.14);color:#fff;border-radius:999px;padding:4px 14px;font-size:1rem;margin-top:10px}.ccr .back::before{content:"← "}
+.ccr .rtools .ic{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff}
+.ccr .tt{color:#1d5534;border-left:5px solid #d4a017;padding-left:10px}
+.ccr .meta{display:flex;flex-wrap:wrap;gap:6px 18px;color:#44524a}.ccr .meta div{margin:0;background:#f3f6f4;border-radius:999px;padding:4px 12px}
+.ccr .rank{border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}.ccr .rank tr:first-child th{border-bottom:3px solid #d4a017}
+.ccr .rank tr.pr:nth-of-type(2) td:first-child,.ccr .rank tr.pr td:first-child{font-weight:700}
+.ccr .bhead h2{color:#1d5534}.ccr .pgn a.on{background:#1d5534}.ccr .pgn a{color:#1d5534}
+.ccr .bd{border-radius:14px;border-color:#dfe8e2}.ccr .bd h4{color:#1d5534}
+.ccr .dg{background:radial-gradient(ellipse at center,#2f7a4a 0%,#1d5534 75%);border-radius:12px;padding:12px 8px;max-width:none}
+.ccr .dg .h{background:#fffdf7;border-radius:8px;padding:4px 10px;box-shadow:0 2px 5px rgba(0,0,0,.3)}
+.ccr .cp{filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.ccr .dd th{background:#1d5534}.ccr .dd tr:first-child th{border-bottom:3px solid #d4a017}
+@media print{.ccr .rhead{background:none;color:#000;box-shadow:none}.ccr .rt{color:#000}.ccr .dg{background:none}}`;
 
 function pageHtml(withBar){
   const L=v=>window.i18nText?i18nText(v):v;
@@ -110,7 +126,7 @@ function pageHtml(withBar){
   const date=(s._finishedAt||s._startedAt||new Date().toISOString()).slice(0,10);
   // numbers as the reader writes them (46,70 or 46.70)
   const loc={tr:'tr-TR',no:'nb-NO',es:'es-ES',fr:'fr-FR',it:'it-IT',de:'de-DE',ru:'ru-RU',pl:'pl-PL',zh:'zh-CN'}[(()=>{ try{ return localStorage.getItem('bricskor_language'); }catch(e){ return ''; } })()]||'en-GB';
-  const num=v=>typeof v==='number'&&isFinite(v)?v.toLocaleString(loc,{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+  const num=v=>typeof v==='number'&&isFinite(v)?(v+0||0).toLocaleString(loc,{minimumFractionDigits:2,maximumFractionDigits:2}):'';
   const pts=x=>sh.byImp?x.imp:x.pm;   // a result's points: ± match points, or IMPs in a team match
   const conCells=b=>{ const pass=!b.level; return pass?`<td class="c" colspan="3">PASS</td><td class="c">${suitHtml(b.lead||'')}</td>`:`<td class="c l">${suitHtml(b.level+(b.suit||'')+(b.doubled||''))}</td><td>${esc(b.declarer||'')}</td><td>${b.level+6+(+b.result||0)}</td><td class="c">${suitHtml(b.lead||'')}</td>`; };
   // a pair tapped in the ranking: its boards (the opponents, the contract, the result, the points), and the points again by
