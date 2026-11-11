@@ -532,8 +532,35 @@ window.bgMoveTo=function(t,nextR,from){
   window._bgEndOf=null;
   // a test tournament: this table has seen where to go; the next round may start
   if(typeof bgTestOn==='function'&&bgTestOn()){ DB.get('ready').then(v=>{ const r=v||{}; r[(nextR-1)+'_'+from]=true; DB.set('ready',r); }).catch(()=>{}); }
-  if(t!==from){ try{ unlockTable(from); }catch(e){} bmTableNo=t; window.bmCodeTable=t; try{ if(typeof bgTestOn==='function'&&bgTestOn()) sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(t)); }catch(e){} }
+  // the pair moves: this device leaves its table now (another device may take it) and the player types the new
+  // table's number when sitting down there
+  if(t!==from){ try{ unlockTable(from); }catch(e){} bmTableNo=null; window.bmCodeTable=null; bgNewTableEntry(t,nextR,from); return; }
   bmShowWaiting(t,nextR);
+};
+window.bgNewTableEntry=function(t,nextR,from){
+  if(bmPollInterval){clearInterval(bmPollInterval);bmPollInterval=null;}
+  const s=getState(), n=s.tableCount||0;
+  document.getElementById('panelContent').innerHTML=`
+    <div class="bm-device" style="max-width:360px;">
+      <div class="bm-lcd">
+        <div class="bm-lcd-row inv">Round ${String(nextR).padStart(2,' ')}</div>
+        <div class="bm-lcd-row">→ Table ${t}</div>
+      </div>
+      <div class="waiting-screen">
+        <div class="waiting-icon">🚶</div>
+        <div class="waiting-title">Go to your new table</div>
+        <div class="waiting-sub">At the table, type its number</div>
+      </div>
+      <div class="bm3-keys k4" style="padding:0;margin-top:12px;">${Array.from({length:n},(_,i)=>i+1).map(k=>`<button class="bm3-key" onclick="bgNewTablePick(${k},${t},${nextR})">${k}</button>`).join('')}</div>
+    </div>`;
+};
+window.bgNewTablePick=async function(k,t,nextR){
+  const L=window.i18nText?i18nText:x=>x;
+  if(k!==t&&!await confirmDialog(L('This is not the table your pair goes to.')+' (→ '+t+')',{title:'Table '+k,confirmLabel:L('Sit here anyway'),danger:false})) return;
+  if(isTableLocked(k)&&!await confirmDialog(`Table ${k} already appears open on another device.\n\nDo you still want to enter this table?`,{title:'Table Already Open',confirmLabel:'Enter Anyway'})) return;
+  lockTable(k); bmTableNo=k; window.bmCodeTable=k;
+  try{ if(typeof bgTestOn==='function'&&bgTestOn()) sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(k)); }catch(e){}
+  bmShowWaiting(k,nextR);
 };
 window.bmShowWaiting=function(tableNo,nextR){
   // nextR is passed explicitly — never computed from currentRound (which may already have advanced)
