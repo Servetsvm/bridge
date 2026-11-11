@@ -260,6 +260,9 @@ window.adminSetup=function(){
     else result=generateSwissRound1(pairCount,bpr,rounds);
   }
   const totalBoards=rounds*bpr;
+  // the last tournament's hands and double-dummy analysis go with it (they are kept in its archive); a tournament set up
+  // again before it starts keeps the hand file already loaded for it
+  if(getState().status&&getState().status!=='setup'){ _cache['hands']=[]; DB.set('hands',[]); _cache['dd']={}; DB.set('dd',{}); }
   setMovements(result.movements);setPairs(result.pairs);setBoards({});setApprovals({});
   setTableLocks({}); DB.set('ready',{}); DB.set('kicks',{});   // no table taken in a new tournament
   setLive(false);   // a new tournament is listed when it starts
