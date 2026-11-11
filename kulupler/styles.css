@@ -535,3 +535,8 @@ body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}
 @media (max-width:420px){.ccd-h{min-width:0;width:100%}.ccd-l{font-size:.9rem;padding:1px 6px}.ccd-tbl{grid-template-columns:1fr 72px 1fr;padding:10px 4px}.ccd-comp{width:66px;height:66px}}
 .pe-boards{background:linear-gradient(135deg,#d4a017,#f3d36b);color:#2a2108;border-radius:12px;padding:10px 12px;margin:0 0 12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .pe-boards div{font-size:1.15rem}.pe-boards b{font-size:1.6rem;margin-left:6px}.pe-boards small{display:block;font-weight:600;margin-top:2px}
+.cc-ask2{background:var(--golddim,rgba(212,160,23,.15));border:1px solid var(--gold,#d4a017);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.cc-askt{font-size:.95rem;font-weight:600}
+.cc-askrow{display:grid;grid-template-columns:2fr 1fr;gap:8px}
+.cc-big{font-size:1.15rem;padding:16px 8px;font-weight:800}
+.cc-skip{font-size:.9rem;padding:10px 6px}

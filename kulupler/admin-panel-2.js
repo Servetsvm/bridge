@@ -463,15 +463,15 @@ function renderMovement(){
       <div class="card-title"><span>${active?'▶':'○'}</span> Round ${r} ${active?'<span style="color:var(--green);font-size:0.68rem;margin-left:4px;">● ACTIVE</span>':''}</div>
       <div class="movement-full">
         <table>
-          <thead><tr><th>Table</th><th>NS Pair</th><th>EW Pair</th><th>Boards</th></tr></thead>
+          <thead><tr><th>Table</th><th>North–South</th><th>East–West</th><th>Boards</th></tr></thead>
           <tbody>${Array.from({length:s.tableCount},(_,i)=>i+1).map(t=>{
             const m=mv[r+'_'+t]||{};
             const ns=pairs[m.ns]||{name:m.ns||'—',isPhantom:false};
             const ew=pairs[m.ew]||{name:m.ew||'—',isPhantom:false};
             return`<tr>
               <td style="font-weight:700;color:var(--gold);">Table ${t}</td>
-              <td style="color:var(--blue);">${ns.name}${ns.isPhantom?' 👻':''}</td>
-              <td style="color:var(--gold);">${ew.name}${ew.isPhantom?' 👻':''}</td>
+              <td style="color:var(--blue);">${typeof ccPairLabel==='function'?ccPairLabel(m.ns,pairs):ns.name}</td>
+              <td style="color:var(--gold);">${typeof ccPairLabel==='function'?ccPairLabel(m.ew,pairs):ew.name}</td>
               <td style="color:var(--text3);font-family:'Share Tech Mono',monospace;">B${m.boardStart||'?'}–B${m.boardEnd||'?'}</td>
             </tr>`;
           }).join('')}</tbody>
@@ -499,7 +499,7 @@ window.adminPrintMovement=function(){
   <style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px;}h1{font-size:16px;}table{width:100%;border-collapse:collapse;margin-top:12px;}th,td{border:1px solid #ccc;padding:5px 8px;text-align:left;}th{background:#f5f5f5;font-weight:bold;}tr:nth-child(even)td{background:#fafafa;}</style>
   </head><body><h1>${s.name} — Movement Chart</h1>
   <p>${s.tableCount} tables · ${s.roundCount} rounds · ${s.boardsPerRound} boards/round · ${scoringName(s)} · ${s.movement}</p>
-  <table><thead><tr><th>Table</th><th>NS Pair</th><th>EW Pair</th><th>Boards</th></tr></thead><tbody>${rows}</tbody></table>
+  <table><thead><tr><th>Table</th><th>North–South</th><th>East–West</th><th>Boards</th></tr></thead><tbody>${rows}</tbody></table>
   </body></html>`);
   win.document.close();
   if(window.localizePrintWindow)window.localizePrintWindow(win);

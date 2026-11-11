@@ -1,6 +1,7 @@
 // BridgeGate interface in de (loaded by i18n.js when this language is chosen): English text → de, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["de"]={"d":{"Take these boards to the table":"Nimm diese Boards mit an den Tisch","Choose your pair":"Wähle dein Paar","All":"Alle","No tournament is being played now.":"Gerade wird kein Turnier gespielt.","Seat":"Richtung",
+window.BG_LANG["de"]={"d":{"North–South":"Nord–Süd","East–West":"Ost–West","Continue without":"Ohne weiter",
+"Take these boards to the table":"Nimm diese Boards mit an den Tisch","Choose your pair":"Wähle dein Paar","All":"Alle","No tournament is being played now.":"Gerade wird kein Turnier gespielt.","Seat":"Richtung",
 "Deal with the camera":"Mit der Kamera austeilen",
 "📷 Deal with the camera":"📷 Mit der Kamera austeilen",
 "Next board":"Nächstes Board",

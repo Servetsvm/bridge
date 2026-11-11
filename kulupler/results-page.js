@@ -12,6 +12,9 @@ const red=s=>/[♥♦]/.test(s);
 const suitHtml=t=>esc(t).replace(/([♥♦])/g,'<span class="r">$1</span>');
 // a pair's number only, one for each pair: North-South pairs first, then East-West (EW 1 after the last NS pair)
 const pairNo=id=>{ const v=String(id||''), m=v.match(/^(ns|ew|p)_?(\d+)$/); if(!m) return v; const n=+m[2]; if(m[1]!=='ew') return String(n); const ns=Object.keys(getPairs()).filter(k=>/^ns_\d+$/.test(k)).length; return String(ns+n); };
+const realName=n=>n&&!/^(NS|EW|Pair|Par|Çift)\s*\d+$/i.test(String(n).trim());
+window.ccPairNo=pairNo;
+window.ccPairLabel=(id,P)=>{ const p=(P||getPairs())[id]; if(!p) return '—'; if(p.isPhantom) return '👻'; return pairNo(id)+(realName(p.name)?' · '+p.name:''); };
 const fmt=(n,d=2)=>(typeof n==='number'&&isFinite(n)?n.toFixed(d):'—');
 
 // a PBN deal → four hands (N E S W) of card numbers
@@ -235,22 +238,27 @@ window.ccResultsIndex=async function(){
 };
 // the movement: for each round, at each table the North-South and East-West pairs (number and names) and the boards;
 // a pair chosen: only its own way round (table, its seats, its opponents, the boards)
-let MOVP=null;
+let MOVP=null, MOVT=null;
 function movementHtml(){
   const L=v=>window.i18nText?i18nText(v):v, s=getState(), mv=getMovements(), P=getPairs();
   const head=`<div class="rhead"><div><h1 class="rt">${L('Movement')}</h1></div><div class="rtools"><button class="ic" title="${esc(L('Close'))}" onclick="ccResultsClose()">✕</button></div></div>`;
   if(!s.tableCount||!Object.keys(mv).length||s.status==='finished') return `<div class="ccr">${head}<div class="inone">${L('No tournament is being played now.')}</div></div>`;
   const ids=Object.keys(P).filter(id=>!P[id].isPhantom).sort((a,b)=>(+pairNo(a)||0)-(+pairNo(b)||0));
-  const nm=id=>P[id]&&!P[id].isPhantom?`<b>${esc(pairNo(id))}</b> <small>${esc(P[id].name||'')}</small>`:'—';
+  const nm=id=>P[id]&&!P[id].isPhantom?`<b>${esc(pairNo(id))}</b>${realName(P[id].name)?` <small>${esc(P[id].name)}</small>`:''}`:(P[id]&&P[id].isPhantom?'👻':'—');
   const rounds=[...new Set(Object.keys(mv).map(k=>+k.split('_')[0]))].sort((a,b)=>a-b);
-  const pick=`<div class="mpick"><span>${L('Choose your pair')}:</span><a class="${MOVP==null?'on':''}" onclick="ccMovePair(null)">${L('All')}</a>${ids.map(id=>`<a class="${MOVP===id?'on':''}" title="${esc(P[id].name||'')}" onclick="ccMovePair('${id}')">${esc(pairNo(id))}</a>`).join('')}</div>`;
+  const tables=[...new Set(Object.keys(mv).map(k=>+k.split('_')[1]))].sort((a,b)=>a-b);
+  const tpick=`<div class="mpick"><span>${L('Table')}:</span>${tables.map(t=>`<a class="${MOVT===t?'on':''}" onclick="ccMoveTable(${t})">${t}</a>`).join('')}</div>`;
+  const pick=tpick+`<div class="mpick"><span>${L('Choose your pair')}:</span><a class="${MOVP==null&&MOVT==null?'on':''}" onclick="ccMovePair(null)">${L('All')}</a>${ids.map(id=>`<a class="${MOVP===id?'on':''}" title="${esc(P[id].name||'')}" onclick="ccMovePair('${id}')">${esc(pairNo(id))}</a>`).join('')}</div>`;
   let body='';
-  if(MOVP){
-    const rows=rounds.map(r=>{ const t=Object.keys(mv).find(k=>+k.split('_')[0]===r&&(mv[k].ns===MOVP||mv[k].ew===MOVP)); if(!t) return `<tr><td>${r}</td><td colspan="4">—</td></tr>`; const m=mv[t], ns=m.ns===MOVP; return `<tr class="${r===s.currentRound?'now':''}"><td>${r}</td><td><b>${t.split('_')[1]}</b></td><td>${ns?'NS':'EW'}</td><td class="nmc">${nm(ns?m.ew:m.ns)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('');
+  if(MOVT!=null){
+    const rows=rounds.map(r=>{ const m=mv[r+'_'+MOVT]; if(!m) return ''; return `<tr class="${r===s.currentRound?'now':''}"><td>${r}</td><td class="nmc">${nm(m.ns)}</td><td class="nmc">${nm(m.ew)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('');
+    body=`<h2 class="tt">${L('Table')} ${MOVT}</h2><div class="resw"><table class="res mv"><tr><th>${L('Round')}</th><th>${L('North–South')}</th><th>${L('East–West')}</th><th>${L('Boards')}</th></tr>${rows}</table></div>`;
+  } else if(MOVP){
+    const rows=rounds.map(r=>{ const t=Object.keys(mv).find(k=>+k.split('_')[0]===r&&(mv[k].ns===MOVP||mv[k].ew===MOVP)); if(!t) return `<tr><td>${r}</td><td colspan="4">—</td></tr>`; const m=mv[t], ns=m.ns===MOVP; return `<tr class="${r===s.currentRound?'now':''}"><td>${r}</td><td><b>${t.split('_')[1]}</b></td><td>${ns?L('North–South'):L('East–West')}</td><td class="nmc">${nm(ns?m.ew:m.ns)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('');
     body=`<h2 class="tt">${esc(pairNo(MOVP))} · ${esc(P[MOVP]&&P[MOVP].name||'')}</h2><div class="resw"><table class="res mv"><tr><th>${L('Round')}</th><th>${L('Table')}</th><th>${L('Seat')}</th><th>${L('Opponents')}</th><th>${L('Boards')}</th></tr>${rows}</table></div>`;
   } else {
     body=rounds.map(r=>{ const ts=Object.keys(mv).filter(k=>+k.split('_')[0]===r).map(k=>+k.split('_')[1]).sort((a,b)=>a-b);
-      return `<h2 class="tt${r===s.currentRound?' now':''}">${L('Round')} ${r}</h2><div class="resw"><table class="res mv"><tr><th>${L('Table')}</th><th>NS</th><th>EW</th><th>${L('Boards')}</th></tr>${ts.map(t=>{ const m=mv[r+'_'+t]; return `<tr><td><b>${t}</b></td><td class="nmc">${nm(m.ns)}</td><td class="nmc">${nm(m.ew)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('')}</table></div>`; }).join('');
+      return `<h2 class="tt${r===s.currentRound?' now':''}">${L('Round')} ${r}</h2><div class="resw"><table class="res mv"><tr><th>${L('Table')}</th><th>${L('North–South')}</th><th>${L('East–West')}</th><th>${L('Boards')}</th></tr>${ts.map(t=>{ const m=mv[r+'_'+t]; return `<tr><td><b>${t}</b></td><td class="nmc">${nm(m.ns)}</td><td class="nmc">${nm(m.ew)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('')}</table></div>`; }).join('');
   }
   return `<div class="ccr">${head}<h2 class="tt">${esc(s.name||L('Tournament'))}</h2>${pick}${body}</div>`;
 }
@@ -259,7 +267,8 @@ const MOV_CSS=`.ccr .mpick{display:flex;flex-wrap:wrap;align-items:center;gap:6p
 .ccr .mpick a.on{background:#1d5534;color:#fff;border-color:#1d5534}
 .ccr .mv td{text-align:center}.ccr .mv td.nmc{text-align:left;white-space:normal}.ccr .mv td.nmc small{color:#5b6b61}
 .ccr .mv tr.now td{background:#fff6d6!important}.ccr .tt.now{color:#b8860b}.ccr .inone{color:#777;padding:20px 0}`;
-window.ccMovePair=function(id){ MOVP=id; const el=layerEl(); el.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; };
+window.ccMoveTable=function(t){ MOVT=MOVT===t?null:t; MOVP=null; const el=layerEl(); el.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; };
+window.ccMovePair=function(id){ MOVP=id; MOVT=null; const el=layerEl(); el.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; };
 window.ccMovementPage=async function(){
   try{ await Promise.all(['state','movements','pairs'].map(k=>DB.get(k))); }catch(e){}
   const el=layerEl(); el.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; el.scrollTop=0;

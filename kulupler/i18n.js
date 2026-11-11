@@ -10,6 +10,9 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "North–South":"Kuzey–Güney",
+    "East–West":"Doğu–Batı",
+    "Continue without":"Kaydetmeden devam",
     "Take these boards to the table":"Bu boardları alıp masaya götürün",
     "Choose your pair":"Çiftini seç",
     "All":"Hepsi",

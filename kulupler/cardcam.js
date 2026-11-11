@@ -256,15 +256,18 @@ function ddBoardHtml(h,a,board){
 // the table's screen: for each board played in this round, its double dummy or a button to record its hands; the
 // board just finished opens its double dummy once by itself
 let lastFetch=0;
+window.ccSkipBoard=function(b){ let L=[]; try{ L=JSON.parse(sessionStorage.getItem('ccSkip:'+CLUB_ID)||'[]'); }catch(e){} if(!L.includes(String(b))) L.push(String(b)); try{ sessionStorage.setItem('ccSkip:'+CLUB_ID,JSON.stringify(L)); }catch(e){} if(typeof renderTableDetail==='function'&&typeof bmTableNo!=='undefined'&&bmTableNo) renderTableDetail(bmTableNo); };
 window.ccTableSection=function(tableNo,doneBoards){
   ccTableNo=tableNo;
   const box=document.getElementById('ccTable'); if(!box) return;
   const draw=()=>{
     const el=document.getElementById('ccTable'); if(!el) return;
     if(!doneBoards.length){ el.innerHTML=''; return; }
-    const missing=doneBoards.filter(b=>!handOf(b));
-    el.innerHTML=`<div class="cc-tbl">${missing.length?`<div class="cc-ask">📷 <span>The hands of this board are not recorded yet.</span> <b>Board ${missing.map(esc).join(', ')}</b></div>`:''}
-      <div class="cc-tbtns">${doneBoards.map(b=>handOf(b)?`<button class="btn btn-ghost btn-sm" onclick="ccShowDD('${esc(b)}')">🎯 DD · ${esc(b)}</button>`:`<button class="btn btn-gold btn-sm" onclick="ccRecordStart('${esc(b)}')">📷 <span>Record the hands</span> · ${esc(b)}</button>`).join('')}</div></div>`;
+    let skip=[]; try{ skip=JSON.parse(sessionStorage.getItem('ccSkip:'+CLUB_ID)||'[]'); }catch(e){}
+    const missing=doneBoards.filter(b=>!handOf(b)&&!skip.includes(String(b)));
+    const ask=missing.length?`<div class="cc-ask2"><div class="cc-askt">📷 <span>The hands of this board are not recorded yet.</span></div>${missing.map(b=>`<div class="cc-askrow"><button class="btn btn-gold cc-big" onclick="ccRecordStart('${esc(b)}')">📷 <span>Record the hands</span> · ${esc(b)}</button><button class="btn btn-ghost cc-skip" onclick="ccSkipBoard('${esc(b)}')">⏭ <span>Continue without</span></button></div>`).join('')}</div>`:'';
+    const dds=doneBoards.filter(b=>handOf(b));
+    el.innerHTML=`<div class="cc-tbl">${ask}${dds.length?`<div class="cc-tbtns">${dds.map(b=>`<button class="btn btn-ghost btn-sm" onclick="ccShowDD('${esc(b)}')">🎯 DD · ${esc(b)}</button>`).join('')}</div>`:''}</div>`;
     // the board just finished: its double dummy once, by itself
     window._ccSeen=window._ccSeen||new Set();
     const lastB=doneBoards[doneBoards.length-1], k=tableNo+'_'+lastB;
