@@ -539,6 +539,7 @@ window.showTableFinalResults=function(tableNo){
       <div style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);margin:14px 0;">
         ${rowsHTML||'<div style="padding:14px;text-align:center;color:var(--text3);font-size:0.8rem;">No results yet</div>'}
       </div>
+      <button class="btn btn-green btn-full" style="margin-bottom:8px;" onclick="ccResultsPage()">📄 Results page</button>
       <button class="btn btn-gold btn-full" onclick="performLogout()">← Log Out</button>
     </div>`;
 };

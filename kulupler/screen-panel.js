@@ -18,7 +18,7 @@ function renderScreenPanel(){
         <div class="sb-title">🏆 ${s.name}</div>
         <div style="display:flex;gap:6px;align-items:center;">
           <span class="live-pill"><div class="live-dot"></div>Live</span>
-          <button class="btn btn-blue btn-sm" onclick="screenPrintPDF()">🖨 Print PDF</button>
+          ${s.status==='finished'?'<button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button>':''}<button class="btn btn-blue btn-sm" onclick="screenPrintPDF()">🖨 Print PDF</button>
         </div>
       </div>
       <div class="stats-row">

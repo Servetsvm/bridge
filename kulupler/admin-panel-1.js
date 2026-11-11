@@ -583,7 +583,7 @@ function showFinalScoreboard(){
         </tr>`;
       }).join('')}</tbody>
     </table>`,
-    `<button class="btn btn-blue" onclick="adminExport();closeModal()">⬇ Export Results</button>
+    `<button class="btn btn-gold" onclick="closeModal();ccResultsPage()">📄 Results page</button><button class="btn btn-blue" onclick="adminExport();closeModal()">⬇ Export Results</button>
      <button class="btn btn-ghost" onclick="closeModal()">Close</button>`);
 }
 window.adminExport=function(){
