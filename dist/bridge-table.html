@@ -2060,6 +2060,16 @@ body.homev2 #hClubs .h2ti{font-size:28px}
 #clubView .cvclubs{font-size:18px}
 #bHome.hbtn b{font-size:20px;line-height:1}
 @media (max-width:600px){ #bHome.hbtn b{font-size:18px} }
+/* Start and Practise conventions side by side, on a phone too */
+body.homev2 .h2ptx .h2btns{display:flex;flex-wrap:nowrap;gap:8px;align-items:stretch;margin-top:4px}
+body.homev2 .h2ptx .h2btns .h2go{margin:0;white-space:nowrap}
+body.homev2 .h2ptx .h2btns .h2conv{margin:0}
+@media (max-width:600px){ body.homev2 .h2ptx .h2btns .h2go{flex:1 1 auto;padding:10px 8px;font-size:14px} body.homev2 .h2ptx .h2btns #bGo{flex:0 0 auto} }
+/* Clubs looks different from the other tiles: the green felt with a brass edge */
+body.homev2 #hClubs.h2tile{background:linear-gradient(160deg,#1f5c3c,#123d27);border:2px solid var(--h2-brass,#c9a227);box-shadow:var(--h2-shadow),inset 0 0 0 1px rgba(255,230,160,.25)}
+body.homev2 #hClubs.h2tile b{color:#f6e3a6}
+body.homev2 #hClubs.h2tile small{color:rgba(246,236,208,.85)}
+body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#fff7dc,#f0dca0 60%,#c9a227)}
 
 </style>
 
@@ -9898,7 +9908,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 433;
+const APP_V = 434;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11515,7 +11525,7 @@ function homeShell2() {
       <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2mid"><div class="h2chips" id="hMe"></div><button class="hpz" id="hPuzzle"></button></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
       <div class="h2pr"><div class="h2play">
         <button class="h2fan h2fango" id="bGoFan" aria-hidden="true" tabindex="-1">${fan}</button>
-        <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📚 ${T('Practise conventions')}</button></div>
+        <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><div class="h2btns"><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📚 ${T('Practise conventions')}</button></div></div>
       </div>
       </div>
       <div class="h2tiles">
