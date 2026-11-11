@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 431;
+const APP_V = 432;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3248,6 +3248,9 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.pldet) { ev_.preventDefault(); ui.plOpen = ui.plOpen === t.dataset.pldet ? null : t.dataset.pldet; showPlayers(); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
+  if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
+  if (t.id === 'ppGo') { playerPinGo(); return; }
+  if (t.id === 'ppBack') { ui.plPinK = null; closeOv(); showPlayers(); return; }
   if (t.id === 'hSup') { showSup(); return; }
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.id === 'supSend') { sendSup(); return; }
@@ -4025,7 +4028,7 @@ async function showPlayers() {
   // a name opened: its days, newest first (30): in and out, and what was played that day
   const plDays = x => `<div class="pldays">${(x.hist || []).slice(0, 30).map(h => { const a = h.a || {}, cv = Object.keys(a.cv || {}).concat(String(h.pr || '').split(',')).filter((k, i, A) => k && A.indexOf(k) === i && E.convInfo(k));
     const did = [a.r ? '🤖 ' + T('With robots') + ' ' + a.r : '', a.o ? '🌐 ' + T('At a table') + ' ' + a.o : '', a.t ? '🏆 ' + T('Tournaments') + ' ' + a.t : '', a.p ? '📚 ' + T('Practise conventions') + ' ' + a.p : ''].filter(Boolean).join(' · ');
-    return `<div class="plday"><b>${new Date(h.day).toLocaleDateString()}</b><span>${T('Logged in')} ${hm(h.in)} · ${T('Last seen')} ${hm(h.out)}</span><span>${did || '—'}${a.b ? ' · ' + T('Boards') + ' ' + a.b : ''}</span>${cv.length ? `<small>${cv.map(k => esc(pracName(k))).join(', ')}</small>` : ''}</div>`; }).join('') || `<div class="muted">—</div>`}</div>`;
+    return `<div class="plday"><b>${new Date(h.day).toLocaleDateString()}</b><span>${T('Logged in')} ${hm(h.in)} · ${T('Last seen')} ${hm(h.out)}</span><span>${did || '—'}${a.b ? ' · ' + T('Boards') + ' ' + a.b : ''}</span>${cv.length ? `<small>${cv.map(k => esc(pracName(k))).join(', ')}</small>` : ''}</div>`; }).join('') || `<div class="muted">—</div>`}${x.me ? '' : `<button class="btn mini-btn plpin" data-plpin="${esc(x.k)}">🔑 ${T('New PIN')}</button>`}</div>`;
   const rows = L.filter(x => !q || x.name.toLowerCase().includes(q)).map(x => `<label class="plrow${sel.has(x.k) ? ' on' : ''}">
       <input type="checkbox" data-plk="${esc(x.k)}" ${sel.has(x.k) ? 'checked' : ''} ${x.me ? 'disabled' : ''}>
       <b>${esc(x.name)}</b><small>${T('Made')}: ${when(x.ts)} · ${T('Last seen')}: ${x.hist && x.hist[0] ? when(x.hist[0].out || x.hist[0].in) : '–'} · ${T('{0} days', x.days)}</small><button class="pldet" data-pldet="${esc(x.k)}">${ui.plOpen === x.k ? '▾' : '▸'}</button></label>${ui.plOpen === x.k ? plDays(x) : ''}`).join('');
@@ -4035,6 +4038,27 @@ async function showPlayers() {
     <div class="muted">${T('Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.')}</div>
     <div class="row2"><button class="btn bad" id="plDel" ${sel.size ? '' : 'disabled'}>🗑 ${T('Remove the ticked ({0})', sel.size)}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
   const i = $('plQ'); if (i && ui.plFocus) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+}
+// a new PIN for a player who forgot theirs: typed here by the administrator, who tells it to the player
+function playerPin(k) {
+  const x = (ui.plList || []).find(y => y.k === k); if (!x) return;
+  ui.plPinK = k;
+  openOv('plpin', `<h2>🔑 ${T('New PIN for {0}', esc(x.name))}</h2>
+    <div class="muted">${T('The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.')}</div>
+    <div class="grp"><span>${T('PIN (4 digits)')}</span><input id="ppPin" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off"></div>
+    <div class="grp"><span>${T('PIN again')}</span><input id="ppPin2" class="tok gpin" inputmode="numeric" pattern="[0-9]*" maxlength="4" type="password" autocomplete="off"></div>
+    <div class="err" id="ppErr"></div>
+    <div class="row2"><button class="btn new" id="ppGo">🔑 ${T('Save')}</button><button class="btn" id="ppBack">${T('Cancel')}</button></div>`);
+}
+async function playerPinGo() {
+  const x = (ui.plList || []).find(y => y.k === ui.plPinK), a = $('ppPin') ? $('ppPin').value : '', b = $('ppPin2') ? $('ppPin2').value : '';
+  const err = m => { const e = $('ppErr'); if (e) e.textContent = m; };
+  if (!x) return;
+  if (!/^\d{4}$/.test(a)) return err(T('The PIN is 4 digits.'));
+  if (a !== b) return err(T('The two PINs are not the same.'));
+  let ok = false; try { ok = await Net.adminSetPin(x.k, await pinHash(x.name, a)); } catch (e) {}
+  if (!ok) return err(T('The online database could not be reached.'));
+  flash('🔑 ' + T('The PIN of {0} is changed.', x.name), 2500); ui.plPinK = null; closeOv(); showPlayers();
 }
 function playersDelete() {
   const sel = ui.plSel; if (!sel || !sel.size) return;

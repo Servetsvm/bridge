@@ -879,6 +879,13 @@ const Net = (() => {
     await Cloud.patch('data/' + seg(u.pin), { hist: [], wipe: Date.now() });
     return true;
   }
+  // the administrator gives a player a new PIN (the player forgot it): the name stays; the PIN is typed by the
+  // administrator on their own device and only its one-way code is stored
+  async function adminSetPin(k, pinH) {
+    if (!isAdmin() || !/^[0-9a-f]{32}$/.test(pinH || '')) return false;
+    await Cloud.put('users/' + seg(k) + '/pin', pinH);
+    return true;
+  }
   async function adminDelete(k) {
     if (!isAdmin() || k === ruleKey(myName())) return false;
     const u = await Cloud.get('users/' + seg(k)).catch(() => null), logins = await Cloud.get('logins?shallow=true').catch(() => null) || {};
@@ -1059,6 +1066,7 @@ const Net = (() => {
   }
   async function login(name, pinH) {
     if (!Cloud.on) return 'offline';
+    try { await Auth.token(); } catch (e) { return 'offline'; }   // the device could not sign in to the database: not a wrong PIN
     try { if (!(await Cloud.exists(name))) return 'nouser'; return (await Cloud.session(name, pinH)) ? 'ok' : 'pin'; } catch (e) { return 'offline'; }
   }
   // free names close to the one asked for (Servet2, Servet_NO, Servet35 …)
@@ -1850,5 +1858,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
