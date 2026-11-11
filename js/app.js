@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 427;
+const APP_V = 428;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3185,6 +3185,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
+  if (t.dataset.pldet) { ev_.preventDefault(); ui.plOpen = ui.plOpen === t.dataset.pldet ? null : t.dataset.pldet; showPlayers(); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.id === 'hSup') { showSup(); return; }
@@ -3959,10 +3960,15 @@ async function showPlayers() {
   if (!ui.plList) { openOv('players', `<h2>👥 ${T('Players')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`); try { ui.plList = await Net.adminUsers(); } catch (e) { ui.plList = null; } }
   if (ui.overlay !== 'players' && ui.overlay) return;
   const L = ui.plList || [], q = (ui.plQ || '').toLowerCase(), sel = ui.plSel || (ui.plSel = new Set());
-  const day = ts => ts ? new Date(ts).toLocaleDateString() : '–';
+  const when = ts => ts ? new Date(ts).toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+  const hm = ts => ts ? new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '–';
+  // a name opened: its days, newest first (30): in and out, and what was played that day
+  const plDays = x => `<div class="pldays">${(x.hist || []).slice(0, 30).map(h => { const a = h.a || {}, cv = Object.keys(a.cv || {}).concat(String(h.pr || '').split(',')).filter((k, i, A) => k && A.indexOf(k) === i && E.convInfo(k));
+    const did = [a.r ? '🤖 ' + T('With robots') + ' ' + a.r : '', a.o ? '🌐 ' + T('At a table') + ' ' + a.o : '', a.t ? '🏆 ' + T('Tournaments') + ' ' + a.t : '', a.p ? '📚 ' + T('Practise conventions') + ' ' + a.p : ''].filter(Boolean).join(' · ');
+    return `<div class="plday"><b>${new Date(h.day).toLocaleDateString()}</b><span>${T('Logged in')} ${hm(h.in)} · ${T('Last seen')} ${hm(h.out)}</span><span>${did || '—'}${a.b ? ' · ' + T('Boards') + ' ' + a.b : ''}</span>${cv.length ? `<small>${cv.map(k => esc(pracName(k))).join(', ')}</small>` : ''}</div>`; }).join('') || `<div class="muted">—</div>`}</div>`;
   const rows = L.filter(x => !q || x.name.toLowerCase().includes(q)).map(x => `<label class="plrow${sel.has(x.k) ? ' on' : ''}">
       <input type="checkbox" data-plk="${esc(x.k)}" ${sel.has(x.k) ? 'checked' : ''} ${x.me ? 'disabled' : ''}>
-      <b>${esc(x.name)}</b><small>${T('Made')}: ${day(x.ts)} · ${T('Last seen')}: ${x.last ? new Date(x.last).toLocaleDateString() : '–'} · ${T('{0} days', x.days)}</small></label>`).join('');
+      <b>${esc(x.name)}</b><small>${T('Made')}: ${when(x.ts)} · ${T('Last seen')}: ${x.hist && x.hist[0] ? when(x.hist[0].out || x.hist[0].in) : '–'} · ${T('{0} days', x.days)}</small><button class="pldet" data-pldet="${esc(x.k)}">${ui.plOpen === x.k ? '▾' : '▸'}</button></label>${ui.plOpen === x.k ? plDays(x) : ''}`).join('');
   openOv('players', `<h2>👥 ${T('All players')} <small>(${L.length})</small></h2>
     <input id="plQ" class="tok wide" placeholder="🔍 ${T('Search a name…')}" value="${esc(ui.plQ || '')}">
     <div class="pllist">${rows || `<div class="muted">${T('Nobody yet.')}</div>`}</div>

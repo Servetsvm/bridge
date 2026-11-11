@@ -1975,3 +1975,7 @@ body.homev2 .h2mid{grid-area:chips;display:flex;align-items:center;justify-conte
 .hpz:hover{filter:brightness(1.05)}
 .pzdd{text-align:center;margin-top:8px}
 .clubtools{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.clubtools .btn{padding:8px 4px;font-size:.9rem;white-space:nowrap}
+.plrow{position:relative}.plrow .pldet{margin-left:auto;background:none;border:1px solid var(--line,#c9b98f);border-radius:8px;padding:2px 10px;font-size:1rem;cursor:pointer;color:inherit}
+.pldays{margin:2px 0 8px 28px;display:flex;flex-direction:column;gap:4px}
+.plday{display:flex;flex-direction:column;gap:1px;padding:6px 8px;border-left:3px solid var(--brass,#d4a017);background:rgba(0,0,0,.04);border-radius:6px;font-size:.85rem}
+.plday small{opacity:.75}

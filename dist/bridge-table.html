@@ -2027,6 +2027,10 @@ body.homev2 .h2mid{grid-area:chips;display:flex;align-items:center;justify-conte
 .hpz:hover{filter:brightness(1.05)}
 .pzdd{text-align:center;margin-top:8px}
 .clubtools{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.clubtools .btn{padding:8px 4px;font-size:.9rem;white-space:nowrap}
+.plrow{position:relative}.plrow .pldet{margin-left:auto;background:none;border:1px solid var(--line,#c9b98f);border-radius:8px;padding:2px 10px;font-size:1rem;cursor:pointer;color:inherit}
+.pldays{margin:2px 0 8px 28px;display:flex;flex-direction:column;gap:4px}
+.plday{display:flex;flex-direction:column;gap:1px;padding:6px 8px;border-left:3px solid var(--brass,#d4a017);background:rgba(0,0,0,.04);border-radius:6px;font-size:.85rem}
+.plday small{opacity:.75}
 
 </style>
 
@@ -5321,7 +5325,7 @@ const I18N = {
     "All players": "Tüm oyuncular",
     "Players": "Oyuncular",
     "Made": "Açıldı",
-    "Last seen": "Son giriş",
+    "Logged in": "Giriş", "Last seen": "Son giriş",
     "{0} days": "{0} gün",
     "Search a name…": "İsim ara…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Bir ismi silmek onu sonuçları, ayarları, giriş kayıtları ve mesajlarıyla birlikte kalıcı olarak siler; isim yeniden boşa çıkar.",
@@ -5755,7 +5759,7 @@ const I18N = {
     "All players": "Alle spillere",
     "Players": "Spillere",
     "Made": "Opprettet",
-    "Last seen": "Sist sett",
+    "Logged in": "Logget inn", "Last seen": "Sist sett",
     "{0} days": "{0} dager",
     "Search a name…": "Søk etter navn…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Å fjerne et navn sletter det for godt med resultater, innstillinger, innlogginger og meldinger; navnet blir ledig igjen.",
@@ -6189,7 +6193,7 @@ const I18N = {
     "All players": "Todos los jugadores",
     "Players": "Jugadores",
     "Made": "Creado",
-    "Last seen": "Última vez",
+    "Logged in": "Entrada", "Last seen": "Última vez",
     "{0} days": "{0} días",
     "Search a name…": "Buscar un nombre…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Eliminar un nombre lo borra para siempre con sus resultados, ajustes, accesos y mensajes; el nombre queda libre.",
@@ -6651,7 +6655,7 @@ const I18N = {
     "All players": "Tous les joueurs",
     "Players": "Joueurs",
     "Made": "Créé",
-    "Last seen": "Dernière visite",
+    "Logged in": "Entrée", "Last seen": "Dernière visite",
     "{0} days": "{0} jours",
     "Search a name…": "Chercher un nom…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Supprimer un nom l’efface définitivement avec ses résultats, réglages, connexions et messages ; le nom redevient libre.",
@@ -7113,7 +7117,7 @@ const I18N = {
     "All players": "Tutti i giocatori",
     "Players": "Giocatori",
     "Made": "Creato",
-    "Last seen": "Ultimo accesso",
+    "Logged in": "Entrata", "Last seen": "Ultimo accesso",
     "{0} days": "{0} giorni",
     "Search a name…": "Cerca un nome…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Eliminare un nome lo cancella per sempre con risultati, impostazioni, accessi e messaggi; il nome torna libero.",
@@ -7575,7 +7579,7 @@ const I18N = {
     "All players": "Alle Spieler",
     "Players": "Spieler",
     "Made": "Angelegt",
-    "Last seen": "Zuletzt gesehen",
+    "Logged in": "Anmeldung", "Last seen": "Zuletzt gesehen",
     "{0} days": "{0} Tage",
     "Search a name…": "Namen suchen…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Ein Name wird mit Ergebnissen, Einstellungen, Logins und Nachrichten endgültig gelöscht; der Name ist dann wieder frei.",
@@ -8037,7 +8041,7 @@ const I18N = {
     "All players": "Все игроки",
     "Players": "Игроки",
     "Made": "Создан",
-    "Last seen": "Последний вход",
+    "Logged in": "Вход", "Last seen": "Последний вход",
     "{0} days": "дней: {0}",
     "Search a name…": "Поиск имени…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Удаление имени навсегда стирает его результаты, настройки, входы и сообщения; имя снова становится свободным.",
@@ -8499,7 +8503,7 @@ const I18N = {
     "All players": "Wszyscy gracze",
     "Players": "Gracze",
     "Made": "Utworzono",
-    "Last seen": "Ostatnio",
+    "Logged in": "Logowanie", "Last seen": "Ostatnio",
     "{0} days": "{0} dni",
     "Search a name…": "Szukaj nazwy…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Usunięcie nazwy kasuje ją na zawsze wraz z wynikami, ustawieniami, logowaniami i wiadomościami; nazwa znów jest wolna.",
@@ -8961,7 +8965,7 @@ const I18N = {
     "All players": "所有玩家",
     "Players": "玩家",
     "Made": "创建",
-    "Last seen": "最近登录",
+    "Logged in": "登录", "Last seen": "最近登录",
     "{0} days": "{0} 天",
     "Search a name…": "搜索名字…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "删除一个名字会永久删除其成绩、设置、登录记录和消息；该名字可再次被使用。",
@@ -9865,7 +9869,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 427;
+const APP_V = 428;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -13040,6 +13044,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
+  if (t.dataset.pldet) { ev_.preventDefault(); ui.plOpen = ui.plOpen === t.dataset.pldet ? null : t.dataset.pldet; showPlayers(); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.id === 'hSup') { showSup(); return; }
@@ -13814,10 +13819,15 @@ async function showPlayers() {
   if (!ui.plList) { openOv('players', `<h2>👥 ${T('Players')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`); try { ui.plList = await Net.adminUsers(); } catch (e) { ui.plList = null; } }
   if (ui.overlay !== 'players' && ui.overlay) return;
   const L = ui.plList || [], q = (ui.plQ || '').toLowerCase(), sel = ui.plSel || (ui.plSel = new Set());
-  const day = ts => ts ? new Date(ts).toLocaleDateString() : '–';
+  const when = ts => ts ? new Date(ts).toLocaleString([], { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+  const hm = ts => ts ? new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '–';
+  // a name opened: its days, newest first (30): in and out, and what was played that day
+  const plDays = x => `<div class="pldays">${(x.hist || []).slice(0, 30).map(h => { const a = h.a || {}, cv = Object.keys(a.cv || {}).concat(String(h.pr || '').split(',')).filter((k, i, A) => k && A.indexOf(k) === i && E.convInfo(k));
+    const did = [a.r ? '🤖 ' + T('With robots') + ' ' + a.r : '', a.o ? '🌐 ' + T('At a table') + ' ' + a.o : '', a.t ? '🏆 ' + T('Tournaments') + ' ' + a.t : '', a.p ? '📚 ' + T('Practise conventions') + ' ' + a.p : ''].filter(Boolean).join(' · ');
+    return `<div class="plday"><b>${new Date(h.day).toLocaleDateString()}</b><span>${T('Logged in')} ${hm(h.in)} · ${T('Last seen')} ${hm(h.out)}</span><span>${did || '—'}${a.b ? ' · ' + T('Boards') + ' ' + a.b : ''}</span>${cv.length ? `<small>${cv.map(k => esc(pracName(k))).join(', ')}</small>` : ''}</div>`; }).join('') || `<div class="muted">—</div>`}</div>`;
   const rows = L.filter(x => !q || x.name.toLowerCase().includes(q)).map(x => `<label class="plrow${sel.has(x.k) ? ' on' : ''}">
       <input type="checkbox" data-plk="${esc(x.k)}" ${sel.has(x.k) ? 'checked' : ''} ${x.me ? 'disabled' : ''}>
-      <b>${esc(x.name)}</b><small>${T('Made')}: ${day(x.ts)} · ${T('Last seen')}: ${x.last ? new Date(x.last).toLocaleDateString() : '–'} · ${T('{0} days', x.days)}</small></label>`).join('');
+      <b>${esc(x.name)}</b><small>${T('Made')}: ${when(x.ts)} · ${T('Last seen')}: ${x.hist && x.hist[0] ? when(x.hist[0].out || x.hist[0].in) : '–'} · ${T('{0} days', x.days)}</small><button class="pldet" data-pldet="${esc(x.k)}">${ui.plOpen === x.k ? '▾' : '▸'}</button></label>${ui.plOpen === x.k ? plDays(x) : ''}`).join('');
   openOv('players', `<h2>👥 ${T('All players')} <small>(${L.length})</small></h2>
     <input id="plQ" class="tok wide" placeholder="🔍 ${T('Search a name…')}" value="${esc(ui.plQ || '')}">
     <div class="pllist">${rows || `<div class="muted">${T('Nobody yet.')}</div>`}</div>
@@ -14705,6 +14715,7 @@ const Net = (() => {
         await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof(), pc });
         if (st.cloudFail) { st.cloudFail = 0; render(); }
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()), ...(SET.act && SET.act.d === today() ? { a: actOut() } : {}) }); st.loggedDay = today(); st.prSent = ''; }
+        if (!st.leAt || Date.now() - st.leAt > 5 * 60e3) { st.leAt = Date.now(); Cloud.put('logins/' + today() + '/' + fbKey(name) + '/le', st.leAt).catch(() => {}); }
         // the conventions being practised now: kept with the day's login, which only the administrator can read
         { const pr = w === 'robots' && typeof pracList === 'function' ? pracList().join(',') : ''; if (pr !== (st.prSent || '')) { await Cloud.put('logins/' + today() + '/' + fbKey(name) + '/pr', pr || null); st.prSent = pr; } }
         supCheck();   // a new message for you (the administrator: from a player)
@@ -14893,15 +14904,16 @@ const Net = (() => {
   async function adminUsers() {
     if (!Cloud.on || !isAdmin()) return [];
     const [users, logins] = await Promise.all([Cloud.get('users'), Cloud.get('logins').catch(() => null)]);
-    const last = {}, days = {};
-    for (const [day, L] of Object.entries(logins || {})) for (const k of Object.keys(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; }
-    return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, me: k === ruleKey(myName()) }))
+    const last = {}, days = {}, hist = {};
+    for (const [day, L] of Object.entries(logins || {})) for (const [k, x] of Object.entries(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; (hist[k] = hist[k] || []).push({ day, in: x && x.ts || 0, out: x && x.le || 0, a: x && x.a || null, pr: x && x.pr || '' }); }
+    for (const k in hist) hist[k].sort((a, b) => b.day.localeCompare(a.day));
+    return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, hist: hist[k] || [], me: k === ruleKey(myName()) }))
       .sort((a, b) => (b.last || '').localeCompare(a.last || '') || b.ts - a.ts);
   }
   // this player leaves (logs out): off the online list now, and no more beats from this page
   async function goOffline() {
     const name = myName(); st.out = true; if (!Cloud.on || !name) return;
-    try { await Promise.race([Cloud.put('online/' + fbKey(name), null), new Promise(r => setTimeout(r, 2500))]); } catch (e) {}
+    try { await Promise.race([Promise.all([Cloud.put('online/' + fbKey(name), null), Cloud.put('logins/' + today() + '/' + fbKey(name) + '/le', Date.now())]), new Promise(r => setTimeout(r, 2500))]); } catch (e) {}
   }
   // the administrator wipes a player's score history: the boards in the database, and a mark for the player's devices
   async function adminWipe(k) {

@@ -670,6 +670,7 @@ const Net = (() => {
         await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof(), pc });
         if (st.cloudFail) { st.cloudFail = 0; render(); }
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()), ...(SET.act && SET.act.d === today() ? { a: actOut() } : {}) }); st.loggedDay = today(); st.prSent = ''; }
+        if (!st.leAt || Date.now() - st.leAt > 5 * 60e3) { st.leAt = Date.now(); Cloud.put('logins/' + today() + '/' + fbKey(name) + '/le', st.leAt).catch(() => {}); }
         // the conventions being practised now: kept with the day's login, which only the administrator can read
         { const pr = w === 'robots' && typeof pracList === 'function' ? pracList().join(',') : ''; if (pr !== (st.prSent || '')) { await Cloud.put('logins/' + today() + '/' + fbKey(name) + '/pr', pr || null); st.prSent = pr; } }
         supCheck();   // a new message for you (the administrator: from a player)
@@ -858,15 +859,16 @@ const Net = (() => {
   async function adminUsers() {
     if (!Cloud.on || !isAdmin()) return [];
     const [users, logins] = await Promise.all([Cloud.get('users'), Cloud.get('logins').catch(() => null)]);
-    const last = {}, days = {};
-    for (const [day, L] of Object.entries(logins || {})) for (const k of Object.keys(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; }
-    return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, me: k === ruleKey(myName()) }))
+    const last = {}, days = {}, hist = {};
+    for (const [day, L] of Object.entries(logins || {})) for (const [k, x] of Object.entries(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; (hist[k] = hist[k] || []).push({ day, in: x && x.ts || 0, out: x && x.le || 0, a: x && x.a || null, pr: x && x.pr || '' }); }
+    for (const k in hist) hist[k].sort((a, b) => b.day.localeCompare(a.day));
+    return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, hist: hist[k] || [], me: k === ruleKey(myName()) }))
       .sort((a, b) => (b.last || '').localeCompare(a.last || '') || b.ts - a.ts);
   }
   // this player leaves (logs out): off the online list now, and no more beats from this page
   async function goOffline() {
     const name = myName(); st.out = true; if (!Cloud.on || !name) return;
-    try { await Promise.race([Cloud.put('online/' + fbKey(name), null), new Promise(r => setTimeout(r, 2500))]); } catch (e) {}
+    try { await Promise.race([Promise.all([Cloud.put('online/' + fbKey(name), null), Cloud.put('logins/' + today() + '/' + fbKey(name) + '/le', Date.now())]), new Promise(r => setTimeout(r, 2500))]); } catch (e) {}
   }
   // the administrator wipes a player's score history: the boards in the database, and a mark for the player's devices
   async function adminWipe(k) {
