@@ -10,7 +10,8 @@ const SYM=['♣','♦','♥','♠'], RK='23456789TJQKA';
 const esc=s=>String(s==null?'':s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
 const red=s=>/[♥♦]/.test(s);
 const suitHtml=t=>esc(t).replace(/([♥♦])/g,'<span class="r">$1</span>');
-const pairNo=id=>String(id||'').replace(/^ns_/,'NS ').replace(/^ew_/,'EW ').replace(/^p/,'');
+// a pair's number only, one for each pair: North-South pairs first, then East-West (EW 1 after the last NS pair)
+const pairNo=id=>{ const v=String(id||''), m=v.match(/^(ns|ew|p)_?(\d+)$/); if(!m) return v; const n=+m[2]; if(m[1]!=='ew') return String(n); const ns=Object.keys(getPairs()).filter(k=>/^ns_\d+$/.test(k)).length; return String(ns+n); };
 const fmt=(n,d=2)=>(typeof n==='number'&&isFinite(n)?n.toFixed(d):'—');
 
 // a PBN deal → four hands (N E S W) of card numbers
