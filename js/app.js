@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 425;
+const APP_V = 426;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3914,9 +3914,11 @@ function openClubs(q) {
   let v = $('clubView');
   if (!v) {
     v = document.createElement('div'); v.id = 'clubView';
-    v.innerHTML = `<div class="cvbar"><button class="btn" id="cvHome">⌂ ${T('Home')}</button><b>🏛 ${T('Clubs')}</b></div><iframe id="cvFrame"></iframe>`;
+    v.innerHTML = `<div class="cvbar"><button class="btn" id="cvHome">⌂ ${T('Home')}</button><button class="cvclubs" id="cvClubs">🏛 ${T('Clubs')}</button></div><iframe id="cvFrame"></iframe>`;
     document.body.appendChild(v);
     v.querySelector('#cvHome').addEventListener('click', () => history.state && history.state.clubs ? history.back() : closeClubs());
+    // the Clubs list again (the clubs program closes)
+    v.querySelector('#cvClubs').addEventListener('click', () => { if (history.state && history.state.clubs) history.back(); else closeClubs(); setTimeout(() => { ui.overlay = null; showClubs(); }, 60); });
   }
   const p = new URLSearchParams(String(q || '').replace(/^\?/, '')); p.set('embed', '1'); p.set('lang', SET.lang || 'en');   // the clubs program in Bridge Table's language
   const fr = document.createElement('iframe'); fr.id = 'cvFrame'; fr.title = T('Clubs'); fr.src = 'kulupler/index.html?' + p.toString();   // a new frame: its first page adds no step to Back
