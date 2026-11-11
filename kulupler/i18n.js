@@ -10,6 +10,10 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Random boards":"Rastgele eller",
+    "Boards for conventions":"Konvansiyonlu eller",
+    "Choose at least one convention":"En az bir konvansiyon seç",
+    "Random":"Rastgele",
     "🎲 Make the boards automatically":"🎲 Board’ları otomatik oluştur",
     "Make the boards automatically":"Board’ları otomatik oluştur",
     "Base system":"Temel sistem",

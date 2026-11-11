@@ -554,3 +554,7 @@ body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}
 .dg-h{font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin:10px 0 4px}
 .dg-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px;max-height:40vh;overflow:auto}
 .dg-c{display:flex;align-items:center;gap:6px;font-size:.85rem;padding:3px 0;cursor:pointer}
+.dg-mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.dg-m{padding:12px 6px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:700;cursor:pointer}
+.dg-m.on{background:var(--gold);color:#1b1404;border-color:var(--gold)}
+.dd-note2{font-size:.72rem;color:var(--gold);flex-basis:100%}

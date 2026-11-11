@@ -309,15 +309,15 @@ window.adminAutoBoardsOpen=function(){
       box.innerHTML=`<div class="field"><label>Base system</label><select id="dgSys">${d.meta.systems.map(x=>`<option value="${x.k}">${cleanData(x.n)}</option>`).join('')}</select></div>
         <div class="field"><label>How many boards?</label><input type="number" id="dgN" min="1" max="99" value="${n}"></div>
         <div style="font-size:.8rem;color:var(--text2);margin:4px 0 6px;">The robots deal each board so that one of the chosen conventions comes up in the auction.</div>
-        <label class="dg-c"><input type="checkbox" id="dgNone" checked onchange="document.querySelectorAll('[data-dgc]').forEach(x=>x.checked=false)"> <b>None — random boards</b></label>
-        <div class="dg-h">Basics</div><div class="dg-list">${d.meta.convs.filter(c=>c.basic).map(item).join('')}</div>
-        <div class="dg-h">Conventions</div><div class="dg-list">${d.meta.convs.filter(c=>!c.basic).map(item).join('')}</div>`;
-      box.querySelectorAll('[data-dgc]').forEach(x=>x.addEventListener('change',()=>{ document.getElementById('dgNone').checked=!box.querySelector('[data-dgc]:checked'); }));
+        <div class="dg-mode"><button type="button" class="dg-m on" id="dgRand" onclick="adminDgMode(0)">🎲 <span>Random boards</span></button><button type="button" class="dg-m" id="dgConvM" onclick="adminDgMode(1)">📚 <span>Boards for conventions</span></button></div>
+        <div id="dgConvBox" hidden><div class="dg-h">Basics</div><div class="dg-list">${d.meta.convs.filter(c=>c.basic).map(item).join('')}</div>
+        <div class="dg-h">Conventions</div><div class="dg-list">${d.meta.convs.filter(c=>!c.basic).map(item).join('')}</div></div>`;
+      _dg._meta=d.meta;
       const go=document.getElementById('dgGo'); if(go) go.disabled=false;
     }
     if(d.progress&&box){ const p=document.getElementById('dgProg'); if(p) p.textContent=d.progress+' / '+_dg._n; }
     if(d.done){
-      const RK='AKQJT98765432', hands=d.done.map(x=>({board:x.board,deal:'N:'+x.cards.map(h=>[3,2,1,0].map(su=>h.filter(c=>((c/13)|0)===su).map(c=>c%13).sort((a,b)=>b-a).map(r=>RK[12-r]).join('')).join('.')).join(' '),dealer:dfDealer(x.board),vulnerable:dfVul(x.board)}));
+      const RK='AKQJT98765432', hands=d.done.map(x=>({board:x.board,deal:'N:'+x.cards.map(h=>[3,2,1,0].map(su=>h.filter(c=>((c/13)|0)===su).map(c=>c%13).sort((a,b)=>b-a).map(r=>RK[12-r]).join('')).join('.')).join(' '),dealer:dfDealer(x.board),vulnerable:dfVul(x.board),note:_dg._conv?[(_dg._sys&&_dg._sys.n||'').replace(/\s*\(.*\)$/,'')].concat((x.used||[]).map(k=>((_dg._meta.convs.find(c=>c.k===k)||{}).n||k))).filter(Boolean).join(' · '):(window.i18nText?i18nText('Random'):'Random')}));
       const conv=_dg._conv, hit=d.hit; adminAutoBoardsClose(true);
       // how many boards have one of the chosen conventions in the robots' auction
       if(conv) setTimeout(()=>toast('🎲 '+hit+' / '+hands.length+' · '+(window.i18nText?i18nText('with the chosen conventions'):'with the chosen conventions'),4000),2600);
@@ -326,9 +326,16 @@ window.adminAutoBoardsOpen=function(){
   };
   _dg.postMessage({meta:true});
 };
+window.adminDgMode=function(conv){
+  document.getElementById('dgRand')?.classList.toggle('on',!conv); document.getElementById('dgConvM')?.classList.toggle('on',!!conv);
+  const b=document.getElementById('dgConvBox'); if(b) b.hidden=!conv;
+  if(!conv) document.querySelectorAll('[data-dgc]').forEach(x=>{ x.checked=false; });
+};
 window.adminAutoBoardsGo=function(){
   if(!_dg) return;
-  const n=Math.max(1,Math.min(99,parseInt(document.getElementById('dgN')?.value)||0)), sys=document.getElementById('dgSys')?.value, convs=[...document.querySelectorAll('[data-dgc]:checked')].map(x=>x.dataset.dgc);
+  const n=Math.max(1,Math.min(99,parseInt(document.getElementById('dgN')?.value)||0)), sys=document.getElementById('dgSys')?.value, conv=!document.getElementById('dgConvBox')?.hidden, convs=conv?[...document.querySelectorAll('[data-dgc]:checked')].map(x=>x.dataset.dgc):[];
+  if(conv&&!convs.length){ toast('📚 '+(window.i18nText?i18nText('Choose at least one convention'):'Choose at least one convention')); return; }
+  _dg._sys=((_dg._meta&&_dg._meta.systems)||[]).find(x=>x.k===sys);
   _dg._n=n; _dg._conv=convs.length;
   const box=document.getElementById('dgBody'); if(box) box.innerHTML=`<div style="text-align:center;padding:16px;"><div style="font-size:1.6rem;">🎲</div><div>Making the boards…</div><div id="dgProg" style="font-size:1.3rem;font-weight:700;color:var(--gold);margin-top:6px;">0 / ${n}</div></div>`;
   const go=document.getElementById('dgGo'); if(go) go.disabled=true;
@@ -913,7 +920,7 @@ function renderHandsAnalysis(){
   if(!_ddRunning&&done<hands.length&&role==='admin')setTimeout(()=>startDDAnalysis(),300);   // continue an analysis that was interrupted
   return `<div class="card">${head}<div class="dd-list">${hands.map(h=>{
     const a=dd[String(h.board)];
-    return `<button class="dd-row" onclick="showBoardAnalysis('${String(h.board).replace(/[^0-9A-Za-z]/g,'')}')"><b>Board ${h.board}</b><span>${h.dealer||''} · ${h.vulnerable||''}</span><span class="dd-par">${a?'Par: '+a.par.text:'⏳'}</span></button>`;
+    return `<button class="dd-row" onclick="showBoardAnalysis('${String(h.board).replace(/[^0-9A-Za-z]/g,'')}')"><b>Board ${h.board}</b><span>${h.dealer||''} · ${h.vulnerable||''}</span>${h.note?`<span class="dd-note2">${cleanData(h.note)}</span>`:''}<span class="dd-par">${a?'Par: '+a.par.text:'⏳'}</span></button>`;
   }).join('')}</div></div>`;
 }
 window.showBoardAnalysis=function(b){
@@ -924,7 +931,7 @@ window.showBoardAnalysis=function(b){
     const d=boards[k],[t,r]=k.split('_'),m=mv[r+'_'+t]||{};
     return `<tr><td>T${t}/R${r}</td><td>${pairs[m.ns]?.name||m.ns||''}</td><td>${pairs[m.ew]?.name||m.ew||''}</td><td style="font-family:'Share Tech Mono',monospace;">${d.contract||'—'}</td><td>${typeof d.nsScore==='number'?(d.nsScore>0?'+':'')+d.nsScore:'—'}</td><td>${a?ddCompare(d,a):''}</td></tr>`;
   }).join('');
-  openModal('Board '+h.board,`
+  openModal('Board '+h.board+(h.note?' · '+cleanData(h.note):''),`
     <div style="font-size:0.75rem;color:var(--text2);margin-bottom:6px;">Dealer ${h.dealer||'?'} · Vulnerable: ${h.vulnerable||'?'}</div>
     ${ddDiagram(h.deal)}
     ${a?`<div class="dd-parline">Par: <b>${a.par.text}</b></div>${ddTableHtml(a.t)}`:'<div class="dd-note">⏳ The analysis of this board is not ready yet.</div>'}

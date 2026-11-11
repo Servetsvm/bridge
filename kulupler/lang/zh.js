@@ -1,6 +1,7 @@
 // BridgeGate interface in zh (loaded by i18n.js when this language is chosen): English text → zh, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["zh"]={"d":{"with the chosen conventions":"含所选约定","🎲 Make the boards automatically":"🎲 自动生成牌套","Make the boards automatically":"自动生成牌套","Base system":"基础体系","How many boards?":"几副牌？","The robots deal each board so that one of the chosen conventions comes up in the auction.":"机器人发每副牌，使所选约定之一在叫牌中出现。","None — random boards":"不选——随机牌","Basics":"基础","Conventions":"约定","Make the boards":"生成牌套","Making the boards…":"正在生成牌套…","❌ Not available on this device":"❌ 本设备不可用","Loading…":"加载中…",
+window.BG_LANG["zh"]={"d":{"Random boards":"随机牌","Boards for conventions":"针对约定的牌","Choose at least one convention":"至少选择一个约定","Random":"随机",
+"with the chosen conventions":"含所选约定","🎲 Make the boards automatically":"🎲 自动生成牌套","Make the boards automatically":"自动生成牌套","Base system":"基础体系","How many boards?":"几副牌？","The robots deal each board so that one of the chosen conventions comes up in the auction.":"机器人发每副牌，使所选约定之一在叫牌中出现。","None — random boards":"不选——随机牌","Basics":"基础","Conventions":"约定","Make the boards":"生成牌套","Making the boards…":"正在生成牌套…","❌ Not available on this device":"❌ 本设备不可用","Loading…":"加载中…",
 "Find your pair":"找到你的搭档组","The pairings of this round are not ready yet.":"本轮配对尚未就绪。",
 "Pair N/S":"南北对","Pair E/W":"东西对",
 "North–South":"南北","East–West":"东西","Continue without":"不记录，继续",

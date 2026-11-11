@@ -103,7 +103,7 @@ const CSS=`.ccr{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif
 .ccr .bhead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:26px}.ccr .bhead h2{margin:0;color:#1d5534;font-weight:600}
 .ccr .bhead .pgn{margin:0}
 .ccr .bd{border:1px solid #e3e7ec;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.ccr .bd h3{display:none}.ccr .bd h4{color:#1d5534}
+.ccr .bd h3{display:none}.ccr .bnote{text-align:center;font-weight:700;color:#1d5534;background:#f3f6f4;border-radius:999px;padding:4px 12px;margin:0 auto 8px;width:fit-content;font-size:.9rem}.ccr .bd h4{color:#1d5534}
 .ccr .dg .h div{font-size:1.1rem;letter-spacing:.5px}.ccr .dg .sy{display:inline-block;width:20px}
 @media (max-width:640px){.ccr .rt{font-size:1.9rem}.ccr .tt{font-size:1.3rem}.ccr .meta{font-size:.95rem}.ccr .rank{font-size:.9rem}.ccr .rank td{padding:7px 4px}.ccr .dg .h div{font-size:1rem}.ccr .bhead{justify-content:center}}
 /* Bridge Table's own look */
@@ -156,7 +156,7 @@ function pageHtml(withBar){
       const b=x.b, ns=typeof b.nsScore==='number'?b.nsScore:null, p=pts(x);
       return `<tr><td>${esc(pairNo(x.ns))}</td><td>${esc(pairNo(x.ew))}</td><td>${x.r}</td>${conCells(b)}<td class="n">${ns>0?ns:ns===0?'0':'–'}</td><td class="n">${ns<0?-ns:'–'}</td><td class="n">${num(p)}</td><td class="n">${p==null?'':num(-p)}</td></tr>`;
     }).join('')}</table></div>`:'';
-    return `<div class="bd" id="b${esc(bn)}"><h3>${L('Board')} ${esc(bn)}</h3>${hd?diagram(hd,bn):''}${a?`<div class="ddbox"><h4>Double Dummy</h4>${ddHtml(a)}</div>`:''}${L2.length?`<h4>${L('Results')}</h4>`:''}${res}</div>`;
+    return `<div class="bd" id="b${esc(bn)}"><h3>${L('Board')} ${esc(bn)}</h3>${hd&&hd.note?`<div class="bnote">${esc(hd.note)}</div>`:''}${hd?diagram(hd,bn):''}${a?`<div class="ddbox"><h4>Double Dummy</h4>${ddHtml(a)}</div>`:''}${L2.length?`<h4>${L('Results')}</h4>`:''}${res}</div>`;
   }).join('');
   const head=withBar?`<div class="rhead"><div><h1 class="rt">${L('Results')}</h1><a href="#" class="back" onclick="ccResultsIndex();return false;">${L('Back')}</a></div><div class="rtools"><button class="ic" title="${esc(L('Print'))}" onclick="window.print()">🖨</button><button class="ic" title="${esc(L('Close'))}" onclick="ccResultsClose()">✕</button></div></div>`:'';
   return `<div class="ccr">${head}<h2 class="tt">${esc(s.name||L('Tournament'))} ${esc(date)}</h2>

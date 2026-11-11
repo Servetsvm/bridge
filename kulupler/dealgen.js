@@ -23,7 +23,7 @@ self.onmessage = e => {
   const cards = [cfg(), cfg()], out = [], seen = new Set(); let hit = 0;
   for (let i = 0; i < m.n; i++) {
     const board = (m.from || 1) + i, dealer = E.dealerOf(board), t0 = Date.now();
-    let pick = null, first = null;
+    let pick = null, first = null, used = [];
     // the conventions in turn, so that each comes up: this board looks for one of them, any other one will do too
     const aim = want.length ? want[i % want.length] : null;
     for (let k = 0; k < 4000; k++) {
@@ -33,13 +33,13 @@ self.onmessage = e => {
       if (!first) first = deal;
       const auc = [];
       while (!over(auc) && auc.length < 60) { const t = (dealer + auc.length) % 4, r = E.aiBid(auc, t, deal[t], cards); auc.push({ seat: t, call: r.call, m: r.m }); }
-      const used = auc.filter(x => x.m && want.includes(x.m.cv)).map(x => x.m.cv);
-      if (used.includes(aim) || (used.length && Date.now() - t0 > (m.ms || 1500) / 2)) { pick = deal; hit++; break; }
+      const u = auc.filter(x => x.m && want.includes(x.m.cv)).map(x => x.m.cv).filter((k, j, A) => A.indexOf(k) === j);
+      if (u.includes(aim) || (u.length && Date.now() - t0 > (m.ms || 1500) / 2)) { pick = deal; used = u; hit++; break; }
       if (Date.now() - t0 > (m.ms || 1500)) break;
     }
     pick = pick || first;
     seen.add(E.dealKey(pick));
-    out.push({ board, cards: pick });
+    out.push({ board, cards: pick, used });
     self.postMessage({ progress: i + 1 });
   }
   self.postMessage({ done: out, hit });
