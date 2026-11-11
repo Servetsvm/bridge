@@ -161,8 +161,8 @@ const Net = (() => {
       cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", cardV: q.cardV === 1 ? 1 : 0, club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
-  // a board being played (bidding or card play): a finished board left on the screen does not count, nor the home page
-  const inPlay = t => t.phase === 'bid' || t.phase === 'play';
+  // at a board: bidding, card play, or a finished board still on the screen (the next one comes from there); not the home page
+  const inPlay = t => t.phase === 'bid' || t.phase === 'play' || t.phase === 'done';
   function whereIs(name) {
     const k = nameKey(name);
     for (const t of (st.tables || [])) if ((t.online || inPlay(t)) && (nameKey(t.host) === k || Object.values(t.names || {}).some(n => nameKey(n) === k))) return { host: t.host, online: t.online, phase: t.phase, own: nameKey(t.host) === k };   // someone on the home page is just in the lobby
@@ -654,7 +654,7 @@ const Net = (() => {
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
       const name = myName(); if (st.out || !Cloud.on || !name || !SET.pinH) return;
-      const w = st.on ? 'table' : G && !G.watch && (G.phase === 'bid' || G.phase === 'play') ? (G.champ ? 'champ' : 'robots') : 'lobby';   // watching the robots is not playing   // a finished board left on the screen counts as the lobby
+      const w = st.on ? 'table' : G && !G.watch && (G.phase === 'bid' || G.phase === 'play' || G.phase === 'done') ? (G.champ ? 'champ' : 'robots') : 'lobby';   // watching the robots is not playing; a finished board on the screen is still at the table
       try {
         // a name no longer in the database was removed by the administrator: this device signs out (it used to take
         // the name again, for names chosen before the database existed; they are all in it now)

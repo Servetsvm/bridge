@@ -1979,3 +1979,5 @@ body.homev2 .h2mid{grid-area:chips;display:flex;align-items:center;justify-conte
 .pldays{margin:2px 0 8px 28px;display:flex;flex-direction:column;gap:4px}
 .plday{display:flex;flex-direction:column;gap:1px;padding:6px 8px;border-left:3px solid var(--brass,#d4a017);background:rgba(0,0,0,.04);border-radius:6px;font-size:.85rem}
 .plday small{opacity:.75}
+.pzline{margin:6px 0;font-size:.95rem}
+.pzpair{display:flex;flex-direction:column;gap:2px}.pzpair small{opacity:.75;font-weight:700}

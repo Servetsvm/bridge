@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 428;
+const APP_V = 429;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -905,6 +905,7 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
+  if (G.pz && g) { G.result = e; G.phase = 'done'; sfx(e.tricks >= G.pz.need ? 'good' : 'bad'); pzPlayDone(e); save(); render(); return; }   // the daily puzzle: not in the results
   if (G.watch) { e.watch = true; e.normC = G.field && G.field.normC ? { ...G.field.normC } : null; G.result = e; G.phase = 'done'; RHIST = RHIST.filter(h => h.id !== e.id); RHIST.push(e); saveRH(); render(); if (g) RoboAna.add(e); return; }   // watched: in the robots' chart, not your Results   // watched: shown, not recorded (the robots' cards are checked)
   const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
   // a practice board where the convention really came up counts for it (shown on its tile)
@@ -2209,16 +2210,74 @@ function pzSave(s) { const PZ_KEY = 'bridge-puzzle'; try { localStorage.setItem(
 // the bank of leads that alone beat the contract, double dummy (.github/puzzles/make.js): one for each day from PZB_FROM
 const PZB_FROM = '2026-11-10';
 let PZB;   // undefined: not read yet; null: could not be read (the generated problems are used)
-const pzWait = () => PZB === undefined && new Date().toISOString().slice(0, 10) >= PZB_FROM;
-function pzLoad() { if (ui.pzLoading) return; ui.pzLoading = 1; fetch('js/puzzles.json').then(r => r.ok ? r.json() : null).catch(() => null).then(j => { PZB = j && j.length ? j : null; ui.pzLoading = 0; ui.pz = null; showPuzzle(); }); }
+// the declarer problems (.github/puzzles/makeplay.js): one for each day from PZP_FROM, in place of the leads
+const PZP_FROM = '2026-11-12';
+let PZP;
+const pzWait = () => { const d = new Date().toISOString().slice(0, 10); return (PZB === undefined && d >= PZB_FROM) || (PZP === undefined && d >= PZP_FROM); };
+function pzLoad() { if (ui.pzLoading) return; ui.pzLoading = 1; const get = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null); Promise.all([get('js/puzzles.json'), get('js/puzzles-play.json')]).then(([j, k]) => { PZB = j && j.length ? j : null; PZP = k && k.length ? k : null; ui.pzLoading = 0; ui.pz = null; showPuzzle(); }); }
 function pzBank(day) {
   const e = PZB[(Math.round((Date.parse(day) - Date.parse(PZB_FROM)) / 864e5)) % PZB.length], cfg = { conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }, cards = [cfg, cfg], auction = [];
   e.a.forEach((call, i) => { const seat = (e.l + i) % 4; auction.push({ seat, call, m: E.explainCall(auction, seat, call, cards) }); });
   return { kind: 'lead', deal: e.d, dealer: e.l, auction, c: { level: e.c[0], strain: e.c[1], dbl: 0, decl: 1 }, vals: Object.fromEntries(e.v) };
 }
+// the declarer problem's window: dummy above your hand, the auction, the contract, the lead; then Play (the first try
+// counts: it is marked as failed from the moment it starts, and as made only when the contract is made)
+function showPlayPuzzle(pz) {
+  const st = pzState(), done = st.day === pz.day && st.ans === 'play' ? st : null, me = pz.c.decl, dm = (me + 2) % 4, ld = (me + 1) % 4;
+  const card = c => `<b class="${(c / 13 | 0) === 1 || (c / 13 | 0) === 2 ? 'red' : ''}">${RTXT[R(c)]}${STR[S(c)]}</b>`;
+  const con = `${pz.c.level}${STR[pz.c.strain]}${pz.c.dbl === 2 ? 'XX' : pz.c.dbl ? 'X' : ''}`;
+  let res = '';
+  if (done) {
+    res = done.ok ? `<div class="okmsg">✅ ${T('Well done! You made it with {0} tricks.', done.tr)}</div>`
+      : `<div class="err">❌ ${done.tr != null ? T('Failed: {0} tricks, {1} needed.', done.tr, pz.need) : T('The game was left unfinished: it counts as failed.')}</div>`;
+    res += `<div class="muted">${T('The key: at trick one, play {0} from dummy.', `${RTXT[R(pz.pick)]}${STR[S(pz.pick)]}`)}</div>
+      <details class="pzdeal"><summary>${T('Show all four hands')}</summary>${dealHtml(pz.deal, me)}</details>
+      <div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
+  }
+  openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2>
+    <div class="big">${T('Make the contract: you have one chance.')}</div>
+    <div class="pzline">${T('Contract')}: <b>${con}</b> · ${T('Declarer')}: ${SEAT[me]} · ${T('The opening lead: {0}', SEAT[ld] + ' ' + RTXT[R(pz.lead)] + STR[S(pz.lead)])}</div>
+    <div class="pzbox"><div class="pzpair"><small>${T('Dummy')} (${SEAT[dm]})</small>${pzHand(pz.deal[dm])}<small>${T('You')} (${SEAT[me]})</small>${pzHand(pz.deal[me])}</div>
+    <div class="auction">${auctionTable(pz.auction, false, { board: pz.bn, dealer: pz.dealer, seat: me, sel: null })}</div></div>
+    ${done ? '' : `<div class="muted">${T('Your first try is the one that counts: plan the play before you start.')}</div>`}${res}
+    <div class="row2">${done ? `<button class="btn" id="pzAgain">🔁 ${T('Try again (does not count)')}</button>` : `<button class="btn gold" id="pzGo">▶ ${T('Play')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+// the problem on the normal table: the auction is already made, the lead is on the table's first trick, the robots defend
+// seeing every card
+function pzPlayStart(pz, first) {
+  if (first) {
+    const st = pzState(), next = { day: pz.day, ans: 'play', streak: st.streak || 0, lastOk: st.lastOk, prev: st.lastOk, prevStreak: st.streak || 0, tr: null };
+    pzFinish(next, false);   // a try started counts as failed until the contract is made
+  }
+  closeOv();
+  newBoard(pz.deal.map(h => h.slice()), pz.bn);
+  clearTimeout(timer);
+  G.pz = { day: pz.day, first: !!first, lead: pz.lead, need: pz.need };
+  G.auction = pz.auction.map(a => ({ ...a }));
+  const c = { ...pz.c };
+  G.play = E.newPlayState(G.deal, c, G.auction, G.cards); G.play.rb = [0, 1, 2, 3].filter(s => s !== c.decl && s !== (c.decl + 2) % 4);
+  G.phase = 'play';
+  Field.dd(G.id, 'you', G.deal, c);
+  flash(T('You are declarer'), 1500);
+  save(); render(); tick();
+}
+function pzPlayDone(e) {
+  const made = e.tricks >= G.pz.need;
+  if (G.pz.first) { const s = pzState(); if (s.day === G.pz.day && s.ans === 'play') { s.tr = e.tricks; pzFinish(s, made); } setTimeout(showPuzzle, 1600); }
+  else { flash(made ? '✅ ' + T('This time you made it (it does not count).') : '❌ ' + T('Not made this time.'), 2500); setTimeout(showPuzzle, 2600); }
+}
+// a declarer problem turned so that you are the declarer (your seat), dummy opposite; the board number gives its dealer
+function pzPlayBank(day) {
+  const e = PZP[(Math.round((Date.parse(day) - Date.parse(PZP_FROM)) / 864e5)) % PZP.length], me = U(), rot = (me - e.c[3] + 4) % 4;
+  const deal = [0, 1, 2, 3].map(() => null); e.d.forEach((h, s) => { deal[(s + rot) % 4] = h.slice(); });
+  const dealer = (e.l + rot) % 4, cfg = { conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }, cards = [cfg, cfg], auction = [];
+  e.a.forEach((call, i) => { const seat = (dealer + i) % 4; auction.push({ seat, call, m: E.explainCall(auction, seat, call, cards) }); });
+  return { kind: 'play', deal, dealer, bn: dealer + 1, auction, c: { level: e.c[0], strain: e.c[1], dbl: e.c[2], decl: me }, lead: e.ld, pick: e.pk, need: e.c[0] + 6 };
+}
 function pzToday() {
   const day = new Date().toISOString().slice(0, 10);
   if (ui.pz && ui.pz.day === day && ui.pz.sys === (SET.sys || 'twoone')) return ui.pz;
+  if (day >= PZP_FROM && PZP) { const b = pzPlayBank(day); b.day = day; b.sys = SET.sys || 'twoone'; ui.pz = b; return b; }
   if (day >= PZB_FROM && PZB) { const b = pzBank(day); b.day = day; b.sys = SET.sys || 'twoone'; ui.pz = b; return b; }
   let seed = 2166136261; for (const ch of 'puzzle-' + day) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
   const hard = day >= '2026-11-09', nDay = Math.floor(Date.parse(day) / 864e5), cards = sideCards();
@@ -2291,6 +2350,7 @@ function pzQuestion(k) { return T(k === 'open' ? 'What do you open?' : k === 'an
 function pzHand(h) { return `<div class="pzhand">${[3, 2, 1, 0].map(s => `<div>${symHtml(s)} ${E.desc(E.inSuit(h, s)).map(c => RTXT[R(c)]).join(' ') || '—'}</div>`).join('')}<small>${ev(h).hcp} HCP</small></div>`; }
 function showPuzzle() {
   if (pzWait()) { pzLoad(); return; }
+  { const p0 = pzToday(); if (p0 && p0.kind === 'play') { showPlayPuzzle(p0); return; } }
   const pz = pzToday(); if (!pz) { flash(T('No problem today — try again later'), 2000); return; }
   const st = pzState(), done = st.day === pz.day ? st : null;
   const auc = pz.auction.length || pz.kind !== 'open' ? `<div class="auction">${auctionTable(pz.auction, pz.kind !== 'lead' && !done, { board: 1, dealer: pz.dealer, seat: 2, sel: done ? ui.pzSel ?? null : null }).replace(/data-ri=/g, "data-pzi=")}${done && ui.pzSel != null && pz.auction[ui.pzSel] ? `<div class="expl">${explHtml(pz.auction[ui.pzSel])}</div>` : ''}</div>` : `<div class="muted">${T('You are the dealer. Nobody is vulnerable.')}</div>`;
@@ -2363,6 +2423,7 @@ function pzLeads() {
   else setTimeout(() => end(E.leadValues(pz.deal, pz.c, 3e6)), 50);
 }
 document.addEventListener('click', e => {
+  if (e.target.closest('#pzGo') || e.target.closest('#pzAgain')) { const p = pzToday(); if (p && p.kind === 'play') pzPlayStart(p, !!e.target.closest('#pzGo')); return; }
   const b = e.target.closest('[data-pzb]'); if (b) { pzAnswer(b.dataset.pzb); return; }
   const c = e.target.closest('[data-pzc]'); if (c) { pzAnswer(+c.dataset.pzc); return; }
   const pi = e.target.closest('[data-pzi]'); if (pi) { const i = +pi.dataset.pzi; ui.pzSel = ui.pzSel === i ? null : i; showPuzzle(); return; }
@@ -2501,7 +2562,8 @@ function robotCardAsync(g, t) {
 }
 async function robotCardFor(g, t) {
   const lv = SET.robotLvl || 'expert';
-  if (G.watch) return Bot.ask(g, t, { ...BOT_OPT, open: true });   // a deal given to the robots: played with every hand open
+  if (G.pz && !g.history.length && !g.trick.length && G.pz.lead != null && g.hands[t].includes(G.pz.lead)) return G.pz.lead;   // the problem's lead
+  if (G.watch || G.pz) return Bot.ask(g, t, { ...BOT_OPT, open: true });   // a deal given to the robots, or the puzzle's defence: played with every hand open
   if (lv === 'expert' || online() || G.tour || G.tprac || sideOf(t) === sideOf(U())) return Bot.ask(g, t, BOT_OPT);
   return robotCard(g, t);
 }
@@ -3304,6 +3366,7 @@ document.addEventListener('click', ev_ => {
     case 'bAuc': showAuction(); break;
     case 'oShow': showEnd(); break;
     case 'bHint':
+      if (G.pz && G.pz.first) { flash('🧩 ' + T('No hints in the puzzle'), 1800); break; }
       if (guest() && G.phase === "play") { if (userControls(G.play.turn) && G.play.trick.length < 4) Net.send({ t: "hint" }); break; } // the host works it out
       if (G.phase === 'bid' && bidTurn() === U()) { ui.hintBid = E.aiBid(G.auction, U(), G.deal[U()], G.cards); SET.expl = true; render(); }
       else if (G.phase === 'play' && userControls(G.play.turn) && G.play.trick.length < 4) { ui.hintCard = E.aiPlay(G.play, G.play.turn); render(); }
