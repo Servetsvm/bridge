@@ -21,7 +21,7 @@ function cards(deal){
   parts.forEach((p,i)=>p.split('.').forEach((rs,k)=>{ for(const ch of rs.toUpperCase()){ const r=RK.indexOf(ch); if(r>=0) h[(first+i)%4].push((3-k)*13+r); } }));
   return h;
 }
-function handHtml(h){ return [3,2,1,0].map(s=>{ const rs=h.filter(c=>((c/13)|0)===s).sort((a,b)=>b-a).map(c=>RK[c%13]==='T'?'10':RK[c%13]); return `<div><span class="${s===1||s===2?'r':''}">${SYM[s]}</span> ${rs.length?rs.join(' '):'—'}</div>`; }).join(''); }
+function handHtml(h){ return [3,2,1,0].map(s=>{ const rs=h.filter(c=>((c/13)|0)===s).sort((a,b)=>b-a).map(c=>RK[c%13]==='T'?'10':RK[c%13]); return `<div><span class="sy${s===1||s===2?' r':''}">${SYM[s]}</span>${rs.length?rs.join(''):'—'}</div>`; }).join(''); }
 function diagram(hd,board){
   const h=cards(hd.deal); if(!h) return '';
   const v=String(hd.vulnerable||'').toLowerCase(), dl='NESW'.indexOf(String(hd.dealer||'').toUpperCase()[0]);
@@ -43,7 +43,7 @@ function ddHtml(a){
 function collect(){
   const s=getState(), pairs=getPairs(), boards=getBoards(), mv=getMovements(), mp=calcMP(), sh=scoringShows();
   const hands=(typeof ccHandsList==='function'?ccHandsList():(_cache['hands']||[])), dd=_cache['dd']||{};
-  const ranking=Object.keys(pairs).filter(id=>!pairs[id].isPhantom).map(id=>{ const d=mp[id]||{mp:0,top:0,imp:0,boards:0}; return {id,no:pairNo(id),name:pairs[id].name||id,mp:d.mp,top:d.top,pct:d.top>0?d.mp/d.top*100:0,imp:d.imp||0,boards:d.boards}; })
+  const ranking=Object.keys(pairs).filter(id=>!pairs[id].isPhantom).map(id=>{ const d=mp[id]||{mp:0,top:0,imp:0,boards:0}; return {id,no:pairNo(id),name:pairs[id].name||id,mp:d.mp,top:d.top,pm:d.mp-d.top/2,pct:d.top>0?d.mp/d.top*100:0,imp:d.imp||0,boards:d.boards}; })
     .sort((a,b)=>sh.byImp?b.imp-a.imp:(b.pct-a.pct||b.mp-a.mp));
   // each board: its results, each with the match points of both sides on that board
   const by={};
@@ -53,7 +53,7 @@ function collect(){
     for(const x of L){
       if(typeof x.b.nsScore!=='number'){ x.nsMP=x.ewMP=null; continue; }
       let m=0,imp=0; for(const y of sc){ if(y===x) continue; m+=x.b.nsScore>y.b.nsScore?2:x.b.nsScore===y.b.nsScore?1:0; imp+=scoreToIMP(x.b.nsScore-y.b.nsScore); }
-      x.nsMP=sc.length>1?m:null; x.ewMP=sc.length>1?top-m:null; x.imp=sc.length>1?imp/(sc.length-1):null; x.top=top;
+      x.nsMP=sc.length>1?m:null; x.ewMP=sc.length>1?top-m:null; x.pm=sc.length>1?m-top/2:null; x.imp=sc.length>1?imp/(sc.length-1):null; x.top=top;
     }
     L.sort((p,q)=>(q.b.nsScore||0)-(p.b.nsScore||0));
   }
@@ -85,44 +85,63 @@ const CSS=`.ccr{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif
 .ccr .res{margin-top:6px;font-size:.92rem}.ccr .res td{white-space:nowrap}
 .ccr .bar{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 @media print{.ccr .bar,.ccr .pgn{display:none}.ccr .bd{display:block!important;break-inside:avoid;margin-bottom:12px}.ccr .bds{display:block}}
-@media (max-width:640px){.ccr{padding:10px 6px 30px}.ccr h1{font-size:1.3rem}.ccr .res{font-size:.8rem}.ccr .res td,.ccr .res th{padding:5px 3px}.ccr .rank td,.ccr .rank th{padding:6px 3px;font-size:.85rem}.ccr .dg{font-size:.95rem;gap:4px 8px}.ccr .cp{width:88px;height:88px}.ccr .dd{min-width:0;width:100%}.ccr .par{max-width:none}.ccr .dd td,.ccr .dd th{padding:6px 4px}.ccr .bd{padding:10px 8px}.ccr .pgn{justify-content:center}}`;
+@media (max-width:640px){.ccr{padding:10px 6px 30px}.ccr h1{font-size:1.3rem}.ccr .res{font-size:.8rem}.ccr .res td,.ccr .res th{padding:5px 3px}.ccr .rank td,.ccr .rank th{padding:6px 3px;font-size:.85rem}.ccr .dg{font-size:.95rem;gap:4px 8px}.ccr .cp{width:88px;height:88px}.ccr .dd{min-width:0;width:100%}.ccr .par{max-width:none}.ccr .dd td,.ccr .dd th{padding:6px 4px}.ccr .bd{padding:10px 8px}.ccr .pgn{justify-content:center}}
+.ccr .rhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin:4px 0 18px}
+.ccr .rt{font-size:2.6rem;font-weight:500;color:#222;margin:0;line-height:1.1}
+.ccr .back{display:inline-block;margin-top:6px;color:#2e7d32;font-size:1.2rem;text-decoration:none}
+.ccr .rtools{display:flex;gap:6px}.ccr .rtools .ic{width:40px;height:40px;border-radius:50%;border:1px solid #d5dbe1;background:#fff;font-size:1.05rem;cursor:pointer}
+.ccr .tt{color:#1f6fa8;font-size:1.7rem;font-weight:500;margin:6px 0 10px}
+.ccr .meta{font-size:1.05rem;margin:0 0 16px}.ccr .meta div{margin:6px 0}
+.ccr .rank{font-size:1.05rem}.ccr .rank td:nth-child(2),.ccr .rank td.n{white-space:nowrap}.ccr .rank th{background:#2b4a70}.ccr .rank td{padding:9px 8px}
+.ccr .rank .ar{color:#8aa0b8;font-size:.8rem;display:inline-block;transition:transform .15s}.ccr .rank tr.open .ar{transform:rotate(90deg)}
+.ccr .res th{background:#2b4a70}.ccr .pb th{background:#d6e6f8!important;color:#22364f!important;font-weight:600}
+.ccr .res td.n{text-align:right;font-variant-numeric:tabular-nums}.ccr .res td.l{text-align:left}
+.ccr .bhead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:26px}.ccr .bhead h2{margin:0;color:#1f6fa8;font-weight:600}
+.ccr .bhead .pgn{margin:0}
+.ccr .bd{border:1px solid #e3e7ec;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ccr .bd h3{display:none}.ccr .bd h4{color:#1f6fa8}
+.ccr .dg .h div{font-size:1.1rem;letter-spacing:.5px}.ccr .dg .sy{display:inline-block;width:20px}
+@media (max-width:640px){.ccr .rt{font-size:1.9rem}.ccr .tt{font-size:1.3rem}.ccr .meta{font-size:.95rem}.ccr .rank{font-size:.9rem}.ccr .rank td{padding:7px 4px}.ccr .dg .h div{font-size:1rem}.ccr .bhead{justify-content:center}}`;
 
 function pageHtml(withBar){
   const L=v=>window.i18nText?i18nText(v):v;
   const {s,sh,ranking,by,nums,hands,dd,rounds}=collect();
   const date=(s._finishedAt||s._startedAt||new Date().toISOString()).slice(0,10);
-  // a pair tapped in the ranking: its boards, each with the opponents, the round, the contract, the lead, its score and points
-  const cols=3+(sh.mp?2:0)+(sh.imp?1:0);
-  // the points also by who played the hand: as declarer, and in defence by who led (the declarer's left-hand opponent),
-  // each under the player's name (North or East first, as the pair's name is written)
+  // numbers as the reader writes them (46,70 or 46.70)
+  const loc={tr:'tr-TR',no:'nb-NO',es:'es-ES',fr:'fr-FR',it:'it-IT',de:'de-DE',ru:'ru-RU',pl:'pl-PL',zh:'zh-CN'}[(()=>{ try{ return localStorage.getItem('bricskor_language'); }catch(e){ return ''; } })()]||'en-GB';
+  const num=v=>typeof v==='number'&&isFinite(v)?v.toLocaleString(loc,{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+  const pts=x=>sh.byImp?x.imp:x.pm;   // a result's points: ± match points, or IMPs in a team match
+  const conCells=b=>{ const pass=!b.level; return pass?`<td class="c" colspan="3">PASS</td><td class="c">${suitHtml(b.lead||'')}</td>`:`<td class="c l">${suitHtml(b.level+(b.suit||'')+(b.doubled||''))}</td><td>${esc(b.declarer||'')}</td><td>${b.level+6+(+b.result||0)}</td><td class="c">${suitHtml(b.lead||'')}</td>`; };
+  // a pair tapped in the ranking: its boards (the opponents, the contract, the result, the points), and the points again by
+  // who played the hand: as declarer, or in defence by who led, under each player's name
   const pairBoards=(id,name)=>{
     const rows=[], who=String(name||'').split(/\s+-\s+/).map(n=>n.trim().split(/\s+/)[0]||'?'); while(who.length<2) who.push('?');
     for(const [bn,L2] of Object.entries(by)) for(const x of L2){
       if(x.ns!==id&&x.ew!==id) continue;
-      const me=x.ns===id, b=x.b, pass=!b.level, ns=typeof b.nsScore==='number'?b.nsScore:null;
-      rows.push({bn:+bn||bn,r:x.r,opp:pairNo(me?x.ew:x.ns),con:pass?'PASS':`${b.level}${b.suit||''}${b.doubled||''} ${b.declarer||''}`,tr:pass?'—':b.level+6+(+b.result||0),lead:b.lead||'',sc:ns==null?null:(me?ns:-ns),mp:me?x.nsMP:x.ewMP,imp:x.imp==null?null:(me?x.imp:-x.imp)});
-      const R=rows[rows.length-1], d='NESW'.indexOf(b.declarer||''); R.pts=sh.byImp?R.imp:R.mp; R.dc=null; R.df=null;
-      if(!pass&&d>=0){ const ours=me?d%2===0:d%2===1; if(ours) R.dc=d<2?0:1; else { const ld=(d+1)%4; R.df=ld<2?0:1; } }
+      const me=x.ns===id, b=x.b, ns=typeof b.nsScore==='number'?b.nsScore:null, p=pts(x), d='NESW'.indexOf(b.declarer||'');
+      const R={bn:+bn||bn,r:x.r,me:pairNo(id),opp:pairNo(me?x.ew:x.ns),b,sc:ns==null?null:(me?ns:-ns),p:p==null?null:(me?p:-p),dc:null,df:null};
+      if(b.level&&d>=0){ const ours=me?d%2===0:d%2===1; if(ours) R.dc=d<2?0:1; else R.df=((d+1)%4)<2?0:1; }
+      rows.push(R);
     }
     rows.sort((a,b)=>a.r-b.r||a.bn-b.bn);
     if(!rows.length) return `<div style="padding:8px">—</div>`;
-    const pv=v=>v==null?'':(sh.byImp?fmt(v):v), cell=(x,k,i)=>`<td class="sp">${x[k]===i?pv(x.pts):''}</td>`;
-    return `<div class="pbw"><table class="res pb"><tr><th rowspan="2">${L('Board')}</th><th rowspan="2">${L('Opponents')}</th><th rowspan="2">${L('Round')}</th><th rowspan="2">${L('Contract')}</th><th rowspan="2">${L('Tricks')}</th><th rowspan="2">${L('Lead')}</th><th rowspan="2">${L('Score')}</th>${sh.mp?'<th rowspan="2">MP</th>':''}${sh.imp?'<th rowspan="2">IMP</th>':''}<th colspan="2">${L('Declarer')}</th><th colspan="2">${L('Defence')}</th></tr><tr><th>${esc(who[0])}</th><th>${esc(who[1])}</th><th>${esc(who[0])}</th><th>${esc(who[1])}</th></tr>${rows.map(x=>`<tr><td><a href="#b${esc(x.bn)}" onclick="return window.ccrGo?ccrGo('${esc(x.bn)}'):true">${esc(x.bn)}</a></td><td>${esc(x.opp)}</td><td>${x.r}</td><td class="c">${suitHtml(x.con)}</td><td>${x.tr}</td><td class="c">${suitHtml(x.lead)}</td><td>${x.sc==null?'':x.sc}</td>${sh.mp?`<td>${x.mp==null?'':x.mp}</td>`:''}${sh.imp?`<td>${x.imp==null?'':fmt(x.imp)}</td>`:''}${cell(x,'dc',0)}${cell(x,'dc',1)}${cell(x,'df',0)}${cell(x,'df',1)}</tr>`).join('')}${(()=>{ const sum=(k,i)=>{ const v=rows.filter(x=>x[k]===i&&x.pts!=null).reduce((a,x)=>a+x.pts,0); return sh.byImp?fmt(v):v; }; return `<tr class="tot"><td colspan="${7+(sh.mp?1:0)+(sh.imp?1:0)}"></td><td class="sp">${sum('dc',0)}</td><td class="sp">${sum('dc',1)}</td><td class="sp">${sum('df',0)}</td><td class="sp">${sum('df',1)}</td></tr>`; })()}</table></div>`;
+    const cell=(x,k,i)=>`<td class="sp">${x[k]===i?num(x.p):''}</td>`, sum=(k,i)=>num(rows.filter(x=>x[k]===i&&x.p!=null).reduce((a,x)=>a+x.p,0));
+    return `<div class="pbw"><table class="res pb"><tr><th rowspan="2">${L('Board')}</th><th rowspan="2" colspan="2">${L('Pair')}</th><th rowspan="2" colspan="4">${L('Contract')}</th><th rowspan="2">${L('Score')}</th><th rowspan="2">${L('Points')}</th><th colspan="2">${L('Declarer')}</th><th colspan="2">${L('Defence')}</th></tr><tr><th>${esc(who[0])}</th><th>${esc(who[1])}</th><th>${esc(who[0])}</th><th>${esc(who[1])}</th></tr>${rows.map(x=>`<tr><td><a href="#b${esc(x.bn)}" onclick="return window.ccrGo?ccrGo('${esc(x.bn)}'):true">${esc(x.bn)}</a></td><td>${esc(x.me)}</td><td>${esc(x.opp)}</td>${conCells(x.b)}<td class="n">${x.sc==null?'':x.sc}</td><td class="n">${num(x.p)}</td>${cell(x,'dc',0)}${cell(x,'dc',1)}${cell(x,'df',0)}${cell(x,'df',1)}</tr>`).join('')}<tr class="tot"><td colspan="9"></td><td class="sp">${sum('dc',0)}</td><td class="sp">${sum('dc',1)}</td><td class="sp">${sum('df',0)}</td><td class="sp">${sum('df',1)}</td></tr></table></div>`;
   };
-  const rank=`<table class="rank"><tr><th>${L('Place')}</th><th>${L('Pair')}</th><th>${L('Name')}</th>${sh.mp?`<th>${L('Points')}</th><th>%</th>`:''}${sh.imp?'<th>IMP</th>':''}</tr>${ranking.map((p,i)=>`<tr class="pr" onclick="var d=this.nextElementSibling;d.hidden=!d.hidden;this.classList.toggle('open')"><td>${i+1}</td><td>${esc(p.no)}</td><td class="nm">▸ ${esc(p.name)}</td>${sh.mp?`<td class="n">${fmt(p.mp,1)}</td><td class="n">${fmt(p.pct)}</td>`:''}${sh.imp?`<td class="n">${fmt(p.imp)}</td>`:''}</tr><tr class="pd" hidden><td colspan="${cols}">${pairBoards(p.id,p.name)}</td></tr>`).join('')}</table>`;
+  const cols=sh.byImp?4:5;
+  const rank=`<table class="rank"><tr><th>${L('Place')}</th><th>${L('Pair')}</th><th>${L('Name')}</th>${sh.byImp?'<th>IMP</th>':`<th>${L('Points')}</th><th>%</th>`}</tr>${ranking.map((p,i)=>`<tr class="pr" onclick="var d=this.nextElementSibling;d.hidden=!d.hidden;this.classList.toggle('open')"><td>${i+1}</td><td>${esc(p.no)}</td><td class="nm"><span class="ar">▸</span> ${esc(p.name)}</td>${sh.byImp?`<td class="n">${num(p.imp)}</td>`:`<td class="n">${num(p.pm)}</td><td class="n">${num(p.pct)}</td>`}</tr><tr class="pd" hidden><td colspan="${cols}">${pairBoards(p.id,p.name)}</td></tr>`).join('')}</table>`;
   const boardsHtml=nums.map(bn=>{
     const hd=hands.find(h=>String(h.board)===String(bn)), a=dd[String(bn)], L2=by[bn]||[];
-    const res=L2.length?`<div class="resw"><table class="res"><tr><th>NS</th><th>EW</th><th>${L('Round')}</th><th>${L('Contract')}</th><th>${L('Tricks')}</th><th>${L('Lead')}</th><th>NS</th><th>EW</th>${sh.mp?`<th>MP NS</th><th>MP EW</th>`:''}${sh.imp?'<th>IMP NS</th>':''}</tr>${L2.map(x=>{
-      const b=x.b, pass=!b.level, tr=pass?'—':b.level+6+(+b.result||0), ns=typeof b.nsScore==='number'?b.nsScore:null;
-      const con=pass?'PASS':`${b.level}${b.suit||''}${b.doubled||''} ${b.declarer||''}`;
-      return `<tr><td>${esc(pairNo(x.ns))}</td><td>${esc(pairNo(x.ew))}</td><td>${x.r}</td><td class="c">${suitHtml(con)}</td><td>${tr}</td><td class="c">${suitHtml(b.lead||'')}</td><td>${ns>0?ns:''}</td><td>${ns<0?-ns:''}</td>${sh.mp?`<td>${x.nsMP==null?'':x.nsMP}</td><td>${x.ewMP==null?'':x.ewMP}</td>`:''}${sh.imp?`<td>${x.imp==null?'':fmt(x.imp)}</td>`:''}</tr>`;
+    const res=L2.length?`<div class="resw"><table class="res"><tr><th colspan="2">${L('Pair')}</th><th>${L('Round')}</th><th colspan="4">${L('Contract')}</th><th colspan="2">${L('Score')}</th><th colspan="2">${L('Points')}</th></tr>${L2.map(x=>{
+      const b=x.b, ns=typeof b.nsScore==='number'?b.nsScore:null, p=pts(x);
+      return `<tr><td>${esc(pairNo(x.ns))}</td><td>${esc(pairNo(x.ew))}</td><td>${x.r}</td>${conCells(b)}<td class="n">${ns>0?ns:ns===0?'0':'–'}</td><td class="n">${ns<0?-ns:'–'}</td><td class="n">${num(p)}</td><td class="n">${p==null?'':num(-p)}</td></tr>`;
     }).join('')}</table></div>`:'';
     return `<div class="bd" id="b${esc(bn)}"><h3>${L('Board')} ${esc(bn)}</h3>${hd?diagram(hd,bn):''}${a?`<div class="ddbox"><h4>Double Dummy</h4>${ddHtml(a)}</div>`:''}${L2.length?`<h4>${L('Results')}</h4>`:''}${res}</div>`;
   }).join('');
-  const bar=withBar?`<div class="bar"><button class="btn btn-gold" onclick="ccResultsIndex()">☰ ${L('All results')}</button><button class="btn btn-ghost" onclick="window.print()">🖨 ${L('Print')}</button><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>`:'';
-  return `<div class="ccr">${bar}<h1>${esc(s.name||L('Tournament'))} ${esc(date)}</h1>
+  const head=withBar?`<div class="rhead"><div><h1 class="rt">${L('Results')}</h1><a href="#" class="back" onclick="ccResultsIndex();return false;">${L('Back')}</a></div><div class="rtools"><button class="ic" title="${esc(L('Print'))}" onclick="window.print()">🖨</button><button class="ic" title="${esc(L('Close'))}" onclick="ccResultsClose()">✕</button></div></div>`:'';
+  return `<div class="ccr">${head}<h2 class="tt">${esc(s.name||L('Tournament'))} ${esc(date)}</h2>
     <div class="meta"><div>${L('Date')}: ${esc(date)}</div><div>${L('Club')}: ${esc(CLUB_NAME||'')}</div><div>${L('Boards')}: ${nums.length}, ${L('rounds')}: ${rounds}, ${L('pairs')}: ${ranking.length}</div></div>
-    ${rank}<h2>${L('Boards')}</h2><div class="pgn" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div><div class="bds">${boardsHtml}</div><div class="pgn pgn2" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div>`;
+    ${rank}<div class="bhead"><h2>${L('Boards')}</h2><div class="pgn" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div><div class="bds">${boardsHtml}</div><div class="pgn pgn2" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div>`;
 }
 /* the pages of boards (two on a wide screen, one on a phone); runs in the program and inside the saved page, so it
    uses nothing from the program */
