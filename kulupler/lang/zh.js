@@ -1,6 +1,7 @@
 // BridgeGate interface in zh (loaded by i18n.js when this language is chosen): English text → zh, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["zh"]={"d":{"Pair N/S":"南北对","Pair E/W":"东西对",
+window.BG_LANG["zh"]={"d":{"Find your pair":"找到你的搭档组","The pairings of this round are not ready yet.":"本轮配对尚未就绪。",
+"Pair N/S":"南北对","Pair E/W":"东西对",
 "North–South":"南北","East–West":"东西","Continue without":"不记录，继续",
 "Take these boards to the table":"请把这些牌套拿到桌上","Choose your pair":"选择你的搭档组","All":"全部","No tournament is being played now.":"现在没有进行中的比赛。","Seat":"方位",
 "Deal with the camera":"用摄像头发牌",

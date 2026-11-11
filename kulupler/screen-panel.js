@@ -32,6 +32,7 @@ function renderScreenPanel(){
         <button class="sb-tab ${screenTab==='overall'?'active':''}" onclick="setScreenTab('overall',this)">🌐 Overall</button>
         <button class="sb-tab ${screenTab==='ns'?'active':''}" onclick="setScreenTab('ns',this)">🔵 NS</button>
         <button class="sb-tab ${screenTab==='ew'?'active':''}" onclick="setScreenTab('ew',this)">🟡 EW</button>
+        <button class="sb-tab ${screenTab==='speed'?'active':''}" onclick="setScreenTab('speed',this)">⚡ Speedball</button>
         <button class="sb-tab ${screenTab==='tables'?'active':''}" onclick="setScreenTab('tables',this)">📋 Tables</button>
       </div>
       <div id="sbContent">${renderSbTab(allRows)}</div>
@@ -125,8 +126,24 @@ window.setScreenTab=function(tab,btn){
   document.getElementById('sbContent').innerHTML=renderSbTab(allRows);
 };
 
+// Speedball: this round's pairings, so each player finds the pair they meet, the table, the seats and the boards
+let _sbPair=null;
+window.sbFindPair=function(id){ _sbPair=_sbPair===id?null:id; const c=document.getElementById('sbContent'); if(c) c.innerHTML=renderSpeedTab(); };
+function renderSpeedTab(){
+  const L=v=>window.i18nText?i18nText(v):v, s=getState(), mv=getMovements(), P=getPairs(), r=s.currentRound||1;
+  const no=id=>typeof ccPairNo==='function'?ccPairNo(id):id, lab=id=>{ const p=P[id]; if(!p) return '—'; if(p.isPhantom) return '👻'; const nm=p.name&&!/^(NS|EW|Pair)\s*\d+$/i.test(p.name)?p.name:''; return `<b class="sp-no">${no(id)}</b> <span class="sp-nm">${nm}</span>`; };
+  const ts=Object.keys(mv).filter(k=>+k.split('_')[0]===r).map(k=>+k.split('_')[1]).sort((a,b)=>a-b);
+  if(!ts.length) return `<div class="empty-state"><div class="empty-icon">⏳</div>${L('The pairings of this round are not ready yet.')}</div>`;
+  const ids=Object.keys(P).filter(id=>!P[id].isPhantom).sort((a,b)=>(+no(a)||0)-(+no(b)||0));
+  const mine=_sbPair?ts.find(t=>mv[r+'_'+t].ns===_sbPair||mv[r+'_'+t].ew===_sbPair):null;
+  const found=mine?(()=>{ const m=mv[r+'_'+mine], ns=m.ns===_sbPair; return `<div class="sp-found"><div><span>${L('Table')}</span> <b>${mine}</b></div><div><span>${ns?L('North–South'):L('East–West')}</span></div><div><span>${L('Opponents')}</span> ${lab(ns?m.ew:m.ns)}</div><div><span>${L('Boards')}</span> <b>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</b></div></div>`; })():'';
+  return `<div class="sp-head">${L('Round')} ${r}</div>
+    <div class="sp-pick"><span>${L('Find your pair')}:</span>${ids.map(id=>`<a class="${_sbPair===id?'on':''}" onclick="sbFindPair('${id}')">${no(id)}</a>`).join('')}</div>${found}
+    <table class="sb-table sp-table"><thead><tr><th>${L('Table')}</th><th>${L('Pair N/S')}</th><th>${L('Pair E/W')}</th><th>${L('Boards')}</th></tr></thead><tbody>${ts.map(t=>{ const m=mv[r+'_'+t], me=_sbPair&&(m.ns===_sbPair||m.ew===_sbPair); return `<tr class="${me?'sp-me':''}"><td><b>${t}</b></td><td>${lab(m.ns)}</td><td>${lab(m.ew)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('')}</tbody></table>`;
+}
 function renderSbTab(allRows){
   if(screenTab==='tables')return renderTablesTab();
+  if(screenTab==='speed'){ DB.get('movements').then(()=>{ const c=document.getElementById('sbContent'); if(c&&screenTab==='speed') c.innerHTML=renderSpeedTab(); }).catch(()=>{}); return renderSpeedTab(); }
   // the rankings stay hidden until the director finishes the tournament
   // the hall's screen (and the admin) show the standings live; anywhere else they wait for the end of the tournament
   if(getState().status!=='finished'&&role!=='screen'&&role!=='admin')return`<div class="empty-state"><div class="empty-icon">🔒</div>The results appear when the director finishes the tournament.</div>`;

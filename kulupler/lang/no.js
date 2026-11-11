@@ -1,6 +1,7 @@
 // BridgeGate interface in no (loaded by i18n.js when this language is chosen): English text → no, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["no"]={"d":{"Pair N/S":"Par N/S","Pair E/W":"Par Ø/V",
+window.BG_LANG["no"]={"d":{"Find your pair":"Finn paret ditt","The pairings of this round are not ready yet.":"Parene for denne runden er ikke klare ennå.",
+"Pair N/S":"Par N/S","Pair E/W":"Par Ø/V",
 "North–South":"Nord–Syd","East–West":"Øst–Vest","Continue without":"Fortsett uten",
 "Take these boards to the table":"Ta med disse spillene til bordet","Choose your pair":"Velg ditt par","All":"Alle","No tournament is being played now.":"Ingen turnering spilles nå.","Seat":"Retning",
 "Deal with the camera":"Del ut med kameraet",

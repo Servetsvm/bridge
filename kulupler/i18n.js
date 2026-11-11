@@ -10,6 +10,8 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Find your pair":"Çiftini bul",
+    "The pairings of this round are not ready yet.":"Bu turun eşleşmeleri henüz hazır değil.",
     "Pair N/S":"Çift K/G",
     "Pair E/W":"Çift D/B",
     "North–South":"Kuzey–Güney",

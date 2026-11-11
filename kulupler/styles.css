@@ -540,3 +540,11 @@ body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}
 .cc-askrow{display:grid;grid-template-columns:2fr 1fr;gap:8px}
 .cc-big{font-size:1.15rem;padding:16px 8px;font-weight:800}
 .cc-skip{font-size:.9rem;padding:10px 6px}
+.sp-head{font-size:1.2rem;font-weight:800;color:var(--gold,#d4a017);margin:6px 0}
+.sp-pick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 10px}.sp-pick span{font-weight:700;margin-right:4px}
+.sp-pick a{min-width:40px;height:40px;line-height:40px;text-align:center;border-radius:20px;border:1px solid var(--border,#3a4a40);font-weight:800;cursor:pointer}
+.sp-pick a.on{background:var(--gold,#d4a017);color:#1b1404;border-color:var(--gold,#d4a017)}
+.sp-found{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;background:linear-gradient(135deg,#d4a017,#f3d36b);color:#2a2108;border-radius:12px;padding:12px;margin:0 0 12px}
+.sp-found span{display:block;font-size:.8rem;font-weight:700;opacity:.8}.sp-found b{font-size:1.5rem}
+.sp-table td{text-align:center}.sp-table td+td{border-left:1px solid var(--border,#3a4a40)}.sp-no{font-size:1.15rem}.sp-nm{font-size:.8rem;opacity:.8}
+.sp-table tr.sp-me td{background:rgba(212,160,23,.25)}
