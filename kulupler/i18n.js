@@ -56,6 +56,8 @@
     "Save as a page":"Sayfa olarak kaydet",
     "Print":"Yazdır",
     "Opponents":"Rakip",
+    "Declarer":"Deklaran",
+    "Defence":"Savunma",
     "Score":"Skor",
     "Share the page":"Sayfayı paylaş",
     "Date":"Tarih",
