@@ -119,7 +119,7 @@ function pageHtml(withBar){
     }).join('')}</table></div>`:'';
     return `<div class="bd" id="b${esc(bn)}"><h3>${L('Board')} ${esc(bn)}</h3>${hd?diagram(hd,bn):''}${a?`<div class="ddbox"><h4>Double Dummy</h4>${ddHtml(a)}</div>`:''}${L2.length?`<h4>${L('Results')}</h4>`:''}${res}</div>`;
   }).join('');
-  const bar=withBar?`<div class="bar"><button class="btn btn-gold" onclick="ccResultsDownload()">⬇ ${L('Save as a page')}</button><button class="btn" style="background:#25d366;color:#fff" onclick="ccResultsShare('wa')">💬 WhatsApp</button><button class="btn btn-blue" onclick="ccResultsShare('sms')">✉️ SMS</button>${navigator.canShare?`<button class="btn btn-ghost" onclick="ccResultsShare('file')">📤 ${L('Share the page')}</button>`:''}<button class="btn btn-ghost" onclick="window.print()">🖨 ${L('Print')}</button><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>`:'';
+  const bar=withBar?`<div class="bar"><button class="btn btn-gold" onclick="ccResultsIndex()">☰ ${L('All results')}</button><button class="btn btn-ghost" onclick="window.print()">🖨 ${L('Print')}</button><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>`:'';
   return `<div class="ccr">${bar}<h1>${esc(s.name||L('Tournament'))} ${esc(date)}</h1>
     <div class="meta"><div>${L('Date')}: ${esc(date)}</div><div>${L('Club')}: ${esc(CLUB_NAME||'')}</div><div>${L('Boards')}: ${nums.length}, ${L('rounds')}: ${rounds}, ${L('pairs')}: ${ranking.length}</div></div>
     ${rank}<h2>${L('Boards')}</h2><div class="pgn" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div><div class="bds">${boardsHtml}</div><div class="pgn pgn2" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div>`;
@@ -152,43 +152,49 @@ function withSrc(fn){
   const keep={}; KEYS.forEach(k=>{ keep[k]=_cache[k]; }); _cache.state=a.state; _cache.pairs=a.pairs; _cache.boards=a.boards; _cache.movements=a.movements; _cache.hands=a.hands||[]; _cache.dd=a.dd||{};
   try{ return fn(); } finally { KEYS.forEach(k=>{ _cache[k]=keep[k]; }); }
 }
-window.ccResultsPick=function(v){ SRC=v===''?null:+v; ccResultsDraw(); };
+function layerEl(){ let el=document.getElementById('ccLayer'); if(!el){ el=document.createElement('div'); el.id='ccLayer'; document.body.appendChild(el); } el.style.background='#fff'; el.hidden=false; return el; }
 function ccResultsDraw(){
   const el=document.getElementById('ccLayer'); if(!el) return;
-  const L=v=>window.i18nText?i18nText(v):v, arc=getArchives()||[], cur=getState();
-  const opts=(cur.status==='finished'?[`<option value=""${SRC==null?' selected':''}>${esc(cur.name||L('Tournament'))} · ${esc(String(cur._finishedAt||'').slice(0,10))}</option>`]:[])
-    .concat(arc.map((a,i)=>`<option value="${i}"${SRC===i?' selected':''}>${esc(a.state&&a.state.name||L('Tournament'))} · ${esc(String(a.finished||'').slice(0,10))}</option>`));
-  const pick=opts.length>1?`<div class="bar"><select class="pick" onchange="ccResultsPick(this.value)">${opts.join('')}</select></div>`:'';
-  el.innerHTML=`<style>${CSS}.ccr .pick{font-size:1rem;padding:6px 8px;border-radius:8px;border:1px solid #c9d3de;max-width:100%}</style>${withSrc(()=>pageHtml(true)).replace('<div class="ccr">','<div class="ccr">'+pick)}`;
+  el.innerHTML=`<style>${CSS}</style>${withSrc(()=>pageHtml(true))}`;
   el.scrollTop=0; pager();
 }
+// one tournament's page: i = its place in the archive; nothing given: the tournament just finished (else the last one)
 window.ccResultsPage=async function(i){
   try{ await Promise.all(['hands','dd','boards','pairs','movements','state','archives'].map(k=>DB.get(k))); }catch(e){}
-  // nothing said: the tournament just finished, else the last one archived
   SRC=i!=null?i:(getState().status==='finished'||!(getArchives()||[]).length?null:0);
-  let el=document.getElementById('ccLayer'); if(!el){ el=document.createElement('div'); el.id='ccLayer'; document.body.appendChild(el); }
-  el.style.background='#fff'; el.hidden=false;
-  ccResultsDraw();
+  layerEl(); ccResultsDraw();
 };
-// the ranking as a short message (WhatsApp, SMS), or the whole page as a file to the phone's share menu
-function shareText(){
-  const L=v=>window.i18nText?i18nText(v):v, {s,sh,ranking}=withSrc(collect), date=(s._finishedAt||new Date().toISOString()).slice(0,10);
-  return [(CLUB_NAME?CLUB_NAME+' — ':'')+(s.name||L('Tournament'))+' '+date, ...ranking.map((p,i)=>(i+1)+'. '+p.name+' — '+(sh.byImp?fmt(p.imp)+' IMP':fmt(p.pct,1)+'%'))].join('\n');
+// the list of the club's results: a tab for each year, the months newest first, each tournament's date and name
+let IDXY=null;
+const IDX_CSS=`.ccr .ihead{display:flex;align-items:center;justify-content:center;gap:22px;background:#f1f1f1;padding:20px 10px;margin:4px 0 14px}
+.ccr .ihead span{flex:0 1 100px;height:5px;background:#f39c12;border-radius:2px}
+.ccr .ihead h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:2.3rem;letter-spacing:1px;text-transform:uppercase;color:#222}
+.ccr .iclub{color:#555;margin:0 0 12px;font-size:1.05rem}
+.ccr .ytabs{display:flex;flex-wrap:wrap;border-bottom:1px solid #dee2e6;margin:0 0 6px}
+.ccr .ytabs a{padding:10px 22px;color:#2e7d32;cursor:pointer;font-size:1.15rem;border:1px solid transparent;border-radius:6px 6px 0 0;text-decoration:none}
+.ccr .ytabs a.on{color:#222;border-color:#dee2e6 #dee2e6 #fff;background:#fff;margin-bottom:-1px}
+.ccr .imon{font-size:1.9rem;font-weight:400;color:#222;margin:22px 0 10px}
+.ccr .ir{display:grid;grid-template-columns:200px 1fr;gap:10px;padding:14px 12px;border-bottom:1px solid #e3e3e3;cursor:pointer;font-size:1.15rem}
+.ccr .ir:nth-child(odd){background:#f2f2f2}.ccr .ir:hover{background:#e8f2ea}
+.ccr .ir a{color:#2e7d32;text-decoration:none}
+.ccr .inone{color:#777;padding:20px 0}
+@media (max-width:640px){.ccr .ihead h1{font-size:1.6rem}.ccr .ihead span{flex-basis:40px}.ccr .ir{grid-template-columns:105px 1fr;font-size:1rem;padding:12px 8px}.ccr .imon{font-size:1.4rem}.ccr .ytabs a{padding:8px 14px;font-size:1rem}}`;
+function indexHtml(){
+  const L=v=>window.i18nText?i18nText(v):v;
+  const loc={tr:'tr-TR',no:'nb-NO',es:'es-ES',fr:'fr-FR',it:'it-IT',de:'de-DE',ru:'ru-RU',pl:'pl-PL',zh:'zh-CN'}[(()=>{ try{ return localStorage.getItem('bricskor_language'); }catch(e){ return ''; } })()]||'en-GB';
+  const list=(getArchives()||[]).map((a,i)=>({i,name:(a.state&&a.state.name)||L('Tournament'),d:new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d.getTime()>0).sort((a,b)=>b.d-a.d);
+  const years=[...new Set(list.map(x=>x.d.getFullYear()))];
+  if(!years.includes(IDXY)) IDXY=years[0];
+  const months=[]; for(const x of list.filter(x=>x.d.getFullYear()===IDXY)){ const k=x.d.getMonth(); let m=months.find(m=>m.k===k); if(!m) months.push(m={k,t:x.d.toLocaleDateString(loc,{month:'long',year:'numeric'}),rows:[]}); m.rows.push(x); }
+  const dd=d=>String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
+  return `<div class="ccr"><div class="bar"><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>
+    <div class="ihead"><span></span><h1>${L('Results')}</h1><span></span></div><div class="iclub">${esc(CLUB_NAME||'')}</div>
+    ${years.length?`<div class="ytabs">${years.map(y=>`<a class="${y===IDXY?'on':''}" onclick="ccResultsYear(${y})">${y}</a>`).join('')}</div>
+    ${months.map(m=>`<div class="imon">${esc(m.t)}</div><div>${m.rows.map(x=>`<div class="ir" onclick="ccResultsPage(${x.i})"><span>${dd(x.d)}</span><a href="#" onclick="return false">${esc(x.name)}</a></div>`).join('')}</div>`).join('')}`:`<div class="inone">${L('No results yet.')}</div>`}</div>`;
 }
-function pageFile(){
-  const s=withSrc(getState), html=withSrc(()=>`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(s.name||'Results')}</title><style>body{margin:0;background:#fff}${CSS}</style></head><body>${pageHtml(false)}<script>(${pager.toString()})();</script></body></html>`);
-  return new File([html],(String(s.name||'results').replace(/[^\w\-]+/g,'_')||'results')+'.html',{type:'text/html'});
-}
-window.ccResultsShare=async function(how){
-  const text=shareText();
-  if(how==='wa'){ window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank'); return; }
-  if(how==='sms'){ location.href='sms:?&body='+encodeURIComponent(text); return; }
-  try{ const f=pageFile(); if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],text}); return; } }catch(e){ if(e&&e.name==='AbortError') return; }
-  ccResultsDownload();
-};
-window.ccResultsDownload=function(){
-  const s=withSrc(getState), html=withSrc(()=>`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(s.name||'Results')}</title><style>body{margin:0;background:#fff}${CSS}</style></head><body>${pageHtml(false)}<script>(${pager.toString()})();</script></body></html>`);
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
-  a.download=(String(s.name||'results').replace(/[^\w\-]+/g,'_')||'results')+'.html'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1000);
+window.ccResultsYear=function(y){ IDXY=y; const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}</style>${indexHtml()}`; };
+window.ccResultsIndex=async function(){
+  try{ await DB.get('archives'); }catch(e){}
+  const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}</style>${indexHtml()}`; el.scrollTop=0;
 };
 })();

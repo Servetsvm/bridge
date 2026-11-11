@@ -673,10 +673,18 @@ function renderHistory(){
         <span class="rc-num">${a.state.name}</span>
         <span class="rc-stat">${a.state.tableCount} tables · ${a.state.roundCount} rounds · ${new Date(a.finished).toLocaleDateString()}</span>
       </div>
-      <button class="btn btn-blue btn-sm" onclick="viewArchive(${i})">View Results</button> <button class="btn btn-gold btn-sm" onclick="ccResultsPage(${i})">📄 Results page</button>
+      <button class="btn btn-blue btn-sm" onclick="viewArchive(${i})">View Results</button> <button class="btn btn-gold btn-sm" onclick="ccResultsPage(${i})">📄 Results page</button> <button class="btn btn-red btn-sm" onclick="adminDeleteArchive(${i})">🗑 Delete</button>
     </div>`).join('')}
   </div>`;
 }
+window.adminDeleteArchive=async function(i){
+  const arc=getArchives(), a=arc[i]; if(!a) return;
+  const L=window.i18nText?i18nText:x=>x;
+  if(!await confirmDialog(L('Delete the results of this tournament? Nobody can see them afterwards, and this cannot be undone.')+'\n\n'+(a.state&&a.state.name||'')+' · '+String(a.finished||'').slice(0,10),{title:'🗑',confirmLabel:L('Delete'),danger:true})) return;
+  arc.splice(i,1); await setArchives(arc);
+  addLog('warn','Archived tournament deleted',(a.state&&a.state.name||'')+' '+String(a.finished||'').slice(0,10));
+  toast('🗑 '+L('Deleted')); renderAdminTab();
+};
 window.viewArchive=function(i){
   const a=getArchives()[i];if(!a)return;
   const mpData=calcMPFromData(a.boards,a.movements);
