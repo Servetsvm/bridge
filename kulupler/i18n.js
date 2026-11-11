@@ -55,6 +55,8 @@
     "Points":"Puan",
     "Save as a page":"Sayfa olarak kaydet",
     "Print":"Yazdır",
+    "Opponents":"Rakip",
+    "Score":"Skor",
     "Share the page":"Sayfayı paylaş",
     "Date":"Tarih",
     "Club":"Kulüp",

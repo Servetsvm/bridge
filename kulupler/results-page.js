@@ -66,6 +66,8 @@ const CSS=`.ccr{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif
 .ccr .rank td,.ccr .res td{padding:7px 6px;border-bottom:1px solid #e3e7ec;text-align:center}
 .ccr .rank td.nm{text-align:left}.ccr .rank tr:nth-child(even) td,.ccr .res tr:nth-child(even) td{background:#f4f6f8}
 .ccr .rank td.n{text-align:right;font-variant-numeric:tabular-nums}
+.ccr .rank tr.pr{cursor:pointer}.ccr .rank tr.pr:hover td{background:#e6eef7}.ccr .rank tr.pr.open td{background:#dbe7f3;font-weight:700}
+.ccr .rank tr.pd>td{padding:4px 0 10px;background:#fff!important;text-align:left}.ccr .pb{margin:4px 0 0;font-size:.88rem}.ccr .pb th{background:#cfe0f3!important;color:#1f3550!important}.ccr .pb a{color:#1f4e79;font-weight:700}
 .ccr .nav{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.ccr .nav a{color:#1f4e79;font-weight:700;text-decoration:none;padding:3px 8px;border:1px solid #c9d3de;border-radius:6px}
 .ccr .bd{border:1px solid #dfe5ec;border-radius:10px;padding:12px;margin:14px 0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .ccr .bd h3{margin:0 0 8px;color:#1f4e79}
@@ -87,7 +89,20 @@ function pageHtml(withBar){
   const L=v=>window.i18nText?i18nText(v):v;
   const {s,sh,ranking,by,nums,hands,dd,rounds}=collect();
   const date=(s._finishedAt||s._startedAt||new Date().toISOString()).slice(0,10);
-  const rank=`<table class="rank"><tr><th>${L('Place')}</th><th>${L('Pair')}</th><th>${L('Name')}</th>${sh.mp?`<th>${L('Points')}</th><th>%</th>`:''}${sh.imp?'<th>IMP</th>':''}</tr>${ranking.map((p,i)=>`<tr><td>${i+1}</td><td>${esc(p.no)}</td><td class="nm">${esc(p.name)}</td>${sh.mp?`<td class="n">${fmt(p.mp,1)}</td><td class="n">${fmt(p.pct)}</td>`:''}${sh.imp?`<td class="n">${fmt(p.imp)}</td>`:''}</tr>`).join('')}</table>`;
+  // a pair tapped in the ranking: its boards, each with the opponents, the round, the contract, the lead, its score and points
+  const cols=3+(sh.mp?2:0)+(sh.imp?1:0);
+  const pairBoards=id=>{
+    const rows=[];
+    for(const [bn,L2] of Object.entries(by)) for(const x of L2){
+      if(x.ns!==id&&x.ew!==id) continue;
+      const me=x.ns===id, b=x.b, pass=!b.level, ns=typeof b.nsScore==='number'?b.nsScore:null;
+      rows.push({bn:+bn||bn,r:x.r,opp:pairNo(me?x.ew:x.ns),con:pass?'PASS':`${b.level}${b.suit||''}${b.doubled||''} ${b.declarer||''}`,tr:pass?'—':b.level+6+(+b.result||0),lead:b.lead||'',sc:ns==null?null:(me?ns:-ns),mp:me?x.nsMP:x.ewMP,imp:x.imp==null?null:(me?x.imp:-x.imp)});
+    }
+    rows.sort((a,b)=>a.r-b.r||a.bn-b.bn);
+    if(!rows.length) return `<div style="padding:8px">—</div>`;
+    return `<table class="res pb"><tr><th>${L('Board')}</th><th>${L('Opponents')}</th><th>${L('Round')}</th><th>${L('Contract')}</th><th>${L('Tricks')}</th><th>${L('Lead')}</th><th>${L('Score')}</th>${sh.mp?'<th>MP</th>':''}${sh.imp?'<th>IMP</th>':''}</tr>${rows.map(x=>`<tr><td><a href="#b${esc(x.bn)}" onclick="var e=document.getElementById('b${esc(x.bn)}');if(e){e.scrollIntoView();return false;}">${esc(x.bn)}</a></td><td>${esc(x.opp)}</td><td>${x.r}</td><td class="c">${suitHtml(x.con)}</td><td>${x.tr}</td><td class="c">${suitHtml(x.lead)}</td><td>${x.sc==null?'':x.sc}</td>${sh.mp?`<td>${x.mp==null?'':x.mp}</td>`:''}${sh.imp?`<td>${x.imp==null?'':fmt(x.imp)}</td>`:''}</tr>`).join('')}</table>`;
+  };
+  const rank=`<table class="rank"><tr><th>${L('Place')}</th><th>${L('Pair')}</th><th>${L('Name')}</th>${sh.mp?`<th>${L('Points')}</th><th>%</th>`:''}${sh.imp?'<th>IMP</th>':''}</tr>${ranking.map((p,i)=>`<tr class="pr" onclick="var d=this.nextElementSibling;d.hidden=!d.hidden;this.classList.toggle('open')"><td>${i+1}</td><td>${esc(p.no)}</td><td class="nm">▸ ${esc(p.name)}</td>${sh.mp?`<td class="n">${fmt(p.mp,1)}</td><td class="n">${fmt(p.pct)}</td>`:''}${sh.imp?`<td class="n">${fmt(p.imp)}</td>`:''}</tr><tr class="pd" hidden><td colspan="${cols}">${pairBoards(p.id)}</td></tr>`).join('')}</table>`;
   const boardsHtml=nums.map(bn=>{
     const hd=hands.find(h=>String(h.board)===String(bn)), a=dd[String(bn)], L2=by[bn]||[];
     const res=L2.length?`<table class="res"><tr><th>NS</th><th>EW</th><th>${L('Round')}</th><th>${L('Contract')}</th><th>${L('Tricks')}</th><th>${L('Lead')}</th><th>NS</th><th>EW</th>${sh.mp?`<th>MP NS</th><th>MP EW</th>`:''}${sh.imp?'<th>IMP NS</th>':''}</tr>${L2.map(x=>{
