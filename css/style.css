@@ -2018,3 +2018,16 @@ body.homev2 #hClubs.h2tile{background:linear-gradient(160deg,#1f5c3c,#123d27);bo
 body.homev2 #hClubs.h2tile b{color:#f6e3a6}
 body.homev2 #hClubs.h2tile small{color:rgba(246,236,208,.85)}
 body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#fff7dc,#f0dca0 60%,#c9a227)}
+
+/* Home (and the system table's Tables) in the top row of the bar, as tall as the boxes */
+#bar>#bHome.hbtn,#bar>#bRtList.hbtn{align-self:stretch;flex:none;padding:3px 10px;min-width:54px;border-radius:10px}
+#bar>#bRtList.hbtn b{font-size:20px;line-height:1}
+@media (max-width:600px){ #bar>#bHome.hbtn,#bar>#bRtList.hbtn{min-width:48px;padding:2px 6px} }
+/* on a phone: Start / Continue and Practise conventions as two equal buttons across the card */
+@media (max-width:600px){
+  body.homev2 .h2ptx .h2btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+  body.homev2 .h2ptx .h2btns .h2go,body.homev2 .h2ptx .h2btns #bGo{display:flex;align-items:center;justify-content:center;text-align:center;white-space:normal;line-height:1.15;min-height:46px;padding:8px 8px;font-size:15px;width:100%;border-radius:12px}
+}
+#bRtList.hbtn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1}
+#bRtList.hbtn small{font-size:11px;font-weight:700;white-space:nowrap}
+@media (max-width:600px){ #bRtList.hbtn small{font-size:10px} #bar>#bRtList.hbtn b{font-size:18px} #bar:has(#bRtList){flex-wrap:nowrap} #bar:has(#bRtList)>.box{min-width:0;flex:1 1 auto} }
