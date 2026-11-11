@@ -21,6 +21,13 @@ function renderScreenPanel(){
           ${s.status==='finished'?'<button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button>':''}<button class="btn btn-blue btn-sm" onclick="screenPrintPDF()">🖨 Print PDF</button>
         </div>
       </div>
+      <div class="sb-tabs">
+        <button class="sb-tab ${screenTab==='speed'?'active':''}" onclick="setScreenTab('speed',this)">⚡ Speedball</button>
+        <button class="sb-tab ${screenTab==='overall'?'active':''}" onclick="setScreenTab('overall',this)">🌐 Overall</button>
+        <button class="sb-tab ${screenTab==='ns'?'active':''}" onclick="setScreenTab('ns',this)">🔵 NS</button>
+        <button class="sb-tab ${screenTab==='ew'?'active':''}" onclick="setScreenTab('ew',this)">🟡 EW</button>
+        <button class="sb-tab ${screenTab==='tables'?'active':''}" onclick="setScreenTab('tables',this)">📋 Tables</button>
+      </div>
       <div class="stats-row">
         <div class="stat-box"><div class="sv">${s.currentRound||0}/${s.roundCount||0}</div><div class="sl">Round</div></div>
         <div class="stat-box"><div class="sv">${s.tableCount||0}</div><div class="sl">Tables</div></div>
@@ -28,13 +35,6 @@ function renderScreenPanel(){
         <div class="stat-box"><div class="sv">${doneBoards}</div><div class="sl">Boards Done</div></div>
       </div>
       ${(()=>{const mvs2=getMovements();let tot=0,don=0;for(let t=1;t<=s.tableCount;t++){const mv2=mvs2[s.currentRound+'_'+t]||{};for(let b=mv2.boardStart||1;b<=(mv2.boardEnd||3);b++){tot++;if(boards[t+'_'+s.currentRound+'_'+b]?.status==='done')don++;}}const pct=tot>0?Math.round(don/tot*100):0;return`<div style="padding:0 0 8px;"><div style="font-size:0.7rem;color:var(--text3);margin-bottom:3px;">Round ${s.currentRound} progress: ${don}/${tot} boards · ${pct}%</div><div style="height:5px;background:var(--border);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:${pct>=100?'var(--green)':'var(--gold)'};transition:width 0.5s;"></div></div></div>`;})()} 
-      <div class="sb-tabs">
-        <button class="sb-tab ${screenTab==='overall'?'active':''}" onclick="setScreenTab('overall',this)">🌐 Overall</button>
-        <button class="sb-tab ${screenTab==='ns'?'active':''}" onclick="setScreenTab('ns',this)">🔵 NS</button>
-        <button class="sb-tab ${screenTab==='ew'?'active':''}" onclick="setScreenTab('ew',this)">🟡 EW</button>
-        <button class="sb-tab ${screenTab==='speed'?'active':''}" onclick="setScreenTab('speed',this)">⚡ Speedball</button>
-        <button class="sb-tab ${screenTab==='tables'?'active':''}" onclick="setScreenTab('tables',this)">📋 Tables</button>
-      </div>
       <div id="sbContent">${renderSbTab(allRows)}</div>
     </div>`;
   startScreenAutoScroll();
