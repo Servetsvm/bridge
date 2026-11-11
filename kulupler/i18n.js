@@ -10,6 +10,8 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Pair N/S":"Çift K/G",
+    "Pair E/W":"Çift D/B",
     "North–South":"Kuzey–Güney",
     "East–West":"Doğu–Batı",
     "Continue without":"Kaydetmeden devam",

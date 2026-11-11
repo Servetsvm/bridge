@@ -252,20 +252,20 @@ function movementHtml(){
   let body='';
   if(MOVT!=null){
     const rows=rounds.map(r=>{ const m=mv[r+'_'+MOVT]; if(!m) return ''; return `<tr class="${r===s.currentRound?'now':''}"><td>${r}</td><td class="nmc">${nm(m.ns)}</td><td class="nmc">${nm(m.ew)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('');
-    body=`<h2 class="tt">${L('Table')} ${MOVT}</h2><div class="resw"><table class="res mv"><tr><th>${L('Round')}</th><th>${L('North–South')}</th><th>${L('East–West')}</th><th>${L('Boards')}</th></tr>${rows}</table></div>`;
+    body=`<h2 class="tt">${L('Table')} ${MOVT}</h2><div class="resw"><table class="res mv"><tr><th>${L('Round')}</th><th>${L('Pair N/S')}</th><th>${L('Pair E/W')}</th><th>${L('Boards')}</th></tr>${rows}</table></div>`;
   } else if(MOVP){
     const rows=rounds.map(r=>{ const t=Object.keys(mv).find(k=>+k.split('_')[0]===r&&(mv[k].ns===MOVP||mv[k].ew===MOVP)); if(!t) return `<tr><td>${r}</td><td colspan="4">—</td></tr>`; const m=mv[t], ns=m.ns===MOVP; return `<tr class="${r===s.currentRound?'now':''}"><td>${r}</td><td><b>${t.split('_')[1]}</b></td><td>${ns?L('North–South'):L('East–West')}</td><td class="nmc">${nm(ns?m.ew:m.ns)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('');
     body=`<h2 class="tt">${esc(pairNo(MOVP))} · ${esc(P[MOVP]&&P[MOVP].name||'')}</h2><div class="resw"><table class="res mv"><tr><th>${L('Round')}</th><th>${L('Table')}</th><th>${L('Seat')}</th><th>${L('Opponents')}</th><th>${L('Boards')}</th></tr>${rows}</table></div>`;
   } else {
     body=rounds.map(r=>{ const ts=Object.keys(mv).filter(k=>+k.split('_')[0]===r).map(k=>+k.split('_')[1]).sort((a,b)=>a-b);
-      return `<h2 class="tt${r===s.currentRound?' now':''}">${L('Round')} ${r}</h2><div class="resw"><table class="res mv"><tr><th>${L('Table')}</th><th>${L('North–South')}</th><th>${L('East–West')}</th><th>${L('Boards')}</th></tr>${ts.map(t=>{ const m=mv[r+'_'+t]; return `<tr><td><b>${t}</b></td><td class="nmc">${nm(m.ns)}</td><td class="nmc">${nm(m.ew)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('')}</table></div>`; }).join('');
+      return `<h2 class="tt${r===s.currentRound?' now':''}">${L('Round')} ${r}</h2><div class="resw"><table class="res mv"><tr><th>${L('Table')}</th><th>${L('Pair N/S')}</th><th>${L('Pair E/W')}</th><th>${L('Boards')}</th></tr>${ts.map(t=>{ const m=mv[r+'_'+t]; return `<tr><td><b>${t}</b></td><td class="nmc">${nm(m.ns)}</td><td class="nmc">${nm(m.ew)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('')}</table></div>`; }).join('');
   }
   return `<div class="ccr">${head}<h2 class="tt">${esc(s.name||L('Tournament'))}</h2>${pick}${body}</div>`;
 }
 const MOV_CSS=`.ccr .mpick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 14px}.ccr .mpick span{font-weight:600;margin-right:4px}
 .ccr .mpick a{min-width:36px;height:36px;line-height:36px;text-align:center;padding:0 8px;border-radius:18px;border:1px solid #c9d8cd;color:#1d5534;font-weight:700;cursor:pointer;background:#fff}
 .ccr .mpick a.on{background:#1d5534;color:#fff;border-color:#1d5534}
-.ccr .mv td{text-align:center}.ccr .mv td.nmc{text-align:left;white-space:normal}.ccr .mv td.nmc small{color:#5b6b61}
+.ccr .mv td{text-align:center}.ccr .mv th,.ccr .mv td{border-left:1px solid #d6e2da}.ccr .mv th:first-child,.ccr .mv td:first-child{border-left:0}.ccr .mv th{border-left-color:rgba(255,255,255,.35)}.ccr .mv td.nmc b{display:inline-block;min-width:26px;font-size:1.1rem;color:#1d5534}.ccr .mv td.nmc{text-align:left;white-space:normal}.ccr .mv td.nmc small{color:#5b6b61}
 .ccr .mv tr.now td{background:#fff6d6!important}.ccr .tt.now{color:#b8860b}.ccr .inone{color:#777;padding:20px 0}`;
 window.ccMoveTable=function(t){ MOVT=MOVT===t?null:t; MOVP=null; const el=layerEl(); el.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; };
 window.ccMovePair=function(id){ MOVP=id; MOVT=null; const el=layerEl(); el.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; };

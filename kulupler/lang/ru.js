@@ -1,6 +1,7 @@
 // BridgeGate interface in ru (loaded by i18n.js when this language is chosen): English text → ru, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["ru"]={"d":{"North–South":"Север–Юг","East–West":"Восток–Запад","Continue without":"Продолжить без записи",
+window.BG_LANG["ru"]={"d":{"Pair N/S":"Пара С/Ю","Pair E/W":"Пара В/З",
+"North–South":"Север–Юг","East–West":"Восток–Запад","Continue without":"Продолжить без записи",
 "Take these boards to the table":"Возьмите эти сдачи к столу","Choose your pair":"Выберите свою пару","All":"Все","No tournament is being played now.":"Сейчас турнир не идёт.","Seat":"Линия",
 "Deal with the camera":"Раздать с камерой",
 "📷 Deal with the camera":"📷 Раздать с камерой",
