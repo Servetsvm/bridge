@@ -10,6 +10,18 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "🎲 Make the boards automatically":"🎲 Board’ları otomatik oluştur",
+    "Make the boards automatically":"Board’ları otomatik oluştur",
+    "Base system":"Temel sistem",
+    "How many boards?":"Kaç board?",
+    "The robots deal each board so that one of the chosen conventions comes up in the auction.":"Robotlar her board’u, seçilen konvansiyonlardan biri deklarasyonda çıkacak şekilde dağıtır.",
+    "None — random boards":"Hiçbiri — rastgele board’lar",
+    "Basics":"Temeller",
+    "Conventions":"Konvansiyonlar",
+    "Make the boards":"Board’ları oluştur",
+    "Making the boards…":"Board’lar oluşturuluyor…",
+    "❌ Not available on this device":"❌ Bu cihazda kullanılamıyor",
+    "Loading…":"Yükleniyor…",
     "Find your pair":"Çiftini bul",
     "The pairings of this round are not ready yet.":"Bu turun eşleşmeleri henüz hazır değil.",
     "Pair N/S":"Çift K/G",

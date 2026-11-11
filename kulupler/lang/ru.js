@@ -1,6 +1,7 @@
 // BridgeGate interface in ru (loaded by i18n.js when this language is chosen): English text → ru, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["ru"]={"d":{"Find your pair":"Найдите свою пару","The pairings of this round are not ready yet.":"Пары этого тура ещё не готовы.",
+window.BG_LANG["ru"]={"d":{"with the chosen conventions":"с выбранными конвенциями","🎲 Make the boards automatically":"🎲 Создать сдачи автоматически","Make the boards automatically":"Создать сдачи автоматически","Base system":"Базовая система","How many boards?":"Сколько сдач?","The robots deal each board so that one of the chosen conventions comes up in the auction.":"Роботы раздают каждую сдачу так, чтобы в торговле встретилась одна из выбранных конвенций.","None — random boards":"Нет — случайные сдачи","Basics":"Основы","Conventions":"Конвенции","Make the boards":"Создать сдачи","Making the boards…":"Создаём сдачи…","❌ Not available on this device":"❌ Недоступно на этом устройстве","Loading…":"Загрузка…",
+"Find your pair":"Найдите свою пару","The pairings of this round are not ready yet.":"Пары этого тура ещё не готовы.",
 "Pair N/S":"Пара С/Ю","Pair E/W":"Пара В/З",
 "North–South":"Север–Юг","East–West":"Восток–Запад","Continue without":"Продолжить без записи",
 "Take these boards to the table":"Возьмите эти сдачи к столу","Choose your pair":"Выберите свою пару","All":"Все","No tournament is being played now.":"Сейчас турнир не идёт.","Seat":"Линия",

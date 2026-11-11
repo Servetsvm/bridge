@@ -551,3 +551,6 @@ body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}
 /* the screen: the round, tables, pairs and boards in a small row, four across on a phone too */
 .stats-row{gap:5px;margin-bottom:10px}.stat-box{padding:5px 6px}.stat-box .sv{font-size:1.05rem}.stat-box .sl{font-size:.6rem}
 @media (max-width:600px){.stats-row{grid-template-columns:repeat(4,1fr)!important;gap:4px}.stat-box{padding:4px 2px}.stat-box .sv{font-size:.9rem}.stat-box .sl{font-size:.55rem;line-height:1.1}}
+.dg-h{font-size:.72rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin:10px 0 4px}
+.dg-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 10px;max-height:40vh;overflow:auto}
+.dg-c{display:flex;align-items:center;gap:6px;font-size:.85rem;padding:3px 0;cursor:pointer}

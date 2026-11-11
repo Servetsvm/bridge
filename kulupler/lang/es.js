@@ -1,6 +1,7 @@
 // BridgeGate interface in es (loaded by i18n.js when this language is chosen): English text → es, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["es"]={"d":{"Find your pair":"Busca tu pareja","The pairings of this round are not ready yet.":"Los emparejamientos de esta ronda aún no están listos.",
+window.BG_LANG["es"]={"d":{"with the chosen conventions":"con las convenciones elegidas","🎲 Make the boards automatically":"🎲 Crear las manos automáticamente","Make the boards automatically":"Crear las manos automáticamente","Base system":"Sistema base","How many boards?":"¿Cuántas manos?","The robots deal each board so that one of the chosen conventions comes up in the auction.":"Los robots reparten cada mano para que una de las convenciones elegidas aparezca en la subasta.","None — random boards":"Ninguna — manos al azar","Basics":"Básicas","Conventions":"Convenciones","Make the boards":"Crear las manos","Making the boards…":"Creando las manos…","❌ Not available on this device":"❌ No disponible en este dispositivo","Loading…":"Cargando…",
+"Find your pair":"Busca tu pareja","The pairings of this round are not ready yet.":"Los emparejamientos de esta ronda aún no están listos.",
 "Pair N/S":"Pareja N/S","Pair E/W":"Pareja E/O",
 "North–South":"Norte–Sur","East–West":"Este–Oeste","Continue without":"Seguir sin registrar",
 "Take these boards to the table":"Lleva estas manos a la mesa","Choose your pair":"Elige tu pareja","All":"Todas","No tournament is being played now.":"Ahora no se juega ningún torneo.","Seat":"Posición",

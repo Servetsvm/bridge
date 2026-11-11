@@ -1,6 +1,7 @@
 // BridgeGate interface in it (loaded by i18n.js when this language is chosen): English text → it, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["it"]={"d":{"Find your pair":"Trova la tua coppia","The pairings of this round are not ready yet.":"Gli abbinamenti di questo turno non sono ancora pronti.",
+window.BG_LANG["it"]={"d":{"with the chosen conventions":"con le convenzioni scelte","🎲 Make the boards automatically":"🎲 Crea le smazzate automaticamente","Make the boards automatically":"Crea le smazzate automaticamente","Base system":"Sistema di base","How many boards?":"Quante smazzate?","The robots deal each board so that one of the chosen conventions comes up in the auction.":"I robot distribuiscono ogni smazzata in modo che una delle convenzioni scelte compaia nella licita.","None — random boards":"Nessuna — smazzate a caso","Basics":"Basi","Conventions":"Convenzioni","Make the boards":"Crea le smazzate","Making the boards…":"Creazione delle smazzate…","❌ Not available on this device":"❌ Non disponibile su questo dispositivo","Loading…":"Caricamento…",
+"Find your pair":"Trova la tua coppia","The pairings of this round are not ready yet.":"Gli abbinamenti di questo turno non sono ancora pronti.",
 "Pair N/S":"Coppia N/S","Pair E/W":"Coppia E/O",
 "North–South":"Nord–Sud","East–West":"Est–Ovest","Continue without":"Continua senza",
 "Take these boards to the table":"Porta queste smazzate al tavolo","Choose your pair":"Scegli la tua coppia","All":"Tutte","No tournament is being played now.":"Nessun torneo in corso.","Seat":"Linea",

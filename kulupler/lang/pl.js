@@ -1,6 +1,7 @@
 // BridgeGate interface in pl (loaded by i18n.js when this language is chosen): English text → pl, and the patterns in the order of i18n.js PATTERNS ({1}, {2} … are the matched parts)
 window.BG_LANG=window.BG_LANG||{};
-window.BG_LANG["pl"]={"d":{"Find your pair":"Znajdź swoją parę","The pairings of this round are not ready yet.":"Pary tej rundy nie są jeszcze gotowe.",
+window.BG_LANG["pl"]={"d":{"with the chosen conventions":"z wybranymi konwencjami","🎲 Make the boards automatically":"🎲 Utwórz rozdania automatycznie","Make the boards automatically":"Utwórz rozdania automatycznie","Base system":"System bazowy","How many boards?":"Ile rozdań?","The robots deal each board so that one of the chosen conventions comes up in the auction.":"Roboty rozdają każde rozdanie tak, by w licytacji pojawiła się jedna z wybranych konwencji.","None — random boards":"Brak — losowe rozdania","Basics":"Podstawy","Conventions":"Konwencje","Make the boards":"Utwórz rozdania","Making the boards…":"Tworzenie rozdań…","❌ Not available on this device":"❌ Niedostępne na tym urządzeniu","Loading…":"Ładowanie…",
+"Find your pair":"Znajdź swoją parę","The pairings of this round are not ready yet.":"Pary tej rundy nie są jeszcze gotowe.",
 "Pair N/S":"Para N/S","Pair E/W":"Para E/W",
 "North–South":"Północ–Południe","East–West":"Wschód–Zachód","Continue without":"Dalej bez zapisu",
 "Take these boards to the table":"Zabierz te rozdania do stołu","Choose your pair":"Wybierz swoją parę","All":"Wszystkie","No tournament is being played now.":"Teraz nie trwa żaden turniej.","Seat":"Linia",
