@@ -102,7 +102,11 @@ window.bgPlayerNames=function(prefix,n){
   if(!window._bgEntry||window._bgEntry.n!==n) window._bgEntry={prefix,n,seats:{N:'',S:'',E:'',W:''}};
   const st=window._bgEntry.seats;
   const seat=k=>`<button class="pe-pos pe-${k}" onclick="bgSeatEdit('${k}')"><small>${BG_SEATS[k]}</small><b>${st[k]?cleanData(st[k]):'＋'}</b></button>`;
-  pe.innerHTML=`<div class="pe-table">${seat('N')}${seat('W')}<div class="pe-mid">Table ${n}</div>${seat('E')}${seat('S')}</div>
+  // the boards this table plays first: fetched from the board box before sitting down
+  const s0=getState(), mv=getMovements()[s0.currentRound+'_'+n];
+  if(!mv&&!window._bgMovLoad){ window._bgMovLoad=1; Promise.all([DB.get('movements'),DB.get('state')]).then(()=>{ window._bgMovLoad=0; if(window._bgEntry&&window._bgEntry.n===n) bgPlayerNames(prefix,n); }).catch(()=>{ window._bgMovLoad=0; }); }
+  const brd=mv?`<div class="pe-boards"><div><span>Boards</span> <b>${mv.boardStart}${mv.boardEnd!==mv.boardStart?' – '+mv.boardEnd:''}</b></div><small>Take these boards to the table</small></div>`:'';
+  pe.innerHTML=`${brd}<div class="pe-table">${seat('N')}${seat('W')}<div class="pe-mid">Table ${n}</div>${seat('E')}${seat('S')}</div>
     <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:12px;"><button class="btn btn-ghost" onclick="bgLeaveEntry('${prefix}')">🚪 Leave the table</button><button class="btn-primary" style="margin:0;" onclick="bgPlayerSit()">Continue →</button></div>`;
 };
 // one seat: a member number (its name is shown at once) or a name; OK goes back to the table

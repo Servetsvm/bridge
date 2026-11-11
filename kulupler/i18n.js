@@ -10,6 +10,11 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Take these boards to the table":"Bu boardları alıp masaya götürün",
+    "Choose your pair":"Çiftini seç",
+    "All":"Hepsi",
+    "No tournament is being played now.":"Şu an oynanan bir turnuva yok.",
+    "Seat":"Yön",
     "⏳ The next round starts when every table has finished this round":"⏳ Sonraki tur, bütün masalar bu turu bitirince başlar",
     'BridgeGate · Tournament System':'BridgeGate · Turnuva Sistemi',
     'Tournament Control System':'Turnuva Kontrol Sistemi',

@@ -233,4 +233,37 @@ window.ccResultsIndex=async function(){
   try{ await DB.get('archives'); }catch(e){}
   const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}</style>${indexHtml()}`; el.scrollTop=0;
 };
+// the movement: for each round, at each table the North-South and East-West pairs (number and names) and the boards;
+// a pair chosen: only its own way round (table, its seats, its opponents, the boards)
+let MOVP=null;
+function movementHtml(){
+  const L=v=>window.i18nText?i18nText(v):v, s=getState(), mv=getMovements(), P=getPairs();
+  const head=`<div class="rhead"><div><h1 class="rt">${L('Movement')}</h1></div><div class="rtools"><button class="ic" title="${esc(L('Close'))}" onclick="ccResultsClose()">✕</button></div></div>`;
+  if(!s.tableCount||!Object.keys(mv).length||s.status==='finished') return `<div class="ccr">${head}<div class="inone">${L('No tournament is being played now.')}</div></div>`;
+  const ids=Object.keys(P).filter(id=>!P[id].isPhantom).sort((a,b)=>(+pairNo(a)||0)-(+pairNo(b)||0));
+  const nm=id=>P[id]&&!P[id].isPhantom?`<b>${esc(pairNo(id))}</b> <small>${esc(P[id].name||'')}</small>`:'—';
+  const rounds=[...new Set(Object.keys(mv).map(k=>+k.split('_')[0]))].sort((a,b)=>a-b);
+  const pick=`<div class="mpick"><span>${L('Choose your pair')}:</span><a class="${MOVP==null?'on':''}" onclick="ccMovePair(null)">${L('All')}</a>${ids.map(id=>`<a class="${MOVP===id?'on':''}" title="${esc(P[id].name||'')}" onclick="ccMovePair('${id}')">${esc(pairNo(id))}</a>`).join('')}</div>`;
+  let body='';
+  if(MOVP){
+    const rows=rounds.map(r=>{ const t=Object.keys(mv).find(k=>+k.split('_')[0]===r&&(mv[k].ns===MOVP||mv[k].ew===MOVP)); if(!t) return `<tr><td>${r}</td><td colspan="4">—</td></tr>`; const m=mv[t], ns=m.ns===MOVP; return `<tr class="${r===s.currentRound?'now':''}"><td>${r}</td><td><b>${t.split('_')[1]}</b></td><td>${ns?'NS':'EW'}</td><td class="nmc">${nm(ns?m.ew:m.ns)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('');
+    body=`<h2 class="tt">${esc(pairNo(MOVP))} · ${esc(P[MOVP]&&P[MOVP].name||'')}</h2><div class="resw"><table class="res mv"><tr><th>${L('Round')}</th><th>${L('Table')}</th><th>${L('Seat')}</th><th>${L('Opponents')}</th><th>${L('Boards')}</th></tr>${rows}</table></div>`;
+  } else {
+    body=rounds.map(r=>{ const ts=Object.keys(mv).filter(k=>+k.split('_')[0]===r).map(k=>+k.split('_')[1]).sort((a,b)=>a-b);
+      return `<h2 class="tt${r===s.currentRound?' now':''}">${L('Round')} ${r}</h2><div class="resw"><table class="res mv"><tr><th>${L('Table')}</th><th>NS</th><th>EW</th><th>${L('Boards')}</th></tr>${ts.map(t=>{ const m=mv[r+'_'+t]; return `<tr><td><b>${t}</b></td><td class="nmc">${nm(m.ns)}</td><td class="nmc">${nm(m.ew)}</td><td>${m.boardStart}${m.boardEnd!==m.boardStart?' – '+m.boardEnd:''}</td></tr>`; }).join('')}</table></div>`; }).join('');
+  }
+  return `<div class="ccr">${head}<h2 class="tt">${esc(s.name||L('Tournament'))}</h2>${pick}${body}</div>`;
+}
+const MOV_CSS=`.ccr .mpick{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 14px}.ccr .mpick span{font-weight:600;margin-right:4px}
+.ccr .mpick a{min-width:36px;height:36px;line-height:36px;text-align:center;padding:0 8px;border-radius:18px;border:1px solid #c9d8cd;color:#1d5534;font-weight:700;cursor:pointer;background:#fff}
+.ccr .mpick a.on{background:#1d5534;color:#fff;border-color:#1d5534}
+.ccr .mv td{text-align:center}.ccr .mv td.nmc{text-align:left;white-space:normal}.ccr .mv td.nmc small{color:#5b6b61}
+.ccr .mv tr.now td{background:#fff6d6!important}.ccr .tt.now{color:#b8860b}.ccr .inone{color:#777;padding:20px 0}`;
+window.ccMovePair=function(id){ MOVP=id; const el=layerEl(); el.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; };
+window.ccMovementPage=async function(){
+  try{ await Promise.all(['state','movements','pairs'].map(k=>DB.get(k))); }catch(e){}
+  const el=layerEl(); el.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; el.scrollTop=0;
+  // the page follows the tournament (a new round, a Swiss pairing)
+  clearInterval(window._ccMovT); window._ccMovT=setInterval(async()=>{ const L=document.getElementById('ccLayer'); if(!L||L.hidden||!L.querySelector('.mpick,.inone')){ clearInterval(window._ccMovT); return; } try{ await Promise.all(['state','movements','pairs'].map(k=>DB.get(k))); }catch(e){} const top=L.scrollTop; L.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; L.scrollTop=top; },15000);
+};
 })();
