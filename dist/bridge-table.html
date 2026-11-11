@@ -2042,6 +2042,25 @@ body.homev2 .h2pr .h2rt .rtgo{padding:0;color:#f6ecd0}
 body.homev2 .h2pr .h2rt .rtrows{display:flex;flex-wrap:wrap;gap:6px;padding:0}
 body.homev2 .h2pr .h2rt .rtchip{padding:8px 10px;font-size:13px}
 
+/* the home button in the bar: a big house with its name under it */
+#bHome.hbtn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1;padding:3px 10px;min-width:52px}
+#bHome.hbtn b{font-size:24px;line-height:.9;font-weight:400}
+#bHome.hbtn small{font-size:11px;font-weight:700;white-space:nowrap}
+@media (max-width:600px){ #bar .tools>#bHome.hbtn{padding:2px 6px;min-width:44px} #bHome.hbtn b{font-size:21px} #bHome.hbtn small{font-size:10px} }
+/* the home page: Play offline fills its card; the robots' table is a card of its own */
+body.homev2 .h2pr{grid-template-columns:1fr}
+body.homev2 .h2pr .h2play{min-width:0}
+body.homev2 .rtcard .rtrows{display:flex;flex-wrap:wrap;gap:6px}
+@media (max-width:600px){ body.homev2 .rtcard .rtrows{display:grid;grid-template-columns:1fr 1fr;gap:6px} body.homev2 .rtcard .rtchip{width:100%;text-align:center} }
+@media (min-width:900px){ body.homev2 .h2colb{height:auto} body.homev2 .h2colb .hcard.prac{flex:none} }
+/* the tiles' pictures: larger, on a round brass badge so they stand out (the grey 🏛 of Clubs above all) */
+body.homev2 .h2tile .h2ti{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;font-size:26px;background:radial-gradient(circle at 35% 30%,#f3d98f,var(--h2-brass,#c9a227) 60%,#9c7a1a);box-shadow:0 2px 6px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.5);margin-bottom:6px}
+body.homev2 #hClubs .h2ti{font-size:28px}
+@media (max-width:600px){ body.homev2 .h2tile .h2ti{width:40px;height:40px;font-size:24px;margin:0 0 4px} body.homev2 #hClubs .h2ti{font-size:26px} }
+#clubView .cvclubs{font-size:18px}
+#bHome.hbtn b{font-size:20px;line-height:1}
+@media (max-width:600px){ #bHome.hbtn b{font-size:18px} }
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -9879,7 +9898,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 432;
+const APP_V = 433;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11035,7 +11054,7 @@ function renderBar() {
     $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
      <button class="box" id="bAuc"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
      <div class="box"><b>🔴 ${esc(RT_SYS[b.sys] || b.sys)}</b></div>
-     <div class="spacer"></div><div class="tools"><button class="btn" id="bHome" title="${T('Home')}">⌂</button><button class="btn gold" id="bRtList">📊 ${T('Tables')}</button></div>`;
+     <div class="spacer"></div><div class="tools"><button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold" id="bRtList">📊 ${T('Tables')}</button></div>`;
     return; }
   const g = G.play;
   const canClaim = G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
@@ -11049,7 +11068,7 @@ function renderBar() {
    <div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>
    <div class="spacer"></div>
    <div class="tools">
-     <button class="btn" id="bHome" title="${T('Home')}">⌂</button>
+     <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button>
      <button class="btn new${ui.confirmNew > Date.now() ? ' warn' : ''}" id="bNew">${ui.confirmNew > Date.now() ? T('Sure?') : T('New Deal')}</button>
      <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME()) || (canFix() && UNDO.some(u => u.by === 'robotfix'))) ? "" : "disabled"}${canFix() ? ` title="${T("Take back the robot's card")}"` : ''}>${canFix() ? '↩ 🤖' : T('Undo')}</button>
      <button class="btn gold" id="bHint">${T('Hint')}</button>
@@ -11498,15 +11517,16 @@ function homeShell2() {
         <button class="h2fan h2fango" id="bGoFan" aria-hidden="true" tabindex="-1">${fan}</button>
         <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📚 ${T('Practise conventions')}</button></div>
       </div>
-      <div class="h2champ rtcard h2rt" id="hRobot"></div></div>
+      </div>
       <div class="h2tiles">
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Team match'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
       </div>
-      <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>   <!-- the open tables right under the ways to play -->
       </div><div class="h2colb"><div id="hPend"></div>
       <div class="hcard prac" id="hPrac"></div>
+      <div class="hcard rtcard" id="hRobot"></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
+      <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
       <div id="hSec"></div>
     </div></section>
   </div><div id="hSheet"></div></div>`;

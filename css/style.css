@@ -1989,3 +1989,22 @@ body.homev2 .h2pr .h2rt{justify-content:flex-start;gap:8px}
 body.homev2 .h2pr .h2rt .rtgo{padding:0;color:#f6ecd0}
 body.homev2 .h2pr .h2rt .rtrows{display:flex;flex-wrap:wrap;gap:6px;padding:0}
 body.homev2 .h2pr .h2rt .rtchip{padding:8px 10px;font-size:13px}
+
+/* the home button in the bar: a big house with its name under it */
+#bHome.hbtn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1;padding:3px 10px;min-width:52px}
+#bHome.hbtn b{font-size:24px;line-height:.9;font-weight:400}
+#bHome.hbtn small{font-size:11px;font-weight:700;white-space:nowrap}
+@media (max-width:600px){ #bar .tools>#bHome.hbtn{padding:2px 6px;min-width:44px} #bHome.hbtn b{font-size:21px} #bHome.hbtn small{font-size:10px} }
+/* the home page: Play offline fills its card; the robots' table is a card of its own */
+body.homev2 .h2pr{grid-template-columns:1fr}
+body.homev2 .h2pr .h2play{min-width:0}
+body.homev2 .rtcard .rtrows{display:flex;flex-wrap:wrap;gap:6px}
+@media (max-width:600px){ body.homev2 .rtcard .rtrows{display:grid;grid-template-columns:1fr 1fr;gap:6px} body.homev2 .rtcard .rtchip{width:100%;text-align:center} }
+@media (min-width:900px){ body.homev2 .h2colb{height:auto} body.homev2 .h2colb .hcard.prac{flex:none} }
+/* the tiles' pictures: larger, on a round brass badge so they stand out (the grey 🏛 of Clubs above all) */
+body.homev2 .h2tile .h2ti{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;font-size:26px;background:radial-gradient(circle at 35% 30%,#f3d98f,var(--h2-brass,#c9a227) 60%,#9c7a1a);box-shadow:0 2px 6px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.5);margin-bottom:6px}
+body.homev2 #hClubs .h2ti{font-size:28px}
+@media (max-width:600px){ body.homev2 .h2tile .h2ti{width:40px;height:40px;font-size:24px;margin:0 0 4px} body.homev2 #hClubs .h2ti{font-size:26px} }
+#clubView .cvclubs{font-size:18px}
+#bHome.hbtn b{font-size:20px;line-height:1}
+@media (max-width:600px){ #bHome.hbtn b{font-size:18px} }

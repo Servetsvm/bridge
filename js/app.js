@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 432;
+const APP_V = 433;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1166,7 +1166,7 @@ function renderBar() {
     $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
      <button class="box" id="bAuc"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
      <div class="box"><b>🔴 ${esc(RT_SYS[b.sys] || b.sys)}</b></div>
-     <div class="spacer"></div><div class="tools"><button class="btn" id="bHome" title="${T('Home')}">⌂</button><button class="btn gold" id="bRtList">📊 ${T('Tables')}</button></div>`;
+     <div class="spacer"></div><div class="tools"><button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold" id="bRtList">📊 ${T('Tables')}</button></div>`;
     return; }
   const g = G.play;
   const canClaim = G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
@@ -1180,7 +1180,7 @@ function renderBar() {
    <div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>
    <div class="spacer"></div>
    <div class="tools">
-     <button class="btn" id="bHome" title="${T('Home')}">⌂</button>
+     <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button>
      <button class="btn new${ui.confirmNew > Date.now() ? ' warn' : ''}" id="bNew">${ui.confirmNew > Date.now() ? T('Sure?') : T('New Deal')}</button>
      <button class="btn" id="bUndo" ${(guest() ? G.phase !== "done" || true : UNDO.some(u => u.by === ME()) || (canFix() && UNDO.some(u => u.by === 'robotfix'))) ? "" : "disabled"}${canFix() ? ` title="${T("Take back the robot's card")}"` : ''}>${canFix() ? '↩ 🤖' : T('Undo')}</button>
      <button class="btn gold" id="bHint">${T('Hint')}</button>
@@ -1629,15 +1629,16 @@ function homeShell2() {
         <button class="h2fan h2fango" id="bGoFan" aria-hidden="true" tabindex="-1">${fan}</button>
         <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📚 ${T('Practise conventions')}</button></div>
       </div>
-      <div class="h2champ rtcard h2rt" id="hRobot"></div></div>
+      </div>
       <div class="h2tiles">
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Team match'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
       </div>
-      <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>   <!-- the open tables right under the ways to play -->
       </div><div class="h2colb"><div id="hPend"></div>
       <div class="hcard prac" id="hPrac"></div>
+      <div class="hcard rtcard" id="hRobot"></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
+      <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
       <div id="hSec"></div>
     </div></section>
   </div><div id="hSheet"></div></div>`;
