@@ -230,7 +230,9 @@ function renderTableDetail(tableNo){
 
   const approvals=getApprovals();
   // Find the next (first un-done) board to play
-  const nextBoard=boardList.find(bl=>!(bl.data&&bl.data.status==='done'));
+  // Social Bridge: a board another table is playing now (taken in the last 40 minutes and not finished there) is busy
+  const social=!!m.social, locks=social?(_cache['boardLocks']||{}):{}, busyAt=b=>{ const l=locks[b]; if(!l||+l.t===+tableNo||Date.now()-(l.at||0)>40*60e3) return 0; return boards[l.t+'_'+s.currentRound+'_'+b]?.status==='done'?0:+l.t; };
+  const nextBoard=boardList.find(bl=>!(bl.data&&bl.data.status==='done')&&!busyAt(bl.boardNo))||boardList.find(bl=>!(bl.data&&bl.data.status==='done'));
   const approvalPending=boardList.find(bl=>{
     const apk=tableNo+'_'+s.currentRound+'_'+bl.boardNo;
     const ap=approvals[apk];
@@ -293,7 +295,8 @@ function renderTableDetail(tableNo){
     const isNext=!done&&!pend&&!approvalPending&&nextBoard&&nextBoard.boardNo===bl.boardNo;
     const score=done&&typeof bl.data.nsScore==='number'?(bl.data.nsScore>0?'+':'')+bl.data.nsScore+' NS':done?'✓':'';
     const cmp=cmpOf(bl);
-    return `<button class="sbb${done?' me':''}${isNext?' some':''}${pend?' pend':''}" ${!done&&!pend&&!approvalPending?`onclick="bmEnterBoard(${bl.boardNo})"`:'disabled'}><b>${bl.boardNo}</b><small>${done?'✓ '+score:pend?'⏳':isNext?'▶':'—'}</small>${cmp?`<i>${cmp}</i>`:''}</button>`;
+    const busy=!done&&!pend&&busyAt(bl.boardNo);
+    return `<button class="sbb${done?' me':''}${isNext?' some':''}${pend?' pend':''}${busy?' busy':''}" ${!done&&!pend&&!approvalPending&&!busy?`onclick="bmEnterBoard(${bl.boardNo})"`:'disabled'}><b>${bl.boardNo}</b><small>${done?'✓ '+score:pend?'⏳':busy?'🔒 '+busy:isNext?'▶':'—'}</small>${cmp?`<i>${cmp}</i>`:''}</button>`;
   }).join('');
   document.getElementById('panelContent').innerHTML=`
     <div class="bm3t">
@@ -369,6 +372,7 @@ function renderTableDetail(tableNo){
 function bmPollApprovals(tableNo){
   const s=getState();
   const m=getMovements()[s.currentRound+'_'+tableNo]||{};
+  if(m.social&&Date.now()-(window._bgLockT||0)>5000){ window._bgLockT=Date.now(); const was=JSON.stringify(_cache['boardLocks']||{}); Promise.all([DB.get('boardLocks'),DB.get('boards')]).then(()=>{ if(JSON.stringify(_cache['boardLocks']||{})!==was&&document.querySelector('.sbgrid')&&!document.getElementById('modalBg')?.classList.contains('open')) renderTableDetail(tableNo); }).catch(()=>{}); }
   const approvals=getApprovals();
   const boards=getBoards();
   let needRefresh=false;
@@ -725,6 +729,10 @@ window.savePairNames=function(nsId,ewId,tableNo){
 
 // ── Board Entry Form ──
 window.bmEnterBoard=function(boardNo){
+  const m0=getMovements()[getState().currentRound+'_'+bmTableNo]||{};
+  if(m0.social&&bmTableNo){ (async()=>{ try{ const L=(await DB.get('boardLocks'))||{}, put=async(b,v)=>fetch(await fbUrl('/boardLocks/'+b+'.json'),{method:'PUT',body:JSON.stringify(v)});
+    for(const [b,l] of Object.entries(L)) if(l&&+l.t===+bmTableNo&&+b!==+boardNo) await put(b,null);
+    await put(boardNo,{t:bmTableNo,at:Date.now()}); const N={}; for(const [b,l] of Object.entries(L)) if(!(l&&+l.t===+bmTableNo)) N[b]=l; N[boardNo]={t:bmTableNo,at:Date.now()}; _cache['boardLocks']=N; }catch(e){} })(); }
   const vuln=getVuln(boardNo);
   const key=bmTableNo+'_'+getState().currentRound+'_'+boardNo;
   const existing=getBoards()[key];

@@ -558,3 +558,4 @@ body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}
 .dg-m{padding:12px 6px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-weight:700;cursor:pointer}
 .dg-m.on{background:var(--gold);color:#1b1404;border-color:var(--gold)}
 .dd-note2{font-size:.72rem;color:var(--gold);flex-basis:100%}
+.sbb.busy{opacity:.55;border-style:dashed}

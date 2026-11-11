@@ -138,7 +138,7 @@ function renderSetup(){
       </div>
       <div class="field">
         <label>Boards per Round</label>
-        <input type="number" id="aBPR" value="${s.boardsPerRound||3}" min="1" max="8" oninput="adminUpdateCalc()">
+        <input type="number" id="aBPR" value="${s.movement==='social'?3:(s.boardsPerRound||3)}" min="1" max="8" oninput="adminUpdateCalc()">
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="bprHint"></div>
       </div>
     </div>
@@ -149,18 +149,14 @@ function renderSetup(){
         <option value="howell" ${s.movement==='howell'?'selected':''}>Howell — all pairs move</option>
         <option value="barometer" ${s.movement==='barometer'?'selected':''}>Barometer — every table plays the same boards each round, then the pairs move</option>
         <option value="swiss" ${s.movement==='swiss'?'selected':''}>Swiss — pairings adapt to standings each round</option>
-        <option value="team" ${s.movement==='team'?'selected':''}>Team Match — team-based match movement</option>
+        <option value="social" ${s.movement==='social'?'selected':''}>Social Bridge — pairs stay at their table, each table plays any free board</option>
       </select>
       <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="movHint">${isTeam?'Team Match: 2 teams, 2 or more pairs per team, two-table mirrored boards and IMP scoring.':'Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).'}</div>
     </div>
-    <div id="aTeamSettings" style="display:${isTeam?'block':'none'};padding:10px 12px;margin:8px 0 10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
-      <div style="font-size:.76rem;font-weight:700;color:var(--gold);margin-bottom:8px;">🏆 Team Match Settings</div>
-      <div class="field-row">
-        <div class="field"><label>Team A</label><input id="aTeamA" value="${s._teamAName||'Team A'}" placeholder="Team A"></div>
-        <div class="field"><label>Team B</label><input id="aTeamB" value="${s._teamBName||'Team B'}" placeholder="Team B"></div>
-      </div>
-      <div class="field"><label>Pairs per Team</label><input type="number" id="aTeamPairs" value="${teamPairs}" min="2" max="12" oninput="adminUpdateCalc()">
-      <div style="font-size:.7rem;color:var(--text3);margin-top:3px;">${teamPairs} pairs/team = ${teamPairs*2} pairs = ${teamPairs*4} players. Each opponent pairing uses two tables and the same boards.</div></div>
+    <div class="field" id="aSocialField" style="display:${s.movement==='social'?'block':'none'};">
+      <label>Number of boards</label>
+      <input type="number" id="aSocBoards" value="${s.movement==='social'?(s.totalBoards||24):24}" min="1" max="99" oninput="adminUpdateCalc()">
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">Every pair stays at the same table in the same direction all evening. A table takes any board it has not played that no other table is playing, and plays it.</div>
     </div>
     <div class="field" id="aSwissRoundsField" style="display:${s.movement==='swiss'?'block':'none'};">
       <label>Number of Rounds (Swiss)</label>
@@ -205,13 +201,14 @@ window.adminUpdateCalc=function(){
   const swissField=document.getElementById('aSwissRoundsField');
   const teamField=document.getElementById('aTeamSettings');
   if(swissField)swissField.style.display=(mov==='swiss')?'block':'none';
-  if(teamField)teamField.style.display=(mov==='team')?'block':'none';
+  if(teamField)teamField.style.display='none';
+  const socField=document.getElementById('aSocialField'); if(socField) socField.style.display=mov==='social'?'block':'none';
+  const bprBox=document.getElementById('aBPR')?.closest('.field'); if(bprBox) bprBox.style.display=mov==='social'?'none':'';
   const playersEl=document.getElementById('aPlayers');
   let players=parseInt(playersEl?.value||0), rounds=0, tables=0;
-  if(mov==='team'){
-    const pp=teamMatchPairCount()||2;
-    players=pp*4;tables=pp;rounds=pp;
-    if(playersEl){playersEl.value=players;playersEl.readOnly=true;}
+  if(mov==='social'){
+    if(playersEl)playersEl.readOnly=false;
+    tables=Math.floor(players/4); rounds=1;
   }else{
     if(playersEl)playersEl.readOnly=false;
     const phantom=players%4!==0;
@@ -221,9 +218,9 @@ window.adminUpdateCalc=function(){
     else if(mov==='howell'||mov==='barometer')rounds=pairCount%2?pairCount:pairCount-1;   // an odd number of pairs: each pair sits out one round
     else rounds=parseInt(document.getElementById('aSwissRounds')?.value||7);
   }
-  const totalBoards=rounds*bpr;
+  const totalBoards=mov==='social'?(parseInt(document.getElementById('aSocBoards')?.value)||0):rounds*bpr;
   const hint=document.getElementById('calcHint'), bprHint=document.getElementById('bprHint');
-  if(hint)hint.textContent=mov==='team'?`→ ${tables} tables · 2 teams · ${tables} pairs/team`:`→ ${tables} table${tables!==1?'s':''}${players%4!==0?(mov==='howell'||mov==='barometer'?' + one pair sits out each round':' + phantom'):''}${mov==='barometer'||mov==='howell'&&(()=>{const pc=Math.floor(players/4)*2+(players%4!==0?1:0);return pc+pc%2;})()<=6?' · ⚠ every table plays the same boards each round: one copy of the boards per table':''}`;
+  if(hint)hint.textContent=mov==='social'?`→ ${tables} tables · ${tables*2} pairs`:`→ ${tables} table${tables!==1?'s':''}${players%4!==0?(mov==='howell'||mov==='barometer'?' + one pair sits out each round':' + phantom'):''}${mov==='barometer'||mov==='howell'&&(()=>{const pc=Math.floor(players/4)*2+(players%4!==0?1:0);return pc+pc%2;})()<=6?' · ⚠ every table plays the same boards each round: one copy of the boards per table':''}`;
   if(bprHint&&rounds>0)bprHint.textContent=`→ ${bpr} boards/round × ${rounds} rounds = ${totalBoards} total boards`;
   window._computedRounds=rounds;window._computedTotalBoards=totalBoards;
 };
@@ -237,8 +234,16 @@ window.adminSetup=function(){
   const bpr=parseInt(document.getElementById('aBPR').value);
   let players=parseInt(document.getElementById('aPlayers').value),tables,phantom=false,pairCount,rounds,swissRounds;
   let result,teams=null;
-  if(isNaN(bpr)||bpr<1||bpr>8){toast('❌ Boards/round: 1-8');return;}
-  if(mov==='team'){
+  if(mov!=='social'&&(isNaN(bpr)||bpr<1||bpr>8)){toast('❌ Boards/round: 1-8');return;}
+  if(mov==='social'){
+    const nb=parseInt(document.getElementById('aSocBoards')?.value);
+    if(isNaN(nb)||nb<1||nb>99){toast('❌ Boards: 1-99');return;}
+    if(isNaN(players)||players<8||players%4!==0){toast('❌ Social Bridge: a number of players divisible by 4 (at least 8)');return;}
+    tables=players/4; pairCount=tables*2; rounds=1;
+    result={pairs:{},movements:{},rounds:1};
+    for(let t=1;t<=tables;t++){ result.pairs['ns_'+t]={id:'ns_'+t,name:'NS '+t,dir:'NS',startTable:t,isPhantom:false}; result.pairs['ew_'+t]={id:'ew_'+t,name:'EW '+t,dir:'EW',startTable:t,isPhantom:false}; result.movements['1_'+t]={ns:'ns_'+t,ew:'ew_'+t,boardStart:1,boardEnd:nb,social:true}; }
+    window._socialBoards=nb;
+  }else if(mov==='team'){
     const tm=teamMatchSettingsFromUI();
     if(tm.pairsPerTeam<2||tm.pairsPerTeam>12){toast('❌ Team Match: 2-12 pairs per team');return;}
     players=tm.pairsPerTeam*4;pairCount=tm.pairsPerTeam*2;rounds=tm.pairsPerTeam;
@@ -259,22 +264,22 @@ window.adminSetup=function(){
     else if(mov==='howell'||mov==='barometer')result=generateHowell(tables,bpr,totalBoards,phantom,mov==='barometer');
     else result=generateSwissRound1(pairCount,bpr,rounds);
   }
-  const totalBoards=rounds*bpr;
+  const totalBoards=mov==='social'?window._socialBoards:rounds*bpr;
   // the last tournament's hands and double-dummy analysis go with it (they are kept in its archive); a tournament set up
   // again before it starts keeps the hand file already loaded for it
   if(getState().status&&getState().status!=='setup'){ _cache['hands']=[]; DB.set('hands',[]); _cache['dd']={}; DB.set('dd',{}); }
   setMovements(result.movements);setPairs(result.pairs);setBoards({});setApprovals({});
-  setTableLocks({}); DB.set('ready',{}); DB.set('kicks',{});   // no table taken in a new tournament
+  setTableLocks({}); DB.set('ready',{}); DB.set('kicks',{}); DB.set('boardLocks',{});   // no table taken in a new tournament
   setLive(false);   // a new tournament is listed when it starts
   const s=getState();
-  s.name=name;s.tableCount=tables;s.boardsPerRound=bpr;s.totalBoards=totalBoards;s.roundCount=rounds;s.phantom=phantom;s.status='setup';s.currentRound=0;
+  s.name=name;s.tableCount=tables;s.boardsPerRound=mov==='social'?totalBoards:bpr;s.totalBoards=totalBoards;s.roundCount=rounds;s.phantom=phantom;s.status='setup';s.currentRound=0;
   s.movement=mov;s.scoring=mov==='team'?'IMP':'BOTH';s._setupPlayers=players;s._setupSwissRounds=swissRounds||s._setupSwissRounds;
   if(mov==='team'){
     const tm=teamMatchSettingsFromUI();s.teams=teams;s._teamPairs=tm.pairsPerTeam;s._teamAName=tm.teamA;s._teamBName=tm.teamB;s._teamScoring='IMP';
   }else{delete s.teams;delete s._teamPairs;delete s._teamAName;delete s._teamBName;}
   setState(s);
   addLog('ok','Tournament created',`${players} players, ${tables} tables, ${result.rounds} rounds, ${mov}, ${scoringName(s)}`);
-  toast(mov==='team'?`✅ Team Match created: ${s.teams.A.name} vs ${s.teams.B.name}`:'✅ Tournament created');
+  toast('✅ Tournament created');
   adminTab='setup';refreshTopbar();renderAdminPanel();   // the names come from the tables after the start
 };
 

@@ -10,6 +10,11 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Social Bridge — pairs stay at their table, each table plays any free board":"Sosyal Briç — çiftler masasında kalır, her masa boştaki board’u oynar",
+    "Number of boards":"Board sayısı",
+    "Every pair stays at the same table in the same direction all evening. A table takes any board it has not played that no other table is playing, and plays it.":"Her çift bütün akşam aynı masada, aynı yönde kalır. Masa, oynamadığı ve başka masada oynanmayan herhangi bir board’u alıp oynar.",
+    "❌ Social Bridge: a number of players divisible by 4 (at least 8)":"❌ Sosyal Briç: oyuncu sayısı 4’e bölünebilmeli (en az 8)",
+    "❌ Boards: 1-99":"❌ Board: 1-99",
     "Random boards":"Rastgele eller",
     "Boards for conventions":"Konvansiyonlu eller",
     "Choose at least one convention":"En az bir konvansiyon seç",
