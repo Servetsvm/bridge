@@ -2272,6 +2272,7 @@ const CONVS = [
   { k: 'j2nt', n: 'Jacoby 2NT', d: '2NT over a major opening = 4+ card support, 13+ points, game forcing. Opener: 3 of a new suit = singleton or void; 4 of a new suit = a good 5-card side suit; 3 of the major = 18+ no shortness; 3NT = 15-17 no shortness; 4 of the major = minimum.' },
   { k: 'wjs', n: 'Weak Jump Shifts', d: 'A single jump in a new suit by responder (e.g. 1♦–2♠, 1♣–2♥) shows a 6+ card suit and a weak hand (0-5 HCP). It is to play; opener passes. Not after an opponent\'s double.' },
   { k: 'stayman', n: 'Stayman', d: '2♣ over 1NT (3♣ over 2NT) asks for a 4-card major. Replies: ♦ = no 4-card major, ♥ = four hearts, ♠ = four spades and not four hearts. After 2♦, 2♥/2♠ = five of that major + four of the other, invitational. If responder bids NT over 2♥, opener with four spades bids them too.' },
+  { k: 'puppet', n: 'Puppet Stayman', off: 1, d: 'Over 2NT, 3♣ asks for a 4- or 5-card major (in place of Stayman). Replies: 3♦ = one or two 4-card majors, 3♥ = five hearts, 3♠ = five spades, 3NT = no 4-card major. After 3♦ responder bids the major not held: 3♥ = four spades, 3♠ = four hearts, 4♦ = both, 3NT = none, so the 2NT opener declares.' },
   { k: 'fourWay', n: '4-Way Transfers', d: 'Over 1NT: 2♦ → hearts, 2♥ → spades (Jacoby), 2♠ → clubs (opener bids 3♣), 2NT → diamonds (opener bids 3♦). Balanced invitations go through 2♣ Stayman.' },
   { k: 'smolen', n: 'Smolen', d: 'After 1NT–2♣–2♦, a game-forcing hand with 5-4 in the majors bids its 4-card major at the three level: 3♥ = 4♥ + 5♠, 3♠ = 4♠ + 5♥, so the strong hand declares.' },
   { k: 'michaels', n: 'Michaels Cue Bid / Unusual 2NT', d: 'A direct cue bid of their one-level opening shows a 5-5 two-suiter, 7+ HCP: over a minor, both majors; over a major, the other major and a minor (advancer bids 2NT to ask for the minor). A jump to 2NT (Unusual) shows the two lowest unbid suits. Advancer chooses the suit; with a fit and 10+ he may jump to game.' },
@@ -2967,9 +2968,21 @@ function cands(x) {
   if (!oppOpened && (opening.call === B(1, 4) || opening.call === B(2, 4)) && ourOnly(x)) {
     const lv = LV(opening.call);
     const A = shiftAdd(add, lv === 1 ? x.ntShift : 0, opening.seat === p);   // the system's notrump range
-    if (opening.seat === p && my.length === 1 && pa.length === 2 && (mm.tag === 'stay' || mm.tag === 'tr')) {
+    if (opening.seat === p && my.length === 1 && pa.length === 2 && (mm.tag === 'stay' || mm.tag === 'tr' || mm.tag === 'pup')) {
       const ans = pa[1].call;
-      if (mm.tag === 'stay') {
+      if (mm.tag === 'pup') {
+        if (ans === B(3, 2) || ans === B(3, 3)) {
+          const M = ST(ans);
+          A(B(4, M), h => h.len[M] >= 3, { len: { [M]: 3 }, cv: 'puppet', t: 'Major fit: game' });
+          A(B(3, 4), () => true, { t: 'No major fit: 3NT' });
+        } else if (ans === B(3, 1)) {
+          // the major not held, so the 2NT opener declares
+          A(B(4, 1), h => h.len[2] === 4 && h.len[3] === 4, { len: { 2: 4, 3: 4 }, cv: 'puppet', t: 'Puppet Stayman: four hearts and four spades', f: 1 });
+          A(B(3, 2), h => h.len[3] === 4, { len: { 3: 4 }, cv: 'puppet', t: 'Puppet Stayman: four spades, not four hearts', f: 1 });
+          A(B(3, 3), h => h.len[2] === 4, { len: { 2: 4 }, cv: 'puppet', t: 'Puppet Stayman: four hearts, not four spades', f: 1 });
+          A(B(3, 4), () => true, { cv: 'puppet', t: 'Puppet Stayman: no 4-card major' });
+        } else A('P', () => true, { t: 'Pass' });
+      } else if (mm.tag === 'stay') {
         const aS = ST(ans);
         if (aS === 2 || aS === 3) {
           A(B(4, aS), h => h.len[aS] >= 4 && (lv === 2 || h.hcp >= 10) && h.hcp <= 15, { min: lv === 1 ? 10 : 4, len: { [aS]: 4 }, t: 'Major fit: game' });
@@ -3007,6 +3020,14 @@ function cands(x) {
         }
       }
       if (L.length) return L;
+    }
+    // opener after Puppet 3♦: 3♥ shows four spades, 3♠ four hearts, 4♦ both
+    if (opening.seat === x.seat && lv === 2 && my.length === 2 && pa.length === 2 && pa[0].m && pa[0].m.tag === 'pup' && my[1].call === B(3, 1)) {
+      const r2 = pa[1].call;
+      if (r2 === B(3, 2)) { A(B(4, 3), h => h.len[3] >= 4, { len: { 3: 4 }, t: 'Spade fit: game' }); A(B(3, 4), () => true, { t: 'No spade fit: 3NT' }); return L; }
+      if (r2 === B(3, 3)) { A(B(4, 2), h => h.len[2] >= 4, { len: { 2: 4 }, t: 'Heart fit: game' }); A(B(3, 4), () => true, { t: 'No heart fit: 3NT' }); return L; }
+      if (r2 === B(4, 1)) { A(B(4, 2), h => h.len[2] >= 4, { len: { 2: 4 }, t: 'Heart fit: game' }); A(B(4, 3), () => true, { len: { 3: 4 }, t: 'Spade fit: game' }); return L; }
+      if (r2 === B(3, 4)) { A('P', () => true, { t: 'Pass' }); return L; }
     }
     // opener after Stayman: responder's 2NT/3NT/2♠ may hide the other major (responder promised one)
     if (opening.seat === x.seat && my.length === 2 && pa.length === 2 && pa[0].m && pa[0].m.tag === 'stay' && ST(my[1].call) === 2) {
@@ -3072,10 +3093,13 @@ function ntResponses(x, add, lv, own) {
     add(B(4, 2), h => h.len[3] >= 6 && h.hcp >= (lv === 1 ? 10 : 4) && h.hcp <= (lv === 1 ? 15 : 11), { min: lv === 1 ? 10 : 4, len: { 3: 6 }, tag: 'texas', to: B(4, 3), cv: 'texas', t: 'Texas transfer: 6+ ♠, game (partner bids 4♠)' });
   }
   if (C.gerber) add(B(4, 0), h => h.hcp >= (lv === 1 ? 18 : 13) && h.semi, { min: lv === 1 ? 18 : 13, tag: 'gerb', cv: 'gerber', t: 'Gerber: asking for aces (slam interest)' });
-  if (C.stayman) add(B(2 + off, 0), h => h.len[2] >= 4 && h.len[3] >= 4 && h.hcp >= (lv === 1 ? 8 : 4), { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
+  const pup = lv === 2 && C.puppet;   // Puppet Stayman over 2NT (Stayman stays over 1NT)
+  if (pup) add(B(3, 0), h => h.hcp >= 4 && h.len[2] <= 4 && h.len[3] <= 4 && (h.len[2] >= 4 || h.len[3] >= 4), { min: 4, tag: 'pup', cv: 'puppet', t: 'Puppet Stayman: asking for a 4- or 5-card major', f: 1 });
+  if (C.stayman && !pup) add(B(2 + off, 0), h => h.len[2] >= 4 && h.len[3] >= 4 && h.hcp >= (lv === 1 ? 8 : 4), { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
   add(B(2 + off, 1), h => h.len[2] >= 5 && h.len[2] >= h.len[3], { len: { 2: 5 }, tag: 'tr', cv: 'jtr', t: 'Transfer: 5+ ♥ (partner bids hearts)', f: 1 });
   add(B(2 + off, 2), h => h.len[3] >= 5, { len: { 3: 5 }, tag: 'tr', cv: 'jtr', t: 'Transfer: 5+ ♠ (partner bids spades)', f: 1 });
-  if (C.stayman) add(B(2 + off, 0), h => h.hcp >= (lv === 1 ? 8 : 4) && (h.len[2] === 4 || h.len[3] === 4) && h.pat !== '4333', { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
+  if (pup) add(B(3, 0), h => h.hcp >= 4 && h.hcp <= 10 && h.len[2] <= 4 && h.len[3] <= 4 && (h.len[2] === 3 || h.len[3] === 3), { min: 4, tag: 'pup', cv: 'puppet', t: 'Puppet Stayman: asking for a 4- or 5-card major', f: 1 });
+  if (C.stayman && !pup) add(B(2 + off, 0), h => h.hcp >= (lv === 1 ? 8 : 4) && (h.len[2] === 4 || h.len[3] === 4) && h.pat !== '4333', { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
   if (lv === 1) {
     if (C.fourWay) {
       add(B(2, 3), h => h.len[0] >= 6 && h.hcp <= 7, { max: 7, len: { 0: 6 }, tag: 'trm', to: B(3, 0), cv: 'fourWay', t: '4-way transfer: 6+ ♣ (partner bids 3♣)' });
@@ -3186,6 +3210,13 @@ function openerRebid(x, add, o, resp) {
     // our own 1NT opening: its range comes from the system (see shiftAdd)
     if (ol === 1 && x.opening && x.opening.call === B(1, 4) && sideOf(x.opening.seat) === sideOf(x.seat)) add = shiftAdd(add, x.ntShift, false);
     const off = ol - 1;
+    if (rm.tag === 'pup') {
+      add(B(3, 2), h => h.len[2] >= 5, { len: { 2: 5 }, cv: 'puppet', t: 'Puppet Stayman reply: five hearts' });
+      add(B(3, 3), h => h.len[3] >= 5, { len: { 3: 5 }, cv: 'puppet', t: 'Puppet Stayman reply: five spades' });
+      add(B(3, 1), h => h.len[2] >= 4 || h.len[3] >= 4, { tag: 'pupd', cv: 'puppet', t: 'Puppet Stayman reply: one or two 4-card majors, no five-card major', f: 1 });
+      add(B(3, 4), () => true, { cv: 'puppet', t: 'Puppet Stayman reply: no 4-card major' });
+      return true;
+    }
     if (rm.tag === 'stay') {
       add(B(2 + off, 2), h => h.len[2] >= 4, { len: { 2: 4 }, cv: 'stayman', t: 'Stayman reply: four hearts' });
       add(B(2 + off, 3), h => h.len[3] >= 4, { len: { 3: 4 }, cv: 'stayman', t: 'Stayman reply: four spades, not four hearts' });
@@ -3455,7 +3486,7 @@ function explainCall(auc, seat, call, cards) {
     const lastOur = ours[ours.length - 1];
     if (lastOur && ST(lastOur.call) < 4 && !ours.some(e => e.m && ['bw', 'gerb'].includes(e.m.tag))) {
       const P = pInfo(x), mine = [0, 0, 0, 0], pl = [0, 0, 0, 0];
-      ours.forEach(e => { if (ST(e.call) < 4 && !(e.m && (e.m.cv === 'jtr' || e.m.cv === 'stayman' || e.m.tag === 'texas' || e.m.tag === 'trm' || e.m.tag === 'bergen7' || e.m.tag === 'bergen10' || e.m.tag === 'splinter' || e.m.tag === 'drury'))) (e.seat === seat ? mine : pl)[ST(e.call)]++; });
+      ours.forEach(e => { if (ST(e.call) < 4 && !(e.m && (e.m.cv === 'jtr' || e.m.cv === 'stayman' || e.m.cv === 'puppet' || e.m.tag === 'texas' || e.m.tag === 'trm' || e.m.tag === 'bergen7' || e.m.tag === 'bergen10' || e.m.tag === 'splinter' || e.m.tag === 'drury'))) (e.seat === seat ? mine : pl)[ST(e.call)]++; });
       let t = -1; for (const s of [3, 2, 1, 0]) if (mine[s] && pl[s]) { t = s; break; }
       if (t < 0 && ours.some(e => ST(e.call) === 4 && e.m && (e.m.tag === 'nt1' || e.m.tag === 'nt2'))) return { tag: 'q', cv: 'q', min: 16, t: 'Quantitative 4NT: slam invitation' };
       if (t < 0) for (let s = 0; s < 4; s++) if (P.len[s] >= 4 && (t < 0 || P.len[s] > P.len[t])) t = s;
@@ -9385,6 +9416,7 @@ const CONV_T = {
     wjs: ['Zayıf atlamalı renk değişimi', 'Cevaplayanın yeni renkte tek atlaması (ör. 1♦–2♠, 1♣–2♥) 6+ kartlı renk ve zayıf el (0-5 HCP) gösterir. Oynamak içindir; açan pas geçer. Rakibin kontrundan sonra geçerli değil.'],
     stayman: ['Stayman', '1NT üzerine 2♣ (2NT üzerine 3♣) 4 kartlı majör sorar. Cevaplar: ♦ = 4 kartlı majör yok, ♥ = dört kupa, ♠ = dört pik ve dört kupa yok. 2♦’den sonra 2♥/2♠ = o majörde beş + diğerinde dört, davet. Cevaplayan 2♥ üzerine NT derse, dört piki olan açan onları da söyler.'],
     fourWay: ['4 yönlü transferler', '1NT üzerine: 2♦ → kupa, 2♥ → pik (Jacoby), 2♠ → sinek (açan 3♣ der), 2NT → karo (açan 3♦ der). Dengeli davetler 2♣ Stayman üzerinden gider.'],
+    puppet: ["Puppet Stayman","2NT’den sonra 3♣, 4 veya 5 kartlı majör sorar (Stayman’ın yerine). Cevaplar: 3♦ = bir veya iki 4’lü majör, 3♥ = 5 kupa, 3♠ = 5 pik, 3NT = 4’lü majör yok. 3♦’dan sonra cevaplayan elinde olmayan majörü söyler: 3♥ = 4 pik, 3♠ = 4 kupa, 4♦ = ikisi de, 3NT = hiçbiri; böylece 2NT açan oynar."],
     smolen: ['Smolen', '1NT–2♣–2♦’den sonra majörlerde 5-4 olan oyun forsing el, 4 kartlı majörünü üç seviyesinde söyler: 3♥ = 4♥ + 5♠, 3♠ = 4♠ + 5♥; böylece güçlü el oynar.'],
     michaels: ['Michaels cue bid / Unusual 2NT', 'Rakibin bir seviyesindeki açışına doğrudan cue bid 5-5 iki renkli el, 7+ HCP gösterir: minör üzerine iki majör; majör üzerine diğer majör ve bir minör (partner minörü sormak için 2NT der). 2NT’ye atlama (Unusual) söylenmemiş en düşük iki rengi gösterir. Partner rengi seçer; uyum ve 10+ ile oyuna atlayabilir.'],
     splinter: ['Splinter', 'Majör açışa yeni renkte çift atlama (ör. 1♠–4♥, 1♥–3♠) = 4+ kartlı destek, söylenen renkte tekli ya da renksizlik, 11-15 HCP, oyun forsing, şilem ilgisi. Açan majörde 4’te durur ya da şilemi araştırır.'],
@@ -9426,6 +9458,7 @@ const CONV_T = {
     wjs: ['Svake hoppskift', 'Et enkelt hopp i ny farge av svarer (f.eks. 1♦–2♠, 1♣–2♥) viser 6+ korts farge og svak hånd (0-5 HP). Det er for å spille; åpner passer. Ikke etter motpartens dobling.'],
     stayman: ['Stayman', '2♣ over 1NT (3♣ over 2NT) spør etter firekorts major. Svar: ♦ = ingen firekorts major, ♥ = fire hjerter, ♠ = fire spar og ikke fire hjerter. Etter 2♦ er 2♥/2♠ = fem i den majoren + fire i den andre, invitt. Melder svarer NT over 2♥, melder åpner med fire spar dem også.'],
     fourWay: ['Firevegs overføringer', 'Over 1NT: 2♦ → hjerter, 2♥ → spar (Jacoby), 2♠ → kløver (åpner melder 3♣), 2NT → ruter (åpner melder 3♦). Balanserte invitter går via 2♣ Stayman.'],
+    puppet: ["Puppet Stayman","Etter 2NT spør 3♣ etter en firer- eller femkorts major (i stedet for Stayman). Svar: 3♦ = én eller to firekorts majorer, 3♥ = fem hjerter, 3♠ = fem spar, 3NT = ingen firekorts major. Etter 3♦ melder svarer majoren han ikke har: 3♥ = fire spar, 3♠ = fire hjerter, 4♦ = begge, 3NT = ingen, slik at 2NT-åpneren blir spillefører."],
     smolen: ['Smolen', 'Etter 1NT–2♣–2♦ melder en hånd med utgangskrav og 5-4 i majorene firekortsmajoren på tretrinnet: 3♥ = 4♥ + 5♠, 3♠ = 4♠ + 5♥, slik at den sterke hånden blir spillefører.'],
     michaels: ['Michaels cue bid / Unusual 2NT', 'Direkte cue bid av motpartens åpning på ett viser 5-5 tofarget, 7+ HP: over minor begge majorer; over major den andre majoren og en minor (makker melder 2NT for å spørre om minoren). Hopp til 2NT (Unusual) viser de to laveste umeldte fargene. Makker velger farge; med tilpasning og 10+ kan han hoppe til utgang.'],
     splinter: ['Splinter', 'Dobbelt hopp i ny farge over majoråpning (f.eks. 1♠–4♥, 1♥–3♠) = 4+ korts støtte, singelton eller renons i fargen, 11-15 HP, krav til utgang, slaminteresse. Åpner stopper i 4 i majoren eller undersøker slem.'],
@@ -9467,6 +9500,7 @@ const CONV_T = {
     wjs: ['Saltos débiles en palo nuevo', 'Un salto simple en palo nuevo del respondedor (p. ej. 1♦–2♠, 1♣–2♥) muestra un palo de 6+ cartas y mano débil (0-5 PH). Es para jugar; el abridor pasa. No tras un doblo rival.'],
     stayman: ['Stayman', '2♣ sobre 1SA (3♣ sobre 2SA) pregunta por un mayor de cuatro cartas. Respuestas: ♦ = sin mayor de cuatro, ♥ = cuatro corazones, ♠ = cuatro picas y no cuatro corazones. Tras 2♦, 2♥/2♠ = cinco en ese mayor + cuatro en el otro, invitación. Si el respondedor dice SA sobre 2♥, el abridor con cuatro picas también las dice.'],
     fourWay: ['Transferencias a cuatro palos', 'Sobre 1SA: 2♦ → corazones, 2♥ → picas (Jacoby), 2♠ → tréboles (el abridor dice 3♣), 2SA → diamantes (el abridor dice 3♦). Las invitaciones equilibradas pasan por 2♣ Stayman.'],
+    puppet: ["Puppet Stayman","Sobre 2SA, 3♣ pregunta por un palo mayor de 4 o 5 cartas (en lugar de Stayman). Respuestas: 3♦ = uno o dos mayores de 4, 3♥ = cinco corazones, 3♠ = cinco picas, 3SA = sin mayor de 4. Tras 3♦ el respondedor dice el mayor que no tiene: 3♥ = cuatro picas, 3♠ = cuatro corazones, 4♦ = ambos, 3SA = ninguno; así juega el que abrió 2SA."],
     smolen: ['Smolen', 'Tras 1SA–2♣–2♦, una mano forcing a manga con 5-4 en mayores dice su mayor de cuatro a nivel de tres: 3♥ = 4♥ + 5♠, 3♠ = 4♠ + 5♥, para que juegue la mano fuerte.'],
     michaels: ['Cue bid Michaels / 2SA inusual', 'Un cue bid directo de su apertura de uno muestra un bicolor 5-5, 7+ PH: sobre un menor, ambos mayores; sobre un mayor, el otro mayor y un menor (el compañero dice 2SA para preguntar el menor). Un salto a 2SA (inusual) muestra los dos palos más bajos no nombrados. El compañero elige palo; con ajuste y 10+ puede saltar a manga.'],
     splinter: ['Splinters', 'Doble salto en palo nuevo sobre apertura de mayor (p. ej. 1♠–4♥, 1♥–3♠) = apoyo de 4+ cartas, semifallo o fallo en el palo nombrado, 11-15 PH, forcing a manga, interés de slam. El abridor se para en 4 del mayor o explora el slam.'],
@@ -9508,6 +9542,7 @@ const CONV_T = {
     wjs: ['Sauts faibles', 'Un saut simple du répondant dans une couleur nouvelle (p. ex. 1♦–2♠, 1♣–2♥) montre une couleur de 6+ cartes et une main faible (0-5 H). C’est pour jouer ; l’ouvreur passe. Pas après un contre adverse.'],
     stayman: ['Stayman', '2♣ sur 1SA (3♣ sur 2SA) demande une majeure de quatre cartes. Réponses : ♦ = pas de majeure quatrième, ♥ = quatre cœurs, ♠ = quatre piques et pas quatre cœurs. Après 2♦, 2♥/2♠ = cinq dans cette majeure + quatre dans l’autre, invitationnel. Si le répondant dit SA sur 2♥, l’ouvreur avec quatre piques les annonce aussi.'],
     fourWay: ['Transferts à quatre couleurs', 'Sur 1SA : 2♦ → cœurs, 2♥ → piques (Jacoby), 2♠ → trèfles (l’ouvreur dit 3♣), 2SA → carreaux (l’ouvreur dit 3♦). Les invitations régulières passent par 2♣ Stayman.'],
+    puppet: ["Puppet Stayman","Sur 2SA, 3♣ demande une majeure quatrième ou cinquième (à la place du Stayman). Réponses : 3♦ = une ou deux majeures quatrièmes, 3♥ = cinq cœurs, 3♠ = cinq piques, 3SA = pas de majeure quatrième. Après 3♦ le répondant annonce la majeure qu’il n’a pas : 3♥ = quatre piques, 3♠ = quatre cœurs, 4♦ = les deux, 3SA = aucune ; ainsi l’ouvreur de 2SA joue."],
     smolen: ['Smolen', 'Après 1SA–2♣–2♦, une main forcing de manche avec 5-4 en majeures annonce sa majeure quatrième au palier de trois : 3♥ = 4♥ + 5♠, 3♠ = 4♠ + 5♥, pour que la main forte joue.'],
     michaels: ['Cue-bid Michaels / 2SA unusual', 'Un cue-bid direct de leur ouverture d’un montre un bicolore 5-5, 7+ H : sur une mineure, les deux majeures ; sur une majeure, l’autre majeure et une mineure (le partenaire dit 2SA pour demander la mineure). Un saut à 2SA (unusual) montre les deux couleurs non nommées les plus basses. Le partenaire choisit ; avec un fit et 10+ il peut sauter à la manche.'],
     splinter: ['Splinters', 'Double saut dans une couleur nouvelle sur une ouverture en majeure (p. ex. 1♠–4♥, 1♥–3♠) = soutien de 4+ cartes, singleton ou chicane dans la couleur nommée, 11-15 H, forcing de manche, intérêt de chelem. L’ouvreur s’arrête à 4 dans la majeure ou explore le chelem.'],
@@ -9549,6 +9584,7 @@ const CONV_T = {
     wjs: ['Salti deboli', 'Un salto semplice del rispondente in un colore nuovo (es. 1♦–2♠, 1♣–2♥) mostra un colore di 6+ carte e una mano debole (0-5 PO). È per giocare; l’apritore passa. Non dopo un contro avversario.'],
     stayman: ['Stayman', '2♣ su 1SA (3♣ su 2SA) chiede una maggiore quarta. Risposte: ♦ = nessuna maggiore quarta, ♥ = quattro cuori, ♠ = quattro picche e non quattro cuori. Dopo 2♦, 2♥/2♠ = cinque in quella maggiore + quattro nell’altra, invitante. Se il rispondente dice SA su 2♥, l’apritore con quattro picche le dichiara.'],
     fourWay: ['Transfer a quattro vie', 'Su 1SA: 2♦ → cuori, 2♥ → picche (Jacoby), 2♠ → fiori (l’apritore dice 3♣), 2SA → quadri (l’apritore dice 3♦). Gli inviti bilanciati passano per 2♣ Stayman.'],
+    puppet: ["Puppet Stayman","Su 2SA, 3♣ chiede un nobile di 4 o 5 carte (al posto dello Stayman). Risposte: 3♦ = uno o due nobili quarti, 3♥ = cinque cuori, 3♠ = cinque picche, 3SA = nessun nobile quarto. Dopo 3♦ il rispondente dichiara il nobile che non ha: 3♥ = quattro picche, 3♠ = quattro cuori, 4♦ = entrambi, 3SA = nessuno; così gioca chi ha aperto 2SA."],
     smolen: ['Smolen', 'Dopo 1SA–2♣–2♦, una mano forzante manche con 5-4 nelle maggiori dice la maggiore quarta a livello di tre: 3♥ = 4♥ + 5♠, 3♠ = 4♠ + 5♥, così gioca la mano forte.'],
     michaels: ['Cue bid Michaels / 2SA unusual', 'Una surlicita diretta della loro apertura a livello di uno mostra un bicolore 5-5, 7+ PO: su una minore, le due maggiori; su una maggiore, l’altra maggiore e una minore (il compagno dice 2SA per chiedere la minore). Un salto a 2SA (unusual) mostra i due colori più bassi non dichiarati. Il compagno sceglie; con fit e 10+ può saltare a manche.'],
     splinter: ['Splinter', 'Doppio salto in un colore nuovo su un’apertura di maggiore (es. 1♠–4♥, 1♥–3♠) = appoggio di 4+ carte, singolo o vuoto nel colore nominato, 11-15 PO, forzante manche, interesse di slam. L’apritore si ferma a 4 nella maggiore o esplora lo slam.'],
@@ -9590,6 +9626,7 @@ const CONV_T = {
     wjs: ['Schwache Sprungwechsel', 'Ein einfacher Sprung des Antwortenden in einer neuen Farbe (z. B. 1♦–2♠, 1♣–2♥) zeigt 6+ Karten und eine schwache Hand (0-5 FP). Zum Spielen; der Eröffner passt. Nicht nach gegnerischem Kontra.'],
     stayman: ['Stayman', '2♣ über 1SA (3♣ über 2SA) fragt nach einer Vierer-Oberfarbe. Antworten: ♦ = keine Vierer-Oberfarbe, ♥ = vier Coeur, ♠ = vier Pik und nicht vier Coeur. Nach 2♦ zeigen 2♥/2♠ fünf in dieser Oberfarbe + vier in der anderen, einladend. Reizt der Antwortende SA über 2♥, nennt der Eröffner mit vier Pik diese auch.'],
     fourWay: ['Vierfach-Transfers', 'Über 1SA: 2♦ → Coeur, 2♥ → Pik (Jacoby), 2♠ → Treff (Eröffner reizt 3♣), 2SA → Karo (Eröffner reizt 3♦). Ausgeglichene Einladungen gehen über 2♣ Stayman.'],
+    puppet: ["Puppet Stayman","Nach 2SA fragt 3♣ nach einer Vierer- oder Fünfer-Oberfarbe (statt Stayman). Antworten: 3♦ = eine oder zwei Vierer-Oberfarben, 3♥ = fünf Coeur, 3♠ = fünf Pik, 3SA = keine Vierer-Oberfarbe. Nach 3♦ reizt der Antwortende die Oberfarbe, die er nicht hat: 3♥ = vier Pik, 3♠ = vier Coeur, 4♦ = beide, 3SA = keine; so spielt der 2SA-Eröffner."],
     smolen: ['Smolen', 'Nach 1SA–2♣–2♦ reizt eine partieforcierende Hand mit 5-4 in Oberfarben ihre Vierer-Oberfarbe auf Dreierstufe: 3♥ = 4♥ + 5♠, 3♠ = 4♠ + 5♥, damit die starke Hand spielt.'],
     michaels: ['Michaels-Cuebid / Unusual 2SA', 'Ein direktes Cuebid ihrer Einer-Eröffnung zeigt einen 5-5-Zweifärber, 7+ FP: über Unterfarbe beide Oberfarben; über Oberfarbe die andere Oberfarbe und eine Unterfarbe (Partner fragt mit 2SA nach der Unterfarbe). Ein Sprung auf 2SA (Unusual) zeigt die zwei niedrigsten ungereizten Farben. Partner wählt; mit Fit und 10+ kann er in die Partie springen.'],
     splinter: ['Splinter', 'Doppelsprung in neuer Farbe über eine Oberfarberöffnung (z. B. 1♠–4♥, 1♥–3♠) = 4+ Unterstützung, Single oder Chicane in der genannten Farbe, 11-15 FP, partieforcierend, Schleminteresse. Der Eröffner stoppt in 4 der Oberfarbe oder erkundet den Schlemm.'],
@@ -9631,6 +9668,7 @@ const CONV_T = {
     wjs: ['Слабые прыжки', 'Одинарный прыжок отвечающего в новой масти (напр. 1♦–2♠, 1♣–2♥) показывает масть из 6+ карт и слабую руку (0-5 О). Это игровая заявка; открывший пасует. Не после контры соперника.'],
     stayman: ['Стейман', '2♣ после 1БК (3♣ после 2БК) спрашивает четвёртый мажор. Ответы: ♦ = нет четвёртого мажора, ♥ = четыре червы, ♠ = четыре пики и не четыре червы. После 2♦ 2♥/2♠ = пять в этом мажоре + четыре в другом, инвит. Если отвечающий говорит БК на 2♥, открывший с четырьмя пиками называет и их.'],
     fourWay: ['Четырёхсторонние трансферы', 'После 1БК: 2♦ → червы, 2♥ → пики (Якоби), 2♠ → трефы (открывший говорит 3♣), 2БК → бубны (открывший говорит 3♦). Равномерные инвиты идут через 2♣ Стейман.'],
+    puppet: ["Паппет Стейман","После 2БК 3♣ спрашивает о 4- или 5-карточном мажоре (вместо Стеймана). Ответы: 3♦ = один или два 4-карточных мажора, 3♥ = пять червей, 3♠ = пять пик, 3БК = нет 4-карточного мажора. После 3♦ отвечающий называет мажор, которого у него нет: 3♥ = четыре пики, 3♠ = четыре червы, 4♦ = оба, 3БК = ни одного; так разыгрывает открывший 2БК."],
     smolen: ['Смолен', 'После 1БК–2♣–2♦ рука с форсингом до гейма и 5-4 в мажорах называет свой четвёртый мажор на уровне трёх: 3♥ = 4♥ + 5♠, 3♠ = 4♠ + 5♥, чтобы играла сильная рука.'],
     michaels: ['Кью-бид Михаэльса / необычные 2БК', 'Прямой кью-бид их открытия на уровне одного показывает двухмастку 5-5, 7+ О: на младшую — обе старшие; на мажор — другой мажор и младшую (партнёр спрашивает младшую через 2БК). Прыжок в 2БК (необычные) показывает две младшие незаявленные масти. Партнёр выбирает; с фитом и 10+ может прыгнуть в гейм.'],
     splinter: ['Сплинтер', 'Двойной прыжок в новой масти на открытие в мажоре (напр. 1♠–4♥, 1♥–3♠) = поддержка из 4+ карт, синглет или ренонс в названной масти, 11-15 О, форсинг до гейма, интерес к шлему. Открывший останавливается в 4 мажора или исследует шлем.'],
@@ -9672,6 +9710,7 @@ const CONV_T = {
     wjs: ['Słabe skoki', 'Pojedynczy skok odpowiadającego w nowym kolorze (np. 1♦–2♠, 1♣–2♥) pokazuje kolor 6+ i słabą rękę (0-5 PC). To do gry; otwierający pasuje. Nie po kontrze przeciwnika.'],
     stayman: ['Stayman', '2♣ po 1BA (3♣ po 2BA) pyta o czwórkę w starszym. Odpowiedzi: ♦ = brak czwórki w starszym, ♥ = cztery kiery, ♠ = cztery piki i nie cztery kiery. Po 2♦ 2♥/2♠ = pięć w tym starszym + cztery w drugim, inwit. Jeśli odpowiadający licytuje BA na 2♥, otwierający z czterema pikami też je zgłasza.'],
     fourWay: ['Transfery czterokierunkowe', 'Po 1BA: 2♦ → kiery, 2♥ → piki (Jacoby), 2♠ → trefle (otwierający mówi 3♣), 2BA → kara (otwierający mówi 3♦). Równe inwity idą przez 2♣ Stayman.'],
+    puppet: ["Puppet Stayman","Po 2BA 3♣ pyta o starszy kolor 4- lub 5-kartowy (zamiast Staymana). Odpowiedzi: 3♦ = jeden lub dwa starsze czwórki, 3♥ = pięć kierów, 3♠ = pięć pików, 3BA = brak starszej czwórki. Po 3♦ odpowiadający licytuje starszy, którego nie ma: 3♥ = cztery piki, 3♠ = cztery kiery, 4♦ = oba, 3BA = żadnego; dzięki temu rozgrywa otwierający 2BA."],
     smolen: ['Smolen', 'Po 1BA–2♣–2♦ ręka forsująca do końcówki z układem 5-4 w starszych zgłasza czwórkę w starszym na poziomie trzech: 3♥ = 4♥ + 5♠, 3♠ = 4♠ + 5♥, aby rozgrywała silna ręka.'],
     michaels: ['Cue bid Michaelsa / nietypowe 2BA', 'Bezpośredni cue bid ich otwarcia na poziomie jednego pokazuje dwukolorówkę 5-5, 7+ PC: na młodszy — oba starsze; na starszy — drugi starszy i młodszy (partner pyta o młodszy przez 2BA). Skok na 2BA (nietypowe) pokazuje dwa najniższe niezalicytowane kolory. Partner wybiera; z fitem i 10+ może skoczyć do końcówki.'],
     splinter: ['Splinter', 'Podwójny skok w nowym kolorze na otwarcie w starszym (np. 1♠–4♥, 1♥–3♠) = poparcie 4+ kart, singel lub renons w nazwanym kolorze, 11-15 PC, forsuje do końcówki, zainteresowanie szlemem. Otwierający zatrzymuje się na 4 w starszym lub bada szlema.'],
@@ -9713,6 +9752,7 @@ const CONV_T = {
     wjs: ['弱跳新花', '应叫人在新花色上的单跳(如 1♦–2♠、1♣–2♥)表示 6+ 张套和弱牌(0-5 点)。这是止叫;开叫人不叫。对方加倍后不适用。'],
     stayman: ['斯台曼', '1NT 后 2♣(2NT 后 3♣)问四张高花。回答:♦ = 无四张高花,♥ = 四张红心,♠ = 四张黑桃且没有四张红心。2♦ 之后 2♥/2♠ = 该高花五张 + 另一高花四张,邀叫。若应叫人在 2♥ 后叫 NT,有四张黑桃的开叫人也要叫出黑桃。'],
     fourWay: ['四路转移', '1NT 后:2♦ → 红心,2♥ → 黑桃(雅可比),2♠ → 梅花(开叫人叫 3♣),2NT → 方块(开叫人叫 3♦)。均型邀叫经由 2♣ 斯台曼。'],
+    puppet: ["傀儡斯台曼","2NT 之后 3♣ 询问四张或五张高花（代替斯台曼）。回答：3♦ = 一门或两门四张高花，3♥ = 五张红心，3♠ = 五张黑桃，3NT = 没有四张高花。3♦ 之后应叫人叫出自己没有的高花：3♥ = 四张黑桃，3♠ = 四张红心，4♦ = 两门都有，3NT = 都没有；这样由开叫 2NT 的人做庄。"],
     smolen: ['斯莫伦', '1NT–2♣–2♦ 之后,高花 5-4 的逼局牌在三阶叫出其四张高花:3♥ = 4♥ + 5♠,3♠ = 4♠ + 5♥,使强牌一方做庄。'],
     michaels: ['迈克尔斯扣叫 / 不寻常 2NT', '直接扣叫对方的一阶开叫表示 5-5 两套,7+ 点:对低花开叫为两高花;对高花开叫为另一高花加一个低花(同伴叫 2NT 询问低花)。跳叫 2NT(不寻常)表示未叫过的两个最低花色。同伴选择花色;有配合且 10+ 可跳到成局。'],
     splinter: ['爆裂叫', '高花开叫后在新花色上双跳(如 1♠–4♥、1♥–3♠)= 4+ 张支持,所叫花色单张或缺门,11-15 点,逼局,有满贯兴趣。开叫人停在 4 阶高花或探索满贯。'],
@@ -9991,7 +10031,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 451;
+const APP_V = 452;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10606,7 +10646,7 @@ function pracNames() { return pracList().map(pracName).join(', '); }
 // does a practised convention ever come up in the base system? a short search in the background, one convention at a
 // time; the answer is kept per system and convention, and a "no" shows a warning under the choice. Rare conventions
 // (about one deal in a thousand or fewer) are not checked: a short search would miss them even where they belong.
-const PRAC_CHK = {}, PRAC_RARE = new Set(['gerber', 'smolen', 'texasInt', 'fsf', 'respx', 'gamb', 'sjs', 'lav', 'roman']), PRAC_Q = [];
+const PRAC_CHK = {}, PRAC_RARE = new Set(['gerber', 'smolen', 'puppet', 'texasInt', 'fsf', 'respx', 'gamb', 'sjs', 'lav', 'roman']), PRAC_Q = [];
 function pracCheck(k) {
   if (PRAC_RARE.has(k)) return true;
   const key = (SET.sys || 'twoone') + ':' + k;
@@ -10671,6 +10711,9 @@ const ntShape = l => balOf(l) && l[0] <= 5 && l[1] <= 5;
 const ntOpen = (noMajor) => h => { const l = lensOf(h), p = hcpOf(h); return p >= 15 && p <= 17 && balOf(l) && l[0] <= 5 && l[1] <= 5 && (!noMajor || (l[2] < 4 && l[3] < 4)); };
 const PRAC_GEN = {
   gerber: () => [['open', ntOpen(), null, ntShape], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 18 && p <= 20 && l.every(x => x >= 2) && l[2] < 4 && l[3] < 4; }, null, l => l.every(x => x >= 2) && l[2] < 4 && l[3] < 4]],
+  // Puppet Stayman: a 2NT opening (20-21) with a 4- or 5-card major, a responder with game values and a 3- or 4-card major
+  puppet: () => [['open', h => { const l = lensOf(h), p = hcpOf(h); return p >= 20 && p <= 21 && balOf(l) && l[0] <= 5 && l[1] <= 5 && (l[2] >= 4 || l[3] >= 4); }, null, l => balOf(l) && l[0] <= 5 && l[1] <= 5 && (l[2] >= 4 || l[3] >= 4)],
+    ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 5 && p <= 10 && l[2] <= 4 && l[3] <= 4 && (l[2] >= 3 || l[3] >= 3) && l[0] <= 5 && l[1] <= 5; }]],
   smolen: () => [['open', ntOpen(true)], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 10 && p <= 14 && ((l[2] === 4 && l[3] === 5) || (l[2] === 5 && l[3] === 4)); }]],
   texasInt: () => [['open', ntOpen()], ['lho', h => { const l = lensOf(h), p = hcpOf(h); return p >= 9 && p <= 14 && (l[0] >= 6 || l[1] >= 6) && l[2] <= 2 && l[3] <= 2; }],
     ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 8 && p <= 13 && (l[2] >= 6 || l[3] >= 6); }]],
@@ -11510,7 +11553,8 @@ function turnAlert() {
 
 /* ================= home page: start, open tables, our convention card and the lobby chat ================= */
 // a base system chosen: another system starts with no conventions ticked (the player ticks the ones they play)
-function setSys(k) { if (SET.sys !== k) SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.sys = k; SET.practice = ''; }
+// a new base system keeps the conventions already on the card (the player adds or removes them; nothing is wiped)
+function setSys(k) { SET.sys = k; SET.practice = ''; }
 const sysIs = k => (SET.sys || 'twoone') === k;   // 'none' (a new player's empty card) marks none
 const myNm = () => { try { return localStorage.getItem('bridge-table-name') || ''; } catch (e) { return ''; } };
 /* ---- several people on one device: each name keeps its own results, settings, progress, friends and messages.
@@ -11543,7 +11587,7 @@ function acctLoad(k) {
 /* ---- practise a convention: the heart of the home page. Pick one and the robots deal hands where our side uses
    it (freshDeal looks for them); every call can be tapped to see what it means. ---- */
 const PRAC_GROUPS = [
-  ['After 1NT', ['stayman', 'fourWay', 'smolen', 'texas', 'texasInt', 'leb']],
+  ['After 1NT', ['stayman', 'puppet', 'fourWay', 'smolen', 'texas', 'texasInt', 'leb']],
   ['Major openings', ['j2nt', 'bergen', 'splinter', 'drury']],
   ['Slam bidding', ['rkc', 'rkc0314', 'gerber']],
   ['When they bid', ['capp', 'dont', 'michaels', 'supx', 'respx']],
@@ -12049,7 +12093,7 @@ function loginsTxt(n) { for (const s of [10000, 5000, 1000, 500, 100, 50]) if (n
 // a title from the boards played
 function titleOf(n) { return n >= 5000 ? 'Grandmaster' : n >= 2000 ? 'Master' : n >= 500 ? 'Strategist' : n >= 100 ? 'Player' : 'Newcomer'; }
 // the convention card in one line: system, notrump range and the conventions switched on (short names)
-const CONV_SHORT = { rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
+const CONV_SHORT = { rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', puppet: 'Puppet Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
 function convLine(p) {
   if (p.cline && p.cline.trim()) return esc(p.cline.trim());   // the player wrote it themselves
   const y = p.sys && p.sys !== 'none' ? E.sysOf(p.sys) : null;
@@ -12515,6 +12559,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 452, tr: 'Puppet Stayman’ı öğrendim (Sigride’nin isteği): kartında açıksa 2SA’dan sonra 3♣ 4’lü veya 5’li majör sorar; 3♦ = 4’lü majör var, 3♥/3♠ = 5’li, 3SA = yok. 3♦’dan sonra elimde olmayan majörü söylüyorum (3♥ = 4 pik, 3♠ = 4 kupa, 4♦ = ikisi de), böylece 2SA açan oynar.', en: 'I learned Puppet Stayman (Sigride’s request): when it is on your card, 3♣ over 2NT asks for a 4- or 5-card major; 3♦ = a 4-card major, 3♥/3♠ = five, 3NT = none. After 3♦ I bid the major I do not hold (3♥ = four spades, 3♠ = four hearts, 4♦ = both), so the 2NT opener declares.' },
   { v: 442, tr: '1♠–1SA gibi bir dizide 19+ puanlık güçlü açışla artık pas geçmiyor ya da minimum teklif vermiyorum: ikinci 4’lü renkle atlamalı söylüyorum (oyuna zorlayıcı), 6’lı majörle doğrudan oyuna çıkıyorum, dengeli 20-21 ile 3SA. Ortağın weak two ya da baraj açışına 19+ puan, destek ve iki asla doğrudan oyuna atlamıyorum, önce 4SA ile anahtar kart soruyorum.', en: 'With a strong opening (19+) after partner’s 1NT answer I no longer pass or make a minimum bid: a jump in a second suit (game forcing), game with six cards in my major, or 3NT balanced. With 19+, support and two aces opposite partner’s weak two or preempt I ask for key cards before bidding game.' },
   { v: 420, tr: 'Ortak araya girdikten sonra fitim yoksa ve 5 kartlı majörüm varsa önce majörü söylüyorum, 2SA’yı ondan sonra düşünüyorum (1♥–2♣–pas, ♠K10943 ♥Q73 ♦AJ98 ♣8: 2♠).', en: 'After partner’s overcall, with no fit and a five-card major, I bid the major before notrump.' },
   { v: 411, tr: 'Kartta Gerber kapalı olsa bile, ortağın 1NT, 2NT veya 3NT’sinin hemen üzerine, renk anlaşması yokken gelen 4♣ as sorusu: 4♦/4♥/4♠/4NT ile cevap veriyorum.', en: 'Even with Gerber off the card, 4♣ straight after partner’s 1NT, 2NT or 3NT with no suit agreed asks for aces, and I answer it.' },

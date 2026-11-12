@@ -623,9 +623,21 @@ function cands(x) {
   if (!oppOpened && (opening.call === B(1, 4) || opening.call === B(2, 4)) && ourOnly(x)) {
     const lv = LV(opening.call);
     const A = shiftAdd(add, lv === 1 ? x.ntShift : 0, opening.seat === p);   // the system's notrump range
-    if (opening.seat === p && my.length === 1 && pa.length === 2 && (mm.tag === 'stay' || mm.tag === 'tr')) {
+    if (opening.seat === p && my.length === 1 && pa.length === 2 && (mm.tag === 'stay' || mm.tag === 'tr' || mm.tag === 'pup')) {
       const ans = pa[1].call;
-      if (mm.tag === 'stay') {
+      if (mm.tag === 'pup') {
+        if (ans === B(3, 2) || ans === B(3, 3)) {
+          const M = ST(ans);
+          A(B(4, M), h => h.len[M] >= 3, { len: { [M]: 3 }, cv: 'puppet', t: 'Major fit: game' });
+          A(B(3, 4), () => true, { t: 'No major fit: 3NT' });
+        } else if (ans === B(3, 1)) {
+          // the major not held, so the 2NT opener declares
+          A(B(4, 1), h => h.len[2] === 4 && h.len[3] === 4, { len: { 2: 4, 3: 4 }, cv: 'puppet', t: 'Puppet Stayman: four hearts and four spades', f: 1 });
+          A(B(3, 2), h => h.len[3] === 4, { len: { 3: 4 }, cv: 'puppet', t: 'Puppet Stayman: four spades, not four hearts', f: 1 });
+          A(B(3, 3), h => h.len[2] === 4, { len: { 2: 4 }, cv: 'puppet', t: 'Puppet Stayman: four hearts, not four spades', f: 1 });
+          A(B(3, 4), () => true, { cv: 'puppet', t: 'Puppet Stayman: no 4-card major' });
+        } else A('P', () => true, { t: 'Pass' });
+      } else if (mm.tag === 'stay') {
         const aS = ST(ans);
         if (aS === 2 || aS === 3) {
           A(B(4, aS), h => h.len[aS] >= 4 && (lv === 2 || h.hcp >= 10) && h.hcp <= 15, { min: lv === 1 ? 10 : 4, len: { [aS]: 4 }, t: 'Major fit: game' });
@@ -663,6 +675,14 @@ function cands(x) {
         }
       }
       if (L.length) return L;
+    }
+    // opener after Puppet 3♦: 3♥ shows four spades, 3♠ four hearts, 4♦ both
+    if (opening.seat === x.seat && lv === 2 && my.length === 2 && pa.length === 2 && pa[0].m && pa[0].m.tag === 'pup' && my[1].call === B(3, 1)) {
+      const r2 = pa[1].call;
+      if (r2 === B(3, 2)) { A(B(4, 3), h => h.len[3] >= 4, { len: { 3: 4 }, t: 'Spade fit: game' }); A(B(3, 4), () => true, { t: 'No spade fit: 3NT' }); return L; }
+      if (r2 === B(3, 3)) { A(B(4, 2), h => h.len[2] >= 4, { len: { 2: 4 }, t: 'Heart fit: game' }); A(B(3, 4), () => true, { t: 'No heart fit: 3NT' }); return L; }
+      if (r2 === B(4, 1)) { A(B(4, 2), h => h.len[2] >= 4, { len: { 2: 4 }, t: 'Heart fit: game' }); A(B(4, 3), () => true, { len: { 3: 4 }, t: 'Spade fit: game' }); return L; }
+      if (r2 === B(3, 4)) { A('P', () => true, { t: 'Pass' }); return L; }
     }
     // opener after Stayman: responder's 2NT/3NT/2♠ may hide the other major (responder promised one)
     if (opening.seat === x.seat && my.length === 2 && pa.length === 2 && pa[0].m && pa[0].m.tag === 'stay' && ST(my[1].call) === 2) {
@@ -728,10 +748,13 @@ function ntResponses(x, add, lv, own) {
     add(B(4, 2), h => h.len[3] >= 6 && h.hcp >= (lv === 1 ? 10 : 4) && h.hcp <= (lv === 1 ? 15 : 11), { min: lv === 1 ? 10 : 4, len: { 3: 6 }, tag: 'texas', to: B(4, 3), cv: 'texas', t: 'Texas transfer: 6+ ♠, game (partner bids 4♠)' });
   }
   if (C.gerber) add(B(4, 0), h => h.hcp >= (lv === 1 ? 18 : 13) && h.semi, { min: lv === 1 ? 18 : 13, tag: 'gerb', cv: 'gerber', t: 'Gerber: asking for aces (slam interest)' });
-  if (C.stayman) add(B(2 + off, 0), h => h.len[2] >= 4 && h.len[3] >= 4 && h.hcp >= (lv === 1 ? 8 : 4), { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
+  const pup = lv === 2 && C.puppet;   // Puppet Stayman over 2NT (Stayman stays over 1NT)
+  if (pup) add(B(3, 0), h => h.hcp >= 4 && h.len[2] <= 4 && h.len[3] <= 4 && (h.len[2] >= 4 || h.len[3] >= 4), { min: 4, tag: 'pup', cv: 'puppet', t: 'Puppet Stayman: asking for a 4- or 5-card major', f: 1 });
+  if (C.stayman && !pup) add(B(2 + off, 0), h => h.len[2] >= 4 && h.len[3] >= 4 && h.hcp >= (lv === 1 ? 8 : 4), { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
   add(B(2 + off, 1), h => h.len[2] >= 5 && h.len[2] >= h.len[3], { len: { 2: 5 }, tag: 'tr', cv: 'jtr', t: 'Transfer: 5+ ♥ (partner bids hearts)', f: 1 });
   add(B(2 + off, 2), h => h.len[3] >= 5, { len: { 3: 5 }, tag: 'tr', cv: 'jtr', t: 'Transfer: 5+ ♠ (partner bids spades)', f: 1 });
-  if (C.stayman) add(B(2 + off, 0), h => h.hcp >= (lv === 1 ? 8 : 4) && (h.len[2] === 4 || h.len[3] === 4) && h.pat !== '4333', { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
+  if (pup) add(B(3, 0), h => h.hcp >= 4 && h.hcp <= 10 && h.len[2] <= 4 && h.len[3] <= 4 && (h.len[2] === 3 || h.len[3] === 3), { min: 4, tag: 'pup', cv: 'puppet', t: 'Puppet Stayman: asking for a 4- or 5-card major', f: 1 });
+  if (C.stayman && !pup) add(B(2 + off, 0), h => h.hcp >= (lv === 1 ? 8 : 4) && (h.len[2] === 4 || h.len[3] === 4) && h.pat !== '4333', { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
   if (lv === 1) {
     if (C.fourWay) {
       add(B(2, 3), h => h.len[0] >= 6 && h.hcp <= 7, { max: 7, len: { 0: 6 }, tag: 'trm', to: B(3, 0), cv: 'fourWay', t: '4-way transfer: 6+ ♣ (partner bids 3♣)' });
@@ -842,6 +865,13 @@ function openerRebid(x, add, o, resp) {
     // our own 1NT opening: its range comes from the system (see shiftAdd)
     if (ol === 1 && x.opening && x.opening.call === B(1, 4) && sideOf(x.opening.seat) === sideOf(x.seat)) add = shiftAdd(add, x.ntShift, false);
     const off = ol - 1;
+    if (rm.tag === 'pup') {
+      add(B(3, 2), h => h.len[2] >= 5, { len: { 2: 5 }, cv: 'puppet', t: 'Puppet Stayman reply: five hearts' });
+      add(B(3, 3), h => h.len[3] >= 5, { len: { 3: 5 }, cv: 'puppet', t: 'Puppet Stayman reply: five spades' });
+      add(B(3, 1), h => h.len[2] >= 4 || h.len[3] >= 4, { tag: 'pupd', cv: 'puppet', t: 'Puppet Stayman reply: one or two 4-card majors, no five-card major', f: 1 });
+      add(B(3, 4), () => true, { cv: 'puppet', t: 'Puppet Stayman reply: no 4-card major' });
+      return true;
+    }
     if (rm.tag === 'stay') {
       add(B(2 + off, 2), h => h.len[2] >= 4, { len: { 2: 4 }, cv: 'stayman', t: 'Stayman reply: four hearts' });
       add(B(2 + off, 3), h => h.len[3] >= 4, { len: { 3: 4 }, cv: 'stayman', t: 'Stayman reply: four spades, not four hearts' });
@@ -1111,7 +1141,7 @@ function explainCall(auc, seat, call, cards) {
     const lastOur = ours[ours.length - 1];
     if (lastOur && ST(lastOur.call) < 4 && !ours.some(e => e.m && ['bw', 'gerb'].includes(e.m.tag))) {
       const P = pInfo(x), mine = [0, 0, 0, 0], pl = [0, 0, 0, 0];
-      ours.forEach(e => { if (ST(e.call) < 4 && !(e.m && (e.m.cv === 'jtr' || e.m.cv === 'stayman' || e.m.tag === 'texas' || e.m.tag === 'trm' || e.m.tag === 'bergen7' || e.m.tag === 'bergen10' || e.m.tag === 'splinter' || e.m.tag === 'drury'))) (e.seat === seat ? mine : pl)[ST(e.call)]++; });
+      ours.forEach(e => { if (ST(e.call) < 4 && !(e.m && (e.m.cv === 'jtr' || e.m.cv === 'stayman' || e.m.cv === 'puppet' || e.m.tag === 'texas' || e.m.tag === 'trm' || e.m.tag === 'bergen7' || e.m.tag === 'bergen10' || e.m.tag === 'splinter' || e.m.tag === 'drury'))) (e.seat === seat ? mine : pl)[ST(e.call)]++; });
       let t = -1; for (const s of [3, 2, 1, 0]) if (mine[s] && pl[s]) { t = s; break; }
       if (t < 0 && ours.some(e => ST(e.call) === 4 && e.m && (e.m.tag === 'nt1' || e.m.tag === 'nt2'))) return { tag: 'q', cv: 'q', min: 16, t: 'Quantitative 4NT: slam invitation' };
       if (t < 0) for (let s = 0; s < 4; s++) if (P.len[s] >= 4 && (t < 0 || P.len[s] > P.len[t])) t = s;

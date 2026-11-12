@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 451;
+const APP_V = 452;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -625,7 +625,7 @@ function pracNames() { return pracList().map(pracName).join(', '); }
 // does a practised convention ever come up in the base system? a short search in the background, one convention at a
 // time; the answer is kept per system and convention, and a "no" shows a warning under the choice. Rare conventions
 // (about one deal in a thousand or fewer) are not checked: a short search would miss them even where they belong.
-const PRAC_CHK = {}, PRAC_RARE = new Set(['gerber', 'smolen', 'texasInt', 'fsf', 'respx', 'gamb', 'sjs', 'lav', 'roman']), PRAC_Q = [];
+const PRAC_CHK = {}, PRAC_RARE = new Set(['gerber', 'smolen', 'puppet', 'texasInt', 'fsf', 'respx', 'gamb', 'sjs', 'lav', 'roman']), PRAC_Q = [];
 function pracCheck(k) {
   if (PRAC_RARE.has(k)) return true;
   const key = (SET.sys || 'twoone') + ':' + k;
@@ -690,6 +690,9 @@ const ntShape = l => balOf(l) && l[0] <= 5 && l[1] <= 5;
 const ntOpen = (noMajor) => h => { const l = lensOf(h), p = hcpOf(h); return p >= 15 && p <= 17 && balOf(l) && l[0] <= 5 && l[1] <= 5 && (!noMajor || (l[2] < 4 && l[3] < 4)); };
 const PRAC_GEN = {
   gerber: () => [['open', ntOpen(), null, ntShape], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 18 && p <= 20 && l.every(x => x >= 2) && l[2] < 4 && l[3] < 4; }, null, l => l.every(x => x >= 2) && l[2] < 4 && l[3] < 4]],
+  // Puppet Stayman: a 2NT opening (20-21) with a 4- or 5-card major, a responder with game values and a 3- or 4-card major
+  puppet: () => [['open', h => { const l = lensOf(h), p = hcpOf(h); return p >= 20 && p <= 21 && balOf(l) && l[0] <= 5 && l[1] <= 5 && (l[2] >= 4 || l[3] >= 4); }, null, l => balOf(l) && l[0] <= 5 && l[1] <= 5 && (l[2] >= 4 || l[3] >= 4)],
+    ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 5 && p <= 10 && l[2] <= 4 && l[3] <= 4 && (l[2] >= 3 || l[3] >= 3) && l[0] <= 5 && l[1] <= 5; }]],
   smolen: () => [['open', ntOpen(true)], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 10 && p <= 14 && ((l[2] === 4 && l[3] === 5) || (l[2] === 5 && l[3] === 4)); }]],
   texasInt: () => [['open', ntOpen()], ['lho', h => { const l = lensOf(h), p = hcpOf(h); return p >= 9 && p <= 14 && (l[0] >= 6 || l[1] >= 6) && l[2] <= 2 && l[3] <= 2; }],
     ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 8 && p <= 13 && (l[2] >= 6 || l[3] >= 6); }]],
@@ -1529,7 +1532,8 @@ function turnAlert() {
 
 /* ================= home page: start, open tables, our convention card and the lobby chat ================= */
 // a base system chosen: another system starts with no conventions ticked (the player ticks the ones they play)
-function setSys(k) { if (SET.sys !== k) SET.conv = Object.fromEntries(E.CONVS.map(c => [c.k, false])); SET.sys = k; SET.practice = ''; }
+// a new base system keeps the conventions already on the card (the player adds or removes them; nothing is wiped)
+function setSys(k) { SET.sys = k; SET.practice = ''; }
 const sysIs = k => (SET.sys || 'twoone') === k;   // 'none' (a new player's empty card) marks none
 const myNm = () => { try { return localStorage.getItem('bridge-table-name') || ''; } catch (e) { return ''; } };
 /* ---- several people on one device: each name keeps its own results, settings, progress, friends and messages.
@@ -1562,7 +1566,7 @@ function acctLoad(k) {
 /* ---- practise a convention: the heart of the home page. Pick one and the robots deal hands where our side uses
    it (freshDeal looks for them); every call can be tapped to see what it means. ---- */
 const PRAC_GROUPS = [
-  ['After 1NT', ['stayman', 'fourWay', 'smolen', 'texas', 'texasInt', 'leb']],
+  ['After 1NT', ['stayman', 'puppet', 'fourWay', 'smolen', 'texas', 'texasInt', 'leb']],
   ['Major openings', ['j2nt', 'bergen', 'splinter', 'drury']],
   ['Slam bidding', ['rkc', 'rkc0314', 'gerber']],
   ['When they bid', ['capp', 'dont', 'michaels', 'supx', 'respx']],
@@ -2068,7 +2072,7 @@ function loginsTxt(n) { for (const s of [10000, 5000, 1000, 500, 100, 50]) if (n
 // a title from the boards played
 function titleOf(n) { return n >= 5000 ? 'Grandmaster' : n >= 2000 ? 'Master' : n >= 500 ? 'Strategist' : n >= 100 ? 'Player' : 'Newcomer'; }
 // the convention card in one line: system, notrump range and the conventions switched on (short names)
-const CONV_SHORT = { rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
+const CONV_SHORT = { rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', puppet: 'Puppet Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
 function convLine(p) {
   if (p.cline && p.cline.trim()) return esc(p.cline.trim());   // the player wrote it themselves
   const y = p.sys && p.sys !== 'none' ? E.sysOf(p.sys) : null;
@@ -2534,6 +2538,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 452, tr: 'Puppet Stayman’ı öğrendim (Sigride’nin isteği): kartında açıksa 2SA’dan sonra 3♣ 4’lü veya 5’li majör sorar; 3♦ = 4’lü majör var, 3♥/3♠ = 5’li, 3SA = yok. 3♦’dan sonra elimde olmayan majörü söylüyorum (3♥ = 4 pik, 3♠ = 4 kupa, 4♦ = ikisi de), böylece 2SA açan oynar.', en: 'I learned Puppet Stayman (Sigride’s request): when it is on your card, 3♣ over 2NT asks for a 4- or 5-card major; 3♦ = a 4-card major, 3♥/3♠ = five, 3NT = none. After 3♦ I bid the major I do not hold (3♥ = four spades, 3♠ = four hearts, 4♦ = both), so the 2NT opener declares.' },
   { v: 442, tr: '1♠–1SA gibi bir dizide 19+ puanlık güçlü açışla artık pas geçmiyor ya da minimum teklif vermiyorum: ikinci 4’lü renkle atlamalı söylüyorum (oyuna zorlayıcı), 6’lı majörle doğrudan oyuna çıkıyorum, dengeli 20-21 ile 3SA. Ortağın weak two ya da baraj açışına 19+ puan, destek ve iki asla doğrudan oyuna atlamıyorum, önce 4SA ile anahtar kart soruyorum.', en: 'With a strong opening (19+) after partner’s 1NT answer I no longer pass or make a minimum bid: a jump in a second suit (game forcing), game with six cards in my major, or 3NT balanced. With 19+, support and two aces opposite partner’s weak two or preempt I ask for key cards before bidding game.' },
   { v: 420, tr: 'Ortak araya girdikten sonra fitim yoksa ve 5 kartlı majörüm varsa önce majörü söylüyorum, 2SA’yı ondan sonra düşünüyorum (1♥–2♣–pas, ♠K10943 ♥Q73 ♦AJ98 ♣8: 2♠).', en: 'After partner’s overcall, with no fit and a five-card major, I bid the major before notrump.' },
   { v: 411, tr: 'Kartta Gerber kapalı olsa bile, ortağın 1NT, 2NT veya 3NT’sinin hemen üzerine, renk anlaşması yokken gelen 4♣ as sorusu: 4♦/4♥/4♠/4NT ile cevap veriyorum.', en: 'Even with Gerber off the card, 4♣ straight after partner’s 1NT, 2NT or 3NT with no suit agreed asks for aces, and I answer it.' },
