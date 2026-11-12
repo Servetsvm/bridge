@@ -2048,3 +2048,10 @@ body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#f
 .pzdeal>summary.pzsum{display:inline-flex;align-items:center;gap:6px;margin:8px 0 4px;padding:9px 16px;border-radius:10px;background:linear-gradient(180deg,#ecc874,#c9a227 55%,#a8841c);color:#2a1f05;border:1px solid #8a6a1c;font-weight:700;font-size:15px;cursor:pointer;list-style:none;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .pzdeal>summary.pzsum::-webkit-details-marker{display:none}
 .pzdeal[open]>summary.pzsum{filter:brightness(.95)}
+
+/* the puzzle's progress: the rating and level, then Next puzzle or the wait */
+.pzprog{margin:10px 0 4px;padding:8px 12px;border-radius:10px;background:rgba(201,162,39,.14);border:1px solid rgba(201,162,39,.45);font-size:14px}
+.pzprog b{font-size:16px}
+.pznext{margin:8px 0;padding:11px 18px;font-size:16px;font-weight:700}
+.pzwait{margin:8px 0;font-weight:700}
+.pzline .sym{font-weight:700}

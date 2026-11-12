@@ -2101,6 +2101,13 @@ body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#f
 .pzdeal>summary.pzsum::-webkit-details-marker{display:none}
 .pzdeal[open]>summary.pzsum{filter:brightness(.95)}
 
+/* the puzzle's progress: the rating and level, then Next puzzle or the wait */
+.pzprog{margin:10px 0 4px;padding:8px 12px;border-radius:10px;background:rgba(201,162,39,.14);border:1px solid rgba(201,162,39,.45);font-size:14px}
+.pzprog b{font-size:16px}
+.pznext{margin:8px 0;padding:11px 18px;font-size:16px;font-weight:700}
+.pzwait{margin:8px 0;font-weight:700}
+.pzline .sym{font-weight:700}
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -5394,7 +5401,7 @@ const I18N = {
     "All players": "Tüm oyuncular",
     "Players": "Oyuncular",
     "Made": "Açıldı",
-    "Logged in": "Giriş", "Make the contract: you have one chance.": "Kontratı çıkar: tek şansın var.", "Your first try is the one that counts: plan the play before you start.": "Sayılan ilk denemen: oynamaya başlamadan planını yap.", "The opening lead: {0}": "Atak: {0}", "Failed: {0} tricks, {1} needed.": "Başarısız oldu: {0} löve, {1} gerekiyordu.", "Well done! You made it with {0} tricks.": "Tebrikler! {0} löveyle çıkardın.", "Try again (does not count)": "Tekrar dene (sayılmaz)", "The game was left unfinished: it counts as failed.": "Oyun yarım kaldı: başarısız sayılır.", "The key: at trick one, play {0} from dummy.": "Anahtar: ilk lövede yalancıdan {0} oyna.", "No hints in the puzzle": "Bulmacada ipucu yok", "This time you made it (it does not count).": "Bu sefer çıkardın (sayılmaz).", "Not made this time.": "Bu sefer çıkmadı.", "New PIN": "Yeni PIN", "New PIN for {0}": "{0} için yeni PIN", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "İsim kalır. Yeni PIN’i oyuncuya söyleyin; eski PIN ile kaydedilen sonuçlar gelmez.", "The PIN of {0} is changed.": "{0} için PIN değiştirildi.", "Sit down": "Otur", "Choose a seat: you play the next boards in it with these robots.": "Bir yer seç: sıradaki elleri bu robotlarla o yerde oynarsın.", "{0} new convention requests": "{0} yeni konvansiyon isteği", "Copy all": "Hepsini kopyala", "Last seen": "Son giriş",
+    "Logged in": "Giriş", "Make the contract: you have one chance.": "Kontratı çıkar: tek şansın var.", "Your first try is the one that counts: plan the play before you start.": "Sayılan ilk denemen: oynamaya başlamadan planını yap.", "The opening lead: {0}": "Atak: {0}", "Failed: {0} tricks, {1} needed.": "Başarısız oldu: {0} löve, {1} gerekiyordu.", "Well done! You made it with {0} tricks.": "Tebrikler! {0} löveyle çıkardın.", "Try again (does not count)": "Tekrar dene (sayılmaz)", "The game was left unfinished: it counts as failed.": "Oyun yarım kaldı: başarısız sayılır.", "The key: at trick one, play {0} from dummy.": "Anahtar: ilk lövede yalancıdan {0} oyna.", "No hints in the puzzle": "Bulmacada ipucu yok", "This time you made it (it does not count).": "Bu sefer çıkardın (sayılmaz).", "Not made this time.": "Bu sefer çıkmadı.", "New PIN": "Yeni PIN", "New PIN for {0}": "{0} için yeni PIN", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "İsim kalır. Yeni PIN’i oyuncuya söyleyin; eski PIN ile kaydedilen sonuçlar gelmez.", "The PIN of {0} is changed.": "{0} için PIN değiştirildi.", "Sit down": "Otur", "Choose a seat: you play the next boards in it with these robots.": "Bir yer seç: sıradaki elleri bu robotlarla o yerde oynarsın.", "{0} new convention requests": "{0} yeni konvansiyon isteği", "Copy all": "Hepsini kopyala", "Puzzle rating": "Bulmaca puanı", "{0} of {1} solved": "{1} bulmacadan {0} çözüldü", "Next puzzle": "Sıradaki bulmaca", "New puzzle in {0}": "Yeni bulmaca {0} sonra", "Last seen": "Son giriş",
     "{0} days": "{0} gün",
     "Search a name…": "İsim ara…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Bir ismi silmek onu sonuçları, ayarları, giriş kayıtları ve mesajlarıyla birlikte kalıcı olarak siler; isim yeniden boşa çıkar.",
@@ -5828,7 +5835,7 @@ const I18N = {
     "All players": "Alle spillere",
     "Players": "Spillere",
     "Made": "Opprettet",
-    "Logged in": "Logget inn", "Make the contract: you have one chance.": "Vinn kontrakten: du har én sjanse.", "Your first try is the one that counts: plan the play before you start.": "Det første forsøket teller: legg en plan før du begynner.", "The opening lead: {0}": "Utspill: {0}", "Failed: {0} tricks, {1} needed.": "Mislyktes: {0} stikk, {1} trengtes.", "Well done! You made it with {0} tricks.": "Bra! Du vant den med {0} stikk.", "Try again (does not count)": "Prøv igjen (teller ikke)", "The game was left unfinished: it counts as failed.": "Spillet ble ikke fullført: det teller som mislykket.", "The key: at trick one, play {0} from dummy.": "Nøkkelen: i første stikk spiller du {0} fra bordet.", "No hints in the puzzle": "Ingen tips i oppgaven", "This time you made it (it does not count).": "Denne gangen klarte du det (teller ikke).", "Not made this time.": "Ikke denne gangen.", "New PIN": "Ny PIN", "New PIN for {0}": "Ny PIN for {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Navnet blir. Fortell spilleren den nye PIN-en; resultater lagret med den gamle PIN-en følger ikke med.", "The PIN of {0} is changed.": "PIN-en til {0} er endret.", "Sit down": "Sett deg", "Choose a seat: you play the next boards in it with these robots.": "Velg en plass: du spiller de neste spillene der med disse robotene.", "{0} new convention requests": "{0} nye konvensjonsønsker", "Copy all": "Kopier alle", "Last seen": "Sist sett",
+    "Logged in": "Logget inn", "Make the contract: you have one chance.": "Vinn kontrakten: du har én sjanse.", "Your first try is the one that counts: plan the play before you start.": "Det første forsøket teller: legg en plan før du begynner.", "The opening lead: {0}": "Utspill: {0}", "Failed: {0} tricks, {1} needed.": "Mislyktes: {0} stikk, {1} trengtes.", "Well done! You made it with {0} tricks.": "Bra! Du vant den med {0} stikk.", "Try again (does not count)": "Prøv igjen (teller ikke)", "The game was left unfinished: it counts as failed.": "Spillet ble ikke fullført: det teller som mislykket.", "The key: at trick one, play {0} from dummy.": "Nøkkelen: i første stikk spiller du {0} fra bordet.", "No hints in the puzzle": "Ingen tips i oppgaven", "This time you made it (it does not count).": "Denne gangen klarte du det (teller ikke).", "Not made this time.": "Ikke denne gangen.", "New PIN": "Ny PIN", "New PIN for {0}": "Ny PIN for {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Navnet blir. Fortell spilleren den nye PIN-en; resultater lagret med den gamle PIN-en følger ikke med.", "The PIN of {0} is changed.": "PIN-en til {0} er endret.", "Sit down": "Sett deg", "Choose a seat: you play the next boards in it with these robots.": "Velg en plass: du spiller de neste spillene der med disse robotene.", "{0} new convention requests": "{0} nye konvensjonsønsker", "Copy all": "Kopier alle", "Puzzle rating": "Oppgavepoeng", "{0} of {1} solved": "{0} av {1} løst", "Next puzzle": "Neste oppgave", "New puzzle in {0}": "Ny oppgave om {0}", "Last seen": "Sist sett",
     "{0} days": "{0} dager",
     "Search a name…": "Søk etter navn…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Å fjerne et navn sletter det for godt med resultater, innstillinger, innlogginger og meldinger; navnet blir ledig igjen.",
@@ -6262,7 +6269,7 @@ const I18N = {
     "All players": "Todos los jugadores",
     "Players": "Jugadores",
     "Made": "Creado",
-    "Logged in": "Entrada", "Make the contract: you have one chance.": "Cumple el contrato: tienes una sola oportunidad.", "Your first try is the one that counts: plan the play before you start.": "Cuenta tu primer intento: planifica el carteo antes de empezar.", "The opening lead: {0}": "Salida: {0}", "Failed: {0} tricks, {1} needed.": "Fallido: {0} bazas, se necesitaban {1}.", "Well done! You made it with {0} tricks.": "¡Bien hecho! Lo cumpliste con {0} bazas.", "Try again (does not count)": "Intentar de nuevo (no cuenta)", "The game was left unfinished: it counts as failed.": "La partida quedó sin terminar: cuenta como fallida.", "The key: at trick one, play {0} from dummy.": "La clave: en la primera baza, juega {0} del muerto.", "No hints in the puzzle": "No hay pistas en el problema", "This time you made it (it does not count).": "Esta vez lo cumpliste (no cuenta).", "Not made this time.": "Esta vez no.", "New PIN": "Nuevo PIN", "New PIN for {0}": "Nuevo PIN para {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "El nombre se mantiene. Dile al jugador el nuevo PIN; los resultados guardados con el PIN antiguo no se conservan.", "The PIN of {0} is changed.": "El PIN de {0} se ha cambiado.", "Sit down": "Sentarse", "Choose a seat: you play the next boards in it with these robots.": "Elige un asiento: juegas las siguientes manos en él con estos robots.", "{0} new convention requests": "{0} solicitudes nuevas de convenciones", "Copy all": "Copiar todo", "Last seen": "Última vez",
+    "Logged in": "Entrada", "Make the contract: you have one chance.": "Cumple el contrato: tienes una sola oportunidad.", "Your first try is the one that counts: plan the play before you start.": "Cuenta tu primer intento: planifica el carteo antes de empezar.", "The opening lead: {0}": "Salida: {0}", "Failed: {0} tricks, {1} needed.": "Fallido: {0} bazas, se necesitaban {1}.", "Well done! You made it with {0} tricks.": "¡Bien hecho! Lo cumpliste con {0} bazas.", "Try again (does not count)": "Intentar de nuevo (no cuenta)", "The game was left unfinished: it counts as failed.": "La partida quedó sin terminar: cuenta como fallida.", "The key: at trick one, play {0} from dummy.": "La clave: en la primera baza, juega {0} del muerto.", "No hints in the puzzle": "No hay pistas en el problema", "This time you made it (it does not count).": "Esta vez lo cumpliste (no cuenta).", "Not made this time.": "Esta vez no.", "New PIN": "Nuevo PIN", "New PIN for {0}": "Nuevo PIN para {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "El nombre se mantiene. Dile al jugador el nuevo PIN; los resultados guardados con el PIN antiguo no se conservan.", "The PIN of {0} is changed.": "El PIN de {0} se ha cambiado.", "Sit down": "Sentarse", "Choose a seat: you play the next boards in it with these robots.": "Elige un asiento: juegas las siguientes manos en él con estos robots.", "{0} new convention requests": "{0} solicitudes nuevas de convenciones", "Copy all": "Copiar todo", "Puzzle rating": "Puntuación de problemas", "{0} of {1} solved": "{0} de {1} resueltos", "Next puzzle": "Siguiente problema", "New puzzle in {0}": "Nuevo problema en {0}", "Last seen": "Última vez",
     "{0} days": "{0} días",
     "Search a name…": "Buscar un nombre…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Eliminar un nombre lo borra para siempre con sus resultados, ajustes, accesos y mensajes; el nombre queda libre.",
@@ -6724,7 +6731,7 @@ const I18N = {
     "All players": "Tous les joueurs",
     "Players": "Joueurs",
     "Made": "Créé",
-    "Logged in": "Entrée", "Make the contract: you have one chance.": "Gagnez le contrat : vous avez une seule chance.", "Your first try is the one that counts: plan the play before you start.": "Seul le premier essai compte : préparez votre plan avant de commencer.", "The opening lead: {0}": "Entame : {0}", "Failed: {0} tricks, {1} needed.": "Échec : {0} levées, il en fallait {1}.", "Well done! You made it with {0} tricks.": "Bravo ! Vous l’avez gagné avec {0} levées.", "Try again (does not count)": "Réessayer (ne compte pas)", "The game was left unfinished: it counts as failed.": "La partie est restée inachevée : elle compte comme un échec.", "The key: at trick one, play {0} from dummy.": "La clé : au premier pli, jouez {0} du mort.", "No hints in the puzzle": "Pas d’indice dans le problème", "This time you made it (it does not count).": "Cette fois vous l’avez gagné (ne compte pas).", "Not made this time.": "Pas cette fois.", "New PIN": "Nouveau PIN", "New PIN for {0}": "Nouveau PIN pour {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Le nom reste. Donnez le nouveau PIN au joueur ; les résultats enregistrés avec l’ancien PIN ne suivent pas.", "The PIN of {0} is changed.": "Le PIN de {0} a été changé.", "Sit down": "S’asseoir", "Choose a seat: you play the next boards in it with these robots.": "Choisissez une place : vous jouez les donnes suivantes à cette place avec ces robots.", "{0} new convention requests": "{0} nouvelles demandes de conventions", "Copy all": "Tout copier", "Last seen": "Dernière visite",
+    "Logged in": "Entrée", "Make the contract: you have one chance.": "Gagnez le contrat : vous avez une seule chance.", "Your first try is the one that counts: plan the play before you start.": "Seul le premier essai compte : préparez votre plan avant de commencer.", "The opening lead: {0}": "Entame : {0}", "Failed: {0} tricks, {1} needed.": "Échec : {0} levées, il en fallait {1}.", "Well done! You made it with {0} tricks.": "Bravo ! Vous l’avez gagné avec {0} levées.", "Try again (does not count)": "Réessayer (ne compte pas)", "The game was left unfinished: it counts as failed.": "La partie est restée inachevée : elle compte comme un échec.", "The key: at trick one, play {0} from dummy.": "La clé : au premier pli, jouez {0} du mort.", "No hints in the puzzle": "Pas d’indice dans le problème", "This time you made it (it does not count).": "Cette fois vous l’avez gagné (ne compte pas).", "Not made this time.": "Pas cette fois.", "New PIN": "Nouveau PIN", "New PIN for {0}": "Nouveau PIN pour {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Le nom reste. Donnez le nouveau PIN au joueur ; les résultats enregistrés avec l’ancien PIN ne suivent pas.", "The PIN of {0} is changed.": "Le PIN de {0} a été changé.", "Sit down": "S’asseoir", "Choose a seat: you play the next boards in it with these robots.": "Choisissez une place : vous jouez les donnes suivantes à cette place avec ces robots.", "{0} new convention requests": "{0} nouvelles demandes de conventions", "Copy all": "Tout copier", "Puzzle rating": "Score de problèmes", "{0} of {1} solved": "{0} sur {1} résolus", "Next puzzle": "Problème suivant", "New puzzle in {0}": "Nouveau problème dans {0}", "Last seen": "Dernière visite",
     "{0} days": "{0} jours",
     "Search a name…": "Chercher un nom…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Supprimer un nom l’efface définitivement avec ses résultats, réglages, connexions et messages ; le nom redevient libre.",
@@ -7186,7 +7193,7 @@ const I18N = {
     "All players": "Tutti i giocatori",
     "Players": "Giocatori",
     "Made": "Creato",
-    "Logged in": "Entrata", "Make the contract: you have one chance.": "Mantieni il contratto: hai una sola possibilità.", "Your first try is the one that counts: plan the play before you start.": "Conta il primo tentativo: pianifica il gioco prima di iniziare.", "The opening lead: {0}": "Attacco: {0}", "Failed: {0} tricks, {1} needed.": "Fallito: {0} prese, ne servivano {1}.", "Well done! You made it with {0} tricks.": "Bravo! L’hai mantenuto con {0} prese.", "Try again (does not count)": "Riprova (non conta)", "The game was left unfinished: it counts as failed.": "La partita è rimasta a metà: conta come fallita.", "The key: at trick one, play {0} from dummy.": "La chiave: alla prima presa gioca {0} dal morto.", "No hints in the puzzle": "Nessun aiuto nel problema", "This time you made it (it does not count).": "Questa volta ce l’hai fatta (non conta).", "Not made this time.": "Non questa volta.", "New PIN": "Nuovo PIN", "New PIN for {0}": "Nuovo PIN per {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Il nome resta. Comunica al giocatore il nuovo PIN; i risultati salvati con il vecchio PIN non vengono trasferiti.", "The PIN of {0} is changed.": "Il PIN di {0} è stato cambiato.", "Sit down": "Siediti", "Choose a seat: you play the next boards in it with these robots.": "Scegli un posto: giochi le prossime smazzate lì con questi robot.", "{0} new convention requests": "{0} nuove richieste di convenzioni", "Copy all": "Copia tutto", "Last seen": "Ultimo accesso",
+    "Logged in": "Entrata", "Make the contract: you have one chance.": "Mantieni il contratto: hai una sola possibilità.", "Your first try is the one that counts: plan the play before you start.": "Conta il primo tentativo: pianifica il gioco prima di iniziare.", "The opening lead: {0}": "Attacco: {0}", "Failed: {0} tricks, {1} needed.": "Fallito: {0} prese, ne servivano {1}.", "Well done! You made it with {0} tricks.": "Bravo! L’hai mantenuto con {0} prese.", "Try again (does not count)": "Riprova (non conta)", "The game was left unfinished: it counts as failed.": "La partita è rimasta a metà: conta come fallita.", "The key: at trick one, play {0} from dummy.": "La chiave: alla prima presa gioca {0} dal morto.", "No hints in the puzzle": "Nessun aiuto nel problema", "This time you made it (it does not count).": "Questa volta ce l’hai fatta (non conta).", "Not made this time.": "Non questa volta.", "New PIN": "Nuovo PIN", "New PIN for {0}": "Nuovo PIN per {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Il nome resta. Comunica al giocatore il nuovo PIN; i risultati salvati con il vecchio PIN non vengono trasferiti.", "The PIN of {0} is changed.": "Il PIN di {0} è stato cambiato.", "Sit down": "Siediti", "Choose a seat: you play the next boards in it with these robots.": "Scegli un posto: giochi le prossime smazzate lì con questi robot.", "{0} new convention requests": "{0} nuove richieste di convenzioni", "Copy all": "Copia tutto", "Puzzle rating": "Punteggio problemi", "{0} of {1} solved": "{0} su {1} risolti", "Next puzzle": "Problema successivo", "New puzzle in {0}": "Nuovo problema tra {0}", "Last seen": "Ultimo accesso",
     "{0} days": "{0} giorni",
     "Search a name…": "Cerca un nome…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Eliminare un nome lo cancella per sempre con risultati, impostazioni, accessi e messaggi; il nome torna libero.",
@@ -7648,7 +7655,7 @@ const I18N = {
     "All players": "Alle Spieler",
     "Players": "Spieler",
     "Made": "Angelegt",
-    "Logged in": "Anmeldung", "Make the contract: you have one chance.": "Erfülle den Kontrakt: du hast nur eine Chance.", "Your first try is the one that counts: plan the play before you start.": "Der erste Versuch zählt: plane das Spiel, bevor du beginnst.", "The opening lead: {0}": "Ausspiel: {0}", "Failed: {0} tricks, {1} needed.": "Verfehlt: {0} Stiche, {1} nötig.", "Well done! You made it with {0} tricks.": "Gut gemacht! Mit {0} Stichen erfüllt.", "Try again (does not count)": "Nochmal versuchen (zählt nicht)", "The game was left unfinished: it counts as failed.": "Das Spiel wurde nicht beendet: es zählt als verfehlt.", "The key: at trick one, play {0} from dummy.": "Der Schlüssel: im ersten Stich {0} vom Tisch spielen.", "No hints in the puzzle": "Keine Tipps in der Aufgabe", "This time you made it (it does not count).": "Diesmal hast du es geschafft (zählt nicht).", "Not made this time.": "Diesmal nicht.", "New PIN": "Neue PIN", "New PIN for {0}": "Neue PIN für {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Der Name bleibt. Sag dem Spieler die neue PIN; mit der alten PIN gespeicherte Ergebnisse kommen nicht mit.", "The PIN of {0} is changed.": "Die PIN von {0} wurde geändert.", "Sit down": "Hinsetzen", "Choose a seat: you play the next boards in it with these robots.": "Wähle einen Platz: du spielst die nächsten Boards dort mit diesen Robotern.", "{0} new convention requests": "{0} neue Konventionswünsche", "Copy all": "Alle kopieren", "Last seen": "Zuletzt gesehen",
+    "Logged in": "Anmeldung", "Make the contract: you have one chance.": "Erfülle den Kontrakt: du hast nur eine Chance.", "Your first try is the one that counts: plan the play before you start.": "Der erste Versuch zählt: plane das Spiel, bevor du beginnst.", "The opening lead: {0}": "Ausspiel: {0}", "Failed: {0} tricks, {1} needed.": "Verfehlt: {0} Stiche, {1} nötig.", "Well done! You made it with {0} tricks.": "Gut gemacht! Mit {0} Stichen erfüllt.", "Try again (does not count)": "Nochmal versuchen (zählt nicht)", "The game was left unfinished: it counts as failed.": "Das Spiel wurde nicht beendet: es zählt als verfehlt.", "The key: at trick one, play {0} from dummy.": "Der Schlüssel: im ersten Stich {0} vom Tisch spielen.", "No hints in the puzzle": "Keine Tipps in der Aufgabe", "This time you made it (it does not count).": "Diesmal hast du es geschafft (zählt nicht).", "Not made this time.": "Diesmal nicht.", "New PIN": "Neue PIN", "New PIN for {0}": "Neue PIN für {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Der Name bleibt. Sag dem Spieler die neue PIN; mit der alten PIN gespeicherte Ergebnisse kommen nicht mit.", "The PIN of {0} is changed.": "Die PIN von {0} wurde geändert.", "Sit down": "Hinsetzen", "Choose a seat: you play the next boards in it with these robots.": "Wähle einen Platz: du spielst die nächsten Boards dort mit diesen Robotern.", "{0} new convention requests": "{0} neue Konventionswünsche", "Copy all": "Alle kopieren", "Puzzle rating": "Aufgabenwertung", "{0} of {1} solved": "{0} von {1} gelöst", "Next puzzle": "Nächste Aufgabe", "New puzzle in {0}": "Neue Aufgabe in {0}", "Last seen": "Zuletzt gesehen",
     "{0} days": "{0} Tage",
     "Search a name…": "Namen suchen…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Ein Name wird mit Ergebnissen, Einstellungen, Logins und Nachrichten endgültig gelöscht; der Name ist dann wieder frei.",
@@ -8110,7 +8117,7 @@ const I18N = {
     "All players": "Все игроки",
     "Players": "Игроки",
     "Made": "Создан",
-    "Logged in": "Вход", "Make the contract: you have one chance.": "Выполните контракт: у вас одна попытка.", "Your first try is the one that counts: plan the play before you start.": "Засчитывается первая попытка: продумайте розыгрыш, прежде чем начать.", "The opening lead: {0}": "Первый ход: {0}", "Failed: {0} tricks, {1} needed.": "Не вышло: {0} взяток, нужно {1}.", "Well done! You made it with {0} tricks.": "Отлично! Вы выполнили контракт с {0} взятками.", "Try again (does not count)": "Ещё раз (не засчитывается)", "The game was left unfinished: it counts as failed.": "Игра не доиграна: засчитана как неудача.", "The key: at trick one, play {0} from dummy.": "Ключ: в первой взятке сыграйте {0} с болвана.", "No hints in the puzzle": "В задаче нет подсказок", "This time you made it (it does not count).": "На этот раз получилось (не засчитывается).", "Not made this time.": "На этот раз не вышло.", "New PIN": "Новый PIN", "New PIN for {0}": "Новый PIN для {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Имя остаётся. Сообщите игроку новый PIN; результаты, сохранённые со старым PIN, не переносятся.", "The PIN of {0} is changed.": "PIN игрока {0} изменён.", "Sit down": "Сесть", "Choose a seat: you play the next boards in it with these robots.": "Выберите место: следующие сдачи вы играете на нём с этими роботами.", "{0} new convention requests": "Новых запросов конвенций: {0}", "Copy all": "Скопировать всё", "Last seen": "Последний вход",
+    "Logged in": "Вход", "Make the contract: you have one chance.": "Выполните контракт: у вас одна попытка.", "Your first try is the one that counts: plan the play before you start.": "Засчитывается первая попытка: продумайте розыгрыш, прежде чем начать.", "The opening lead: {0}": "Первый ход: {0}", "Failed: {0} tricks, {1} needed.": "Не вышло: {0} взяток, нужно {1}.", "Well done! You made it with {0} tricks.": "Отлично! Вы выполнили контракт с {0} взятками.", "Try again (does not count)": "Ещё раз (не засчитывается)", "The game was left unfinished: it counts as failed.": "Игра не доиграна: засчитана как неудача.", "The key: at trick one, play {0} from dummy.": "Ключ: в первой взятке сыграйте {0} с болвана.", "No hints in the puzzle": "В задаче нет подсказок", "This time you made it (it does not count).": "На этот раз получилось (не засчитывается).", "Not made this time.": "На этот раз не вышло.", "New PIN": "Новый PIN", "New PIN for {0}": "Новый PIN для {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Имя остаётся. Сообщите игроку новый PIN; результаты, сохранённые со старым PIN, не переносятся.", "The PIN of {0} is changed.": "PIN игрока {0} изменён.", "Sit down": "Сесть", "Choose a seat: you play the next boards in it with these robots.": "Выберите место: следующие сдачи вы играете на нём с этими роботами.", "{0} new convention requests": "Новых запросов конвенций: {0}", "Copy all": "Скопировать всё", "Puzzle rating": "Рейтинг задач", "{0} of {1} solved": "Решено {0} из {1}", "Next puzzle": "Следующая задача", "New puzzle in {0}": "Новая задача через {0}", "Last seen": "Последний вход",
     "{0} days": "дней: {0}",
     "Search a name…": "Поиск имени…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Удаление имени навсегда стирает его результаты, настройки, входы и сообщения; имя снова становится свободным.",
@@ -8572,7 +8579,7 @@ const I18N = {
     "All players": "Wszyscy gracze",
     "Players": "Gracze",
     "Made": "Utworzono",
-    "Logged in": "Logowanie", "Make the contract: you have one chance.": "Wygraj kontrakt: masz jedną szansę.", "Your first try is the one that counts: plan the play before you start.": "Liczy się pierwsza próba: zaplanuj rozgrywkę, zanim zaczniesz.", "The opening lead: {0}": "Wist: {0}", "Failed: {0} tricks, {1} needed.": "Nie udało się: {0} lew, potrzeba było {1}.", "Well done! You made it with {0} tricks.": "Brawo! Wygrałeś z {0} lewami.", "Try again (does not count)": "Spróbuj ponownie (nie liczy się)", "The game was left unfinished: it counts as failed.": "Rozgrywka nie została skończona: liczy się jako nieudana.", "The key: at trick one, play {0} from dummy.": "Klucz: w pierwszej lewie zagraj {0} ze stołu.", "No hints in the puzzle": "W zadaniu nie ma podpowiedzi", "This time you made it (it does not count).": "Tym razem się udało (nie liczy się).", "Not made this time.": "Tym razem się nie udało.", "New PIN": "Nowy PIN", "New PIN for {0}": "Nowy PIN dla {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Nazwa zostaje. Podaj graczowi nowy PIN; wyniki zapisane ze starym PIN-em nie zostaną przeniesione.", "The PIN of {0} is changed.": "PIN gracza {0} został zmieniony.", "Sit down": "Usiądź", "Choose a seat: you play the next boards in it with these robots.": "Wybierz miejsce: grasz na nim następne rozdania z tymi robotami.", "{0} new convention requests": "Nowe prośby o konwencje: {0}", "Copy all": "Kopiuj wszystko", "Last seen": "Ostatnio",
+    "Logged in": "Logowanie", "Make the contract: you have one chance.": "Wygraj kontrakt: masz jedną szansę.", "Your first try is the one that counts: plan the play before you start.": "Liczy się pierwsza próba: zaplanuj rozgrywkę, zanim zaczniesz.", "The opening lead: {0}": "Wist: {0}", "Failed: {0} tricks, {1} needed.": "Nie udało się: {0} lew, potrzeba było {1}.", "Well done! You made it with {0} tricks.": "Brawo! Wygrałeś z {0} lewami.", "Try again (does not count)": "Spróbuj ponownie (nie liczy się)", "The game was left unfinished: it counts as failed.": "Rozgrywka nie została skończona: liczy się jako nieudana.", "The key: at trick one, play {0} from dummy.": "Klucz: w pierwszej lewie zagraj {0} ze stołu.", "No hints in the puzzle": "W zadaniu nie ma podpowiedzi", "This time you made it (it does not count).": "Tym razem się udało (nie liczy się).", "Not made this time.": "Tym razem się nie udało.", "New PIN": "Nowy PIN", "New PIN for {0}": "Nowy PIN dla {0}", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "Nazwa zostaje. Podaj graczowi nowy PIN; wyniki zapisane ze starym PIN-em nie zostaną przeniesione.", "The PIN of {0} is changed.": "PIN gracza {0} został zmieniony.", "Sit down": "Usiądź", "Choose a seat: you play the next boards in it with these robots.": "Wybierz miejsce: grasz na nim następne rozdania z tymi robotami.", "{0} new convention requests": "Nowe prośby o konwencje: {0}", "Copy all": "Kopiuj wszystko", "Puzzle rating": "Ranking zadań", "{0} of {1} solved": "Rozwiązane {0} z {1}", "Next puzzle": "Następne zadanie", "New puzzle in {0}": "Nowe zadanie za {0}", "Last seen": "Ostatnio",
     "{0} days": "{0} dni",
     "Search a name…": "Szukaj nazwy…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "Usunięcie nazwy kasuje ją na zawsze wraz z wynikami, ustawieniami, logowaniami i wiadomościami; nazwa znów jest wolna.",
@@ -9034,7 +9041,7 @@ const I18N = {
     "All players": "所有玩家",
     "Players": "玩家",
     "Made": "创建",
-    "Logged in": "登录", "Make the contract: you have one chance.": "完成定约：你只有一次机会。", "Your first try is the one that counts: plan the play before you start.": "第一次尝试才算数：开始前先想好打法。", "The opening lead: {0}": "首攻：{0}", "Failed: {0} tricks, {1} needed.": "失败：{0} 墩，需要 {1} 墩。", "Well done! You made it with {0} tricks.": "做得好！你以 {0} 墩完成了定约。", "Try again (does not count)": "再试一次（不计分）", "The game was left unfinished: it counts as failed.": "这局没有打完：算作失败。", "The key: at trick one, play {0} from dummy.": "关键：第一墩从明手出 {0}。", "No hints in the puzzle": "题目中没有提示", "This time you made it (it does not count).": "这次你完成了（不计分）。", "Not made this time.": "这次没有完成。", "New PIN": "新 PIN", "New PIN for {0}": "{0} 的新 PIN", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "名字保留。请把新 PIN 告诉玩家；用旧 PIN 保存的成绩不会带过来。", "The PIN of {0} is changed.": "{0} 的 PIN 已更改。", "Sit down": "入座", "Choose a seat: you play the next boards in it with these robots.": "选一个座位：接下来的牌你坐在这里和这些机器人打。", "{0} new convention requests": "{0} 个新的约定请求", "Copy all": "全部复制", "Last seen": "最近登录",
+    "Logged in": "登录", "Make the contract: you have one chance.": "完成定约：你只有一次机会。", "Your first try is the one that counts: plan the play before you start.": "第一次尝试才算数：开始前先想好打法。", "The opening lead: {0}": "首攻：{0}", "Failed: {0} tricks, {1} needed.": "失败：{0} 墩，需要 {1} 墩。", "Well done! You made it with {0} tricks.": "做得好！你以 {0} 墩完成了定约。", "Try again (does not count)": "再试一次（不计分）", "The game was left unfinished: it counts as failed.": "这局没有打完：算作失败。", "The key: at trick one, play {0} from dummy.": "关键：第一墩从明手出 {0}。", "No hints in the puzzle": "题目中没有提示", "This time you made it (it does not count).": "这次你完成了（不计分）。", "Not made this time.": "这次没有完成。", "New PIN": "新 PIN", "New PIN for {0}": "{0} 的新 PIN", "The name stays. Tell the player the new PIN; results saved with the old PIN do not come along.": "名字保留。请把新 PIN 告诉玩家；用旧 PIN 保存的成绩不会带过来。", "The PIN of {0} is changed.": "{0} 的 PIN 已更改。", "Sit down": "入座", "Choose a seat: you play the next boards in it with these robots.": "选一个座位：接下来的牌你坐在这里和这些机器人打。", "{0} new convention requests": "{0} 个新的约定请求", "Copy all": "全部复制", "Puzzle rating": "题目积分", "{0} of {1} solved": "已解 {0}/{1}", "Next puzzle": "下一题", "New puzzle in {0}": "{0} 后出新题", "Last seen": "最近登录",
     "{0} days": "{0} 天",
     "Search a name…": "搜索名字…",
     "Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.": "删除一个名字会永久删除其成绩、设置、登录记录和消息；该名字可再次被使用。",
@@ -9938,7 +9945,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 437;
+const APP_V = 438;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11622,8 +11629,8 @@ function renderHome() {
       set("hDaily", `🗓 <b>${T("Daily tournament")}</b> · ${done >= t.n ? T("finished") : done ? T("{0} of {1} boards", done, t.n) : T("{0} boards — play now", t.n)}${i >= 0 && rows.length > 1 ? " · " + T("place {0} of {1}", i + 1, rows.length) : rows.length ? " · " + T("{0} players", rows.length) : ""} ›`);
     } else set("hDaily", "");
   }
-  const pzS = pzState(), pzDone = pzS.day === new Date().toISOString().slice(0, 10);   // the problem of the day: on the Today line
-  set("hPuzzle", `${pzDone ? (pzS.ok ? "✅" : "❌") : "🧩"} ${T("Puzzle")}${pzDone && pzS.streak ? " " + pzS.streak : ""}`);
+  { const pzS = pzState(), pzP = pzProg(), wait = pzS.day === 'p' + pzP.i && pzS.ok === false && !pzLive();   // the puzzle: its rating; ⏳ while the next waits
+    set("hPuzzle", `${wait ? "⏳" : pzS.day === 'p' + pzP.i && pzS.ok ? "✅" : "🧩"} ${T("Puzzle")}${pzP.t ? " " + Math.round(pzP.r) : ""}`); }
 
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
@@ -11958,6 +11965,7 @@ function showPlayer(name) {
   const fields = [
     [T('Rank card'), rankBig(p, shown)],
     [T("Rating"), p && p.rtn ? `<b class="prt">${p.rt}</b> <small>(${p.rtn} ${T("boards")})</small>` : "—"],
+    [T('Puzzle'), p && p.pz && p.pz.t ? `🧩 <b>${p.pz.r}</b> · ${T(LEVEL_N[pzLvl(p.pz.r)])} · ${T('{0} of {1} solved', p.pz.s, p.pz.t)}` : '—'],
     [T('Club'), p && p.club ? `🏛 ${esc(p.club)}` : '—'],
     [T('Skill level'), lvlHtml(lvl, p)],
     [T('Joined'), p && p.joined ? esc(p.joined) : '—'],
@@ -12141,30 +12149,52 @@ let PZB;   // undefined: not read yet; null: could not be read (the generated pr
 // the declarer problems (.github/puzzles/makeplay.js): one for each day from PZP_FROM, in place of the leads
 const PZP_FROM = '2026-11-12';
 let PZP;
-const pzWait = () => { const d = new Date().toISOString().slice(0, 10); return (PZB === undefined && d >= PZB_FROM) || (PZP === undefined && d >= PZP_FROM); };
+const pzWait = () => PZB === undefined || PZP === undefined;
+/* the puzzles one after another (not one a day): solved, the next comes at once; failed, the next comes 24 hours after
+   the try. Each answer moves the puzzle rating (start 1200) and with it the puzzle level; kept on the player's card. */
+const PZ_HOLD = 864e5;
+const pzLive = () => !!(G && G.pz && G.pz.first && G.phase === 'play');   // the first try is being played now
+const pzProg = () => ({ r: 1200, s: 0, t: 0, i: 0, st: 0, ...(SET.pz || {}) });
+function pzProgSave(p) { SET.pz = { r: Math.round(p.r), s: p.s, t: p.t, i: p.i, st: p.st }; Store.saveSettings(SET); save(); scheduleSync(); if (typeof Net !== 'undefined' && Net.shareInfo) Net.shareInfo(); }
+const pzLvl = r => r < 1100 ? 'beg' : r < 1300 ? 'int' : r < 1500 ? 'adv' : r < 1700 ? 'exp' : 'wc';
+// the puzzle that is up now (its number); a failed one past its 24 hours gives way to the next
+function pzIdx() {
+  const p = pzProg(), s = pzState();
+  if (s.day === 'p' + p.i && s.ok === false && Date.now() - (s.at || 0) >= PZ_HOLD) { p.i++; pzProgSave(p); pzSave({}); ui.pz = null; }
+  return p.i;
+}
+// the rating, the level, how many solved; then Next puzzle (solved) or how long until the next (failed)
+function pzProgHtml(done) {
+  const p = pzProg(), s = pzState();
+  let nx = '';
+  if (done && s.ok) nx = `<button class="btn new pznext" id="pzNext">▶ ${T('Next puzzle')}</button>`;
+  else if (done && s.ok === false && !pzLive()) { const mn = Math.ceil(Math.max(0, (s.at || 0) + PZ_HOLD - Date.now()) / 6e4), h = Math.floor(mn / 60), m = mn % 60; nx = `<div class="pzwait">⏳ ${T('New puzzle in {0}', h + ':' + String(m).padStart(2, '0'))}</div>`; }
+  return `<div class="pzprog">🧩 ${T('Puzzle rating')} <b>${Math.round(p.r)}</b> · ${T(LEVEL_N[pzLvl(p.r)])} · ${T('{0} of {1} solved', p.s, p.t)}${p.st ? ' · 🔥 ' + p.st : ''}</div>${nx}`;
+}
 function pzLoad() { if (ui.pzLoading) return; ui.pzLoading = 1; const get = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null); Promise.all([get('js/puzzles.json'), get('js/puzzles-play.json')]).then(([j, k]) => { PZB = j && j.length ? j : null; PZP = k && k.length ? k : null; ui.pzLoading = 0; ui.pz = null; showPuzzle(); }); }
-function pzBank(day) {
-  const e = PZB[(Math.round((Date.parse(day) - Date.parse(PZB_FROM)) / 864e5)) % PZB.length], cfg = { conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }, cards = [cfg, cfg], auction = [];
+function pzBank(n) {
+  const e = PZB[n % PZB.length], cfg = { conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }, cards = [cfg, cfg], auction = [];
   e.a.forEach((call, i) => { const seat = (e.l + i) % 4; auction.push({ seat, call, m: E.explainCall(auction, seat, call, cards) }); });
   return { kind: 'lead', deal: e.d, dealer: e.l, auction, c: { level: e.c[0], strain: e.c[1], dbl: 0, decl: 1 }, vals: Object.fromEntries(e.v) };
 }
 // the declarer problem's window: dummy above your hand, the auction, the contract, the lead; then Play (the first try
 // counts: it is marked as failed from the moment it starts, and as made only when the contract is made)
 function showPlayPuzzle(pz) {
-  const st = pzState(), done = st.day === pz.day && st.ans === 'play' ? st : null, me = pz.c.decl, dm = (me + 2) % 4, ld = (me + 1) % 4;
+  const st = pzState(), done = st.day === pz.day && st.ans === 'play' && !(st.pend && pzLive()) ? st : null, me = pz.c.decl, dm = (me + 2) % 4, ld = (me + 1) % 4;
   const card = c => `<b class="${(c / 13 | 0) === 1 || (c / 13 | 0) === 2 ? 'red' : ''}">${RTXT[R(c)]}${STR[S(c)]}</b>`;
-  const con = `${pz.c.level}${STR[pz.c.strain]}${pz.c.dbl === 2 ? 'XX' : pz.c.dbl ? 'X' : ''}`;
+  const con = `${pz.c.level}${symHtml(pz.c.strain)}${pz.c.dbl === 2 ? 'XX' : pz.c.dbl ? 'X' : ''}`;
   let res = '';
   if (done) {
     res = done.ok ? `<div class="okmsg">✅ ${T('Well done! You made it with {0} tricks.', done.tr)}</div>`
       : `<div class="err">❌ ${done.tr != null ? T('Failed: {0} tricks, {1} needed.', done.tr, pz.need) : T('The game was left unfinished: it counts as failed.')}</div>`;
-    res += `<div class="muted">${T('The key: at trick one, play {0} from dummy.', `${RTXT[R(pz.pick)]}${STR[S(pz.pick)]}`)}</div>
+    res += `<div class="muted">${T('The key: at trick one, play {0} from dummy.', `${RTXT[R(pz.pick)]}${symHtml(S(pz.pick))}`)}</div>
       <details class="pzdeal"><summary class="pzsum">👁 ${T('Show all four hands')}</summary>${dealHtml(pz.deal, me)}</details>
-      <div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
+      `;
   }
-  openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2>
+  res += pzProgHtml(!!done);
+  openOv('puzzle', `<h2>🧩 ${T('Puzzle')}</h2>
     <div class="big">${T('Make the contract: you have one chance.')}</div>
-    <div class="pzline">${T('Contract')}: <b>${con}</b> · ${T('Declarer')}: ${SEAT[me]} · ${T('The opening lead: {0}', SEAT[ld] + ' ' + RTXT[R(pz.lead)] + STR[S(pz.lead)])}</div>
+    <div class="pzline">${T('Contract')}: <b>${con}</b> · ${T('Declarer')}: ${SEAT[me]} · ${T('The opening lead: {0}', SEAT[ld] + ' ' + RTXT[R(pz.lead)] + symHtml(S(pz.lead)))}</div>
     <div class="pzbox"><div class="pzpair"><small>${T('Dummy')} (${SEAT[dm]})</small>${pzHand(pz.deal[dm])}<small>${T('You')} (${SEAT[me]})</small>${pzHand(pz.deal[me])}</div>
     <div class="auction">${auctionTable(pz.auction, false, { board: pz.bn, dealer: pz.dealer, seat: me, sel: null })}</div></div>
     ${done ? '' : `<div class="muted">${T('Your first try is the one that counts: plan the play before you start.')}</div>`}${res}
@@ -12174,8 +12204,8 @@ function showPlayPuzzle(pz) {
 // seeing every card
 function pzPlayStart(pz, first) {
   if (first) {
-    const st = pzState(), next = { day: pz.day, ans: 'play', streak: st.streak || 0, lastOk: st.lastOk, prev: st.lastOk, prevStreak: st.streak || 0, tr: null };
-    pzFinish(next, false);   // a try started counts as failed until the contract is made
+    const p = pzProg(), next = { day: pz.day, ans: 'play', tr: null, prevSt: p.st, at: Date.now(), ok: false, scored: 1, pend: 1 };
+    p.t++; p.r = Math.max(800, p.r - 15); p.st = 0; pzProgSave(p); pzSave(next); render();   // a try started counts as failed until the contract is made
   }
   closeOv();
   newBoard(pz.deal.map(h => h.slice()), pz.bn);
@@ -12191,12 +12221,12 @@ function pzPlayStart(pz, first) {
 }
 function pzPlayDone(e) {
   const made = e.tricks >= G.pz.need;
-  if (G.pz.first) { const s = pzState(); if (s.day === G.pz.day && s.ans === 'play') { s.tr = e.tricks; pzFinish(s, made); } setTimeout(showPuzzle, 1600); }
+  if (G.pz.first) { const s = pzState(); if (s.day === G.pz.day && s.ans === 'play') { s.tr = e.tricks; pzFinish(s, made); } setTimeout(showPuzzle, 1600); }   // pend: the start's failure is undone when made
   else { flash(made ? '✅ ' + T('This time you made it (it does not count).') : '❌ ' + T('Not made this time.'), 2500); setTimeout(showPuzzle, 2600); }
 }
 // a declarer problem turned so that you are the declarer (your seat), dummy opposite; the board number gives its dealer
-function pzPlayBank(day) {
-  const e = PZP[(Math.round((Date.parse(day) - Date.parse(PZP_FROM)) / 864e5)) % PZP.length], me = U(), rot = (me - e.c[3] + 4) % 4;
+function pzPlayBank(n) {
+  const e = PZP[n % PZP.length], me = U(), rot = (me - e.c[3] + 4) % 4;
   const deal = [0, 1, 2, 3].map(() => null); e.d.forEach((h, s) => { deal[(s + rot) % 4] = h.slice(); });
   const dealer = (e.l + rot) % 4, cfg = { conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }, cards = [cfg, cfg], auction = [];
   e.a.forEach((call, i) => { const seat = (dealer + i) % 4; auction.push({ seat, call, m: E.explainCall(auction, seat, call, cards) }); });
@@ -12204,9 +12234,13 @@ function pzPlayBank(day) {
 }
 function pzToday() {
   const day = new Date().toISOString().slice(0, 10);
-  if (ui.pz && ui.pz.day === day && ui.pz.sys === (SET.sys || 'twoone')) return ui.pz;
-  if (day >= PZP_FROM && PZP) { const b = pzPlayBank(day); b.day = day; b.sys = SET.sys || 'twoone'; ui.pz = b; return b; }
-  if (day >= PZB_FROM && PZB) { const b = pzBank(day); b.day = day; b.sys = SET.sys || 'twoone'; ui.pz = b; return b; }
+  if (ui.pz && ui.pz.day === day && ui.pz.sys === (SET.sys || 'twoone') && !(PZP || PZB)) return ui.pz;
+  if (PZP || PZB) {   // the banks: a declarer problem and a lead in turn
+    const i = pzIdx(), key = 'p' + i;
+    if (ui.pz && ui.pz.day === key) return ui.pz;
+    const play = PZP && (!PZB || i % 2 === 0), b = play ? pzPlayBank(PZB ? i >> 1 : i) : pzBank(PZP ? i >> 1 : i);
+    b.day = key; b.idx = i; b.sys = SET.sys || 'twoone'; ui.pz = b; return b;
+  }
   let seed = 2166136261; for (const ch of 'puzzle-' + day) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
   const hard = day >= '2026-11-09', nDay = Math.floor(Date.parse(day) / 864e5), cards = sideCards();
   const kind = hard ? ['answer', 'rebid', 'compete', 'lead'][nDay % 4] : ['open', 'answer', 'lead'][nDay % 3];
@@ -12312,9 +12346,10 @@ function showPuzzle() {
     }
     if (done.dd) res += `<div class="pzdd"><b>Double dummy</b>${ddTabHtml(done.dd)}</div>`; else if (ui.pzDdFail !== pz.day) { pzDD(pz); res += `<div class="muted">⏳ Double dummy…</div>`; }
     if (done.ok != null) res += `<details class="pzdeal"><summary class="pzsum">👁 ${T('Show all four hands')}</summary>${dealHtml(pz.deal, 2)}</details>`;
-    if (done.ok != null) res += `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
+    if (done.ok != null) res += /^p\d+$/.test(pz.day) ? pzProgHtml(true) : `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
   }
-  openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2><div class="big">${pzQuestion(pz.kind)}</div>${pz.vals ? `<div class="muted">${T('Only one lead beats this contract.')} · ${esc(E.sysOf('twoone').n)}</div>` : ''}
+  else if (/^p\d+$/.test(pz.day)) res += pzProgHtml(false);
+  openOv('puzzle', `<h2>🧩 ${T('Puzzle')}</h2><div class="big">${pzQuestion(pz.kind)}</div>${pz.vals ? `<div class="muted">${T('Only one lead beats this contract.')} · ${esc(E.sysOf('twoone').n)}</div>` : ''}
     <div class="pzbox">${pzHand(pz.deal[2])}${auc}</div>${ctl}${res}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
@@ -12328,8 +12363,11 @@ function pzAnswer(ans) {
 }
 /* a right answer on the day after the last right one makes the run longer */
 function pzFinish(s, ok) {
-  const yday = new Date(Date.parse(s.day) - 864e5).toISOString().slice(0, 10);
-  s.ok = ok; if (ok) { s.streak = s.prev === yday ? s.prevStreak + 1 : 1; s.lastOk = s.day; } else s.streak = 0;
+  const p = pzProg(), lead = s.ans !== 'play', up = lead ? 15 : 20, dn = lead ? 10 : 15;
+  if (s.pend) { if (ok) { p.r += dn + up; p.s++; p.st = (s.prevSt || 0) + 1; } delete s.pend; }   // a declarer try: counted as failed when it started
+  else if (!s.scored) { p.t++; if (ok) { p.r += up; p.s++; p.st++; } else { p.r = Math.max(800, p.r - dn); p.st = 0; } }
+  s.scored = 1; s.ok = ok; s.at = s.at || Date.now(); s.streak = p.st;
+  if (/^p\d+$/.test(s.day || '')) pzProgSave(p);
   pzSave(s); if (ui.overlay === 'puzzle') showPuzzle(); render();
 }
 /* the leads are worked out in the background; each value shows as it comes */
@@ -12356,6 +12394,7 @@ document.addEventListener('click', e => {
   const c = e.target.closest('[data-pzc]'); if (c) { pzAnswer(+c.dataset.pzc); return; }
   const pi = e.target.closest('[data-pzi]'); if (pi) { const i = +pi.dataset.pzi; ui.pzSel = ui.pzSel === i ? null : i; showPuzzle(); return; }
   if (e.target.closest('#hPuzzle')) { ui.pzSel = null; showPuzzle(); }
+  if (e.target.closest('#pzNext')) { const p = pzProg(); p.i++; pzProgSave(p); pzSave({}); ui.pz = null; ui.pzSel = null; showPuzzle(); }
 });
 // the practice review of a board: per convention ✓ when every call where it came up was the system's, else ✗
 function prvSum(rv) {
@@ -14323,7 +14362,7 @@ const Net = (() => {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
     return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, cardV: SET.cardV === 1 ? 1 : 0, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
-      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', club: String(SET.club || '').trim().slice(0, 24), ...ratingOf(HIST) };   // the player card: level, country, a few words
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', club: String(SET.club || '').trim().slice(0, 24), pz: SET.pz && SET.pz.t ? { r: Math.round(SET.pz.r), s: SET.pz.s, t: SET.pz.t } : undefined, ...ratingOf(HIST) };   // the player card: level, country, a few words
   }
   /* the rating: 1500 plus 150 × the IMPs won against the robot field over the last 200 scored boards, shrunk for a
      player with few boards (so ten lucky boards do not make a champion). Every app sends its own; the lobby keeps the
@@ -14369,7 +14408,7 @@ const Net = (() => {
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
       joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
-      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", cardV: q.cardV === 1 ? 1 : 0, club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
+      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", cardV: q.cardV === 1 ? 1 : 0, club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", pz: q.pz && typeof q.pz === 'object' && +q.pz.t > 0 ? { r: Math.max(0, Math.min(4000, Math.round(+q.pz.r || 0))), s: Math.max(0, Math.min(1e6, +q.pz.s || 0)), t: Math.max(0, Math.min(1e6, +q.pz.t || 0)) } : undefined, rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   // at a board: bidding, card play, or a finished board still on the screen (the next one comes from there); not the home page
@@ -15291,7 +15330,7 @@ const Net = (() => {
 
   /* your results on every device: kept in the database under a key made from your name and PIN (only someone who
      knows both can find them). Boards from both sides are merged; your settings come along to a new device. */
-  const SYNC_KEYS = ['sys', 'conv', 'cardV', 'cardTs', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN', 'pracS', 'pracHint'];
+  const SYNC_KEYS = ['sys', 'conv', 'cardV', 'cardTs', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN', 'pracS', 'pracHint', 'pz'];
   let syncing = null, syncT = null;
   async function cloudSync() {
     if (!Cloud.on || !SET.pinH || syncing) return syncing;

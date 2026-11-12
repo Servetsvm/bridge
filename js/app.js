@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 437;
+const APP_V = 438;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1694,8 +1694,8 @@ function renderHome() {
       set("hDaily", `🗓 <b>${T("Daily tournament")}</b> · ${done >= t.n ? T("finished") : done ? T("{0} of {1} boards", done, t.n) : T("{0} boards — play now", t.n)}${i >= 0 && rows.length > 1 ? " · " + T("place {0} of {1}", i + 1, rows.length) : rows.length ? " · " + T("{0} players", rows.length) : ""} ›`);
     } else set("hDaily", "");
   }
-  const pzS = pzState(), pzDone = pzS.day === new Date().toISOString().slice(0, 10);   // the problem of the day: on the Today line
-  set("hPuzzle", `${pzDone ? (pzS.ok ? "✅" : "❌") : "🧩"} ${T("Puzzle")}${pzDone && pzS.streak ? " " + pzS.streak : ""}`);
+  { const pzS = pzState(), pzP = pzProg(), wait = pzS.day === 'p' + pzP.i && pzS.ok === false && !pzLive();   // the puzzle: its rating; ⏳ while the next waits
+    set("hPuzzle", `${wait ? "⏳" : pzS.day === 'p' + pzP.i && pzS.ok ? "✅" : "🧩"} ${T("Puzzle")}${pzP.t ? " " + Math.round(pzP.r) : ""}`); }
 
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
@@ -2030,6 +2030,7 @@ function showPlayer(name) {
   const fields = [
     [T('Rank card'), rankBig(p, shown)],
     [T("Rating"), p && p.rtn ? `<b class="prt">${p.rt}</b> <small>(${p.rtn} ${T("boards")})</small>` : "—"],
+    [T('Puzzle'), p && p.pz && p.pz.t ? `🧩 <b>${p.pz.r}</b> · ${T(LEVEL_N[pzLvl(p.pz.r)])} · ${T('{0} of {1} solved', p.pz.s, p.pz.t)}` : '—'],
     [T('Club'), p && p.club ? `🏛 ${esc(p.club)}` : '—'],
     [T('Skill level'), lvlHtml(lvl, p)],
     [T('Joined'), p && p.joined ? esc(p.joined) : '—'],
@@ -2213,30 +2214,52 @@ let PZB;   // undefined: not read yet; null: could not be read (the generated pr
 // the declarer problems (.github/puzzles/makeplay.js): one for each day from PZP_FROM, in place of the leads
 const PZP_FROM = '2026-11-12';
 let PZP;
-const pzWait = () => { const d = new Date().toISOString().slice(0, 10); return (PZB === undefined && d >= PZB_FROM) || (PZP === undefined && d >= PZP_FROM); };
+const pzWait = () => PZB === undefined || PZP === undefined;
+/* the puzzles one after another (not one a day): solved, the next comes at once; failed, the next comes 24 hours after
+   the try. Each answer moves the puzzle rating (start 1200) and with it the puzzle level; kept on the player's card. */
+const PZ_HOLD = 864e5;
+const pzLive = () => !!(G && G.pz && G.pz.first && G.phase === 'play');   // the first try is being played now
+const pzProg = () => ({ r: 1200, s: 0, t: 0, i: 0, st: 0, ...(SET.pz || {}) });
+function pzProgSave(p) { SET.pz = { r: Math.round(p.r), s: p.s, t: p.t, i: p.i, st: p.st }; Store.saveSettings(SET); save(); scheduleSync(); if (typeof Net !== 'undefined' && Net.shareInfo) Net.shareInfo(); }
+const pzLvl = r => r < 1100 ? 'beg' : r < 1300 ? 'int' : r < 1500 ? 'adv' : r < 1700 ? 'exp' : 'wc';
+// the puzzle that is up now (its number); a failed one past its 24 hours gives way to the next
+function pzIdx() {
+  const p = pzProg(), s = pzState();
+  if (s.day === 'p' + p.i && s.ok === false && Date.now() - (s.at || 0) >= PZ_HOLD) { p.i++; pzProgSave(p); pzSave({}); ui.pz = null; }
+  return p.i;
+}
+// the rating, the level, how many solved; then Next puzzle (solved) or how long until the next (failed)
+function pzProgHtml(done) {
+  const p = pzProg(), s = pzState();
+  let nx = '';
+  if (done && s.ok) nx = `<button class="btn new pznext" id="pzNext">▶ ${T('Next puzzle')}</button>`;
+  else if (done && s.ok === false && !pzLive()) { const mn = Math.ceil(Math.max(0, (s.at || 0) + PZ_HOLD - Date.now()) / 6e4), h = Math.floor(mn / 60), m = mn % 60; nx = `<div class="pzwait">⏳ ${T('New puzzle in {0}', h + ':' + String(m).padStart(2, '0'))}</div>`; }
+  return `<div class="pzprog">🧩 ${T('Puzzle rating')} <b>${Math.round(p.r)}</b> · ${T(LEVEL_N[pzLvl(p.r)])} · ${T('{0} of {1} solved', p.s, p.t)}${p.st ? ' · 🔥 ' + p.st : ''}</div>${nx}`;
+}
 function pzLoad() { if (ui.pzLoading) return; ui.pzLoading = 1; const get = u => fetch(u).then(r => r.ok ? r.json() : null).catch(() => null); Promise.all([get('js/puzzles.json'), get('js/puzzles-play.json')]).then(([j, k]) => { PZB = j && j.length ? j : null; PZP = k && k.length ? k : null; ui.pzLoading = 0; ui.pz = null; showPuzzle(); }); }
-function pzBank(day) {
-  const e = PZB[(Math.round((Date.parse(day) - Date.parse(PZB_FROM)) / 864e5)) % PZB.length], cfg = { conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }, cards = [cfg, cfg], auction = [];
+function pzBank(n) {
+  const e = PZB[n % PZB.length], cfg = { conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }, cards = [cfg, cfg], auction = [];
   e.a.forEach((call, i) => { const seat = (e.l + i) % 4; auction.push({ seat, call, m: E.explainCall(auction, seat, call, cards) }); });
   return { kind: 'lead', deal: e.d, dealer: e.l, auction, c: { level: e.c[0], strain: e.c[1], dbl: 0, decl: 1 }, vals: Object.fromEntries(e.v) };
 }
 // the declarer problem's window: dummy above your hand, the auction, the contract, the lead; then Play (the first try
 // counts: it is marked as failed from the moment it starts, and as made only when the contract is made)
 function showPlayPuzzle(pz) {
-  const st = pzState(), done = st.day === pz.day && st.ans === 'play' ? st : null, me = pz.c.decl, dm = (me + 2) % 4, ld = (me + 1) % 4;
+  const st = pzState(), done = st.day === pz.day && st.ans === 'play' && !(st.pend && pzLive()) ? st : null, me = pz.c.decl, dm = (me + 2) % 4, ld = (me + 1) % 4;
   const card = c => `<b class="${(c / 13 | 0) === 1 || (c / 13 | 0) === 2 ? 'red' : ''}">${RTXT[R(c)]}${STR[S(c)]}</b>`;
-  const con = `${pz.c.level}${STR[pz.c.strain]}${pz.c.dbl === 2 ? 'XX' : pz.c.dbl ? 'X' : ''}`;
+  const con = `${pz.c.level}${symHtml(pz.c.strain)}${pz.c.dbl === 2 ? 'XX' : pz.c.dbl ? 'X' : ''}`;
   let res = '';
   if (done) {
     res = done.ok ? `<div class="okmsg">✅ ${T('Well done! You made it with {0} tricks.', done.tr)}</div>`
       : `<div class="err">❌ ${done.tr != null ? T('Failed: {0} tricks, {1} needed.', done.tr, pz.need) : T('The game was left unfinished: it counts as failed.')}</div>`;
-    res += `<div class="muted">${T('The key: at trick one, play {0} from dummy.', `${RTXT[R(pz.pick)]}${STR[S(pz.pick)]}`)}</div>
+    res += `<div class="muted">${T('The key: at trick one, play {0} from dummy.', `${RTXT[R(pz.pick)]}${symHtml(S(pz.pick))}`)}</div>
       <details class="pzdeal"><summary class="pzsum">👁 ${T('Show all four hands')}</summary>${dealHtml(pz.deal, me)}</details>
-      <div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
+      `;
   }
-  openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2>
+  res += pzProgHtml(!!done);
+  openOv('puzzle', `<h2>🧩 ${T('Puzzle')}</h2>
     <div class="big">${T('Make the contract: you have one chance.')}</div>
-    <div class="pzline">${T('Contract')}: <b>${con}</b> · ${T('Declarer')}: ${SEAT[me]} · ${T('The opening lead: {0}', SEAT[ld] + ' ' + RTXT[R(pz.lead)] + STR[S(pz.lead)])}</div>
+    <div class="pzline">${T('Contract')}: <b>${con}</b> · ${T('Declarer')}: ${SEAT[me]} · ${T('The opening lead: {0}', SEAT[ld] + ' ' + RTXT[R(pz.lead)] + symHtml(S(pz.lead)))}</div>
     <div class="pzbox"><div class="pzpair"><small>${T('Dummy')} (${SEAT[dm]})</small>${pzHand(pz.deal[dm])}<small>${T('You')} (${SEAT[me]})</small>${pzHand(pz.deal[me])}</div>
     <div class="auction">${auctionTable(pz.auction, false, { board: pz.bn, dealer: pz.dealer, seat: me, sel: null })}</div></div>
     ${done ? '' : `<div class="muted">${T('Your first try is the one that counts: plan the play before you start.')}</div>`}${res}
@@ -2246,8 +2269,8 @@ function showPlayPuzzle(pz) {
 // seeing every card
 function pzPlayStart(pz, first) {
   if (first) {
-    const st = pzState(), next = { day: pz.day, ans: 'play', streak: st.streak || 0, lastOk: st.lastOk, prev: st.lastOk, prevStreak: st.streak || 0, tr: null };
-    pzFinish(next, false);   // a try started counts as failed until the contract is made
+    const p = pzProg(), next = { day: pz.day, ans: 'play', tr: null, prevSt: p.st, at: Date.now(), ok: false, scored: 1, pend: 1 };
+    p.t++; p.r = Math.max(800, p.r - 15); p.st = 0; pzProgSave(p); pzSave(next); render();   // a try started counts as failed until the contract is made
   }
   closeOv();
   newBoard(pz.deal.map(h => h.slice()), pz.bn);
@@ -2263,12 +2286,12 @@ function pzPlayStart(pz, first) {
 }
 function pzPlayDone(e) {
   const made = e.tricks >= G.pz.need;
-  if (G.pz.first) { const s = pzState(); if (s.day === G.pz.day && s.ans === 'play') { s.tr = e.tricks; pzFinish(s, made); } setTimeout(showPuzzle, 1600); }
+  if (G.pz.first) { const s = pzState(); if (s.day === G.pz.day && s.ans === 'play') { s.tr = e.tricks; pzFinish(s, made); } setTimeout(showPuzzle, 1600); }   // pend: the start's failure is undone when made
   else { flash(made ? '✅ ' + T('This time you made it (it does not count).') : '❌ ' + T('Not made this time.'), 2500); setTimeout(showPuzzle, 2600); }
 }
 // a declarer problem turned so that you are the declarer (your seat), dummy opposite; the board number gives its dealer
-function pzPlayBank(day) {
-  const e = PZP[(Math.round((Date.parse(day) - Date.parse(PZP_FROM)) / 864e5)) % PZP.length], me = U(), rot = (me - e.c[3] + 4) % 4;
+function pzPlayBank(n) {
+  const e = PZP[n % PZP.length], me = U(), rot = (me - e.c[3] + 4) % 4;
   const deal = [0, 1, 2, 3].map(() => null); e.d.forEach((h, s) => { deal[(s + rot) % 4] = h.slice(); });
   const dealer = (e.l + rot) % 4, cfg = { conv: { ...E.sysOf('twoone').conv }, agg: 0, sys: 'twoone' }, cards = [cfg, cfg], auction = [];
   e.a.forEach((call, i) => { const seat = (dealer + i) % 4; auction.push({ seat, call, m: E.explainCall(auction, seat, call, cards) }); });
@@ -2276,9 +2299,13 @@ function pzPlayBank(day) {
 }
 function pzToday() {
   const day = new Date().toISOString().slice(0, 10);
-  if (ui.pz && ui.pz.day === day && ui.pz.sys === (SET.sys || 'twoone')) return ui.pz;
-  if (day >= PZP_FROM && PZP) { const b = pzPlayBank(day); b.day = day; b.sys = SET.sys || 'twoone'; ui.pz = b; return b; }
-  if (day >= PZB_FROM && PZB) { const b = pzBank(day); b.day = day; b.sys = SET.sys || 'twoone'; ui.pz = b; return b; }
+  if (ui.pz && ui.pz.day === day && ui.pz.sys === (SET.sys || 'twoone') && !(PZP || PZB)) return ui.pz;
+  if (PZP || PZB) {   // the banks: a declarer problem and a lead in turn
+    const i = pzIdx(), key = 'p' + i;
+    if (ui.pz && ui.pz.day === key) return ui.pz;
+    const play = PZP && (!PZB || i % 2 === 0), b = play ? pzPlayBank(PZB ? i >> 1 : i) : pzBank(PZP ? i >> 1 : i);
+    b.day = key; b.idx = i; b.sys = SET.sys || 'twoone'; ui.pz = b; return b;
+  }
   let seed = 2166136261; for (const ch of 'puzzle-' + day) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
   const hard = day >= '2026-11-09', nDay = Math.floor(Date.parse(day) / 864e5), cards = sideCards();
   const kind = hard ? ['answer', 'rebid', 'compete', 'lead'][nDay % 4] : ['open', 'answer', 'lead'][nDay % 3];
@@ -2384,9 +2411,10 @@ function showPuzzle() {
     }
     if (done.dd) res += `<div class="pzdd"><b>Double dummy</b>${ddTabHtml(done.dd)}</div>`; else if (ui.pzDdFail !== pz.day) { pzDD(pz); res += `<div class="muted">⏳ Double dummy…</div>`; }
     if (done.ok != null) res += `<details class="pzdeal"><summary class="pzsum">👁 ${T('Show all four hands')}</summary>${dealHtml(pz.deal, 2)}</details>`;
-    if (done.ok != null) res += `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
+    if (done.ok != null) res += /^p\d+$/.test(pz.day) ? pzProgHtml(true) : `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
   }
-  openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2><div class="big">${pzQuestion(pz.kind)}</div>${pz.vals ? `<div class="muted">${T('Only one lead beats this contract.')} · ${esc(E.sysOf('twoone').n)}</div>` : ''}
+  else if (/^p\d+$/.test(pz.day)) res += pzProgHtml(false);
+  openOv('puzzle', `<h2>🧩 ${T('Puzzle')}</h2><div class="big">${pzQuestion(pz.kind)}</div>${pz.vals ? `<div class="muted">${T('Only one lead beats this contract.')} · ${esc(E.sysOf('twoone').n)}</div>` : ''}
     <div class="pzbox">${pzHand(pz.deal[2])}${auc}</div>${ctl}${res}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
@@ -2400,8 +2428,11 @@ function pzAnswer(ans) {
 }
 /* a right answer on the day after the last right one makes the run longer */
 function pzFinish(s, ok) {
-  const yday = new Date(Date.parse(s.day) - 864e5).toISOString().slice(0, 10);
-  s.ok = ok; if (ok) { s.streak = s.prev === yday ? s.prevStreak + 1 : 1; s.lastOk = s.day; } else s.streak = 0;
+  const p = pzProg(), lead = s.ans !== 'play', up = lead ? 15 : 20, dn = lead ? 10 : 15;
+  if (s.pend) { if (ok) { p.r += dn + up; p.s++; p.st = (s.prevSt || 0) + 1; } delete s.pend; }   // a declarer try: counted as failed when it started
+  else if (!s.scored) { p.t++; if (ok) { p.r += up; p.s++; p.st++; } else { p.r = Math.max(800, p.r - dn); p.st = 0; } }
+  s.scored = 1; s.ok = ok; s.at = s.at || Date.now(); s.streak = p.st;
+  if (/^p\d+$/.test(s.day || '')) pzProgSave(p);
   pzSave(s); if (ui.overlay === 'puzzle') showPuzzle(); render();
 }
 /* the leads are worked out in the background; each value shows as it comes */
@@ -2428,6 +2459,7 @@ document.addEventListener('click', e => {
   const c = e.target.closest('[data-pzc]'); if (c) { pzAnswer(+c.dataset.pzc); return; }
   const pi = e.target.closest('[data-pzi]'); if (pi) { const i = +pi.dataset.pzi; ui.pzSel = ui.pzSel === i ? null : i; showPuzzle(); return; }
   if (e.target.closest('#hPuzzle')) { ui.pzSel = null; showPuzzle(); }
+  if (e.target.closest('#pzNext')) { const p = pzProg(); p.i++; pzProgSave(p); pzSave({}); ui.pz = null; ui.pzSel = null; showPuzzle(); }
 });
 // the practice review of a board: per convention ✓ when every call where it came up was the system's, else ✗
 function prvSum(rv) {

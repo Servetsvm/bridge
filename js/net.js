@@ -112,7 +112,7 @@ const Net = (() => {
     const p = Store.periods(HIST)[0];
     // with the system this player bids, and the rating over each period (today, week, month, year, all time)
     return { n: p.n, imp: p.impAvg, mp: p.mpAvg, sys: SET.sys || "twoone", conv: { ...SET.conv }, cardV: SET.cardV === 1 ? 1 : 0, per: Store.periods(HIST).map(x => [x.n, x.impAvg, x.mpAvg]),
-      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', club: String(SET.club || '').trim().slice(0, 24), ...ratingOf(HIST) };   // the player card: level, country, a few words
+      lvl: SET.lvl || '', ctry: SET.ctry || '', about: String(SET.about || '').slice(0, 80), lang: SET.lang || 'en', joined: SET.joined || '', logins: SET.logins || 0, cline: String(SET.cline || '').slice(0, 300), av: SET.av || '', club: String(SET.club || '').trim().slice(0, 24), pz: SET.pz && SET.pz.t ? { r: Math.round(SET.pz.r), s: SET.pz.s, t: SET.pz.t } : undefined, ...ratingOf(HIST) };   // the player card: level, country, a few words
   }
   /* the rating: 1500 plus 150 × the IMPs won against the robot field over the last 200 scored boards, shrunk for a
      player with few boards (so ten lucky boards do not make a champion). Every app sends its own; the lobby keeps the
@@ -158,7 +158,7 @@ const Net = (() => {
       lvl: ['beg', 'int', 'adv', 'exp', 'wc'].includes(q.lvl) ? q.lvl : '', ctry: /^[A-Z]{2}$/.test(q.ctry || '') ? q.ctry : '',
       about: typeof q.about === 'string' ? q.about.slice(0, 80) : '', lang: typeof q.lang === 'string' ? q.lang.slice(0, 3) : '',
       joined: /^\d{4}-\d{2}-\d{2}$/.test(q.joined || '') ? q.joined : '', logins: Math.max(0, Math.min(1e6, +q.logins || 0)),
-      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", cardV: q.cardV === 1 ? 1 : 0, club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
+      cline: typeof q.cline === "string" ? q.cline.slice(0, 300) : "", cardV: q.cardV === 1 ? 1 : 0, club: typeof q.club === "string" ? q.club.slice(0, 24) : "", av: AVATARS.includes(q.av) ? q.av : "", pz: q.pz && typeof q.pz === 'object' && +q.pz.t > 0 ? { r: Math.max(0, Math.min(4000, Math.round(+q.pz.r || 0))), s: Math.max(0, Math.min(1e6, +q.pz.s || 0)), t: Math.max(0, Math.min(1e6, +q.pz.t || 0)) } : undefined, rt: Math.max(0, Math.min(4000, Math.round(+q.rt || 0))), rtn: Math.max(0, Math.min(200, Math.round(+q.rtn || 0))) };
   }
   // where a player is: at a table (whose, online or with robots) or just in the lobby
   // at a board: bidding, card play, or a finished board still on the screen (the next one comes from there); not the home page
@@ -1080,7 +1080,7 @@ const Net = (() => {
 
   /* your results on every device: kept in the database under a key made from your name and PIN (only someone who
      knows both can find them). Boards from both sides are merged; your settings come along to a new device. */
-  const SYNC_KEYS = ['sys', 'conv', 'cardV', 'cardTs', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN', 'pracS', 'pracHint'];
+  const SYNC_KEYS = ['sys', 'conv', 'cardV', 'cardTs', 'lvl', 'ctry', 'cline', 'four', 'felt', 'back', 'theme', 'big', 'mode', 'opp', 'speed', 'expl', 'auto', 'alert', 'sfx', 'style', 'pracN', 'pracS', 'pracHint', 'pz'];
   let syncing = null, syncT = null;
   async function cloudSync() {
     if (!Cloud.on || !SET.pinH || syncing) return syncing;
