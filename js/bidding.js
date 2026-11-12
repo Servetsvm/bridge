@@ -472,6 +472,8 @@ function cands(x) {
     }
     if (opening.m && opening.m.tag === 'weak' && rhoPass && C.ogust && ol === 2) add(B(2, 4), h => h.hcp >= 15, { min: 15, tag: 'ogust', cv: 'ogust', t: 'Ogust 2NT: asking about strength and suit quality', f: 1 });
     if (opening.m && (opening.m.tag === 'weak' || opening.m.tag === 'pre') && rhoPass) {
+      // slam values with support (19+ HCP, two aces): key cards first (2♦ weak – ? with ♠KJT62 ♥AK2 ♦A54 ♣AQ: 4NT, not 5♦)
+      add(B(4, 4), h => h.len[os] >= 3 && h.hcp >= 19 && h.sup(os) >= 21 && h.aces >= 2, { min: 19, len: { [os]: 3 }, tag: 'bw', trump: os, rkc: C.rkc0314 ? 2 : C.rkc ? 1 : 0, cv: C.rkc0314 ? 'rkc0314' : C.rkc ? 'rkc' : 'bw', t: C.rkc0314 || C.rkc ? (C.rkc0314 ? 'RKCB 0314' : 'RKCB 1430') + ': asking for key cards (trumps ' + SUIT[os] + ')' : 'Blackwood: how many aces?', f: 1 });
       add(os < 2 ? B(5, os) : B(4, os), h => h.len[os] >= 3 && h.sup(os) >= 16, { min: 14, len: { [os]: 3 }, t: 'Game: support and values' });
       add(B(3, 4), h => h.hcp >= 16 && [0, 1, 2, 3].filter(s => s !== os).every(s => h.stop(s)), { min: 16, t: 'Game: stoppers in every side suit' });
       if (ol === 2) add(B(3, os), h => h.len[os] >= 3 && h.hcp <= 13, { len: { [os]: 3 }, t: 'Preemptive raise' });
@@ -952,6 +954,11 @@ function openerRebid(x, add, o, resp) {
   }
   if (r === B(1, 4)) {
     const forcing = rm.tag === 'nt1f';
+    // a strong opener (19+): a jump in a second suit forces to game; six cards in the major opened: game; balanced 20-21: 3NT
+    // (1♠–1NT with ♠AKJT7 ♥75 ♦AQT7 ♣AK: 3♦, not pass or a minimum 2♦)
+    for (const s of [0, 1, 2, 3]) if (s !== os) add(B(3, s), h => h.len[s] >= 4 && h.hcp >= 19 && h.len[os] >= 5, { min: 19, len: { [s]: 4 }, t: 'Jump shift: 4+ ' + SUIT[s] + ', 19+ HCP, game forcing', f: 1, gf: 1 });
+    if (os >= 2) add(B(4, os), h => h.len[os] >= 6 && h.tp >= 19, { min: 18, len: { [os]: 6 }, t: 'Game: 6+ ' + SUIT[os] + ', 19+ points' });
+    add(B(3, 4), h => h.bal && h.hcp >= 20, { min: 20, max: 21, t: 'Balanced 20-21: game' });
     add(B(2, 4), h => h.bal && h.hcp >= 18, { min: 18, max: 19, t: 'Balanced 18-19, invitational' });
     add(B(3, os), h => h.len[os] >= 6 && h.tp >= 16, { min: 16, len: { [os]: 6 }, t: '6+ ' + SUIT[os] + ', invitational' });
     add(B(2, os), h => h.len[os] >= 6, { len: { [os]: 6 }, t: '6+ ' + SUIT[os] });
