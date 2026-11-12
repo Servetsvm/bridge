@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 455;
+const APP_V = 456;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -140,7 +140,9 @@ function load(d) {
   try {
     const q = new URLSearchParams(location.search), ql = q.get('lang');
     if (ql && LANGS.some(([v]) => v === ql)) { SET.lang = ql; SET.langAuto = false; }
-    if (q.has('lang')) { q.delete('lang'); history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); }
+    // a lesson's Practise button (?prac=puppet): that convention goes on the card and the practice panel opens
+    const qp = q.get('prac'); if (qp && /^[a-zA-Z0-9]{2,20}$/.test(qp)) window.PRAC_Q = qp;
+    if (q.has('lang') || q.has('prac')) { q.delete('lang'); q.delete('prac'); history.replaceState(history.state, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash); }
   } catch (e) {}
   applyLang();
   // the player card's "joined" date (the first day this device played; from the oldest board for old players) and logins
@@ -3955,6 +3957,7 @@ async function learnCheck() {
   if (typeof Net === "undefined" || !Net.isAdmin()) return;
   try { const L = await Net.roboErrs(); const n = L.filter(r => !r.u && !r.ok && r.ts > (SET.learnSeen || 0)).length; if (n !== ui.learnNew) { ui.learnNew = n; render(); } } catch (e) {}
 }
+setTimeout(() => { const k = window.PRAC_Q; window.PRAC_Q = null; if (!k || !pracKnown(k)) return; togglePractice(k, true); ui.pracOpen = 1; ui.pracDrop = null; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 1200);
 setTimeout(learnCheck, 20000); setInterval(learnCheck, 15 * 60000);
 /* ---- the robots' learning report (the administrator only): what the robots got wrong on the boards played, from
    every player — the cards (double dummy, as in Robot mistakes) and the bidding (the robot tables' contracts against
