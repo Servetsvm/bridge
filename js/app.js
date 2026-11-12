@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 436;
+const APP_V = 437;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1712,7 +1712,8 @@ function renderHome() {
     const sup = N.supNew ? (N.isAdmin() ? `<button class="hcard supnew" id="hSupIn">✉️ ${T('{0} new messages from players', N.supNew)}</button>` : `<button class="hcard supnew" id="hSup">✉️ ${T('The administrator answered you')}</button>`) : '';
     // the database cannot be reached: results, progress and messages are not saved; say why and what to do
     const bad = N.cloudBad && myNm() ? `<div class="hcard cloudbad"><b>⚠ ${T('Cannot reach the server: your results, progress and messages are not saved.')}</b><small>${T('Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.')}</small></div>` : '';
-    set('hPend', bad + sup + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
+    const cvn = N.isAdmin() && N.cvNew ? `<button class="hcard supnew" id="hConvReq">📥 ${T('{0} new convention requests', N.cvNew)}</button>` : '';
+    set('hPend', bad + sup + cvn + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
     set('hTables', N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
@@ -2230,7 +2231,7 @@ function showPlayPuzzle(pz) {
     res = done.ok ? `<div class="okmsg">✅ ${T('Well done! You made it with {0} tricks.', done.tr)}</div>`
       : `<div class="err">❌ ${done.tr != null ? T('Failed: {0} tricks, {1} needed.', done.tr, pz.need) : T('The game was left unfinished: it counts as failed.')}</div>`;
     res += `<div class="muted">${T('The key: at trick one, play {0} from dummy.', `${RTXT[R(pz.pick)]}${STR[S(pz.pick)]}`)}</div>
-      <details class="pzdeal"><summary>${T('Show all four hands')}</summary>${dealHtml(pz.deal, me)}</details>
+      <details class="pzdeal"><summary class="pzsum">👁 ${T('Show all four hands')}</summary>${dealHtml(pz.deal, me)}</details>
       <div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
   }
   openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2>
@@ -2382,7 +2383,7 @@ function showPuzzle() {
         <div class="muted">${T('With your system ({0}).', esc(E.sysOf(SET.sys).n))}</div>`;
     }
     if (done.dd) res += `<div class="pzdd"><b>Double dummy</b>${ddTabHtml(done.dd)}</div>`; else if (ui.pzDdFail !== pz.day) { pzDD(pz); res += `<div class="muted">⏳ Double dummy…</div>`; }
-    if (done.ok != null) res += `<details class="pzdeal"><summary>${T('Show all four hands')}</summary>${dealHtml(pz.deal, 2)}</details>`;
+    if (done.ok != null) res += `<details class="pzdeal"><summary class="pzsum">👁 ${T('Show all four hands')}</summary>${dealHtml(pz.deal, 2)}</details>`;
     if (done.ok != null) res += `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
   }
   openOv('puzzle', `<h2>🧩 ${T('Problem of the day')}</h2><div class="big">${pzQuestion(pz.kind)}</div>${pz.vals ? `<div class="muted">${T('Only one lead beats this contract.')} · ${esc(E.sysOf('twoone').n)}</div>` : ''}
@@ -3267,6 +3268,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.supk) { showSupThread(t.dataset.supk); return; }
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
   if (t.id === 'hConvReq') { showConvRequests(); return; }
+  if (t.id === 'cvCopy') { const txt = (ui.cvList || []).map(r => '# ' + r.ad + ' (' + (r.kim || '') + ', ' + new Date(r.ts).toLocaleDateString() + ')\n' + (r.acik || '') + (r.ornek ? '\n' + r.ornek : '')).join('\n\n'); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash('📋 ' + T('Copied'), 1500)).catch(() => prompt(T('Copy'), txt)); return; }
   // beside Play offline: the conventions to practise open (the drop-down of the practice card, scrolled to)
   if (t.id === 'pdClose') { ui.pracOpen = 0; ui.pracDrop = null; render(); return; }
   if (t.id === 'bConvGo') { ui.pracOpen = 1; ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
@@ -3817,12 +3819,13 @@ async function showConvRequests() {
   openOv('convreq', `<h2>📥 ${T('Convention requests')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let L = []; try { L = await Net.convRequests(); } catch (e) {}
   if (ui.overlay !== 'convreq') return;
+  SET.cvSeen = Date.now(); Store.saveSettings(SET); Net.st.cvNew = 0; ui.cvList = L;
   openOv('convreq', `<h2>📥 ${T('Convention requests')}</h2>
     <div class="muted">${T('Ask Claude to add these conventions to the robots; then remove them from the list.')}</div>
     ${L.length ? L.map(r => `<div class="cvreq"><div class="cvh"><b>${esc(r.ad)}</b><small>${esc(r.kim || '')} · ${new Date(r.ts).toLocaleDateString()}</small></div>
       <div class="cvb">${symText(esc(r.acik))}</div>${r.ornek ? `<div class="cvx">${symText(esc(r.ornek))}</div>` : ''}
       <button class="btn mini-btn" data-cvdone="${esc(r.path)}">✓ ${T('Done — remove')}</button></div>`).join('') : `<div class="muted">${T('No requests yet.')}</div>`}
-    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+    <div class="row2">${L.length ? `<button class="btn new" id="cvCopy">📋 ${T('Copy all')}</button>` : ''}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 /* the robots' mistakes (administrator): each board where a robot's card gave away tricks double dummy, with the
    cards; copied for Claude, who improves the robots, and then removed */

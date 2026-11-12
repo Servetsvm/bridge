@@ -2041,3 +2041,10 @@ body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#f
 .rtseats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
 .rtseats .btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 8px;font-size:16px;font-weight:700}
 .rtseats .btn small{font-size:12px;font-weight:500;opacity:.85}
+
+/* the system table's Sit down: brass, so it shows on the green */
+#bar>#bRtSit.hbtn{background:linear-gradient(180deg,#ffe9a8,#e0b84a 55%,#b8901f);color:#2a1f05;border:1px solid #8a6a1c;box-shadow:0 0 0 2px rgba(255,236,170,.55),0 3px 8px rgba(0,0,0,.35)}
+/* the puzzle: Show all four hands as a button */
+.pzdeal>summary.pzsum{display:inline-flex;align-items:center;gap:6px;margin:8px 0 4px;padding:9px 16px;border-radius:10px;background:linear-gradient(180deg,#ecc874,#c9a227 55%,#a8841c);color:#2a1f05;border:1px solid #8a6a1c;font-weight:700;font-size:15px;cursor:pointer;list-style:none;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.pzdeal>summary.pzsum::-webkit-details-marker{display:none}
+.pzdeal[open]>summary.pzsum{filter:brightness(.95)}
