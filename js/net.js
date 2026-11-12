@@ -823,8 +823,9 @@ const Net = (() => {
     } catch (e) {}
     st.supChk = 0; supCheck();
   }
-  async function supReply(k, txt) {
+  async function supReply(k, txt, n) {
     if (!isAdmin()) return;
+    if (n) try { await Cloud.put('destek/' + k + '/n', String(n).slice(0, 20)); } catch (e) {}   // a conversation the administrator starts: the player's name on it
     await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'a', t: String(txt).slice(0, 1000), ts: Date.now() });
     await Cloud.put('destek/' + k + '/ar', Date.now());
   }

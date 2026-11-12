@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 452;
+const APP_V = 453;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3303,6 +3303,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
+  if (t.dataset.plmsg) { ev_.preventDefault(); ui.supNm = t.dataset.plmsg; showSupThread(Net.fbKey(t.dataset.plmsg)); return; }
   if (t.id === 'ppGo') { playerPinGo(); return; }
   if (t.id === 'ppBack') { ui.plPinK = null; closeOv(); showPlayers(); return; }
   if (t.id === 'hSup') { showSup(); return; }
@@ -3837,6 +3838,7 @@ async function showSupThread(k) {
   openOv('supth', `<h2>📨 ${T('Messages')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let th = null; try { th = await Net.supThread(k); } catch (e) {}
   if (ui.overlay !== 'supth') return;
+  if (th && !th.n && ui.supNm && Net.fbKey(ui.supNm) === k) th.n = ui.supNm;
   openOv('supth', `<h2>📨 ${esc(th && th.n || '')}</h2>
     ${th ? supMsgsHtml(th.m, false) : `<div class="err">${T('The online database could not be reached.')}</div>`}
     ${th ? supBox('supRe', T('Your answer…')) : ''}
@@ -3846,7 +3848,7 @@ async function showSupThread(k) {
 }
 async function sendSupReply() {
   const t = ($('supRe') && $('supRe').value || '').trim(); if (t.length < 1 || !ui.supK) return;
-  try { await Net.supReply(ui.supK, t); await showSupThread(ui.supK); } catch (e) { flash(T('The online database could not be reached.'), 2500); }
+  try { const nm = ui.supNm && Net.fbKey(ui.supNm) === ui.supK ? ui.supNm : ''; await Net.supReply(ui.supK, t, nm); await showSupThread(ui.supK); } catch (e) { flash(T('The online database could not be reached.'), 2500); }
 }
 function showConvAsk(err) {
   openOv('convask', `<h2>➕ ${T('Add a convention')}</h2>
@@ -4090,7 +4092,7 @@ async function showPlayers() {
   // a name opened: its days, newest first (30): in and out, and what was played that day
   const plDays = x => `<div class="pldays">${(x.hist || []).slice(0, 30).map(h => { const a = h.a || {}, cv = Object.keys(a.cv || {}).concat(String(h.pr || '').split(',')).filter((k, i, A) => k && A.indexOf(k) === i && E.convInfo(k));
     const did = [a.r ? '🤖 ' + T('With robots') + ' ' + a.r : '', a.o ? '🌐 ' + T('At a table') + ' ' + a.o : '', a.t ? '🏆 ' + T('Tournaments') + ' ' + a.t : '', a.p ? '📚 ' + T('Practise conventions') + ' ' + a.p : ''].filter(Boolean).join(' · ');
-    return `<div class="plday"><b>${new Date(h.day).toLocaleDateString()}</b><span>${T('Logged in')} ${hm(h.in)} · ${T('Last seen')} ${hm(h.out)}</span><span>${did || '—'}${a.b ? ' · ' + T('Boards') + ' ' + a.b : ''}</span>${cv.length ? `<small>${cv.map(k => esc(pracName(k))).join(', ')}</small>` : ''}</div>`; }).join('') || `<div class="muted">—</div>`}${x.me ? '' : `<button class="btn mini-btn plpin" data-plpin="${esc(x.k)}">🔑 ${T('New PIN')}</button>`}</div>`;
+    return `<div class="plday"><b>${new Date(h.day).toLocaleDateString()}</b><span>${T('Logged in')} ${hm(h.in)} · ${T('Last seen')} ${hm(h.out)}</span><span>${did || '—'}${a.b ? ' · ' + T('Boards') + ' ' + a.b : ''}</span>${cv.length ? `<small>${cv.map(k => esc(pracName(k))).join(', ')}</small>` : ''}</div>`; }).join('') || `<div class="muted">—</div>`}${x.me ? '' : `<button class="btn mini-btn plpin" data-plpin="${esc(x.k)}">🔑 ${T('New PIN')}</button><button class="btn mini-btn plpin" data-plmsg="${esc(x.name)}">✉️ ${T('Write a message…')}</button>`}</div>`;
   const rows = L.filter(x => !q || x.name.toLowerCase().includes(q)).map(x => `<label class="plrow${sel.has(x.k) ? ' on' : ''}">
       <input type="checkbox" data-plk="${esc(x.k)}" ${sel.has(x.k) ? 'checked' : ''} ${x.me ? 'disabled' : ''}>
       <b>${esc(x.name)}</b><small>${T('Made')}: ${when(x.ts)} · ${T('Last seen')}: ${x.hist && x.hist[0] ? when(x.hist[0].out || x.hist[0].in) : '–'} · ${T('{0} days', x.days)}</small><button class="pldet" data-pldet="${esc(x.k)}">${ui.plOpen === x.k ? '▾' : '▸'}</button></label>${ui.plOpen === x.k ? plDays(x) : ''}`).join('');
