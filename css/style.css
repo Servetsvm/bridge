@@ -2072,3 +2072,8 @@ body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#f
 .suprow.read .supth{opacity:.6}
 .supth .supgo{grid-column:1/-1;font-style:normal;font-weight:700;font-size:13px;color:#1f5f8b}
 .supsep{margin:12px 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.6}
+
+/* the administrator's card on the home page */
+.admcard>b{display:block;margin-bottom:6px}
+.admcard .praskrow{display:flex;flex-wrap:wrap;gap:6px}
+.admcard .prask{background:none;border:1px dashed rgba(31,95,139,.5);color:#1f5f8b;border-radius:8px;padding:6px 10px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
