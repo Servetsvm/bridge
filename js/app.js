@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 446;
+const APP_V = 447;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1714,7 +1714,8 @@ function renderHome() {
     const bad = N.cloudBad && myNm() ? `<div class="hcard cloudbad"><b>⚠ ${T('Cannot reach the server: your results, progress and messages are not saved.')}</b><small>${T('Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.')}</small></div>` : '';
     const cvn = N.isAdmin() && N.cvNew ? `<button class="hcard supnew" id="hConvReq">📥 ${T('{0} new convention requests', N.cvNew)}</button>` : '';
     // the administrator's card: always on the home page (players, messages, requests, robots)
-    const adm = N.isAdmin() ? `<div class="hcard admcard"><b>👑 ${T('Admin')}</b><div class="praskrow"><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="prask" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="prask" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="prask" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div></div>` : '';
+    const admN = (N.supNew || 0) + (N.cvNew || 0) + (ui.learnNew || 0);
+    const adm = N.isAdmin() ? `<div class="hcard admcard${ui.admOpen ? ' open' : ''}"><button class="admtog" id="admTog" aria-expanded="${!!ui.admOpen}">👑 ${T('Admin')}${admN ? ` <b class="supc">${admN}</b>` : ''} <i>${ui.admOpen ? '▴' : '▾'}</i></button>${ui.admOpen ? `<div class="praskrow"><button class="prask" id="admPlayers">👥 ${T('All players')}</button><button class="prask" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="prask" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="prask" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="prask" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div>` : ''}</div>` : '';
     set('hPend', bad + sup + cvn + adm + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
     set('hTables', N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
@@ -3292,6 +3293,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
   if (t.dataset.pldet) { ev_.preventDefault(); ui.plOpen = ui.plOpen === t.dataset.pldet ? null : t.dataset.pldet; showPlayers(); return; }
+  if (t.id === 'admTog') { ui.admOpen = !ui.admOpen; renderHome(); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }

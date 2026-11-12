@@ -2077,3 +2077,9 @@ body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#f
 .admcard>b{display:block;margin-bottom:6px}
 .admcard .praskrow{display:flex;flex-wrap:wrap;gap:6px}
 .admcard .prask{background:none;border:1px dashed rgba(31,95,139,.5);color:#1f5f8b;border-radius:8px;padding:6px 10px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer}
+
+/* the administrator's card: one line, opens like a menu */
+.admcard{padding:6px 10px}
+.admcard .admtog{background:none;border:0;font:inherit;font-weight:700;font-size:14px;cursor:pointer;padding:4px 2px;color:inherit;display:flex;align-items:center;gap:6px;width:100%;text-align:left}
+.admcard .admtog i{margin-left:auto;font-style:normal;opacity:.6}
+.admcard.open .praskrow{margin-top:6px}
