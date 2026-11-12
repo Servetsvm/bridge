@@ -2055,3 +2055,7 @@ body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#f
 .pznext{margin:8px 0;padding:11px 18px;font-size:16px;font-weight:700}
 .pzwait{margin:8px 0;font-weight:700}
 .pzline .sym{font-weight:700}
+/* the system table's bar: Home and Tables plain, Sit down in red so it cannot be mistaken */
+#bar>#bRtList.hbtn{background:#f4f1e8;color:#1f2a22;border:1px solid rgba(0,0,0,.18);box-shadow:none}
+#bar>#bRtSit.hbtn{background:linear-gradient(180deg,#e2384f,#b3122a);color:#fff;border:1px solid #7d0b1c;box-shadow:0 0 0 2px rgba(255,255,255,.55),0 3px 8px rgba(0,0,0,.35)}
+#bar>#bRtSit.hbtn small{color:#fff}
