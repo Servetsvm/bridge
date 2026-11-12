@@ -2031,3 +2031,13 @@ body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#f
 #bRtList.hbtn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1}
 #bRtList.hbtn small{font-size:11px;font-weight:700;white-space:nowrap}
 @media (max-width:600px){ #bRtList.hbtn small{font-size:10px} #bar>#bRtList.hbtn b{font-size:18px} #bar:has(#bRtList){flex-wrap:nowrap} #bar:has(#bRtList)>.box{min-width:0;flex:1 1 auto} }
+
+#bRtSit.hbtn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1}
+#bRtSit.hbtn small{font-size:11px;font-weight:700;white-space:nowrap}
+#bar>#bRtSit.hbtn{align-self:stretch;flex:none;padding:3px 10px;min-width:54px;border-radius:10px}
+#bar>#bRtSit.hbtn b{font-size:20px;line-height:1}
+@media (max-width:600px){ #bar>#bRtSit.hbtn{min-width:46px;padding:2px 5px} #bRtSit.hbtn small{font-size:10px} #bar>#bRtSit.hbtn b{font-size:18px} #bar:has(#bRtList){gap:5px} }
+
+.rtseats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.rtseats .btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 8px;font-size:16px;font-weight:700}
+.rtseats .btn small{font-size:12px;font-weight:500;opacity:.85}

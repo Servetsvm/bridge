@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 435;
+const APP_V = 436;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1166,7 +1166,7 @@ function renderBar() {
     $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
      <button class="box" id="bAuc"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
      <div class="box"><b>🔴 ${esc(RT_SYS[b.sys] || b.sys)}</b></div>
-     <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button>`;
+     <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
     return; }
   const g = G.play;
   const canClaim = G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
@@ -2776,6 +2776,14 @@ function rtSit(s) {
     closeOv(); ui.saved = null; Net.st.soloPub = true; resume();
   });
 }
+// 🪑 Sit down on the system table's bar: the four seats with their robots' names
+function rtSitPick() {
+  const x = rtCur(Date.now()), b = x && (x.b || x.wait); if (!b) return;
+  openOv('rtsit', `<h2>🪑 ${T('Sit down')} · ${esc(RT_SYS[b.sys] || b.sys)}</h2>
+    <div class="muted">${T('Choose a seat: you play the next boards in it with these robots.')}</div>
+    <div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtsit="${s}">${SEAT[s]}<small>${esc(rtName(s))}</small></button>`).join('')}</div>
+    <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
 // the home page's card: the six tables (their systems' names)
 function rtCardHtml() {
   return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(RT_SYS[k])}</button>`).join('')}</div>`;
@@ -3268,6 +3276,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.rtwatch) { rtWatch(RT.cur); return; }
   if (t.id === 'bRtAgain') { rtAgain(); return; }
   if (t.id === 'bRtNext') { rtNext(); return; }
+  if (t.id === 'bRtSit') { rtSitPick(); return; }
   if (t.id === 'bRtList') { rtOpen(G && G.rtv ? G.rtv.k : RT.cur); return; }
   if (t.dataset.rtsit != null) { rtSit(+t.dataset.rtsit); return; }
   if (t.dataset.rtt) { RT.tab = t.dataset.rtt; RT.view = null; RT.sel = null; rtDraw(); return; }
