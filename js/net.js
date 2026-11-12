@@ -707,6 +707,13 @@ const Net = (() => {
     if (!(await Cloud.session(name, SET.pinH))) throw new Error('signin');
     const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     await Cloud.put('istek/' + fbKey(name) + '/' + id, { ad: String(ad).slice(0, 40), acik: String(acik).slice(0, 1000), ornek: String(ornek || '').slice(0, 300), kim: name, ts: Date.now() });
+    // the automatic thank-you in the player's messages (by 'auto' with cv: shown in the reader's own language, with the name)
+    try {
+      const k = fbKey(name), now = Date.now();
+      await Cloud.put('destek/' + k + '/n', String(name).slice(0, 20));
+      await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', cv: 1, t: String(ad).slice(0, 40), ts: now });
+      await Cloud.put('destek/' + k + '/pr', now + 1);
+    } catch (e) {}
   }
   async function convRequests() {
     if (!Cloud.on || !isAdmin()) return [];

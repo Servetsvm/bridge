@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 453;
+const APP_V = 454;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3792,7 +3792,7 @@ function supMsgsHtml(m, mine) {
   if (!m.length) return `<div class="muted">${T('No messages yet.')}</div>`;
   return `<div class="supmsgs" id="supMsgs">${m.map(x => {
     const own = mine ? x.by === 'p' : x.by === 'a', who = x.by === 'p' ? '' : x.by === 'auto' ? '🤖 ' : '👑 ';
-    const txt = x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
+    const txt = x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
     return `<div class="supm ${own ? 'own' : ''} ${x.by}"><div>${who}${txt.replace(/\n/g, '<br>')}</div><small>${new Date(x.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></div>`;
   }).join('')}</div>`;
 }
@@ -3825,7 +3825,7 @@ async function showSupInbox() {
   if (ui.overlay !== 'supin') return;
   ui.supList = L;
   const row = x => `<div class="suprow${x.unread ? '' : ' read'}"><button class="supth${x.unread ? ' new' : ''}" data-supk="${esc(x.k)}"><b>${x.unread ? '🔵 ' : ''}${esc(x.n)}</b>
-      <span>${x.last.by === 'auto' ? '🤖 ' : x.last.by === 'a' ? '👑 ' : ''}${esc(x.last.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : x.last.t).slice(0, 90)}</span>
+      <span>${x.last.by === 'auto' && x.last.cv ? '📥 ' : x.last.by === 'auto' ? '🤖 ' : x.last.by === 'a' ? '👑 ' : ''}${esc(x.last.by === 'auto' && !x.last.cv ? T('Thank you! Your message will be answered as soon as possible.') : x.last.t).slice(0, 90)}</span>
       <small>${new Date(x.last.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small><em class="supgo">💬 ${T('Reply')} ›</em></button><button class="btn mini-btn supdel" data-supdel="${esc(x.k)}" title="${T('Delete the conversation')}">🗑</button></div>`;
   const U = L.filter(x => x.unread), Rd = L.filter(x => !x.unread);
   openOv('supin', `<h2>📨 ${T('Messages')}</h2>
@@ -3862,7 +3862,7 @@ function showConvAsk(err) {
 async function sendConvAsk() {
   const ad = ($('cvaName').value || '').trim(), how = ($('cvaHow').value || '').trim(), ex = ($('cvaEx').value || '').trim();
   if (ad.length < 2 || how.length < 10) { flash(T('Write the name and how it works'), 2200); return; }
-  try { await Net.convAsk(ad, how, ex); closeOv(); flash('✅ ' + T('Thank you! Your request was sent to the administrator.'), 3000); }
+  try { await Net.convAsk(ad, how, ex); closeOv(); flash('✅ ' + T('Thank you! Your request was sent to the administrator.') + ' ' + T('The answer comes in your messages (✉️).'), 4000); }
   catch (e) { const keep = [ad, how, ex]; showConvAsk(e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.')); $('cvaName').value = keep[0]; $('cvaHow').value = keep[1]; $('cvaEx').value = keep[2]; }
 }
 async function showConvRequests() {
