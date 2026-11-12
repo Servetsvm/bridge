@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 443;
+const APP_V = 444;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3295,7 +3295,9 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'ppGo') { playerPinGo(); return; }
   if (t.id === 'ppBack') { ui.plPinK = null; closeOv(); showPlayers(); return; }
   if (t.id === 'hSup') { showSup(); return; }
+  if (t.id === 'hSupIn' && Net.isAdmin()) { Net.supInbox().then(L => { const u = L.filter(x => x.unread); if (u.length === 1) showSupThread(u[0].k); else showSupInbox(); }).catch(() => showSupInbox()); return; }
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
+  if (t.dataset.supdel) { const k = t.dataset.supdel, x = (ui.supList || []).find(y => y.k === k); askYes(T('Delete the conversation with {0}?', esc(x ? x.n : decodeURIComponent(k))), async () => { try { await Net.supDelete(k); } catch (e) { flash(T('Could not remove'), 2000); } showSupInbox(); }); return; }
   if (t.id === 'supSend') { sendSup(); return; }
   if (t.id === 'supReply') { sendSupReply(); return; }
   if (t.dataset.supk) { showSupThread(t.dataset.supk); return; }
@@ -3809,10 +3811,13 @@ async function showSupInbox() {
   openOv('supin', `<h2>📨 ${T('Messages')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let L = []; try { L = await Net.supInbox(); } catch (e) {}
   if (ui.overlay !== 'supin') return;
-  openOv('supin', `<h2>📨 ${T('Messages')}</h2>
-    ${L.length ? L.map(x => `<button class="supth${x.unread ? ' new' : ''}" data-supk="${esc(x.k)}"><b>${x.unread ? '🔵 ' : ''}${esc(x.n)}</b>
+  ui.supList = L;
+  const row = x => `<div class="suprow${x.unread ? '' : ' read'}"><button class="supth${x.unread ? ' new' : ''}" data-supk="${esc(x.k)}"><b>${x.unread ? '🔵 ' : ''}${esc(x.n)}</b>
       <span>${x.last.by === 'auto' ? '🤖 ' : x.last.by === 'a' ? '👑 ' : ''}${esc(x.last.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : x.last.t).slice(0, 90)}</span>
-      <small>${new Date(x.last.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></button>`).join('') : `<div class="muted">${T('No messages yet.')}</div>`}
+      <small>${new Date(x.last.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small><em class="supgo">💬 ${T('Reply')} ›</em></button><button class="btn mini-btn supdel" data-supdel="${esc(x.k)}" title="${T('Delete the conversation')}">🗑</button></div>`;
+  const U = L.filter(x => x.unread), Rd = L.filter(x => !x.unread);
+  openOv('supin', `<h2>📨 ${T('Messages')}</h2>
+    ${L.length ? U.map(row).join('') + (Rd.length ? `<div class="supsep">${T('Read')}</div>` + Rd.map(row).join('') : '') : `<div class="muted">${T('No messages yet.')}</div>`}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 async function showSupThread(k) {
@@ -3824,7 +3829,7 @@ async function showSupThread(k) {
   openOv('supth', `<h2>📨 ${esc(th && th.n || '')}</h2>
     ${th ? supMsgsHtml(th.m, false) : `<div class="err">${T('The online database could not be reached.')}</div>`}
     ${th ? supBox('supRe', T('Your answer…')) : ''}
-    <div class="row2">${th ? `<button class="btn new" id="supReply">📨 ${T('Send')}</button>` : ''}<button class="btn" id="supBack">← ${T('Messages')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+    <div class="row2">${th ? `<button class="btn new" id="supReply">📨 ${T('Send')}</button><button class="btn" data-supdel="${esc(k)}">🗑 ${T('Delete the conversation')}</button>` : ''}<button class="btn" id="supBack">← ${T('Messages')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
   const b = $('supMsgs'); if (b) b.scrollTop = b.scrollHeight;
   if (th) Net.supRead(k);
 }
