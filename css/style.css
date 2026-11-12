@@ -2061,3 +2061,6 @@ body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#f
 #bar>#bRtSit.hbtn small{color:#fff}
 /* Sit down: a calm blue, easy on the eye and unlike the other buttons */
 #bar>#bRtSit.hbtn{background:linear-gradient(180deg,#5b9cf0,#2f6fd6);color:#fff;border:1px solid #1f4fa0;box-shadow:0 0 0 2px rgba(255,255,255,.6),0 3px 8px rgba(0,0,0,.3)}
+/* Sit down: white with a dark green edge */
+#bar>#bRtSit.hbtn{background:#fff;color:#123d27;border:2px solid #1f5c3c;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+#bar>#bRtSit.hbtn small{color:#123d27}
