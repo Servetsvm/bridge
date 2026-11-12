@@ -26,6 +26,15 @@
         ".write": "auth != null && (root.child('sess').child(auth.uid).child('k').val() === $name || root.child('sess').child(auth.uid).child('k').val() === 'servet')"
       }
     },
+    "visits": {
+      ".read": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
+      "$day": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid && !data.exists()",
+          ".validate": "$day.matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) && newData.isString() && newData.val().matches(/^[a-z]{1,12}[+]?$/)"
+        }
+      }
+    },
     "logins": {
       ".read": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'",
       "$day": {

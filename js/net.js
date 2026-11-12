@@ -909,6 +909,45 @@ const Net = (() => {
     if (u && u.name) { delete st.known[nameKey(u.name)]; try { localStorage.setItem('bridge-known', JSON.stringify(st.known)); } catch (e) {} }
     return true;
   }
+  /* where visitors come from: each device once a day (players and guests alike) writes its source — a search engine,
+     a social site, another site, or none (typed, a bookmark, the installed app); '+' marks a device's very first visit.
+     Only the source is kept, never the page it came from. */
+  const REF = (() => { try { return document.referrer || ''; } catch (e) { return ''; } })();
+  const refSrc = r => {
+    let h = ''; try { h = r ? new URL(r).hostname.toLowerCase() : ''; } catch (e) {}
+    if (!h || h === location.hostname) return 'direct';
+    const M = [['google', /(^|\.)google\./], ['bing', /(^|\.)bing\.com$/], ['yandex', /(^|\.)yandex\./], ['duckduckgo', /duckduckgo\.com$/], ['yahoo', /yahoo\./], ['ecosia', /ecosia\.org$/],
+      ['facebook', /(^|\.)(facebook\.com|fb\.com|fb\.me)$/], ['instagram', /instagram\.com$/], ['x', /(^|\.)(t\.co|twitter\.com|x\.com)$/], ['whatsapp', /whatsapp\./], ['github', /github\.(com|io)$/]];
+    for (const [k, re] of M) if (re.test(h)) return k;
+    return 'other';
+  };
+  async function noteVisit() {
+    if (!Cloud.on) return;
+    const day = today(); let last = '', first = false;
+    try { last = localStorage.getItem('bridge-visit-day') || ''; first = !localStorage.getItem('bridge-visit-first'); } catch (e) {}
+    if (last === day) return;
+    try {
+      const uid = await Cloud.uid(); if (!uid) return;
+      await Cloud.put('visits/' + day + '/' + uid, refSrc(REF) + (first ? '+' : ''));
+      try { localStorage.setItem('bridge-visit-day', day); localStorage.setItem('bridge-visit-first', day); } catch (e) {}
+    } catch (e) {}
+  }
+  setTimeout(noteVisit, 5000);
+  // the administrator: the sources by period (visitors and first-time visitors)
+  async function visitStats() {
+    if (!Cloud.on || !isAdmin()) return null;
+    const all = await Cloud.get('visits') || {}, now = Date.now(), out = {};
+    for (const [p, days] of Object.entries({ day: 1, week: 7, month: 30, year: 365 })) {
+      const from = new Date(now - (days - 1) * 864e5).toISOString().slice(0, 10), by = {};
+      let total = 0, fresh = 0;
+      for (const day in all) if (day >= from) for (const v of Object.values(all[day] || {})) {
+        if (typeof v !== 'string') continue; const nw = v.endsWith('+'), k = v.replace('+', '');
+        const b = by[k] || (by[k] = [0, 0]); b[0]++; if (nw) { b[1]++; fresh++; } total++;
+      }
+      out[p] = { total, fresh, by };
+    }
+    return out;
+  }
   async function loginStats() {
     if (!Cloud.on || !isAdmin()) return null;
     const all = await Cloud.get('logins') || {}, now = Date.now(), out = {};
@@ -1870,5 +1909,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
