@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 448;
+const APP_V = 449;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1844,7 +1844,7 @@ function showStandings(id) {
   const mine = (Net.st.tres[id] || {})[Net.devId()];
   for (const e of HIST) if (e.tour && e.tour.id === id && e.tour.table == null && e.imp != null && !(mine && mine.f && mine.f[e.tour.b] && mine.c && mine.c[e.tour.b])) tourSend(e);
   const done = t.format === 'tables' ? 0 : Object.keys(myTour(id)).length;
-  openOv('tour', `<h2>🏆 ${esc(t.name)}</h2><div class="muted">${T('{0} boards', t.n)} · ${t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')} · ${T('ranked by {0}', tourSort(t) === 'imp' ? 'IMP' : 'MP %')}${t.byKey === "daily" ? "" : " · " + T("started by {0}", esc(t.by))}</div>
+  openOv('tour', `<h2>🏆 ${esc(t.name)}</h2><div class="muted">${T('{0} boards', t.n)} · ${t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')} · ${T('ranked by {0}', tourSort(t) === 'imp' ? 'IMP' : 'MP %')}</div><div class="muted">${Net.tourBy(t)}</div>
     ${t.kind === 'teams' ? teamsHtml(t) : ''}${standingsHtml(id)}<div class="muted">🤖 ${T('= your score against 4 robot tables that played the same boards; it ranks the players until others have played.')}</div>
     ${otherTablesHtml(id)}
     <div class="row2">${t.format !== 'tables' && t.state === 'live' && done < t.n ? `<button class="btn new" data-tplay="${t.id}">${done ? T('Continue') : T('Play')}</button>` : ''}${t.format === 'tables' || done >= t.n ? `<button class="btn" data-tprac="${t.id}">🔁 ${T('Practice these boards')}</button>` : ''}<button class="btn gold" id="oClose">${T('Close')}</button></div>`);
@@ -1946,7 +1946,7 @@ function toursHtml() {
     const players = Math.max(Object.keys(t.joined).length, Object.keys(Net.st.tres[t.id] || {}).length);
     const status = t.state === 'setup' ? `<span class="tst reg">${T('Registering')}</span>` : `<span class="tst run">${T('Running')}</span>`;
     const r = tourRowBtns(t, me);
-    return `<tr><td data-l=""><b>🏆 ${esc(t.name)}</b>${t.club ? ` <span class="tclub">🏛 ${esc(t.club)}</span>` : ""}<small>${T('started by {0}', esc(t.by))}</small>${r.note ? `<small class="tnote">${r.note}</small>` : ''}</td>
+    return `<tr><td data-l=""><b>🏆 ${esc(t.name)}</b>${t.club ? ` <span class="tclub">🏛 ${esc(t.club)}</span>` : ""}<small>${Net.tourBy(t)}</small>${r.note ? `<small class="tnote">${r.note}</small>` : ''}</td>
       <td data-l="${T('Format')}">${TOUR_KINDS[t.kind] && t.kind !== 'custom' ? `${TOUR_KINDS[t.kind].icon} ${T(TOUR_KINDS[t.kind].n)}` : t.format === 'tables' ? T('{0} tables', t.tables.length) : T('individual')}</td><td data-l="${T('Boards')}" class="n">${t.n}</td><td data-l="${T('Ranking')}">${t.kind === 'teams' ? 'IMP' : 'MP % · IMP'}</td>
       <td data-l="${T('Players')}" class="n">${players}</td><td data-l="${T('Status')}">${status}</td><td data-l="${T('Ends in')}">${left(t)}</td>
       <td data-l="" class="tact">${r.btns}${Net.isMine(t) || Net.isAdmin() ? `<button class="btn tdel" data-tdel="${t.id}" title="${T('Cancel the tournament')}">✕</button>` : ''}</td></tr>`;
