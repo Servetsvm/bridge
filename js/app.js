@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 444;
+const APP_V = 445;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2799,13 +2799,14 @@ function rtNext() {
   const go = n => { if (n) rtShow(n, Date.now() - n.t0); else flash(T('The robots will be back soon.'), 2500); };
   const n = find(); if (n) go(n); else rtLoad(true).then(() => go(find()));
 }
-// a player takes a robot's seat: the next boards at their own table, in this system (and convention), with these
-// robots (their names) in the other seats
+// a player takes a robot's seat: the next boards at their own table with these robots (their names) in the other
+// seats; the robots (the partner too) play the player's own system and conventions, not the table's
 function rtSit(s) {
   const x = rtCur(Date.now()), b = x && (x.b || x.wait); if (!b) return;
-  askYes(T('Take {0}\'s seat? You play the next boards as {1} with these robots, in {2}. Your seat and system change to these.', rtName(s), SEAT[s], RT_SYS[b.sys] + (b.conv ? ' · ' + pracName(b.conv) : '')), () => {
-    SET.rtNames = { sys: b.sys, n: [0, 1, 2, 3].map(q => rtName(q)) };
-    SET.seat = s; setSys(b.sys); if (b.conv && pracKnown(b.conv)) togglePractice(b.conv, true);
+  const mine = (RT_SYS[SET.sys] || SET.sys) + (pracList()[0] ? ' · ' + pracName(pracList()[0]) : '');
+  askYes(T('Take {0}\'s seat? You play the next boards as {1} with these robots. Your robot partner plays your own system and conventions ({2}).', rtName(s), SEAT[s], mine), () => {
+    SET.rtNames = { sys: SET.sys, n: [0, 1, 2, 3].map(q => rtName(q)) };
+    SET.seat = s;
     Store.saveSettings(SET); save();
     closeOv(); ui.saved = null; Net.st.soloPub = true; resume();
   });
@@ -2814,7 +2815,7 @@ function rtSit(s) {
 function rtSitPick() {
   const x = rtCur(Date.now()), b = x && (x.b || x.wait); if (!b) return;
   openOv('rtsit', `<h2>🪑 ${T('Sit down')} · ${esc(RT_SYS[b.sys] || b.sys)}</h2>
-    <div class="muted">${T('Choose a seat: you play the next boards in it with these robots.')}</div>
+    <div class="muted">${T('Choose a seat: you play the next boards in it with these robots.')} ${T('Your robot partner plays your own system and conventions.')}</div>
     <div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtsit="${s}">${SEAT[s]}<small>${esc(rtName(s))}</small></button>`).join('')}</div>
     <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
