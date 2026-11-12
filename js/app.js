@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 449;
+const APP_V = 450;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2221,7 +2221,7 @@ const pzWait = () => PZB === undefined || PZP === undefined;
 /* the puzzles one after another (not one a day): solved, the next comes at once; failed, the next comes 24 hours after
    the try. Each answer moves the puzzle rating (start 1200) and with it the puzzle level; kept on the player's card. */
 const PZ_HOLD = 864e5;
-const pzLive = () => !!(G && G.pz && G.pz.first && G.phase === 'play');   // the first try is being played now
+const pzLive = () => !!(G && G.pz && G.pz.first && G.phase === 'play') || !!(ui.saved && ui.saved.pz && ui.saved.pz.first && ui.saved.phase === 'play');   // the first try is being played now (or waits, kept, to be continued)
 const pzProg = () => ({ r: 1200, s: 0, t: 0, i: 0, st: 0, ...(SET.pz || {}) });
 function pzProgSave(p) { SET.pz = { r: Math.round(p.r), s: p.s, t: p.t, i: p.i, st: p.st }; Store.saveSettings(SET); save(); scheduleSync(); if (typeof Net !== 'undefined' && Net.shareInfo) Net.shareInfo(); }
 const pzLvl = r => r < 1100 ? 'beg' : r < 1300 ? 'int' : r < 1500 ? 'adv' : r < 1700 ? 'exp' : 'wc';
@@ -2248,7 +2248,7 @@ function pzBank(n) {
 // the declarer problem's window: dummy above your hand, the auction, the contract, the lead; then Play (the first try
 // counts: it is marked as failed from the moment it starts, and as made only when the contract is made)
 function showPlayPuzzle(pz) {
-  const st = pzState(), done = st.day === pz.day && st.ans === 'play' && !(st.pend && pzLive()) ? st : null, me = pz.c.decl, dm = (me + 2) % 4, ld = (me + 1) % 4;
+  const st = pzState(), going = st.day === pz.day && st.ans === 'play' && st.pend && pzLive(), done = st.day === pz.day && st.ans === 'play' && !going ? st : null, me = pz.c.decl, dm = (me + 2) % 4, ld = (me + 1) % 4;
   const card = c => `<b class="${(c / 13 | 0) === 1 || (c / 13 | 0) === 2 ? 'red' : ''}">${RTXT[R(c)]}${STR[S(c)]}</b>`;
   const con = `${pz.c.level}${symHtml(pz.c.strain)}${pz.c.dbl === 2 ? 'XX' : pz.c.dbl ? 'X' : ''}`;
   let res = '';
@@ -2265,8 +2265,8 @@ function showPlayPuzzle(pz) {
     <div class="pzline">${T('Contract')}: <b>${con}</b> · ${T('Declarer')}: ${SEAT[me]} · ${T('The opening lead: {0}', SEAT[ld] + ' ' + RTXT[R(pz.lead)] + symHtml(S(pz.lead)))}</div>
     <div class="pzbox"><div class="pzpair"><small>${T('Dummy')} (${SEAT[dm]})</small>${pzHand(pz.deal[dm])}<small>${T('You')} (${SEAT[me]})</small>${pzHand(pz.deal[me])}</div>
     <div class="auction">${auctionTable(pz.auction, false, { board: pz.bn, dealer: pz.dealer, seat: me, sel: null })}</div></div>
-    ${done ? '' : `<div class="muted">${T('Your first try is the one that counts: plan the play before you start.')}</div>`}${res}
-    <div class="row2">${done ? `<button class="btn" id="pzAgain">🔁 ${T('Try again (does not count)')}</button>` : `<button class="btn gold" id="pzGo">▶ ${T('Play')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+    ${done ? '' : `<div class="muted">${going ? T('Your try has started: continue it, it is the one that counts.') : T('Your first try is the one that counts: plan the play before you start.')}</div>`}${res}
+    <div class="row2">${done ? `<button class="btn" id="pzAgain">🔁 ${T('Try again (does not count)')}</button>` : going ? `<button class="btn gold" id="pzCont">▶ ${T('Continue')}</button>` : `<button class="btn gold" id="pzGo">▶ ${T('Play')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 // the problem on the normal table: the auction is already made, the lead is on the table's first trick, the robots defend
 // seeing every card
@@ -2457,6 +2457,7 @@ function pzLeads() {
   else setTimeout(() => end(E.leadValues(pz.deal, pz.c, 3e6)), 50);
 }
 document.addEventListener('click', e => {
+  if (e.target.closest('#pzCont')) { closeOv(); if (!(G && G.pz && G.phase === 'play') && ui.saved) resume(); return; }
   if (e.target.closest('#pzGo') || e.target.closest('#pzAgain')) { const p = pzToday(); if (p && p.kind === 'play') pzPlayStart(p, !!e.target.closest('#pzGo')); return; }
   const b = e.target.closest('[data-pzb]'); if (b) { pzAnswer(b.dataset.pzb); return; }
   const c = e.target.closest('[data-pzc]'); if (c) { pzAnswer(+c.dataset.pzc); return; }
