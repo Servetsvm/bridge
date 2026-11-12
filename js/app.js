@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 450;
+const APP_V = 451;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1689,7 +1689,7 @@ function renderHome() {
   // the daily tournament: your progress and your place so far
   if (N && N.dailyId) {
     const id = N.dailyId(), t = N.st.tours[id];
-    if (t && t.state !== "off") {
+    if (false && t && t.state !== "off") {   // the daily tournament is no more
       const done = Object.keys(myTour(id)).length, rows = tourRank(id), i = rows.findIndex(r => r.k === N.devId());
       set("hDaily", `🗓 <b>${T("Daily tournament")}</b> · ${done >= t.n ? T("finished") : done ? T("{0} of {1} boards", done, t.n) : T("{0} boards — play now", t.n)}${i >= 0 && rows.length > 1 ? " · " + T("place {0} of {1}", i + 1, rows.length) : rows.length ? " · " + T("{0} players", rows.length) : ""} ›`);
     } else set("hDaily", "");

@@ -248,17 +248,10 @@ const Net = (() => {
     t.state = 'off'; t.v = (t.v || 0) + 1000; saveTours(); renderL();
   }
   function adminCloseTour(id) { if (!isAdmin()) return; closeTourLocal(id); meshSend({ t: 'tadmin', id, by: myName() }); }
+  // the daily tournament is no more (the live system tables took its place): the ones kept on this device go
   function ensureDaily() {
-    for (let back = 0; back < 3; back++) {   // today, and the two days before (their rankings are still shown)
-      const d = new Date(Date.now() - back * 864e5), id = dailyId(d), ts = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-      const name = T("Daily tournament") + " · " + new Date(ts).toLocaleDateString(undefined, { timeZone: "UTC" });   // in the chosen language
-      if (st.tours[id]) { st.tours[id].name = name; st.tours[id].by = T("Daily"); if (dailyOff().includes(id)) st.tours[id].state = 'off'; continue; }
-      let seed = 2166136261; for (const ch of id) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
-      st.tours[id] = cleanTour({ id, name, by: T("Daily"), byKey: 'daily', n: 8, seed: seed >>> 0,
-        ts, state: dailyOff().includes(id) ? "off" : "live", inv: [], joined: {}, declined: {}, v: 1, format: "ind", kind: "robot", scoring: "mp", hours: 72 });
-    }
-    for (const k of Object.keys(st.tours)) if (/^daily-/.test(k) && Date.now() - st.tours[k].ts > 72 * 3600e3) delete st.tours[k];
-    saveTours();
+    let n = 0; for (const k of Object.keys(st.tours)) if (/^daily-/.test(k) || st.tours[k].byKey === 'daily') { delete st.tours[k]; n++; }
+    if (n) saveTours();
   }
   ensureDaily(); setInterval(() => { ensureDaily(); }, 10 * 60e3);
 
