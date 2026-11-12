@@ -2083,3 +2083,12 @@ body.homev2 #hClubs.h2tile .h2ti{background:radial-gradient(circle at 35% 30%,#f
 .admcard .admtog{background:none;border:0;font:inherit;font-weight:700;font-size:14px;cursor:pointer;padding:4px 2px;color:inherit;display:flex;align-items:center;gap:6px;width:100%;text-align:left}
 .admcard .admtog i{margin-left:auto;font-style:normal;opacity:.6}
 .admcard.open .praskrow{margin-top:6px}
+
+/* 👑 the administrator's icon to the right of the puzzle; its menu */
+#hAdm:empty{display:none}
+.hadmb{position:relative;flex:none;margin-left:6px;background:linear-gradient(180deg,#fff,#efe6cf);border:1px solid #8a6a1c;border-radius:10px;padding:6px 9px;font-size:17px;line-height:1;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+.hadmb .supc{position:absolute;top:-7px;right:-7px;font-size:11px}
+.admmenu{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.admmenu .btn{text-align:left}
+body.homev2 .h2mid .hpz{margin-left:auto}
+#hAdm{display:flex;flex:none}
