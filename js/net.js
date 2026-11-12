@@ -845,14 +845,15 @@ const Net = (() => {
   /* new messages (looked at on arrival and every two minutes): for the administrator the threads with a player's
      message not read yet, for a player the administrator's answers not read yet. The home page shows a notice. */
   async function supCheck() {
-    if (!Cloud.on || !myName() || !SET.pinH || Date.now() - (st.supChk || 0) < 110e3) return;
+    if (!Cloud.on || !myName() || !SET.pinH || Date.now() - (st.supChk || 0) < 50e3) return;
     st.supChk = Date.now();
     try {
       let n = 0;
       if (isAdmin()) n = (await supInbox()).filter(x => x.unread).length;
       else { const th = await supThread(); n = th.m.filter(x => x.by === 'a' && x.ts > th.pr).length; }
+      if (n > (st.supNew || 0) && typeof flash === 'function') flash('✉️ ' + (isAdmin() ? T('{0} new messages from players', n) : T('The administrator answered you')), 5000);   // seen on any screen, not only the home page
       if (n !== (st.supNew || 0)) { st.supNew = n; if (typeof render === 'function') render(); }
-      if (isAdmin()) { const seen = +SET.cvSeen || 0, c = (await convRequests()).filter(r => (r.ts || 0) > seen).length; if (c !== (st.cvNew || 0)) { st.cvNew = c; if (typeof render === 'function') render(); } }
+      if (isAdmin()) { const seen = +SET.cvSeen || 0, c = (await convRequests()).filter(r => (r.ts || 0) > seen).length; if (c > (st.cvNew || 0) && typeof flash === 'function') flash('📥 ' + T('{0} new convention requests', c), 5000); if (c !== (st.cvNew || 0)) { st.cvNew = c; if (typeof render === 'function') render(); } }
     } catch (e) {}
   }
   /* the administrator's list of every registered name (when it was made, when it last signed in, on how many days),
