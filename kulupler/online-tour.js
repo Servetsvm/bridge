@@ -22,11 +22,12 @@ function otMeta() {
     w.onmessage = e => { if (e.data && e.data.meta) { OT.meta = e.data.meta; w.terminate(); res(OT.meta); } };
     w.postMessage({ meta: true }); setTimeout(() => res(OT.meta), 8000); });
 }
-const OT_MOV = { howell: 'Howell — all pairs move', mitchell: 'Mitchell — NS fixed, EW moves', barometer: 'Barometer — every table plays the same boards each round, then the pairs move' };
+const OT_MOV = { howell: 'Howell — all pairs move', mitchell: 'Mitchell — NS fixed, EW moves', barometer: 'Barometer / Speedball — every table plays the same boards each round, then the pairs move' };
 // the form of an online tournament (also in Tournament Setup under 🌐 Online): what is played first, then when and how
 function otFormHtml(M) {
   const d0 = new Date(Date.now() + 864e5), ymd = d0.toISOString().slice(0, 10);
   return `<div class="field"><label>Base system</label><select id="otSys" onchange="otPreview()">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
+      <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Always played: ${M.convs.filter(x => x.basic).map(x => cleanData(x.n)).join(', ')}</div>
       <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
       <div style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.filter(x => !x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}" onchange="otPreview()"> ${cleanData(x.n)}</label>`).join('')}</div>
       <div class="field"><label>Name</label><input id="otName" maxlength="60" placeholder="Empty: the system and the conventions" oninput="otPreview()"></div>
@@ -95,7 +96,8 @@ async function renderOnlineAdmin() {
     </div>
     <div class="card"><div class="card-title">➕ <span>New online tournament</span></div>${otFormHtml(M)}</div>`;
   otPreview();
-  clearTimeout(OT.liveT); if (L.some(([, t]) => t.run)) OT.liveT = setTimeout(() => { if (adminTab === 'online') renderOnlineAdmin(); }, 20000);   // the live state every 20 seconds
+  // every 20 seconds: new registrations, and the live state once it has started (not while the director is filling in the form)
+  clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (adminTab !== 'online') return; const a = document.activeElement; if (a && a.closest && a.closest('#adminContent input, #adminContent select')) { OT.liveT = setTimeout(again, 20000); return; } renderOnlineAdmin(); }, 20000);
 }
 window.otSave = async function () {
   if (OT.busy) return;
@@ -148,3 +150,16 @@ window.otResults = function (id) {
   P.CT.adminView = true;   // the director may always watch
   P.ctLoad(true).then(() => { if (typeof P.closeClubs === 'function') P.closeClubs(); P.ctShowResults(CLUB_ID, id); });
 };
+
+// the Players tab: the online tournaments coming up with the pairs registered (and the players looking for a partner)
+function otPlayersSlot() {
+  setTimeout(async () => {
+    await otLoad(); const box = document.getElementById('otPlayersBox'); if (!box) return;
+    const L = Object.entries(OT.list || {}).filter(([, t]) => t && t.info).map(([id, t]) => ({ id, t, d: otNext(t.info) })).filter(x => x.d + 4 * 3600e3 > Date.now() && x.d - Date.now() < 14 * 864e5).sort((a, b) => a.d - b.d);
+    box.innerHTML = L.map(x => {
+      const P = Object.values(x.t.pairs || {}).filter(p => p && p.d === x.d), S = Object.values(x.t.seek || {}).filter(p => p && p.d === x.d);
+      return `<div class="card"><div class="card-title">🌐 ${cleanData(x.t.info.n)} <small>· ${otWhen(x.d)}</small></div><div><b>${P.length}</b> <span>pairs registered</span></div>${P.map((p, k) => `<div>${k + 1}. ${cleanData(p.a)} – ${cleanData(p.b)}</div>`).join('')}${S.length ? `<div style="margin-top:4px;">🔎 <span>Looking for a partner</span>: ${S.map(p => cleanData(p.n)).join(', ')}</div>` : ''}</div>`;
+    }).join('');
+  }, 0);
+  return '<div id="otPlayersBox"></div>';
+}

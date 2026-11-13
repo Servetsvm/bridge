@@ -10,6 +10,7 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Barometer / Speedball — every table plays the same boards each round, then the pairs move":"Barometre / Speedball — her turda tüm masalar aynı board’ları oynar, sonra çiftler hareket eder",
     "At the club":"Kulüpte",
     "Online (from home)":"Online (evden)",
     "Spectator mode: players may watch the tables":"Seyirci modu: oyuncular masaları izleyebilir",
