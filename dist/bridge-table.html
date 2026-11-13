@@ -10059,7 +10059,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 467;
+const APP_V = 468;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -13663,10 +13663,19 @@ function start(data) {
   window.addEventListener("online", () => syncNow(true));
   // installable/offline app when served from a normal web address
   if ('serviceWorker' in navigator && document.querySelector('link[rel=manifest]') && /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname)) {
-    // when a new version has been installed, switch to it right away (the game in progress is kept)
-    const hadController = !!navigator.serviceWorker.controller; let reloaded = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController && !reloaded) { reloaded = true; save(); location.reload(); } });
+    /* a new version: switched to at a quiet moment — not in the middle of bidding or play, not at an online table (the
+       others would lose the table), not with a window open (a message being written); the game in progress is kept.
+       While the app stays open it looks for a new version every ten minutes and whenever it comes back to the screen,
+       so players who never close it get updates too. */
+    const hadController = !!navigator.serviceWorker.controller; let reloaded = false, want = false;
+    const quiet = () => !(typeof Net !== 'undefined' && Net.st && Net.st.on) && !ui.overlay && (!G || G.rtv || !['bid', 'play'].includes(G.phase));
+    const go = () => { if (want && !reloaded && quiet()) { reloaded = true; save(); location.reload(); } };
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) { want = true; go(); } });
+    setInterval(go, 15000);
+    const look = () => navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
     navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});
+    setInterval(look, 10 * 60e3);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { look(); go(); } });
   }
 }
 window.claude?.hot?.snapshot?.(() => ({ SET, G, HIST, BOARD }));
