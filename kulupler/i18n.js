@@ -10,6 +10,16 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Always played":"Her zaman oynanır",
+    "Change the tournament":"Turnuvayı değiştir",
+    "Cancel":"İptal",
+    "Started":"Başladı",
+    "Add a pair":"Çift ekle",
+    "Start now":"Şimdi başlat",
+    "Change":"Değiştir",
+    "Save the changes":"Değişiklikleri kaydet",
+    "Save":"Kaydet",
+    "The players' names in Bridge Table (Robot for a robot partner).":"Oyuncuların Bridge Table’daki adları (robot ortak için Robot).",
     "Preview with the pairs registered so far: the movement is made at the start.":"Şimdiye kadar kayıtlı çiftlerle önizleme: hareket başlangıçta kurulur.",
     "No pairs registered yet.":"Henüz kayıtlı çift yok.",
     "Board":"Board",

@@ -15,12 +15,11 @@ function renderAdminPanel(){
         <button class="admin-tab" onclick="setAdminTab('boards',this)">📊 Boards</button>
         <button class="admin-tab" onclick="setAdminTab('history',this)">📜 History</button>
         <button class="admin-tab" onclick="setAdminTab('log',this)">📋 Log</button>
-        <button class="admin-tab" onclick="setAdminTab('online',this)">🌐 Online</button>
       </div>
       <div id="adminContent"></div>
     </div>`;
   const tabs=document.querySelectorAll('.admin-tab');
-  const idx=['setup','players','movement','tables','boards','history','log','online'].indexOf(adminTab);
+  const idx=['setup','players','movement','tables','boards','history','log'].indexOf(adminTab);
   if(tabs[idx])tabs[idx].classList.add('active');
   renderAdminTab();
 }
@@ -33,7 +32,7 @@ window.setAdminTab=function(tab,btn){
 function renderAdminTab(){
   const c=document.getElementById('adminContent');if(!c)return;
   const ot=k=>typeof otTabSlot==='function'?otTabSlot(k):'';
-  const m={setup:renderSetup,players:()=>(typeof otPlayersSlot==='function'?otPlayersSlot():'')+renderPlayersAdmin(),movement:()=>ot('movement')+renderMovement(),tables:()=>ot('tables')+renderTables(),boards:()=>ot('boards')+renderBoards(),history:()=>ot('history')+renderHistory(),log:()=>ot('log')+renderLog(),online:renderOnlineAdmin};
+  const m={setup:renderSetup,players:()=>(typeof otPlayersSlot==='function'?otPlayersSlot():'')+renderPlayersAdmin(),movement:()=>ot('movement')+renderMovement(),tables:()=>ot('tables')+renderTables(),boards:()=>ot('boards')+renderBoards(),history:()=>ot('history')+renderHistory(),log:()=>ot('log')+renderLog()};
   const fin=getState().status==='finished';
   c.innerHTML=(fin?`<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;"><b>🏁 <span>Tournament Finished</span></b><button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button></div>`:'')+(m[adminTab]||renderSetup)();
   if(adminTab==='setup') setTimeout(adminUpdateCalc, 0);
