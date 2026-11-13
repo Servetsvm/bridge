@@ -10,6 +10,15 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Preview with the pairs registered so far: the movement is made at the start.":"Şimdiye kadar kayıtlı çiftlerle önizleme: hareket başlangıçta kurulur.",
+    "No pairs registered yet.":"Henüz kayıtlı çift yok.",
+    "Board":"Board",
+    "registered":"kaydoldu",
+    "looks for a partner":"ortak arıyor",
+    "The tables were made":"Masalar kuruldu",
+    "last seen":"son görülme",
+    "Log":"Kayıtlar",
+    "Watch":"İzle",
     "Barometer / Speedball — every table plays the same boards each round, then the pairs move":"Barometre / Speedball — her turda tüm masalar aynı board’ları oynar, sonra çiftler hareket eder",
     "At the club":"Kulüpte",
     "Online (from home)":"Online (evden)",

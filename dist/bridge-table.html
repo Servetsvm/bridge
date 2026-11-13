@@ -10071,7 +10071,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 475;
+const APP_V = 476;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -16407,6 +16407,7 @@ const Net = (() => {
    (d = the start registered for; a weekly tournament has a new one each week). */
 'use strict';
 const CT = { all: null, at: 0, busy: false, told: {} };
+window.CT = CT;   // the clubs program (in its frame) reads and sets it
 // the next start: the date, or for a weekly tournament the first week whose start is not more than 4 hours ago
 const ctNext = i => { let t = +i.at || 0; if (i.rep) while (t + 4 * 3600e3 < Date.now()) t += 7 * 864e5; return t; };
 const ctWhen = t => new Date(t).toLocaleString(SET.lang || undefined, { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
@@ -16813,16 +16814,20 @@ function ctShowResults(club, id, d, tab) {
     <div class="row2"><button class="btn" data-ctpbn="1">⬇ PBN</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 // a board's double dummy: tricks for each declarer and strain, and the best contract
-function ctDD(bn) {
-  const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d), el = $('ctdd' + bn); if (!x || !el) return;
-  el.innerHTML = '⏳';
-  setTimeout(() => {
+// a board of an evening: the hands, the double dummy tricks and the best contract (also used by the clubs program)
+function ctDDHtml(plan, bn) {
+  {
+    const x = { plan };
     const deal = ctDeal(x.plan, +bn), tab = [0, 1, 2, 3].map(dc => [0, 1, 2, 3, 4].map(st => E.ddContract(deal, { level: 1, strain: st, decl: dc, dbl: 0 })));
     const top = [null, null];
     for (let dc = 0; dc < 4; dc++) for (let st = 0; st < 5; st++) { const tr = tab[dc][st]; for (let l = 1; l <= tr - 6; l++) { const sc = E.scoreOf(l, st, 0, E.vulOf(+bn, dc), tr), sd = E.sideOf(dc); if (!top[sd] || sc > top[sd].sc) top[sd] = { sc, l, st, dc }; } }
     const nsB = top[0] ? top[0].sc : 0, ewB = top[1] ? top[1].sc : 0, best = nsB >= ewB ? (top[0] && { ...top[0], v: nsB }) : (top[1] && { ...top[1], v: -ewB });
-    el.innerHTML = (typeof dealHtml === 'function' ? dealHtml(deal, 2) : '') + (typeof ddTabHtml === 'function' ? ddTabHtml(tab) : '') + (best ? `<div class="muted">${T('Best contract (double dummy)')}: ${best.l}${CT_SN[best.st]} ${SEAT_AB[best.dc]} · ${fmtSigned(best.v)}</div>` : '');
-  }, 30);
+    return (typeof dealHtml === 'function' ? dealHtml(deal, 2) : '') + (typeof ddTabHtml === 'function' ? ddTabHtml(tab) : '') + (best ? `<div class="muted">${T('Best contract (double dummy)')}: ${best.l}${CT_SN[best.st]} ${SEAT_AB[best.dc]} · ${fmtSigned(best.v)}</div>` : '');
+  }
+}
+function ctDD(bn) {
+  const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d), el = $('ctdd' + bn); if (!x || !el) return;
+  el.innerHTML = '⏳'; setTimeout(() => { el.innerHTML = ctDDHtml(x.plan, bn); }, 30);
 }
 // the evening's deals as a PBN file
 function ctPBN() {

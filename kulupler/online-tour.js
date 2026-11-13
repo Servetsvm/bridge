@@ -163,3 +163,86 @@ function otPlayersSlot() {
   }, 0);
   return '<div id="otPlayersBox"></div>';
 }
+
+/* ---- the other admin tabs for the online tournaments (Movement, Tables, Boards, History, Log) ----
+   The plan, the scores and the double dummy are Bridge Table's own (the page the clubs program runs in). */
+const otP = () => (window.parent && window.parent !== window && typeof window.parent.ctScore === 'function') ? window.parent : null;
+// the evenings of this club: started ones (with their plan) newest first, and the next one coming up
+function otEvenings() {
+  const out = [];
+  for (const [id, t] of Object.entries(OT.list || {})) {
+    if (!t || !t.info) continue;
+    for (const [d, run] of Object.entries(t.run || {})) if (run && run.plan) out.push({ id, d: +d, i: t.info, plan: run.plan, run, t });
+  }
+  return out.sort((a, b) => b.d - a.d);
+}
+function otComing() {
+  const L = Object.entries(OT.list || {}).filter(([, t]) => t && t.info).map(([id, t]) => ({ id, t, i: t.info, d: otNext(t.info) })).filter(x => !(x.t.run && x.t.run[x.d]) && x.d - Date.now() < 14 * 864e5 && x.d + 4 * 3600e3 > Date.now());
+  return L.sort((a, b) => a.d - b.d)[0] || null;
+}
+const otPn = p => p.robot ? '🤖 Robot' : cleanData(p.a) + ' – ' + cleanData(p.b);
+let otCss = false;
+function otStyle() {   // the hands and the double dummy table as Bridge Table draws them
+  if (otCss) return; otCss = true;
+  const st = document.createElement('style');
+  st.textContent = '.otbox table{border-collapse:collapse;margin:4px 0}.otbox td,.otbox th{border:1px solid var(--border);padding:2px 6px;font-size:.8rem;text-align:center}.otbox .deal{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:.78rem;margin:6px 0}.otbox .deal .h.n{grid-column:2}.otbox .deal .h.w{grid-column:1;grid-row:2}.otbox .deal .h.e{grid-column:3;grid-row:2}.otbox .deal .h.s{grid-column:2;grid-row:3}.otbox .red,.otbox .rd{color:#c4122f}.otbox .gm{font-weight:700}';
+  document.head.appendChild(st);
+}
+function otTabSlot(tab) {
+  setTimeout(async () => { await otLoad(); const box = document.getElementById('otTabBox'); if (box && adminTab === tab) box.innerHTML = otTabHtml(tab); otStyle(); }, 0);
+  return '<div id="otTabBox" class="otbox"></div>';
+}
+function otTabHtml(tab) {
+  const P = otP(), E = otEvenings(), cur = E[0], come = otComing();
+  if (!E.length && !come) return '';
+  const head = x => `<div class="card-title">🌐 ${cleanData(x.i.n)} <small>· ${otWhen(x.d)}</small></div>`;
+  if (tab === 'movement') {
+    // started: the plan; coming: what the registrations so far would make
+    let x = cur, plan = cur && cur.plan, note = '';
+    if (come && (!cur || come.d > cur.d)) {
+      const pairs = Object.entries(come.t.pairs || {}).filter(([, p]) => p && p.d === come.d).map(([pid, p]) => ({ pid, ...p }));
+      plan = P && pairs.length ? (P.ctMakePlan({ id: come.id, d: come.d, i: come.i, pairs }) || {}).plan : null; x = come; note = '<div style="font-size:0.75rem;color:var(--text3);">Preview with the pairs registered so far: the movement is made at the start.</div>';
+    }
+    if (!plan) return `<div class="card">${head(x)}<div style="color:var(--text3);">No pairs registered yet.</div></div>`;
+    return `<div class="card">${head(x)}${note}<table><thead><tr><th><span>Round</span></th><th><span>Table</span></th><th>N/S</th><th>E/W</th><th><span>Boards</span></th></tr></thead><tbody>${plan.rounds.map((tb, r) => tb.map(([a, b], ti) => `<tr><td>${r + 1}</td><td>${ti + 1}</td><td>${otPn(plan.pairs[a])}</td><td>${otPn(plan.pairs[b])}</td><td>${r * plan.bpr + 1}-${r * plan.bpr + plan.bpr}</td></tr>`).join('')).join('')}</tbody></table></div>`;
+  }
+  if (!cur) return `<div class="card">${head(come)}<div style="color:var(--text3);">Starts ${otWhen(come.d)}.</div></div>`;
+  if (tab === 'tables') return `<div class="card">${head(cur)}${otLiveHtml(cur.t, cur.d)}${P ? `<div style="margin-top:6px;"><button class="btn btn-sm" onclick="otOpenRes('${cur.id}',${cur.d},'live')">👁 <span>Watch</span></button></div>` : ''}</div>`;
+  if (tab === 'boards') {
+    if (!P) return '';
+    const S = P.ctScore({ plan: cur.plan, run: cur.run, i: cur.i });
+    const bs = Object.keys(S.boards).sort((a, b) => a - b);
+    if (!bs.length) return `<div class="card">${head(cur)}<div style="color:var(--text3);">No results yet.</div></div>`;
+    return `<div class="card">${head(cur)}${bs.map(bn => `<div style="margin:8px 0;"><b><span>Board</span> ${bn}</b> <button class="btn btn-sm" onclick="otDD('${cur.id}',${cur.d},${bn})">🎯 Double dummy</button><div id="otdd${bn}"></div>
+      <table><tbody>${S.boards[bn].map(q => `<tr><td>${otPn(cur.plan.pairs[q.ns])}</td><td>${otPn(cur.plan.pairs[q.ew])}</td><td>${q.v.pass ? 'Pass' : q.v.c ? q.v.c[0] + ['♣', '♦', '♥', '♠', 'NT'][q.v.c[1]] + (q.v.c[2] ? 'X' : '') + ' ' + 'NESW'[q.v.c[3]] : ''}${q.v.tr != null ? ' · ' + q.v.tr : ''}</td><td><b>${(q.v.ns > 0 ? '+' : '') + (q.v.ns || 0)}</b></td><td>${Math.round(q.mp)}% · ${q.imp > 0 ? '+' : ''}${q.imp} IMP</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
+  }
+  if (tab === 'history') {
+    if (!P) return '';
+    return `<div class="card"><div class="card-title">🌐 <span>Online club tournaments</span></div>${E.map(x => { const S = P.ctScore({ plan: x.plan, run: x.run, i: x.i }), w = S.rank[0];
+      return `<div style="margin:6px 0;"><b>${cleanData(x.i.n)}</b> <small>· ${otWhen(x.d)}</small><div style="font-size:0.8rem;">${S.rank.length} <span>pairs</span>${w ? ' · 🏆 ' + otPn(w.p) + ' ' + (S.imp ? (w.imp > 0 ? '+' : '') + w.imp + ' IMP' : w.pct.toFixed(1) + '%') : ''}</div><button class="btn btn-sm" onclick="otOpenRes('${x.id}',${x.d},'rank')">📊 <span>Results</span></button></div>`; }).join('')}</div>`;
+  }
+  if (tab === 'log') {
+    const ev = [];
+    for (const x of [cur, come].filter(Boolean)) {
+      const t = x.t;
+      for (const p of Object.values(t.pairs || {})) if (p && p.d === x.d) ev.push([p.ts || 0, '✍️ ' + cleanData(p.a) + ' – ' + cleanData(p.b) + ' <span>registered</span>']);
+      for (const p of Object.values(t.seek || {})) if (p && p.d === x.d) ev.push([p.ts || 0, '🔎 ' + cleanData(p.n) + ' <span>looks for a partner</span>']);
+      const run = t.run && t.run[x.d];
+      if (run && run.plan) ev.push([run.plan.at || x.d, '🪑 <span>The tables were made</span>: ' + run.plan.rounds.length + ' <span>rounds</span>']);
+      if (run && run.hb) for (const [k, ts] of Object.entries(run.hb)) ev.push([+ts, '📶 ' + cleanData(k) + ' <span>last seen</span>']);
+    }
+    ev.sort((a, b) => b[0] - a[0]);
+    return `<div class="card"><div class="card-title">🌐 <span>Log</span></div>${ev.slice(0, 60).map(([ts, t]) => `<div style="font-size:0.8rem;">${ts ? new Date(ts).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''} · ${t}</div>`).join('') || '<div style="color:var(--text3);">—</div>'}</div>`;
+  }
+  return '';
+}
+window.otDD = function (id, d, bn) {
+  const P = otP(), x = otEvenings().find(y => y.id === id && y.d === d), el = document.getElementById('otdd' + bn); if (!P || !x || !el) return;
+  el.innerHTML = '⏳'; setTimeout(() => { el.innerHTML = P.ctDDHtml(x.plan, bn); }, 30);
+};
+// the full results (ranking, boards, rating, watching) in Bridge Table
+window.otOpenRes = function (id, d, tab) {
+  const P = otP(); if (!P) return;
+  P.CT.adminView = true;
+  P.ctLoad(true).then(() => { if (typeof P.closeClubs === 'function') P.closeClubs(); P.ctShowResults(CLUB_ID, id, d, tab); });
+};
