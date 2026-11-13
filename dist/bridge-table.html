@@ -10059,7 +10059,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 468;
+const APP_V = 469;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -10075,8 +10075,15 @@ function bidTxt(t) {
   const out = String(t).replace(r.re, w => { const v = r.map.get(w.toLowerCase()); if (v == null) return w; return w[0] !== w[0].toLowerCase() && v ? v[0].toUpperCase() + v.slice(1) : v; });
   return out.replace(/ {2,}/g, " ").replace(/ ([,:;)])/g, "$1").replace(/\( /g, "(").trim();
 }
+// a language not loaded yet (the site loads the visitor's own only): its file is fetched, the screen is drawn again
+const LANG_LOAD = {};
+function loadLang(L) {
+  if (!L || L === 'en' || (typeof I18N !== 'undefined' && I18N[L])) return Promise.resolve();
+  return LANG_LOAD[L] || (LANG_LOAD[L] = new Promise(res => { const s = document.createElement('script'); s.src = 'js/lang/' + L + '.js'; s.onload = () => res(); s.onerror = () => { delete LANG_LOAD[L]; res(); }; document.head.appendChild(s); }));
+}
 // put the chosen language's seats, convention names/descriptions and system descriptions on the screen
 function applyLang() {
+  { const L = SET.lang; if (L && L !== 'en' && !I18N[L]) loadLang(L).then(() => { if (SET.lang === L && I18N[L]) { applyLang(); document.querySelectorAll('[data-lang]').forEach(el => { el.dataset.lang = ''; }); if (typeof render === 'function') render(); } }); }
   const L = SET.lang || 'en'; document.documentElement.lang = L === 'no' ? 'nb' : L;
   if (typeof Net !== "undefined" && Net.ensureDaily) Net.ensureDaily();
   SEAT.splice(0, 4, ...(SEAT_T[L] || SEAT_T.en)); SEAT_AB = SEAT_AB_T[L] || 'NESW';
@@ -14016,6 +14023,7 @@ const rbDone = path => String(path).startsWith('rt:') ? rtHide(path) : Net.roboE
 const rbFixed = (path, on) => String(path).startsWith('rt:') ? rtHide(path) : Net.roboErrFixed(path, on);
 // a report of Servet's drawn in Turkish (the words, the bid meanings, the seats), then the app's language again
 async function inTurkish(f) {
+  await loadLang('tr');
   const seats = SEAT.slice(), ab = SEAT_AB; T_FORCE = 'tr'; SEAT.splice(0, 4, ...(SEAT_T.tr || seats)); SEAT_AB = SEAT_AB_T.tr || ab;
   try { return await f(); } finally { T_FORCE = null; SEAT.splice(0, 4, ...seats); SEAT_AB = ab; }
 }

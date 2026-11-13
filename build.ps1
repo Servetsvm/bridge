@@ -3,7 +3,11 @@
 # Run:  powershell -ExecutionPolicy Bypass -File build.ps1
 $root = $PSScriptRoot
 $utf8 = New-Object System.Text.UTF8Encoding $false
+& node "$root\.github\lang\split.js"   # js/lang/<language>.js for the site, from js/lang.js
 $html = [IO.File]::ReadAllText("$root\index.html", $utf8)
+# the one file holds every language: the page's language loader gives way to the whole js/lang.js
+$lm = [regex]::Match($html, '<!--lang-->[\s\S]*?<!--/lang-->')
+if ($lm.Success) { $all = [IO.File]::ReadAllText("$root\js\lang.js", $utf8); $html = $html.Replace($lm.Value, "<script>`n$all`n</script>") }
 
 $css = [IO.File]::ReadAllText("$root\css\style.css", $utf8)
 $html = $html.Replace('<link rel="stylesheet" href="css/style.css">', "<style>`n$css`n</style>")

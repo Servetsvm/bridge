@@ -77,7 +77,18 @@
 <!-- screen and storage -->
 <script src="js/storage.js"></script>
 <script src="js/photo.js"></script>
-<script src="js/lang.js"></script>
+<!--lang--><script>/* the texts in the visitor's language only (js/lang/<language>.js); app.js loads another when it is changed */
+(function () {
+  var K = ['en', 'tr', 'no', 'es', 'fr', 'it', 'de', 'ru', 'pl', 'zh'], L = null;
+  var ok = function (v) { v = String(v || '').toLowerCase(); var b = /^(nb|nn|no)\b/.test(v) ? 'no' : v.slice(0, 2); return K.indexOf(b) >= 0 ? b : null; };
+  try { L = ok(new URLSearchParams(location.search).get('lang')); } catch (e) {}
+  if (!L) try { var d = JSON.parse(localStorage.getItem('bric-masasi-v2') || 'null'); L = d && d.SET && ok(d.SET.lang); } catch (e) {}
+  if (!L) { var n = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language]; for (var i = 0; i < n.length && !L; i++) L = ok(n[i]); }
+  if (!L) { var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    var Z = { 'Europe/Istanbul': 'tr', 'Asia/Istanbul': 'tr', 'Asia/Nicosia': 'tr', 'Europe/Oslo': 'no', 'Europe/Madrid': 'es', 'Europe/Paris': 'fr', 'Europe/Brussels': 'fr', 'Europe/Rome': 'it', 'Europe/Berlin': 'de', 'Europe/Vienna': 'de', 'Europe/Zurich': 'de', 'Europe/Moscow': 'ru', 'Europe/Warsaw': 'pl', 'Asia/Shanghai': 'zh', 'Asia/Hong_Kong': 'zh', 'Asia/Taipei': 'zh' };
+    L = Z[tz] || 'en'; }
+  document.write('<script src="js/lang/' + L + '.js"><\/script>');
+})();</script><!--/lang-->
 <script src="js/app.js"></script>
 <script src="js/net.js"></script>
 <script src="js/social.js"></script>
