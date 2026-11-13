@@ -2157,7 +2157,7 @@ body.homev2 .h2mid .hpz{margin-left:auto}
 #hClubT{display:flex;flex-direction:column;gap:8px}
 .ctcard{display:flex;flex-direction:column;gap:3px;text-align:left;cursor:pointer;border:2px solid #1f7a2e;background:linear-gradient(180deg,#f4fbf2,#e3f2df);color:#17311d;font:inherit}
 .ctcard b{font-size:15px}.ctcard span{font-size:13px}.ctcard small{font-size:13px;font-weight:700;color:#1f5f8b}
-.ctcard.short{width:100%;margin:0 0 8px;padding:8px 12px;gap:2px}.ctcard.short b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.ctcard.short span{font-size:12.5px}.ctcard.short .ctmore{font-style:normal;font-weight:700;color:#1f5f8b;float:right}
+.ctcard.short{width:100%;margin:0 0 8px;padding:8px 12px;gap:2px}.ctcard.short b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.ctcard.short span{font-size:12.5px}.ctcard.short .ctmore{font-style:normal;font-weight:700;color:#1f5f8b;float:right;margin-left:8px}
 .ctcard.reg{border-color:#d4a017;background:linear-gradient(180deg,#fffaf0,#f8ecc9)}
 
 </style>
@@ -10074,7 +10074,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 478;
+const APP_V = 479;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -16486,8 +16486,7 @@ function ctCardHtml() {
   return L.slice(0, 3).map(x => {
     const mine = ctMine(x), seeking = x.seek.some(s => s.k === ctMe()), started = x.d <= Date.now();
     if (started && !x.plan) ctEnsurePlan(x);
-    return `<button class="hcard ctcard short${mine ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} · ${esc(x.i.n)}</b>
-      <span>${started ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}${mine ? ' · ✅' : seeking ? ' · 🔎' : ''} <i class="ctmore">${T('Details')} ›</i></span></button>`;
+    return `<button class="hcard ctcard short${mine ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} online<i class="ctmore">›</i></b></button>`;
   }).join('');
 }
 const nameKeyEq = n => Net.ruleKey(n || '') === ctMe();

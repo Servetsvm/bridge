@@ -82,8 +82,7 @@ function ctCardHtml() {
   return L.slice(0, 3).map(x => {
     const mine = ctMine(x), seeking = x.seek.some(s => s.k === ctMe()), started = x.d <= Date.now();
     if (started && !x.plan) ctEnsurePlan(x);
-    return `<button class="hcard ctcard short${mine ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} · ${esc(x.i.n)}</b>
-      <span>${started ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}${mine ? ' · ✅' : seeking ? ' · 🔎' : ''} <i class="ctmore">${T('Details')} ›</i></span></button>`;
+    return `<button class="hcard ctcard short${mine ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} online<i class="ctmore">›</i></b></button>`;
   }).join('');
 }
 const nameKeyEq = n => Net.ruleKey(n || '') === ctMe();
