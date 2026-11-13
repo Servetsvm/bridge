@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 458;
+const APP_V = 459;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2545,6 +2545,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 459, tr: 'Minörde 4’ü artık “oyun” diye açıklamıyorum: 4♣/4♦ davettir, oyun 5’tir; oyuna zorlayan dizide doğrudan 5♣/5♦ diyorum (1♥–2♣–2♥ ile ♠987 ♥J ♦AJ2 ♣AJ9653: 4♣ = davet). 3.000 elde denendi; 3SA’ya daha sık geçmek ve rakibin oyununun üstünde 5’e çıkmak IMP kaybettirdiği için alınmadı.', en: 'I no longer explain four of a minor as game: 4♣/4♦ invites, game is five; in a game-forcing auction I bid 5♣/5♦ at once (1♥–2♣–2♥ with ♠987 ♥J ♦AJ2 ♣AJ9653: 4♣ invites). Tried on 3,000 deals: going to 3NT more often and pushing to five over their game lost IMPs, so they were left out.' },
   { v: 458, tr: 'Minör Transfer’i öğrendim: kartında açıksa 1SA’ya 2♠ sineğe, 3♣ karoya transfer (6’lı minörlü zayıf el, açan 3♣/3♦ der, ben pas). Rakip yapay transfer teklifimi kontr ederse artık transferi yine tamamlıyorum; eskiden 2♠ kontrlü bırakılabiliyordu.', en: 'I learned Minor Transfer: when it is on your card, over 1NT 2♠ transfers to clubs and 3♣ to diamonds (a weak hand with a six-card minor; opener bids 3♣/3♦, I pass). If an opponent doubles the artificial transfer bid I still complete it; 2♠ doubled used to be left in.' },
   { v: 452, tr: 'Puppet Stayman’ı öğrendim (Sigride’nin isteği): kartında açıksa 2SA’dan sonra 3♣ 4’lü veya 5’li majör sorar; 3♦ = 4’lü majör var, 3♥/3♠ = 5’li, 3SA = yok. 3♦’dan sonra elimde olmayan majörü söylüyorum (3♥ = 4 pik, 3♠ = 4 kupa, 4♦ = ikisi de), böylece 2SA açan oynar.', en: 'I learned Puppet Stayman (Sigride’s request): when it is on your card, 3♣ over 2NT asks for a 4- or 5-card major; 3♦ = a 4-card major, 3♥/3♠ = five, 3NT = none. After 3♦ I bid the major I do not hold (3♥ = four spades, 3♠ = four hearts, 4♦ = both), so the 2NT opener declares.' },
   { v: 442, tr: '1♠–1SA gibi bir dizide 19+ puanlık güçlü açışla artık pas geçmiyor ya da minimum teklif vermiyorum: ikinci 4’lü renkle atlamalı söylüyorum (oyuna zorlayıcı), 6’lı majörle doğrudan oyuna çıkıyorum, dengeli 20-21 ile 3SA. Ortağın weak two ya da baraj açışına 19+ puan, destek ve iki asla doğrudan oyuna atlamıyorum, önce 4SA ile anahtar kart soruyorum.', en: 'With a strong opening (19+) after partner’s 1NT answer I no longer pass or make a minimum bid: a jump in a second suit (game forcing), game with six cards in my major, or 3NT balanced. With 19+, support and two aces opposite partner’s weak two or preempt I ask for key cards before bidding game.' },

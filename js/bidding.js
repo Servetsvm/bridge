@@ -1066,13 +1066,19 @@ function generic(x, h) {
   if (est >= 37 && lo >= 35) goal = 7;
   // a game force with a fit and two aces: a little less is enough to look for slam (1♠–2♦–3♦ with 17 and three aces)
   else if (est >= 33 || (gf && fitLen >= 8 && est >= 31 && h.aces >= 2)) goal = 6;
-  else if (t < 2) { goal = est >= 29 ? 5 : (est >= 26 ? 4 : 0); if (minorFit >= 0 && est >= 25 && oppStops && est < 29) { t = 4; goal = 3; } }
+  else if (t < 2) {
+    goal = est >= 29 ? 5 : (est >= 26 ? 4 : 0);
+    if (minorFit >= 0 && est >= 25 && oppStops && est < 29) { t = 4; goal = 3; }
+  }
   else if (lo >= 25 || est >= 26) goal = gameL;
   else if (hi >= 25 && est >= 23) goal = -1;
   else goal = 0;
   const cheapest = s => last < 0 ? 1 : (ST(last) < s ? LV(last) : LV(last) + 1);
   const cl = cheapest(t);
   const ourLast = st.lastSeat >= 0 && sideOf(st.lastSeat) === sideOf(me);
+  // four of a minor is not game: in our own game-forcing auction (they have not bid, partner has not bid a game) the
+  // minor game is five
+  if (t < 2 && goal === 4 && !x.oppSuits.length && gf && !(st.lastSeat === x.p && last >= B(4, 2))) goal = 5;
   const bwUsed = x.auc.some(e => sideOf(e.seat) === sideOf(me) && e.m && ['bw', 'q', 'gerb'].includes(e.m.tag));
   const range = { min: Math.max(0, h.hcp - 1), max: h.hcp + 2 };
   const lenm = t < 4 ? { [t]: Math.min(h.len[t], 6) } : undefined;
@@ -1095,7 +1101,7 @@ function generic(x, h) {
     if (!bwUsed && last < B(4, 4) && t < 4 && (t !== 0 || h.aces >= 2)) { call = B(4, 4); m = { tag: 'bw', trump: t, rkc: x.C.rkc0314 ? 2 : x.C.rkc ? 1 : 0, cv: x.C.rkc0314 ? 'rkc0314' : x.C.rkc ? 'rkc' : 'bw', t: x.C.rkc0314 || x.C.rkc ? (x.C.rkc0314 ? 'RKCB 0314' : 'RKCB 1430') + ': asking for key cards (trumps ' + SUIT[t] + ')' : 'Blackwood: how many aces?', ...range }; }
     else if (B(goal, t) > last) { call = B(goal, t); m = { t: (goal === 7 ? 'Grand' : 'Small') + ' slam', ...range, len: lenm }; }
   }
-  if (call === null && goal >= 3 && goal < 6 && cl <= goal) { call = B(goal, t); m = { t: 'Game contract', ...range, len: lenm }; }
+  if (call === null && goal >= 3 && goal < 6 && cl <= goal) { call = B(goal, t); m = { t: t < 2 && goal === 4 ? 'Invitation: game is 5' + SUIT[t] : 'Game contract', ...range, len: lenm }; }
   if (call === null && goal === -1) {
     if (cl <= gameL - 1) { call = B(gameL - 1, t); m = { t: 'Game invitation', ...range, len: lenm }; }
     else if (cl <= gameL && est >= 24) { call = B(gameL, t); m = { t: 'Game contract', ...range, len: lenm }; }
