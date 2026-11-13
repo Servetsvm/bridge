@@ -42,7 +42,7 @@ const ctMine = x => x.pairs.find(p => p.ka === ctMe() || p.kb === ctMe());
 function ctSeed(str) { let h = 2166136261; for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; }
 function ctMakePlan(x) {
   const P = x.pairs.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0) || String(a.pid).localeCompare(String(b.pid))).map(p => ({ a: p.a, b: p.b, ka: p.ka, kb: p.kb }));
-  if (P.length < 2) return null;
+  if (P.length < 1) return null;   // one pair plays the robot pair
   if (P.length % 2) P.push({ a: 'Robot', b: 'Robot', ka: '', kb: '', robot: 1 });
   const n = P.length, R = Math.max(1, Math.floor((+x.i.b || 18) / (+x.i.bpr || 3)));   // after everyone has met everyone the circle goes on (the same opponents, other boards)
   const rounds = []; let arr = [...Array(n).keys()];
@@ -99,27 +99,28 @@ function ctShow(key, err) {
       <div><b>${esc(sys)}</b>${convs ? ' · ' + esc(convs) : ''}</div><div class="muted">${T('Everyone bids with this card, the robots too.')}</div></div>
     <div class="grp"><span>${T('Pairs registered')} (${x.pairs.length})</span>${x.pairs.length ? x.pairs.map((p, k) => `<div>${k + 1}. ${esc(p.a)} – ${esc(p.b)}</div>`).join('') : `<div class="muted">${T('Nobody yet.')}</div>`}</div>
     ${x.seek.length ? `<div class="grp"><span>🔎 ${T('Looking for a partner')}</span>${x.seek.map(s => esc(s.n)).join(', ')}<div class="muted">${T('Write to one of them, or the director pairs you.')}</div></div>` : ''}
-    ${x.plan ? ctPlanHtml(x) : x.d <= Date.now() ? `<div class="grp"><span>🪑 ${T('Tables')}</span><div class="muted">${x.pairs.length < 2 ? T('At least two pairs are needed.') : '⏳ ' + T('The tables are being made…')}</div></div>` : ''}
+    ${x.plan ? ctPlanHtml(x) : x.d <= Date.now() ? `<div class="grp"><span>🪑 ${T('Tables')}</span><div class="muted">${!x.pairs.length ? T('Nobody yet.') : '⏳ ' + T('The tables are being made…')}</div></div>` : ''}
     ${err ? `<div class="err">${esc(err)}</div>` : ''}
     ${x.d <= Date.now() && !mine ? `<div class="row2">` : mine ? `<div class="okmsg">✅ ${T('You are registered with {0}', esc(nameKeyEq(mine.a) ? mine.b : mine.a))}</div><div class="row2">${x.d > Date.now() ? `<button class="btn" data-ctcancel="${esc(key)}">${T('Cancel the registration')}</button>` : ''}`
       : `<div class="grp"><span>✍️ ${T('Register as a pair')}</span><input id="ctPartner" class="tok wide" list="ctNames" maxlength="20" placeholder="${T('Your partner\'s name')}"><datalist id="ctNames">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist>
         <div class="muted">${T('Your partner needs a name in Bridge Table (the same name they sign in with).')}</div></div>
-        <div class="row2"><button class="btn new" data-ctreg="${esc(key)}">✍️ ${T('Register')}</button><button class="btn" data-ctseek="${esc(key)}">${seeking ? '✖ ' + T('I no longer look for a partner') : '🔎 ' + T('I am looking for a partner')}</button>`}
+        <div class="row2"><button class="btn new" data-ctreg="${esc(key)}">✍️ ${T('Register')}</button><button class="btn" data-ctrobot="${esc(key)}">🤖 ${T('Register with a robot partner')}</button><button class="btn" data-ctseek="${esc(key)}">${seeking ? '✖ ' + T('I no longer look for a partner') : '🔎 ' + T('I am looking for a partner')}</button>`}
       <button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 async function ctSession() { const n = myNm(); if (!n || !SET.pinH) throw new Error('signin'); if (!(await Net.Cloud.session(n, SET.pinH))) throw new Error('signin'); }
 const ctPath = (x, p) => 'ot/' + encodeURIComponent(x.club) + '/' + encodeURIComponent(x.id) + p;
-async function ctRegister(key) {
-  const x = ctFind(key), inp = $('ctPartner'), b = (inp && inp.value || '').trim().slice(0, 20); if (!x || CT.busy) return;
+// robot: a player who wants to play with a robot partner (it bids with the tournament's card)
+async function ctRegister(key, robot) {
+  const x = ctFind(key), inp = $('ctPartner'), b = robot ? T('Robot') : (inp && inp.value || '').trim().slice(0, 20); if (!x || CT.busy) return;
   if (!b) { ctShow(key, T('Write your partner\'s name')); return; }
-  if (Net.ruleKey(b) === ctMe()) { ctShow(key, T('Your partner cannot be you')); return; }
-  if (x.pairs.some(p => p.ka === Net.ruleKey(b) || p.kb === Net.ruleKey(b))) { ctShow(key, T('{0} is already registered with another partner', b)); return; }
+  if (!robot && Net.ruleKey(b) === ctMe()) { ctShow(key, T('Your partner cannot be you')); return; }
+  if (!robot && x.pairs.some(p => p.ka === Net.ruleKey(b) || p.kb === Net.ruleKey(b))) { ctShow(key, T('{0} is already registered with another partner', b)); return; }
   CT.busy = true;
   try {
-    if (!(await Net.Cloud.exists(b))) { ctShow(key, T('There is no player called {0} in Bridge Table', b)); return; }
+    if (!robot && !(await Net.Cloud.exists(b))) { ctShow(key, T('There is no player called {0} in Bridge Table', b)); return; }
     await ctSession();
     const pid = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
-    await Net.Cloud.put(ctPath(x, '/pairs/' + pid), { a: myNm(), b, ka: ctMe(), kb: Net.ruleKey(b), d: x.d, ts: Date.now() });
+    await Net.Cloud.put(ctPath(x, '/pairs/' + pid), { a: myNm(), b, ka: ctMe(), kb: robot ? '' : Net.ruleKey(b), d: x.d, ts: Date.now() });
     try { await Net.Cloud.put(ctPath(x, '/seek/' + Net.fbKey(myNm())), null); } catch (e) {}
     await ctLoad(true); flash('✅ ' + T('Registered: {0} – {1}', myNm(), b), 2500); ctShow(key);
   } catch (e) { ctShow(key, e.message === 'signin' ? T('Could not send — sign in with your name and PIN first.') : T('The online database could not be reached.')); }
@@ -140,7 +141,8 @@ function ctPlanHtml(x) {
   const P = x.plan, pi = ctMyPair(P), S = pi >= 0 ? ctSched(P, pi) : [];
   const mineH = S.length ? `<div class="grp"><span>🪑 ${T('Your rounds')}</span>${S.map(s => `<div>${T('Round {0} · table {1} · {2} against {3} · boards {4}-{5}', s.r + 1, s.ti + 1, s.ns ? T('North-South') : T('East-West'), ctPairTxt(s.opp), s.from, s.to)}</div>`).join('')}</div>` : '';
   const all = `<div class="grp"><span>${T('The tables, round {0}', 1)}</span>${P.rounds[0].map(([a, b], ti) => `<div>${T('Table {0}', ti + 1)}: ${ctPairTxt(P.pairs[a])} – ${ctPairTxt(P.pairs[b])}</div>`).join('')}</div>`;
-  return mineH + all + `<div class="muted">${T('{0} rounds of {1} boards; every table of a round plays the same boards.', P.rounds.length, P.bpr)}</div>`;
+  const sit = S.length ? `<div class="row2"><button class="btn new" data-ctsit="${esc(x.club + '|' + x.id)}">🪑 ${T('Sit down at your table')}</button></div>` : '';
+  return sit + mineH + all + `<div class="muted">${T('{0} rounds of {1} boards; every table of a round plays the same boards.', P.rounds.length, P.bpr)}</div>`;
 }
 // 15 minutes before the start a registered player is told (once), on any screen
 function ctRemind() {
@@ -152,8 +154,137 @@ function ctRemind() {
     }
   }
 }
+/* ---- step 2b: the club tournament's table, kept in the database ----
+   Every call and card of a table goes into run/<start>/t/<round_table>/a/<n> in turn (n = 0, 1, 2 …; the first app to
+   write a number keeps it). Every app at the table rebuilds the game from that list, so nobody's device holds the table:
+   a player who drops and comes back (or opens another device) is back at the same point. Each seat is played by its
+   player; a robot pair's seats, and the seats of a player away for more than 90 seconds, are played by the robots on
+   the device of the first player present at the table (another takes over when that one goes). A player counts as
+   present while their app writes run/<start>/hb/<player> (every 20 seconds, at any table of the evening). */
+const CT_AWAY = 90e3;
+CT.tbl = null;
+const ctRunP = x => ctPath(x, '/run/' + x.d);
+function ctCardsOf(plan) { const sys = E.sysOf(plan.sys).k, conv = { ...E.sysOf(sys).conv }; for (const k of plan.conv || []) conv[k] = true; return [{ conv, agg: 0, sys }, { conv: { ...conv }, agg: 0, sys }]; }
+// the four seats of a table: the North-South pair's first player South, the partner North; East-West: first East
+function ctSeatsOf(plan, r, ti) {
+  const [ns, ew] = plan.rounds[r][ti], A = plan.pairs[ns], B = plan.pairs[ew];
+  const s = (p, w) => p.robot ? { n: T('Robot'), k: '' } : { n: w ? p.b : p.a, k: w ? p.kb : p.ka };
+  return [s(A, 1), s(B, 0), s(A, 0), s(B, 1)];
+}
+const ctBoards = (plan, r) => [...Array(plan.bpr).keys()].map(i => r * plan.bpr + i + 1);
+// who decides a seat now: its player (present), else the robots of the runner's device; dummy goes with declarer
+function ctPresent(k) { const t = CT.tbl; return !!k && (k === ctMe() || (t && t.hb && Date.now() - (+t.hb[k] || 0) < CT_AWAY)); }
+function ctRunner() { const t = CT.tbl; if (!t) return ''; const ks = t.seats.map(s => s.k).filter(ctPresent).sort(); return ks[0] || ctMe(); }
+function ctWho(seat) {
+  const t = CT.tbl; if (!t || !G) return '';
+  let s = seat;
+  if (G.play && G.phase === 'play') { const c = G.play.contract, dummy = (c.decl + 2) % 4; if (s === dummy) s = c.decl; }
+  const k = t.seats[s].k; return ctPresent(k) ? k : 'robot';
+}
+const ctControls = seat => ctWho(seat) === ctMe();
+const ctRobotHere = seat => ctWho(seat) === 'robot' && ctRunner() === ctMe();
+// an action made here goes to the table's list; if another app was quicker the table is read again
+function ctAct(a) {
+  const t = CT.tbl; if (!t || CT.replay || !G || !G.ct) return;
+  const n = t.n++; t.wait = (t.wait || 0) + 1;
+  Net.Cloud.put(t.p + '/t/' + t.tid + '/a/' + n, a).then(() => { t.wait--; }, () => { t.wait--; ctRebuild(); });
+}
+// a board started at the table (its deal from the plan's seed); id fixed so its result is kept once
+function ctStartBoard(i) {
+  const t = CT.tbl, bn = t.boards[i];
+  CT.replay = true;
+  try { newBoard(ctDeal(t.plan, bn), bn, null, { id: 'ct' + t.id + t.d + '-' + bn, ct: { i, seat: t.seat, seats: t.seats.map(s => s.n), name: t.name }, cards: ctCardsOf(t.plan) }); } finally { CT.replay = false; }
+}
+// one action from the list: a call, or a card (the trick is gathered at once while catching up)
+// true when the action could be applied (a call or card refused means this device is out of step: read again)
+const ctStep = () => G ? G.ct.i * 1000 + G.auction.length + (G.play ? G.play.history.length * 4 + G.play.trick.length : 0) : -1;
+function ctApply(a) {
+  if (!G || !G.ct) return false;
+  const st0 = ctStep(), i0 = G.ct.i;
+  CT.replay = true;
+  try {
+    // a full trick still on the table is gathered first (the last one ends the board)
+    if (G.phase === 'play' && G.play && G.play.trick.length === 4) collectTrick();
+    if (G.phase === 'done') { if (G.ct.i + 1 < CT.tbl.boards.length) ctStartBoard(G.ct.i + 1); else return false; }
+    CT.replay = true;   // a new board's start clears it
+    if (a.c != null) makeCall(a.s, a.c);
+    else if (a.k != null) playCard(a.s, a.k);
+  } finally { CT.replay = false; }
+  return G && G.ct && (G.ct.i !== i0 || ctStep() > st0);
+}
+// read the table again from the start (entering it, coming back, or after a clash)
+async function ctRebuild() {
+  const t = CT.tbl; if (!t || t.busy) return; t.busy = true;
+  try {
+    const raw = await Net.Cloud.get(t.p + '/t/' + t.tid + '/a'), L = Array.isArray(raw) ? raw : Object.keys(raw || {}).sort((a, b) => a - b).map(k => raw[k]);
+    ctStartBoard(0); t.n = 0;
+    for (const a of L) { if (!a || !ctApply(a)) break; t.n++; }
+    if (G && G.play && G.play.trick.length === 4) collectTrick();
+    save(); render(); tick();
+  } catch (e) {} finally { t.busy = false; }
+}
+// what the others did since: applied in order
+async function ctPoll() {
+  const t = CT.tbl; if (!t || t.busy || !G || !G.ct) return;
+  try {
+    const raw = await Net.Cloud.get(t.p + '/t/' + t.tid + '/a'), L = Array.isArray(raw) ? raw : Object.keys(raw || {}).sort((a, b) => a - b).map(k => raw[k]);
+    if (L.length < t.n) { if (!t.wait) ctRebuild(); return; }   // our own last action may still be on its way
+    let moved = false;
+    while (t.n < L.length && L[t.n]) { if (!ctApply(L[t.n])) { ctRebuild(); return; } t.n++; moved = true; }
+    if (moved) { save(); render(); tick(); }
+    // nothing moved for a while although a robot (here) is to play or a full trick waits: the table is nudged on
+    const st = ctStep(); if (st !== t.st) { t.st = st; t.stAt = Date.now(); }
+    else if (Date.now() - (t.stAt || 0) > 6000 && G.phase === 'play' && G.play && (G.play.trick.length === 4 || ctRobotHere(G.play.turn))) { t.stAt = Date.now(); tick(); }
+    else if (Date.now() - (t.stAt || 0) > 6000 && G.phase === 'bid' && ctRobotHere(bidTurn())) { t.stAt = Date.now(); tick(); }
+  } catch (e) {}
+}
+async function ctBeat() {
+  const t = CT.tbl; if (!t) return;
+  try { await Net.Cloud.put(t.p + '/hb/' + Net.fbKey(myNm()), Date.now()); t.hb = await Net.Cloud.get(t.p + '/hb') || {}; } catch (e) {}
+  if (G && G.ct) tick();   // a player gone (or back): the robots take the seat (or give it back)
+}
+// sit down at your table of the round (the first round not finished); the whole list is read, so it also brings back
+// a table after a drop or another device
+async function ctSit(key, r0) {
+  const x = ctFind(key); if (!x || !x.plan) return;
+  const pi = ctMyPair(x.plan); if (pi < 0) return;
+  const S = ctSched(x.plan, pi), r = r0 != null ? r0 : +(localStorage.getItem('ct-r-' + x.id + x.d) || 0), s = S.find(q => q.r === r) || S[0];
+  if (!s) return;
+  try { await ctSession(); } catch (e) { flash(T('Could not send — sign in with your name and PIN first.'), 2500); return; }
+  const seats = ctSeatsOf(x.plan, s.r, s.ti), seat = seats.findIndex(q => q.k === ctMe());
+  clearInterval(CT.pollT); clearInterval(CT.beatT);
+  CT.tbl = { key, id: x.id, d: x.d, p: ctRunP(x), plan: x.plan, r: s.r, ti: s.ti, tid: s.r + '_' + s.ti, seats, seat, boards: ctBoards(x.plan, s.r), n: 0, hb: {}, name: x.i.n, rounds: x.plan.rounds.length };
+  try { localStorage.setItem('ct-r-' + x.id + x.d, String(s.r)); } catch (e) {}
+  closeOv();
+  await ctBeat(); await ctRebuild();
+  CT.pollT = setInterval(ctPoll, 1500); CT.beatT = setInterval(ctBeat, 20e3);
+  flash('🪑 ' + T('Round {0} · table {1}', s.r + 1, s.ti + 1), 2500);
+}
+// the next board of the round, or the next round's table, or the end of the evening
+function ctGoNext() {
+  const t = CT.tbl; if (!t || !G || !G.ct) return;
+  if (G.phase !== 'done') { flash(T('Finish this tournament board first'), 2000); return; }
+  if (G.ct.i + 1 < t.boards.length) { ctStartBoard(G.ct.i + 1); ctPoll(); return; }
+  if (t.r + 1 < t.rounds) { ctSit(t.key, t.r + 1); return; }
+  clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = null;
+  flash('🏁 ' + T('The tournament is over for you — thank you!'), 4000); G = null; goHome();
+}
+// a board finished here: its result for the club's list (written by every app of the table: the same values)
+function ctBoardDone(e) {
+  const t = CT.tbl; if (!t || !e) return;
+  const res = e.c ? { c: [e.c.level, e.c.strain, e.c.dbl, e.c.decl], tr: e.tricks, ns: e.ns } : { pass: 1, ns: 0 };
+  Net.Cloud.put(t.p + '/t/' + t.tid + '/res/' + e.board, res).catch(() => {});
+}
+// back to the home page from a club table: the table goes on (the robots take the seat after 90 seconds); the card
+// offers to sit down again
+function ctLeave() { clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = null; }
+// a game kept from before a reload: the table is read again from the database (not the copy on this device)
+setTimeout(() => { if (typeof ui !== 'undefined' && ui.saved && ui.saved.ct) ui.saved = null; if (typeof G !== 'undefined' && G && G.ct && !CT.tbl) { G = null; if (typeof render === 'function') render(); } }, 500);
+
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek]'); if (!t) return;
+  const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek],[data-ctsit],[data-ctrobot]'); if (!t) return;
+  if (t.dataset.ctrobot) { ctRegister(t.dataset.ctrobot, true); return; }
+  if (t.dataset.ctsit) { ctSit(t.dataset.ctsit); return; }
   if (t.dataset.ct) ctShow(t.dataset.ct);
   else if (t.dataset.ctreg) ctRegister(t.dataset.ctreg);
   else if (t.dataset.ctcancel) ctCancel(t.dataset.ctcancel);

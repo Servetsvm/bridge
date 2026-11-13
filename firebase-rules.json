@@ -494,7 +494,23 @@
               },
               "t": {
                 "$tbl": {
-                  ".write": "auth != null && root.child('ot').child($club).child($tid).child('run').child($occ).child('m').child($tbl).child(root.child('sess').child(auth.uid).child('k').val()).exists()"
+                  "a": {
+                    "$n": {
+                      ".write": "auth != null && !data.exists() && root.child('ot').child($club).child($tid).child('run').child($occ).child('m').child($tbl).child(root.child('sess').child(auth.uid).child('k').val()).exists()",
+                      ".validate": "newData.hasChildren(['s']) && newData.child('s').isNumber()"
+                    }
+                  },
+                  "res": {
+                    "$b": {
+                      ".write": "auth != null && root.child('ot').child($club).child($tid).child('run').child($occ).child('m').child($tbl).child(root.child('sess').child(auth.uid).child('k').val()).exists()"
+                    }
+                  }
+                }
+              },
+              "hb": {
+                "$k": {
+                  ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $k",
+                  ".validate": "newData.isNumber()"
                 }
               }
             }

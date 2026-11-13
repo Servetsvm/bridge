@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 471;
+const APP_V = 472;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -50,7 +50,7 @@ const ui = { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: nu
 const online = () => typeof Net !== "undefined" && Net.on;
 const guest = () => typeof Net !== "undefined" && Net.guest;
 // your seat (a tournament, and the system table watched, always from South); a spectator has no seat of their own (meSeat -1)
-const U = () => (guest() ? Net.st.seat : G && (G.champ || G.rtv) ? 2 : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
+const U = () => (G && G.ct ? G.ct.seat : guest() ? Net.st.seat : G && (G.champ || G.rtv) ? 2 : G && G.tour && G.tour.table == null ? (G.tour.seat ?? 2) : SET.seat);
 const meSeat = () => (guest() && Net.st.watching ? -1 : G && G.watch ? -1 : U());
 const delay = () => G && G.watch ? 1700 : [1100, 650, 250][SET.speed];   // watching the robots: slowly, to follow every card
 const $ = id => document.getElementById(id);
@@ -795,7 +795,7 @@ function freshDeal(dealer) {
   throw new Error('could not find an unseen deal');
 }
 /* replay: a deal to play again or an entered deal; boardNo: board number for an entered deal (sets dealer and vulnerability) */
-function newBoard(replay, boardNo, tour) {
+function newBoard(replay, boardNo, tour, extra) {
   clearTimeout(timer);
   // the cards are dealt: they fly into the hands one after the other
   document.body.classList.add("dealing"); clearTimeout(ui.dealT); ui.dealT = setTimeout(() => document.body.classList.remove("dealing"), 1100);
@@ -804,6 +804,7 @@ function newBoard(replay, boardNo, tour) {
   const deal = replay ? replay.map(h => h.slice()) : freshDeal(dealerOf(bn));
   UNDO.length = 0;
   G = { id: Date.now().toString(36) + E.rnd(1e6).toString(36), board: bn, dealer: dealerOf(bn), deal, auction: [], phase: 'bid', play: null, result: null, claimed: false, field: null, tour: tour || null, cards: sideCards() };
+  if (extra) Object.assign(G, extra);   // a club tournament's board (js/clubtour.js): its id, seats and the tournament's card
   if (ui.champNext) { G.champ = ui.champNext; ui.champNext = null; }   // a championship board (from South, a closed table)
   Object.assign(ui, { selLvl: 0, hintBid: null, hintCard: null, lastExpl: null, toast: null, overlay: null, photoMsg: null, photoHands: null, signal: null, fixSeat: null, fixCard: null });
   $('ov').hidden = true;
@@ -816,7 +817,7 @@ const bidTurn = () => (G.dealer + G.auction.length) % 4;
 const UNDO = [];
 const ME = () => (online() ? Net.me : "local");
 // who acted at a seat: a human id ("local" offline) or "robot"
-const actor = seat => (G && G.watch ? 'robot' : online() ? Net.owner(seat) : (G.phase === "bid" ? (seat === U() ? "local" : "robot") : (userControls(seat) ? "local" : "robot")));
+const actor = seat => (G && G.watch ? 'robot' : G && G.ct ? (userControls(seat) ? 'local' : ctWho(seat) === 'robot' ? 'robot' : 'remote') : online() ? Net.owner(seat) : (G.phase === "bid" ? (seat === U() ? "local" : "robot") : (userControls(seat) ? "local" : "robot")));
 function pushUndo(by, x) { const { field, ...rest } = G; UNDO.push({ by: by || "local", s: JSON.stringify(rest), ...(x || {}) }); if (UNDO.length > 120) UNDO.shift(); }
 // correcting the robots: offline, outside tournaments, when switched on in the settings
 const canFix = () => !!SET.fixBot && !online() && !guest() && !G.tour && !G.tprac;
@@ -852,9 +853,10 @@ function makeCall(seat, call, m, al) {
   if (!m) m = E.explainCall(G.auction, seat, call, G.cards);
   // while practising: what the system (the robot's own choice) bids here, to look back on when the board ends
   let sg = null;
-  if (pracList().length && !online() && !G.tour && actor(seat) !== 'robot') { const r = E.aiBid(G.auction, seat, G.deal[seat], G.cards); sg = { c: r.call, cv: (r.m && r.m.cv) || '', t: (r.m && r.m.t) || '' }; }
+  if (pracList().length && !online() && !G.tour && !G.ct && actor(seat) !== 'robot') { const r = E.aiBid(G.auction, seat, G.deal[seat], G.cards); sg = { c: r.call, cv: (r.m && r.m.cv) || '', t: (r.m && r.m.t) || '' }; }
   G.auction.push(al ? { seat, call, m, al: String(al).slice(0, 120) } : { seat, call, m });
   if (sg) G.auction[G.auction.length - 1].sg = sg;
+  if (G.ct) ctAct({ s: seat, c: call });   // a club table: the call goes to the table in the database
   ui.selLvl = 0; ui.hintBid = null;
   if (auctionOver(G.auction)) {
     const c = contractOf(G.auction);
@@ -872,6 +874,7 @@ function makeCall(seat, call, m, al) {
 function userControls(seat) {
   if (G && G.watch) return false;   // the robots play every seat
   if (online()) return Net.owner(seat) === Net.me;
+  if (G && G.ct) return ctControls(seat);   // a club table: your seat, and dummy when you are declarer
   if (ui.fixSeat != null && G.play && G.phase === 'play' && G.play.turn === ui.fixSeat && seat === ui.fixSeat) return true;   // correcting a robot's card
   if (!G.play) return seat === U();
   return seat === U() || (sideOf(G.play.contract.decl) === sideOf(U()) && sideOf(seat) === sideOf(U()));
@@ -897,6 +900,7 @@ function playCard(seat, c) {
     }
   }
   E.applyCard(g, seat, c); ui.hintCard = null; ui.showLast = false; sfx("card");
+  if (G.ct) ctAct({ s: seat, k: c });
   save(); render(); tick();
 }
 function collectTrick() {
@@ -950,6 +954,7 @@ function finishBoard() {
   if (typeof Net !== 'undefined' && Net.noteBoard && !guest()) Net.noteBoard(act);
   G.result = e; G.phase = 'done'; if (!e.passed) sfx(e.us >= 0 ? 'good' : 'bad');
   if (online() && !guest()) Net.boardDone(e);
+  if (G.ct) ctBoardDone(e);
   if (G.tprac) { const c = tourCompare(G.tprac.id, G.tprac.b, e); if (c) { e.tprac = c; flash('🏆 ' + T('Against the tournament ({0} players): {1} IMP · {2}%', c.n, fmtSigned(c.imp), c.mp), 4500); } }
   if (G.tour && G.tour.table != null) tourMark(G.tour.id);   // still playing at this tournament table
   if (G.tour && G.tour.table == null && !guest()) { e.tour = G.tour; tourSend(e); }   // an individual board (also while someone watches)
@@ -968,7 +973,7 @@ function finishBoard() {
 }
 function tick() {
   clearTimeout(timer); if (!G || guest() || G.rtv) return;   // the system table: the file plays it // when you are a guest, the host runs the table
-  const robot = s => online() ? Net.owner(s) === "robot" : (G.phase === "bid" ? G.watch || s !== U() : !userControls(s));
+  const robot = s => G.ct ? ctRobotHere(s) : online() ? Net.owner(s) === "robot" : (G.phase === "bid" ? G.watch || s !== U() : !userControls(s));
   if (G.phase === "bid") {
     const t = bidTurn();
     if (robot(t)) timer = setTimeout(() => { const r = E.aiBid(G.auction, t, G.deal[t], G.cards); makeCall(t, r.call, r.m); }, delay());
@@ -978,7 +983,7 @@ function tick() {
     else if (robot(g.turn)) {
       const t = g.turn, left = g.hands[t].length;
       // a robot side about to lead may claim the rest (asked once per trick, near the end of the board)
-      const mayClaim = !G.watch && !g.trick.length && g.rcl !== g.history.length && robot(pd(t)) && left >= 2 && left <= 8;
+      const mayClaim = !G.watch && !G.ct && !g.trick.length && g.rcl !== g.history.length && robot(pd(t)) && left >= 2 && left <= 8;
       // the robot starts thinking at once (in the background); its card goes down after the usual pause, or when it is ready
       const think = mayClaim ? null : robotCardAsync(g, t);
       timer = setTimeout(async () => {
@@ -1003,6 +1008,7 @@ function tick() {
 const tricksLeft = () => G.play.hands[G.play.leader].length;
 // the claimer picks the number of tricks (all of them first)
 function claim(seat) {
+  if (G && G.ct) return;
   const g = G.play; if (!g || G.phase !== "play" || g.trick.length) return;
   const left = tricksLeft();
   openOv('claim', `<h2>${T('Claim')}</h2><div class="muted">${T('How many of the remaining {0} tricks do you take?', left)}</div>
@@ -1146,6 +1152,7 @@ function vHand(seat) {
 }
 // the name of the player at a seat (you, a player at an online table, or a robot)
 function seatName(seat) {
+  if (G && G.ct) return seat === U() ? (myNm() || T('You')) : G.ct.seats[seat];
   if (G && G.rtv) return rtName(seat, RT.all[G.rtv.k]);
   if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
   // a robots' table's seat taken: the robots keep their names (while the system stays that table's)
@@ -1183,7 +1190,7 @@ function renderBar() {
      <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
     return; }
   const g = G.play;
-  const canClaim = G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
+  const canClaim = !G.ct && G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
   const last = HIST.length ? HIST[HIST.length - 1] : null;
   const lastTxt = last ? (last.imp != null ? (fmtSigned(last.imp) + ' IMP · ' + last.mp + '%') : fmtSigned(last.us || 0)) : '&nbsp;';
   const per = Store.periods(HIST)[0];
@@ -2175,6 +2182,7 @@ function showOpenChoice() {
 }
 // back to the home page from a board played alone (the board is kept for Continue)
 function goHome() {
+  if (G && G.ct) { ctLeave(); G = idleG(); closeOv(); save(); render(); return; }   // a club table goes on without you (the card brings you back)
   if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
   // an unfinished board is kept: "Play with robots" carries on from where it was
   clearTimeout(timer); ui.saved = G && !G.rtv && (G.phase === 'bid' || G.phase === 'play') ? G : G && G.rtv ? ui.saved : null;
@@ -3432,6 +3440,7 @@ document.addEventListener('click', ev_ => {
   }
   switch (t.id) {
     case "bNew": case "oNext2":
+      if (G && G.ct) { ctGoNext(); break; }   // a club table: the next board of the round, or the next round
       if (G && G.tour && !guest()) { if (G.phase === 'done') nextTourBoard(); else flash(T('Finish this tournament board first'), 2000); break; }
       if (guest()) { if (G.phase === "done") Net.send({ t: "next" }); else Net.askNewDeal(); break; }
       if (online() && (G.phase === "bid" || G.phase === "play")) {
@@ -3455,6 +3464,7 @@ document.addEventListener('click', ev_ => {
       break;
     case "bClaim": claim(); break;
     case "bUndo": {
+      if (G && G.ct) break;   // a club table: no taking back
       if (online() && !guest()) { requestUndo("host", Net.st.names[SET.seat] || "Host", SET.seat).then(ok => { if (ok === false) flash(T("Nothing to take back, or the other side said no"), 1800); }); break; }
       if (guest()) { undo(); break; }
       if (canFix()) { if (UNDO.some(u => u.by === 'robotfix')) askYes(T("Take back the robot's card?"), fixUndo); else fixUndo(); break; }
