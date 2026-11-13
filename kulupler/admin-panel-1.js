@@ -130,7 +130,7 @@ function renderSetup(){
   const teamPairs=s._teamPairs||2;
   return`
   <div class="card">
-    <div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span>⚙️</span> Tournament Setup<span style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-sm btn-gold" disabled>🏛 <span>At the club</span></button><button class="btn btn-sm" onclick="setSetupOnline(true)">🌐 Online</button></span></div>
+    <div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span>⚙️</span> Tournament Setup<span style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-sm btn-gold" disabled>🏛 <span>At the club</span></button><button class="btn btn-sm" onclick="setSetupOnline(true)">🌐 <span>Online (from home)</span></button></span></div>
     <div class="field"><label>Tournament ID (auto)</label><input id="aName" value="${s.name||''}" readonly style="cursor:default;color:var(--text3);font-size:0.82rem;" placeholder="Assigned automatically when tournament is created"></div>
     <div class="field-row">
       <div class="field">

@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 473;
+const APP_V = 474;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -923,6 +923,7 @@ function finishBoard() {
   e.auc = G.auction.map(a => [a.seat, a.call]);
   if (g) { e.pl = g.history.map(t => t.cards.map(x => [x.s, x.c])); if (G.claimed) e.claimedAt = g.history.length; }
   if (G.field) { applyField(e, G.field); e.dd = { ...(G.field.dd || {}) }; }
+  if (G.ct && typeof CT !== 'undefined' && CT.tbl && CT.tbl.watch) { G.result = e; G.phase = 'done'; save(); render(); return; }   // watching a club table: not in your results
   if (G.pz && g) { G.result = e; G.phase = 'done'; sfx(e.tricks >= G.pz.need ? 'good' : 'bad'); pzPlayDone(e); save(); render(); return; }   // the daily puzzle: not in the results
   if (G.watch) { e.watch = true; e.normC = G.field && G.field.normC ? { ...G.field.normC } : null; G.result = e; G.phase = 'done'; RHIST = RHIST.filter(h => h.id !== e.id); RHIST.push(e); saveRH(); render(); if (g) RoboAna.add(e); return; }   // watched: in the robots' chart, not your Results   // watched: shown, not recorded (the robots' cards are checked)
   const act = { mode: G.tour ? "t" : online() ? "o" : "r", cv: [], ok: 0, n: 0 };   // for the day's activity (administrator statistics)
@@ -1116,6 +1117,7 @@ function cardHtml(c, cls) {
 const handsNow = () => G.phase === "play" ? (ui.ask && ui.ask.hands) || G.play.hands : G.deal;   // a claim being asked shows every remaining card
 function isVisible(seat) {
   if (G && G.watch) return true;
+  if (G && G.ct && typeof CT !== 'undefined' && CT.tbl && CT.tbl.watch) return true;   // watching a club table: every hand
   if (ui.ask && ui.ask.hands && G.phase === "play") return true;
   if (guest()) return handsNow()[seat].every(c => c >= 0); // the host only sends the cards you may see
   if (seat === U() || G.phase === "done") return true;
@@ -4058,7 +4060,8 @@ async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];
     const otOf = c => typeof ctList === 'function' ? ctList().filter(x => x.club === c) : [];
-    const otRows = c => otOf(c).map(x => `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`).join('');
+    const lastRun = c => typeof ctRuns === 'function' ? ctRuns(c)[0] : null;
+    const otRows = c => (lastRun(c) ? `<button class="btn" data-ctresopen="${esc(c + '|' + lastRun(c).id)}">📊 ${T('Results')}: ${esc(lastRun(c).i.n || '')} · ${esc(ctWhen(lastRun(c).d))}</button>` : '') + otOf(c).map(x => `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`).join('');
     const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
       (ui.clubOpen !== t.club ? '' : t.tb ? (ui.clubTaken && ui.clubTaken[t.club] ? (L => L.length ? `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${L.map(n => `<button class="bm3-key" data-clubtn="${esc(t.club)}|${t.p}|${n}">${n}</button>`).join('')}</div></div>` : `<div class="muted">${T('Every table is taken.')}</div>`)([...Array(t.tb).keys()].map(i => i + 1).filter(n => !ui.clubTaken[t.club].has(n))) : `<div class="muted">${T('Loading…')}</div>`) + `<div class="row2"><button class="btn" data-clubadmin="${esc(t.club)}">⚙️ ${T('Admin')}</button></div>`
         : `<div class="muted">${T('No tournament at this club now.')}</div><div class="row2"><button class="btn gold" data-clubadmin="${esc(t.club)}">➕ ${T('Set up a tournament')}</button></div>`) + (ui.clubOpen === t.club ? `<div class="row3 clubtools"><button class="btn" data-clubres="${esc(t.club)}">📄 ${T('Results')}</button><button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button><button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button></div>` : '') + `</div>`).join('');

@@ -143,7 +143,8 @@ function ctPlanHtml(x) {
   const mineH = S.length ? `<div class="grp"><span>🪑 ${T('Your rounds')}</span>${S.map(s => `<div>${T('Round {0} · table {1} · {2} against {3} · boards {4}-{5}', s.r + 1, s.ti + 1, s.ns ? T('North-South') : T('East-West'), ctPairTxt(s.opp), s.from, s.to)}</div>`).join('')}</div>` : '';
   const all = `<div class="grp"><span>${T('The tables, round {0}', 1)}</span>${P.rounds[0].map(([a, b], ti) => `<div>${T('Table {0}', ti + 1)}: ${ctPairTxt(P.pairs[a])} – ${ctPairTxt(P.pairs[b])}</div>`).join('')}</div>`;
   const sit = S.length ? `<div class="row2"><button class="btn new" data-ctsit="${esc(x.club + '|' + x.id)}">🪑 ${T('Sit down at your table')}</button></div>` : '';
-  return sit + mineH + all + `<div class="muted">${T('{0} rounds of {1} boards; every table of a round plays the same boards.', P.rounds.length, P.bpr)}</div>`;
+  const res = `<div class="row2"><button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}">📊 ${T('Results')}</button></div>`;
+  return sit + mineH + all + res + `<div class="muted">${T('{0} rounds of {1} boards; every table of a round plays the same boards.', P.rounds.length, P.bpr)}</div>`;
 }
 // 15 minutes before the start a registered player is told (once), on any screen
 function ctRemind() {
@@ -182,11 +183,11 @@ function ctWho(seat) {
   if (G.play && G.phase === 'play') { const c = G.play.contract, dummy = (c.decl + 2) % 4; if (s === dummy) s = c.decl; }
   const k = t.seats[s].k; return ctPresent(k) ? k : 'robot';
 }
-const ctControls = seat => ctWho(seat) === ctMe();
-const ctRobotHere = seat => ctWho(seat) === 'robot' && ctRunner() === ctMe();
+const ctControls = seat => !(CT.tbl && CT.tbl.watch) && ctWho(seat) === ctMe();
+const ctRobotHere = seat => !(CT.tbl && CT.tbl.watch) && ctWho(seat) === 'robot' && ctRunner() === ctMe();
 // an action made here goes to the table's list; if another app was quicker the table is read again
 function ctAct(a) {
-  const t = CT.tbl; if (!t || CT.replay || !G || !G.ct) return;
+  const t = CT.tbl; if (!t || t.watch || CT.replay || !G || !G.ct) return;
   const n = t.n++; t.wait = (t.wait || 0) + 1;
   Net.Cloud.put(t.p + '/t/' + t.tid + '/a/' + n, a).then(() => { t.wait--; }, () => { t.wait--; ctRebuild(); });
 }
@@ -265,6 +266,7 @@ async function ctSit(key, r0) {
 // the next board of the round, or the next round's table, or the end of the evening
 function ctGoNext() {
   const t = CT.tbl; if (!t || !G || !G.ct) return;
+  if (t.watch) { ctLeave(); G = idleG(); save(); render(); return; }   // watching: back home
   if (G.phase !== 'done') { flash(T('Finish this tournament board first'), 2000); return; }
   if (G.ct.i + 1 < t.boards.length) { ctStartBoard(G.ct.i + 1); ctPoll(); return; }
   if (t.r + 1 < t.rounds) { ctWaitRound(t, t.r + 1); return; }
@@ -273,7 +275,7 @@ function ctGoNext() {
 }
 // a board finished here: its result for the club's list (written by every app of the table: the same values)
 function ctBoardDone(e) {
-  const t = CT.tbl; if (!t || !e) return;
+  const t = CT.tbl; if (!t || t.watch || !e) return;
   const res = e.c ? { c: [e.c.level, e.c.strain, e.c.dbl, e.c.decl], tr: e.tricks, ns: e.ns } : { pass: 1, ns: 0 };
   Net.Cloud.put(t.p + '/t/' + t.tid + '/res/' + e.board, res).catch(() => {});
 }
@@ -336,3 +338,113 @@ document.addEventListener('click', e => {
 setTimeout(() => ctLoad(true), 6000);
 setInterval(() => ctLoad(false), 60e3);
 setInterval(() => { ctRemind(); const el = $('hClubT'); if (el && document.body.classList.contains('athome')) { const h = ctCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; } }, 30e3);
+
+/* ---- step 3: results, double dummy, the club's online rating, watching, PBN ----
+   Everything is worked out from what the tables wrote (run/<start>/t/<table>/res/<board>) and the plan (pairs, rounds,
+   the deals' seed): nothing more is kept. MP: each North-South score against the others on the same board (2 for
+   better, 1 for equal), East-West the rest; IMP: against the board's average. The club rating starts at 1500 and moves
+   after each evening by the pair's result (MP: (% − 50) × 0.6; IMP: IMP a board × 4). */
+const CT_SN = ['♣', '♦', '♥', '♠', 'NT'];
+// every evening of a club that has been played (or is being played): newest first
+function ctRuns(club) {
+  const out = [];
+  for (const [c, L] of Object.entries(CT.all || {})) {
+    if (club && c !== club) continue;
+    for (const [id, t] of Object.entries(L || {})) for (const [d, run] of Object.entries((t && t.run) || {})) {
+      if (run && run.plan) out.push({ club: c, id, d: +d, i: t.info || {}, plan: run.plan, run });
+    }
+  }
+  return out.sort((a, b) => b.d - a.d);
+}
+function ctScore(x) {
+  const P = x.plan, boards = {};
+  P.rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => {
+    const res = (((x.run.t || {})[r + '_' + ti]) || {}).res || {};
+    for (const [bn, v] of Object.entries(res)) (boards[bn] || (boards[bn] = [])).push({ r, ti, ns: a, ew: b, v });
+  }));
+  const tot = P.pairs.map(() => ({ mp: 0, n: 0, imp: 0 })), imp = P.sc === 'imp' || x.i.sc === 'imp';
+  for (const L of Object.values(boards)) {
+    const avg = Math.round(L.reduce((s, q) => s + (q.v.ns || 0), 0) / L.length / 10) * 10;
+    for (const q of L) {
+      const o = L.filter(z => z !== q), mp = o.length ? o.reduce((s, z) => s + ((q.v.ns || 0) > (z.v.ns || 0) ? 2 : (q.v.ns || 0) === (z.v.ns || 0) ? 1 : 0), 0) / (2 * o.length) * 100 : 50;
+      q.mp = mp; q.imp = E.imps((q.v.ns || 0) - avg);
+      tot[q.ns].mp += mp; tot[q.ns].n++; tot[q.ns].imp += q.imp;
+      tot[q.ew].mp += 100 - mp; tot[q.ew].n++; tot[q.ew].imp -= q.imp;
+    }
+  }
+  const rank = P.pairs.map((p, k) => ({ k, p, n: tot[k].n, pct: tot[k].n ? tot[k].mp / tot[k].n : 0, imp: tot[k].imp }))
+    .filter(r => r.n).sort((a, b) => imp ? b.imp - a.imp : b.pct - a.pct);
+  return { boards, rank, imp };
+}
+// the club's online rating, from every evening in turn
+function ctRating(club) {
+  const R = {};
+  for (const x of ctRuns(club).slice().reverse()) {
+    const S = ctScore(x);
+    for (const r of S.rank) {
+      if (r.p.robot) continue;
+      const delta = S.imp ? (r.n ? r.imp / r.n * 4 : 0) : (r.pct - 50) * 0.6;
+      for (const [n, k] of [[r.p.a, r.p.ka], [r.p.b, r.p.kb]]) {
+        if (!k) continue;
+        const e = R[k] || (R[k] = { n, r: 1500, g: 0 }); e.r += delta; e.g++; e.n = n;
+      }
+    }
+  }
+  return Object.values(R).sort((a, b) => b.r - a.r);
+}
+const ctCon = v => v.pass ? T('Pass') : v.c ? v.c[0] + CT_SN[v.c[1]] + (v.c[2] === 2 ? 'XX' : v.c[2] ? 'X' : '') + ' ' + SEAT_AB[v.c[3]] : '—';
+// the evening's results: the ranking, then each board with every table, the double dummy on request
+function ctShowResults(club, id, d, tab) {
+  const x = ctRuns(club).find(y => y.id === id && (!d || y.d === +d)); if (!x) { flash(T('No results yet.'), 2000); return; }
+  CT.res = { club, id, d: x.d, tab: tab || CT.res && CT.res.tab || 'rank' };
+  if (CT.res.tab === 'live' && !(x.i.watch || CT.adminView)) CT.res.tab = 'rank';   // watching only when the director allowed it (or for the director)
+  const S = ctScore(x), P = x.plan, pn = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b), t = CT.res.tab;
+  const tabs = `<div class="seg" data-seg="ctrestab">${[['rank', '🏆 ' + T('Ranking')], ['boards', '🃏 ' + T('The boards')], ['rating', '🏅 ' + T('Club rating')], ...(x.i.watch || CT.adminView ? [['live', '👁 ' + T('Watch')]] : [])].map(([v, l]) => `<button data-ctres="${v}" class="${t === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  let body = '';
+  if (t === 'rank') body = S.rank.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Pair')}</th><th>${S.imp ? 'IMP' : 'MP %'}</th><th>${T('Boards')}</th></tr></thead><tbody>${S.rank.map((r, k) => `<tr${[r.p.ka, r.p.kb].includes(ctMe()) ? ' class="me"' : ''}><td>${k + 1}</td><td>${pn(r.p)}</td><td><b>${S.imp ? fmtSigned(r.imp) : r.pct.toFixed(1) + '%'}</b></td><td>${r.n}</td></tr>`).join('')}</tbody></table>` : `<div class="muted">${T('No results yet.')}</div>`;
+  else if (t === 'boards') body = Object.keys(S.boards).sort((a, b) => a - b).map(bn => `<div class="grp"><span>${T('Board {0}', bn)} <button class="btn mini-btn" data-ctdd="${bn}">🎯 ${T('Double dummy')}</button></span>
+      <div id="ctdd${bn}"></div>
+      <table class="res"><tbody>${S.boards[bn].map(q => `<tr><td>${pn(P.pairs[q.ns])}<br><small>${pn(P.pairs[q.ew])}</small></td><td>${ctCon(q.v)}${q.v.tr != null ? ' · ' + T('{0} tricks', q.v.tr) : ''}</td><td><b>${fmtSigned(q.v.ns || 0)}</b></td><td>${S.imp ? fmtSigned(q.imp) + ' IMP' : Math.round(q.mp) + '%'}</td></tr>`).join('')}</tbody></table></div>`).join('') || `<div class="muted">${T('No results yet.')}</div>`;
+  else if (t === 'rating') { const L = ctRating(club); body = L.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th>${T('Rating')}</th><th>${T('Evenings')}</th></tr></thead><tbody>${L.map((r, k) => `<tr><td>${k + 1}</td><td>${esc(r.n)}</td><td><b>${Math.round(r.r)}</b></td><td>${r.g}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Everyone starts at 1500; each evening moves it by the pair\'s result.')}</div>` : `<div class="muted">${T('No results yet.')}</div>`; }
+  else body = P.rounds.map((tb, r) => `<div class="grp"><span>${T('Round {0}', r + 1)}</span>${tb.map(([a, b], ti) => { const n = Object.keys((((x.run.t || {})[r + '_' + ti]) || {}).res || {}).length; return `<div class="row2" style="align-items:center"><span>${T('Table {0}', ti + 1)}: ${pn(P.pairs[a])} / ${pn(P.pairs[b])} · ${n}/${P.bpr}</span>${n < P.bpr ? `<button class="btn mini-btn" data-ctwatch="${r}_${ti}">👁 ${T('Watch')}</button>` : ''}</div>`; }).join('')}</div>`).join('');
+  openOv('ctres', `<h2>📊 ${esc(x.i.n || '')}</h2><div class="muted">🏛 ${esc(x.i.cn || club)} · ${esc(ctWhen(x.d))}</div>${tabs}${body}
+    <div class="row2"><button class="btn" data-ctpbn="1">⬇ PBN</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+// a board's double dummy: tricks for each declarer and strain, and the best contract
+function ctDD(bn) {
+  const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d), el = $('ctdd' + bn); if (!x || !el) return;
+  el.innerHTML = '⏳';
+  setTimeout(() => {
+    const deal = ctDeal(x.plan, +bn), tab = [0, 1, 2, 3].map(dc => [0, 1, 2, 3, 4].map(st => E.ddContract(deal, { level: 1, strain: st, decl: dc, dbl: 0 })));
+    const top = [null, null];
+    for (let dc = 0; dc < 4; dc++) for (let st = 0; st < 5; st++) { const tr = tab[dc][st]; for (let l = 1; l <= tr - 6; l++) { const sc = E.scoreOf(l, st, 0, E.vulOf(+bn, dc), tr), sd = E.sideOf(dc); if (!top[sd] || sc > top[sd].sc) top[sd] = { sc, l, st, dc }; } }
+    const nsB = top[0] ? top[0].sc : 0, ewB = top[1] ? top[1].sc : 0, best = nsB >= ewB ? (top[0] && { ...top[0], v: nsB }) : (top[1] && { ...top[1], v: -ewB });
+    el.innerHTML = (typeof dealHtml === 'function' ? dealHtml(deal, 2) : '') + (typeof ddTabHtml === 'function' ? ddTabHtml(tab) : '') + (best ? `<div class="muted">${T('Best contract (double dummy)')}: ${best.l}${CT_SN[best.st]} ${SEAT_AB[best.dc]} · ${fmtSigned(best.v)}</div>` : '');
+  }, 30);
+}
+// the evening's deals as a PBN file
+function ctPBN() {
+  const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d); if (!x) return;
+  const RK = '23456789TJQKA', hand = h => [3, 2, 1, 0].map(s => h.filter(c => (c / 13 | 0) === s).map(c => RK[c % 13]).sort((a, b) => RK.indexOf(b) - RK.indexOf(a)).join('')).join('.');
+  const V = ['None', 'NS', 'EW', 'All'], vul = bn => { const ns = E.vulOf(bn, 0), ew = E.vulOf(bn, 1); return V[(ns ? 1 : 0) + (ew ? 2 : 0)]; };
+  const n = x.plan.rounds.length * x.plan.bpr, out = [];
+  for (let bn = 1; bn <= n; bn++) { const d = ctDeal(x.plan, bn), dl = E.dealerOf(bn); out.push(`[Event "${String(x.i.n || '').replace(/"/g, "'")}"]\n[Date "${new Date(x.d).toISOString().slice(0, 10).replace(/-/g, '.')}"]\n[Board "${bn}"]\n[Dealer "${'NESW'[dl]}"]\n[Vulnerable "${vul(bn)}"]\n[Deal "N:${[0, 1, 2, 3].map(s => hand(d[s])).join(' ')}"]\n`); }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([out.join('\n')], { type: 'text/plain' })); a.download = (x.i.n || 'club') .replace(/[^\w-]+/g, '_') + '-' + new Date(x.d).toISOString().slice(0, 10) + '.pbn'; a.click();
+}
+// watching a table (its round still going): the game read from the list as the players see it, every hand open
+async function ctWatch(tid) {
+  const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d); if (!x) return;
+  const [rr, ti] = tid.split('_').map(Number);
+  clearInterval(CT.pollT); clearInterval(CT.beatT);
+  CT.tbl = { key: r.club + '|' + r.id, id: r.id, d: r.d, p: 'ot/' + encodeURIComponent(r.club) + '/' + encodeURIComponent(r.id) + '/run/' + r.d, plan: x.plan, r: rr, ti, tid, seats: ctSeatsOf(x.plan, rr, ti), seat: 2, boards: ctBoards(x.plan, rr), n: 0, hb: {}, name: x.i.n, rounds: x.plan.rounds.length, watch: true };
+  closeOv(); await ctRebuild(); CT.pollT = setInterval(ctPoll, 2000);
+  flash('👁 ' + T('Round {0} · table {1}', rr + 1, ti + 1), 2000);
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-ctres],[data-ctdd],[data-ctpbn],[data-ctwatch],[data-ctresopen]'); if (!t) return;
+  if (t.dataset.ctresopen) { const [c, i] = t.dataset.ctresopen.split('|'); ctShowResults(c, i); }
+  else if (t.dataset.ctres && CT.res) ctShowResults(CT.res.club, CT.res.id, CT.res.d, t.dataset.ctres);
+  else if (t.dataset.ctdd) ctDD(t.dataset.ctdd);
+  else if (t.dataset.ctpbn) ctPBN();
+  else if (t.dataset.ctwatch) ctWatch(t.dataset.ctwatch);
+});

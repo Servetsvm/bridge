@@ -10,8 +10,10 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
-    "Create the online tournament":"Online turnuvayı oluştur",
     "At the club":"Kulüpte",
+    "Online (from home)":"Online (evden)",
+    "Spectator mode: players may watch the tables":"Seyirci modu: oyuncular masaları izleyebilir",
+    "Create the online tournament":"Online turnuvayı oluştur",
     "Live":"Canlı",
     "Finished":"Bitti",
     "Round":"Tur",

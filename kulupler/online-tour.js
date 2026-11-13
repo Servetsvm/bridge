@@ -37,6 +37,7 @@ function otFormHtml(M) {
       <div class="field"><label>Scoring</label><select id="otSc" onchange="otPreview()"><option value="mp">MP</option><option value="imp">IMP</option></select></div></div>
       <div class="field"><label>Movement</label><select id="otMov" onchange="otPreview()">${Object.entries(OT_MOV).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select>
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">An odd number of pairs gets a robot pair; a pair can also play with a robot partner.</div></div>
+      <label style="display:block;margin:6px 0;"><input id="otWatch" type="checkbox" checked> 👁 <span>Spectator mode: players may watch the tables</span></label>
       <div id="otPrev" class="card" style="margin:8px 0;background:var(--bg3,rgba(0,0,0,.05));"></div>
       <button class="btn btn-gold btn-full" style="margin-top:6px;" onclick="otSave()">🌐 <span>Create the online tournament</span></button>`;
 }
@@ -47,7 +48,7 @@ function otRead() {
   const sysN = ((M.systems.find(x => x.k === v('otSys')) || {}).n || v('otSys')).replace(/ \(.*\)$/, '');
   const auto = sysN + (conv.length ? ' · ' + conv.map(k => (M.convs.find(x => x.k === k) || {}).n || k).join(', ') : '');
   return { n: (v('otName').trim() || auto).slice(0, 60), at: Date.parse(v('otDay') + 'T' + (v('otTime') || '19:00')), b: +v('otB') || 18, bpr: +v('otBpr') || 3,
-    sc: v('otSc') === 'imp' ? 'imp' : 'mp', sys: v('otSys') || 'sayc', conv, mov: OT_MOV[v('otMov')] ? v('otMov') : 'howell', rep: (document.getElementById('otRep') || {}).checked ? 1 : 0, sysN };
+    sc: v('otSc') === 'imp' ? 'imp' : 'mp', sys: v('otSys') || 'sayc', conv, mov: OT_MOV[v('otMov')] ? v('otMov') : 'howell', rep: (document.getElementById('otRep') || {}).checked ? 1 : 0, watch: (document.getElementById('otWatch') || {}).checked ? 1 : 0, sysN };
 }
 // the line shown before saving: "SAYC · RKCB 0314, Stayman · Sat 14 Nov 20:00 / 18 boards · 3 boards a round · MP · Howell"
 window.otPreview = function () {
@@ -61,7 +62,7 @@ window.setSetupOnline = function (on) { setupOnline = !!on; renderAdminTab(); };
 function otSetupCard() {
   setTimeout(async () => { await otMeta(); const box = document.getElementById('otSetupBox'); if (box) { box.innerHTML = otFormHtml(OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }); otPreview(); } }, 0);
   return `<div class="card"><div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span>⚙️</span> Tournament Setup
-      <span style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-sm" onclick="setSetupOnline(false)">🏛 <span>At the club</span></button><button class="btn btn-sm btn-gold" disabled>🌐 Online</button></span></div>
+      <span style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-sm" onclick="setSetupOnline(false)">🏛 <span>At the club</span></button><button class="btn btn-sm btn-gold" disabled>🌐 <span>Online (from home)</span></button></span></div>
     <div style="font-size:0.78rem;color:var(--text2);margin-bottom:8px;">Played in Bridge Table: pairs against each other, each at home. Players register as pairs in Bridge Table and see the tournament there and here before it starts.</div>
     <div id="otSetupBox">⏳</div></div>`;
 }
@@ -90,7 +91,7 @@ async function renderOnlineAdmin() {
         <div style="margin-top:6px;"><b>${P.length}</b> <span>pairs registered</span>${P.length ? ': ' + P.map(([, p]) => cleanData(p.a) + ' – ' + cleanData(p.b)).join(' · ') : ''}</div>
         ${S.length ? `<div style="margin-top:4px;">🔎 <span>Looking for a partner</span>: ${S.map(([k, p]) => `<label style="margin-right:8px;"><input type="checkbox" data-otseek="${id}|${cleanData(k)}|${cleanData(p.n)}"> ${cleanData(p.n)}</label>`).join('')}<button class="btn btn-sm" onclick="otPairUp('${id}',${d})">🤝 <span>Pair the two ticked</span></button></div>` : ''}
         ${otLiveHtml(t, d)}
-        <div style="margin-top:6px;"><button class="btn btn-sm" onclick="renderOnlineAdmin()">🔄</button> <button class="btn btn-sm btn-red" onclick="otDelete('${id}')">🗑 <span>Delete</span></button></div></div>`; }).join('') : '<div style="color:var(--text3);">No online tournament yet.</div>'}
+        <div style="margin-top:6px;"><button class="btn btn-sm" onclick="otResults('${id}')">📊 <span>Results</span></button> <button class="btn btn-sm" onclick="renderOnlineAdmin()">🔄</button> <button class="btn btn-sm btn-red" onclick="otDelete('${id}')">🗑 <span>Delete</span></button></div></div>`; }).join('') : '<div style="color:var(--text3);">No online tournament yet.</div>'}
     </div>
     <div class="card"><div class="card-title">➕ <span>New online tournament</span></div>${otFormHtml(M)}</div>`;
   otPreview();
@@ -100,7 +101,7 @@ window.otSave = async function () {
   if (OT.busy) return;
   const f = otRead(), { n, at } = f;
   if (!at || at < Date.now()) { toast('❌ The start must be in the future'); return; }
-  const info = { n, at, b: f.b, bpr: f.bpr, sc: f.sc, sys: f.sys, conv: f.conv, mov: f.mov, rep: f.rep,
+  const info = { n, at, b: f.b, bpr: f.bpr, sc: f.sc, sys: f.sys, conv: f.conv, mov: f.mov, rep: f.rep, watch: f.watch,
     st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: Date.now() };
   OT.busy = true;
   try {
@@ -140,3 +141,10 @@ async function otUpcomingHtml() {
   L.sort((a, b) => a.d - b.d);
   return `<div style="font-size:0.72rem;color:var(--text3);margin:8px 0 4px;">🌐 Online club tournaments</div>` + L.map(x => `<div class="bg-entry" style="padding:8px 10px;"><b>🏛 ${cleanData(x.i.cn || x.club)} — ${cleanData(x.i.n)}</b><div style="font-size:0.78rem;">${otWhen(x.d)} · ${x.n} <span>pairs registered</span>${x.i.rep ? ' · 🔁' : ''}</div><div style="font-size:0.72rem;color:var(--text3);">Register as a pair on Bridge Table's home page.</div></div>`).join('');
 }
+
+// the results, double dummy, rating and watching are worked out by Bridge Table (the page the clubs program runs in)
+window.otResults = function (id) {
+  const P = window.parent; if (!P || P === window || typeof P.ctShowResults !== 'function') { toast('❌'); return; }
+  P.CT.adminView = true;   // the director may always watch
+  P.ctLoad(true).then(() => { if (typeof P.closeClubs === 'function') P.closeClubs(); P.ctShowResults(CLUB_ID, id); });
+};
