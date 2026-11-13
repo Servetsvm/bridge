@@ -917,7 +917,7 @@ const Net = (() => {
     let h = ''; try { h = r ? new URL(r).hostname.toLowerCase() : ''; } catch (e) {}
     if (!h || h === location.hostname) return 'direct';
     const M = [['google', /(^|\.)google\./], ['bing', /(^|\.)bing\.com$/], ['yandex', /(^|\.)yandex\./], ['duckduckgo', /duckduckgo\.com$/], ['yahoo', /yahoo\./], ['ecosia', /ecosia\.org$/],
-      ['facebook', /(^|\.)(facebook\.com|fb\.com|fb\.me)$/], ['instagram', /instagram\.com$/], ['x', /(^|\.)(t\.co|twitter\.com|x\.com)$/], ['whatsapp', /whatsapp\./], ['github', /github\.(com|io)$/]];
+      ['facebook', /(^|\.)(facebook\.com|fb\.com|fb\.me)$/], ['instagram', /instagram\.com$/], ['x', /(^|\.)(t\.co|twitter\.com|x\.com)$/], ['whatsapp', /whatsapp\./], ['github', /github\.(com|io)$/], ['askim', /(^|\.)askimbk\.org$/]];
     for (const [k, re] of M) if (re.test(h)) return k;
     return 'other';
   };

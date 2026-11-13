@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 460;
+const APP_V = 461;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -4167,7 +4167,7 @@ function statActHtml(a) {
     ${pl.map(([nm, q]) => `<tr><td><b>${esc(nm)}</b></td><td class="n">${q.b}</td><td class="n">${q.p}</td><td class="n">${pct(q.ok, q.n)}</td><td class="muted">${Object.entries(q.cv).filter(([k]) => E.convInfo(k)).sort((x, y) => y[1] - x[1]).slice(0, 3).map(([k]) => esc(pracName(k))).join(', ')}</td></tr>`).join('')}</tbody></table>`;
 }
 // where the visitors came from (Google first): each device once a day, the first-time ones apart
-const VIS_N = { google: '🔎 Google', bing: '🔎 Bing', yandex: '🔎 Yandex', duckduckgo: '🔎 DuckDuckGo', yahoo: '🔎 Yahoo', ecosia: '🔎 Ecosia', facebook: '📘 Facebook', instagram: '📷 Instagram', x: '𝕏 X', whatsapp: '💬 WhatsApp', github: '🐙 GitHub', other: '🔗 ', direct: '🏠 ' };
+const VIS_N = { google: '🔎 Google', bing: '🔎 Bing', yandex: '🔎 Yandex', duckduckgo: '🔎 DuckDuckGo', yahoo: '🔎 Yahoo', ecosia: '🔎 Ecosia', facebook: '📘 Facebook', instagram: '📷 Instagram', x: '𝕏 X', whatsapp: '💬 WhatsApp', github: '🐙 GitHub', askim: '🏛 Askim BK', other: '🔗 ', direct: '🏠 ' };
 function statVisHtml(V) {
   if (!V) return '';
   const L = Object.entries(V.by).sort((a, b) => (b[0] === 'google') - (a[0] === 'google') || b[1][0] - a[1][0]), max = Math.max(1, ...L.map(x => x[1][0]));
