@@ -2094,3 +2094,6 @@ body.homev2 .h2mid .hpz{margin-left:auto}
 #hAdm{display:flex;flex:none}
 
 .otour small.tby{display:block;opacity:.8}
+
+/* the end of a board: Next deal under the result with the double dummy table */
+.ddnext{display:block;margin:10px auto 0;font-size:17px;padding:10px 26px}

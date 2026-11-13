@@ -148,7 +148,8 @@ function cands(x) {
     add(B(3, 4), () => true, { cv: 'leb', t: 'Reply to Lebensohl Stayman: no four-card major' });
     return L;
   }
-  if (pJust && rhoPass && pm.tag === 'trm') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the transfer' }); return L; }
+  // a minor transfer is completed even if the next opponent doubles it (their double of the artificial bid must not be left in)
+  if (pJust && (rhoPass || x.rhoCall === 'X') && pm.tag === 'trm') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the transfer' }); return L; }
   // Texas is completed even if the next opponent doubles it
   if (pJust && (rhoPass || x.rhoCall === 'X') && pm.tag === 'texas') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the Texas transfer' }); return L; }
   if (pLast && pm.tag === 'wjs' && pJust) { add('P', () => true, { t: 'Passing partner\'s weak suit' }); return L; }
@@ -756,7 +757,12 @@ function ntResponses(x, add, lv, own) {
   if (pup) add(B(3, 0), h => h.hcp >= 4 && h.hcp <= 10 && h.len[2] <= 4 && h.len[3] <= 4 && (h.len[2] === 3 || h.len[3] === 3), { min: 4, tag: 'pup', cv: 'puppet', t: 'Puppet Stayman: asking for a 4- or 5-card major', f: 1 });
   if (C.stayman && !pup) add(B(2 + off, 0), h => h.hcp >= (lv === 1 ? 8 : 4) && (h.len[2] === 4 || h.len[3] === 4) && h.pat !== '4333', { min: lv === 1 ? 8 : 4, tag: 'stay', cv: 'stayman', t: 'Stayman: asking for a 4-card major', f: 1 });
   if (lv === 1) {
-    if (C.fourWay) {
+    // Minor Transfer (in place of the 4-way ones): 2♠ → 3♣, 3♣ → 3♦; 2NT stays natural
+    if (C.minorTr) {
+      add(B(2, 3), h => h.len[0] >= 6 && h.hcp <= 7, { max: 7, len: { 0: 6 }, tag: 'trm', to: B(3, 0), cv: 'minorTr', t: 'Minor transfer: 6+ ♣ (partner bids 3♣)' });
+      add(B(3, 0), h => h.len[1] >= 6 && h.hcp <= 7, { max: 7, len: { 1: 6 }, tag: 'trm', to: B(3, 1), cv: 'minorTr', t: 'Minor transfer: 6+ ♦ (partner bids 3♦)' });
+    }
+    if (C.fourWay && !C.minorTr) {
       add(B(2, 3), h => h.len[0] >= 6 && h.hcp <= 7, { max: 7, len: { 0: 6 }, tag: 'trm', to: B(3, 0), cv: 'fourWay', t: '4-way transfer: 6+ ♣ (partner bids 3♣)' });
       add(B(2, 4), h => h.len[1] >= 6 && h.hcp <= 7, { max: 7, len: { 1: 6 }, tag: 'trm', to: B(3, 1), cv: 'fourWay', t: '4-way transfer: 6+ ♦ (partner bids 3♦)' });
       if (C.stayman) add(B(2, 0), h => h.hcp >= 8 && h.hcp <= 9, { min: 8, tag: 'stay', cv: 'stayman', t: 'Stayman (may be a balanced invitation)', f: 1 });

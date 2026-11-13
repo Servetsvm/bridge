@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 456;
+const APP_V = 458;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -695,6 +695,8 @@ const PRAC_GEN = {
   // Puppet Stayman: a 2NT opening (20-21) with a 4- or 5-card major, a responder with game values and a 3- or 4-card major
   puppet: () => [['open', h => { const l = lensOf(h), p = hcpOf(h); return p >= 20 && p <= 21 && balOf(l) && l[0] <= 5 && l[1] <= 5 && (l[2] >= 4 || l[3] >= 4); }, null, l => balOf(l) && l[0] <= 5 && l[1] <= 5 && (l[2] >= 4 || l[3] >= 4)],
     ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 5 && p <= 10 && l[2] <= 4 && l[3] <= 4 && (l[2] >= 3 || l[3] >= 3) && l[0] <= 5 && l[1] <= 5; }]],
+  // Minor Transfer: a 1NT opening, a weak responder with a six-card minor
+  minorTr: () => [['open', ntOpen()], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p <= 7 && (l[0] >= 6 || l[1] >= 6) && l[2] <= 3 && l[3] <= 3; }, null, l => (l[0] >= 6 || l[1] >= 6) && l[2] <= 3 && l[3] <= 3]],
   smolen: () => [['open', ntOpen(true)], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 10 && p <= 14 && ((l[2] === 4 && l[3] === 5) || (l[2] === 5 && l[3] === 4)); }]],
   texasInt: () => [['open', ntOpen()], ['lho', h => { const l = lensOf(h), p = hcpOf(h); return p >= 9 && p <= 14 && (l[0] >= 6 || l[1] >= 6) && l[2] <= 2 && l[3] <= 2; }],
     ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 8 && p <= 13 && (l[2] >= 6 || l[3] >= 6); }]],
@@ -1296,7 +1298,7 @@ function renderTable() {
     const e = G.result;
     { const first = ui.doneSeen !== G.id; if (first) setTimeout(() => { ui.doneSeen = G.id; }, 0); var doneCls = first ? (e && e.us > 0 ? " good" : e && e.us < 0 ? " bad" : "") : ""; }
     const tab = (e && e.dd && e.dd.tab) || (G.field && G.field.dd && G.field.dd.tab);
-    C.innerHTML = e && tab ? `<button class="rtdone ddend" id="oShow"><span class="rtres">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : ''}</span>${ddTabHtml(tab)}<span class="ddtap">👆 ${T('Tap for the details')}</span></button>` : e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}${e.prv ? `<small class="prvsum">${prvSum(e.prv)}</small>` : ""}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
+    C.innerHTML = e && tab ? `<button class="rtdone ddend" id="oShow"><span class="rtres">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : ''}</span>${ddTabHtml(tab)}<span class="ddtap">👆 ${T('Tap for the details')}</span></button><button class="btn new ddnext" id="oNext2">▶ ${T('Next deal')}</button>` : e ? `<button class="donebanner${doneCls}" id="oShow">${resultLine(e)}${e.imp != null ? `<small>${fmtSigned(e.imp)} IMP · ${e.mp}% MP</small>` : (G.field && !G.field.done ? `<small>Robot tables: ${G.field.tables.length}/${G.field.n || 10}…</small>` : "")}${e.prv ? `<small class="prvsum">${prvSum(e.prv)}</small>` : ""}<small>${T("Tap for details")}</small></button><button class="btn new" id="oNext2" style="align-self:center;margin-top:8px">${T("Next deal")}</button>` : '';
   }
   if (ui.toast) C.insertAdjacentHTML('beforeend', `<div class="toast" id="toast">${ui.toast}</div>`);
   layoutFans(); fitTable(); updateRcpt();
@@ -1568,7 +1570,7 @@ function acctLoad(k) {
 /* ---- practise a convention: the heart of the home page. Pick one and the robots deal hands where our side uses
    it (freshDeal looks for them); every call can be tapped to see what it means. ---- */
 const PRAC_GROUPS = [
-  ['After 1NT', ['stayman', 'puppet', 'fourWay', 'smolen', 'texas', 'texasInt', 'leb']],
+  ['After 1NT', ['stayman', 'puppet', 'fourWay', 'minorTr', 'smolen', 'texas', 'texasInt', 'leb']],
   ['Major openings', ['j2nt', 'bergen', 'splinter', 'drury']],
   ['Slam bidding', ['rkc', 'rkc0314', 'gerber']],
   ['When they bid', ['capp', 'dont', 'michaels', 'supx', 'respx']],
@@ -2074,7 +2076,7 @@ function loginsTxt(n) { for (const s of [10000, 5000, 1000, 500, 100, 50]) if (n
 // a title from the boards played
 function titleOf(n) { return n >= 5000 ? 'Grandmaster' : n >= 2000 ? 'Master' : n >= 500 ? 'Strategist' : n >= 100 ? 'Player' : 'Newcomer'; }
 // the convention card in one line: system, notrump range and the conventions switched on (short names)
-const CONV_SHORT = { rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', puppet: 'Puppet Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
+const CONV_SHORT = { rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', puppet: 'Puppet Stayman', fourWay: '4-way transfers', minorTr: 'Minor Transfer', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
 function convLine(p) {
   if (p.cline && p.cline.trim()) return esc(p.cline.trim());   // the player wrote it themselves
   const y = p.sys && p.sys !== 'none' ? E.sysOf(p.sys) : null;
@@ -2272,6 +2274,7 @@ function showPlayPuzzle(pz) {
     <div class="pzbox"><div class="pzpair"><small>${T('Dummy')} (${SEAT[dm]})</small>${pzHand(pz.deal[dm])}<small>${T('You')} (${SEAT[me]})</small>${pzHand(pz.deal[me])}</div>
     <div class="auction">${auctionTable(pz.auction, false, { board: pz.bn, dealer: pz.dealer, seat: me, sel: null })}</div></div>
     ${done ? '' : `<div class="muted">${going ? T('Your try has started: continue it, it is the one that counts.') : T('Your first try is the one that counts: plan the play before you start.')}</div>`}${res}
+    ${typeof Net !== 'undefined' && Net.isAdmin() ? `<div class="row2"><button class="btn mini-btn" id="pzReset">🔄 ${T('Reset my puzzle rating')}</button></div>` : ''}
     <div class="row2">${done ? `<button class="btn" id="pzAgain">🔁 ${T('Try again (does not count)')}</button>` : going ? `<button class="btn gold" id="pzCont">▶ ${T('Continue')}</button>` : `<button class="btn gold" id="pzGo">▶ ${T('Play')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 // the problem on the normal table: the auction is already made, the lead is on the table's first trick, the robots defend
@@ -2425,6 +2428,7 @@ function showPuzzle() {
   else if (/^p\d+$/.test(pz.day)) res += pzProgHtml(false);
   openOv('puzzle', `<h2>🧩 ${T('Puzzle')}</h2><div class="big">${pzQuestion(pz.kind)}</div>${pz.vals ? `<div class="muted">${T('Only one lead beats this contract.')} · ${esc(E.sysOf('twoone').n)}</div>` : ''}
     <div class="pzbox">${pzHand(pz.deal[2])}${auc}</div>${ctl}${res}
+    ${typeof Net !== 'undefined' && Net.isAdmin() && /^p\d+$/.test(pz.day) ? `<div class="row2"><button class="btn mini-btn" id="pzReset">🔄 ${T('Reset my puzzle rating')}</button></div>` : ''}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 function pzAnswer(ans) {
@@ -2463,6 +2467,7 @@ function pzLeads() {
   else setTimeout(() => end(E.leadValues(pz.deal, pz.c, 3e6)), 50);
 }
 document.addEventListener('click', e => {
+  if (e.target.closest('#pzReset')) { askYes(T('Reset your puzzle rating to 1200 and the solved count to 0?'), () => { const p = pzProg(); pzSave({}); pzProgSave({ r: 1200, s: 0, t: 0, i: p.i + 1, st: 0 }); ui.pz = null; render(); showPuzzle(); flash('🔄 ' + T('Puzzle rating reset'), 2000); }); return; }
   if (e.target.closest('#pzCont')) { closeOv(); if (!(G && G.pz && G.phase === 'play') && ui.saved) resume(); return; }
   if (e.target.closest('#pzGo') || e.target.closest('#pzAgain')) { const p = pzToday(); if (p && p.kind === 'play') pzPlayStart(p, !!e.target.closest('#pzGo')); return; }
   const b = e.target.closest('[data-pzb]'); if (b) { pzAnswer(b.dataset.pzb); return; }
@@ -2540,6 +2545,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 458, tr: 'Minör Transfer’i öğrendim: kartında açıksa 1SA’ya 2♠ sineğe, 3♣ karoya transfer (6’lı minörlü zayıf el, açan 3♣/3♦ der, ben pas). Rakip yapay transfer teklifimi kontr ederse artık transferi yine tamamlıyorum; eskiden 2♠ kontrlü bırakılabiliyordu.', en: 'I learned Minor Transfer: when it is on your card, over 1NT 2♠ transfers to clubs and 3♣ to diamonds (a weak hand with a six-card minor; opener bids 3♣/3♦, I pass). If an opponent doubles the artificial transfer bid I still complete it; 2♠ doubled used to be left in.' },
   { v: 452, tr: 'Puppet Stayman’ı öğrendim (Sigride’nin isteği): kartında açıksa 2SA’dan sonra 3♣ 4’lü veya 5’li majör sorar; 3♦ = 4’lü majör var, 3♥/3♠ = 5’li, 3SA = yok. 3♦’dan sonra elimde olmayan majörü söylüyorum (3♥ = 4 pik, 3♠ = 4 kupa, 4♦ = ikisi de), böylece 2SA açan oynar.', en: 'I learned Puppet Stayman (Sigride’s request): when it is on your card, 3♣ over 2NT asks for a 4- or 5-card major; 3♦ = a 4-card major, 3♥/3♠ = five, 3NT = none. After 3♦ I bid the major I do not hold (3♥ = four spades, 3♠ = four hearts, 4♦ = both), so the 2NT opener declares.' },
   { v: 442, tr: '1♠–1SA gibi bir dizide 19+ puanlık güçlü açışla artık pas geçmiyor ya da minimum teklif vermiyorum: ikinci 4’lü renkle atlamalı söylüyorum (oyuna zorlayıcı), 6’lı majörle doğrudan oyuna çıkıyorum, dengeli 20-21 ile 3SA. Ortağın weak two ya da baraj açışına 19+ puan, destek ve iki asla doğrudan oyuna atlamıyorum, önce 4SA ile anahtar kart soruyorum.', en: 'With a strong opening (19+) after partner’s 1NT answer I no longer pass or make a minimum bid: a jump in a second suit (game forcing), game with six cards in my major, or 3NT balanced. With 19+, support and two aces opposite partner’s weak two or preempt I ask for key cards before bidding game.' },
   { v: 420, tr: 'Ortak araya girdikten sonra fitim yoksa ve 5 kartlı majörüm varsa önce majörü söylüyorum, 2SA’yı ondan sonra düşünüyorum (1♥–2♣–pas, ♠K10943 ♥Q73 ♦AJ98 ♣8: 2♠).', en: 'After partner’s overcall, with no fit and a five-card major, I bid the major before notrump.' },
@@ -3933,7 +3939,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-12T16:41:02Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-13T14:36:59Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {
