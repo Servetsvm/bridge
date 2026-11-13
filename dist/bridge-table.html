@@ -10059,7 +10059,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 461;
+const APP_V = 462;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -13358,7 +13358,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
   if (t.dataset.pldet) { ev_.preventDefault(); ui.plOpen = ui.plOpen === t.dataset.pldet ? null : t.dataset.pldet; showPlayers(); return; }
-  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
