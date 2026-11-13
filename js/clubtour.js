@@ -81,9 +81,9 @@ function ctCardHtml() {
   const L = ctList(); if (!L.length || !myNm()) return '';
   return L.slice(0, 3).map(x => {
     const mine = ctMine(x), seeking = x.seek.some(s => s.k === ctMe()), started = x.d <= Date.now();
-    return `<button class="hcard ctcard${mine ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} · ${esc(x.i.n)}</b>
+    return `<div class="ctwrap"><button class="hcard ctcard${mine ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} · ${esc(x.i.n)}</b>
       <span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${started ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span>
-      <small>${(() => { if (x.plan && mine) { const pi = ctMyPair(x.plan), S = pi >= 0 ? ctSched(x.plan, pi) : []; return S.length ? '🪑 ' + T('Round {0} · table {1} · {2} against {3} · boards {4}-{5}', S[0].r + 1, S[0].ti + 1, S[0].ns ? T('North-South') : T('East-West'), ctPairTxt(S[0].opp), S[0].from, S[0].to) : ''; } if (started && !x.plan) ctEnsurePlan(x); return mine ? '✅ ' + T('You are registered with {0}', esc(nameKeyEq(mine.a) ? mine.b : mine.a)) : seeking ? '🔎 ' + T('You are looking for a partner') : started ? '' : '✍️ ' + T('Register as a pair'); })()}</small></button>`;
+      <small>${(() => { if (x.plan && mine) { const pi = ctMyPair(x.plan), S = pi >= 0 ? ctSched(x.plan, pi) : []; return S.length ? '🪑 ' + T('Round {0} · table {1} · {2} against {3} · boards {4}-{5}', S[0].r + 1, S[0].ti + 1, S[0].ns ? T('North-South') : T('East-West'), ctPairTxt(S[0].opp), S[0].from, S[0].to) : ''; } if (started && !x.plan) ctEnsurePlan(x); return mine ? '✅ ' + T('You are registered with {0}', esc(nameKeyEq(mine.a) ? mine.b : mine.a)) : seeking ? '🔎 ' + T('You are looking for a partner') : started ? '' : '✍️ ' + T('Register as a pair'); })()}</small></button><button class="btn ctadm" data-ctadmin="${esc(x.club + '|' + x.id)}">⚙️ ${T('Admin')}</button></div>`;
   }).join('');
 }
 const nameKeyEq = n => Net.ruleKey(n || '') === ctMe();
@@ -98,7 +98,7 @@ function ctShow(key, err) {
   openOv('ctour', `<h2>🏛 ${esc(i.cn || x.club)}</h2><div class="big">${esc(i.n)}</div>
     <div class="grp"><span>${T('When')}</span><b>${esc(ctWhen(x.d))}</b>${i.rep ? ' · 🔁 ' + T('every week') : ''} · ${x.d > Date.now() ? '⏳ ' + ctLeft(x.d) : '🟢 ' + T('Started')}</div>
     <div class="grp"><span>${T('What is played')}</span>${T('{0} boards', i.b)} · ${T('{0} boards a round', i.bpr)} · ${i.sc === 'imp' ? 'IMP' : 'MP'} · ${T('pairs against each other')}
-      <div><b>${esc(sys)}</b>${convs ? ' · ' + esc(convs) : ''}</div><div class="muted">${T('Everyone bids with this card, the robots too.')}</div></div>
+      <div><b>${esc(sys)}</b>${convs ? ' · ' + esc(convs) : ''}</div><div class="muted">${T('Always played')}: ${esc(PRAC_BASICS.map(pracName).join(', '))}</div><div class="muted">${T('Everyone bids with this card, the robots too.')}</div></div>
     <div class="grp"><span>${T('Pairs registered')} (${x.pairs.length})</span>${x.pairs.length ? x.pairs.map((p, k) => `<div>${k + 1}. ${esc(p.a)} – ${esc(p.b)}</div>`).join('') : `<div class="muted">${T('Nobody yet.')}</div>`}</div>
     ${x.seek.length ? `<div class="grp"><span>🔎 ${T('Looking for a partner')}</span>${x.seek.map(s => esc(s.n)).join(', ')}<div class="muted">${T('Write to one of them, or the director pairs you.')}</div></div>` : ''}
     ${x.plan ? ctPlanHtml(x) : x.d <= Date.now() ? `<div class="grp"><span>🪑 ${T('Tables')}</span><div class="muted">${!x.pairs.length ? T('Nobody yet.') : '⏳ ' + T('The tables are being made…')}</div></div>` : ''}
@@ -446,6 +446,8 @@ async function ctWatch(tid) {
   flash('👁 ' + T('Round {0} · table {1}', rr + 1, ti + 1), 2000);
 }
 document.addEventListener('click', e => {
+  const a = e.target.closest('[data-ctadmin]');   // the club's admin: the Clubs sign-in (the club's password), then the tournament to change
+  if (a) { const [c, i] = a.dataset.ctadmin.split('|'); openClubs('club=' + encodeURIComponent(c) + '&role=admin&admin=1&ot=' + encodeURIComponent(i)); return; }
   const t = e.target.closest('[data-ctres],[data-ctdd],[data-ctpbn],[data-ctwatch],[data-ctresopen]'); if (!t) return;
   if (t.dataset.ctresopen) { const [c, i] = t.dataset.ctresopen.split('|'); ctShowResults(c, i); }
   else if (t.dataset.ctres && CT.res) ctShowResults(CT.res.club, CT.res.id, CT.res.d, t.dataset.ctres);

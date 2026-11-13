@@ -5,6 +5,8 @@ var adminRefreshTimer=null;
 let adminTab='setup';
 
 function renderAdminPanel(){
+  const otq=new URLSearchParams(location.search).get('ot');
+  if(otq&&!window._otOpened&&typeof OT!=='undefined'){ window._otOpened=1; adminTab='setup'; setupOnline=true; OT.edit=otq; }
   document.getElementById('panelContent').innerHTML=`
     <div class="admin-wrap">
       <div class="admin-tabs">

@@ -438,7 +438,7 @@ window.doLogin=async function(){
 
   if(role==='admin'){
     const st=getState();
-    if(st&&st.status==='running'){
+    if(st&&st.status==='running'&&!new URLSearchParams(location.search).get('ot')){
       refreshTopbar();
       document.getElementById('panelContent').innerHTML=`
         <div style="max-width:420px;margin:40px auto;padding:0 14px;">
