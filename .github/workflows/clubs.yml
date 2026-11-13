@@ -1,0 +1,22 @@
+# Online club tournaments: a table everyone has left goes on with its robots (.github/clubs/runner.js). Every five
+# minutes a run looks for an evening being played; while there is one it stays (up to almost six hours) and plays the
+# robots of the empty tables. Without an evening it ends at once.
+name: Club tables
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+concurrency: clubs-runner
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Play the empty tables
+        env:
+          FIREBASE_DB_SECRET: ${{ secrets.FIREBASE_DB_SECRET }}
+        run: node .github/clubs/runner.js
