@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 459;
+const APP_V = 460;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2545,6 +2545,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 460, tr: 'Uyum belli değilken 5’li renkle oyuna atlamıyorum, davet ediyorum: 1♦–1♠–1SA ile ♠AKQ84 ♥973 ♦95 ♣A76: 4♠ değil 3♠; ortak uyumsuz bir renk söylediyse 5’li kupamla 4♥’e çıkmıyorum. 9.000 elde eski robotlarla yarıştırıldı: +131 IMP. Denenip kaybettirdiği için alınmayanlar: kontraya cevapta oyuna atlamamak (−67 IMP) ve 6’lı minör desteğiyle 1SA yerine yükseltmek.', en: 'With no known fit I no longer jump to game in a five-card suit, I invite: 1♦–1♠–1NT with ♠AKQ84 ♥973 ♦95 ♣A76: 3♠, not 4♠; after partner names a suit that does not fit, no 4♥ on my five hearts. Played against the old robots on 9,000 deals: +131 IMP. Tried and left out because they lost: no game jump when answering a takeout double (−67 IMP), and raising partner’s minor with six instead of 1NT.' },
   { v: 459, tr: 'Minörde 4’ü artık “oyun” diye açıklamıyorum: 4♣/4♦ davettir, oyun 5’tir; oyuna zorlayan dizide doğrudan 5♣/5♦ diyorum (1♥–2♣–2♥ ile ♠987 ♥J ♦AJ2 ♣AJ9653: 4♣ = davet). 3.000 elde denendi; 3SA’ya daha sık geçmek ve rakibin oyununun üstünde 5’e çıkmak IMP kaybettirdiği için alınmadı.', en: 'I no longer explain four of a minor as game: 4♣/4♦ invites, game is five; in a game-forcing auction I bid 5♣/5♦ at once (1♥–2♣–2♥ with ♠987 ♥J ♦AJ2 ♣AJ9653: 4♣ invites). Tried on 3,000 deals: going to 3NT more often and pushing to five over their game lost IMPs, so they were left out.' },
   { v: 458, tr: 'Minör Transfer’i öğrendim: kartında açıksa 1SA’ya 2♠ sineğe, 3♣ karoya transfer (6’lı minörlü zayıf el, açan 3♣/3♦ der, ben pas). Rakip yapay transfer teklifimi kontr ederse artık transferi yine tamamlıyorum; eskiden 2♠ kontrlü bırakılabiliyordu.', en: 'I learned Minor Transfer: when it is on your card, over 1NT 2♠ transfers to clubs and 3♣ to diamonds (a weak hand with a six-card minor; opener bids 3♣/3♦, I pass). If an opponent doubles the artificial transfer bid I still complete it; 2♠ doubled used to be left in.' },
   { v: 452, tr: 'Puppet Stayman’ı öğrendim (Sigride’nin isteği): kartında açıksa 2SA’dan sonra 3♣ 4’lü veya 5’li majör sorar; 3♦ = 4’lü majör var, 3♥/3♠ = 5’li, 3SA = yok. 3♦’dan sonra elimde olmayan majörü söylüyorum (3♥ = 4 pik, 3♠ = 4 kupa, 4♦ = ikisi de), böylece 2SA açan oynar.', en: 'I learned Puppet Stayman (Sigride’s request): when it is on your card, 3♣ over 2NT asks for a 4- or 5-card major; 3♦ = a 4-card major, 3♥/3♠ = five, 3NT = none. After 3♦ I bid the major I do not hold (3♥ = four spades, 3♠ = four hearts, 4♦ = both), so the 2NT opener declares.' },
@@ -3940,7 +3941,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-13T14:36:59Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-13T15:10:17Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {

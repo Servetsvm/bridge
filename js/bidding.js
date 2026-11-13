@@ -1075,6 +1075,9 @@ function generic(x, h) {
   else goal = 0;
   const cheapest = s => last < 0 ? 1 : (ST(last) < s ? LV(last) : LV(last) + 1);
   const cl = cheapest(t);
+  // no known fit and only a five-card suit: invite, do not jump to game in it (1♦–1♠–1NT with ♠AKQ84 and 13: not 4♠)
+  const shortTrump = t < 4 && h.len[t] <= 5 && fitLen < 8 && !gf;
+  if (shortTrump && goal >= 3 && goal < 6) goal = -1;
   const ourLast = st.lastSeat >= 0 && sideOf(st.lastSeat) === sideOf(me);
   // four of a minor is not game: in our own game-forcing auction (they have not bid, partner has not bid a game) the
   // minor game is five
@@ -1104,7 +1107,7 @@ function generic(x, h) {
   if (call === null && goal >= 3 && goal < 6 && cl <= goal) { call = B(goal, t); m = { t: t < 2 && goal === 4 ? 'Invitation: game is 5' + SUIT[t] : 'Game contract', ...range, len: lenm }; }
   if (call === null && goal === -1) {
     if (cl <= gameL - 1) { call = B(gameL - 1, t); m = { t: 'Game invitation', ...range, len: lenm }; }
-    else if (cl <= gameL && est >= 24) { call = B(gameL, t); m = { t: 'Game contract', ...range, len: lenm }; }
+    else if (cl <= gameL && est >= 24 && !shortTrump) { call = B(gameL, t); m = { t: 'Game contract', ...range, len: lenm }; }
   }
   if (call === null && goal === 0) {
     if (!(ourLast && (ST(last) === t || t === 4 || h.len[ST(last)] >= 2))) {
