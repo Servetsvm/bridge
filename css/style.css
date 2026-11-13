@@ -2105,5 +2105,6 @@ body.homev2 .h2mid .hpz{margin-left:auto}
 #hClubT{display:flex;flex-direction:column;gap:8px}
 .ctcard{display:flex;flex-direction:column;gap:3px;text-align:left;cursor:pointer;border:2px solid #1f7a2e;background:linear-gradient(180deg,#f4fbf2,#e3f2df);color:#17311d;font:inherit}
 .ctcard b{font-size:15px}.ctcard span{font-size:13px}.ctcard small{font-size:13px;font-weight:700;color:#1f5f8b}
+.ctcard.short .ctonl{display:inline-block;margin-left:6px;padding:1px 9px;border-radius:999px;background:#1f8a3a;color:#fff;font-weight:800;font-size:12.5px;letter-spacing:.3px;vertical-align:1px}
 .ctcard.short{width:100%;margin:0 0 8px;padding:8px 12px;gap:2px}.ctcard.short b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.ctcard.short span{font-size:12.5px}.ctcard.short .ctmore{font-style:normal;font-weight:700;color:#1f5f8b;float:right;margin-left:8px}
 .ctcard.reg{border-color:#d4a017;background:linear-gradient(180deg,#fffaf0,#f8ecc9)}
