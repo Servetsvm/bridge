@@ -30,6 +30,13 @@ function otFormHtml(M, ed) {
     const set = (id, v) => { const e = document.getElementById(id); if (e && v != null) e.value = v; }, at = new Date(otNext(ed));
     set('otSys', ed.sys); set('otName', ed.n); set('otDay', at.getFullYear() + '-' + String(at.getMonth() + 1).padStart(2, '0') + '-' + String(at.getDate()).padStart(2, '0')); set('otTime', String(at.getHours()).padStart(2, '0') + ':' + String(at.getMinutes()).padStart(2, '0'));
     set('otB', ed.b); set('otBpr', ed.bpr); set('otSc', ed.sc); set('otMov', ed.mov || 'howell');
+    const t = OT.list && OT.list[OT.edit], run = t && t.run && t.run[otNext(ed)];
+    if (run && run.plan) {
+      for (const id of ['otDay', 'otTime', 'otB', 'otBpr', 'otMov']) { const e = document.getElementById(id); if (e) e.disabled = true; }
+      const e = document.getElementById('otTime'), note = document.createElement('div');
+      note.style.cssText = 'font-size:0.75rem;color:var(--gold);margin:4px 0;'; note.innerHTML = '🟢 <span>The tournament is under way: the day, the time, the boards and the movement stay as they are (the tables already made); the other changes are saved without starting again.</span>';
+      if (e) e.closest('.field-row').after(note);
+    }
     const ck = (id, v) => { const e = document.getElementById(id); if (e) e.checked = !!v; }; ck('otRep', ed.rep); ck('otWatch', ed.watch);
     document.querySelectorAll('[data-otconv]').forEach(x => { x.checked = (ed.conv || []).includes(x.dataset.otconv); });
     otPreview();
@@ -120,7 +127,10 @@ async function otMove(id, old, nw) {
 }
 window.otSave = async function () {
   if (OT.busy) return;
-  const f = otRead(), { n, at } = f, ed = OT.edit && OT.list && OT.list[OT.edit];
+  const f = otRead(), { n } = f, ed = OT.edit && OT.list && OT.list[OT.edit];
+  const run0 = ed && ed.run && ed.run[otNext(ed.info)], started = !!(run0 && run0.plan);
+  // under way: the start stays as it is; the same day and minute as before: the start to the second kept too
+  const at = ed && (started || Math.floor(f.at / 6e4) === Math.floor(otNext(ed.info) / 6e4)) ? ed.info.at : f.at;
   if (!at || (!ed && at < Date.now())) { toast('❌ The start must be in the future'); return; }
   const info = { ...(ed ? ed.info : {}), n, at, b: f.b, bpr: f.bpr, sc: f.sc, sys: f.sys, conv: f.conv, mov: f.mov, rep: f.rep, watch: f.watch,
     st: ed ? ed.info.st || 'reg' : 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: ed ? ed.info.ts || Date.now() : Date.now() };

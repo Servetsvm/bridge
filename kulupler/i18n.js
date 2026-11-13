@@ -10,6 +10,7 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "The tournament is under way: the day, the time, the boards and the movement stay as they are (the tables already made); the other changes are saved without starting again.":"Turnuva sürüyor: gün, saat, board sayısı ve hareket olduğu gibi kalır (masalar kuruldu); diğer değişiklikler turnuva baştan başlamadan kaydedilir.",
     "Always played":"Her zaman oynanır",
     "Change the tournament":"Turnuvayı değiştir",
     "Cancel":"İptal",
