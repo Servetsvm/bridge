@@ -71,16 +71,56 @@
   <url><loc>https://servetsvm.github.io/bridge/zh/learn/stayman.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://servetsvm.github.io/bridge/zh/learn/transfers.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://servetsvm.github.io/bridge/zh/learn/rkcb.html</loc><lastmod>2026-11-01</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/en/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/tr/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/no/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/es/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/fr/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/it/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/de/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/ru/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/pl/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/zh/daily/</loc><lastmod>2026-11-12</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/en/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/en/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/en/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/en/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/tr/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/tr/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/tr/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/tr/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/no/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/no/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/no/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/no/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/es/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/es/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/es/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/es/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/fr/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/fr/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/fr/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/fr/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/it/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/it/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/it/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/it/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/de/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/de/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/de/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/de/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/ru/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/ru/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/ru/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/ru/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/pl/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/pl/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/pl/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/pl/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/zh/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/zh/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/zh/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/zh/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/en/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/tr/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/no/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/es/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/fr/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/it/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/de/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/ru/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/pl/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/zh/daily/</loc><lastmod>2026-11-13</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>
   <url><loc>https://servetsvm.github.io/bridge/en/daily/2026-10-31.html</loc><lastmod>2026-10-31</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://servetsvm.github.io/bridge/tr/daily/2026-10-31.html</loc><lastmod>2026-10-31</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://servetsvm.github.io/bridge/no/daily/2026-10-31.html</loc><lastmod>2026-10-31</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
@@ -201,44 +241,14 @@
   <url><loc>https://servetsvm.github.io/bridge/ru/daily/2026-11-12.html</loc><lastmod>2026-11-12</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://servetsvm.github.io/bridge/pl/daily/2026-11-12.html</loc><lastmod>2026-11-12</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://servetsvm.github.io/bridge/zh/daily/2026-11-12.html</loc><lastmod>2026-11-12</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/en/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/en/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/en/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/en/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/tr/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/tr/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/tr/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/tr/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/no/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/no/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/no/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/no/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/es/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/es/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/es/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/es/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/fr/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/fr/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/fr/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/fr/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/it/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/it/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/it/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/it/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/de/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/de/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/de/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/de/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/ru/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/ru/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/ru/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/ru/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/pl/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/pl/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/pl/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/pl/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/zh/learn/puppet-stayman.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/zh/learn/jacoby-2nt.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/zh/learn/michaels.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://servetsvm.github.io/bridge/zh/learn/bergen-raises.html</loc><lastmod>2026-11-12</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/en/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/tr/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/no/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/es/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/fr/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/it/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/de/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/ru/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/pl/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://servetsvm.github.io/bridge/zh/daily/2026-11-13.html</loc><lastmod>2026-11-13</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
 </urlset>
