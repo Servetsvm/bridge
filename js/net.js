@@ -542,7 +542,9 @@ const Net = (() => {
     // the players the online list has at an online table the direct lines have not found: one line for each table
     // (players sitting together carry the same names), so nobody playing is missing from the lobby
     const TB = (st.cloud && Cloud.on && st.cloud.on || []).filter(x => x.at === 'table' && x.name && nameKey(x.name) !== nameKey(myName()) && !seen.has(nameKey(x.name)));
-    const tbs = new Map(); for (const x of TB) { const key = (x.tb && x.tb.n) || nameKey(x.name); if (!tbs.has(key)) tbs.set(key, x); }
+    // a player named on another's table (that one has the newer app, this one not yet) is not a table of their own
+    const atTb = new Set(TB.flatMap(x => x.tb && x.tb.n ? x.tb.n.split(', ').map(nameKey) : []));
+    const tbs = new Map(); for (const x of TB) { if (!(x.tb && x.tb.n) && atTb.has(nameKey(x.name))) continue; const key = (x.tb && x.tb.n) || nameKey(x.name); if (!tbs.has(key)) tbs.set(key, x); }
     rows += [...tbs.values()].map(x => {
       const k = st.roomOf && st.roomOf[nameKey(x.name)], ppl = x.tb && x.tb.n ? x.tb.n.split(', ').map(pn).join(', ') : pn(x.name);
       return line(!(x.tb && x.tb.pv), T("{0}'s table", esc(x.name)), T('online'), ppl, '', k ? `<button class="btn gold" data-jt="${k}">${T('Ask to join')}</button>` : '');
