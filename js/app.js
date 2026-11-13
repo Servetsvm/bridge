@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 465;
+const APP_V = 466;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1186,7 +1186,7 @@ function renderBar() {
   $('bar').innerHTML = `
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
    <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
-   ${tblScore ? `<button class="box" id="bTblScore" title="${T('Table score')}"><small>${T('Table score')}</small><b>NS ${tblScore.ns} – EW ${tblScore.ew}</b><span class="tr">${tblScore.n} ${T('boards')}</span></button>` : `<div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>`}
+   ${tblScore ? `<button class="box" id="bTblScore" title="${T('Table score')}"><small>${T('Table score')}</small><b>NS ${tblScore.ins || 0} – EW ${tblScore.iew || 0}</b><span class="tr">IMP · ${tblScore.n} ${T('boards')}${tblScore.wait ? ' ⏳' : ''}</span></button>` : `<div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>`}
    <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button>
    <div class="spacer"></div>
    <div class="tools">
