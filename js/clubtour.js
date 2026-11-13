@@ -46,12 +46,13 @@ function ctMakePlan(x) {
   if (P.length % 2) P.push({ a: 'Robot', b: 'Robot', ka: '', kb: '', robot: 1 });
   const n = P.length, R = Math.max(1, Math.floor((+x.i.b || 18) / (+x.i.bpr || 3)));   // after everyone has met everyone the circle goes on (the same opponents, other boards)
   const rounds = []; let arr = [...Array(n).keys()];
-  for (let r = 0; r < R; r++) {
+  if (x.i.mov === 'mitchell') { const tn = n / 2; for (let r = 0; r < R; r++) rounds.push([...Array(tn).keys()].map(i => [i, tn + (i + r) % tn])); }
+  else for (let r = 0; r < R; r++) {
     const tb = []; for (let i = 0; i < n / 2; i++) { let a = arr[i], b = arr[n - 1 - i]; if ((r + i) % 2) [a, b] = [b, a]; tb.push([a, b]); }
     rounds.push(tb); arr = [arr[0], arr[n - 1], ...arr.slice(1, n - 1)];
   }
   const m = {}; rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => { const id = r + '_' + ti; m[id] = {}; for (const k of [P[a].ka, P[a].kb, P[b].ka, P[b].kb]) if (k) m[id][k] = 1; }));
-  return { plan: { pairs: P, rounds, bpr: +x.i.bpr || 3, sys: x.i.sys, conv: x.i.conv || [], sc: x.i.sc, seed: ctSeed(x.id + ':' + x.d), at: Date.now() }, m };
+  return { plan: { pairs: P, rounds, mov: x.i.mov || 'howell', bpr: +x.i.bpr || 3, sys: x.i.sys, conv: x.i.conv || [], sc: x.i.sc, seed: ctSeed(x.id + ':' + x.d), at: Date.now() }, m };
 }
 async function ctEnsurePlan(x) {
   if (x.plan || x.d > Date.now() || !ctMine(x) || CT.planning) return;
@@ -240,6 +241,7 @@ async function ctPoll() {
 }
 async function ctBeat() {
   const t = CT.tbl; if (!t) return;
+  ctSlowCheck();
   try { await Net.Cloud.put(t.p + '/hb/' + Net.fbKey(myNm()), Date.now()); t.hb = await Net.Cloud.get(t.p + '/hb') || {}; } catch (e) {}
   if (G && G.ct) tick();   // a player gone (or back): the robots take the seat (or give it back)
 }
@@ -265,7 +267,7 @@ function ctGoNext() {
   const t = CT.tbl; if (!t || !G || !G.ct) return;
   if (G.phase !== 'done') { flash(T('Finish this tournament board first'), 2000); return; }
   if (G.ct.i + 1 < t.boards.length) { ctStartBoard(G.ct.i + 1); ctPoll(); return; }
-  if (t.r + 1 < t.rounds) { ctSit(t.key, t.r + 1); return; }
+  if (t.r + 1 < t.rounds) { ctWaitRound(t, t.r + 1); return; }
   clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = null;
   flash('🏁 ' + T('The tournament is over for you — thank you!'), 4000); G = null; goHome();
 }
@@ -275,6 +277,46 @@ function ctBoardDone(e) {
   const res = e.c ? { c: [e.c.level, e.c.strain, e.c.dbl, e.c.decl], tr: e.tricks, ns: e.ns } : { pass: 1, ns: 0 };
   Net.Cloud.put(t.p + '/t/' + t.tid + '/res/' + e.board, res).catch(() => {});
 }
+/* the end of a round at your table: the next round starts when every table has finished this one (the tables still
+   playing are shown; after five minutes you may go on without waiting); then you are seated at your next table */
+async function ctTablesLeft(p, plan, r) {
+  const left = [];
+  for (let ti = 0; ti < plan.rounds[r].length; ti++) {
+    let res = null; try { res = await Net.Cloud.get(p + '/t/' + r + '_' + ti + '/res'); } catch (e) {}
+    const n = Object.keys(res || {}).length; if (n < plan.bpr) left.push({ ti, n });
+  }
+  return left;
+}
+async function ctWaitRound(t, next) {
+  const { key, p, plan, r } = t;
+  ctLeave(); G = idleG(); save(); render();
+  CT.waiting = { key, next, since: Date.now(), p, plan, r, k: 0 };
+  const beat = () => Net.Cloud.put(p + '/hb/' + Net.fbKey(myNm()), Date.now()).catch(() => {});   // still here: the next table waits for you
+  beat(); clearInterval(CT.waitT);
+  const check = async () => {
+    const w = CT.waiting; if (!w) { clearInterval(CT.waitT); return; }
+    const left = await ctTablesLeft(p, plan, r);
+    if (CT.waiting !== w) return;
+    if (!left.length) { clearInterval(CT.waitT); CT.waiting = null; if (ui.overlay === 'ctwait') closeOv(); flash('🪑 ' + T('Every table has finished: round {0}', next + 1), 2500); ctSit(key, next); return; }
+    if (ui.overlay === 'ctwait' || !ui.overlay) ctWaitShow(left);
+    if (++w.k % 4 === 0) beat();
+  };
+  CT.waitT = setInterval(check, 5000); check();
+}
+function ctWaitShow(left) {
+  const w = CT.waiting; if (!w) return; const P = w.plan, long = Date.now() - w.since > 5 * 60e3;
+  openOv('ctwait', `<h2>⏳ ${T('Waiting for the other tables')}</h2>
+    <div class="big">${T('Round {0} is over at your table. You sit down at your next table as soon as every table has finished.', w.r + 1)}</div>
+    <div class="grp"><span>${T('Tables still playing')}</span>${left.map(x => { const [a, b] = P.rounds[w.r][x.ti]; return `<div>${T('Table {0}', x.ti + 1)}: ${ctPairTxt(P.pairs[a])} – ${ctPairTxt(P.pairs[b])} · ${x.n}/${P.bpr}</div>`; }).join('')}</div>
+    <div class="row2">${long ? `<button class="btn gold" data-ctskip="1">⏭ ${T('Go on without waiting')}</button>` : ''}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+// a table still playing while the others have finished the round: its players are told (once a minute)
+async function ctSlowCheck() {
+  const t = CT.tbl; if (!t || !G || !G.ct || Date.now() - (t.slowAt || 0) < 60e3) return;
+  t.slowAt = Date.now();
+  const left = await ctTablesLeft(t.p, t.plan, t.r);
+  if (left.length === 1 && left[0].ti === t.ti && t.plan.rounds[t.r].length > 1) flash('⏳ ' + T('The other tables have finished this round and wait for yours'), 5000);
+}
 // back to the home page from a club table: the table goes on (the robots take the seat after 90 seconds); the card
 // offers to sit down again
 function ctLeave() { clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = null; }
@@ -282,9 +324,10 @@ function ctLeave() { clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = 
 setTimeout(() => { if (typeof ui !== 'undefined' && ui.saved && ui.saved.ct) ui.saved = null; if (typeof G !== 'undefined' && G && G.ct && !CT.tbl) { G = null; if (typeof render === 'function') render(); } }, 500);
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek],[data-ctsit],[data-ctrobot]'); if (!t) return;
+  const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek],[data-ctsit],[data-ctrobot],[data-ctskip]'); if (!t) return;
   if (t.dataset.ctrobot) { ctRegister(t.dataset.ctrobot, true); return; }
   if (t.dataset.ctsit) { ctSit(t.dataset.ctsit); return; }
+  if (t.dataset.ctskip && CT.waiting) { const w = CT.waiting; CT.waiting = null; clearInterval(CT.waitT); closeOv(); ctSit(w.key, w.next); return; }
   if (t.dataset.ct) ctShow(t.dataset.ct);
   else if (t.dataset.ctreg) ctRegister(t.dataset.ctreg);
   else if (t.dataset.ctcancel) ctCancel(t.dataset.ctcancel);

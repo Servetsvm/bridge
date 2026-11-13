@@ -22,6 +22,58 @@ function otMeta() {
     w.onmessage = e => { if (e.data && e.data.meta) { OT.meta = e.data.meta; w.terminate(); res(OT.meta); } };
     w.postMessage({ meta: true }); setTimeout(() => res(OT.meta), 8000); });
 }
+const OT_MOV = { howell: 'Howell — all pairs move', mitchell: 'Mitchell — NS fixed, EW moves', barometer: 'Barometer — every table plays the same boards each round, then the pairs move' };
+// the form of an online tournament (also in Tournament Setup under 🌐 Online): what is played first, then when and how
+function otFormHtml(M) {
+  const d0 = new Date(Date.now() + 864e5), ymd = d0.toISOString().slice(0, 10);
+  return `<div class="field"><label>Base system</label><select id="otSys" onchange="otPreview()">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
+      <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
+      <div style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.filter(x => !x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}" onchange="otPreview()"> ${cleanData(x.n)}</label>`).join('')}</div>
+      <div class="field"><label>Name</label><input id="otName" maxlength="60" placeholder="Empty: the system and the conventions" oninput="otPreview()"></div>
+      <div class="field-row"><div class="field"><label>Day</label><input id="otDay" type="date" value="${ymd}" onchange="otPreview()"></div><div class="field"><label>Start time</label><input id="otTime" type="time" value="19:00" onchange="otPreview()"></div></div>
+      <label style="display:block;margin:6px 0;"><input id="otRep" type="checkbox" onchange="otPreview()"> 🔁 <span>Every week at this time</span></label>
+      <div class="field-row"><div class="field"><label>Boards</label><select id="otB" onchange="otPreview()">${[12, 16, 18, 20, 24, 27].map(n => `<option ${n === 18 ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+      <div class="field"><label>Boards a round</label><select id="otBpr" onchange="otPreview()">${[2, 3, 4].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+      <div class="field"><label>Scoring</label><select id="otSc" onchange="otPreview()"><option value="mp">MP</option><option value="imp">IMP</option></select></div></div>
+      <div class="field"><label>Movement</label><select id="otMov" onchange="otPreview()">${Object.entries(OT_MOV).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">An odd number of pairs gets a robot pair; a pair can also play with a robot partner.</div></div>
+      <div id="otPrev" class="card" style="margin:8px 0;background:var(--bg3,rgba(0,0,0,.05));"></div>
+      <button class="btn btn-gold btn-full" style="margin-top:6px;" onclick="otSave()">🌐 <span>Create the online tournament</span></button>`;
+}
+// the form read: what the tournament will be called and how it is played
+function otRead() {
+  const v = id => (document.getElementById(id) || {}).value || '', M = OT.meta || { systems: [], convs: [] };
+  const conv = [...document.querySelectorAll('[data-otconv]')].filter(x => x.checked).map(x => x.dataset.otconv);
+  const sysN = ((M.systems.find(x => x.k === v('otSys')) || {}).n || v('otSys')).replace(/ \(.*\)$/, '');
+  const auto = sysN + (conv.length ? ' · ' + conv.map(k => (M.convs.find(x => x.k === k) || {}).n || k).join(', ') : '');
+  return { n: (v('otName').trim() || auto).slice(0, 60), at: Date.parse(v('otDay') + 'T' + (v('otTime') || '19:00')), b: +v('otB') || 18, bpr: +v('otBpr') || 3,
+    sc: v('otSc') === 'imp' ? 'imp' : 'mp', sys: v('otSys') || 'sayc', conv, mov: OT_MOV[v('otMov')] ? v('otMov') : 'howell', rep: (document.getElementById('otRep') || {}).checked ? 1 : 0, sysN };
+}
+// the line shown before saving: "SAYC · RKCB 0314, Stayman · Sat 14 Nov 20:00 / 18 boards · 3 boards a round · MP · Howell"
+window.otPreview = function () {
+  const el = document.getElementById('otPrev'); if (!el) return;
+  const i = otRead(), M = OT.meta || { convs: [] };
+  el.innerHTML = `<b>${cleanData(i.n)}</b>${i.at ? ' · ' + otWhen(i.at) : ''}${i.rep ? ' · 🔁' : ''}<div style="font-size:0.8rem;">${i.b} <span>boards</span> · ${i.bpr} <span>boards a round</span> · ${i.sc === 'imp' ? 'IMP' : 'MP'} · ${cleanData(i.sysN)}${i.conv.length ? ' · ' + i.conv.map(k => cleanData((M.convs.find(x => x.k === k) || {}).n || k)).join(', ') : ''} · ${cleanData(OT_MOV[i.mov].split(' — ')[0])}</div>`;
+};
+// Tournament Setup with 🌐 Online chosen: the online tournament's form in place of the club room's
+let setupOnline = false;
+window.setSetupOnline = function (on) { setupOnline = !!on; renderAdminTab(); };
+function otSetupCard() {
+  setTimeout(async () => { await otMeta(); const box = document.getElementById('otSetupBox'); if (box) { box.innerHTML = otFormHtml(OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }); otPreview(); } }, 0);
+  return `<div class="card"><div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span>⚙️</span> Tournament Setup
+      <span style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-sm" onclick="setSetupOnline(false)">🏛 <span>At the club</span></button><button class="btn btn-sm btn-gold" disabled>🌐 Online</button></span></div>
+    <div style="font-size:0.78rem;color:var(--text2);margin-bottom:8px;">Played in Bridge Table: pairs against each other, each at home. Players register as pairs in Bridge Table and see the tournament there and here before it starts.</div>
+    <div id="otSetupBox">⏳</div></div>`;
+}
+// the state of an evening: each round's tables with the boards finished there
+function otLiveHtml(t, d) {
+  const run = t.run && t.run[d], P = run && run.plan; if (!P) return '';
+  const T_ = run.t || {}, done = (r, ti) => Object.keys((T_[r + '_' + ti] || {}).res || {}).length;
+  const cur = P.rounds.findIndex((tb, r) => tb.some((x, ti) => done(r, ti) < P.bpr));
+  const pn = p => p.robot ? '🤖' : cleanData(p.a) + ' – ' + cleanData(p.b);
+  return `<div style="margin-top:6px;font-size:0.8rem;"><b>🟢 <span>Live</span></b> · ${cur < 0 ? '🏁 <span>Finished</span>' : '<span>Round</span> ' + (cur + 1) + '/' + P.rounds.length}
+    ${P.rounds.map((tb, r) => r < Math.max(0, cur) - 1 || (cur >= 0 && r > cur) ? '' : `<div style="margin-top:4px;"><span>Round</span> ${r + 1}: ${tb.map(([a, b], ti) => { const n = done(r, ti); return `<span style="display:inline-block;margin:2px 6px 2px 0;padding:2px 6px;border-radius:6px;background:${n >= P.bpr ? 'rgba(31,122,46,.18)' : 'rgba(212,160,23,.2)'};"><span>Table</span> ${ti + 1}: ${pn(P.pairs[a])} / ${pn(P.pairs[b])} · ${n}/${P.bpr}</span>`; }).join('')}</div>`).join('')}</div>`;
+}
 async function renderOnlineAdmin() {
   const c = document.getElementById('adminContent'); if (!c) return;
   c.innerHTML = '<div class="card">⏳</div>';
@@ -31,45 +83,31 @@ async function renderOnlineAdmin() {
   const L = Object.entries(OT.list || {}).filter(([, t]) => t && t.info).sort((a, b) => otNext(a[1].info) - otNext(b[1].info));
   const pairsOf = (t, d) => Object.entries(t.pairs || {}).filter(([, p]) => p && p.d === d);
   const seekOf = (t, d) => Object.entries(t.seek || {}).filter(([, p]) => p && p.d === d);
-  const d0 = new Date(Date.now() + 864e5), ymd = d0.toISOString().slice(0, 10);
   c.innerHTML = `<div class="card"><div class="card-title">🌐 <span>Online club tournaments</span></div>
-    <div style="font-size:0.78rem;color:var(--text2);margin-bottom:8px;">Played in Bridge Table: pairs against each other, each at home. Players register as pairs in Bridge Table and see the tournament there and here before it starts.</div>
     ${L.length ? L.map(([id, t]) => { const i = t.info, d = otNext(i), P = pairsOf(t, d), S = seekOf(t, d);
       return `<div class="card" style="margin:8px 0;"><b>${cleanData(i.n)}</b> <small>· ${otWhen(d)}${i.rep ? ' · 🔁 <span>every week</span>' : ''}</small>
-        <div style="font-size:0.78rem;color:var(--text2);">${i.b} <span>boards</span> · ${i.bpr} <span>boards a round</span> · ${i.sc === 'imp' ? 'IMP' : 'MP'} · ${cleanData((M.systems.find(s => s.k === i.sys) || {}).n || i.sys)}${(i.conv || []).length ? ' · ' + (i.conv || []).map(k => cleanData((M.convs.find(x => x.k === k) || {}).n || k)).join(', ') : ''}</div>
+        <div style="font-size:0.78rem;color:var(--text2);">${i.b} <span>boards</span> · ${i.bpr} <span>boards a round</span> · ${i.sc === 'imp' ? 'IMP' : 'MP'} · ${cleanData((M.systems.find(s => s.k === i.sys) || {}).n || i.sys)}${(i.conv || []).length ? ' · ' + (i.conv || []).map(k => cleanData((M.convs.find(x => x.k === k) || {}).n || k)).join(', ') : ''} · ${cleanData((OT_MOV[i.mov] || OT_MOV.howell).split(' — ')[0])}</div>
         <div style="margin-top:6px;"><b>${P.length}</b> <span>pairs registered</span>${P.length ? ': ' + P.map(([, p]) => cleanData(p.a) + ' – ' + cleanData(p.b)).join(' · ') : ''}</div>
         ${S.length ? `<div style="margin-top:4px;">🔎 <span>Looking for a partner</span>: ${S.map(([k, p]) => `<label style="margin-right:8px;"><input type="checkbox" data-otseek="${id}|${cleanData(k)}|${cleanData(p.n)}"> ${cleanData(p.n)}</label>`).join('')}<button class="btn btn-sm" onclick="otPairUp('${id}',${d})">🤝 <span>Pair the two ticked</span></button></div>` : ''}
-        <div style="margin-top:6px;"><button class="btn btn-sm btn-red" onclick="otDelete('${id}')">🗑 <span>Delete</span></button></div></div>`; }).join('') : '<div style="color:var(--text3);">No online tournament yet.</div>'}
+        ${otLiveHtml(t, d)}
+        <div style="margin-top:6px;"><button class="btn btn-sm" onclick="renderOnlineAdmin()">🔄</button> <button class="btn btn-sm btn-red" onclick="otDelete('${id}')">🗑 <span>Delete</span></button></div></div>`; }).join('') : '<div style="color:var(--text3);">No online tournament yet.</div>'}
     </div>
-    <div class="card"><div class="card-title">➕ <span>New online tournament</span></div>
-      <div class="field"><label>Base system</label><select id="otSys">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
-      <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
-      <div style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.filter(x => !x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}"> ${cleanData(x.n)}</label>`).join('')}</div>
-      <div class="field"><label>Name</label><input id="otName" maxlength="60" placeholder="Empty: the system and the conventions"></div>
-      <div class="field-row"><div class="field"><label>Day</label><input id="otDay" type="date" value="${ymd}"></div><div class="field"><label>Start time</label><input id="otTime" type="time" value="19:00"></div></div>
-      <label style="display:block;margin:6px 0;"><input id="otRep" type="checkbox"> 🔁 <span>Every week at this time</span></label>
-      <div class="field-row"><div class="field"><label>Boards</label><select id="otB">${[12, 16, 18, 20, 24, 27].map(n => `<option ${n === 18 ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-      <div class="field"><label>Boards a round</label><select id="otBpr">${[2, 3, 4].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-      <div class="field"><label>Scoring</label><select id="otSc"><option value="mp">MP</option><option value="imp">IMP</option></select></div></div>
-      <button class="btn-primary" style="margin-top:10px;" onclick="otSave()">💾 <span>Save the tournament</span></button></div>`;
+    <div class="card"><div class="card-title">➕ <span>New online tournament</span></div>${otFormHtml(M)}</div>`;
+  otPreview();
+  clearTimeout(OT.liveT); if (L.some(([, t]) => t.run)) OT.liveT = setTimeout(() => { if (adminTab === 'online') renderOnlineAdmin(); }, 20000);   // the live state every 20 seconds
 }
 window.otSave = async function () {
   if (OT.busy) return;
-  const v = id => (document.getElementById(id) || {}).value || '';
-  const conv0 = [...document.querySelectorAll('[data-otconv]')].filter(x => x.checked).map(x => x.dataset.otconv), M = OT.meta || { systems: [], convs: [] };
-  // no name: the tournament is called by what is played ("SAYC · Stayman, Puppet Stayman")
-  const auto = ((M.systems.find(x => x.k === v('otSys')) || {}).n || v('otSys')).replace(/ \(.*\)$/, '') + (conv0.length ? ' · ' + conv0.map(k => (M.convs.find(x => x.k === k) || {}).n || k).join(', ') : '');
-  const n = (v('otName').trim() || auto).slice(0, 60), at = Date.parse(v('otDay') + 'T' + (v('otTime') || '19:00'));
+  const f = otRead(), { n, at } = f;
   if (!at || at < Date.now()) { toast('❌ The start must be in the future'); return; }
-  const conv = [...document.querySelectorAll('[data-otconv]')].filter(x => x.checked).map(x => x.dataset.otconv);
-  const info = { n, at, b: +v('otB') || 18, bpr: +v('otBpr') || 3, sc: v('otSc') === 'imp' ? 'imp' : 'mp', sys: v('otSys') || 'sayc', conv, rep: document.getElementById('otRep').checked ? 1 : 0,
+  const info = { n, at, b: f.b, bpr: f.bpr, sc: f.sc, sys: f.sys, conv: f.conv, mov: f.mov, rep: f.rep,
     st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: Date.now() };
   OT.busy = true;
   try {
     const id = Date.now().toString(36);
     const r = await fetch(await otUrl('/' + id + '/info'), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(info) });
     if (!r.ok) throw new Error(r.status);
-    toast('✅ Saved'); renderOnlineAdmin();
+    toast('✅ Saved'); setupOnline = false; if (adminTab === 'online') renderOnlineAdmin(); else setAdminTab('online', document.querySelectorAll('.admin-tab')[7]);
   } catch (e) { toast('❌ Could not save'); } finally { OT.busy = false; }
 };
 window.otDelete = async function (id) {
