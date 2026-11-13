@@ -4,7 +4,7 @@
 // any .js/.css file). Otherwise returning users may keep loading a stale
 // cached version instead of your update. Suggested pattern:
 // 'bridgegate-v' + YYYYMMDD, e.g. 'bridgegate-v20260709'.
-const CACHE_NAME = 'kulup-v61';
+const CACHE_NAME = 'kulup-v62';
 
 const APP_SHELL = [
   './',
@@ -21,6 +21,7 @@ const APP_SHELL = [
   './screen-panel.js',
   './admin-panel-1.js',
   './admin-panel-2.js',
+  './online-tour.js',
   './dealfiles.js',
   './dd.js',
   './cardcam.js',

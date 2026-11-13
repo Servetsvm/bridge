@@ -15,11 +15,12 @@ function renderAdminPanel(){
         <button class="admin-tab" onclick="setAdminTab('boards',this)">📊 Boards</button>
         <button class="admin-tab" onclick="setAdminTab('history',this)">📜 History</button>
         <button class="admin-tab" onclick="setAdminTab('log',this)">📋 Log</button>
+        <button class="admin-tab" onclick="setAdminTab('online',this)">🌐 Online</button>
       </div>
       <div id="adminContent"></div>
     </div>`;
   const tabs=document.querySelectorAll('.admin-tab');
-  const idx=['setup','players','movement','tables','boards','history','log'].indexOf(adminTab);
+  const idx=['setup','players','movement','tables','boards','history','log','online'].indexOf(adminTab);
   if(tabs[idx])tabs[idx].classList.add('active');
   renderAdminTab();
 }
@@ -31,7 +32,7 @@ window.setAdminTab=function(tab,btn){
 };
 function renderAdminTab(){
   const c=document.getElementById('adminContent');if(!c)return;
-  const m={setup:renderSetup,players:renderPlayersAdmin,movement:renderMovement,tables:renderTables,boards:renderBoards,history:renderHistory,log:renderLog};
+  const m={setup:renderSetup,players:renderPlayersAdmin,movement:renderMovement,tables:renderTables,boards:renderBoards,history:renderHistory,log:renderLog,online:renderOnlineAdmin};
   const fin=getState().status==='finished';
   c.innerHTML=(fin?`<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;"><b>🏁 <span>Tournament Finished</span></b><button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button></div>`:'')+(m[adminTab]||renderSetup)();
   if(adminTab==='setup') setTimeout(adminUpdateCalc, 0);

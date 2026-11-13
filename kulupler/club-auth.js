@@ -197,7 +197,8 @@ async function renderClubGate(live){
   const mine=await myClubs(), ids=Object.keys(mine);
   // the tournaments running now: a player chooses one and gives the table number
   const lv=(live||[]).map(t=>`<button class="btn-primary" style="margin-bottom:6px;" onclick="location.replace(location.pathname+'?club=${encodeURIComponent(t.club)}&role=table&p=${t.p}')">🃏 ${cleanData(t.c||'')}${t.n?' — '+cleanData(t.n):''}</button>`).join('');
-  box.innerHTML=`<div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px;">👤 ${cleanData(u.name)}</div>${lv}
+  const ot=typeof otUpcomingHtml==='function'?await otUpcomingHtml():'';
+  box.innerHTML=`<div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px;">👤 ${cleanData(u.name)}</div>${lv}${ot}
     ${ids.length?`<div style="font-size:0.72rem;color:var(--text3);margin:6px 0 4px;">My clubs</div>`+ids.map(i=>`<button class="btn-primary" style="margin-bottom:6px;" onclick="openMyClub('${i}')">🏛 ${mine[i]}</button>`).join(''):''}
     ${isSuper()?`<div style="font-size:0.72rem;color:var(--text3);margin:10px 0 4px;">${ids.length?'Open another club':'Open your club'}</div>
     <div class="pw-wrap"><input type="text" id="newClubName" maxlength="40" placeholder="Club name" onkeydown="if(event.key==='Enter')createMyClub()"></div>

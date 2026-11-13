@@ -463,6 +463,29 @@
         ".read": "auth != null && (root.child('sess').child(auth.uid).exists() || root.child('gate').child('tsess').child(auth.uid).exists()) || (auth != null && root.child('gate').child('csess').child(auth.uid).exists())",
         ".write": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' && root.child('gate').child('superpw').child('h').exists() && root.child('gate').child('ssess').child(auth.uid).child('h').val() === root.child('gate').child('superpw').child('h').val())"
       }
+    },
+    "ot": {
+      ".read": "auth != null",
+      "$club": {
+        "$tid": {
+          ".write": "auth != null && ((auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' && root.child('gate').child('superpw').child('h').exists() && root.child('gate').child('ssess').child(auth.uid).child('h').val() === root.child('gate').child('superpw').child('h').val()) || (auth != null && root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val()) || (auth != null && root.child('gate').child('csess').child(auth.uid).child('club').val() === $club && root.child('gate').child('csess').child(auth.uid).child('pw').val() === root.child('gate').child('clubs').child($club).child('secret').child('pw').val()))",
+          "info": {
+            ".validate": "newData.hasChildren(['n', 'at']) && newData.child('n').isString() && newData.child('n').val().length <= 60 && newData.child('at').isNumber()"
+          },
+          "pairs": {
+            "$pid": {
+              ".write": "auth != null && root.child('sess').child(auth.uid).exists() && ((!data.exists() && newData.child('ka').val() === root.child('sess').child(auth.uid).child('k').val()) || data.child('ka').val() === root.child('sess').child(auth.uid).child('k').val() || data.child('kb').val() === root.child('sess').child(auth.uid).child('k').val())",
+              ".validate": "!newData.exists() || (newData.hasChildren(['a', 'b', 'ka', 'kb', 'd']) && newData.child('a').isString() && newData.child('a').val().length <= 20 && newData.child('b').isString() && newData.child('b').val().length <= 20 && newData.child('d').isNumber())"
+            }
+          },
+          "seek": {
+            "$k": {
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $k",
+              ".validate": "!newData.exists() || (newData.hasChildren(['n', 'd']) && newData.child('n').isString() && newData.child('n').val().length <= 20 && newData.child('d').isNumber())"
+            }
+          }
+        }
+      }
     }
   }
 }

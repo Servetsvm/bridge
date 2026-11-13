@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 469;
+const APP_V = 470;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1640,7 +1640,7 @@ function homeShell2() {
     <div class="h2tools"><label class="hlang" title="${T('Language')}"><span aria-hidden="true">🌐</span><select id="hLang" class="sel" aria-label="${T('Language')}">${LANGS.map(([v, l]) => `<option value="${v}" ${SET.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico hwa" id="bShareApp" title="${T('Send the app')}" aria-label="${T('Send the app')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
   <div class="hgrid">
-    <section class="hmain"><div class="h2cola"><div id="hPend"></div>
+    <section class="hmain"><div class="h2cola"><div id="hPend"></div><div id="hClubT"></div>
       <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2mid"><div class="h2chips" id="hMe"></div><button class="hpz" id="hPuzzle"></button><span id="hAdm"></span></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
       <div class="h2pr"><div class="h2play">
         <button class="h2fan h2fango" id="bGoFan" aria-hidden="true" tabindex="-1">${fan}</button>
@@ -1733,6 +1733,7 @@ function renderHome() {
     // the administrator's card: always on the home page (players, messages, requests, robots)
     const admN = (N.supNew || 0) + (N.cvNew || 0) + (ui.learnNew || 0);
     set('hAdm', N.isAdmin() ? `<button class="hadmb" id="admTog" title="${T('Admin')}">👑${admN ? `<b class="supc">${admN}</b>` : ''}</button>` : '');
+    if (typeof ctCardHtml === 'function') set('hClubT', ctCardHtml());
     set('hPend', bad + sup + cvn + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
     set('hTables', N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
