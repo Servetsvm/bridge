@@ -281,14 +281,22 @@ function otTabHtml(tab) {
     return `<div class="card">${head(x)}${note}<table><thead><tr><th><span>Round</span></th><th><span>Table</span></th><th>N/S</th><th>E/W</th><th><span>Boards</span></th></tr></thead><tbody>${plan.rounds.map((tb, r) => tb.map(([a, b], ti) => `<tr><td>${r + 1}</td><td>${ti + 1}</td><td>${otPn(plan.pairs[a])}</td><td>${otPn(plan.pairs[b])}</td><td>${r * plan.bpr + 1}-${r * plan.bpr + plan.bpr}</td></tr>`).join('')).join('')}</tbody></table></div>`;
   }
   if (!cur) return `<div class="card">${head(come)}<div style="color:var(--text3);">Starts ${otWhen(come.d)}.</div></div>`;
-  if (tab === 'tables') return `<div class="card">${head(cur)}${otLiveHtml(cur.t, cur.d)}${P ? `<div style="margin-top:6px;"><button class="btn btn-sm" onclick="otOpenRes('${cur.id}',${cur.d},'live')">👁 <span>Watch</span></button></div>` : ''}</div>`;
+  if (tab === 'tables') return `<div class="card">${head(cur)}${otLiveHtml(cur.t, cur.d)}${otPresenceHtml(cur)}${P ? `<div style="margin-top:6px;"><button class="btn btn-sm" onclick="otOpenRes('${cur.id}',${cur.d},'live')">👁 <span>Watch</span></button></div>` : ''}</div>`;
   if (tab === 'boards') {
     if (!P) return '';
-    const S = P.ctScore({ plan: cur.plan, run: cur.run, i: cur.i });
-    const bs = Object.keys(S.boards).sort((a, b) => a - b);
-    if (!bs.length) return `<div class="card">${head(cur)}<div style="color:var(--text3);">No results yet.</div></div>`;
-    return `<div class="card">${head(cur)}${bs.map(bn => `<div style="margin:8px 0;"><b><span>Board</span> ${bn}</b> <button class="btn btn-sm" onclick="otDD('${cur.id}',${cur.d},${bn})">🎯 Double dummy</button><div id="otdd${bn}"></div>
-      <table><tbody>${S.boards[bn].map(q => `<tr><td>${otPn(cur.plan.pairs[q.ns])}</td><td>${otPn(cur.plan.pairs[q.ew])}</td><td>${q.v.pass ? 'Pass' : q.v.c ? q.v.c[0] + ['♣', '♦', '♥', '♠', 'NT'][q.v.c[1]] + (q.v.c[2] ? 'X' : '') + ' ' + 'NESW'[q.v.c[3]] : ''}${q.v.tr != null ? ' · ' + q.v.tr : ''}</td><td><b>${(q.v.ns > 0 ? '+' : '') + (q.v.ns || 0)}</b></td><td>${Math.round(q.mp)}% · ${q.imp > 0 ? '+' : ''}${q.imp} IMP</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
+    const x = E[Math.min(OT.evI || 0, E.length - 1)], S = P.ctScore({ plan: x.plan, run: x.run, i: x.i }), T_ = x.run.t || {};
+    const sel = E.length > 1 ? `<select onchange="OT.evI=+this.value;renderAdminTab()" style="margin-bottom:6px;">${E.map((y, k) => `<option value="${k}" ${y === x ? 'selected' : ''}>${cleanData(y.i.n)} · ${otWhen(y.d)}</option>`).join('')}</select>` : '';
+    const ct = v => !v ? '' : v.pass ? 'Pass' : v.c ? v.c[0] + ['♣', '♦', '♥', '♠', 'NT'][v.c[1]] + (v.c[2] === 2 ? 'XX' : v.c[2] ? 'X' : '') + ' ' + 'NESW'[v.c[3]] : '';
+    const rows = [];
+    x.plan.rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => {
+      for (let k = 0; k < x.plan.bpr; k++) {
+        const bn = r * x.plan.bpr + k + 1, v = ((T_[r + '_' + ti] || {}).res || {})[bn], q = (S.boards[bn] || []).find(z => z.r === r && z.ti === ti);
+        rows.push(`<tr><td>${r + 1}/${ti + 1}</td><td>${bn}</td><td style="font-size:0.72rem;">${otPn(x.plan.pairs[a])}<br>${otPn(x.plan.pairs[b])}</td><td>${v && v.adj ? '<span class="adj-badge">ADJ</span> ' : ''}${ct(v) || '—'}${v && v.tr != null ? ' · ' + v.tr : ''}</td><td><b>${v ? (v.ns > 0 ? '+' : '') + (v.ns || 0) : ''}</b></td><td>${q ? Math.round(q.mp) + '% · ' + (q.imp > 0 ? '+' : '') + q.imp : ''}</td>
+          <td style="white-space:nowrap;"><button class="btn btn-sm" title="Bidding and play" onclick="otPlay(${r},${ti},${bn})">👁</button><button class="btn btn-sm btn-blue" title="Correct the score" onclick="otAdj(${r},${ti},${bn})">✏️</button><button class="btn btn-sm" title="Double dummy" onclick="otDD('${x.id}',${x.d},${bn})">🎯</button></td></tr><tr><td colspan="7" style="padding:0;border:0;"><div id="otdd${bn}"></div><div id="otb-${r}-${ti}-${bn}" class="otbox"></div></td></tr>`);
+      }
+    }));
+    OT.evX = x;
+    return `<div class="card">${head(x)}${sel}<div style="font-size:0.75rem;color:var(--text3);">👁 <span>Bidding and play</span> · ✏️ <span>Correct the score</span> · 🎯 Double dummy</div><div style="overflow-x:auto;"><table><thead><tr><th><span>Round</span>/<span>Table</span></th><th><span>Board</span></th><th>NS / EW</th><th><span>Contract</span></th><th>NS</th><th>MP · IMP</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table></div></div>`;
   }
   if (tab === 'history') {
     if (!P) return '';
@@ -319,4 +327,51 @@ window.otOpenRes = function (id, d, tab) {
   const P = otP(); if (!P) return;
   P.CT.adminView = true;
   P.ctLoad(true).then(() => { if (typeof P.closeClubs === 'function') P.closeClubs(); P.ctShowResults(CLUB_ID, id, d, tab); });
+};
+
+// the players of the evening: here (their app in the last 90 seconds) or away (the robot plays for them)
+function otPresenceHtml(x) {
+  const hb = (x.run && x.run.hb) || {}, now = Date.now(), L = [];
+  for (const p of x.plan.pairs) if (!p.robot) for (const [n, k] of [[p.a, p.ka], [p.b, p.kb]]) if (k) { const ts = +hb[k] || 0; L.push({ n, on: now - ts < 90e3, ts }); }
+  if (!L.length) return '';
+  return '<div style="margin-top:8px;font-size:0.8rem;"><b><span>Players</span></b>' + L.map(p => '<div>' + (p.on ? '🟢 ' : '🔴 ') + cleanData(p.n) + (p.on ? '' : ' · <span>away: the robot plays for them</span>' + (p.ts ? ' · <span>last seen</span> ' + new Date(p.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '')) + '</div>').join('') + '</div>';
+}
+// a board's bidding and play (read from the table's list)
+window.otPlay = async function (r, ti, bn) {
+  const x = OT.evX, P = otP(), box = document.getElementById('otb-' + r + '-' + ti + '-' + bn); if (!x || !P || !box) return;
+  if (box.innerHTML) { box.innerHTML = ''; return; }
+  box.innerHTML = '⏳';
+  try { const res = await fetch(await otUrl('/' + x.id + '/run/' + x.d + '/t/' + r + '_' + ti + '/a'), { cache: 'no-store' }); box.innerHTML = P.ctPlayHtml(x.plan, r, res.ok ? await res.json() : null, bn); }
+  catch (e) { box.innerHTML = '❌'; }
+};
+// the director corrects a board's score: the contract and the tricks (the score worked out), or the score itself
+window.otAdj = function (r, ti, bn) {
+  const x = OT.evX, box = document.getElementById('otb-' + r + '-' + ti + '-' + bn); if (!x || !box) return;
+  const v = (((x.run.t || {})[r + '_' + ti] || {}).res || {})[bn] || {}, c = v.c || [3, 4, 0, 0];
+  const opt = (L, sel) => L.map(([val, t]) => `<option value="${val}" ${String(val) === String(sel) ? 'selected' : ''}>${t}</option>`).join('');
+  const id = 'oa-' + r + '-' + ti + '-' + bn;
+  box.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:6px 0;" id="${id}">
+    <select data-k="l">${opt([['p', 'Pass'], ...[1, 2, 3, 4, 5, 6, 7].map(n => [n, n])], v.pass ? 'p' : c[0])}</select>
+    <select data-k="s">${opt([[0, '♣'], [1, '♦'], [2, '♥'], [3, '♠'], [4, 'NT']], c[1])}</select>
+    <select data-k="x">${opt([[0, '—'], [1, 'X'], [2, 'XX']], c[2])}</select>
+    <select data-k="d">${opt([[0, 'N'], [1, 'E'], [2, 'S'], [3, 'W']], c[3])}</select>
+    <label><span>Tricks</span> <select data-k="t">${opt([...Array(14).keys()].map(n => [n, n]), v.tr != null ? v.tr : 9)}</select></label>
+    <label>NS <input data-k="ns" type="number" step="10" style="width:80px;" placeholder="auto" value=""></label>
+    <b data-k="out"></b>
+    <button class="btn btn-sm btn-gold" onclick="otAdjSave(${r},${ti},${bn})">💾 <span>Save</span></button></div>
+    <div style="font-size:0.72rem;color:var(--text3);">The score is worked out from the contract and the tricks; type a score in NS to set it yourself.</div>`;
+  const f = document.getElementById(id), upd = () => { const o = otAdjRead(f, bn); f.querySelector('[data-k=out]').textContent = '= NS ' + (o.ns > 0 ? '+' : '') + o.ns; };
+  f.querySelectorAll('select,input').forEach(e => e.addEventListener('input', upd)); upd();
+};
+function otAdjRead(f, bn) {
+  const g = k => f.querySelector('[data-k=' + k + ']').value, P = otP(), man = g('ns').trim();
+  if (g('l') === 'p') return { pass: 1, ns: man !== '' ? +man : 0, adj: 1 };
+  const c = [+g('l'), +g('s'), +g('x'), +g('d')], tr = +g('t');
+  return { c, tr, ns: man !== '' ? +man : P ? P.ctNsScore(bn, c[0], c[1], c[2], c[3], tr) : 0, adj: 1 };
+}
+window.otAdjSave = async function (r, ti, bn) {
+  const x = OT.evX, f = document.getElementById('oa-' + r + '-' + ti + '-' + bn); if (!x || !f) return;
+  const o = otAdjRead(f, bn);
+  if (!confirm('Board ' + bn + ': NS ' + o.ns + '?')) return;
+  try { await otPut('/' + x.id + '/run/' + x.d + '/t/' + r + '_' + ti + '/res/' + bn, o); toast('✅ Saved'); await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not save'); }
 };

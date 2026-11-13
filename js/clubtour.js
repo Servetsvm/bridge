@@ -299,7 +299,8 @@ function ctBoardDone(e) {
   const t = CT.tbl; if (!t || t.watch || !e) return;
   setTimeout(ctBackCheck, 0);
   const res = e.c ? { c: [e.c.level, e.c.strain, e.c.dbl, e.c.decl], tr: e.tricks, ns: e.ns } : { pass: 1, ns: 0 };
-  Net.Cloud.put(t.p + '/t/' + t.tid + '/res/' + e.board, res).catch(() => {});
+  const p = t.p + '/t/' + t.tid + '/res/' + e.board;
+  Net.Cloud.get(p).then(o => o && o.adj ? null : Net.Cloud.put(p, res)).catch(() => {});
 }
 /* the end of a round at your table: the next round starts when every table has finished this one (the tables still
    playing are shown; after five minutes you may go on without waiting); then you are seated at your next table */
@@ -485,3 +486,41 @@ setTimeout(async function ctResume() {
   if (x && x.plan && ctMyPair(x.plan) >= 0) ctSit(key, G.ct.r);
   else { G = idleG(); save(); render(); }   // that evening is over (or watching it only): home
 }, 1500);
+
+/* the director's look at a club table (from the Clubs admin): each board's calls and cards, from the table's list */
+function ctTablePlay(plan, r, list) {
+  const L = Array.isArray(list) ? list : Object.keys(list || {}).sort((a, b) => a - b).map(k => list[k]), out = [];
+  let i = 0;
+  for (const bn of ctBoards(plan, r)) {
+    const auc = [], cards = [];
+    while (i < L.length && L[i] && L[i].c != null && !auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
+    const over = auctionOver(auc), c = over ? contractOf(auc) : null;
+    if (c) while (i < L.length && L[i] && L[i].k != null && cards.length < 52) { cards.push(L[i]); i++; }
+    out.push({ bn, auc, c, cards, done: over && (!c || cards.length === 52) });
+    if (!out[out.length - 1].done) break;
+  }
+  return out;
+}
+const ctCallTxt = c => isNum(c) ? LV(c) + STR[ST(c)] : c === 'P' ? T('Pass') : callTxt(c);
+const ctCardTxt = k => SUIT[S(k)] + RTXT[R(k)];
+// North-South's score of a contract made with tr tricks on board bn
+function ctNsScore(bn, level, strain, dbl, decl, tr) { const sc = scoreOf(level, strain, dbl, vulOf(bn, decl), tr); return sideOf(decl) === 0 ? sc : -sc; }
+// one board as the director sees it: the hands, the bidding and every trick (who led, who won)
+function ctPlayHtml(plan, r, list, bn) {
+  const b = ctTablePlay(plan, r, list).find(x => x.bn === bn);
+  if (!b) return '<div>' + T('Not played yet') + '</div>';
+  const SN = ['N', 'E', 'S', 'W'], d0 = dealerOf(bn), red = t => /[♥♦]/.test(t) ? ' style="color:#c4122f"' : '';
+  const cells = []; for (let k = 0; k < d0; k++) cells.push(''); for (const a of b.auc) cells.push(ctCallTxt(a.call));
+  const rows = []; for (let k = 0; k < cells.length; k += 4) rows.push(cells.slice(k, k + 4));
+  let html = '<b>' + T('Board {0}', bn) + '</b><table><thead><tr>' + SN.map(x => '<th>' + x + '</th>').join('') + '</tr></thead><tbody>' + rows.map(rw => '<tr>' + [0, 1, 2, 3].map(k => '<td' + red(rw[k] || '') + '>' + esc(rw[k] || '') + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+  if (!b.c) return html + (b.done ? '<div>' + T('Passed out') + '</div>' : '');
+  const c = b.c, trump = c.strain < 4 ? c.strain : -1; let won = 0;
+  html += '<div><b>' + c.level + STR[c.strain] + (c.dbl === 2 ? 'XX' : c.dbl ? 'X' : '') + ' ' + SN[c.decl] + '</b></div><table><tbody>';
+  for (let k = 0; k < b.cards.length; k += 4) {
+    const tr = b.cards.slice(k, k + 4); let w = tr[0];
+    for (const x of tr) { const sw = S(w.k), sx = S(x.k); if ((sx === sw && R(x.k) > R(w.k)) || (sx === trump && sw !== trump)) w = x; }
+    if (tr.length === 4 && sideOf(w.s) === sideOf(c.decl)) won++;
+    html += '<tr><td>' + (k / 4 + 1) + '</td>' + tr.map(x => '<td' + red(ctCardTxt(x.k)) + '>' + SN[x.s] + ' ' + (x === w && tr.length === 4 ? '<b>' + ctCardTxt(x.k) + '</b>' : ctCardTxt(x.k)) + '</td>').join('') + '</tr>';
+  }
+  return html + '</tbody></table><div>' + T('Tricks') + ': ' + won + (b.done ? ' · NS ' + ctNsScore(bn, c.level, c.strain, c.dbl, c.decl, won) : '') + '</div>';
+}
