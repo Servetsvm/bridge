@@ -42,22 +42,24 @@ async function renderOnlineAdmin() {
         <div style="margin-top:6px;"><button class="btn btn-sm btn-red" onclick="otDelete('${id}')">🗑 <span>Delete</span></button></div></div>`; }).join('') : '<div style="color:var(--text3);">No online tournament yet.</div>'}
     </div>
     <div class="card"><div class="card-title">➕ <span>New online tournament</span></div>
-      <div class="field"><label>Name</label><input id="otName" maxlength="60" placeholder="Club night"></div>
+      <div class="field"><label>Base system</label><select id="otSys">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
+      <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
+      <div style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.filter(x => !x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}"> ${cleanData(x.n)}</label>`).join('')}</div>
+      <div class="field"><label>Name</label><input id="otName" maxlength="60" placeholder="Empty: the system and the conventions"></div>
       <div class="field-row"><div class="field"><label>Day</label><input id="otDay" type="date" value="${ymd}"></div><div class="field"><label>Start time</label><input id="otTime" type="time" value="19:00"></div></div>
       <label style="display:block;margin:6px 0;"><input id="otRep" type="checkbox"> 🔁 <span>Every week at this time</span></label>
       <div class="field-row"><div class="field"><label>Boards</label><select id="otB">${[12, 16, 18, 20, 24, 27].map(n => `<option ${n === 18 ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
       <div class="field"><label>Boards a round</label><select id="otBpr">${[2, 3, 4].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
       <div class="field"><label>Scoring</label><select id="otSc"><option value="mp">MP</option><option value="imp">IMP</option></select></div></div>
-      <div class="field"><label>Base system</label><select id="otSys">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
-      <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
-      <div style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.filter(x => !x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}"> ${cleanData(x.n)}</label>`).join('')}</div>
       <button class="btn-primary" style="margin-top:10px;" onclick="otSave()">💾 <span>Save the tournament</span></button></div>`;
 }
 window.otSave = async function () {
   if (OT.busy) return;
   const v = id => (document.getElementById(id) || {}).value || '';
-  const n = v('otName').trim().slice(0, 60), at = Date.parse(v('otDay') + 'T' + (v('otTime') || '19:00'));
-  if (!n) { toast('❌ Name'); return; }
+  const conv0 = [...document.querySelectorAll('[data-otconv]')].filter(x => x.checked).map(x => x.dataset.otconv), M = OT.meta || { systems: [], convs: [] };
+  // no name: the tournament is called by what is played ("SAYC · Stayman, Puppet Stayman")
+  const auto = ((M.systems.find(x => x.k === v('otSys')) || {}).n || v('otSys')).replace(/ \(.*\)$/, '') + (conv0.length ? ' · ' + conv0.map(k => (M.convs.find(x => x.k === k) || {}).n || k).join(', ') : '');
+  const n = (v('otName').trim() || auto).slice(0, 60), at = Date.parse(v('otDay') + 'T' + (v('otTime') || '19:00'));
   if (!at || at < Date.now()) { toast('❌ The start must be in the future'); return; }
   const conv = [...document.querySelectorAll('[data-otconv]')].filter(x => x.checked).map(x => x.dataset.otconv);
   const info = { n, at, b: +v('otB') || 18, bpr: +v('otBpr') || 3, sc: v('otSc') === 'imp' ? 'imp' : 'mp', sys: v('otSys') || 'sayc', conv, rep: document.getElementById('otRep').checked ? 1 : 0,

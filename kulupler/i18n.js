@@ -10,6 +10,7 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Empty: the system and the conventions":"Boş: sistem ve konvansiyonlar",
     "Online club tournaments":"Online kulüp turnuvaları",
     "Played in Bridge Table: pairs against each other, each at home. Players register as pairs in Bridge Table and see the tournament there and here before it starts.":"Bridge Table’da oynanır: çiftler birbirine karşı, herkes evinden. Oyuncular Bridge Table’da çift olarak kaydolur; turnuvayı başlamadan önce orada ve burada görür.",
     "every week":"her hafta",

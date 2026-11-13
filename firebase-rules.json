@@ -483,6 +483,21 @@
               ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $k",
               ".validate": "!newData.exists() || (newData.hasChildren(['n', 'd']) && newData.child('n').isString() && newData.child('n').val().length <= 20 && newData.child('d').isNumber())"
             }
+          },
+          "run": {
+            "$occ": {
+              "plan": {
+                ".write": "auth != null && root.child('sess').child(auth.uid).exists() && !data.exists()"
+              },
+              "m": {
+                ".write": "auth != null && root.child('sess').child(auth.uid).exists() && !data.exists()"
+              },
+              "t": {
+                "$tbl": {
+                  ".write": "auth != null && root.child('ot').child($club).child($tid).child('run').child($occ).child('m').child($tbl).child(root.child('sess').child(auth.uid).child('k').val()).exists()"
+                }
+              }
+            }
           }
         }
       }
