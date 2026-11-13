@@ -259,6 +259,7 @@ async function ctBeat() {
   ctSlowCheck();
   try { await Net.Cloud.put(t.p + '/hb/' + Net.fbKey(myNm()), Date.now()); t.hb = await Net.Cloud.get(t.p + '/hb') || {}; } catch (e) {}
   if (ctBack()) flash('⏳ ' + T('Wait: the robot is finishing this board for you. You take your seat when it is over.'), 4000);
+  ctMyScore();
   if (G && G.ct) tick();   // a player gone (or back): the robots take the seat (or give it back)
 }
 // sit down at your table of the round (the first round not finished); the whole list is read, so it also brings back
@@ -273,7 +274,7 @@ async function ctSit(key, r0) {
   clearInterval(CT.pollT); clearInterval(CT.beatT);
   CT.tbl = { key, id: x.id, d: x.d, p: ctRunP(x), plan: x.plan, r: s.r, ti: s.ti, tid: s.r + '_' + s.ti, seats, seat, boards: ctBoards(x.plan, s.r), n: 0, hb: {}, name: x.i.n, rounds: x.plan.rounds.length };
   try { localStorage.setItem('ct-r-' + x.id + x.d, String(s.r)); } catch (e) {}
-  closeOv();
+  CT.sc = null; closeOv();
   let hb0 = 0; try { hb0 = +(await Net.Cloud.get(CT.tbl.p + '/hb/' + Net.fbKey(myNm()))) || 0; } catch (e) {}
   const away = Date.now() - hb0 > CT_AWAY;
   await ctBeat(); await ctRebuild();
@@ -300,7 +301,7 @@ function ctBoardDone(e) {
   setTimeout(ctBackCheck, 0);
   const res = e.c ? { c: [e.c.level, e.c.strain, e.c.dbl, e.c.decl], tr: e.tricks, ns: e.ns } : { pass: 1, ns: 0 };
   const p = t.p + '/t/' + t.tid + '/res/' + e.board;
-  Net.Cloud.get(p).then(o => o && o.adj ? null : Net.Cloud.put(p, res)).catch(() => {});
+  Net.Cloud.get(p).then(o => o && o.adj ? null : Net.Cloud.put(p, res)).catch(() => {}).then(() => setTimeout(ctMyScore, 1500));
 }
 /* the end of a round at your table: the next round starts when every table has finished this one (the tables still
    playing are shown; after five minutes you may go on without waiting); then you are seated at your next table */
@@ -575,3 +576,16 @@ async function ctHeadMine() {
   } catch (e) {} finally { CT.headBusy = false; }
 }
 setInterval(ctHeadMine, 2500);
+
+// your pair's score in this evening so far (the box at the top while you play): MP %, IMP, place, the last board
+async function ctMyScore() {
+  const t = CT.tbl; if (!t || t.watch) return;
+  try {
+    const tmap = await Net.Cloud.get(t.p + '/t') || {}, x = ctFind(t.key), pi = ctMyPair(t.plan); if (pi < 0) return;
+    const S = ctScore({ plan: t.plan, run: { t: tmap }, i: (x && x.i) || {} }), k = S.rank.findIndex(q => q.p === t.plan.pairs[pi]), me = S.rank[k];
+    let last = null, lb = -1;
+    for (const [bn, L] of Object.entries(S.boards)) for (const q of L) if ((q.ns === pi || q.ew === pi) && +bn > lb) { lb = +bn; last = q.ns === pi ? { mp: q.mp, imp: q.imp } : { mp: 100 - q.mp, imp: -q.imp }; }
+    CT.sc = me ? { pct: me.pct, imp: me.imp, n: me.n, pos: k + 1, of: S.rank.length, last } : { pct: 0, imp: 0, n: 0, last: null };
+    if (G && G.ct) render();
+  } catch (e) {}
+}
