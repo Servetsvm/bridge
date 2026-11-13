@@ -375,3 +375,31 @@ window.otAdjSave = async function (r, ti, bn) {
   if (!confirm('Board ' + bn + ': NS ' + o.ns + '?')) return;
   try { await otPut('/' + x.id + '/run/' + x.d + '/t/' + r + '_' + ti + '/res/' + bn, o); toast('✅ Saved'); await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not save'); }
 };
+
+/* the director's page open: every table of a running evening where nobody sits is played on by its robots from here
+   (one call or card at a time; written only where nothing is yet, so a player's own app is never overwritten) */
+OT.headBusy = false;
+async function otRobots() {
+  const P = otP(); if (OT.headBusy || !P || !P.ctHeadStep || !document.getElementById('adminContent') || !OT.list) return;
+  OT.headBusy = true;
+  try {
+    for (const [id, t] of Object.entries(OT.list)) {
+      if (!t || !t.info) continue;
+      for (const [d, run] of Object.entries(t.run || {})) {
+        if (!run || !run.plan || Date.now() - +d > 6 * 3600e3 || +d > Date.now()) continue;
+        const base = '/' + id + '/run/' + d, get = async q => { const r = await fetch(await otUrl(base + q), { cache: 'no-store' }); return r.ok ? r.json() : null; };
+        const tmap = await get('/t') || {}, r = P.ctCurRound(run.plan, tmap); if (r < 0) continue;
+        const hb = await get('/hb') || {};
+        for (let ti = 0; ti < run.plan.rounds[r].length; ti++) {
+          if (!P.ctTableEmpty(run.plan, r, ti, hb)) continue;
+          const tb = tmap[r + '_' + ti] || {}, st = P.ctHeadStep(run.plan, r, tb.a, tb.res); if (!st) continue;
+          const q = base + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
+          if (await get(q.slice(base.length)) != null) return;   // written meanwhile by another app: the next look reads it
+          await fetch(await otUrl(q), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(st.v || st.a) });
+          return;   // one step a time
+        }
+      }
+    }
+  } catch (e) {} finally { OT.headBusy = false; }
+}
+setInterval(otRobots, 1500);

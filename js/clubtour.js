@@ -524,3 +524,54 @@ function ctPlayHtml(plan, r, list, bn) {
   }
   return html + '</tbody></table><div>' + T('Tricks') + ': ' + won + (b.done ? ' · NS ' + ctNsScore(bn, c.level, c.strain, c.dbl, c.decl, won) : '') + '</div>';
 }
+
+/* ---- a table where nobody sits (every player gone): its robots go on from another app — the director's Clubs page,
+   or a player of that table who left it (home page open). One step at a time: the next call or card, or the board's
+   result; the same list every app reads, so a player who comes back is at the same point ---- */
+const ctList_ = l => Array.isArray(l) ? l : Object.keys(l || {}).sort((a, b) => a - b).map(k => l[k]);
+// the round being played: the first one with a table not finished
+function ctCurRound(plan, tmap) {
+  for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.keys(((tmap || {})[r + '_' + ti] || {}).res || {}).length < plan.bpr)) return r;
+  return -1;
+}
+// nobody of this table here (their app in the last 90 seconds)
+function ctTableEmpty(plan, r, ti, hb) { return ctSeatsOf(plan, r, ti).every(s => !s.k || Date.now() - (+(hb || {})[s.k] || 0) > CT_AWAY); }
+// the next step of a table played by the robots: { n, a } (the action at index n) or { res: board, v } or null (round done)
+function ctHeadStep(plan, r, list, res) {
+  const L = ctList_(list), cards = ctCardsOf(plan); let i = 0;
+  for (const bn of ctBoards(plan, r)) {
+    const deal = ctDeal(plan, bn), dl = dealerOf(bn), auc = [];
+    while (i < L.length && L[i] && L[i].c != null && !auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
+    if (!auctionOver(auc)) { const s = (dl + auc.length) % 4, b = E.aiBid(auc, s, deal[s], cards); return { n: i, a: { s, c: b.call } }; }
+    const c = contractOf(auc);
+    if (!c) { if (!(res || {})[bn]) return { res: bn, v: { pass: 1, ns: 0 } }; continue; }
+    const g = E.newPlayState(deal, c, auc, cards);
+    while (i < L.length && L[i] && L[i].k != null && !E.handsEmpty(g)) { if (E.applyCard(g, L[i].s, L[i].k)) E.collect(g); i++; }
+    if (!E.handsEmpty(g)) { const t = g.turn; return { n: i, a: { s: t, k: E.aiPlay(g, t, { budget: 250, maxSamples: 12, ddTricks: 6 }) } }; }
+    if (!(res || {})[bn]) { const tr = g.tricks[sideOf(c.decl)]; return { res: bn, v: { c: [c.level, c.strain, c.dbl, c.decl], tr, ns: ctNsScore(bn, c.level, c.strain, c.dbl, c.decl, tr) } }; }
+  }
+  return null;
+}
+// a player who left a table (this app at home): that table's robots go on from here while nobody else is there
+CT.headBusy = false;
+async function ctHeadMine() {
+  if (CT.headBusy || !myNm() || document.hidden) return;
+  if (CT.tbl || CT.waiting) return;   // at a table (or waiting for the next one): that is enough for this app
+  const L = ctList().filter(x => x.plan && x.d <= Date.now() && Date.now() - x.d < 6 * 3600e3);
+  CT.headBusy = true;
+  try {
+    for (const x of L) {
+      const pi = ctMyPair(x.plan); if (pi < 0) continue;
+      const p = ctRunP(x), tmap = await Net.Cloud.get(p + '/t') || {}, r = ctCurRound(x.plan, tmap); if (r < 0) continue;
+      const ti = x.plan.rounds[r].findIndex(([a, b]) => a === pi || b === pi); if (ti < 0) continue;
+      const hb = await Net.Cloud.get(p + '/hb') || {};
+      if (!ctTableEmpty(x.plan, r, ti, hb)) continue;
+      const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(x.plan, r, tb.a, tb.res);
+      if (!st) continue;
+      if (st.res) await Net.Cloud.put(p + '/t/' + r + '_' + ti + '/res/' + st.res, st.v);
+      else await Net.Cloud.put(p + '/t/' + r + '_' + ti + '/a/' + st.n, st.a).catch(() => {});
+      return;
+    }
+  } catch (e) {} finally { CT.headBusy = false; }
+}
+setInterval(ctHeadMine, 2500);
