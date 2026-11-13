@@ -81,9 +81,9 @@ function ctCardHtml() {
   const L = ctList(); if (!L.length || !myNm()) return '';
   return L.slice(0, 3).map(x => {
     const mine = ctMine(x), seeking = x.seek.some(s => s.k === ctMe()), started = x.d <= Date.now();
-    return `<div class="ctwrap"><button class="hcard ctcard${mine ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} · ${esc(x.i.n)}</b>
-      <span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${started ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span>
-      <small>${(() => { if (x.plan && mine) { const pi = ctMyPair(x.plan), S = pi >= 0 ? ctSched(x.plan, pi) : []; return S.length ? '🪑 ' + T('Round {0} · table {1} · {2} against {3} · boards {4}-{5}', S[0].r + 1, S[0].ti + 1, S[0].ns ? T('North-South') : T('East-West'), ctPairTxt(S[0].opp), S[0].from, S[0].to) : ''; } if (started && !x.plan) ctEnsurePlan(x); return mine ? '✅ ' + T('You are registered with {0}', esc(nameKeyEq(mine.a) ? mine.b : mine.a)) : seeking ? '🔎 ' + T('You are looking for a partner') : started ? '' : '✍️ ' + T('Register as a pair'); })()}</small></button><button class="btn ctadm" data-ctadmin="${esc(x.club + '|' + x.id)}">⚙️ ${T('Admin')}</button></div>`;
+    if (started && !x.plan) ctEnsurePlan(x);
+    return `<button class="hcard ctcard short${mine ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} · ${esc(x.i.n)}</b>
+      <span>${started ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}${mine ? ' · ✅' : seeking ? ' · 🔎' : ''} <i class="ctmore">${T('Details')} ›</i></span></button>`;
   }).join('');
 }
 const nameKeyEq = n => Net.ruleKey(n || '') === ctMe();
@@ -107,7 +107,7 @@ function ctShow(key, err) {
       : `<div class="grp"><span>✍️ ${T('Register as a pair')}</span><input id="ctPartner" class="tok wide" list="ctNames" maxlength="20" placeholder="${T('Your partner\'s name')}"><datalist id="ctNames">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist>
         <div class="muted">${T('Your partner needs a name in Bridge Table (the same name they sign in with).')}</div></div>
         <div class="row2"><button class="btn new" data-ctreg="${esc(key)}">✍️ ${T('Register')}</button><button class="btn" data-ctrobot="${esc(key)}">🤖 ${T('Register with a robot partner')}</button><button class="btn" data-ctseek="${esc(key)}">${seeking ? '✖ ' + T('I no longer look for a partner') : '🔎 ' + T('I am looking for a partner')}</button>`}
-      <button class="btn" id="oClose">${T('Close')}</button></div>`);
+      <button class="btn" data-ctadmin="${esc(key)}">⚙️ ${T('Admin')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 async function ctSession() { const n = myNm(); if (!n || !SET.pinH) throw new Error('signin'); if (!(await Net.Cloud.session(n, SET.pinH))) throw new Error('signin'); }
 const ctPath = (x, p) => 'ot/' + encodeURIComponent(x.club) + '/' + encodeURIComponent(x.id) + p;
@@ -447,7 +447,7 @@ async function ctWatch(tid) {
 }
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-ctadmin]');   // the club's admin: the Clubs sign-in (the club's password), then the tournament to change
-  if (a) { const [c, i] = a.dataset.ctadmin.split('|'); openClubs('club=' + encodeURIComponent(c) + '&role=admin&admin=1&ot=' + encodeURIComponent(i)); return; }
+  if (a) { const [c, i] = a.dataset.ctadmin.split('|'); closeOv(); openClubs('club=' + encodeURIComponent(c) + '&role=admin&admin=1&ot=' + encodeURIComponent(i)); return; }
   const t = e.target.closest('[data-ctres],[data-ctdd],[data-ctpbn],[data-ctwatch],[data-ctresopen]'); if (!t) return;
   if (t.dataset.ctresopen) { const [c, i] = t.dataset.ctresopen.split('|'); ctShowResults(c, i); }
   else if (t.dataset.ctres && CT.res) ctShowResults(CT.res.club, CT.res.id, CT.res.d, t.dataset.ctres);
