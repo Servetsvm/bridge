@@ -1,5 +1,5 @@
 /* Bridge Table — offline cache. Bump VERSION after changing any file so phones pick up the new version. */
-const VERSION = 'bridge-v466';
+const VERSION = 'bridge-v467';
 const FILES = ['./', './index.html', './css/style.css', './js/dds.js', './js/core.js', './js/bidding.js', './js/play.js', './js/field.js', './js/storage.js', './js/photo.js', './js/lang.js', './js/app.js', './js/net.js', './js/social.js', './js/puzzles.json', './js/puzzles-play.json', './guide.html', './guide-en.html', './guide-no.html', './guide-es.html', './guide-fr.html', './guide-it.html', './guide-de.html', './guide-ru.html', './guide-pl.html', './guide-zh.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 // the cache may hang (seen in one Chrome: every file then stayed loading for ever), so nothing waits for it for long
 const soon = (p, ms) => Promise.race([p, new Promise(res => setTimeout(res, ms))]).catch(() => {});

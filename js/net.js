@@ -1769,7 +1769,8 @@ const Net = (() => {
     const ns = top[0] || 0, ew = top[1] || 0; return ns >= ew ? ns : -ew;
   }
   /* the table score, double dummy: each board's North-South score against the best one with all hands open, in IMPs
-     (a side that does better than double dummy wins them); the points are kept as well */
+     (a side that does better than double dummy wins them) and in MP (better 100%, the same 50%, worse 0%); the points
+     are kept as well */
   function boardDone(e) {
     if (!st.host || !e) return;
     const s = st.score || (st.score = { ns: 0, ew: 0, n: 0 });
@@ -1779,7 +1780,7 @@ const Net = (() => {
     const take = () => {
       if (st.score !== score) return;   // the score was reset meanwhile
       const tab = (e.dd && e.dd.tab) || (G && G.result === e && G.field && G.field.dd && G.field.dd.tab);
-      if (tab) { const imp = E.imps((e.ns || 0) - ddPar(tab, e.board)); if (imp > 0) score.ins += imp; else score.iew -= imp; score.wait--; broadcast(); panelRefresh(); if (typeof render === 'function') render(); }
+      if (tab) { const d = (e.ns || 0) - ddPar(tab, e.board), imp = E.imps(d); if (imp > 0) score.ins += imp; else score.iew -= imp; score.mp = (score.mp || 0) + (d > 0 ? 100 : d === 0 ? 50 : 0); score.mpn = (score.mpn || 0) + 1; score.wait--; broadcast(); panelRefresh(); if (typeof render === 'function') render(); }
       else if (Date.now() - t0 < 180e3) setTimeout(take, 2000);
       else { score.wait--; broadcast(); }
     };
@@ -1787,7 +1788,7 @@ const Net = (() => {
   }
   function scoreHtml() {
     const s = st.score; if (!st.on) return '';
-    const line = s ? `NS <b>${s.ins || 0}</b> – EW <b>${s.iew || 0}</b> IMP · ${s.n} ${T('boards')} <small>(${T('double dummy')}${s.wait ? ' ⏳' : ''})</small><br><small>${T('Points')}: NS ${s.ns} – EW ${s.ew}</small>` : '—';
+    const line = s ? `NS <b>${s.ins || 0}</b> – EW <b>${s.iew || 0}</b> IMP · ${s.n} ${T('boards')} <small>(${T('double dummy')}${s.wait ? ' ⏳' : ''})</small>${s.mpn ? `<br>NS <b>${Math.round(s.mp / s.mpn)}%</b> – EW <b>${100 - Math.round(s.mp / s.mpn)}%</b> MP` : ''}<br><small>${T('Points')}: NS ${s.ns} – EW ${s.ew}</small>` : '—';
     const btns = st.host ? `<button class="btn" id="nRst">${T('Reset the score')}</button>`
       : st.watching ? '' : `<button class="btn" id="nRstQ">${T('Ask to reset the score')}</button>${G && (G.phase === 'bid' || G.phase === 'play') ? `<button class="btn" id="nNdQ">${T('Ask for a new deal')}</button>` : ''}`;
     return `<div class="grp"><span>${T('Table score')}</span><div>${line}</div><div class="row2">${btns}</div></div>`;
