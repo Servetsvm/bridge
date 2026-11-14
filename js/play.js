@@ -8,6 +8,7 @@ function newPlayState(hands, contract, auction, cards) {
   return {
     lav: cards ? [0, 1].map(i => !(cards[i] && cards[i].conv && cards[i].conv.lav === false)) : [true, true],
     roman: cards ? [0, 1].map(i => !!(cards[i] && cards[i].conv && cards[i].conv.roman)) : [false, false],
+    udca: cards ? [0, 1].map(i => !!(cards[i] && cards[i].conv && cards[i].conv.udca)) : [false, false],
     hands: hands.map(h => h.slice()), auction: auction || [], contract, trump: contract.strain < 4 ? contract.strain : -1,
     dummy: pd(contract.decl), dummyShown: false, leader: (contract.decl + 1) % 4, turn: (contract.decl + 1) % 4,
     trick: [], history: [], tricks: [0, 0], voids: [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
@@ -123,6 +124,8 @@ function discard(g, seat, leg) {
    Lavinthal discards: the suit discarded is not wanted; a high card asks for the higher of the two
    remaining suits (trumps and the suit led left out), a low card for the lower one. */
 const DEFF = { lav: true, att: true, sig: true, dd: true, hint: true, declHint: true, ntLen: true, passInf: true, bidSim: false };
+// upside-down attitude (the Norwegian way): on partner's lead a low card encourages, a high one discourages
+const udOn = (g, seat) => !!(g.udca && g.udca[sideOf(seat)]);
 const romanOn = (g, seat) => DEFF.lav && !!(g.roman && g.roman[sideOf(seat)]);
 const lavOn = (g, seat) => DEFF.lav && !romanOn(g, seat) && (!g.lav || g.lav[sideOf(seat)] !== false);
 const HON = r => (r === 12 ? 4 : r === 11 ? 3 : r === 10 ? 2 : r === 9 ? 1 : 0);
@@ -207,8 +210,9 @@ function attitudeCard(g, seat, follow) {
   const myAll = inSuit(g.hands[seat], ls).map(R);
   const like = myAll.some(r => r >= 10 && isMaster(g, ls * 13 + r, seat)) || (myAll.includes(10) && myAll.includes(9)) ||
     (g.trump >= 0 && ls !== g.trump && mine.length === 2 && inSuit(g.hands[seat], g.trump).length > 0);
-  if (!like) return mine[0];
   const spots = mine.filter(c => R(c) <= 8 && !isMaster(g, c, seat));
+  if (udOn(g, seat)) return like ? mine[0] : (spots.length >= 2 ? spots[spots.length - 1] : mine[0]);   // low = yes, high = no
+  if (!like) return mine[0];
   return spots.length >= 2 ? spots[spots.length - 1] : mine[0];
 }
 /* what partner's cards told us: a suit to lead, or "continue the suit I led" */
@@ -222,7 +226,7 @@ function readSignals(g, seat) {
       if (cand.length === 1) return { suit: cand[0], why: 'lav' };
       if (cand.length === 2 && (r >= 5 || r <= 3)) return { suit: r >= 5 ? Math.max(...cand) : Math.min(...cand), why: 'lav' };
     }
-    if (t.leader === seat && S(pc.c) === ls && t.w !== p) return { suit: R(pc.c) >= 5 && R(pc.c) <= 8 ? ls : -1, why: 'att', led: ls };
+    if (t.leader === seat && S(pc.c) === ls && t.w !== p) return { suit: (udOn(g, p) ? R(pc.c) <= 3 : R(pc.c) >= 5 && R(pc.c) <= 8) ? ls : -1, why: 'att', led: ls };
   }
   return null;
 }
@@ -243,6 +247,7 @@ function signalText(g, seat, c) {
     if (cand.length === 1) return ['Partner discards {0} (Lavinthal): asks for {1}', card, SU[cand[0]]];
     return ['Partner discards {0}: not interested in {1}', card, SU[s]];
   }
+  if (s === ls && g.trick[0].s === pd(seat) && r <= 8 && udOn(g, seat)) return [r <= 3 ? 'Partner plays {0} on your lead: low — encourages, continue the suit (upside-down)' : 'Partner plays {0} on your lead: high — discourages (upside-down)', card];
   if (s === ls && g.trick[0].s === pd(seat) && r <= 8) return [r >= 5 ? 'Partner plays {0} on your lead: high — encourages, continue the suit' : 'Partner plays {0} on your lead: low — discourages', card];
   return null;
 }
@@ -724,7 +729,7 @@ function shownStrength(g, seat) {
         const cand = lavCandidates(g, s, ls);
         if (cand.length === 1) out.add(cand[0]); else if (cand.length === 2 && (r >= 5 || r <= 3)) out.add(r >= 5 ? Math.max(...cand) : Math.min(...cand));
       }
-    } else if (DEFF.att && cs[0].s === seat && cs[2] === pc && s === ls && r >= 5 && r <= 8 && i < g.history.length && g.history[i].w !== p) out.add(ls);
+    } else if (DEFF.att && cs[0].s === seat && cs[2] === pc && s === ls && (udOn(g, p) ? r <= 3 : r >= 5 && r <= 8) && i < g.history.length && g.history[i].w !== p) out.add(ls);
   }
   out.delete(tr);
   return [...out];

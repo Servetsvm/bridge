@@ -38,7 +38,7 @@ const NAMES = {
   claude: [['Nora Eriksen', 'Arjun Mehta'], ['Lucía Romero', 'Tobias Krüger']],
 };
 const PAIRS = NAMES[TABLE];
-const CARD_KEYS = ['lav', 'roman'];   // ways of discarding, not bids
+const CARD_KEYS = ['lav', 'roman', 'udca'];   // ways of discarding, not bids
 const BASICS = ['jtr', 'strong2c', 'weak2', 'nego', 'takeout', 'bw', 'cue', 'pre', 'runout'];
 // the program: each system on its own first, then each of its conventions
 const BLOCKS = [];

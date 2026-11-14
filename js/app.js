@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 504;
+const APP_V = 506;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -614,7 +614,7 @@ function applyField(e, f) {
 // the basics every system plays (no switch on the card) can be practised too
 const PRAC_BASICS = ['jtr', 'strong2c', 'weak2', 'nego', 'takeout', 'bw', 'cue', 'pre', 'runout'];
 // Lavinthal and Roman are ways of discarding: practising them deals hands where you defend and will have to discard
-const CARD_KEYS = ['lav', 'roman'];
+const CARD_KEYS = ['lav', 'roman', 'udca'];
 const pracKnown = k => E.CONVS.some(c => c.k === k) || PRAC_BASICS.includes(k);
 // a deal where our side defends and one of us will likely run out of a suit and have to discard: in a suit contract a
 // short side suit with few trumps, in notrump declarer's long suit against our short holding
@@ -1188,7 +1188,7 @@ function renderBar() {
   if (G.rtv) { const b = G.rtv.b;
     $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
      <button class="box" id="bAuc"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
-     <div class="box"><b>🔴 ${esc(RT_SYS[b.sys] || b.sys)}</b></div>
+     <div class="box"><b>🔴 ${esc(rtSysName(b.sys))}</b></div>
      <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
     return; }
   const g = G.play;
@@ -1387,7 +1387,7 @@ function renderStatus() {
   let s = "";
   // at an online table the player's name is shown when a friend (not a robot) is to act
   const nameOf = seat => { if (!online()) return SEAT[seat]; const o = Net.owner(seat), at = Object.keys(Net.st.names).find(k => (Net.guest ? Net.st.ctl[k] : (Net.st.seats[k] || "robot")) === o); return o !== "robot" && at != null ? Net.st.names[at] : SEAT[seat]; };
-  if (G.rtv) { const b = G.rtv.b; s = '🔴 ' + (RT_SYS[b.sys] || b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }   // the end of a board: in the middle of the table (rtDoneHtml)
+  if (G.rtv) { const b = G.rtv.b; s = '🔴 ' + rtSysName(b.sys) + ' · ' + rtConv(b) + ' · ' + T('Board {0} of {1}', b.k, b.of); }   // the end of a board: in the middle of the table (rtDoneHtml)
   else if (G.watch && (G.phase === 'bid' || G.phase === 'play')) s = '🤖 ' + T('The robots are playing this deal — watch');
   else if (G.phase === 'bid') s = bidTurn() === meSeat() ? T('Your call') : T('{0} is thinking…', nameOf(bidTurn()));
   else if (G.phase === "play" && ui.ask) s = T("Do you agree?");
@@ -2668,6 +2668,7 @@ async function robotCardFor(g, t) {
 const RT_URL = 'https://raw.githubusercontent.com/Servetsvm/bridge/robots-data/';
 const RT_KEYS = ['claude', 'sayc', 'twoone', 'acol', 'sef', 'precision', 'polish'];
 const RT = { all: {}, data: null, cur: 'sayc', at: 0, busy: null, tab: 'live', sel: null, view: null, timer: null };
+const rtSysName = k => T(RT_SYS[k] || k);   // a system's name in the player's language
 const RT_SYS = { twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club', claude: 'Claude System' };
 const rtGet = f => fetch(RT_URL + f + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null);
 function rtLoad(force) {
@@ -2748,7 +2749,7 @@ function rtLive() {
   const b = x.b, P = rtPos(b, t), aucDone = P.calls >= b.a.length;
   const sel = RT.sel != null && RT.sel < P.calls ? RT.sel : P.calls - 1;
   const res = P.done ? `<div class="okmsg">${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS <b>${fmtSigned(b.sc)}</b><br>${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} ${fmtSigned(b.par)} · <b>${fmtSigned(b.imp)} IMP</b></div>` : '';
-  return `<div class="rthd"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b><small>${T('Board {0} of {1}', b.k, b.of)}</small></div>
+  return `<div class="rthd"><b>${esc(rtSysName(b.sys))} · ${esc(rtConv(b))}</b><small>${T('Board {0} of {1}', b.k, b.of)}</small></div>
     <div class="rtpairs"><span>NS: ${esc(rtPair(b.ns))} <small>${rtRating(b.ns)}</small></span><span>EW: ${esc(rtPair(b.ew))} <small>${rtRating(b.ew)}</small></span></div>
     ${aucDone ? `<div class="rtcon">${T('Contract')} <b>${rtCon(b.c)}</b> · NS ${P.won[0]} – EW ${P.won[1]}</div>` : ''}
     ${rtTable(b, P, true)}${res}
@@ -2759,7 +2760,7 @@ function rtBoards() {
   const t = Date.now(), B = ((RT.data && RT.data.boards) || []).filter(b => b.t1 <= t).reverse();
   if (RT.view != null) {
     const b = B.find(x => x.n === RT.view); if (b) { const sel = RT.sel != null ? RT.sel : b.a.length - 1;
-      return `<div class="row2"><button class="btn mini-btn" data-rtb="-1">← ${T('Boards')}</button></div><div class="rthd"><b>${esc(RT_SYS[b.sys] || b.sys)} · ${esc(rtConv(b))}</b><small>${T('Board {0} of {1}', b.k, b.of)}</small></div>
+      return `<div class="row2"><button class="btn mini-btn" data-rtb="-1">← ${T('Boards')}</button></div><div class="rthd"><b>${esc(rtSysName(b.sys))} · ${esc(rtConv(b))}</b><small>${T('Board {0} of {1}', b.k, b.of)}</small></div>
         ${rtTable(b, { seq: [], m: 0, trick: [] })}<div class="auction">${rtAuction(b, b.a.length, sel)}</div><div class="expl">${rtExpl(b, sel)}</div>
         <div class="okmsg">${rtCon(b.c)} · ${T('{0} tricks', b.tr)} · NS <b>${fmtSigned(b.sc)}</b> · ${T('Best contract (double dummy)')}: ${b.pc ? rtCon(b.pc) : T('Pass')} ${fmtSigned(b.par)} · <b>${fmtSigned(b.imp)} IMP</b></div>`; }
   }
@@ -2784,7 +2785,7 @@ function rtLeague() {
 function rtBody() {
   if (!RT.at) return `<div class="muted">⏳ ${T('Loading…')}</div>`;
   const tab = (k, l) => `<button class="${RT.tab === k ? 'on' : ''}" data-rtt="${k}">${l}</button>`;
-  const tables = `<div class="rtchips">${RT_KEYS.map(k => `<button class="rtchip${RT.cur === k ? ' on' : ''}" data-rtk="${k}">${esc(RT_SYS[k])}</button>`).join('')}</div>`;
+  const tables = `<div class="rtchips">${RT_KEYS.map(k => `<button class="rtchip${RT.cur === k ? ' on' : ''}" data-rtk="${k}">${esc(rtSysName(k))}</button>`).join('')}</div>`;
   return `${tables}<div class="seg rtseg">${tab('live', '🔴 ' + T('Live'))}${tab('boards', T('Boards'))}${tab('league', T('League'))}</div>
     ${RT.tab === 'live' ? rtLive() : RT.tab === 'boards' ? rtBoards() : rtLeague()}`;
 }
@@ -2875,7 +2876,7 @@ function rtSit(s) {
 // 🪑 Sit down on the system table's bar: the four seats with their robots' names
 function rtSitPick() {
   const x = rtCur(Date.now()), b = x && (x.b || x.wait); if (!b) return;
-  openOv('rtsit', `<h2>🪑 ${T('Sit down')} · ${esc(RT_SYS[b.sys] || b.sys)}</h2>
+  openOv('rtsit', `<h2>🪑 ${T('Sit down')} · ${esc(rtSysName(b.sys))}</h2>
     <div class="muted">${T('Choose a seat: you play the next boards in it with these robots.')} ${T('Your robot partner plays your own system and conventions.')}</div>
     <div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtsit="${s}">${SEAT[s]}<small>${esc(rtName(s))}</small></button>`).join('')}</div>
     <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
@@ -2883,7 +2884,7 @@ function rtSitPick() {
 // the home page's card: the six tables (their systems' names)
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows"><button class="rtchip rtclaude" data-rtk="claude" data-rtopen="1"><b>✨ ${T('Claude system')}</b><small>${T('The AI Claude\'s own system: its conventions are kept only when they win over thousands of deals. Watch the robots play it.')}</small></button><a class="rtclaudeart" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a>${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(RT_SYS[k])}</button>`).join('')}</div>`;
+  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows"><button class="rtchip rtclaude" data-rtk="claude" data-rtopen="1"><b>✨ ${T('Claude system')}</b><small>${T('The AI Claude\'s own system: its conventions are kept only when they win over thousands of deals. Watch the robots play it.')}</small></button><a class="rtclaudeart" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a>${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(rtSysName(k))}</button>`).join('')}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
