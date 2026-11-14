@@ -517,6 +517,10 @@
           }
         }
       }
+    },
+    "pub": {
+      ".read": true,
+      ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet'"
     }
   }
 }

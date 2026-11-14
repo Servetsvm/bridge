@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 512;
+const APP_V = 513;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2895,10 +2895,13 @@ function claudeOv() {
 // the home page's card: the six tables (their systems' names)
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows"><div class="rtclaudes"><button class="rtchip rtclaude" data-rtk="claude" data-rtopen="1"><b>✨ ${T('Claude system')}</b><small>${T('The AI\'s own system')}</small></button>${SET.opp === 'claude' ? `<button class="rtchip rtclaude rtduel on" id="clDuelEnd"><b>⚔️ ${T('Against Claude')}</b><small>${T('Tap to end')}</small></button>` : `<button class="rtchip rtclaude rtduel" id="clDuel"><b>⚔️ ${T('Challenge Claude')}</b><small>${T('Your system against his')}</small></button>`}</div><a class="rtclaudeart" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a>${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(rtSysName(k))}</button>`).join('')}</div>`;
+  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows">${PUB.hideCl ? '' : `<div class="rtclaudes"><button class="rtchip rtclaude" data-rtk="claude" data-rtopen="1"><b>✨ ${T('Claude system')}</b><small>${T('The AI\'s own system')}</small></button>${SET.opp === 'claude' ? `<button class="rtchip rtclaude rtduel on" id="clDuelEnd"><b>⚔️ ${T('Against Claude')}</b><small>${T('Tap to end')}</small></button>` : `<button class="rtchip rtclaude rtduel" id="clDuel"><b>⚔️ ${T('Challenge Claude')}</b><small>${T('Your system against his')}</small></button>`}</div><a class="rtclaudeart" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a>`}${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(rtSysName(k))}</button>`).join('')}</div>`;
 }
-setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
-setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
+// the site's switches (the administrator's, for every player): read at the start and with the robots' table
+let PUB = {};
+const pubLoad = () => typeof Net === 'undefined' || !Net.Cloud ? Promise.resolve() : Net.Cloud.get('pub').then(v => { PUB = v || {}; }).catch(() => {});
+setTimeout(() => Promise.all([rtLoad(), pubLoad()]).then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
+setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; Promise.all([rtLoad(), pubLoad()]).then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
 function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
@@ -2913,6 +2916,7 @@ function showSettings() {
    <div class="grp"><span>${T('Sound and buzz when it is your turn')}</span>${seg('alert', [['online', T('At online tables')], ['always', T('Always')], ['off', T('Off')]], SET.alert || 'online')}</div>
    <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify !== false ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div></div>
    <div class="grp"><span>${T('Table sounds')}</span>${seg('sfx', [[1, T('On')], [0, T('Off')]], SET.sfx ? 1 : 0)}</div>
+   ${typeof Net !== 'undefined' && Net.isAdmin() ? `<div class="grp"><span>👑 ${T('The Claude row on the home page')}</span>${seg('hidecl', [[0, T('Show')], [1, T('Hide')]], PUB.hideCl ? 1 : 0)}<div class="muted">${T('For every player.')}</div></div>` : ''}
    <div class="muted">${T('Changes apply from the next deal.')} ${Store.online ? T('Settings and scores are saved to your account.') : T('Scores are saved on this device.')} ${T('Every deal you get is new — a deal is never dealt to you twice.')}</div>
    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn" id="sReset">${T('Delete score history')}</button>` : ''}</div>
    <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>
@@ -3479,6 +3483,7 @@ document.addEventListener('click', ev_ => {
     if (seg === 'sfx') { SET.sfx = v === '1'; sfx('card'); } if (seg === 'theme') SET.theme = v; if (seg === 'big') SET.big = v === '1';
     if (seg === "style") SET.style = v; if (seg === 'homev') SET.homeV = v;
     if (seg === "mode") SET.mode = v; if (seg === 'opp') SET.opp = v;
+    if (seg === 'hidecl') { PUB.hideCl = v === '1'; Net.Cloud.put('pub/hideCl', PUB.hideCl).catch(() => flash('❌ ' + T('Could not save.'), 2500)); const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); showSettings(); return; }
     Store.saveSettings(SET); save(); showSettings(); render(); return;
   }
   switch (t.id) {
