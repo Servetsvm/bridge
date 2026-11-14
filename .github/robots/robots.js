@@ -24,7 +24,7 @@ ctx.window.window = ctx.window; ctx.self = ctx.window; vm.createContext(ctx);
 for (const file of ['dds.js', 'core.js', 'bidding.js', 'play.js']) vm.runInContext(fs.readFileSync(root + 'js/' + file, 'utf8'), ctx, { filename: file });
 const E = {}; for (const fn of ctx.window.BRIDGE) fn(E);
 
-const SYS = ['sayc', 'twoone', 'acol', 'sef', 'precision', 'polish'];
+const SYS = ['sayc', 'twoone', 'acol', 'sef', 'precision', 'polish', 'claude'];
 const TABLE = process.argv[3] || 'sayc';
 if (!SYS.includes(TABLE)) throw new Error('no such system: ' + TABLE);
 // each table's two pairs (made-up names from many countries): North-South and East-West all the time
@@ -35,6 +35,7 @@ const NAMES = {
   sef: [['Sofia Lindgren', 'Kenji Mori'], ['Elif Aydın', 'Daniel Okafor']],
   precision: [['Mei Lin Zhou', 'Tomás Silva'], ['Hanna Virtanen', 'Karim Mansour']],
   polish: [['Isabel Duarte', 'Pavel Horák'], ['Amara Nwosu', 'Felix Brandt']],
+  claude: [['Nora Eriksen', 'Arjun Mehta'], ['Lucía Romero', 'Tobias Krüger']],
 };
 const PAIRS = NAMES[TABLE];
 const CARD_KEYS = ['lav', 'roman'];   // ways of discarding, not bids

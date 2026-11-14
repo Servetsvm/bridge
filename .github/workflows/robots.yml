@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sys: [sayc, twoone, acol, sef, precision, polish]
+        sys: [sayc, twoone, acol, sef, precision, polish, claude]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -52,7 +52,7 @@ jobs:
       - name: The tables so far
         run: |
           mkdir -p out
-          for s in sayc twoone acol sef precision polish; do for f in live-$s.json errors-$s.json; do curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/$f?$(date +%s)" -o out/$f || rm -f out/$f; done; done
+          for s in sayc twoone acol sef precision polish claude; do for f in live-$s.json errors-$s.json; do curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/$f?$(date +%s)" -o out/$f || rm -f out/$f; done; done
           curl -sf "https://raw.githubusercontent.com/${{ github.repository }}/robots-data/lessons.json?$(date +%s)" -o out/lessons.json || rm -f out/lessons.json
       - uses: actions/download-artifact@v4
         with:

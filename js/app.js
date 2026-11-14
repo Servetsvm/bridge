@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 503;
+const APP_V = 504;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2666,9 +2666,9 @@ async function robotCardFor(g, t) {
    time, each with its start time, on the robots-data branch); every watcher sees each call and card at its time, so
    all see the same moment. A player can take a robot's seat: the next boards with those robots, on their device ---- */
 const RT_URL = 'https://raw.githubusercontent.com/Servetsvm/bridge/robots-data/';
-const RT_KEYS = ['sayc', 'twoone', 'acol', 'sef', 'precision', 'polish'];
+const RT_KEYS = ['claude', 'sayc', 'twoone', 'acol', 'sef', 'precision', 'polish'];
 const RT = { all: {}, data: null, cur: 'sayc', at: 0, busy: null, tab: 'live', sel: null, view: null, timer: null };
-const RT_SYS = { twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' };
+const RT_SYS = { twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club', claude: 'Claude System' };
 const rtGet = f => fetch(RT_URL + f + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null);
 function rtLoad(force) {
   if (RT.busy) return RT.busy;
@@ -2882,7 +2882,8 @@ function rtSitPick() {
 }
 // the home page's card: the six tables (their systems' names)
 function rtCardHtml() {
-  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(RT_SYS[k])}</button>`).join('')}</div>`;
+  const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
+  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows"><button class="rtchip rtclaude" data-rtk="claude" data-rtopen="1"><b>✨ ${T('Claude system')}</b><small>${T('The AI Claude\'s own system: its conventions are kept only when they win over thousands of deals. Watch the robots play it.')}</small></button><a class="rtclaudeart" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a>${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(RT_SYS[k])}</button>`).join('')}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
