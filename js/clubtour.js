@@ -86,7 +86,7 @@ function ctSched(plan, pi) {
   }));
   return out;
 }
-const ctMyPair = plan => plan.pairs.findIndex(p => p.ka === ctMe() || p.kb === ctMe());
+const ctMyPair = plan => { const me = ctMe(); return me ? plan.pairs.findIndex(p => p.ka === me || p.kb === me) : -1; };   // a robot's empty key is nobody's
 const ctPairTxt = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b);
 // the home page card: each tournament coming up, its countdown and whether you are registered
 function ctCardHtml() {

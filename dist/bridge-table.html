@@ -10076,7 +10076,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 491;
+const APP_V = 492;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -16624,7 +16624,7 @@ function ctSched(plan, pi) {
   }));
   return out;
 }
-const ctMyPair = plan => plan.pairs.findIndex(p => p.ka === ctMe() || p.kb === ctMe());
+const ctMyPair = plan => { const me = ctMe(); return me ? plan.pairs.findIndex(p => p.ka === me || p.kb === me) : -1; };   // a robot's empty key is nobody's
 const ctPairTxt = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b);
 // the home page card: each tournament coming up, its countdown and whether you are registered
 function ctCardHtml() {
