@@ -89,8 +89,11 @@ function ctSched(plan, pi) {
 const ctMyPair = plan => { const me = ctMe(); return me ? plan.pairs.findIndex(p => p.ka === me || p.kb === me) : -1; };   // a robot's empty key is nobody's
 const ctPairTxt = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b);
 // the home page card: each tournament coming up, its countdown and whether you are registered
+// a club's evening to show: the one being played, else the soonest
+const ctFirst = L => L.slice().sort((a, b) => (b.d <= Date.now()) - (a.d <= Date.now()) || a.d - b.d)[0];
+function ctOnePerClub(L) { const by = {}; for (const x of L) (by[x.club] || (by[x.club] = [])).push(x); return Object.values(by).map(ctFirst).sort((a, b) => a.d - b.d); }
 function ctCardHtml() {
-  const L = ctList(); if (!L.length || !myNm()) return '';
+  const L = ctOnePerClub(ctList()); if (!L.length || !myNm()) return '';
   return L.slice(0, 3).map(x => {
     const mine = ctMine(x), seeking = x.seek.some(s => s.k === ctMe()), started = x.d <= Date.now();
     if (started && !x.plan) ctEnsurePlan(x);

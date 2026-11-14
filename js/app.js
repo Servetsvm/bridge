@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 497;
+const APP_V = 498;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -4060,7 +4060,7 @@ async function clubTaken(club, test) {
 async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];
-    const otOf = c => typeof ctList === 'function' ? ctList().filter(x => x.club === c) : [];
+    const otOf = c => typeof ctList === 'function' ? [ctFirst(ctList().filter(x => x.club === c))].filter(Boolean) : [];   // one evening a club
     const otRows = c => otOf(c).map(x => `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`).join('');
     const otLive = c => otOf(c).find(x => x.plan);   // an online evening being played: the club's tournament now
     const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
