@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 515;
+const APP_V = 516;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1530,7 +1530,7 @@ function sfx(k) {
 // what every player has (no longer chosen in Settings)
 function fixedSet() {
   if (SET.explV !== 1) { SET.explV = 1; SET.expl = false; }   // the bid explanations start hidden (once; Settings turns them on)
-  Object.assign(SET, { homeV: 'new', style: 'modern', felt: 'green', back: 'blue', four: true, big: true, opp: SET.opp === 'claude' ? 'claude' : 'same', robotLvl: 'expert', speed: 0 });
+  Object.assign(SET, { homeV: 'new', style: 'modern', felt: 'green', back: 'blue', four: true, big: true, opp: 'same', robotLvl: 'expert', speed: 0 });
 }
 function applyLook() {
   fixedSet();
@@ -2895,13 +2895,10 @@ function claudeOv() {
 // the home page's card: the six tables (their systems' names)
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows">${PUB.hideCl ? '' : `<div class="rtclaudes"><button class="rtchip rtclaude" data-rtk="claude" data-rtopen="1"><b>✨ ${T('Claude system')}</b><small>${T('The AI\'s own system')}</small></button>${SET.opp === 'claude' ? `<button class="rtchip rtclaude rtduel on" id="clDuelEnd"><b>⚔️ ${T('Against Claude')}</b><small>${T('Tap to end')}</small></button>` : `<button class="rtchip rtclaude rtduel" id="clDuel"><b>⚔️ ${T('Challenge Claude')}</b><small>${T('Your system against his')}</small></button>`}</div><a class="rtclaudeart" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a>`}${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(rtSysName(k))}</button>`).join('')}</div>`;
+  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(rtSysName(k))}</button>`).join('')}</div>`;
 }
-// the site's switches (the administrator's, for every player): read at the start and with the robots' table
-let PUB = {};
-const pubLoad = () => typeof Net === 'undefined' || !Net.Cloud ? Promise.resolve() : Net.Cloud.get('pub').then(v => { PUB = v || {}; }).catch(() => {});
-setTimeout(() => Promise.all([rtLoad(), pubLoad()]).then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
-setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; Promise.all([rtLoad(), pubLoad()]).then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
+setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
+setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
 function showSettings() {
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
@@ -3481,7 +3478,6 @@ document.addEventListener('click', ev_ => {
     if (seg === 'sfx') { SET.sfx = v === '1'; sfx('card'); } if (seg === 'theme') SET.theme = v; if (seg === 'big') SET.big = v === '1';
     if (seg === "style") SET.style = v; if (seg === 'homev') SET.homeV = v;
     if (seg === "mode") SET.mode = v; if (seg === 'opp') SET.opp = v;
-    if (seg === 'hidecl') { PUB.hideCl = v === '1'; Net.Cloud.put('pub/hideCl', PUB.hideCl).catch(() => flash('❌ ' + T('Could not save.'), 2500)); const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); showSettings(); return; }
     Store.saveSettings(SET); save(); showSettings(); render(); return;
   }
   switch (t.id) {
@@ -3665,6 +3661,7 @@ function ddsReady() {
 }
 function start(data) {
   load(data && data.G ? data : null);
+  if (SET.opp === 'claude') { SET.opp = 'same'; Store.saveSettings(SET); }   // no Claude challenge on the home page any more
   Field.init();
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
   // an unfinished board (bidding or play) waits for "Play with robots" to carry on
