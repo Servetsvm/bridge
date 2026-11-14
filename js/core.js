@@ -121,6 +121,7 @@ const CONVS = [
   { k: 'respx', n: 'Responsive Double', off: 1, d: 'After their opening, partner\'s takeout double and their raise, a double by advancer is for takeout: 8+ points and both unbid suits (usually the majors), no clear bid.' },
   { k: 'sjs', n: 'Strong Jump Shifts', off: 1, x: 'wjs', d: 'A single jump in a new suit by responder shows a strong hand (19+ points) with a good suit and slam interest. Replaces Weak Jump Shifts.' },
   { k: 'dont', n: 'DONT', off: 1, x: 'capp', d: 'Disturb Opponents\' Notrump (Marty Bergen). Over their 1NT: X = a one-suiter (6+), advancer bids 2♣ to ask; 2♣ = clubs and a higher suit; 2♦ = diamonds and a major; 2♥ = both majors; 2♠ = spades only (natural). Advancer passes with tolerance or bids the next suit (pass or correct). Replaces Cappelletti.' },
+  { k: 'claudex', n: 'Claude Double', off: 1, d: 'Claude system (Bridge Table, servetsvm.github.io/bridge). A double of the opponents\' two- or three-level suit contract in a competitive part-score is for penalty when the doubler counts two defeating tricks or more: the tricks he holds in their trump suit and his quick tricks outside, plus partner\'s share of the defence (one trick for every four points partner has shown), against the seven minus the level they must lose at most. It needs three or more of their trumps. Partner passes, unless he holds a void in their suit or a long suit of his own that plays far better.' },
   { k: 'gamb', n: 'Gambling 3NT', off: 1, d: 'A 3NT opening shows a solid 7+ card minor (AKQ at the top) with no ace or king outside. Partner passes with stoppers, otherwise bids 4♣ (pass or correct).' },
 ];
 CONVS.forEach(c => { if (c.x) { const o = CONVS.find(y => y.k === c.x); if (o) o.x = c.k; } });
@@ -154,6 +155,9 @@ const SYSTEMS = [
   { k: 'sef', n: 'French Standard (SEF)', nt: [15, 17], nt2: [20, 21], maj5: true,
     d: 'Système d\'Enseignement Français: 5-card majors, "best minor" 1♣/1♦, 15-17 1NT, 2♣ strong and forcing, 2♦ artificial game force, weak 2♥/2♠. A two-level new suit is forcing for one round; RKCB.',
     conv: on('rkc', 'stayman', 'j2nt', 'texas', 'michaels', 'splinter', 'leb', 'lav') },
+  { k: 'claude', n: 'Claude System', nt: [15, 17], nt2: [20, 21], maj5: true,
+    d: 'The Claude system, made by Claude (Anthropic\'s AI) for Bridge Table: a natural base — five-card majors, "best minor" 1♣/1♦, 15-17 1NT, strong 2♣ and an artificial game-forcing 2♦, weak 2♥/2♠ — with its own conventions, chosen by measuring them over thousands of deals double dummy against the other systems: the Claude Double (penalty in competitive part-scores, by counting defensive tricks).',
+    conv: on('rkc', 'stayman', 'j2nt', 'texas', 'michaels', 'splinter', 'leb', 'lav', 'claudex') },
   { k: 'precision', n: 'Precision Club', nt: [13, 15], nt2: [22, 23], maj5: true,
     d: 'Strong club: 1♣ = 16+ any shape (artificial, forcing; 1♦ = negative 0-7). Other openings 11-15: 1♦ 2+ ♦ (catch-all), 1♥/1♠ 5+, 1NT 13-15, 2♣ 6+ ♣ (or 5♣ + a 4-card major), 2♦ three-suited short in ♦ (4-4-1-4 / 4-4-0-5), weak 2♥/2♠.',
     conv: on('rkc', 'stayman', 'j2nt', 'texas', 'michaels', 'splinter', 'leb', 'lav') },

@@ -346,11 +346,11 @@ setInterval(otRobots, 1500);
 /* Servet's test: an online tournament started now where every seat is a robot (made-up names); the robots play it
    from this page (and the GitHub run), so the whole evening can be watched and its results looked at */
 window.otTestRobots = async function (mix) {
-  const P = otP(); if (!P || !await otAsk(mix ? otL('Start a systems contest now? Six robot pairs, each playing its own system, every pair against every other.') : otL('Start a test tournament with 4 robot pairs now?'))) return;
+  const P = otP(); if (!P || !await otAsk(mix ? otL('Start a systems contest now? Seven robot pairs (Claude among them), each playing its own system, every pair against every other.') : otL('Start a test tournament with 4 robot pairs now?'))) return;
   const N = ['Ingrid', 'Lars', 'Sofia', 'Mateo', 'Yuki', 'Omar', 'Elif', 'Jonas', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Hanna', 'Karim', 'Amara', 'Felix', 'Leila', 'Tomás', 'Mei', 'Pavel'].sort(() => Math.random() - 0.5);
   const id = Date.now().toString(36), at = Date.now() - 1000, f = otRead();
   const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
-  const SY = [['sayc', 'SAYC'], ['twoone', '2/1'], ['acol', 'Acol'], ['sef', 'SEF'], ['precision', 'Precision'], ['polish', 'Polish Club']];
+  const SY = [['claude', 'Claude'], ['sayc', 'SAYC'], ['twoone', '2/1'], ['acol', 'Acol'], ['sef', 'SEF'], ['precision', 'Precision'], ['polish', 'Polish Club']];
   const pairs = mix ? SY.map(([k, n], j) => ({ pid: 'r' + j, a: n, b: '🤖 ' + N[j], ka: '', kb: '', sys: k, d: at, ts: at + j })) : [0, 1, 2, 3].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
   if (mix) { info.n = '🧪 ' + otL('Systems contest'); info.mov = 'howell'; info.b = 15; info.bpr = 3; info.conv = []; }
   try {

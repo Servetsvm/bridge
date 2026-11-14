@@ -309,7 +309,7 @@ function cands(x) {
       add(B(1, 0), h => can(h), { min: 12, tag: 'pclub', cv: 'sys', f: 1, t: 'Polish 1♣: 12-14 balanced, or 15+ with long clubs, or 18+ any shape' });
     } else {
       // natural systems: SAYC, 2/1, Acol, French Standard
-      if (sk === 'sef') {
+      if ((sk === 'sef' || sk === 'claude')) {
         add(B(2, 1), h => h.hcp >= 23 || (h.hcp >= 20 && h.lp >= 4), { min: 23, tag: '2c', cv: 'sys', f: 1, gf: 1, t: 'SEF 2♦: artificial game force (23+ HCP or about nine tricks)' });
         add(B(2, 0), h => h.hcp >= 20 && !h.bal, { min: 20, max: 22, cv: 'strong2c', f: 1, t: 'SEF 2♣: strong (20-22, unbalanced), forcing for one round' });
       } else add(B(2, 0), h => h.hcp >= (sk === 'acol' ? 23 : 22) || (h.hcp >= 19 && h.lp >= 4), { min: sk === 'acol' ? 23 : 22, cv: 'strong2c', t: 'Strong and artificial: ' + (sk === 'acol' ? 23 : 22) + '+ HCP, game forcing', f: 1, gf: 1, tag: '2c' });
@@ -329,7 +329,7 @@ function cands(x) {
         add(B(1, 0), h => can(h), { min: 11, max: 22, len: { 0: 3 }, t: '3+ ♣, 12-22 HCP (Acol)' });
       }
       preempts();
-      weakTwos(sk === 'sef' ? [3, 2] : [3, 2, 1]);
+      weakTwos((sk === 'sef' || sk === 'claude') ? [3, 2] : [3, 2, 1]);
       threes();
     }
     add('P', () => true, { max: 12, t: 'No opening values' });
@@ -425,7 +425,7 @@ function cands(x) {
       return L;
     }
     // SEF 2♦ (artificial game force): 2♥ is the waiting reply
-    if (o === B(2, 1) && otag === '2c' && x.sys.k === 'sef' && rhoPass && fresh) {
+    if (o === B(2, 1) && otag === '2c' && (x.sys.k === 'sef' || x.sys.k === 'claude') && rhoPass && fresh) {
       for (const s of [3, 0, 1]) add(B(s === 3 ? 2 : 3, s), h => h.hcp >= 7 && h.len[s] >= 5 && h.top5(s) >= 2, { min: 7, len: { [s]: 5 }, cv: 'sys', t: 'Positive: 5+ ' + SUIT[s] + ', 7+ HCP' });
       add(B(2, 2), () => true, { cv: 'sys', tag: 'relay', t: 'Waiting reply (artificial)' });
       return L;
@@ -1112,6 +1112,20 @@ function generic(x, h) {
     if (cl <= gameL - 1) { call = B(gameL - 1, t); m = { t: 'Game invitation', ...range, len: lenm }; }
     else if (cl <= gameL && est >= 24 && !shortTrump) { call = B(gameL, t); m = { t: 'Game contract', ...range, len: lenm }; }
   }
+  // partner's Claude Double: left in, unless a void in their suit or a long suit of mine plays far better
+  const pX = x.auc.length >= 2 && x.auc[x.auc.length - 2].seat === x.p && x.auc[x.auc.length - 2].call === 'X' && x.auc[x.auc.length - 2].m && x.auc[x.auc.length - 2].m.tag === 'cdx' && x.auc[x.auc.length - 1].call === 'P';
+  if (call === null && pX && st.dbl === 1 && last >= 0 && !(h.len[ST(last)] === 0 && h.len[h.longest] >= 6) && !(h.len[h.longest] >= 7)) return { call: 'P', m: { t: 'Leaving in partner\'s Claude Double' } };
+  if (call === null && x.C.claudex && goal <= 0 && last >= 0 && !ourLast && st.dbl === 0 && LV(last) >= 2 && LV(last) <= 3 && ST(last) < 4 && h.len[ST(last)] >= 3) {
+    const os = ST(last), ol = LV(last), r = h.rk[os], L = h.len[os];
+    // tricks in their trumps: the top honours that stand up by length, and a long trump holding
+    let tt = (r[0] === 12 ? 1 : 0) + (r.includes(11) && L >= 2 ? 1 : 0) + (r.includes(10) && L >= 3 ? 0.75 : 0) + (r.includes(9) && L >= 4 ? 0.5 : 0) + Math.max(0, L - 3) * 0.5;
+    // quick tricks outside (a long side suit is ruffed sooner)
+    let qt = 0;
+    for (let s = 0; s < 4; s++) { if (s === os) continue; const k = h.rk[s], l = h.len[s]; const A = k[0] === 12, K = k.includes(11), Q = k.includes(10);
+      let q = A && K ? 2 : A && Q ? 1.5 : A ? 1 : K && Q ? 1 : K && l >= 2 ? 0.5 : 0; if (l >= 6) q = Math.min(q, 1); qt += q; }
+    const partner = Math.max(0, pEst) / 4, need = 7 - ol, sure = tt + qt + partner - need;
+    if (sure >= 2) { call = 'X'; m = { tag: 'cdx', cv: 'claudex', pen: 1, t: 'Claude Double: penalty — about ' + (Math.round((tt + qt + partner) * 2) / 2) + ' defensive tricks, they can lose ' + need }; }
+  }
   if (call === null && goal === 0) {
     if (!(ourLast && (ST(last) === t || t === 4 || h.len[ST(last)] >= 2))) {
       const cap = fitLen >= 9 ? 3 : 2;
@@ -1120,7 +1134,8 @@ function generic(x, h) {
   }
   if (call === null && last >= 0 && !ourLast && st.dbl === 0) {
     const os = ST(last), ol = LV(last), he = h.hcp + pEst;
-    if ((os < 4 && ol >= 2 && he >= 23 && h.len[os] >= 3) || (os === 4 && ol >= 2 && he >= 25) || (ol >= 4 && os < 4 && he >= 21 && h.len[os] >= 2 && h.hcp >= 10)) { call = 'X'; m = { t: 'Penalty double' }; }
+    if (x.C.claudex && os < 4 && ol <= 3) { /* the Claude system: a part-score suit contract is doubled only by counting tricks (above) */ }
+    else if ((os < 4 && ol >= 2 && he >= 23 && h.len[os] >= 3) || (os === 4 && ol >= 2 && he >= 25) || (ol >= 4 && os < 4 && he >= 21 && h.len[os] >= 2 && h.hcp >= 10)) { call = 'X'; m = { t: 'Penalty double' }; }
   }
   if (call === null && forced) {
     let s = t, l = cheapest(s);
