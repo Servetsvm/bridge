@@ -10076,7 +10076,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 493;
+const APP_V = 494;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -17119,6 +17119,7 @@ async function ctHeadMine() {
   try {
     for (const x of L) {
       const pi = ctMyPair(x.plan); if (pi < 0) continue;
+      if (await Net.Cloud.get(ctRunP(x) + '/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
       const p = ctRunP(x), tmap = await Net.Cloud.get(p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
       const ti = plan.rounds[r].findIndex(([a, b]) => a === pi || b === pi); if (ti < 0) continue;
       const hb = await Net.Cloud.get(p + '/hb') || {};

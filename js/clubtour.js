@@ -581,6 +581,7 @@ async function ctHeadMine() {
   try {
     for (const x of L) {
       const pi = ctMyPair(x.plan); if (pi < 0) continue;
+      if (await Net.Cloud.get(ctRunP(x) + '/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
       const p = ctRunP(x), tmap = await Net.Cloud.get(p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
       const ti = plan.rounds[r].findIndex(([a, b]) => a === pi || b === pi); if (ti < 0) continue;
       const hb = await Net.Cloud.get(p + '/hb') || {};

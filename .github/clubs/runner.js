@@ -99,6 +99,7 @@ async function evenings() {
     if (Date.now() - beat > 30e3) { beat = Date.now(); for (const x of L) await put(x.p + '/bot', Date.now()).catch(() => {}); }   // the director sees the server's robots at work
     for (const x of L) {
       try {
+        if (await get(x.p + '/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
         const tmap = await get(x.p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
         const hb = await get(x.p + '/hb') || {};
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {

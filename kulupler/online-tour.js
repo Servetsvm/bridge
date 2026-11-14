@@ -324,6 +324,7 @@ async function otRobots() {
       for (const [d, run] of Object.entries(t.run || {})) {
         if (!run || !run.plan || Date.now() - +d > 6 * 3600e3 || +d > Date.now()) continue;
         const base = '/' + id + '/run/' + d, get = async q => { const r = await fetch(await otUrl(base + q), { cache: 'no-store' }); return r.ok ? r.json() : null; };
+        if (await get('/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
         const tmap = await get('/t') || {}, plan = P.ctFill(run.plan, tmap), r = P.ctCurRound(plan, tmap); if (r < 0) continue;
         const hb = await get('/hb') || {};
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {
