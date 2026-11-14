@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 510;
+const APP_V = 511;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1764,9 +1764,7 @@ function renderHome() {
     // the administrator's card: always on the home page (players, messages, requests, robots)
     const admN = (N.supNew || 0) + (N.cvNew || 0) + (ui.learnNew || 0);
     set('hAdm', N.isAdmin() ? `<button class="hadmb" id="admTog" title="${T('Admin')}">👑${admN ? `<b class="supc">${admN}</b>` : ''}</button>` : '');
-    const clInv = SET.opp === 'claude' ? `<div class="hcard clinv on"><b>⚔️ ${T('You are playing against the Claude system')}</b><small>${T('The robots opposite you bid Claude\'s own system; you and your partner bid yours.')}</small><div class="row2"><button class="btn gold" id="clGo">▶ ${T('Play')}</button><button class="btn" id="clDuelEnd">${T('End the challenge')}</button></div></div>`
-      : SET.clInv !== new Date().toDateString() && myNm() ? `<div class="hcard clinv"><b>⚔️ ${T('Claude invites you to a match')}</b><small>${T('“I made my own bridge system. Bring yours: your bidding against mine, on the same cards. Who reaches the better contracts?” — Claude')}</small><div class="row2"><button class="btn gold" id="clDuel">${T('Accept')}</button><button class="btn" id="clLater">${T('Later')}</button></div></div>` : '';
-    set('hPend', bad + sup + cvn + clInv + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
+    set('hPend', bad + sup + cvn + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
     set('hTables', (typeof ctCardHtml === 'function' ? ctCardHtml() : '') + N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
@@ -2897,7 +2895,7 @@ function claudeOv() {
 // the home page's card: the six tables (their systems' names)
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows"><button class="rtchip rtclaude" data-rtk="claude" data-rtopen="1"><b>✨ ${T('Claude system')}</b><small>${T('The AI Claude\'s own system: its conventions are kept only when they win over thousands of deals. Watch the robots play it.')}</small></button><a class="rtclaudeart" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a>${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(rtSysName(k))}</button>`).join('')}</div>`;
+  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows"><div class="rtclaudes"><button class="rtchip rtclaude" data-rtk="claude" data-rtopen="1"><b>✨ ${T('Claude system')}</b><small>${T('The AI\'s own system')}</small></button>${SET.opp === 'claude' ? `<button class="rtchip rtclaude rtduel on" id="clDuelEnd"><b>⚔️ ${T('Against Claude')}</b><small>${T('Tap to end')}</small></button>` : `<button class="rtchip rtclaude rtduel" id="clDuel"><b>⚔️ ${T('Challenge Claude')}</b><small>${T('Your system against his')}</small></button>`}</div><a class="rtclaudeart" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a>${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(rtSysName(k))}</button>`).join('')}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
@@ -3391,8 +3389,8 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.rtk === 'claude' && t.dataset.rtopen) { claudeOv(); return; }   // the Claude system: try it yourself, watch the robots, read how it works
   if (t.id === 'clPlay') { setSys('claude'); Store.saveSettings(SET); closeOv(); ui.saved = null; Net.st.soloPub = true; resume(); flash('✨ ' + T('You play the Claude system — the robots too'), 2600); return; }
   if (t.id === 'clWatch') { closeOv(); rtWatch('claude'); return; }
-  if (t.id === 'clDuel') { SET.opp = 'claude'; SET.clInv = new Date().toDateString(); Store.saveSettings(SET); closeOv(); ui.saved = null; Net.st.soloPub = true; resume(); flash('⚔️ ' + T('Your system against Claude\'s: the opponents bid the Claude system'), 3000); return; }
-  if (t.id === 'clDuelEnd') { SET.opp = 'same'; Store.saveSettings(SET); render(); flash(T('The opponents bid your system again'), 2000); return; }
+  if (t.id === 'clDuel') { { const el = $('hRobot'); if (el) setTimeout(() => { el.innerHTML = rtCardHtml(); }, 0); } SET.opp = 'claude'; SET.clInv = new Date().toDateString(); Store.saveSettings(SET); closeOv(); ui.saved = null; Net.st.soloPub = true; resume(); flash('⚔️ ' + T('Your system against Claude\'s: the opponents bid the Claude system'), 3000); return; }
+  if (t.id === 'clDuelEnd') { SET.opp = 'same'; Store.saveSettings(SET); render(); { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); } flash(T('The opponents bid your system again'), 2000); return; }
   if (t.id === 'clLater') { SET.clInv = new Date().toDateString(); Store.saveSettings(SET); render(); return; }
   if (t.dataset.rtk) { if (t.dataset.rtopen) rtWatch(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
   if (t.dataset.rtwatch) { rtWatch(RT.cur); return; }

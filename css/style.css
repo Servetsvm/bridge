@@ -2133,3 +2133,12 @@ body.homev2 .rtcard .rtrows .rtclaudeart{grid-column:1/-1;flex-basis:100%;text-a
 body.homev2 .home.v2 .hcard.clinv,body .hcard.clinv{color:#fff;background:linear-gradient(120deg,#5b2a86 0%,#7b3fb0 45%,#c0623a 100%);border:0}
 body.homev2 .home.v2 .hcard.clinv small{color:#f3e9ff}
 body.homev2 .home.v2 .hcard.clinv .btn:not(.gold){background:rgba(255,255,255,.18);color:#fff;border:1px solid rgba(255,255,255,.45)}
+
+/* the Claude row in two: the system and the challenge, side by side, short */
+.rtrows .rtclaudes,body.homev2 .rtcard .rtrows .rtclaudes{grid-column:1/-1;flex-basis:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+body.homev2 .rtcard .rtchip.rtclaude,.rtrows .rtclaude{padding:7px 10px;border-radius:12px}
+body.homev2 .rtcard .rtchip.rtclaude b,.rtrows .rtclaude b{font-size:14.5px}
+body.homev2 .rtcard .rtchip.rtclaude small,.rtrows .rtclaude small{font-size:11.5px}
+body.homev2 .rtcard .rtchip.rtduel,.rtrows .rtduel{background:linear-gradient(120deg,#8a2c2c 0%,#c0623a 60%,#e0a040 100%)}
+body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradient(120deg,#1f6b3a 0%,#2f8a52 100%);box-shadow:0 0 0 2px #ffd54a inset}
+.rtrows .rtclaudes .rtclaude,body.homev2 .rtcard .rtrows .rtclaudes .rtchip.rtclaude{grid-column:auto;width:100%;min-width:0}
