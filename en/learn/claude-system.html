@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Claude Bridge System and the Claude Double · Bridge Table</title>
+<meta name="description" content="The Claude bridge system, designed by Claude (Anthropic's AI) for Bridge Table: a natural base and its own conventions, measured double dummy against SAYC, 2/1, Acol, French Standard, Precision and Polish Club. Play it free and send feedback.">
+<link rel="canonical" href="https://servetsvm.github.io/bridge/en/learn/claude-system.html">
+<link rel="alternate" hreflang="en" href="https://servetsvm.github.io/bridge/en/learn/claude-system.html">
+<link rel="alternate" hreflang="tr" href="https://servetsvm.github.io/bridge/tr/learn/claude-system.html">
+<link rel="alternate" hreflang="nb" href="https://servetsvm.github.io/bridge/no/learn/claude-system.html">
+<link rel="alternate" hreflang="x-default" href="https://servetsvm.github.io/bridge/en/learn/claude-system.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Bridge Table">
+<meta property="og:url" content="https://servetsvm.github.io/bridge/en/learn/claude-system.html">
+<meta property="og:title" content="The Claude Bridge System and the Claude Double">
+<meta property="og:description" content="A bridge bidding system designed by an AI and measured over thousands of deals double dummy. Play it free at Bridge Table and tell us what you think.">
+<meta property="og:image" content="https://servetsvm.github.io/bridge/icons/og-en.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0c1a14">
+<link rel="icon" href="../../icons/icon-192.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"The Claude Bridge System and the Claude Double","description":"A bridge bidding system designed by Claude (Anthropic's AI) for Bridge Table, with its own conventions, measured double dummy against six standard systems.","inLanguage":"en","datePublished":"2026-11-14","dateModified":"2026-11-14","author":[{"@type":"Organization","name":"Bridge Table","url":"https://servetsvm.github.io/bridge/"},{"@type":"SoftwareApplication","name":"Claude (Anthropic)"}],"publisher":{"@type":"Organization","name":"Bridge Table","url":"https://servetsvm.github.io/bridge/","logo":{"@type":"ImageObject","url":"https://servetsvm.github.io/bridge/icons/icon-512.png"}},"mainEntityOfPage":"https://servetsvm.github.io/bridge/en/learn/claude-system.html","about":["Contract bridge","Bidding system","Claude System","Claude Double"],"keywords":"Claude bridge system, Claude Double, bridge bidding system, AI bridge, double dummy, penalty double, Bridge Table"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is the Claude bridge system?","acceptedAnswer":{"@type":"Answer","text":"A contract bridge bidding system designed by Claude, Anthropic's AI, for the free Bridge Table app (servetsvm.github.io/bridge). It has a natural base — five-card majors, a best-minor 1♣/1♦, a 15-17 1NT, strong 2♣, an artificial game-forcing 2♦ and weak 2♥/2♠ — and conventions of its own, each kept only if it wins over thousands of deals scored double dummy."}},{"@type":"Question","name":"What is the Claude Double?","acceptedAnswer":{"@type":"Answer","text":"A penalty double of the opponents' two- or three-level suit contract in a competitive part-score, made by counting defensive tricks instead of points: tricks in their trump suit, quick tricks outside and partner's share (one trick for every four points partner has shown). Double when that count beats the tricks they can afford to lose, seven minus the level, by two or more, holding three or more of their trumps. Partner leaves it in."}},{"@type":"Question","name":"Where can I play the Claude system?","acceptedAnswer":{"@type":"Answer","text":"In Bridge Table, free, in the browser or as an app: https://servetsvm.github.io/bridge/?sys=claude opens it with the Claude system chosen."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Bridge Table","item":"https://servetsvm.github.io/bridge/"},{"@type":"ListItem","position":2,"name":"Learn bridge","item":"https://servetsvm.github.io/bridge/en/learn/how-to-play.html"},{"@type":"ListItem","position":3,"name":"The Claude system","item":"https://servetsvm.github.io/bridge/en/learn/claude-system.html"}]}</script>
+<style>
+  :root{--ink:#1d241f;--muted:#5d6a60;--felt:#1f7a2e;--line:#dcdccf;--soft:#f3f6f1;--gold:#f2c230}
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font:17px/1.6 "Segoe UI",Roboto,Arial,sans-serif}
+  header{background:#0c1a14;color:#f4f1e6;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  header a{color:#f2c230;text-decoration:none;font-weight:700}
+  .langs a{color:#cfe3d4;font-weight:600;margin-left:10px;font-size:14px}
+  main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+  nav.crumb{font-size:14px;color:var(--muted);margin-bottom:6px}nav.crumb a{color:var(--felt)}
+  h1{font-size:30px;line-height:1.2;margin:.2em 0 .3em}
+  h2{font-size:22px;margin:1.6em 0 .4em;border-bottom:2px solid var(--soft);padding-bottom:4px}
+  .lead{font-size:19px;color:#2c3a30}
+  .by{font-size:14px;color:var(--muted)}
+  table{border-collapse:collapse;width:100%;margin:.6em 0;font-size:15px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left}th{background:var(--soft)}
+  td.n{text-align:right;font-variant-numeric:tabular-nums}
+  .box{background:var(--soft);border-left:4px solid var(--felt);padding:12px 14px;border-radius:6px;margin:1em 0}
+  .formula{font:600 17px/1.5 Consolas,Menlo,monospace;background:#0c1a14;color:#f4f1e6;padding:12px 14px;border-radius:8px;overflow-x:auto}
+  .hand{font:600 18px/1.4 Consolas,Menlo,monospace}.red{color:#c4122f}
+  .cta{display:flex;gap:10px;flex-wrap:wrap;margin:1.2em 0}
+  .cta a{display:inline-block;padding:12px 18px;border-radius:10px;font-weight:800;text-decoration:none}
+  .cta .play{background:var(--felt);color:#fff}.cta .fb{background:var(--gold);color:#3a2a00}
+  .muted{color:var(--muted);font-size:15px}
+  footer{max-width:760px;margin:0 auto;padding:16px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<header><a href="../../">♠♥♦♣ Bridge Table</a><span class="langs"><a href="../../tr/learn/claude-system.html">Türkçe</a><a href="../../no/learn/claude-system.html">Norsk</a></span></header>
+<main>
+<nav class="crumb"><a href="../../">Bridge Table</a> › <a href="how-to-play.html">Learn bridge</a> › The Claude system</nav>
+<h1>The Claude Bridge System and the Claude Double</h1>
+<p class="by">Designed by Claude (Anthropic's AI) with Servet for <a href="../../">Bridge Table</a> · first published 14 November 2026</p>
+<p class="lead">The Claude system is a contract bridge bidding system made by an AI and kept honest by arithmetic: every convention in it has to win against the standard systems over thousands of deals scored double dummy, or it does not go in. You can play it free in Bridge Table today — and tell us what you think.</p>
+<div class="cta"><a class="play" href="../../?sys=claude">▶ Play the Claude system</a><a class="fb" href="../../?feedback=claude">✉️ Send feedback</a></div>
+
+<h2>How the systems were measured</h2>
+<p>Comparing bidding systems by results at the table mixes three things: the bidding, the play and the luck of the cards. To look at the bidding alone, every comparison here is a <b>team match</b>. On each deal, table 1 has system A North–South and system B East–West; table 2 has the same cards with the systems swapped. Both final contracts are scored <b>double dummy</b> (the number of tricks perfect play takes, worked out by a solver), with the board's real vulnerability, and the difference becomes IMPs. The cards cancel out; what remains is how well each system's auctions reach the right contract.</p>
+<p>The robots of Bridge Table bid every system with its own convention card. The result is given in IMPs per board, with its standard error and <i>z</i> (the result divided by its standard error; above about 2, a difference that chance alone would rarely produce).</p>
+
+<h2>What the standard systems showed</h2>
+<p>French Standard (SEF), 1,000 deals against each system:</p>
+<table>
+<tr><th>SEF against</th><th>IMP per board for SEF</th><th>z</th></tr>
+<tr><td>2/1 Game Force</td><td class="n">+0.31</td><td class="n">4.1</td></tr>
+<tr><td>Polish Club</td><td class="n">+0.20</td><td class="n">2.4</td></tr>
+<tr><td>SAYC</td><td class="n">+0.01</td><td class="n">0.4</td></tr>
+<tr><td>Acol</td><td class="n">0.00</td><td class="n">0.0</td></tr>
+<tr><td>Precision Club</td><td class="n">−0.05</td><td class="n">−0.5</td></tr>
+</table>
+<p>SEF, SAYC, Acol and Precision come out level; on these numbers the differences between them are noise. Two lessons came from the deals behind the totals:</p>
+<ul>
+<li><b>Part-score fights are lost by going too high:</b> in a 45-board robot tournament between the six systems, all three tables often bid the same part-score one level too high and went two to four down — undoubled, so the defenders also missed the penalty.</li>
+<li><b>Doubles by points alone are dangerous:</b> the usual penalty double (enough combined points, some length in their suit) let opponents make doubled contracts: −1,700, −1,700 and −1,400 on three deals out of 2,000.</li>
+</ul>
+<p>Both point to the same place: in competitive part-scores the decision to double should be made by counting <b>tricks</b>, not points. That is the first convention of the Claude system.</p>
+
+<h2>The Claude Double</h2>
+<div class="box">In a competitive part-score, a double of the opponents' <b>two- or three-level suit contract</b> is for <b>penalty</b> when the doubler counts <b>two defeating tricks or more</b>. It needs three or more of their trumps. Partner leaves it in, unless he holds a void in their suit with a long suit of his own, or a seven-card suit.</div>
+<p>The count:</p>
+<div class="formula">D = T + Q + p / 4<br>need = 7 − L<br>double when  D − need ≥ 2  and  trumps ≥ 3</div>
+<ul>
+<li><b>L</b> — the level of their contract. They must take 6 + L tricks, so the defence beats it with <b>7 − L</b> tricks or more.</li>
+<li><b>T</b> — tricks in their trump suit: ace 1; king 1 (with two or more cards); queen ¾ (three or more); jack ½ (four or more); and ½ for every trump beyond three.</li>
+<li><b>Q</b> — quick tricks outside: A K = 2, A Q = 1½, A = 1, K Q = 1, K x = ½; a side suit of six or more counts at most one trick.</li>
+<li><b>p</b> — the points partner has shown in the auction; four points make about one defensive trick.</li>
+</ul>
+<p>Why two tricks? Undoubled, two down is worth 100–200; doubled it is 300–500, more than the 110–140 our side would score in its own part-score. One trick of margin is not enough: when the count is one off, the contract is often made doubled, and a doubled part-score made is a game for them.</p>
+<p><b>Example.</b> Partner opens 1♣, East overcalls 1♥, you pass, West raises to 2♥ and it comes back to you. You hold:</p>
+<p class="hand">♠ A 2 &nbsp; <span class="red">♥ K J 9 3</span> &nbsp; <span class="red">♦ K 5 2</span> &nbsp; ♣ 9 8 4 3</p>
+<p>T = 1 (♥K) + ½ (♥J with four) + ½ (the fourth trump) = 2. Q = 1 (♠A) + ½ (♦K x) = 1½. Partner opened, about 14 points: p / 4 ≈ 3½. D = 7, need = 7 − 2 = 5, D − need = 2: <b>double</b>. Partner, with a normal opening, passes; 2♥ doubled two down is +300 or +500 — far better than the +110 of a part-score of your own, and it stops the opponents' raise from paying.</p>
+
+<h2>The result</h2>
+<p>The Claude system against French Standard — the same base, so the difference is the Claude Double alone — 3,000 deals as a team match, double dummy:</p>
+<table>
+<tr><th>Deals</th><th>IMPs for Claude</th><th>per board</th><th>z</th><th>part-scores</th><th>games</th></tr>
+<tr><td class="n">3,000</td><td class="n">+62</td><td class="n">+0.021</td><td class="n">1.45</td><td class="n">+62</td><td class="n">0</td></tr>
+</table>
+<p>The double changes the result rarely (on about one deal in three hundred), and when it does it wins: +62 IMPs, nothing lost in games or slams. An earlier version that also replaced the four-level penalty double was measured at +0.002 — its part-score gain was eaten by the game deals — so the Claude Double stays at the two and three levels. With <i>z</i> = 1.45 the edge is real-looking but not yet proven; more deals, and more conventions, will tell.</p>
+
+<h2>The system</h2>
+<ul>
+<li><b>Openings:</b> five-card majors; 1♣/1♦ "best minor"; 1NT 15–17; 2NT 20–21; 2♣ strong; 2♦ artificial game force; 2♥/2♠ weak.</li>
+<li><b>Conventions:</b> Stayman, Jacoby transfers and Texas, Jacoby 2NT, splinters, Michaels and the Unusual 2NT, Lebensohl, RKCB 1430, Lavinthal discards — and the <b>Claude Double</b>.</li>
+<li><b>The rule for what goes in:</b> a convention of its own enters the Claude system only after it wins as a team match over thousands of deals double dummy against the system without it. The standard methods above keep their own names; only what is new carries Claude's.</li>
+</ul>
+
+<h2>Play it, and tell us</h2>
+<p>The Claude system is in <a href="../../">Bridge Table</a> — free, in the browser or installed as an app, with robots that bid it, online tables with friends and club tournaments. Choose it as your system and play; the robots explain every bid, the Claude Double included. Club directors can run a <i>systems contest</i>, where robot pairs of every system, Claude among them, play each other.</p>
+<div class="cta"><a class="play" href="../../?sys=claude">▶ Play the Claude system</a><a class="fb" href="../../?feedback=claude">✉️ Send feedback</a></div>
+<p class="muted">Feedback goes to the people who build Bridge Table: a deal where the Claude Double went wrong is the most useful thing you can send. The numbers on this page are updated as the system grows.</p>
+</main>
+<footer>Bridge Table · <a href="https://servetsvm.github.io/bridge/">servetsvm.github.io/bridge</a> · The Claude system was designed by Claude, an AI model made by Anthropic, together with Bridge Table. Other learn pages: <a href="stayman.html">Stayman</a> · <a href="transfers.html">Transfers</a> · <a href="rkcb.html">RKCB</a> · <a href="scoring.html">Scoring</a></footer>
+</body>
+</html>

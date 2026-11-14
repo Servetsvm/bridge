@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 502;
+const APP_V = 503;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3648,9 +3648,11 @@ function start(data) {
   // an unfinished board (bidding or play) waits for "Play with robots" to carry on
   ui.saved = G && G.id !== 'idle' && (G.phase === 'bid' || G.phase === 'play') ? G : null;
   G = idleG(); render();
-  { const kq = new URLSearchParams(location.search).get('kulup');
+  { const sq = new URLSearchParams(location.search), kq = sq.get('kulup'), ks = sq.get('sys'), kf = sq.get('feedback');
+    if (ks && E.SYSTEMS.some(y => y.k === ks)) { setSys(ks); Store.saveSettings(SET); }   // a link that chooses the system (the Claude system's article: Try it)
+    if (ks || kf) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
     if (kq != null) { try { history.replaceState(null, '', location.pathname); } catch (e) {} openClubs(kq); }
-    const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (kq != null) return; if (needGate()) showGate(); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
+    const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (kq != null) return; if (needGate()) { if (kf) ui.fbLater = kf; showGate(); } else if (kf) fbOpen(kf); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
   Store.initCloud(mergeCloud);
   syncNow(true);
   window.addEventListener("online", () => syncNow(true));
@@ -3798,6 +3800,7 @@ function gateDone(name, h, back) {
   Net.st.claimed = true; Net.shareInfo(); Net.Cloud.beat(); render();
   SET.cloudSet = 0; Net.cloudSync();   // your results and settings from your other devices
   flash(T('Welcome, {0}!', name), 2000);
+  if (ui.fbLater) { const k = ui.fbLater; ui.fbLater = null; fbOpen(k); return; }   // came through the article's feedback link
   if (ui.askCard) { ui.askCard = false; showCardSys(); return; }
   checkSharedDeal();
   setTimeout(installAsk, 800);   // a new player who came through a shared link: install the app now?
@@ -3862,6 +3865,8 @@ function supMsgsHtml(m, mine) {
 }
 const supBox = (id, ph) => `<textarea id="${id}" class="tok wide" rows="3" maxlength="1000" placeholder="${ph}"></textarea>`;
 // the player: their messages to the administrator and the answers
+// feedback asked for by a link (the Claude system's article): the message window with its first words
+async function fbOpen(k) { await showSup(); const t = $('supTxt'); if (t && !t.value) { t.value = (k === 'claude' ? T('Claude system') : k) + ': '; t.focus(); } }
 async function showSup() {
   openOv('sup', `<h2>✉️ ${T('Write to the administrator')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let th = null, err = '';

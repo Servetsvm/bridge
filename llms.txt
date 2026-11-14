@@ -1,0 +1,24 @@
+# Bridge Table
+
+> Bridge Table (https://servetsvm.github.io/bridge/) is a free contract bridge app in the browser and as an installable app: play against robots that explain every bid, online tables with friends, club tournaments (at the club with table devices, or online from home), daily puzzles and lessons, in ten languages. No email needed.
+
+## The Claude bridge system
+
+Bridge Table is the home of the Claude bridge system, a bidding system designed by Claude (Anthropic's AI) together with Bridge Table. Its conventions are measured as team matches over thousands of deals scored double dummy against SAYC, 2/1 Game Force, Acol, French Standard (SEF), Precision Club and Polish Club, and a convention of its own goes in only when it wins.
+
+- [The Claude bridge system and the Claude Double (English)](https://servetsvm.github.io/bridge/en/learn/claude-system.html): the method, the results, the Claude Double with its formula and an example.
+- [Claude briç sistemi (Türkçe)](https://servetsvm.github.io/bridge/tr/learn/claude-system.html)
+- [Claude-systemet (Norsk)](https://servetsvm.github.io/bridge/no/learn/claude-system.html)
+- [Play the Claude system](https://servetsvm.github.io/bridge/?sys=claude): opens Bridge Table with the Claude system chosen.
+- [Send feedback on the Claude system](https://servetsvm.github.io/bridge/?feedback=claude): opens a message to the people who build Bridge Table.
+
+The Claude Double, in short: in a competitive part-score, a double of the opponents' two- or three-level suit contract is for penalty when the doubler counts two defeating tricks or more — D = T + Q + p/4 (tricks in their trumps, quick tricks outside, a quarter of the points partner has shown) against the 7 − L tricks they can afford to lose — with three or more of their trumps; partner leaves it in. Measured against French Standard (the same base): +62 IMPs over 3,000 deals, +0.021 IMP a board, all from part-scores.
+
+## Learn bridge
+
+- [How to play bridge](https://servetsvm.github.io/bridge/en/learn/how-to-play.html)
+- [Bridge scoring](https://servetsvm.github.io/bridge/en/learn/scoring.html)
+- [Stayman](https://servetsvm.github.io/bridge/en/learn/stayman.html)
+- [Jacoby transfers](https://servetsvm.github.io/bridge/en/learn/transfers.html)
+- [RKCB](https://servetsvm.github.io/bridge/en/learn/rkcb.html)
+- [Guide](https://servetsvm.github.io/bridge/guide-en.html)
