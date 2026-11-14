@@ -376,7 +376,8 @@ document.addEventListener('click', e => {
 });
 setTimeout(() => ctLoad(true), 6000);
 setInterval(() => ctLoad(false), 60e3);
-setInterval(() => { ctRemind(); const el = $('hClubT'); if (el && document.body.classList.contains('athome')) { const h = ctCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; } }, 30e3);
+// the club tournaments' cards are in Open tables (drawn again with the home page; the reminder here)
+setInterval(() => { ctRemind(); const el = $('hTables'); if (el && document.body.classList.contains('athome') && typeof Net !== 'undefined') { const h = ctCardHtml() + Net.tablesHtml(); if (el.innerHTML !== h) el.innerHTML = h; } }, 30e3);
 
 /* ---- step 3: results, double dummy, the club's online rating, watching, PBN ----
    Everything is worked out from what the tables wrote (run/<start>/t/<table>/res/<board>) and the plan (pairs, rounds,
