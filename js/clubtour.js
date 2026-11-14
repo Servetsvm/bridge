@@ -153,7 +153,7 @@ function ctPlanHtml(x) {
   const mineH = S.length ? `<div class="grp"><span>🪑 ${T('Your rounds')}</span>${S.map(s => `<div>${T('Round {0} · table {1} · {2} against {3} · boards {4}-{5}', s.r + 1, s.ti + 1, s.ns ? T('North-South') : T('East-West'), ctPairTxt(s.opp), s.from, s.to)}</div>`).join('')}</div>` : '';
   const all = `<div class="grp"><span>${T('The tables, round {0}', 1)}</span>${P.rounds[0].map(([a, b], ti) => `<div>${T('Table {0}', ti + 1)}: ${ctPairTxt(P.pairs[a])} – ${ctPairTxt(P.pairs[b])}</div>`).join('')}</div>`;
   const sit = S.length ? `<div class="row2"><button class="btn new" data-ctsit="${esc(x.club + '|' + x.id)}">🪑 ${T('Sit down at your table')}</button></div>` : '';
-  const res = `<div class="row2"><button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}">📊 ${T('Results')}</button></div>`;
+  const res = `<div class="row2"><button class="btn gold" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button><button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}">📊 ${T('Results')}</button></div>`;
   return sit + mineH + all + res + `<div class="muted">${T('{0} rounds of {1} boards; every table of a round plays the same boards.', P.nr || P.rounds.length, P.bpr)}${P.mov === 'swiss' ? ' ' + T('Swiss: each next round is made from the standings when every table has finished.') : ''}</div>`;
 }
 // 15 minutes before the start a registered player is told (once), on any screen
@@ -436,9 +436,10 @@ function ctShowResults(club, id, d, tab) {
   CT.res = { club, id, d: x.d, tab: tab || CT.res && CT.res.tab || 'rank' };
   if (CT.res.tab === 'live' && !(x.i.watch || CT.adminView)) CT.res.tab = 'rank';   // watching only when the director allowed it (or for the director)
   const S = ctScore(x), P = x.plan, pn = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b), t = CT.res.tab;
-  const tabs = `<div class="seg" data-seg="ctrestab">${[['rank', '🏆 ' + T('Ranking')], ['boards', '🃏 ' + T('The boards')], ['rating', '🏅 ' + T('Club rating')], ...(x.i.watch || CT.adminView ? [['live', '👁 ' + T('Watch')]] : [])].map(([v, l]) => `<button data-ctres="${v}" class="${t === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
+  const tabs = `<div class="seg" data-seg="ctrestab">${[['pair', '🔀 ' + T('Pairings')], ['rank', '🏆 ' + T('Ranking')], ['boards', '🃏 ' + T('The boards')], ['rating', '🏅 ' + T('Club rating')], ...(x.i.watch || CT.adminView ? [['live', '👁 ' + T('Watch')]] : [])].map(([v, l]) => `<button data-ctres="${v}" class="${t === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   let body = '';
-  if (t === 'rank') body = S.rank.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Pair')}</th><th>MP %</th><th>IMP</th><th>${T('Boards')}</th></tr></thead><tbody>${S.rank.map((r, k) => `<tr${[r.p.ka, r.p.kb].includes(ctMe()) ? ' class="me"' : ''}><td>${k + 1}</td><td>${pn(r.p)}</td><td>${S.imp ? '' : '<b>'}${r.pct.toFixed(1)}%${S.imp ? '' : '</b>'}</td><td>${S.imp ? '<b>' : ''}${fmtSigned(r.imp)}${S.imp ? '</b>' : ''}</td><td>${r.n}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Ranked by {0}', S.imp ? 'IMP' : 'MP %')}</div>` : `<div class="muted">${T('No results yet.')}</div>`;
+  if (t === 'pair') body = ctPairsHtml(x);
+  else if (t === 'rank') body = S.rank.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Pair')}</th><th>MP %</th><th>IMP</th><th>${T('Boards')}</th></tr></thead><tbody>${S.rank.map((r, k) => `<tr${[r.p.ka, r.p.kb].includes(ctMe()) ? ' class="me"' : ''}><td>${k + 1}</td><td>${pn(r.p)}</td><td>${S.imp ? '' : '<b>'}${r.pct.toFixed(1)}%${S.imp ? '' : '</b>'}</td><td>${S.imp ? '<b>' : ''}${fmtSigned(r.imp)}${S.imp ? '</b>' : ''}</td><td>${r.n}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Ranked by {0}', S.imp ? 'IMP' : 'MP %')}</div>` : `<div class="muted">${T('No results yet.')}</div>`;
   else if (t === 'boards') body = Object.keys(S.boards).sort((a, b) => a - b).map(bn => `<div class="grp"><span>${T('Board {0}', bn)} <button class="btn mini-btn" data-ctdd="${bn}">🎯 ${T('Double dummy')}</button></span>
       <div id="ctdd${bn}"></div>
       <table class="res"><tbody>${S.boards[bn].map(q => `<tr><td>${pn(P.pairs[q.ns])}<br><small>${pn(P.pairs[q.ew])}</small></td><td>${ctCon(q.v)}${q.v.tr != null ? ' · ' + T('{0} tricks', q.v.tr) : ''}</td><td><b>${fmtSigned(q.v.ns || 0)}</b></td><td>${Math.round(q.mp)}%<br><small>${fmtSigned(q.imp)} IMP</small></td></tr>`).join('')}</tbody></table></div>`).join('') || `<div class="muted">${T('No results yet.')}</div>`;
@@ -484,8 +485,9 @@ async function ctWatch(tid) {
 document.addEventListener('click', e => {
   const a = e.target.closest('[data-ctadmin]');   // the club's admin: the Clubs sign-in (the club's password), then the tournament to change
   if (a) { const [c, i] = a.dataset.ctadmin.split('|'); closeOv(); openClubs('club=' + encodeURIComponent(c) + '&role=admin&admin=1&ot=' + encodeURIComponent(i)); return; }
-  const t = e.target.closest('[data-ctres],[data-ctdd],[data-ctpbn],[data-ctwatch],[data-ctresopen]'); if (!t) return;
-  if (t.dataset.ctresopen) { const [c, i] = t.dataset.ctresopen.split('|'); ctShowResults(c, i); }
+  const t = e.target.closest('[data-ctres],[data-ctdd],[data-ctpbn],[data-ctwatch],[data-ctresopen],[data-ctpick]'); if (!t) return;
+  if (t.dataset.ctresopen) { const [c, i] = t.dataset.ctresopen.split('|'); ctShowResults(c, i, null, t.dataset.cttab); }
+  else if (t.dataset.ctpick != null && CT.res) { CT.pick = +t.dataset.ctpick === CT.pick ? null : +t.dataset.ctpick; ctShowResults(CT.res.club, CT.res.id, CT.res.d, 'pair'); }
   else if (t.dataset.ctres && CT.res) ctShowResults(CT.res.club, CT.res.id, CT.res.d, t.dataset.ctres);
   else if (t.dataset.ctdd) ctDD(t.dataset.ctdd);
   else if (t.dataset.ctpbn) ctPBN();
@@ -601,4 +603,17 @@ async function ctMyScore() {
     CT.sc = me ? { pct: me.pct, imp: me.imp, n: me.n, pos: k + 1, of: S.rank.length, last } : { pct: 0, imp: 0, n: 0, last: null };
     if (G && G.ct) render();
   } catch (e) {}
+}
+
+/* the round's pairings (as the club's screen has them): every table with its two pairs and boards; your pair (or the
+   one tapped) shown on top: the table, the direction, the opponents, the boards */
+function ctPairsHtml(x) {
+  const P = x.plan, r0 = ctCurRound(P, x.run && x.run.t), r = r0 < 0 ? P.rounds.length - 1 : r0, tb = P.rounds[r] || [];
+  const pn = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b), mine = ctMyPair(P), pick = CT.pick != null ? CT.pick : mine;
+  const ti = tb.findIndex(([a, b]) => a === pick || b === pick), from = r * P.bpr + 1, to = from + P.bpr - 1;
+  const found = pick >= 0 && ti >= 0 ? (() => { const [a, b] = tb[ti], ns = a === pick; return `<div class="okmsg" style="font-size:16px;line-height:1.6;"><b>${pn(P.pairs[pick])}</b><br>🪑 ${T('Table {0}', ti + 1)} · ${ns ? T('North-South') : T('East-West')}<br>${T('against')} ${pn(P.pairs[ns ? b : a])}<br>🃏 ${T('Boards')} ${from}-${to}</div>`; })() : '';
+  return `<div class="big">${r0 < 0 ? '🏁 ' + T('Finished') + ' · ' : ''}${T('Round {0}', r + 1)} / ${P.nr || P.rounds.length}</div>${found}
+    <div class="muted">${T('Tap your pair to see your table.')}</div>
+    <table class="res"><thead><tr><th>${T('Table')}</th><th>N/S</th><th>E/W</th><th>${T('Boards')}</th></tr></thead><tbody>${tb.map(([a, b], k) => `<tr${a === pick || b === pick ? ' class="me"' : ''}><td><b>${k + 1}</b></td><td data-ctpick="${a}" style="cursor:pointer">${pn(P.pairs[a])}</td><td data-ctpick="${b}" style="cursor:pointer">${pn(P.pairs[b])}</td><td>${from}-${to}</td></tr>`).join('')}</tbody></table>
+    ${P.mov === 'swiss' && r0 >= 0 ? '<div class="muted">' + T('Swiss: each next round is made from the standings when every table has finished.') + '</div>' : ''}`;
 }
