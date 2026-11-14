@@ -7,7 +7,8 @@
   const VUL = ['None', 'NS', 'EW', 'Both', 'NS', 'EW', 'Both', 'None', 'Both', 'EW', 'NS', 'None', 'Both', 'NS', 'EW', 'None'];
   const vul = bn => VUL[(bn - 1) % 16];
   const listOf = l => Array.isArray(l) ? l : Object.keys(l || {}).filter(k => /^\d+$/.test(k)).sort((a, b) => a - b).map(k => l[k]);
-  function deal(E, plan, bn) { E.seed(((plan.seed >>> 0) + bn * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
+  function ctPbnDeal(str) { const m = /^([NESW]):\s*(.+)$/.exec(String(str || '').trim()); if (!m) return null; const first = 'NESW'.indexOf(m[1]), hs = m[2].trim().split(/\s+/); if (hs.length !== 4) return null; const out = [[], [], [], []], RK = '23456789TJQKA'; hs.forEach((h, k) => { const ss = h.split('.'); if (ss.length !== 4) return; ss.forEach((cs, j) => { for (const ch of cs.toUpperCase().replace('10', 'T')) { const r = RK.indexOf(ch); if (r >= 0) out[(first + k) % 4].push((3 - j) * 13 + r); } }); }); return out.every(h => h.length === 13) ? out.map(h => h.sort((a, b) => b - a)) : null; }
+  function deal(E, plan, bn) { const f = plan.deals && ctPbnDeal(plan.deals[bn - 1]); if (f) return f; E.seed(((plan.seed >>> 0) + bn * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
   // each board's opening lead at a table (the first card after the bidding)
   function leads(E, plan, r, list) {
     const L = listOf(list), out = {}; let i = 0;

@@ -61,7 +61,7 @@ function ctMakePlan(x) {
     const all = {}; for (const p of P) for (const k of [p.ka, p.kb]) if (k) all[k] = 1;
     for (const k of Object.keys(m)) delete m[k]; for (let r = 0; r < nr; r++) for (let ti = 0; ti < n / 2; ti++) m[r + '_' + ti] = { ...all };
   }
-  return { plan: { pairs: P, rounds, ...(nr ? { nr } : {}), mov: x.i.mov || 'howell', bpr: +x.i.bpr || 3, sys: x.i.sys, conv: x.i.conv || [], sc: x.i.sc, seed: ctSeed(x.id + ':' + x.d), at: Date.now() }, m };
+  return { plan: { pairs: P, rounds, ...(nr ? { nr } : {}), mov: x.i.mov || 'howell', bpr: +x.i.bpr || 3, sys: x.i.sys, conv: x.i.conv || [], sc: x.i.sc, seed: ctSeed(x.id + ':' + x.d), ...(Array.isArray(x.i.deals) && x.i.deals.length ? { deals: x.i.deals } : {}), at: Date.now() }, m };
 }
 // the plan with the Swiss rounds that can be made now (from what the tables played)
 // an online evening as the club's own tournament (the Clubs admin's tabs)
@@ -75,7 +75,9 @@ async function ctEnsurePlan(x) {
   finally { CT.planning = false; await ctLoad(true); }
 }
 // a board of the evening: the deal from the plan's seed (board 1, 2 … with the usual dealer and vulnerability)
-function ctDeal(plan, board) { E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
+function ctPbnDeal(str) { const m = /^([NESW]):\s*(.+)$/.exec(String(str || '').trim()); if (!m) return null; const first = 'NESW'.indexOf(m[1]), hs = m[2].trim().split(/\s+/); if (hs.length !== 4) return null; const out = [[], [], [], []], RK = '23456789TJQKA'; hs.forEach((h, k) => { const ss = h.split('.'); if (ss.length !== 4) return; ss.forEach((cs, j) => { for (const ch of cs.toUpperCase().replace('10', 'T')) { const r = RK.indexOf(ch); if (r >= 0) out[(first + k) % 4].push((3 - j) * 13 + r); } }); }); return out.every(h => h.length === 13) ? out.map(h => h.sort((a, b) => b - a)) : null; }
+// a board: from the club's hand file when the evening has one (a dealing machine's set), else from the evening's seed
+function ctDeal(plan, board) { const f = plan.deals && ctPbnDeal(plan.deals[board - 1]); if (f) return f; E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
 // where a pair plays: each round its table, direction, opponents and boards
 function ctSched(plan, pi) {
   const out = [];

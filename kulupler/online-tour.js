@@ -51,6 +51,7 @@ function otFormHtml(M, ed) {
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).</div>
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">The pairs register in Bridge Table; an odd number of pairs gets a robot pair, a pair can also play with a robot partner.</div></div>
       <div class="field"><label>Scoring</label><select id="otSc" onchange="otPreview()"><option value="both">IMP - MP</option></select></div>
+      <div class="field"><label>Hand file (optional)</label><input type="file" id="otDeals" accept=".bri,.dup,.dlm,.dge,.pbn,.lin,.txt" onchange="otDealsFile(this)"><div id="otDealsInfo" style="font-size:0.72rem;color:var(--text3);margin-top:3px;">${ed && ed.deals ? '✅ ' + ed.deals.length + ' <span>boards from the hand file</span>' : '<span>The boards of a dealing machine (Duplimate BRI / DUP, Dealer4 DLM, DGE) or a PBN / LIN file: the evening is played with them. Without a file the boards are dealt at random.</span>'}</div></div>
       <div style="margin:12px 0 4px;padding-top:10px;border-top:1px solid var(--border);font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">🌐 <span>Online (from home)</span></div>
       <div class="field"><label>Base system</label><select id="otSys" onchange="otPreview()">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
       <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
@@ -68,7 +69,7 @@ function otRead() {
   const conv = [...document.querySelectorAll('[data-otconv]')].filter(x => x.checked).map(x => x.dataset.otconv);
   const sysN = ((M.systems.find(x => x.k === v('otSys')) || {}).n || v('otSys')).replace(/ \(.*\)$/, '');
   const auto = sysN + (conv.length ? ' · ' + conv.map(k => (M.convs.find(x => x.k === k) || {}).n || k).join(', ') : '');
-  return { n: (v('otName').trim() || auto).slice(0, 60), at: Date.parse(v('otDay') + 'T' + (v('otTime') || '19:00')), bpr: Math.min(8, Math.max(1, +v('otBpr') || 3)), b: Math.min(8, Math.max(1, +v('otBpr') || 3)) * Math.min(20, Math.max(1, +v('otRounds') || 6)),
+  return { deals: OT.deals || (OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info.deals) || null, n: (v('otName').trim() || auto).slice(0, 60), at: Date.parse(v('otDay') + 'T' + (v('otTime') || '19:00')), bpr: Math.min(8, Math.max(1, +v('otBpr') || 3)), b: Math.min(8, Math.max(1, +v('otBpr') || 3)) * Math.min(20, Math.max(1, +v('otRounds') || 6)),
     sc: 'both', sys: v('otSys') || 'sayc', conv, mov: OT_MOV[v('otMov')] ? v('otMov') : 'howell', rep: (document.getElementById('otRep') || {}).checked ? 1 : 0, watch: (document.getElementById('otWatch') || {}).checked ? 1 : 0, sysN };
 }
 // the line shown before saving: "SAYC · RKCB 0314, Stayman · Sat 14 Nov 20:00 / 18 boards · 3 boards a round · MP · Howell"
@@ -146,14 +147,15 @@ window.otSave = async function () {
   // under way: the start stays as it is; the same day and minute as before: the start to the second kept too
   const at = ed && (started || Math.floor(f.at / 6e4) === Math.floor(otNext(ed.info) / 6e4)) ? ed.info.at : f.at;
   if (!at || (!ed && at < Date.now())) { toast('❌ The start must be in the future'); return; }
-  const info = { ...(ed ? ed.info : {}), n, at, b: f.b, bpr: f.bpr, sc: f.sc, sys: f.sys, conv: f.conv, mov: f.mov, rep: f.rep, watch: f.watch,
+  if (f.deals && f.deals.length < f.b) { toast('❌ ' + otL('The hand file has fewer boards than the tournament')); return; }
+  const info = { ...(ed ? ed.info : {}), ...(f.deals ? { deals: f.deals.slice(0, f.b) } : {}), n, at, b: f.b, bpr: f.bpr, sc: f.sc, sys: f.sys, conv: f.conv, mov: f.mov, rep: f.rep, watch: f.watch,
     st: ed ? ed.info.st || 'reg' : 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: ed ? ed.info.ts || Date.now() : Date.now() };
   OT.busy = true;
   try {
     const id = OT.edit || Date.now().toString(36), old = ed ? otNext(ed.info) : 0;
     await otPut('/' + id + '/info', info);
     if (ed) await otMove(id, old, otNext(info));   // the pairs registered stay registered at the new time
-    toast('✅ Saved'); OT.edit = null; otRerender();
+    toast('✅ Saved'); OT.edit = null; OT.deals = null; otRerender();
   } catch (e) { toast('❌ Could not save'); } finally { OT.busy = false; }
 };
 // start now: the start is set to now and the evening's plan is made at once (from the pairs registered)
@@ -414,3 +416,17 @@ async function otMirror() {
   } catch (e) {} finally { OT.mirBusy = false; }
 }
 setInterval(otMirror, 6000);
+
+// a hand file for the online evening: read as the club's own hand files are (kulupler/dealfiles.js)
+window.otDealsFile = function (inp) {
+  const f = inp.files && inp.files[0], box = document.getElementById('otDealsInfo'); if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const res = readDealFile(f.name, new Uint8Array(e.target.result)), L = (res.hands || []).sort((a, b) => (+a.board || 0) - (+b.board || 0)).map(h => h.deal).filter(d => /^[NESW]:/.test(d));
+      if (!L.length) { OT.deals = null; box.textContent = '❌ ' + otL('No boards found in this file'); return; }
+      OT.deals = L; box.innerHTML = '✅ ' + L.length + ' ' + otL('boards from the hand file') + (res.format ? ' (' + res.format + ')' : '') + (res.bad ? ' · ' + res.bad + ' ✗' : '');
+    } catch (x) { OT.deals = null; box.textContent = '❌ ' + x.message; }
+  };
+  r.readAsArrayBuffer(f); inp.value = '';
+};

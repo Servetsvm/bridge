@@ -10,6 +10,11 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Hand file (optional)":"El dosyası (isteğe bağlı)",
+    "boards from the hand file":"board el dosyasından",
+    "The boards of a dealing machine (Duplimate BRI / DUP, Dealer4 DLM, DGE) or a PBN / LIN file: the evening is played with them. Without a file the boards are dealt at random.":"Dağıtma makinesinin board’ları (Duplimate BRI / DUP, Dealer4 DLM, DGE) ya da PBN / LIN dosyası: akşam bu ellerle oynanır. Dosya yoksa eller rastgele dağıtılır.",
+    "No boards found in this file":"Bu dosyada board bulunamadı",
+    "The hand file has fewer boards than the tournament":"El dosyasında turnuvadan daha az board var",
     "Systems contest":"Sistemler yarışması",
     "Start a systems contest now? Six robot pairs, each playing its own system, every pair against every other.":"Sistemler yarışması şimdi başlatılsın mı? Altı robot çift, her biri kendi sistemiyle, herkes herkese karşı.",
     "Start the server robots":"Sunucu robotlarını başlat",
