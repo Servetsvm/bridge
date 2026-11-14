@@ -697,8 +697,9 @@ function renderBoards(){
           <td style="color:${typeof d.nsScore==='number'?(d.nsScore>=0?'var(--green)':'var(--red)'):'var(--purple)'};">${typeof d.nsScore==='number'?(d.nsScore>0?'+':'')+d.nsScore:d.nsScore||'—'}</td>
           <td style="font-size:0.7rem;color:var(--text3);">${dur}</td>
           <td><div style="display:flex;gap:3px;">
+            ${d.online?`<button class="btn btn-sm" title="Bidding and play" onclick="otClubPlay('${k}')">👁</button><button class="btn btn-sm" title="Double dummy" onclick="otClubDD('${k}')">🎯</button>`:''}
             <button class="btn btn-blue btn-sm" onclick="adminEditBoard('${k}',${t})">✏️</button>
-            <button class="btn btn-red btn-sm" onclick="confirmDeleteBoard('${k}',()=>renderAdminTab())">🗑</button>
+            ${d.online?'':`<button class="btn btn-red btn-sm" onclick="confirmDeleteBoard('${k}',()=>renderAdminTab())">🗑</button>`}
           </div></td>
         </tr>`;
       }).join('')}

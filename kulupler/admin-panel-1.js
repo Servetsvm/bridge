@@ -37,7 +37,7 @@ function renderAdminTab(){
   if(adminTab==='setup'&&typeof setupOnline!=='undefined'&&setupOnline&&document.getElementById('otFormBox')&&typeof OT!=='undefined'&&!OT.force){ otManageRefresh(); return; }
   if(typeof OT!=='undefined') OT.force=false;
   const ot=k=>typeof otTabSlot==='function'?otTabSlot(k):'';
-  const m={setup:renderSetup,players:renderPlayersAdmin,movement:renderMovement,tables:()=>ot('tables')+renderTables(),boards:()=>ot('boards')+renderBoards(),history:renderHistory,log:renderLog};
+  const m={setup:renderSetup,players:renderPlayersAdmin,movement:renderMovement,tables:()=>ot('tables')+renderTables(),boards:renderBoards,history:renderHistory,log:renderLog};
   const fin=getState().status==='finished';
   c.innerHTML=(fin?`<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;"><b>🏁 <span>Tournament Finished</span></b><button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button></div>`:'')+(m[adminTab]||renderSetup)();
   if(adminTab==='setup') setTimeout(adminUpdateCalc, 0);
