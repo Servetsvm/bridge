@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 511;
+const APP_V = 512;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -634,7 +634,7 @@ function pracNames() { return pracList().map(pracName).join(', '); }
 // does a practised convention ever come up in the base system? a short search in the background, one convention at a
 // time; the answer is kept per system and convention, and a "no" shows a warning under the choice. Rare conventions
 // (about one deal in a thousand or fewer) are not checked: a short search would miss them even where they belong.
-const PRAC_CHK = {}, PRAC_RARE = new Set(['gerber', 'smolen', 'puppet', 'texasInt', 'fsf', 'respx', 'gamb', 'sjs', 'lav', 'roman']), PRAC_Q = [];
+const PRAC_CHK = {}, PRAC_RARE = new Set(['gerber', 'smolen', 'puppet', 'texasInt', 'fsf', 'respx', 'gamb', 'sjs', 'lav', 'roman', 'udca']), PRAC_Q = [];
 function pracCheck(k) {
   if (PRAC_RARE.has(k)) return true;
   const key = (SET.sys || 'twoone') + ':' + k;

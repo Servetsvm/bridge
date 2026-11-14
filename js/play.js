@@ -124,7 +124,7 @@ function discard(g, seat, leg) {
    Lavinthal discards: the suit discarded is not wanted; a high card asks for the higher of the two
    remaining suits (trumps and the suit led left out), a low card for the lower one. */
 const DEFF = { lav: true, att: true, sig: true, dd: true, hint: true, declHint: true, ntLen: true, passInf: true, bidSim: false };
-// upside-down attitude (the Norwegian way): on partner's lead a low card encourages, a high one discourages
+// Lav-Liten, lavt som styrke (the Norwegian way): on partner's lead a low card encourages, a high one discourages
 const udOn = (g, seat) => !!(g.udca && g.udca[sideOf(seat)]);
 const romanOn = (g, seat) => DEFF.lav && !!(g.roman && g.roman[sideOf(seat)]);
 const lavOn = (g, seat) => DEFF.lav && !romanOn(g, seat) && (!g.lav || g.lav[sideOf(seat)] !== false);
@@ -247,7 +247,7 @@ function signalText(g, seat, c) {
     if (cand.length === 1) return ['Partner discards {0} (Lavinthal): asks for {1}', card, SU[cand[0]]];
     return ['Partner discards {0}: not interested in {1}', card, SU[s]];
   }
-  if (s === ls && g.trick[0].s === pd(seat) && r <= 8 && udOn(g, seat)) return [r <= 3 ? 'Partner plays {0} on your lead: low — encourages, continue the suit (upside-down)' : 'Partner plays {0} on your lead: high — discourages (upside-down)', card];
+  if (s === ls && g.trick[0].s === pd(seat) && r <= 8 && udOn(g, seat)) return [r <= 3 ? 'Partner plays {0} on your lead: low — encourages, continue the suit (Lav-Liten)' : 'Partner plays {0} on your lead: high — discourages (Lav-Liten)', card];
   if (s === ls && g.trick[0].s === pd(seat) && r <= 8) return [r >= 5 ? 'Partner plays {0} on your lead: high — encourages, continue the suit' : 'Partner plays {0} on your lead: low — discourages', card];
   return null;
 }
