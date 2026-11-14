@@ -10,6 +10,8 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Number of Rounds":"Tur sayısı",
+    "The pairs register in Bridge Table; an odd number of pairs gets a robot pair, a pair can also play with a robot partner.":"Çiftler Bridge Table’dan kaydolur; çift sayısı tekse robot çift eklenir, bir çift robot ortakla da oynayabilir.",
     "Boards: 1-99":"Board: 1-99",
     "Social Bridge: a number of players divisible by 4 (at least 8)":"Sosyal Briç: oyuncu sayısı 4’e bölünebilmeli (en az 8)",
     "Not available on this device":"Bu cihazda kullanılamıyor",
