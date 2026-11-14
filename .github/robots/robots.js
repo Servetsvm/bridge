@@ -138,6 +138,7 @@ if (cand && (!league.ab || league.ab.v !== cand.v)) league.ab = { v: cand.v, L: 
 let boards = prev && prev.boards ? prev.boards : [], errs = []; try { errs = JSON.parse(fs.readFileSync(OUT + 'errors-' + TABLE + '.json', 'utf8')); } catch (e) {}
 for (const k of Object.keys(GEN)) delete st.skip[k];   // skipped before their deals were built
 const now = Date.now();
+{ const keep = boards.filter(b => b.cl || b.t0 <= now + 60e3); if (keep.length < boards.length) { boards = keep; st.end = keep.length ? keep[keep.length - 1].t1 : 0; } }
 if (!st.end || st.end < now) st.end = now + 20e3;   // nothing ahead (the first run, or a long stop): start now
 const t0 = performance.now();
 
@@ -153,16 +154,18 @@ async function main() {
     const f = findDeal(blk, dealer, cards);
     if (!f) { st.skip[key] = 1; st.blk++; st.k = 0; console.log('no deal for', key); continue; }
     const { deal, auc, c } = f;
+    // the board shown: played as in our games — each robot sees its own hand and dummy, never the others (every other
+    // board with the candidate lessons)
+    const arm = cand && st.n % 2 ? 'L' : 'B', o = arm === 'L' ? { ...OPT, lessons: cand.book } : OPT;
     const g = E.newPlayState(deal, { level: c.level, strain: c.strain, dbl: c.dbl, decl: c.decl }, auc, cards);
-    // the board shown: every hand open, the double-dummy best card
-    while (g.history.length < 13) { if (g.trick.length === 4) { E.collect(g); continue; } const s = g.turn, x = E.aiPlay(g, s, { ...OPT, open: true }); if (E.applyCard(g, s, x)) E.collect(g); }
+    while (g.history.length < 13) { if (g.trick.length === 4) { E.collect(g); continue; } const s = g.turn, x = E.aiPlay(g, s, o); if (E.applyCard(g, s, x)) E.collect(g); }
     const pl = g.history.map(t => t.cards.map(x => [x.s, x.c])), tricks = g.tricks[E.sideOf(c.decl)];
     const sd = E.scoreOf(c.level, c.strain, c.dbl, E.vulOf(bn, c.decl), tricks), ns = E.sideOf(c.decl) === 0 ? sd : -sd;
     const bp = best(deal, bn), imp = E.imps(ns - bp.par);
     const pi = 0, pj = 1;
     const b = { n: st.n, t0: st.end, sys: blk.sys, conv: blk.conv, k: st.k + 1, of: PER, bn, dealer, ns: pi, ew: pj, d: deal,
       a: auc.map(e => [e.seat, e.call, (e.m && e.m.t) || '', (e.m && e.m.cv) || '']), p: pl.flat().map(x => x[1]), lead: (c.decl + 1) % 4,
-      c: [c.level, c.strain, c.dbl, c.decl], tr: tricks, sc: ns, par: bp.par, pc: bp.c, imp, dd: bp.tab };
+      c: [c.level, c.strain, c.dbl, c.decl], tr: tricks, sc: ns, par: bp.par, pc: bp.c, imp, dd: bp.tab, cl: 1 };   // cl: played with the hands closed
     b.t1 = b.t0 + dur(b);
     boards.push(b); made++;
     // the league: each pair's rating moves with its IMPs against the best contract; each system / convention: how
@@ -170,14 +173,10 @@ async function main() {
     const P = league.pairs; P[pi].r += RK * imp; P[pj].r -= RK * imp; P[pi].b++; P[pj].b++;
     for (const [m, k] of [[league.sys, blk.sys], [league.conv, blk.conv || '-']]) { const x = m[k] || (m[k] = { b: 0, abs: 0, hit: 0 }); x.b++; x.abs += Math.abs(imp); if (!imp) x.hit++; }
     b.rt = P.map(p => Math.round(p.r * 10) / 10); b.pb = P.map(p => p.b); b.sy = { ...league.sys[blk.sys] };   // as they stand after this board
-    // the same deal played as in our games (the hands closed), for the lessons: every other board with the candidate
-    // lessons; every card checked double dummy, each mistake with its context and the kinds of the card played and the
-    // better one (for Servet's report and the lesson book)
+    // every card of the board checked double dummy, each mistake with its context and the kinds of the card played and
+    // the better one (for Servet's report and the lesson book)
     try {
-      const arm = cand && st.n % 2 ? 'L' : 'B', o = arm === 'L' ? { ...OPT, lessons: cand.book } : OPT;
-      const h = E.newPlayState(deal, { level: c.level, strain: c.strain, dbl: c.dbl, decl: c.decl }, auc, cards);
-      while (h.history.length < 13) { if (h.trick.length === 4) { E.collect(h); continue; } const s = h.turn, x = E.aiPlay(h, s, o); if (E.applyCard(h, s, x)) E.collect(h); }
-      const pl2 = h.history.map(t => t.cards.map(x => [x.s, x.c]));
+      const pl2 = pl;
       const er = E.analysePlay(deal, c, pl2, [0, 1, 2, 3], 1e6);
       if (cand && league.ab) { const a = league.ab[arm]; a.b++; a.lost += er.reduce((t, x) => t + x.lost, 0); }
       if (er.length) errs.unshift({ n: b.n, ts: b.t0, g: now, b: bn, sys: blk.sys, conv: blk.conv, c: b.c, d: deal, a: auc.map(e => [e.seat, e.call]), p: pl2, arm, er: er.map(x => [x.t, x.s, x.c, x.b, x.lost, ...kinds(deal, c, auc, cards, pl2, x)]) });
