@@ -73,18 +73,22 @@ async function mirror(x) {
   }
 }
 // the evenings being played now: [{ p: 'ot/<club>/<tid>/run/<d>', plan }]
+let WHY = {};   // what the last look found (said in the run's notice)
 async function evenings() {
-  const out = [], ot = await get('ot') || {};
-  for (const [club, T] of Object.entries(ot)) for (const [tid, t] of Object.entries(T || {})) for (const [d, run] of Object.entries((t && t.run) || {})) {
-    if (!run || !run.plan || +d > Date.now() || Date.now() - +d > LIVE) continue;
-    if (ctCurRound(ctFill(run.plan, run.t), run.t) < 0) continue;   // finished
+  const out = [], ot = await get('ot') || {}; WHY = { tournaments: 0, evenings: 0, noTables: 0, coming: 0, old: 0, finished: 0 };
+  for (const [club, T] of Object.entries(ot)) for (const [tid, t] of Object.entries(T || {})) { WHY.tournaments++; for (const [d, run] of Object.entries((t && t.run) || {})) {
+    WHY.evenings++;
+    if (!run || !run.plan) { WHY.noTables++; continue; }
+    if (+d > Date.now()) { WHY.coming++; continue; }
+    if (Date.now() - +d > LIVE) { WHY.old++; continue; }
+    if (ctCurRound(ctFill(run.plan, run.t), run.t) < 0) { WHY.finished++; continue; }   // finished
     out.push({ p: 'ot/' + club + '/' + tid + '/run/' + d, plan: run.plan, name: (t.info && t.info.n) || tid, club, tid, d: +d, info: t.info || {} });
-  }
+  } }
   return out;
 }
 (async () => {
   let L = await evenings(), seen = Date.now(), look = Date.now(), steps = 0;
-  if (!L.length) { console.log('::notice::Database reached; no online club evening being played now.'); return; }
+  if (!L.length) { console.log('::notice::Database reached; no online club evening being played now. Found: ' + Object.entries(WHY).map(([k, v]) => k + ' ' + v).join(', ')); return; }
   console.log('::notice::Playing on: ' + L.map(x => x.name).join(', '));
   let beat = 0, mirAt = 0;
   while (Date.now() < LIMIT) {
