@@ -466,7 +466,7 @@ function generateSwissRoundMovements(roundNum, boardsPerRound){
 let _swissGenerating=false;
 async function maybeAdvanceSwissRound(){
   const s=getState();
-  if(s.movement!=='swiss'||s.status!=='running'||_swissGenerating)return;
+  if(s.movement!=='swiss'||s.status!=='running'||s.online||_swissGenerating)return;   // online: Bridge Table makes the Swiss rounds
   const boards=getBoards();const movements=getMovements();
   let total=0,done=0;
   for(let t=1;t<=s.tableCount;t++){
@@ -497,7 +497,7 @@ async function bgAutoNextRound(){
   if(_bgAutoNexting||(typeof bgTestOn==='function'&&bgTestOn())) return;
   _bgAutoNexting=true;
   try{
-    const s=await DB.get('state'); if(!s||s.status!=='running'||!(s.currentRound<s.roundCount)) return;
+    const s=await DB.get('state'); if(!s||s.status!=='running'||s.online||!(s.currentRound<s.roundCount)) return;
     const boards=await DB.get('boards')||{}, movements=await DB.get('movements')||{}, pairs=await DB.get('pairs')||{};
     let total=0,done=0;
     for(let t=1;t<=s.tableCount;t++){

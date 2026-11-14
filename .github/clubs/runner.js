@@ -17,7 +17,7 @@ const AWAY = 90e3, LIVE = 6 * 3600e3;
 // the engine, as in the page
 const ctx = { window: {}, console, performance, setTimeout, clearTimeout, WebAssembly, TextDecoder, TextEncoder, URL, crypto: globalThis.crypto, atob: globalThis.atob };
 ctx.window.window = ctx.window; ctx.self = ctx.window; vm.createContext(ctx);
-for (const file of ['dds.js', 'core.js', 'bidding.js', 'play.js', 'clubswiss.js']) vm.runInContext(fs.readFileSync(root + 'js/' + file, 'utf8'), ctx, { filename: file });
+for (const file of ['dds.js', 'core.js', 'bidding.js', 'play.js', 'clubswiss.js', 'clubmirror.js']) vm.runInContext(fs.readFileSync(root + 'js/' + file, 'utf8'), ctx, { filename: file });
 const E = {}; for (const fn of ctx.window.BRIDGE) fn(E);
 const ctFill = (plan, tmap) => plan && plan.mov === 'swiss' ? ctx.window.CTSW.fill(plan, tmap, E) : plan;   // the Swiss rounds made so far
 
@@ -54,13 +54,31 @@ function ctHeadStep(plan, r, list, res) {
   return null;
 }
 
+// the evening as the club's own tournament (as the director's Clubs page does it): pairs, tables, boards, hands, archive
+async function mirror(x) {
+  const bm = 'gate/clubs/' + x.club + '/bm', tmap = await get(x.p + '/t') || {}, plan = ctFill(x.plan, tmap);
+  const M = ctx.window.CTMIR.build(E, plan, x.info, tmap, x.d, x.tid), s = await get(bm + '/state') || {};
+  const mine = !!(s.online && s.online.tid === x.tid && +s.online.d === x.d);
+  if (!mine && s.status === 'running') return;   // a tournament at the club
+  if (!mine) for (const k of ['approvals', 'tableLocks', 'dd']) await put(bm + '/' + k, {});
+  for (const k of ['pairs', 'movements', 'hands']) await put(bm + '/' + k, M[k]);
+  const cb = mine ? await get(bm + '/boards') || {} : {};
+  for (const [k, v] of Object.entries(cb)) if (v && (v.manualEdit || (v.adjusted && !v.online))) M.boards[k] = v;   // the director's corrections stay (the page sends them to the evening)
+  await put(bm + '/boards', M.boards);
+  const ns = mine ? { ...s, ...M.state } : M.state;
+  await put(bm + '/state', ns);
+  if (M.state.status === 'finished' && !(mine && s.status === 'finished')) {
+    const arc = await get(bm + '/archives') || [];
+    if (!arc.some(a => a && a.state && a.state.online && a.state.online.tid === x.tid && +a.state.online.d === x.d)) { arc.unshift({ state: { ...ns, _finishedAt: new Date().toISOString() }, boards: M.boards, pairs: M.pairs, movements: M.movements, hands: M.hands, dd: {}, finished: new Date().toISOString() }); await put(bm + '/archives', arc); }
+  }
+}
 // the evenings being played now: [{ p: 'ot/<club>/<tid>/run/<d>', plan }]
 async function evenings() {
   const out = [], ot = await get('ot') || {};
   for (const [club, T] of Object.entries(ot)) for (const [tid, t] of Object.entries(T || {})) for (const [d, run] of Object.entries((t && t.run) || {})) {
     if (!run || !run.plan || +d > Date.now() || Date.now() - +d > LIVE) continue;
     if (ctCurRound(ctFill(run.plan, run.t), run.t) < 0) continue;   // finished
-    out.push({ p: 'ot/' + club + '/' + tid + '/run/' + d, plan: run.plan, name: (t.info && t.info.n) || tid });
+    out.push({ p: 'ot/' + club + '/' + tid + '/run/' + d, plan: run.plan, name: (t.info && t.info.n) || tid, club, tid, d: +d, info: t.info || {} });
   }
   return out;
 }
@@ -68,11 +86,12 @@ async function evenings() {
   let L = await evenings(), seen = Date.now(), look = Date.now(), steps = 0;
   if (!L.length) { console.log('::notice::Database reached; no online club evening being played now.'); return; }
   console.log('::notice::Playing on: ' + L.map(x => x.name).join(', '));
-  let beat = 0;
+  let beat = 0, mirAt = 0;
   while (Date.now() < LIMIT) {
     if (Date.now() - look > 60e3) { L = await evenings().catch(() => L); look = Date.now(); if (L.length) seen = Date.now(); }
     if (!L.length && Date.now() - seen > 10 * 60e3) break;   // nothing for ten minutes: the next run looks again
     let moved = false;
+    if (Date.now() - (mirAt || 0) > 10e3) { mirAt = Date.now(); for (const x of L) await mirror(x).catch(e => console.log('mirror', e.message)); }
     if (Date.now() - beat > 30e3) { beat = Date.now(); for (const x of L) await put(x.p + '/bot', Date.now()).catch(() => {}); }   // the director sees the server's robots at work
     for (const x of L) {
       try {

@@ -64,6 +64,8 @@ function ctMakePlan(x) {
   return { plan: { pairs: P, rounds, ...(nr ? { nr } : {}), mov: x.i.mov || 'howell', bpr: +x.i.bpr || 3, sys: x.i.sys, conv: x.i.conv || [], sc: x.i.sc, seed: ctSeed(x.id + ':' + x.d), at: Date.now() }, m };
 }
 // the plan with the Swiss rounds that can be made now (from what the tables played)
+// an online evening as the club's own tournament (the Clubs admin's tabs)
+function ctMirror(plan, info, tmap, at, tid) { return window.CTMIR ? CTMIR.build(E, plan, info, tmap, at, tid) : null; }
 function ctFill(plan, tmap) { return plan && plan.mov === 'swiss' && window.CTSW ? CTSW.fill(plan, tmap, E) : plan; }
 async function ctEnsurePlan(x) {
   if (x.plan || x.d > Date.now() || !ctMine(x) || CT.planning) return;

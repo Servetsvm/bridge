@@ -37,7 +37,7 @@ function renderAdminTab(){
   if(adminTab==='setup'&&typeof setupOnline!=='undefined'&&setupOnline&&document.getElementById('otFormBox')&&typeof OT!=='undefined'&&!OT.force){ otManageRefresh(); return; }
   if(typeof OT!=='undefined') OT.force=false;
   const ot=k=>typeof otTabSlot==='function'?otTabSlot(k):'';
-  const m={setup:renderSetup,players:()=>(typeof otPlayersSlot==='function'?otPlayersSlot():'')+renderPlayersAdmin(),movement:()=>ot('movement')+renderMovement(),tables:()=>ot('tables')+renderTables(),boards:()=>ot('boards')+renderBoards(),history:()=>ot('history')+renderHistory(),log:()=>ot('log')+renderLog()};
+  const m={setup:renderSetup,players:renderPlayersAdmin,movement:renderMovement,tables:()=>ot('tables')+renderTables(),boards:()=>ot('boards')+renderBoards(),history:renderHistory,log:renderLog};
   const fin=getState().status==='finished';
   c.innerHTML=(fin?`<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;"><b>🏁 <span>Tournament Finished</span></b><button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button></div>`:'')+(m[adminTab]||renderSetup)();
   if(adminTab==='setup') setTimeout(adminUpdateCalc, 0);
@@ -193,9 +193,10 @@ function renderSetup(){
     })()}
     <div class="round-card"><div class="rc-head"><span class="rc-num">Round ${s.currentRound||0} / ${s.roundCount||0}</span><span class="rc-stat">${s.status==='running'?'🟢 Running':s.status==='setup'?'⏳ Setup':'🏁 Finished'} &nbsp;|&nbsp; ${scoringName(s)}</span></div><div class="round-progress"><div class="round-bar" style="width:${s.roundCount?(s.currentRound/s.roundCount*100):0}%"></div></div></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
-      ${s.status==='setup'&&s.roundCount>0?`<button class="btn btn-green btn-full" onclick="adminStart()">▶ Start Round 1</button>`:''}
-      ${s.status==='running'&&s.currentRound<s.roundCount?`<button class="btn btn-gold" onclick="adminNextRound()">⏭ Next Round (${s.currentRound+1})</button>`:''}
-      ${s.status==='running'&&s.currentRound>=s.roundCount?`<button class="btn btn-blue" onclick="adminFinish()">🏁 Finish Tournament</button>`:''}
+      ${s.online&&s.status==='running'?`<div style="font-size:0.78rem;color:var(--text2);">🌐 <span>Online evening: the rounds go on by themselves in Bridge Table.</span></div>`:''}
+      ${!s.online&&s.status==='setup'&&s.roundCount>0?`<button class="btn btn-green btn-full" onclick="adminStart()">▶ Start Round 1</button>`:''}
+      ${!s.online&&s.status==='running'&&s.currentRound<s.roundCount?`<button class="btn btn-gold" onclick="adminNextRound()">⏭ Next Round (${s.currentRound+1})</button>`:''}
+      ${!s.online&&s.status==='running'&&s.currentRound>=s.roundCount?`<button class="btn btn-blue" onclick="adminFinish()">🏁 Finish Tournament</button>`:''}
     </div>
     ${s.status==='running'||s.status==='setup'?`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"></div><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);"><div style="font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">⚠️ Slow Table Alert</div><div style="font-size:0.72rem;color:var(--text2);margin-bottom:8px;">Beep + on-screen warning if a table hasn't entered a score in this many minutes.</div><div style="display:flex;gap:6px;align-items:center;"><input type="number" id="stallMinutesInput" value="${s.stallAlertMinutes||15}" min="1" max="120" style="width:80px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);"><span style="font-size:0.76rem;color:var(--text2);">minutes</span><button class="btn btn-ghost btn-sm" onclick="saveStallMinutes()">Save</button></div></div>`:''}
   </div>
@@ -232,7 +233,8 @@ window.adminUpdateCalc=function(){
   window._computedRounds=rounds;window._computedTotalBoards=totalBoards;
 };
 
-window.adminSetup=function(){
+window.adminSetup=async function(){
+  { const s0=getState(); if(s0.online&&s0.status==='running'&&!await confirmDialog(i18nText('An online evening is being played. Set up a tournament at the club anyway?'),{danger:true,title:'⚠️ '+i18nText('Are you sure?'),confirmLabel:i18nText('Yes'),cancelLabel:i18nText('Cancel')})) return; }
   const now=new Date();const pad=n=>String(n).padStart(2,'0');
   const autoName=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes());
   document.getElementById('aName').value=autoName;
@@ -483,7 +485,7 @@ function adminSetupAutoRefresh(){
 let _lastRoundCompleteNotified = -1;
 function checkRoundComplete(){
   const s = getState();
-  if(s.status !== 'running') return;
+  if(s.status !== 'running' || s.online) return;   // an online evening: Bridge Table moves the rounds
   checkStalledTables();
   const boards = getBoards();
   const movements = getMovements();

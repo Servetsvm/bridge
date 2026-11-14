@@ -10,6 +10,8 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Online evening: the rounds go on by themselves in Bridge Table.":"Online akşam: turlar Bridge Table’da kendiliğinden ilerler.",
+    "An online evening is being played. Set up a tournament at the club anyway?":"Şu an online bir akşam oynanıyor. Yine de kulüpte turnuva kurulsun mu?",
     "Number of Rounds":"Tur sayısı",
     "The pairs register in Bridge Table; an odd number of pairs gets a robot pair, a pair can also play with a robot partner.":"Çiftler Bridge Table’dan kaydolur; çift sayısı tekse robot çift eklenir, bir çift robot ortakla da oynayabilir.",
     "Boards: 1-99":"Board: 1-99",

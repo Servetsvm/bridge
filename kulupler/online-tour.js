@@ -237,18 +237,6 @@ window.otResults = function (id) {
   P.ctLoad(true).then(() => { if (typeof P.closeClubs === 'function') P.closeClubs(); P.ctShowResults(CLUB_ID, id); });
 };
 
-// the Players tab: the online tournaments coming up with the pairs registered (and the players looking for a partner)
-function otPlayersSlot() {
-  setTimeout(async () => {
-    await otLoad(); const box = document.getElementById('otPlayersBox'); if (!box) return;
-    const L = Object.entries(OT.list || {}).filter(([, t]) => t && t.info).map(([id, t]) => ({ id, t, d: otNext(t.info) })).filter(x => x.d + 4 * 3600e3 > Date.now() && x.d - Date.now() < 14 * 864e5).sort((a, b) => a.d - b.d);
-    box.innerHTML = L.map(x => {
-      const P = Object.values(x.t.pairs || {}).filter(p => p && p.d === x.d), S = Object.values(x.t.seek || {}).filter(p => p && p.d === x.d);
-      return `<div class="card"><div class="card-title">🌐 ${cleanData(x.t.info.n)} <small>· ${otWhen(x.d)}</small></div><div><b>${P.length}</b> <span>pairs registered</span></div>${P.map((p, k) => `<div>${k + 1}. ${cleanData(p.a)} – ${cleanData(p.b)}</div>`).join('')}${S.length ? `<div style="margin-top:4px;">🔎 <span>Looking for a partner</span>: ${S.map(p => cleanData(p.n)).join(', ')}</div>` : ''}</div>`;
-    }).join('');
-  }, 0);
-  return '<div id="otPlayersBox"></div>';
-}
 
 /* ---- the other admin tabs for the online tournaments (Movement, Tables, Boards, History, Log) ----
    The plan, the scores and the double dummy are Bridge Table's own (the page the clubs program runs in). */
@@ -282,16 +270,6 @@ function otTabHtml(tab) {
   const P = otP(), E = otEvenings(), cur = E[0], come = otComing();
   if (!E.length && !come) return '';
   const head = x => `<div class="card-title">🌐 ${cleanData(x.i.n)} <small>· ${otWhen(x.d)}</small></div>`;
-  if (tab === 'movement') {
-    // started: the plan; coming: what the registrations so far would make
-    let x = cur, plan = cur && cur.plan, note = '';
-    if (come && (!cur || come.d > cur.d)) {
-      const pairs = Object.entries(come.t.pairs || {}).filter(([, p]) => p && p.d === come.d).map(([pid, p]) => ({ pid, ...p }));
-      plan = P && pairs.length ? (P.ctMakePlan({ id: come.id, d: come.d, i: come.i, pairs }) || {}).plan : null; x = come; note = '<div style="font-size:0.75rem;color:var(--text3);">Preview with the pairs registered so far: the movement is made at the start.</div>';
-    }
-    if (!plan) return `<div class="card">${head(x)}<div style="color:var(--text3);">No pairs registered yet.</div></div>`;
-    return `<div class="card">${head(x)}${note}<table><thead><tr><th><span>Round</span></th><th><span>Table</span></th><th>N/S</th><th>E/W</th><th><span>Boards</span></th></tr></thead><tbody>${plan.rounds.map((tb, r) => tb.map(([a, b], ti) => `<tr><td>${r + 1}</td><td>${ti + 1}</td><td>${otPn(plan.pairs[a])}</td><td>${otPn(plan.pairs[b])}</td><td>${r * plan.bpr + 1}-${r * plan.bpr + plan.bpr}</td></tr>`).join('')).join('')}</tbody></table></div>`;
-  }
   if (!cur) return `<div class="card">${head(come)}<div style="color:var(--text3);">Starts ${otWhen(come.d)}.</div></div>`;
   if (tab === 'tables') return `<div class="card">${head(cur)}${otLiveHtml(cur.t, cur.d)}${otPresenceHtml(cur)}${P ? `<div style="margin-top:6px;"><button class="btn btn-sm" onclick="otOpenRes('${cur.id}',${cur.d},'live')">👁 <span>Watch</span></button></div>` : ''}</div>`;
   if (tab === 'boards') {
@@ -309,24 +287,6 @@ function otTabHtml(tab) {
     }));
     OT.evX = x;
     return `<div class="card">${head(x)}${sel}<div style="font-size:0.75rem;color:var(--text3);">👁 <span>Bidding and play</span> · ✏️ <span>Correct the score</span> · 🎯 Double dummy</div><div style="overflow-x:auto;"><table><thead><tr><th><span>Round</span>/<span>Table</span></th><th><span>Board</span></th><th>NS / EW</th><th><span>Contract</span></th><th>NS</th><th>MP · IMP</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table></div></div>`;
-  }
-  if (tab === 'history') {
-    if (!P) return '';
-    return `<div class="card"><div class="card-title">🌐 <span>Online club tournaments</span></div>${E.map(x => { const S = P.ctScore({ plan: x.plan, run: x.run, i: x.i }), w = S.rank[0];
-      return `<div style="margin:6px 0;"><b>${cleanData(x.i.n)}</b> <small>· ${otWhen(x.d)}</small><div style="font-size:0.8rem;">${S.rank.length} <span>pairs</span>${w ? ' · 🏆 ' + otPn(w.p) + ' ' + (S.imp ? (w.imp > 0 ? '+' : '') + w.imp + ' IMP' : w.pct.toFixed(1) + '%') : ''}</div><button class="btn btn-sm" onclick="otOpenRes('${x.id}',${x.d},'rank')">📊 <span>Results</span></button></div>`; }).join('')}</div>`;
-  }
-  if (tab === 'log') {
-    const ev = [];
-    for (const x of [cur, come].filter(Boolean)) {
-      const t = x.t;
-      for (const p of Object.values(t.pairs || {})) if (p && p.d === x.d) ev.push([p.ts || 0, '✍️ ' + cleanData(p.a) + ' – ' + cleanData(p.b) + ' <span>registered</span>']);
-      for (const p of Object.values(t.seek || {})) if (p && p.d === x.d) ev.push([p.ts || 0, '🔎 ' + cleanData(p.n) + ' <span>looks for a partner</span>']);
-      const run = t.run && t.run[x.d];
-      if (run && run.plan) ev.push([run.plan.at || x.d, '🪑 <span>The tables were made</span>: ' + run.plan.rounds.length + ' <span>rounds</span>']);
-      if (run && run.hb) for (const [k, ts] of Object.entries(run.hb)) ev.push([+ts, '📶 ' + cleanData(k) + ' <span>last seen</span>']);
-    }
-    ev.sort((a, b) => b[0] - a[0]);
-    return `<div class="card"><div class="card-title">🌐 <span>Log</span></div>${ev.slice(0, 60).map(([ts, t]) => `<div style="font-size:0.8rem;">${ts ? new Date(ts).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''} · ${t}</div>`).join('') || '<div style="color:var(--text3);">—</div>'}</div>`;
   }
   return '';
 }
@@ -443,3 +403,47 @@ function otAsk(msg) {
       '<button class="btn btn-gold" onclick="_otAns(true)">' + otL('Yes') + '</button> <button class="btn" onclick="_otAns(false)">' + otL('Cancel') + '</button>');
   });
 }
+
+/* the online evening is the club's tournament: its pairs, tables, finished boards and hands written into the club's own
+   data every few seconds while the director's page is open (the GitHub run does the same when it is closed), so
+   Players, Movement, Tables, Boards, History, Log, the screen and PBN show it as a tournament at the club; a score the
+   director corrects in Boards goes back to the evening (its ranking in Bridge Table); at its end it is archived */
+OT.mirBusy = false;
+async function otMirror() {
+  const P = otP(); if (OT.mirBusy || !P || !P.ctMirror || typeof role === 'undefined' || role !== 'admin' || !OT.list || !CLUB_ID) return;
+  let best = null;
+  for (const [id, t] of Object.entries(OT.list)) for (const [d, run] of Object.entries((t && t.run) || {})) if (run && run.plan && +d <= Date.now() && Date.now() - +d < 8 * 3600e3 && (!best || +d > best.d)) best = { id, d: +d, t, run };
+  if (!best) return;
+  OT.mirBusy = true;
+  try {
+    const base = '/' + best.id + '/run/' + best.d, r = await fetch(await otUrl(base + '/t'), { cache: 'no-store' }), tmap = r.ok ? (await r.json()) || {} : {};
+    const plan = P.ctFill(best.run.plan, tmap), M = P.ctMirror(plan, best.t.info || {}, tmap, best.d, best.id); if (!M) return;
+    const s = await DB.get('state') || {}, mine = !!(s.online && s.online.tid === best.id && +s.online.d === best.d);
+    if (!mine && s.status === 'running') return;   // a tournament at the club is being played
+    if (mine) {   // the director's corrections in Boards: to the evening too
+      const cb = await DB.get('boards') || {}, SN = ['♣', '♦', '♥', '♠', 'NT'];
+      for (const [k, v] of Object.entries(cb)) {
+        if (!v || !(v.manualEdit || (v.adjusted && !v.online))) continue;
+        const m = M.boards[k]; if (m && m.nsScore === v.nsScore) continue;
+        const [ti, rr, bn] = k.split('_').map(Number);
+        const o = v.level && SN.includes(v.suit) && 'NESW'.includes(v.declarer || '-') ? { c: [+v.level, SN.indexOf(v.suit), ['', 'X', 'XX'].indexOf(v.doubled || ''), 'NESW'.indexOf(v.declarer)], tr: +v.level + 6 + (+v.result || 0), ns: +v.nsScore || 0, adj: 1 } : v.contract === 'PASS' ? { pass: 1, ns: 0, adj: 1 } : { ns: +v.nsScore || 0, adj: 1 };
+        await otPut(base + '/t/' + (rr - 1) + '_' + (ti - 1) + '/res/' + bn, o);
+        M.boards[k] = { ...v };
+      }
+    }
+    const same = (k, v) => JSON.stringify(_cache[k]) === JSON.stringify(v);
+    if (!mine) { await DB.set('approvals', {}); await DB.set('tableLocks', {}); await DB.set('dd', {}); addLog('ok', '🌐 Online evening', M.state.name); }
+    for (const k of ['pairs', 'movements', 'boards', 'hands']) if (!same(k, M[k])) await DB.set(k, M[k]);
+    const ns = mine ? { ...s, ...M.state } : M.state, wasDone = mine && s.status === 'finished';
+    if (!same('state', ns)) await DB.set('state', ns);
+    if (M.state.status === 'finished' && !wasDone) {   // the evening is over: in History like a tournament at the club
+      const arc = await DB.get('archives') || [];
+      if (!arc.some(a => a && a.state && a.state.online && a.state.online.tid === best.id && +a.state.online.d === best.d)) {
+        arc.unshift({ state: { ...ns, _finishedAt: new Date().toISOString() }, boards: M.boards, pairs: M.pairs, movements: M.movements, hands: M.hands, dd: _cache['dd'] || {}, finished: new Date().toISOString() });
+        await DB.set('archives', arc); addLog('ok', 'Tournament finished & archived', M.state.name);
+      }
+    }
+    if (typeof refreshTopbar === 'function') refreshTopbar();
+  } catch (e) {} finally { OT.mirBusy = false; }
+}
+setInterval(otMirror, 6000);
