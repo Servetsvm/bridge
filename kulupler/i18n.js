@@ -10,6 +10,18 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Boards: 1-99":"Board: 1-99",
+    "Social Bridge: a number of players divisible by 4 (at least 8)":"Sosyal Briç: oyuncu sayısı 4’e bölünebilmeli (en az 8)",
+    "Not available on this device":"Bu cihazda kullanılamıyor",
+    "Load the hand file first":"Önce el dosyasını yükleyin",
+    "The card reader is not loaded":"Kart okuyucu yüklenmedi",
+    "The start must be in the future":"Başlangıç ileri bir zaman olmalı",
+    "Could not save":"Kaydedilemedi",
+    "Could not start":"Başlatılamadı",
+    "Could not delete":"Silinemedi",
+    "Tick two players":"İki oyuncu işaretleyin",
+    "Could not pair":"Eşleştirilemedi",
+    "Warning":"Uyarı",
     "Are you sure?":"Emin misiniz?",
     "Yes":"Evet",
     "Start the tournament now?":"Turnuva şimdi başlatılsın mı?",

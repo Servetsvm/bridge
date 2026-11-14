@@ -356,7 +356,7 @@ window.showTableCodes=async function(fresh){
   openModal('Table codes',`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">Type each table's code (4 digits, all different) and save: the players choose their table and type it.</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">${Array.from({length:n},(_,i)=>`<label class="card" style="margin:0;text-align:center;padding:10px;"><div style="font-size:0.75rem;color:var(--text3);">${i18nText('Table')} ${i+1}</div><input class="tcode-in" data-t="${i+1}" value="${byT[i+1]||''}" inputmode="numeric" maxlength="4" autocomplete="off" style="width:100%;box-sizing:border-box;font-size:1.5rem;font-weight:800;letter-spacing:3px;text-align:center;padding:6px;border-radius:8px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);"></label>`).join('')}</div>
     <div class="login-err" id="tcodeErr"></div>`,
-    `<button class="btn btn-ghost" onclick="if(confirm(i18nText('New codes for every table?')))showTableCodes(true)">🎲 New codes</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-gold" onclick="saveTableCodes()">Save</button>`);
+    `<button class="btn btn-ghost" onclick="confirmDialog(i18nText('New codes for every table?'),{danger:false,title:'⚠️ '+i18nText('Are you sure?'),confirmLabel:i18nText('Yes'),cancelLabel:i18nText('Cancel')}).then(ok=>showTableCodes(ok))">🎲 New codes</button><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-gold" onclick="saveTableCodes()">Save</button>`);
 };
 // the codes typed: 4 digits each, all different
 window.saveTableCodes=async function(){

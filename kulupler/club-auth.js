@@ -604,6 +604,12 @@ function refreshTopbar(){
 //  TOAST & MODAL
 // ══════════════════════════════════════════════════════
 function toast(msg,dur=2500){
+  const m=String(msg), w=m.match(/^(❌|⚠️?)\s*([\s\S]*)$/);
+  if(w&&!document.querySelector('#modalBg.open')){   // a warning: a pop-up in the middle of the page
+    const L=v=>window.i18nText?i18nText(v):v, esc=v=>String(v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    openModal('⚠️ '+L('Warning'),`<div style="font-size:1rem;line-height:1.5;">${esc(w[2]?L(w[2]):'')}</div>`,`<button class="btn btn-gold" onclick="closeModal()">${L('OK')}</button>`);
+    return;
+  }
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),dur);
 }

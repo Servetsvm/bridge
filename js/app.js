@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 486;
+const APP_V = 487;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3389,7 +3389,7 @@ document.addEventListener('click', ev_ => {
     if (!e || txt.trim().length < 3) { flash(T('Write what the robot did wrong'), 2000); return; }
     t.disabled = true; Net.roboNote(e, txt.trim()).then(() => { flash('✅ ' + T('Sent to the robot mistakes'), 2500); if ($('rbNote')) $('rbNote').value = ''; }).catch(() => flash(T('Could not send — sign in with your name and PIN first.'), 2500)).finally(() => { t.disabled = false; }); return; }
   if (t.dataset.rbok) { rbFixed(t.dataset.rbok, t.dataset.v === '1').then(showRoboErrs).catch(() => flash(T('Could not save'), 2000)); return; }
-  if (t.id === 'rbDelAll') { const P = (ui.rbAll || []).slice(); if (!P.length || !confirm(T('Delete all') + ' — ' + T('Robot mistakes') + ' (' + P.length + ')?')) return; Promise.all(P.map(x => rbDone(x))).then(() => { flash('🗑 ' + P.length, 1800); showRoboErrs(); }).catch(() => flash(T('Could not remove'), 2000)); return; }
+  if (t.id === 'rbDelAll') { const P = (ui.rbAll || []).slice(); if (!P.length) return; askOv(T('Delete all') + ' — ' + T('Robot mistakes') + ' (' + P.length + ')?').then(ok => { if (!ok) { showRoboErrs(); return; } Promise.all(P.map(x => rbDone(x))).then(() => { flash('🗑 ' + P.length, 1800); showRoboErrs(); }).catch(() => flash(T('Could not remove'), 2000)); }); return; }
   if (t.id === 'rbOld') { ui.rbOld = !ui.rbOld; showRoboErrs(); return; }
   if (t.id === 'rbSmall') { ui.rbSmall = !ui.rbSmall; showRoboErrs(); return; }
   if (t.id === 'rbShowOk') { ui.rbShowOk = !ui.rbShowOk; showRoboErrs(); return; }
@@ -4388,3 +4388,12 @@ function showCardConv() {
     <div class="convs">${E.CONVS.map(c => `<label class="cvchip${SET.conv[c.k] ? ' on' : ''}" title="${esc(c.d)}"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}>${esc(c.n)}</label>`).join('')}</div>
     <div class="row2"><button class="btn" id="caBack">◀ ${T('Back')}</button><button class="btn gold" id="caDone">${T('Done')}</button></div>`);
 }
+
+// a question in the middle of the page (ours, in the player's language), not the browser's box: true for Yes
+function askOv(msg) {
+  return new Promise(res => {
+    ui.askRes = res;
+    openOv('ask', `<h2>⚠️ ${T('Are you sure?')}</h2><div class="big">${esc(msg)}</div><div class="row2"><button class="btn gold" id="askYes">${T('Yes')}</button><button class="btn" id="askNo">${T('Cancel')}</button></div>`);
+  });
+}
+document.addEventListener('click', e => { const t = e.target.closest('#askYes,#askNo'); if (!t) return; const r = ui.askRes; ui.askRes = null; closeOv(); if (r) r(t.id === 'askYes'); });
