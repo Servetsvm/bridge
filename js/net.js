@@ -815,14 +815,15 @@ const Net = (() => {
     if (!(await Cloud.session(name, SET.pinH))) throw new Error('signin');
     return fbKey(name);
   }
-  async function supSend(txt) {
+  async function supSend(txt, kind) {
     const k = await supMine(), name = myName(), now = Date.now();
     const th = await Cloud.get('destek/' + k).catch(() => null) || {};
     const last = Object.values(th.m || {}).sort((a, b) => a.ts - b.ts).pop();
     await Cloud.put('destek/' + k + '/n', String(name).slice(0, 20));
     await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'p', t: String(txt).slice(0, 1000), ts: now });
     // the automatic thank-you, once for each new question (not after every line of a message sent in parts)
-    if (!last || last.by !== 'p') await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', t: '', ts: now + 1 });
+    // (a message about the Claude system, from its article: the thank-you says so, in the reader's own language)
+    if (!last || last.by !== 'p' || kind === 'claude') await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', t: kind === 'claude' ? 'claude' : '', ts: now + 1 });
     await Cloud.put('destek/' + k + '/pr', now + 1);
     st.supNew = 0;
   }
@@ -926,7 +927,7 @@ const Net = (() => {
   const refSrc = r => {
     let h = ''; try { h = r ? new URL(r).hostname.toLowerCase() : ''; } catch (e) {}
     if (!h || h === location.hostname) return 'direct';
-    const M = [['google', /(^|\.)google\./], ['bing', /(^|\.)bing\.com$/], ['yandex', /(^|\.)yandex\./], ['duckduckgo', /duckduckgo\.com$/], ['yahoo', /yahoo\./], ['ecosia', /ecosia\.org$/],
+    const M = [['chatgpt', /(^|\.)(chatgpt\.com|openai\.com)$/], ['perplexity', /perplexity\.ai$/], ['claude', /(^|\.)claude\.ai$/], ['gemini', /gemini\.google\.com$/], ['copilot', /copilot\.microsoft\.com$/], ['google', /(^|\.)google\./], ['bing', /(^|\.)bing\.com$/], ['yandex', /(^|\.)yandex\./], ['duckduckgo', /duckduckgo\.com$/], ['yahoo', /yahoo\./], ['ecosia', /ecosia\.org$/],
       ['facebook', /(^|\.)(facebook\.com|fb\.com|fb\.me)$/], ['instagram', /instagram\.com$/], ['x', /(^|\.)(t\.co|twitter\.com|x\.com)$/], ['whatsapp', /whatsapp\./], ['github', /github\.(com|io)$/], ['askim', /(^|\.)askimbk\.org$/]];
     for (const [k, re] of M) if (re.test(h)) return k;
     return 'other';

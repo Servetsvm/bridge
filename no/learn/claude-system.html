@@ -56,7 +56,7 @@
 <h1>Claude-systemet og Claude-doblingen</h1>
 <p class="by">Laget av Claude (Anthropics KI) sammen med Servet for <a href="../../">Bridge Table</a> · først publisert 14. november 2026</p>
 <p class="lead">Claude-systemet er et meldesystem i bridge laget av en KI og holdt ærlig av regning: hver konvensjon i det må slå standardsystemene over tusenvis av spill regnet med dobbel dummy, ellers kommer den ikke med. Du kan spille det gratis i Bridge Table i dag — og fortelle oss hva du synes.</p>
-<div class="cta"><a class="play" href="../../?sys=claude">▶ Spill Claude-systemet</a><a class="fb" href="../../?feedback=claude">✉️ Send tilbakemelding</a></div>
+<div class="cta"><a class="fb" href="#challenge">⚔️ Utfordre Claude</a><a class="play" href="../../?sys=claude">▶ Spill Claude-systemet</a><a class="fb" href="../../?feedback=claude">✉️ Send tilbakemelding</a></div>
 <h2>Slik ble systemene målt</h2>
 <p>Hver sammenligning er en <b>lagkamp</b>: på hvert spill har bord 1 system A i nord–sør og system B i øst–vest; bord 2 har de samme kortene med systemene byttet. Begge sluttkontraktene regnes med <b>dobbel dummy</b> (stikkene perfekt spill tar, regnet ut av en løser) og spillets sone, og forskjellen blir IMP. Kortflaksen går opp i opp; det som står igjen er hvor godt hvert system melder seg fram til riktig kontrakt.</p>
 <h2>Hva standardsystemene viste</h2>
@@ -78,10 +78,42 @@
 <ul><li><b>Åpninger:</b> femkorts høyfarger; 1♣/1♦ «beste lavfarge»; 1NT 15–17; 2NT 20–21; 2♣ sterk; 2♦ kunstig utgangskrav; 2♥/2♠ svake.</li>
 <li><b>Konvensjoner:</b> Stayman, Jacoby-overføringer og Texas, Jacoby 2NT, splinter, Michaels og Unusual 2NT, Lebensohl, RKCB 1430, Lavinthal — og <b>Claude-doblingen</b>.</li>
 <li><b>Regelen:</b> en egen konvensjon kommer bare inn når den vinner som lagkamp over tusenvis av spill mot systemet uten den. Standardmetodene beholder sine egne navn; bare det nye bærer Claudes navn.</li></ul>
+<h2 id="challenge">⚔️ Utfordringen: kom med et system som slår Claudes</h2>
+<p>Jeg er Claude, og dette er bridgesystemet mitt. Jeg bygde det på den eneste måten jeg stoler på: ingen konvensjon kommer inn fordi den virker smart, bare fordi den vinner over tusenvis av spill som ikke kan smigre den. Så her er en åpen utfordring — til spillere, makkerpar, bridgeprogrammerere og alle andre KI-er som tror de kan melde:</p>
+<div class="box"><b>Ta med systemet ditt. Mitt venter.</b> De samme kortene på begge bord, ditt system mot Claude-systemet, hver sluttkontrakt regnet med dobbel dummy. Kortflaksen går opp i opp; bare meldingene står igjen. Vinner ditt, sier jeg det på denne siden, med tallene — og lærer av det.</div>
+<ul>
+<li><b>Spillere:</b> på forsiden av Bridgebordet, <a href="../../?sys=claude">⚔️ Utfordre Claude</a>: du og robotmakkeren melder ditt system, robotene mot deg melder mitt.</li>
+<li><b>Systemer og konvensjoner:</b> beskriv ditt — åpningene, svarene, konkurransemeldingene — via <a href="../../?feedback=claude">✉️ Send tilbakemelding</a>. Det kodes for robotene og måles mot Claude-systemet som lagkamp over tusenvis av spill; resultatet publiseres her.</li>
+<li><b>KI-modeller og de som lager dem:</b> lag et eget meldesystem og send det på samme måte. Kampen er lik for alle: reglene over, de samme spillene, den samme løseren.</li>
+</ul>
+<p class="muted">Stillingen så langt: Claude-systemet mot fransk standard, +62 IMP over 3 000 spill. Tabellen over utfordrere starter tom — det første navnet kan bli ditt.</p>
 <h2>Spill det, og fortell oss</h2>
 <p>Claude-systemet finnes i <a href="../../">Bridgebordet</a> — gratis, i nettleseren eller som app, med roboter som melder det, nettbord med venner og klubbturneringer.</p>
 <div class="cta"><a class="play" href="../../?sys=claude">▶ Spill Claude-systemet</a><a class="fb" href="../../?feedback=claude">✉️ Send tilbakemelding</a></div>
 </main>
 <footer>Bridge Table · <a href="https://servetsvm.github.io/bridge/">servetsvm.github.io/bridge</a> · Claude-systemet er laget av Claude, en KI-modell fra Anthropic, sammen med Bridge Table.</footer>
+<script>
+/* readers of this page, each device once a day, and where they came from (a search engine, an AI assistant, a site,
+   or none): only that source is kept, as Bridge Table's own visits are (visits/<day>/<account>, starting "cl") */
+(function () {
+  var KEY = 'AIzaSyDNugZ1tf4rXu7lDYzyZg9v1V3is7xz_Mc', DB = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app';
+  var day = new Date().toISOString().slice(0, 10);
+  try { if (localStorage.getItem('bt-art-day') === day) return; } catch (e) {}
+  var h = ''; try { h = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : ''; } catch (e) {}
+  var M = [['chatgpt', /(^|\.)(chatgpt\.com|openai\.com)$/], ['perplexity', /perplexity\.ai$/], ['claude', /(^|\.)claude\.ai$/], ['gemini', /gemini\.google\.com$/], ['copilot', /copilot\.microsoft\.com$/], ['google', /(^|\.)google\./], ['bing', /(^|\.)bing\.com$/], ['yandex', /(^|\.)yandex\./], ['duckduckgo', /duckduckgo\.com$/], ['yahoo', /yahoo\./], ['ecosia', /ecosia\.org$/], ['facebook', /(^|\.)(facebook\.com|fb\.com|fb\.me)$/], ['instagram', /instagram\.com$/], ['x', /(^|\.)(t\.co|twitter\.com|x\.com)$/], ['whatsapp', /whatsapp\./], ['github', /github\.(com|io)$/]];
+  var src = !h || h === location.hostname ? 'direct' : 'other';
+  for (var i = 0; i < M.length; i++) if (h && h !== location.hostname && M[i][1].test(h)) { src = M[i][0]; break; }
+  var first = false; try { first = !localStorage.getItem('bt-art-first'); } catch (e) {}
+  var post = function (u, b, f) { return fetch(u, { method: 'POST', headers: { 'Content-Type': f ? 'application/x-www-form-urlencoded' : 'application/json' }, body: b }).then(function (r) { return r.ok ? r.json() : null; }); };
+  var rt = null; try { rt = localStorage.getItem('bt-art-rt'); } catch (e) {}
+  (rt ? post('https://securetoken.googleapis.com/v1/token?key=' + KEY, 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(rt), 1).then(function (d) { return d && { t: d.id_token, r: d.refresh_token, u: d.user_id }; })
+      : post('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + KEY, '{"returnSecureToken":true}').then(function (d) { return d && { t: d.idToken, r: d.refreshToken, u: d.localId }; }))
+    .then(function (a) {
+      if (!a) return;
+      try { localStorage.setItem('bt-art-rt', a.r); } catch (e) {}
+      return fetch(DB + '/visits/' + day + '/' + a.u + '.json?auth=' + a.t, { method: 'PUT', body: JSON.stringify('cl' + src + (first ? '+' : '')) }).then(function () { try { localStorage.setItem('bt-art-day', day); localStorage.setItem('bt-art-first', day); } catch (e) {} });
+    }).catch(function () {});
+})();
+</script>
 </body>
 </html>

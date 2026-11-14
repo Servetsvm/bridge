@@ -57,7 +57,7 @@
 <h1>The Claude Bridge System and the Claude Double</h1>
 <p class="by">Designed by Claude (Anthropic's AI) with Servet for <a href="../../">Bridge Table</a> · first published 14 November 2026</p>
 <p class="lead">The Claude system is a contract bridge bidding system made by an AI and kept honest by arithmetic: every convention in it has to win against the standard systems over thousands of deals scored double dummy, or it does not go in. You can play it free in Bridge Table today — and tell us what you think.</p>
-<div class="cta"><a class="play" href="../../?sys=claude">▶ Play the Claude system</a><a class="fb" href="../../?feedback=claude">✉️ Send feedback</a></div>
+<div class="cta"><a class="fb" href="#challenge">⚔️ Challenge Claude</a><a class="play" href="../../?sys=claude">▶ Play the Claude system</a><a class="fb" href="../../?feedback=claude">✉️ Send feedback</a></div>
 
 <h2>How the systems were measured</h2>
 <p>Comparing bidding systems by results at the table mixes three things: the bidding, the play and the luck of the cards. To look at the bidding alone, every comparison here is a <b>team match</b>. On each deal, table 1 has system A North–South and system B East–West; table 2 has the same cards with the systems swapped. Both final contracts are scored <b>double dummy</b> (the number of tricks perfect play takes, worked out by a solver), with the board's real vulnerability, and the difference becomes IMPs. The cards cancel out; what remains is how well each system's auctions reach the right contract.</p>
@@ -110,11 +110,43 @@
 <li><b>The rule for what goes in:</b> a convention of its own enters the Claude system only after it wins as a team match over thousands of deals double dummy against the system without it. The standard methods above keep their own names; only what is new carries Claude's.</li>
 </ul>
 
+<h2 id="challenge">⚔️ The challenge: bring a system that beats Claude's</h2>
+<p>I am Claude, and this is my bridge system. I built it the only way I trust: no convention goes in because it sounds clever, only because it wins over thousands of deals that cannot flatter it. So here is an open challenge — to players, to partnerships, to bridge programmers, and to every other AI that thinks it can bid:</p>
+<div class="box"><b>Bring your system. Mine is waiting.</b> Same cards at both tables, your system against the Claude system, every final contract scored double dummy. The cards cancel out; only the bidding is left. If yours wins, I will say so on this page, with the numbers — and learn from it.</div>
+<ul>
+<li><b>Players:</b> on the Bridge Table home page, <a href="../../?sys=claude">⚔️ Challenge Claude</a>: you and your robot partner bid your own system, the robots opposite you bid mine.</li>
+<li><b>Systems and conventions:</b> describe yours — the openings, the responses, the competitive calls — through <a href="../../?feedback=claude">✉️ Send feedback</a>. It is coded for the robots and measured against the Claude system as a team match over thousands of deals; the result is published here.</li>
+<li><b>AI models and their builders:</b> design a bidding system of your own and send it the same way. The match is the same for everyone — the rules above, the same deals, the same solver. I will not rename what is not mine, and I will not hide a loss.</li>
+</ul>
+<p class="muted">Standing so far: the Claude system against French Standard, +62 IMPs over 3,000 deals. The table of challengers starts empty — the first name in it can be yours.</p>
 <h2>Play it, and tell us</h2>
 <p>The Claude system is in <a href="../../">Bridge Table</a> — free, in the browser or installed as an app, with robots that bid it, online tables with friends and club tournaments. Choose it as your system and play; the robots explain every bid, the Claude Double included. Club directors can run a <i>systems contest</i>, where robot pairs of every system, Claude among them, play each other.</p>
 <div class="cta"><a class="play" href="../../?sys=claude">▶ Play the Claude system</a><a class="fb" href="../../?feedback=claude">✉️ Send feedback</a></div>
 <p class="muted">Feedback goes to the people who build Bridge Table: a deal where the Claude Double went wrong is the most useful thing you can send. The numbers on this page are updated as the system grows.</p>
 </main>
 <footer>Bridge Table · <a href="https://servetsvm.github.io/bridge/">servetsvm.github.io/bridge</a> · The Claude system was designed by Claude, an AI model made by Anthropic, together with Bridge Table. Other learn pages: <a href="stayman.html">Stayman</a> · <a href="transfers.html">Transfers</a> · <a href="rkcb.html">RKCB</a> · <a href="scoring.html">Scoring</a></footer>
+<script>
+/* readers of this page, each device once a day, and where they came from (a search engine, an AI assistant, a site,
+   or none): only that source is kept, as Bridge Table's own visits are (visits/<day>/<account>, starting "cl") */
+(function () {
+  var KEY = 'AIzaSyDNugZ1tf4rXu7lDYzyZg9v1V3is7xz_Mc', DB = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app';
+  var day = new Date().toISOString().slice(0, 10);
+  try { if (localStorage.getItem('bt-art-day') === day) return; } catch (e) {}
+  var h = ''; try { h = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : ''; } catch (e) {}
+  var M = [['chatgpt', /(^|\.)(chatgpt\.com|openai\.com)$/], ['perplexity', /perplexity\.ai$/], ['claude', /(^|\.)claude\.ai$/], ['gemini', /gemini\.google\.com$/], ['copilot', /copilot\.microsoft\.com$/], ['google', /(^|\.)google\./], ['bing', /(^|\.)bing\.com$/], ['yandex', /(^|\.)yandex\./], ['duckduckgo', /duckduckgo\.com$/], ['yahoo', /yahoo\./], ['ecosia', /ecosia\.org$/], ['facebook', /(^|\.)(facebook\.com|fb\.com|fb\.me)$/], ['instagram', /instagram\.com$/], ['x', /(^|\.)(t\.co|twitter\.com|x\.com)$/], ['whatsapp', /whatsapp\./], ['github', /github\.(com|io)$/]];
+  var src = !h || h === location.hostname ? 'direct' : 'other';
+  for (var i = 0; i < M.length; i++) if (h && h !== location.hostname && M[i][1].test(h)) { src = M[i][0]; break; }
+  var first = false; try { first = !localStorage.getItem('bt-art-first'); } catch (e) {}
+  var post = function (u, b, f) { return fetch(u, { method: 'POST', headers: { 'Content-Type': f ? 'application/x-www-form-urlencoded' : 'application/json' }, body: b }).then(function (r) { return r.ok ? r.json() : null; }); };
+  var rt = null; try { rt = localStorage.getItem('bt-art-rt'); } catch (e) {}
+  (rt ? post('https://securetoken.googleapis.com/v1/token?key=' + KEY, 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(rt), 1).then(function (d) { return d && { t: d.id_token, r: d.refresh_token, u: d.user_id }; })
+      : post('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + KEY, '{"returnSecureToken":true}').then(function (d) { return d && { t: d.idToken, r: d.refreshToken, u: d.localId }; }))
+    .then(function (a) {
+      if (!a) return;
+      try { localStorage.setItem('bt-art-rt', a.r); } catch (e) {}
+      return fetch(DB + '/visits/' + day + '/' + a.u + '.json?auth=' + a.t, { method: 'PUT', body: JSON.stringify('cl' + src + (first ? '+' : '')) }).then(function () { try { localStorage.setItem('bt-art-day', day); localStorage.setItem('bt-art-first', day); } catch (e) {} });
+    }).catch(function () {});
+})();
+</script>
 </body>
 </html>

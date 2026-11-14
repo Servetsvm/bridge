@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 508;
+const APP_V = 510;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -3880,14 +3880,14 @@ function supMsgsHtml(m, mine) {
   if (!m.length) return `<div class="muted">${T('No messages yet.')}</div>`;
   return `<div class="supmsgs" id="supMsgs">${m.map(x => {
     const own = mine ? x.by === 'p' : x.by === 'a', who = x.by === 'p' ? '' : x.by === 'auto' ? '🤖 ' : '👑 ';
-    const txt = x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
+    const txt = x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' && x.t === 'claude' ? T('Thank you for writing about the Claude system — your message has reached us, and every one is read. A deal where the Claude Double went wrong is the most useful thing you can send. And if you think your own system bids better: ⚔️ Challenge Claude on the home page. — Claude and Bridge Table') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
     return `<div class="supm ${own ? 'own' : ''} ${x.by}"><div>${who}${txt.replace(/\n/g, '<br>')}</div><small>${new Date(x.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></div>`;
   }).join('')}</div>`;
 }
 const supBox = (id, ph) => `<textarea id="${id}" class="tok wide" rows="3" maxlength="1000" placeholder="${ph}"></textarea>`;
 // the player: their messages to the administrator and the answers
 // feedback asked for by a link (the Claude system's article): the message window with its first words
-async function fbOpen(k) { await showSup(); const t = $('supTxt'); if (t && !t.value) { t.value = (k === 'claude' ? T('Claude system') : k) + ': '; t.focus(); } }
+async function fbOpen(k) { ui.supKind = k; await showSup(); const t = $('supTxt'); if (t && !t.value) { t.value = (k === 'claude' ? T('Claude system') : k) + ': '; t.focus(); } }
 async function showSup() {
   openOv('sup', `<h2>✉️ ${T('Write to the administrator')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let th = null, err = '';
@@ -3904,7 +3904,8 @@ async function showSup() {
 async function sendSup() {
   const t = ($('supTxt') && $('supTxt').value || '').trim();
   if (t.length < 2) { flash(T('Write your message…'), 1800); return; }
-  try { await Net.supSend(t); await showSup(); }
+  const kind = ui.supKind || (t.startsWith(T('Claude system')) ? 'claude' : ''); ui.supKind = null;
+  try { await Net.supSend(t, kind); await showSup(); }
   catch (e) { flash(e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.'), 3000); }
 }
 // the administrator: every player who wrote, the newest first; unread ones marked
@@ -4252,13 +4253,16 @@ function statActHtml(a) {
     ${pl.map(([nm, q]) => `<tr><td><b>${esc(nm)}</b></td><td class="n">${q.b}</td><td class="n">${q.p}</td><td class="n">${pct(q.ok, q.n)}</td><td class="muted">${Object.entries(q.cv).filter(([k]) => E.convInfo(k)).sort((x, y) => y[1] - x[1]).slice(0, 3).map(([k]) => esc(pracName(k))).join(', ')}</td></tr>`).join('')}</tbody></table>`;
 }
 // where the visitors came from (Google first): each device once a day, the first-time ones apart
-const VIS_N = { google: '🔎 Google', bing: '🔎 Bing', yandex: '🔎 Yandex', duckduckgo: '🔎 DuckDuckGo', yahoo: '🔎 Yahoo', ecosia: '🔎 Ecosia', facebook: '📘 Facebook', instagram: '📷 Instagram', x: '𝕏 X', whatsapp: '💬 WhatsApp', github: '🐙 GitHub', askim: '🏛 Askim BK', other: '🔗 ', direct: '🏠 ' };
+const VIS_N = { chatgpt: '🤖 ChatGPT', perplexity: '🤖 Perplexity', claude: '🤖 Claude.ai', gemini: '🤖 Gemini', copilot: '🤖 Copilot', google: '🔎 Google', bing: '🔎 Bing', yandex: '🔎 Yandex', duckduckgo: '🔎 DuckDuckGo', yahoo: '🔎 Yahoo', ecosia: '🔎 Ecosia', facebook: '📘 Facebook', instagram: '📷 Instagram', x: '𝕏 X', whatsapp: '💬 WhatsApp', github: '🐙 GitHub', askim: '🏛 Askim BK', other: '🔗 ', direct: '🏠 ' };
 function statVisHtml(V) {
   if (!V) return '';
+  const art = Object.entries(V.by).filter(([k]) => k.startsWith('cl') && k !== 'claude').map(([k, v]) => [k.slice(2), v]).sort((a, b) => b[1][0] - a[1][0]), artN = art.reduce((a, x) => a + x[1][0], 0);
+  V = { ...V, by: Object.fromEntries(Object.entries(V.by).filter(([k]) => !(k.startsWith('cl') && k !== 'claude'))) };
   const L = Object.entries(V.by).sort((a, b) => (b[0] === 'google') - (a[0] === 'google') || b[1][0] - a[1][0]), max = Math.max(1, ...L.map(x => x[1][0]));
   const nm = k => k === 'other' ? VIS_N.other + T('Other sites') : k === 'direct' ? VIS_N.direct + T('Direct (app, bookmark, typed)') : VIS_N[k] || esc(k);
   return `<h3>🧭 ${T('Where they came from')}</h3>${L.length ? `<table class="res stats">${L.map(([k, v]) => `<tr><td>${nm(k)}</td><td class="n"><b>${v[0]}</b>${v[1] ? ` <small>(${T('{0} new', v[1])})</small>` : ''}</td><td class="sbar"><i style="width:${Math.round(v[0] / max * 100)}%"></i></td></tr>`).join('')}</table>` : `<div class="muted">${T('Nobody yet.')}</div>`}
-    <div class="muted">${T('Every device once a day, guests too; new = its first visit. Counted from {0}.', '13.11.2026')}</div>`;
+    <div class="muted">${T('Every device once a day, guests too; new = its first visit. Counted from {0}.', '13.11.2026')}</div>
+    <h3>📰 ${T('The Claude system\'s article')}: ${artN}</h3>${art.length ? `<table class="res stats">${art.map(([k, v]) => `<tr><td>${nm(k)}</td><td class="n"><b>${v[0]}</b>${v[1] ? ` <small>(${T('{0} new', v[1])})</small>` : ''}</td></tr>`).join('')}</table>` : `<div class="muted">${T('Nobody yet.')}</div>`}<div class="muted">${T('Readers of the article (each device once a day) and where they came from; their messages come to you as messages from players.')}</div>`;
 }
 async function showStats() {
   if (!Net.isAdmin()) return;
