@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 507;
+const APP_V = 508;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -65,7 +65,7 @@ const fmtSigned = v => (v > 0 ? '+' : '') + v;
 
 function sideCards() {
   // our side (you and your robot partner) bids our system; the opponents the same, or SAYC
-  const ours = { conv: { ...SET.conv }, agg: 0, sys: SET.sys || 'twoone' }, opp = SET.opp === 'same' ? { conv: { ...SET.conv }, agg: 0, sys: SET.sys || 'twoone' } : { conv: { ...E.SAYC }, agg: 0, sys: 'sayc' };
+  const ours = { conv: { ...SET.conv }, agg: 0, sys: SET.sys || 'twoone' }, opp = SET.opp === 'claude' ? { conv: { ...E.sysOf('claude').conv }, agg: 0, sys: 'claude' } : SET.opp === 'same' ? { conv: { ...SET.conv }, agg: 0, sys: SET.sys || 'twoone' } : { conv: { ...E.SAYC }, agg: 0, sys: 'sayc' };
   const c = [null, null]; c[sideOf(U())] = ours; c[1 - sideOf(U())] = opp;
   // at an online table the other side bids the system of the player sitting there (their robot partner too)
   if (typeof Net !== 'undefined' && online() && !guest()) {
@@ -1530,7 +1530,7 @@ function sfx(k) {
 // what every player has (no longer chosen in Settings)
 function fixedSet() {
   if (SET.explV !== 1) { SET.explV = 1; SET.expl = false; }   // the bid explanations start hidden (once; Settings turns them on)
-  Object.assign(SET, { homeV: 'new', style: 'modern', felt: 'green', back: 'blue', four: true, big: true, opp: 'same', robotLvl: 'expert', speed: 0 });
+  Object.assign(SET, { homeV: 'new', style: 'modern', felt: 'green', back: 'blue', four: true, big: true, opp: SET.opp === 'claude' ? 'claude' : 'same', robotLvl: 'expert', speed: 0 });
 }
 function applyLook() {
   fixedSet();
@@ -1764,7 +1764,9 @@ function renderHome() {
     // the administrator's card: always on the home page (players, messages, requests, robots)
     const admN = (N.supNew || 0) + (N.cvNew || 0) + (ui.learnNew || 0);
     set('hAdm', N.isAdmin() ? `<button class="hadmb" id="admTog" title="${T('Admin')}">👑${admN ? `<b class="supc">${admN}</b>` : ''}</button>` : '');
-    set('hPend', bad + sup + cvn + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
+    const clInv = SET.opp === 'claude' ? `<div class="hcard clinv on"><b>⚔️ ${T('You are playing against the Claude system')}</b><small>${T('The robots opposite you bid Claude\'s own system; you and your partner bid yours.')}</small><div class="row2"><button class="btn gold" id="clGo">▶ ${T('Play')}</button><button class="btn" id="clDuelEnd">${T('End the challenge')}</button></div></div>`
+      : SET.clInv !== new Date().toDateString() && myNm() ? `<div class="hcard clinv"><b>⚔️ ${T('Claude invites you to a match')}</b><small>${T('“I made my own bridge system. Bring yours: your bidding against mine, on the same cards. Who reaches the better contracts?” — Claude')}</small><div class="row2"><button class="btn gold" id="clDuel">${T('Accept')}</button><button class="btn" id="clLater">${T('Later')}</button></div></div>` : '';
+    set('hPend', bad + sup + cvn + clInv + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
     set('hTables', (typeof ctCardHtml === 'function' ? ctCardHtml() : '') + N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
@@ -2888,6 +2890,7 @@ function claudeOv() {
   openOv('claude', `<h2>✨ ${T('Claude system')}</h2>
     <div class="big">${T("The AI Claude's own system: its conventions are kept only when they win over thousands of deals. Watch the robots play it.")}</div>
     <div class="grp"><span>${T('What is played')}</span>${esc(E.sysOf('claude').d)}</div>
+    <div class="row2"><button class="btn gold" id="clDuel">⚔️ ${T('Challenge Claude: your system against the Claude system')}</button></div>
     <div class="row2"><button class="btn new" id="clPlay">▶ ${T('Play the Claude system')}</button><button class="btn" id="clWatch" ${ready ? '' : 'disabled'}>👁 ${ready ? T('Watch the robots play it') : T('The robots\' table is being prepared…')}</button></div>
     <div class="row2"><a class="btn" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
@@ -3356,7 +3359,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === "pdWeak") { const w = pracWeak(); if (!w.length) return; SET.practice = ""; w.forEach(k => togglePractice(k, true)); flash("🎯 " + T("Practising {0}: the next deals use it", pracNames()), 2200); ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === "pdPlay") { if (!pracList().length) { ui.pracDrop = "conv"; render(); return; } ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
   // Play offline: the title and the fan of cards start too
-  if (t.id === "bGo" || t.id === "bGoTitle" || t.id === "bGoFan") { Net.st.soloPub = true; closeOv(); resume(); return; }
+  if (t.id === "bGo" || t.id === "bGoTitle" || t.id === "bGoFan" || t.id === "clGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
   if (t.id === 'hConvAsk') { showConvAsk(); return; }
@@ -3388,6 +3391,9 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.rtk === 'claude' && t.dataset.rtopen) { claudeOv(); return; }   // the Claude system: try it yourself, watch the robots, read how it works
   if (t.id === 'clPlay') { setSys('claude'); Store.saveSettings(SET); closeOv(); ui.saved = null; Net.st.soloPub = true; resume(); flash('✨ ' + T('You play the Claude system — the robots too'), 2600); return; }
   if (t.id === 'clWatch') { closeOv(); rtWatch('claude'); return; }
+  if (t.id === 'clDuel') { SET.opp = 'claude'; SET.clInv = new Date().toDateString(); Store.saveSettings(SET); closeOv(); ui.saved = null; Net.st.soloPub = true; resume(); flash('⚔️ ' + T('Your system against Claude\'s: the opponents bid the Claude system'), 3000); return; }
+  if (t.id === 'clDuelEnd') { SET.opp = 'same'; Store.saveSettings(SET); render(); flash(T('The opponents bid your system again'), 2000); return; }
+  if (t.id === 'clLater') { SET.clInv = new Date().toDateString(); Store.saveSettings(SET); render(); return; }
   if (t.dataset.rtk) { if (t.dataset.rtopen) rtWatch(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
   if (t.dataset.rtwatch) { rtWatch(RT.cur); return; }
   if (t.id === 'bRtAgain') { rtAgain(); return; }
