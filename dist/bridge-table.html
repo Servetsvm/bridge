@@ -10076,7 +10076,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 492;
+const APP_V = 493;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -16510,7 +16510,7 @@ const Net = (() => {
   }
   // the club's tournament: state, pairs, movements, boards, hands
   function build(E, plan, info, tmap, at, tid) {
-    const R = plan.nr || plan.rounds.length, bpr = plan.bpr, cur = (() => { for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.keys(((tmap || {})[r + '_' + ti] || {}).res || {}).length < bpr)) return r; return plan.rounds.length < R ? plan.rounds.length : -1; })();
+    const R = plan.nr || plan.rounds.length, bpr = plan.bpr, cur = (() => { for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.values(((tmap || {})[r + '_' + ti] || {}).res || {}).filter(Boolean).length < bpr)) return r; return plan.rounds.length < R ? plan.rounds.length : -1; })();
     const pairs = {}, movements = {}, boards = {}, hands = [];
     plan.pairs.forEach((p, i) => { pairs['p' + (i + 1)] = { id: 'p' + (i + 1), name: p.robot ? '🤖 Robot' : (p.a + ' – ' + p.b), dir: '', startTable: 0, isPhantom: false, online: 1 }; });
     plan.rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => {
@@ -16862,7 +16862,7 @@ async function ctTablesLeft(p, plan, r) {
   const left = [];
   for (let ti = 0; ti < plan.rounds[r].length; ti++) {
     let res = null; try { res = await Net.Cloud.get(p + '/t/' + r + '_' + ti + '/res'); } catch (e) {}
-    const n = Object.keys(res || {}).length; if (n < plan.bpr) left.push({ ti, n });
+    const n = Object.values(res || {}).filter(Boolean).length; if (n < plan.bpr) left.push({ ti, n });
   }
   return left;
 }
@@ -16938,7 +16938,7 @@ function ctScore(x) {
   const P = x.plan, boards = {};
   P.rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => {
     const res = (((x.run.t || {})[r + '_' + ti]) || {}).res || {};
-    for (const [bn, v] of Object.entries(res)) (boards[bn] || (boards[bn] = [])).push({ r, ti, ns: a, ew: b, v });
+    for (const [bn, v] of Object.entries(res)) if (v) (boards[bn] || (boards[bn] = [])).push({ r, ti, ns: a, ew: b, v });
   }));
   const tot = P.pairs.map(() => ({ mp: 0, n: 0, imp: 0 })), imp = P.sc === 'imp' || x.i.sc === 'imp';
   for (const L of Object.values(boards)) {
@@ -16985,7 +16985,7 @@ function ctShowResults(club, id, d, tab) {
       <div id="ctdd${bn}"></div>
       <table class="res"><tbody>${S.boards[bn].map(q => `<tr><td>${pn(P.pairs[q.ns])}<br><small>${pn(P.pairs[q.ew])}</small></td><td>${ctCon(q.v)}${q.v.tr != null ? ' · ' + T('{0} tricks', q.v.tr) : ''}</td><td><b>${fmtSigned(q.v.ns || 0)}</b></td><td>${Math.round(q.mp)}%<br><small>${fmtSigned(q.imp)} IMP</small></td></tr>`).join('')}</tbody></table></div>`).join('') || `<div class="muted">${T('No results yet.')}</div>`;
   else if (t === 'rating') { const L = ctRating(club); body = L.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th>${T('Rating')}</th><th>${T('Evenings')}</th></tr></thead><tbody>${L.map((r, k) => `<tr><td>${k + 1}</td><td>${esc(r.n)}</td><td><b>${Math.round(r.r)}</b></td><td>${r.g}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Everyone starts at 1500; each evening moves it by the pair\'s result.')}</div>` : `<div class="muted">${T('No results yet.')}</div>`; }
-  else body = P.rounds.map((tb, r) => `<div class="grp"><span>${T('Round {0}', r + 1)}</span>${tb.map(([a, b], ti) => { const n = Object.keys((((x.run.t || {})[r + '_' + ti]) || {}).res || {}).length; return `<div class="row2" style="align-items:center"><span>${T('Table {0}', ti + 1)}: ${pn(P.pairs[a])} / ${pn(P.pairs[b])} · ${n}/${P.bpr}</span>${n < P.bpr ? `<button class="btn mini-btn" data-ctwatch="${r}_${ti}">👁 ${T('Watch')}</button>` : ''}</div>`; }).join('')}</div>`).join('');
+  else body = P.rounds.map((tb, r) => `<div class="grp"><span>${T('Round {0}', r + 1)}</span>${tb.map(([a, b], ti) => { const n = Object.values((((x.run.t || {})[r + '_' + ti]) || {}).res || {}).filter(Boolean).length; return `<div class="row2" style="align-items:center"><span>${T('Table {0}', ti + 1)}: ${pn(P.pairs[a])} / ${pn(P.pairs[b])} · ${n}/${P.bpr}</span>${n < P.bpr ? `<button class="btn mini-btn" data-ctwatch="${r}_${ti}">👁 ${T('Watch')}</button>` : ''}</div>`; }).join('')}</div>`).join('');
   openOv('ctres', `<h2>📊 ${esc(x.i.n || '')}</h2><div class="muted">🏛 ${esc(x.i.cn || club)} · ${esc(ctWhen(x.d))}</div>${tabs}${body}
     <div class="row2"><button class="btn" data-ctpbn="1">⬇ PBN</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
@@ -17088,7 +17088,7 @@ function ctPlayHtml(plan, r, list, bn) {
 const ctList_ = l => Array.isArray(l) ? l : Object.keys(l || {}).sort((a, b) => a - b).map(k => l[k]);
 // the round being played: the first one with a table not finished
 function ctCurRound(plan, tmap) {
-  for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.keys(((tmap || {})[r + '_' + ti] || {}).res || {}).length < plan.bpr)) return r;
+  for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.values(((tmap || {})[r + '_' + ti] || {}).res || {}).filter(Boolean).length < plan.bpr)) return r;
   return -1;
 }
 // nobody of this table here (their app in the last 90 seconds)

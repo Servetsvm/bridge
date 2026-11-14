@@ -108,7 +108,7 @@ function otSetupCard() {
 // the state of an evening: each round's tables with the boards finished there
 function otLiveHtml(t, d) {
   const run = t.run && t.run[d], P = run && run.plan && (otP() ? otP().ctFill(run.plan, run.t) : run.plan); if (!P) return '';
-  const T_ = run.t || {}, done = (r, ti) => Object.keys((T_[r + '_' + ti] || {}).res || {}).length;
+  const T_ = run.t || {}, done = (r, ti) => Object.values((T_[r + '_' + ti] || {}).res || {}).filter(Boolean).length;
   const cur = P.rounds.findIndex((tb, r) => tb.some((x, ti) => done(r, ti) < P.bpr));
   const pn = p => p.robot ? '🤖' : cleanData(p.a) + ' – ' + cleanData(p.b);
   return `<div style="margin-top:6px;font-size:0.8rem;"><b>🟢 <span>Live</span></b> · ${cur < 0 ? '🏁 <span>Finished</span>' : '<span>Round</span> ' + (cur + 1) + '/' + P.rounds.length}

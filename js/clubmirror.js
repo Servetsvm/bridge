@@ -23,7 +23,7 @@
   }
   // the club's tournament: state, pairs, movements, boards, hands
   function build(E, plan, info, tmap, at, tid) {
-    const R = plan.nr || plan.rounds.length, bpr = plan.bpr, cur = (() => { for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.keys(((tmap || {})[r + '_' + ti] || {}).res || {}).length < bpr)) return r; return plan.rounds.length < R ? plan.rounds.length : -1; })();
+    const R = plan.nr || plan.rounds.length, bpr = plan.bpr, cur = (() => { for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.values(((tmap || {})[r + '_' + ti] || {}).res || {}).filter(Boolean).length < bpr)) return r; return plan.rounds.length < R ? plan.rounds.length : -1; })();
     const pairs = {}, movements = {}, boards = {}, hands = [];
     plan.pairs.forEach((p, i) => { pairs['p' + (i + 1)] = { id: 'p' + (i + 1), name: p.robot ? '🤖 Robot' : (p.a + ' – ' + p.b), dir: '', startTable: 0, isPhantom: false, online: 1 }; });
     plan.rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => {

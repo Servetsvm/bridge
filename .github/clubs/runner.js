@@ -33,7 +33,7 @@ function ctDeal(plan, board) { E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 |
 function ctSeatKeys(plan, r, ti) { const [ns, ew] = plan.rounds[r][ti], A = plan.pairs[ns], B = plan.pairs[ew], k = (p, w) => p.robot ? '' : (w ? p.kb : p.ka) || ''; return [k(A, 1), k(B, 0), k(A, 0), k(B, 1)]; }
 const ctList_ = l => Array.isArray(l) ? l : Object.keys(l || {}).sort((a, b) => a - b).map(k => l[k]);
 function ctCurRound(plan, tmap) {
-  for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.keys(((tmap || {})[r + '_' + ti] || {}).res || {}).length < plan.bpr)) return r;
+  for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.values(((tmap || {})[r + '_' + ti] || {}).res || {}).filter(Boolean).length < plan.bpr)) return r;
   return -1;
 }
 const ctTableEmpty = (plan, r, ti, hb) => ctSeatKeys(plan, r, ti).every(k => !k || Date.now() - (+(hb || {})[k] || 0) > AWAY);
