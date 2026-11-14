@@ -10076,7 +10076,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 494;
+const APP_V = 495;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -16645,7 +16645,7 @@ function ctShow(key, err) {
   const sys = E.sysOf(i.sys) ? E.sysOf(i.sys).n : i.sys;
   const names = typeof Net.knownNames === 'function' ? Net.knownNames() : [];
   openOv('ctour', `<h2>🏛 ${esc(i.cn || x.club)}</h2><div class="big">${esc(i.n)}</div>
-    <div class="grp"><span>${T('When')}</span><b>${esc(ctWhen(x.d))}</b>${i.rep ? ' · 🔁 ' + T('every week') : ''} · ${x.d > Date.now() ? '⏳ ' + ctLeft(x.d) : '🟢 ' + T('Started')}</div>
+    <div class="grp"><span>${T('When')}</span><b>${esc(ctWhen(x.d))}</b><div>${[i.rep ? '🔁 ' + T('every week') : '', x.d > Date.now() ? '⏳ ' + ctLeft(x.d) : '🟢 ' + T('Started')].filter(Boolean).join(' · ')}</div></div>
     <div class="grp"><span>${T('What is played')}</span>${T('{0} boards', i.b)} · ${T('{0} boards a round', i.bpr)} · ${(i.sc === 'imp' ? 'IMP' : i.sc === 'both' ? 'IMP - MP' : 'MP')} · ${T('pairs against each other')}
       <div><b>${esc(sys)}</b>${convs ? ' · ' + esc(convs) : ''}</div><div class="muted">${T('Always played')}: ${esc(PRAC_BASICS.map(pracName).join(', '))}</div><div class="muted">${T('Everyone bids with this card, the robots too.')}</div></div>
     <div class="grp"><span>${T('Pairs registered')} (${x.pairs.length})</span>${x.pairs.length ? x.pairs.map((p, k) => `<div>${k + 1}. ${esc(p.a)} – ${esc(p.b)}</div>`).join('') : `<div class="muted">${T('Nobody yet.')}</div>`}</div>

@@ -107,7 +107,7 @@ function ctShow(key, err) {
   const sys = E.sysOf(i.sys) ? E.sysOf(i.sys).n : i.sys;
   const names = typeof Net.knownNames === 'function' ? Net.knownNames() : [];
   openOv('ctour', `<h2>🏛 ${esc(i.cn || x.club)}</h2><div class="big">${esc(i.n)}</div>
-    <div class="grp"><span>${T('When')}</span><b>${esc(ctWhen(x.d))}</b>${i.rep ? ' · 🔁 ' + T('every week') : ''} · ${x.d > Date.now() ? '⏳ ' + ctLeft(x.d) : '🟢 ' + T('Started')}</div>
+    <div class="grp"><span>${T('When')}</span><b>${esc(ctWhen(x.d))}</b><div>${[i.rep ? '🔁 ' + T('every week') : '', x.d > Date.now() ? '⏳ ' + ctLeft(x.d) : '🟢 ' + T('Started')].filter(Boolean).join(' · ')}</div></div>
     <div class="grp"><span>${T('What is played')}</span>${T('{0} boards', i.b)} · ${T('{0} boards a round', i.bpr)} · ${(i.sc === 'imp' ? 'IMP' : i.sc === 'both' ? 'IMP - MP' : 'MP')} · ${T('pairs against each other')}
       <div><b>${esc(sys)}</b>${convs ? ' · ' + esc(convs) : ''}</div><div class="muted">${T('Always played')}: ${esc(PRAC_BASICS.map(pracName).join(', '))}</div><div class="muted">${T('Everyone bids with this card, the robots too.')}</div></div>
     <div class="grp"><span>${T('Pairs registered')} (${x.pairs.length})</span>${x.pairs.length ? x.pairs.map((p, k) => `<div>${k + 1}. ${esc(p.a)} – ${esc(p.b)}</div>`).join('') : `<div class="muted">${T('Nobody yet.')}</div>`}</div>
