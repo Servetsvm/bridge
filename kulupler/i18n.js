@@ -10,6 +10,10 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Start a test tournament with robots now?":"Robotlarla bir test turnuvası şimdi başlasın mı?",
+    "tables":"masa",
+    "players":"oyuncu",
+    "a robot pair at one":"birinde robot çift",
     "Load the boards dealt for this session: the file of your dealing machine (Duplimate BRI / DUP, Dealer4 / Dealmaster DLM, DGE) or a PBN / LIN file, as it is — no converting.":"Bu oturum için dağıtılmış board’ları yükleyin: dağıtma makinenizin dosyası (Duplimate BRI / DUP, Dealer4 / Dealmaster DLM, DGE) ya da PBN / LIN dosyası, olduğu gibi — dönüştürmeye gerek yok.",
     "Select or drop the hand file":"El dosyasını seçin ya da buraya bırakın",
     "Paste PBN / LIN":"PBN / LIN yapıştır",

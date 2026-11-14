@@ -115,7 +115,7 @@ function ctShow(key, err) {
     <div class="grp"><span>${T('When')}</span><b>${esc(ctWhen(x.d))}</b><div>${[i.rep ? '🔁 ' + T('every week') : '', x.d > Date.now() ? '⏳ ' + ctLeft(x.d) : '🟢 ' + T('Started')].filter(Boolean).join(' · ')}</div></div>
     <div class="grp"><span>${T('What is played')}</span>${T('{0} boards', i.b)} · ${T('{0} boards a round', i.bpr)} · ${(i.sc === 'imp' ? 'IMP' : i.sc === 'both' ? 'IMP - MP' : 'MP')} · ${T('pairs against each other')}
       <div><b>${esc(sys)}</b>${convs ? ' · ' + esc(convs) : ''}</div><div class="muted">${T('Always played')}: ${esc(PRAC_BASICS.map(pracName).join(', '))}</div><div class="muted">${T('Everyone bids with this card, the robots too.')}</div></div>
-    <div class="grp"><span>${T('Pairs registered')} (${x.pairs.length})</span>${x.pairs.length ? x.pairs.map((p, k) => `<div>${k + 1}. ${esc(p.a)} – ${esc(p.b)}</div>`).join('') : `<div class="muted">${T('Nobody yet.')}</div>`}</div>
+    <div class="grp"><span>${T('Pairs registered')} (${x.pairs.length}${i.np ? ' / ' + Math.floor(i.np / 2) : ''})</span>${x.pairs.length ? x.pairs.map((p, k) => `<div>${k + 1}. ${esc(p.a)} – ${esc(p.b)}</div>`).join('') : `<div class="muted">${T('Nobody yet.')}</div>`}</div>
     ${x.seek.length ? `<div class="grp"><span>🔎 ${T('Looking for a partner')}</span>${x.seek.map(s => esc(s.n)).join(', ')}<div class="muted">${T('Write to one of them, or the director pairs you.')}</div></div>` : ''}
     ${x.plan ? ctPlanHtml(x) : x.d <= Date.now() ? `<div class="grp"><span>🪑 ${T('Tables')}</span><div class="muted">${!x.pairs.length ? T('Nobody yet.') : '⏳ ' + T('The tables are being made…')}</div></div>` : ''}
     ${err ? `<div class="err">${esc(err)}</div>` : ''}
@@ -132,6 +132,7 @@ async function ctRegister(key, robot) {
   const x = ctFind(key), inp = $('ctPartner'), b = robot ? T('Robot') : (inp && inp.value || '').trim().slice(0, 20); if (!x || CT.busy) return;
   if (!b) { ctShow(key, T('Write your partner\'s name')); return; }
   if (!robot && Net.ruleKey(b) === ctMe()) { ctShow(key, T('Your partner cannot be you')); return; }
+  if (x.i.np && x.pairs.length * 2 >= x.i.np) { ctShow(key, T('The tournament is full ({0} players).', x.i.np)); return; }
   if (!robot && x.pairs.some(p => p.ka === Net.ruleKey(b) || p.kb === Net.ruleKey(b))) { ctShow(key, T('{0} is already registered with another partner', b)); return; }
   CT.busy = true;
   try {

@@ -14,7 +14,7 @@ self.onmessage = e => {
   const m = e.data || {};
   if (m.meta) {
     const name = k => (E.convInfo(k) || {}).n || k;
-    const keys = BASICS.concat(E.CONVS.map(c => c.k)).filter((k, i, A) => A.indexOf(k) === i && !CARD_KEYS.includes(k) && E.convInfo(k));
+    const keys = BASICS.concat(E.CONVS.map(c => c.k)).filter((k, i, A) => A.indexOf(k) === i && E.convInfo(k));
     self.postMessage({ meta: { systems: E.SYSTEMS.map(s => ({ k: s.k, n: s.n })), convs: keys.map(k => ({ k, n: name(k), basic: BASICS.includes(k) })) } });
     return;
   }

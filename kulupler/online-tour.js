@@ -31,7 +31,7 @@ function otFormHtml(M, ed) {
   if (ed) setTimeout(() => {   // a tournament to change: its values in the form
     const set = (id, v) => { const e = document.getElementById(id); if (e && v != null) e.value = v; }, at = new Date(otNext(ed));
     set('otSys', ed.sys); set('otName', ed.n); set('otDay', at.getFullYear() + '-' + String(at.getMonth() + 1).padStart(2, '0') + '-' + String(at.getDate()).padStart(2, '0')); set('otTime', String(at.getHours()).padStart(2, '0') + ':' + String(at.getMinutes()).padStart(2, '0'));
-    set('otBpr', ed.bpr); set('otRounds', Math.max(1, Math.round((ed.b || 18) / (ed.bpr || 3)))); set('otMov', ed.mov || 'howell');
+    set('otBpr', ed.bpr); set('otPlayers', ed.np || 16); set('otRounds', Math.max(1, Math.round((ed.b || 18) / (ed.bpr || 3)))); set('otMov', ed.mov || 'howell');
     const t = OT.list && OT.list[OT.edit], run = t && t.run && t.run[otNext(ed)];
     if (run && run.plan) {
       for (const id of ['otDay', 'otTime', 'otRounds', 'otBpr', 'otMov']) { const e = document.getElementById(id); if (e) e.disabled = true; }
@@ -44,9 +44,10 @@ function otFormHtml(M, ed) {
     otPreview();
   }, 0);
   return `<div class="field-row">
+        <div class="field"><label>Number of Players</label><input type="number" id="otPlayers" value="16" min="4" max="120" step="2" oninput="otPreview()"><div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="otPHint"></div></div>
         <div class="field"><label>Boards per Round</label><input type="number" id="otBpr" value="3" min="1" max="8" oninput="otPreview()"></div>
-        <div class="field"><label>Number of Rounds</label><input type="number" id="otRounds" value="6" min="1" max="20" oninput="otPreview()"><div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="otCalc"></div></div>
       </div>
+      <div class="field"><label>Number of Rounds</label><input type="number" id="otRounds" value="6" min="1" max="20" oninput="otPreview()"><div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="otCalc"></div></div>
       <div class="field"><label>Movement</label><select id="otMov" onchange="otPreview()">${Object.entries(OT_MOV).map(([k, n]) => `<option value="${k}" ${k === 'howell' ? 'selected' : ''}>${n}</option>`).join('')}</select>
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).</div>
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">The pairs register in Bridge Table; an odd number of pairs gets a robot pair, a pair can also play with a robot partner.</div></div>
@@ -70,14 +71,15 @@ function otRead() {
   const sysN = ((M.systems.find(x => x.k === v('otSys')) || {}).n || v('otSys')).replace(/ \(.*\)$/, '');
   const auto = sysN + (conv.length ? ' · ' + conv.map(k => (M.convs.find(x => x.k === k) || {}).n || k).join(', ') : '');
   return { deals: OT.deals || (OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info.deals) || null, n: (v('otName').trim() || auto).slice(0, 60), at: Date.parse(v('otDay') + 'T' + (v('otTime') || '19:00')), bpr: Math.min(8, Math.max(1, +v('otBpr') || 3)), b: Math.min(8, Math.max(1, +v('otBpr') || 3)) * Math.min(20, Math.max(1, +v('otRounds') || 6)),
-    sc: 'both', sys: v('otSys') || 'sayc', conv, mov: OT_MOV[v('otMov')] ? v('otMov') : 'howell', rep: (document.getElementById('otRep') || {}).checked ? 1 : 0, watch: (document.getElementById('otWatch') || {}).checked ? 1 : 0, sysN };
+    sc: 'both', sys: v('otSys') || 'sayc', conv, mov: OT_MOV[v('otMov')] ? v('otMov') : 'howell', rep: (document.getElementById('otRep') || {}).checked ? 1 : 0, watch: (document.getElementById('otWatch') || {}).checked ? 1 : 0, sysN, np: Math.min(120, Math.max(4, +v('otPlayers') || 16)) };
 }
 // the line shown before saving: "SAYC · RKCB 0314, Stayman · Sat 14 Nov 20:00 / 18 boards · 3 boards a round · MP · Howell"
 window.otPreview = function () {
   const el = document.getElementById('otPrev'); if (!el) return;
   const i = otRead(), M = OT.meta || { convs: [] }, c = document.getElementById('otCalc');
   if (c) c.textContent = '→ ' + i.bpr + ' × ' + (i.b / i.bpr) + ' = ' + i.b + ' ' + (window.i18nText ? i18nText('boards') : 'boards');
-  el.innerHTML = `<b>${cleanData(i.n)}</b>${i.at ? ' · ' + otWhen(i.at) : ''}${i.rep ? ' · 🔁' : ''}<div style="font-size:0.8rem;">${i.b} <span>boards</span> · ${i.bpr} <span>boards a round</span> · ${(i.sc === 'imp' ? 'IMP' : i.sc === 'both' ? 'IMP - MP' : 'MP')} · ${cleanData(i.sysN)}${i.conv.length ? ' · ' + i.conv.map(k => cleanData((M.convs.find(x => x.k === k) || {}).n || k)).join(', ') : ''} · ${cleanData(OT_MOV[i.mov].split(' — ')[0])}</div>`;
+  const ph = document.getElementById('otPHint'); if (ph) ph.textContent = '→ ' + Math.floor(i.np / 2) + ' ' + otL('pairs') + ' · ' + Math.ceil(i.np / 4) + ' ' + otL('tables') + (i.np % 4 ? ' (' + otL('a robot pair at one') + ')' : '');
+  el.innerHTML = `<b>${cleanData(i.n)}</b>${i.at ? ' · ' + otWhen(i.at) : ''}${i.rep ? ' · 🔁' : ''}<div style="font-size:0.8rem;">${i.np} <span>players</span> · ${i.b} <span>boards</span> · ${i.bpr} <span>boards a round</span> · ${(i.sc === 'imp' ? 'IMP' : i.sc === 'both' ? 'IMP - MP' : 'MP')} · ${cleanData(i.sysN)}${i.conv.length ? ' · ' + i.conv.map(k => cleanData((M.convs.find(x => x.k === k) || {}).n || k)).join(', ') : ''} · ${cleanData(OT_MOV[i.mov].split(' — ')[0])}</div>`;
 };
 // Tournament Setup with 🌐 Online chosen: the online tournament's form in place of the club room's
 let setupOnline = false;
@@ -97,7 +99,7 @@ function otSetupCard() {
     await Promise.all([otLoad(), otMeta()]);
     const box = document.getElementById('otSetupBox'); if (!box) return;
     const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, ed = OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info;
-    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <button class="btn btn-sm" onclick="otTestRobots(1)">🧪 <span>Systems contest</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<button class="btn btn-sm" style="margin-top:6px;" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button>' : ''}</div>`;
+    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <button class="btn btn-sm btn-gold" onclick="window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml','_blank','noopener')">🤖 <span>Start the server robots</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<button class="btn btn-sm" style="margin-top:6px;" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button>' : ''}</div>`;
     otPreview();
     clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (!(adminTab === 'setup' && setupOnline)) return; otManageRefresh(); OT.liveT = setTimeout(again, 20000); }, 20000);   // only the list above the form   // new registrations and the live state, every 20 seconds
   }, 0);
@@ -129,7 +131,7 @@ function otManageHtml(M) {
       ${started ? '' : `<div style="margin-top:4px;"><button class="btn btn-sm" onclick="otPairForm('${id}','')">➕ <span>Add a pair</span></button></div>`}<div id="otpf-${id}"></div>
       ${S.length ? `<div style="margin-top:4px;">🔎 <span>Looking for a partner</span>: ${S.map(([k, p]) => `<label style="margin-right:8px;"><input type="checkbox" data-otseek="${id}|${cleanData(k)}|${cleanData(p.n)}"> ${cleanData(p.n)}</label>`).join('')}<button class="btn btn-sm" onclick="otPairUp('${id}',${d})">🤝 <span>Pair the two ticked</span></button></div>` : ''}
       ${otLiveHtml(t, d)}
-      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${started ? '' : `<button class="btn btn-sm btn-gold" onclick="otStartNow('${id}')">▶ <span>Start now</span></button>`}<button class="btn btn-sm" onclick="otEdit('${id}')">✏️ <span>Change</span></button>${started ? `<button class="btn btn-sm btn-gold" onclick="otOpenRes('${id}',${d},'live')">👁 <span>Watch</span></button>` : ''}${started && typeof isSuper === 'function' && isSuper() && !(t.run[d].bot && Date.now() - t.run[d].bot < 120e3) ? `<a class="btn btn-sm" href="https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml" target="_blank" rel="noopener">🤖 <span>Start the server robots</span></a>` : ''}<button class="btn btn-sm" onclick="otResults('${id}')">📊 <span>Results</span></button><button class="btn btn-sm" onclick="otRefresh()">🔄</button><button class="btn btn-sm btn-red" onclick="otDelete('${id}')">🗑 <span>Delete</span></button></div></div>`;
+      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${started ? '' : `<button class="btn btn-sm btn-gold" onclick="otStartNow('${id}')">▶ <span>Start now</span></button>`}<button class="btn btn-sm" onclick="otEdit('${id}')">✏️ <span>Change</span></button>${started ? `<button class="btn btn-sm btn-gold" onclick="otOpenRes('${id}',${d},'live')">👁 <span>Watch</span></button>` : ''}<button class="btn btn-sm" onclick="otResults('${id}')">📊 <span>Results</span></button><button class="btn btn-sm" onclick="otRefresh()">🔄</button><button class="btn btn-sm btn-red" onclick="otDelete('${id}')">🗑 <span>Delete</span></button></div></div>`;
   }).join('');
 }
 window.otEdit = function (id) { OT.edit = id; otRerender(); setTimeout(() => { const f = document.getElementById('otSys'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); };
@@ -148,7 +150,7 @@ window.otSave = async function () {
   const at = ed && (started || Math.floor(f.at / 6e4) === Math.floor(otNext(ed.info) / 6e4)) ? ed.info.at : f.at;
   if (!at || (!ed && at < Date.now())) { toast('❌ The start must be in the future'); return; }
   if (f.deals && f.deals.length < f.b) { toast('❌ ' + otL('The hand file has fewer boards than the tournament')); return; }
-  const info = { ...(ed ? ed.info : {}), ...(f.deals ? { deals: f.deals.slice(0, f.b) } : {}), n, at, b: f.b, bpr: f.bpr, sc: f.sc, sys: f.sys, conv: f.conv, mov: f.mov, rep: f.rep, watch: f.watch,
+  const info = { ...(ed ? ed.info : {}), ...(f.deals ? { deals: f.deals.slice(0, f.b) } : {}), n, at, b: f.b, bpr: f.bpr, np: f.np, sc: f.sc, sys: f.sys, conv: f.conv, mov: f.mov, rep: f.rep, watch: f.watch,
     st: ed ? ed.info.st || 'reg' : 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: ed ? ed.info.ts || Date.now() : Date.now() };
   OT.busy = true;
   try {
@@ -345,14 +347,14 @@ setInterval(otRobots, 1500);
 
 /* Servet's test: an online tournament started now where every seat is a robot (made-up names); the robots play it
    from this page (and the GitHub run), so the whole evening can be watched and its results looked at */
-window.otTestRobots = async function (mix) {
-  const P = otP(); if (!P || !await otAsk(mix ? otL('Start a systems contest now? Seven robot pairs (Claude among them), each playing its own system, every pair against every other.') : otL('Start a test tournament with 4 robot pairs now?'))) return;
+window.otTestRobots = async function () {
+  const f0 = otRead(), np = Math.max(2, Math.floor(f0.np / 2));
+  const P = otP(); if (!P || !await otAsk(otL('Start a test tournament with robots now?') + ' (' + f0.np + ' ' + otL('players') + ' · ' + np + ' ' + otL('pairs') + ')')) return;
   const N = ['Ingrid', 'Lars', 'Sofia', 'Mateo', 'Yuki', 'Omar', 'Elif', 'Jonas', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Hanna', 'Karim', 'Amara', 'Felix', 'Leila', 'Tomás', 'Mei', 'Pavel'].sort(() => Math.random() - 0.5);
   const id = Date.now().toString(36), at = Date.now() - 1000, f = otRead();
-  const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
-  const SY = [['claude', 'Claude'], ['sayc', 'SAYC'], ['twoone', '2/1'], ['acol', 'Acol'], ['sef', 'SEF'], ['precision', 'Precision'], ['polish', 'Polish Club']];
-  const pairs = mix ? SY.map(([k, n], j) => ({ pid: 'r' + j, a: n, b: '🤖 ' + N[j], ka: '', kb: '', sys: k, d: at, ts: at + j })) : [0, 1, 2, 3].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
-  if (mix) { info.n = '🧪 ' + otL('Systems contest'); info.mov = 'howell'; info.b = 15; info.bpr = 3; info.conv = []; }
+  const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, np: f.np, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
+  while (N.length < 2 * np) N.push('Robot ' + (N.length + 1));
+  const pairs = [...Array(np).keys()].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
   try {
     await otPut('/' + id + '/info', info);
     for (const p of pairs) { const { pid, ...v } = p; await otPut('/' + id + '/pairs/' + pid, v); }
