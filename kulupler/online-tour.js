@@ -13,8 +13,10 @@ async function otUrl(p) { const token = await authToken(); return otRoot() + '/o
 function otNext(i) { let t = +i.at || 0; if (i.rep) while (t + 4 * 3600e3 < Date.now()) t += 7 * 864e5; return t; }
 const otWhen = t => new Date(t).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 async function otLoad() {
-  try { const r = await fetch(await otUrl(''), { cache: 'no-store' }); OT.list = r.ok ? (await r.json()) || {} : {}; } catch (e) { OT.list = {}; }
+  try { const r = await fetch(await otUrl(''), { cache: 'no-store' }); OT.list = r.ok ? (await r.json()) || {} : {}; OT.at = Date.now(); } catch (e) { OT.list = OT.list || {}; }
 }
+// the director's page (any tab): the club's online tournaments read again every 20 seconds, for the robots and the club's tabs
+async function otFresh() { if (CLUB_ID && document.getElementById('adminContent') && (!OT.list || Date.now() - (OT.at || 0) > 20e3)) await otLoad(); }
 // the systems and conventions, as the boards made automatically know them (kulupler/dealgen.js)
 function otMeta() {
   if (OT.meta) return Promise.resolve(OT.meta);
@@ -313,7 +315,8 @@ window.otClubDD = async function (key) {
    (one call or card at a time; written only where nothing is yet, so a player's own app is never overwritten) */
 OT.headBusy = false;
 async function otRobots() {
-  const P = otP(); if (OT.headBusy || !P || !P.ctHeadStep || !document.getElementById('adminContent') || !OT.list) return;
+  const P = otP(); if (OT.headBusy || !P || !P.ctHeadStep || !document.getElementById('adminContent')) return;
+  await otFresh(); if (!OT.list) return;
   OT.headBusy = true;
   try {
     for (const [id, t] of Object.entries(OT.list)) {
@@ -370,7 +373,8 @@ function otAsk(msg) {
    director corrects in Boards goes back to the evening (its ranking in Bridge Table); at its end it is archived */
 OT.mirBusy = false;
 async function otMirror() {
-  const P = otP(); if (OT.mirBusy || !P || !P.ctMirror || typeof role === 'undefined' || role !== 'admin' || !OT.list || !CLUB_ID) return;
+  const P = otP(); if (OT.mirBusy || !P || !P.ctMirror || typeof role === 'undefined' || role !== 'admin' || !CLUB_ID) return;
+  await otFresh(); if (!OT.list) return;
   let best = null;
   for (const [id, t] of Object.entries(OT.list)) for (const [d, run] of Object.entries((t && t.run) || {})) if (run && run.plan && +d <= Date.now() && Date.now() - +d < 8 * 3600e3 && (!best || +d > best.d)) best = { id, d: +d, t, run };
   if (!best) return;
