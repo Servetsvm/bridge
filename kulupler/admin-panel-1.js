@@ -743,14 +743,16 @@ function renderPlayersAdmin(){
 
     <div class="card">
       <div class="card-title"><span>📂</span> Board File Upload</div>
-      <p style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">Load pre-dealt boards from a file.</p>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-        <button class="btn btn-gold btn-sm" onclick="document.getElementById('boardFile').click()">📄 JSON</button>
-        <button class="btn btn-blue btn-sm" onclick="adminImportHandsOpen()">🃏 PBN/LIN</button>
-        <button class="btn btn-ghost btn-sm" onclick="toast('Continuing without a board file...')">▶ Skip</button>
+      <p style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">Load the boards dealt for this session: the file of your dealing machine (Duplimate BRI / DUP, Dealer4 / Dealmaster DLM, DGE) or a PBN / LIN file, as it is — no converting.</p>
+      <div class="import-drop" onclick="document.getElementById('handsFile0').click()" ondragover="event.preventDefault()" ondrop="event.preventDefault();const f=event.dataTransfer.files[0];if(f){const i=document.getElementById('handsFile0');const d=new DataTransfer();d.items.add(f);i.files=d.files;adminLoadHandsFile(i);}">
+        <div style="font-size:2rem;">🃏</div><div style="font-weight:600;">Select or drop the hand file</div><div style="font-size:0.72rem;color:var(--text3);">BRI · DUP · DLM · DGE · PBN · LIN</div>
+        <input type="file" id="handsFile0" accept=".bri,.dup,.dlm,.dge,.pbn,.lin,.txt" onchange="adminLoadHandsFile(this)" style="display:none;">
       </div>
-      <div class="import-drop" onclick="document.getElementById('boardFile').click()">
-        <div style="font-size:2rem;">📂</div><div style="font-weight:600;">Drag / Select boards.json</div>
+      <div class="login-err" id="handsErr"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="adminImportHandsOpen()">📋 Paste PBN / LIN</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('boardFile').click()">📄 Results backup (JSON)</button>
+        <button class="btn btn-ghost btn-sm" onclick="toast('Continuing without a board file...')">▶ Skip</button>
         <input type="file" id="boardFile" accept=".json" onchange="adminLoadBoardsFile(this)" style="display:none;">
       </div>
     </div>`;

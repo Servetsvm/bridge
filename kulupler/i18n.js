@@ -10,6 +10,10 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Load the boards dealt for this session: the file of your dealing machine (Duplimate BRI / DUP, Dealer4 / Dealmaster DLM, DGE) or a PBN / LIN file, as it is — no converting.":"Bu oturum için dağıtılmış board’ları yükleyin: dağıtma makinenizin dosyası (Duplimate BRI / DUP, Dealer4 / Dealmaster DLM, DGE) ya da PBN / LIN dosyası, olduğu gibi — dönüştürmeye gerek yok.",
+    "Select or drop the hand file":"El dosyasını seçin ya da buraya bırakın",
+    "Paste PBN / LIN":"PBN / LIN yapıştır",
+    "Results backup (JSON)":"Sonuç yedeği (JSON)",
     "Hand file (optional)":"El dosyası (isteğe bağlı)",
     "boards from the hand file":"board el dosyasından",
     "The boards of a dealing machine (Duplimate BRI / DUP, Dealer4 DLM, DGE) or a PBN / LIN file: the evening is played with them. Without a file the boards are dealt at random.":"Dağıtma makinesinin board’ları (Duplimate BRI / DUP, Dealer4 DLM, DGE) ya da PBN / LIN dosyası: akşam bu ellerle oynanır. Dosya yoksa eller rastgele dağıtılır.",
