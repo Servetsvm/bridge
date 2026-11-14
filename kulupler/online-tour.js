@@ -273,7 +273,7 @@ function otTabHtml(tab) {
   if (!E.length && !come) return '';
   const head = x => `<div class="card-title">🌐 ${cleanData(x.i.n)} <small>· ${otWhen(x.d)}</small></div>`;
   if (!cur) return `<div class="card">${head(come)}<div style="color:var(--text3);">Starts ${otWhen(come.d)}.</div></div>`;
-  if (tab === 'tables') return `<div class="card">${head(cur)}${otLiveHtml(cur.t, cur.d)}${otPresenceHtml(cur)}${P ? `<div style="margin-top:6px;"><button class="btn btn-sm" onclick="otOpenRes('${cur.id}',${cur.d},'live')">👁 <span>Watch</span></button></div>` : ''}</div>`;
+  if (tab === 'tables') return `<div class="card">${head(cur)}${otPresenceHtml(cur)}${P ? `<div style="margin-top:6px;"><button class="btn btn-sm" onclick="otOpenRes('${cur.id}',${cur.d},'live')">👁 <span>Watch</span></button></div>` : ''}</div>`;
   return '';
 }
 // the full results (ranking, boards, rating, watching) in Bridge Table

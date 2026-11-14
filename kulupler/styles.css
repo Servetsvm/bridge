@@ -559,3 +559,8 @@ body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}
 .dg-m.on{background:var(--gold);color:#1b1404;border-color:var(--gold)}
 .dd-note2{font-size:.72rem;color:var(--gold);flex-basis:100%}
 .sbb.busy{opacity:.55;border-style:dashed}
+/* checkboxes in the club's colours (the online form's conventions, the admin's ticks) */
+#adminContent input[type=checkbox],#modalBody input[type=checkbox]{accent-color:var(--gold);width:18px;height:18px;vertical-align:-4px;margin-right:6px;cursor:pointer}
+#otFormBox label:has(input[type=checkbox]){display:block;padding:5px 2px;border-radius:6px;cursor:pointer}
+#otFormBox label:has(input[type=checkbox]:checked){background:var(--golddim);color:var(--gold2)}
+#otFormBox div[style*="max-height:220px"]{background:var(--surface2)}
