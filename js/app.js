@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 506;
+const APP_V = 507;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2881,6 +2881,16 @@ function rtSitPick() {
     <div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtsit="${s}">${SEAT[s]}<small>${esc(rtName(s))}</small></button>`).join('')}</div>
     <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
+// the Claude system's window: play it now (your system becomes Claude's, a new deal), watch its robots' table (once its
+// boards are ready), or read how it works
+function claudeOv() {
+  const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en', ready = !!(RT.all && RT.all.claude && RT.all.claude.boards && RT.all.claude.boards.length);
+  openOv('claude', `<h2>✨ ${T('Claude system')}</h2>
+    <div class="big">${T("The AI Claude's own system: its conventions are kept only when they win over thousands of deals. Watch the robots play it.")}</div>
+    <div class="grp"><span>${T('What is played')}</span>${esc(E.sysOf('claude').d)}</div>
+    <div class="row2"><button class="btn new" id="clPlay">▶ ${T('Play the Claude system')}</button><button class="btn" id="clWatch" ${ready ? '' : 'disabled'}>👁 ${ready ? T('Watch the robots play it') : T('The robots\' table is being prepared…')}</button></div>
+    <div class="row2"><a class="btn" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
 // the home page's card: the six tables (their systems' names)
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
@@ -3375,6 +3385,9 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bConvGo') { ui.pracOpen = 1; ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   // the robots' table: open it, its tabs, a call's meaning, a board played before
+  if (t.dataset.rtk === 'claude' && t.dataset.rtopen) { claudeOv(); return; }   // the Claude system: try it yourself, watch the robots, read how it works
+  if (t.id === 'clPlay') { setSys('claude'); Store.saveSettings(SET); closeOv(); ui.saved = null; Net.st.soloPub = true; resume(); flash('✨ ' + T('You play the Claude system — the robots too'), 2600); return; }
+  if (t.id === 'clWatch') { closeOv(); rtWatch('claude'); return; }
   if (t.dataset.rtk) { if (t.dataset.rtopen) rtWatch(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
   if (t.dataset.rtwatch) { rtWatch(RT.cur); return; }
   if (t.id === 'bRtAgain') { rtAgain(); return; }
