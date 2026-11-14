@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 514;
+const APP_V = 515;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -2916,8 +2916,6 @@ function showSettings() {
    <div class="grp"><span>${T('Sound and buzz when it is your turn')}</span>${seg('alert', [['online', T('At online tables')], ['always', T('Always')], ['off', T('Off')]], SET.alert || 'online')}</div>
    <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify !== false ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div></div>
    <div class="grp"><span>${T('Table sounds')}</span>${seg('sfx', [[1, T('On')], [0, T('Off')]], SET.sfx ? 1 : 0)}</div>
-   ${typeof Net !== 'undefined' && Net.isAdmin() ? `<div class="grp"><span>👑 ${T('The Claude row on the home page')}</span>${seg('hidecl', [[0, T('Show')], [1, T('Hide')]], PUB.hideCl ? 1 : 0)}<div class="muted">${T('For every player.')}</div></div>` : ''}
-   <div class="muted">${T('Changes apply from the next deal.')} ${Store.online ? T('Settings and scores are saved to your account.') : T('Scores are saved on this device.')} ${T('Every deal you get is new — a deal is never dealt to you twice.')}</div>
    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn" id="sReset">${T('Delete score history')}</button>` : ''}</div>
    <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>
    <div class="muted ver">v${APP_V} · ${innerWidth}×${innerHeight} · ×${Math.round(devicePixelRatio * 100) / 100} · 🤖 ${Bot.dds ? 'DDS' : Bot.dds === false || typeof ddsFactory !== 'function' ? 'JS' : 'DDS…'}</div>`);
