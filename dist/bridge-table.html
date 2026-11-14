@@ -2161,6 +2161,13 @@ body.homev2 .h2mid .hpz{margin-left:auto}
 .ctcard.short{width:100%;margin:0 0 8px;padding:8px 12px;gap:2px}.ctcard.short b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.ctcard.short span{font-size:12.5px}.ctcard.short .ctmore{font-style:normal;font-weight:700;color:#1f5f8b;float:right;margin-left:8px}
 .ctcard.reg{border-color:#d4a017;background:linear-gradient(180deg,#fffaf0,#f8ecc9)}
 
+/* your turn: the hand to play from and the bidding box glow, the line under the table is a bright pill */
+@keyframes turnGlow{0%,100%{box-shadow:0 0 0 2px rgba(255,213,74,.9),0 0 14px 2px rgba(255,213,74,.45)}50%{box-shadow:0 0 0 3px rgba(255,213,74,1),0 0 26px 8px rgba(255,213,74,.7)}}
+body.mybid #bidbox{border-radius:14px;animation:turnGlow 1.6s ease-in-out infinite}
+.turnme{border-radius:14px;animation:turnGlow 1.6s ease-in-out infinite}
+#status .yourturn{display:inline-block;background:#ffd54a;color:#3a2a00;font-weight:800;padding:4px 14px;border-radius:999px;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+@media (prefers-reduced-motion:reduce){body.mybid #bidbox,.turnme{animation:none;box-shadow:0 0 0 3px rgba(255,213,74,1)}}
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -10076,7 +10083,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 498;
+const APP_V = 499;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -11615,9 +11622,30 @@ function turnAlert() {
   const g = G.play, me = meSeat();
   const mine = me >= 0 && ((G.phase === 'bid' && bidTurn() === me) || (G.phase === 'play' && g.trick.length < 4 && userControls(g.turn)));
   const key = mine ? G.id + ':' + G.auction.length + ':' + (g ? g.history.length * 4 + g.trick.length : 0) : '';
-  if (mine && key !== ui.alertKey && mode !== 'off' && (mode === 'always' || online())) { beep(); if (online()) notify(T('Your turn')); }
+  const others = online() || !!(G && G.ct && !(typeof CT !== 'undefined' && CT.tbl && CT.tbl.watch));
+  if (mine && key !== ui.alertKey && mode !== 'off' && (mode === 'always' || others)) { beep(); if (others) notify(T('Your turn')); }
   ui.alertKey = key;
+  turnMark();
 }
+/* your turn, plainly: the hand you play from (yours, or dummy's when you declare) and the bidding box glow, the line
+   under the table becomes a bright 'Your turn', and the browser tab says so while you look elsewhere */
+function turnMark() {
+  let t = -1;
+  if (G && !G.watch && !G.rtv) {
+    const me = meSeat();
+    if (G.phase === 'bid' && me >= 0 && bidTurn() === me) t = me;
+    else if (G.phase === 'play' && G.play && G.play.trick.length < 4 && G.play.turn >= 0 && userControls(G.play.turn) && !ui.ask) t = G.play.turn;
+  }
+  document.body.classList.toggle('myturn', t >= 0);
+  document.body.classList.toggle('mybid', t >= 0 && G.phase === 'bid');
+  document.querySelectorAll('.turnme').forEach(e => e.classList.remove('turnme'));
+  if (t >= 0 && G.phase === 'play') { const el = $('pos' + rel(t)); if (el) el.classList.add('turnme'); }
+  const st = $('status'); if (st && t >= 0 && !st.querySelector('.yourturn')) { const txt = st.lastChild && st.lastChild.nodeType === 3 ? st.lastChild : null; if (txt) { const sp = document.createElement('span'); sp.className = 'yourturn'; sp.textContent = '🟢 ' + txt.textContent; txt.replaceWith(sp); } }
+  const mark = '🟢 ';
+  if (t >= 0 && document.hidden) { if (!document.title.startsWith(mark)) { ui.title0 = document.title; document.title = mark + T('Your turn') + ' · ' + document.title; } }
+  else if (document.title.startsWith(mark) && ui.title0) document.title = ui.title0;
+}
+document.addEventListener('visibilitychange', () => { try { turnMark(); } catch (e) {} });
 
 /* ================= home page: start, open tables, our convention card and the lobby chat ================= */
 // a base system chosen: another system starts with no conventions ticked (the player ticks the ones they play)

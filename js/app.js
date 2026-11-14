@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 498;
+const APP_V = 499;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1549,9 +1549,30 @@ function turnAlert() {
   const g = G.play, me = meSeat();
   const mine = me >= 0 && ((G.phase === 'bid' && bidTurn() === me) || (G.phase === 'play' && g.trick.length < 4 && userControls(g.turn)));
   const key = mine ? G.id + ':' + G.auction.length + ':' + (g ? g.history.length * 4 + g.trick.length : 0) : '';
-  if (mine && key !== ui.alertKey && mode !== 'off' && (mode === 'always' || online())) { beep(); if (online()) notify(T('Your turn')); }
+  const others = online() || !!(G && G.ct && !(typeof CT !== 'undefined' && CT.tbl && CT.tbl.watch));
+  if (mine && key !== ui.alertKey && mode !== 'off' && (mode === 'always' || others)) { beep(); if (others) notify(T('Your turn')); }
   ui.alertKey = key;
+  turnMark();
 }
+/* your turn, plainly: the hand you play from (yours, or dummy's when you declare) and the bidding box glow, the line
+   under the table becomes a bright 'Your turn', and the browser tab says so while you look elsewhere */
+function turnMark() {
+  let t = -1;
+  if (G && !G.watch && !G.rtv) {
+    const me = meSeat();
+    if (G.phase === 'bid' && me >= 0 && bidTurn() === me) t = me;
+    else if (G.phase === 'play' && G.play && G.play.trick.length < 4 && G.play.turn >= 0 && userControls(G.play.turn) && !ui.ask) t = G.play.turn;
+  }
+  document.body.classList.toggle('myturn', t >= 0);
+  document.body.classList.toggle('mybid', t >= 0 && G.phase === 'bid');
+  document.querySelectorAll('.turnme').forEach(e => e.classList.remove('turnme'));
+  if (t >= 0 && G.phase === 'play') { const el = $('pos' + rel(t)); if (el) el.classList.add('turnme'); }
+  const st = $('status'); if (st && t >= 0 && !st.querySelector('.yourturn')) { const txt = st.lastChild && st.lastChild.nodeType === 3 ? st.lastChild : null; if (txt) { const sp = document.createElement('span'); sp.className = 'yourturn'; sp.textContent = '🟢 ' + txt.textContent; txt.replaceWith(sp); } }
+  const mark = '🟢 ';
+  if (t >= 0 && document.hidden) { if (!document.title.startsWith(mark)) { ui.title0 = document.title; document.title = mark + T('Your turn') + ' · ' + document.title; } }
+  else if (document.title.startsWith(mark) && ui.title0) document.title = ui.title0;
+}
+document.addEventListener('visibilitychange', () => { try { turnMark(); } catch (e) {} });
 
 /* ================= home page: start, open tables, our convention card and the lobby chat ================= */
 // a base system chosen: another system starts with no conventions ticked (the player ticks the ones they play)
