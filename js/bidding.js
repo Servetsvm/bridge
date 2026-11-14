@@ -137,7 +137,22 @@ function cands(x) {
     add('P', () => true, { t: 'Pass' });
     return L;
   }
+  if (pJust && rhoPass && myLast && mm.tag === 'muider' && (pm.tag === 'muask' || pm.tag === 'mupc')) {
+    if (pm.tag === 'muask') { add(B(3, 0), h => h.len[0] >= 4 && h.len[0] >= h.len[1], { len: { 0: 4 }, tag: 'muans', cv: 'muider', t: 'Muiderberg: my minor is clubs' }); add(B(3, 1), () => true, { len: { 1: 4 }, tag: 'muans', cv: 'muider', t: 'Muiderberg: my minor is diamonds' }); }
+    else { add('P', h => h.len[0] >= 4, { len: { 0: 4 }, cv: 'muider', t: 'Muiderberg: my minor is clubs' }); add(B(3, 1), () => true, { len: { 1: 4 }, tag: 'stop', cv: 'muider', t: 'Muiderberg: my minor is diamonds' }); }
+    return L;
+  }
+  // Muiderberg: after the opener named the minor, the asker places the contract
+  if (pJust && rhoPass && myLast && mm.tag === 'muask' && pm.tag === 'muans') {
+    const M = ST(x.opening.call), m = ST(pLast.call);
+    add(B(4, M), h => h.len[M] >= 3, { tag: 'stop', cv: 'muider', t: 'Game in the major: a fit' });
+    add(B(5, m), h => h.len[m] >= 4 && h.hcp >= 17 && !(h.bal && h.hcp <= 19), { tag: 'stop', cv: 'muider', t: 'Game in the minor: a fit' });
+    add(B(3, 4), h => h.hcp >= 15, { tag: 'stop', cv: 'muider', t: 'Game in notrump' });
+    add('P', () => true, { cv: 'muider', t: 'To play in the minor' });
+    return L;
+  }
   // Multi 2♦: the opener shows the major
+  if (pJust && rhoPass && myLast && mm.tag === 'multi' && pm.tag === 'mpoc2') { add('P', h => h.len[3] >= 6, { len: { 3: 6 }, cv: 'multi', t: 'Multi: my suit is spades' }); add(B(3, 2), () => true, { len: { 2: 6 }, tag: 'stop', cv: 'multi', t: 'Multi: my suit is hearts' }); return L; }
   if (pJust && rhoPass && myLast && mm.tag === 'multi' && (pm.tag === 'mpoc' || pm.tag === 'mask')) {
     if (pm.tag === 'mpoc') { add('P', h => h.len[2] >= 6, { len: { 2: 6 }, cv: 'sys', t: 'Multi: my suit is hearts' }); add(B(2, 3), () => true, { len: { 3: 6 }, cv: 'sys', t: 'Multi: my suit is spades' }); }
     else { add(B(3, 2), h => h.len[2] >= 6, { len: { 2: 6 }, cv: 'sys', t: 'Multi: hearts' }); add(B(3, 3), () => true, { len: { 3: 6 }, cv: 'sys', t: 'Multi: spades' }); }
@@ -276,7 +291,19 @@ function cands(x) {
       for (const s of [3, 2]) add(B(4, s), h => h.len[s] >= 8 && h.hcp >= 5 && h.hcp <= 11, { min: 5, max: 11, len: { [s]: 8 }, cv: 'pre', t: 'Preempt: 8+ ' + SUIT[s] + ', 5-11 HCP', tag: 'pre' });
     };
     const threes = () => { if (pos < 3) for (const s of [3, 2, 1, 0]) add(B(3, s), h => h.len[s] >= 7 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2, { min: 5, max: 10, len: { [s]: 7 }, cv: 'pre', t: 'Preempt: 7+ ' + SUIT[s] + ', 5-10 HCP', tag: 'pre' }); };
-    const weakTwos = suits => { if (pos < 3) for (const s of suits) add(B(2, s), weakTwo(s), { min: 5, max: 10, len: { [s]: 6 }, cv: 'weak2', t: 'Weak two: six ' + SUIT[s] + ', 5-10 HCP', tag: 'weak' }); };
+    // Muiderberg: 2♥/2♠ = five of the major and four or more of a minor, 5-10 (in place of the weak two in the majors)
+    const muider = h => s => h.len[s] === 5 && Math.max(h.len[0], h.len[1]) >= 4 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 1;
+    // Multi 2♦ (weak): a weak two in either major, six cards, 5-11 (the natural systems whose 2♦ is free)
+    const multiOn = C.multi && !['sef', 'claude', 'precision', 'polish'].includes(sk);
+    const weakTwo6 = s => h => h.len[s] === 6 && h.hcp >= 5 && h.hcp <= 11 && h.top5(s) >= 2 && h.len[otherMajor(s)] < 4;
+    const weakTwos = suits => {
+      if (pos >= 3) return;
+      if (multiOn) add(B(2, 1), h => weakTwo6(2)(h) || weakTwo6(3)(h), { min: 5, max: 11, tag: 'multi', cv: 'multi', t: 'Multi 2♦: a weak two (six cards) in ♥ or ♠, 5-11 HCP' });
+      if (C.muider) for (const s of [3, 2]) add(B(2, s), h => muider(h)(s), { min: 5, max: 10, len: { [s]: 5 }, tag: 'muider', cv: 'muider', t: 'Muiderberg: five ' + SUIT[s] + ' and a 4+ card minor, 5-10 HCP' });
+      suits = suits.filter(s => !(s === 1 && multiOn) && !(s >= 2 && (C.muider || multiOn)));
+      _weakTwos(suits);
+    };
+    const _weakTwos = suits => { if (pos < 3) for (const s of suits) add(B(2, s), weakTwo(s), { min: 5, max: 10, len: { [s]: 6 }, cv: 'weak2', t: 'Weak two: six ' + SUIT[s] + ', 5-10 HCP', tag: 'weak' }); };
     const nts = () => {
       add(B(2, 4), ntBal(t1, t2), { min: t1, max: t2, len: BAL, t: 'Balanced, ' + t1 + '-' + t2 + ' HCP', tag: 'nt2' });
       add(B(1, 4), ntBal(n1, n2), { min: n1, max: n2, len: BAL, cv: 'nt1', t: 'Balanced, ' + n1 + '-' + n2 + ' HCP (' + Z + ')', tag: 'nt1' });
@@ -419,6 +446,21 @@ function cands(x) {
       return L;
     }
     // Multi 2♦ (Polish Club): 2♥ = pass or correct, 2NT asks which major
+    if ((o === B(2, 2) || o === B(2, 3)) && otag === 'muider' && rhoPass && fresh) {
+      add(B(4, os), h => h.len[os] >= 3 && (h.hcp >= 14 || (h.len[os] >= 4 && h.hcp >= 10)), { min: 10, len: { [os]: 3 }, tag: 'stop', cv: 'muider', t: 'Game: support for the major' });
+      add(B(2, 4), h => h.hcp >= 14, { min: 14, tag: 'muask', cv: 'muider', f: 1, t: 'Muiderberg 2NT: which minor? (14+ HCP, forcing)' });
+      add(B(3, os), h => h.len[os] >= 3, { len: { [os]: 3 }, tag: 'stop', cv: 'muider', t: 'Preemptive raise: 3+ support, to play' });
+      add(B(3, 0), h => h.len[os] <= 1 && h.len[0] >= 3 && h.len[1] >= 3 && h.hcp >= 6, { len: { 0: 3, 1: 3 }, tag: 'mupc', cv: 'muider', t: 'Pass or correct: no fit for the major, play your minor' });
+      add('P', () => true, { t: 'Pass' });
+      return L;
+    }
+    if (o === B(2, 1) && otag === 'multi' && opening.m.cv === 'multi' && rhoPass && fresh) {
+      add(B(2, 4), h => h.hcp >= 15, { min: 15, tag: 'mask', cv: 'multi', f: 1, t: 'Asking: which major is it?' });
+      for (const m of [0, 1]) add(B(3, m), h => h.len[m] >= 6 && h.len[2] <= 2 && h.len[3] <= 2, { len: { [m]: 6 }, tag: 'stop', cv: 'multi', t: 'Natural: to play in ' + SUIT[m] });
+      add(B(2, 3), h => h.len[2] >= 3 && h.len[3] >= 2 && h.len[3] < h.len[2] && h.hcp >= 8, { tag: 'mpoc2', cv: 'multi', t: 'Pass or correct: pass with spades, 3♥ with hearts' });
+      add(B(2, 2), () => true, { tag: 'mpoc', cv: 'multi', t: 'Pass or correct: pass with hearts, bid 2♠ with spades' });
+      return L;
+    }
     if (o === B(2, 1) && otag === 'multi' && rhoPass && fresh) {
       add(B(2, 4), h => h.hcp >= 15, { min: 15, tag: 'mask', cv: 'sys', f: 1, t: 'Asking: which major is it?' });
       add(B(2, 2), () => true, { tag: 'mpoc', cv: 'sys', t: 'Pass or correct: pass with hearts, bid 2♠ with spades' });
