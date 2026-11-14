@@ -96,7 +96,7 @@ function otSetupCard() {
     await Promise.all([otLoad(), otMeta()]);
     const box = document.getElementById('otSetupBox'); if (!box) return;
     const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, ed = OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info;
-    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<button class="btn btn-sm" style="margin-top:6px;" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button>' : ''}</div>`;
+    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <button class="btn btn-sm" onclick="otTestRobots(1)">🧪 <span>Systems contest</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<button class="btn btn-sm" style="margin-top:6px;" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button>' : ''}</div>`;
     otPreview();
     clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (!(adminTab === 'setup' && setupOnline)) return; otManageRefresh(); OT.liveT = setTimeout(again, 20000); }, 20000);   // only the list above the form   // new registrations and the live state, every 20 seconds
   }, 0);
@@ -329,7 +329,7 @@ async function otRobots() {
         const hb = await get('/hb') || {};
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {
           if (!P.ctTableEmpty(plan, r, ti, hb)) continue;
-          const tb = tmap[r + '_' + ti] || {}, st = P.ctHeadStep(plan, r, tb.a, tb.res); if (!st) continue;
+          const tb = tmap[r + '_' + ti] || {}, st = P.ctHeadStep(plan, r, tb.a, tb.res, ti); if (!st) continue;
           const q = base + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
           if (await get(q.slice(base.length)) != null) continue;   // written meanwhile by another app: the next look reads it
           await fetch(await otUrl(q), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(st.v || st.a) });
@@ -343,12 +343,14 @@ setInterval(otRobots, 1500);
 
 /* Servet's test: an online tournament started now where every seat is a robot (made-up names); the robots play it
    from this page (and the GitHub run), so the whole evening can be watched and its results looked at */
-window.otTestRobots = async function () {
-  const P = otP(); if (!P || !await otAsk(otL('Start a test tournament with 4 robot pairs now?'))) return;
+window.otTestRobots = async function (mix) {
+  const P = otP(); if (!P || !await otAsk(mix ? otL('Start a systems contest now? Six robot pairs, each playing its own system, every pair against every other.') : otL('Start a test tournament with 4 robot pairs now?'))) return;
   const N = ['Ingrid', 'Lars', 'Sofia', 'Mateo', 'Yuki', 'Omar', 'Elif', 'Jonas', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Hanna', 'Karim', 'Amara', 'Felix', 'Leila', 'Tomás', 'Mei', 'Pavel'].sort(() => Math.random() - 0.5);
   const id = Date.now().toString(36), at = Date.now() - 1000, f = otRead();
   const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
-  const pairs = [0, 1, 2, 3].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
+  const SY = [['sayc', 'SAYC'], ['twoone', '2/1'], ['acol', 'Acol'], ['sef', 'SEF'], ['precision', 'Precision'], ['polish', 'Polish Club']];
+  const pairs = mix ? SY.map(([k, n], j) => ({ pid: 'r' + j, a: n, b: '🤖 ' + N[j], ka: '', kb: '', sys: k, d: at, ts: at + j })) : [0, 1, 2, 3].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
+  if (mix) { info.n = '🧪 ' + otL('Systems contest'); info.mov = 'howell'; info.b = 15; info.bpr = 3; info.conv = []; }
   try {
     await otPut('/' + id + '/info', info);
     for (const p of pairs) { const { pid, ...v } = p; await otPut('/' + id + '/pairs/' + pid, v); }

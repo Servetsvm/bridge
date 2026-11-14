@@ -10083,7 +10083,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 499;
+const APP_V = 500;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -16609,7 +16609,7 @@ const ctMine = x => x.pairs.find(p => p.ka === ctMe() || p.kb === ctMe());
    write that table). The deals come from the plan's seed, the same on every device. */
 function ctSeed(str) { let h = 2166136261; for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; }
 function ctMakePlan(x) {
-  const P = x.pairs.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0) || String(a.pid).localeCompare(String(b.pid))).map(p => ({ a: p.a, b: p.b, ka: p.ka, kb: p.kb }));
+  const P = x.pairs.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0) || String(a.pid).localeCompare(String(b.pid))).map(p => ({ a: p.a, b: p.b, ka: p.ka, kb: p.kb, ...(p.sys ? { sys: p.sys } : {}) }));
   if (P.length < 1) return null;   // one pair plays the robot pair
   if (P.length % 2) P.push({ a: 'Robot', b: 'Robot', ka: '', kb: '', robot: 1 });
   const n = P.length, R = Math.max(1, Math.floor((+x.i.b || 18) / (+x.i.bpr || 3)));   // after everyone has met everyone the circle goes on (the same opponents, other boards)
@@ -16747,7 +16747,8 @@ function ctRemind() {
 const CT_AWAY = 90e3;
 CT.tbl = null;
 const ctRunP = x => ctPath(x, '/run/' + x.d);
-function ctCardsOf(plan) { const sys = E.sysOf(plan.sys).k, conv = { ...E.sysOf(sys).conv }; for (const k of plan.conv || []) conv[k] = true; return [{ conv, agg: 0, sys }, { conv: { ...conv }, agg: 0, sys }]; }
+function ctCardOf(sys, conv) { const k = E.sysOf(sys).k, c = { ...E.sysOf(k).conv }; for (const x of conv || []) c[x] = true; return { conv: c, agg: 0, sys: k }; }
+function ctCardsOf(plan, r, ti) { const t = r != null && plan.rounds[r] && plan.rounds[r][ti], P = t ? [plan.pairs[t[0]], plan.pairs[t[1]]] : []; return [0, 1].map(k => P[k] && P[k].sys ? ctCardOf(P[k].sys, []) : ctCardOf(plan.sys, plan.conv)); }
 // the four seats of a table: the North-South pair's first player South, the partner North; East-West: first East
 function ctSeatsOf(plan, r, ti) {
   const [ns, ew] = plan.rounds[r][ti], A = plan.pairs[ns], B = plan.pairs[ew];
@@ -16789,7 +16790,7 @@ function ctAct(a) {
 function ctStartBoard(i) {
   const t = CT.tbl, bn = t.boards[i];
   CT.replay = true;
-  try { newBoard(ctDeal(t.plan, bn), bn, null, { id: 'ct' + t.id + t.d + '-' + bn, ct: { i, seat: t.seat, seats: t.seats.map(s => s.n), name: t.name, key: t.key, r: t.r }, cards: ctCardsOf(t.plan) }); } finally { CT.replay = false; }
+  try { newBoard(ctDeal(t.plan, bn), bn, null, { id: 'ct' + t.id + t.d + '-' + bn, ct: { i, seat: t.seat, seats: t.seats.map(s => s.n), name: t.name, key: t.key, r: t.r }, cards: ctCardsOf(t.plan, t.r, t.ti) }); } finally { CT.replay = false; }
 }
 // one action from the list: a call, or a card (the trick is gathered at once while catching up)
 // true when the action could be applied (a call or card refused means this device is out of step: read again)
@@ -17127,8 +17128,8 @@ function ctTableEmpty(plan, r, ti, hb) { return ctSeatsOf(plan, r, ti).every(s =
 // the next step of a table played by the robots: { n, a } (the action at index n) or { res: board, v } or null (round done)
 // the deal fixed the robots' dice: each decision gets fresh ones (otherwise every empty table plays the same)
 const ctFresh = () => E.seed(null);   // true chance again (a deal sets the dice)
-function ctHeadStep(plan, r, list, res) {
-  const L = ctList_(list), cards = ctCardsOf(plan); let i = 0;
+function ctHeadStep(plan, r, list, res, ti) {
+  const L = ctList_(list), cards = ctCardsOf(plan, r, ti); let i = 0;
   for (const bn of ctBoards(plan, r)) {
     const deal = ctDeal(plan, bn), dl = dealerOf(bn), auc = [];
     while (i < L.length && L[i] && L[i].c != null && !auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
@@ -17157,7 +17158,7 @@ async function ctHeadMine() {
       const ti = plan.rounds[r].findIndex(([a, b]) => a === pi || b === pi); if (ti < 0) continue;
       const hb = await Net.Cloud.get(p + '/hb') || {};
       if (!ctTableEmpty(plan, r, ti, hb)) continue;
-      const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res);
+      const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res, ti);
       if (!st) continue;
       if (st.res) await Net.Cloud.put(p + '/t/' + r + '_' + ti + '/res/' + st.res, st.v);
       else await Net.Cloud.put(p + '/t/' + r + '_' + ti + '/a/' + st.n, st.a).catch(() => {});

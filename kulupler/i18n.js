@@ -10,6 +10,8 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Systems contest":"Sistemler yarışması",
+    "Start a systems contest now? Six robot pairs, each playing its own system, every pair against every other.":"Sistemler yarışması şimdi başlatılsın mı? Altı robot çift, her biri kendi sistemiyle, herkes herkese karşı.",
     "Start the server robots":"Sunucu robotlarını başlat",
     "Online evening: the rounds go on by themselves in Bridge Table.":"Online akşam: turlar Bridge Table’da kendiliğinden ilerler.",
     "An online evening is being played. Set up a tournament at the club anyway?":"Şu an online bir akşam oynanıyor. Yine de kulüpte turnuva kurulsun mu?",

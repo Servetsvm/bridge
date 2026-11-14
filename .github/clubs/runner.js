@@ -27,7 +27,8 @@ async function put(p, v) { const r = await fetch(url(p), { method: 'PUT', header
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 // as js/clubtour.js has them
-const ctCardsOf = plan => { const sys = E.sysOf(plan.sys).k, conv = { ...E.sysOf(sys).conv }; for (const k of plan.conv || []) conv[k] = true; return [{ conv, agg: 0, sys }, { conv: { ...conv }, agg: 0, sys }]; };
+function ctCardOf(sys, conv) { const k = E.sysOf(sys).k, c = { ...E.sysOf(k).conv }; for (const x of conv || []) c[x] = true; return { conv: c, agg: 0, sys: k }; }
+function ctCardsOf(plan, r, ti) { const t = r != null && plan.rounds[r] && plan.rounds[r][ti], P = t ? [plan.pairs[t[0]], plan.pairs[t[1]]] : []; return [0, 1].map(k => P[k] && P[k].sys ? ctCardOf(P[k].sys, []) : ctCardOf(plan.sys, plan.conv)); }
 const ctBoards = (plan, r) => [...Array(plan.bpr).keys()].map(i => r * plan.bpr + i + 1);
 function ctDeal(plan, board) { E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
 function ctSeatKeys(plan, r, ti) { const [ns, ew] = plan.rounds[r][ti], A = plan.pairs[ns], B = plan.pairs[ew], k = (p, w) => p.robot ? '' : (w ? p.kb : p.ka) || ''; return [k(A, 1), k(B, 0), k(A, 0), k(B, 1)]; }
@@ -40,8 +41,8 @@ const ctTableEmpty = (plan, r, ti, hb) => ctSeatKeys(plan, r, ti).every(k => !k 
 function ctNsScore(bn, level, strain, dbl, decl, tr) { const sc = E.scoreOf(level, strain, dbl, E.vulOf(bn, decl), tr); return E.sideOf(decl) === 0 ? sc : -sc; }
 // the deal fixed the robots' dice: each decision gets fresh ones (otherwise every empty table plays the same)
 const ctFresh = () => E.seed(null);   // true chance again (a deal sets the dice)
-function ctHeadStep(plan, r, list, res) {
-  const L = ctList_(list), cards = ctCardsOf(plan); let i = 0;
+function ctHeadStep(plan, r, list, res, ti) {
+  const L = ctList_(list), cards = ctCardsOf(plan, r, ti); let i = 0;
   for (const bn of ctBoards(plan, r)) {
     const deal = ctDeal(plan, bn), dl = E.dealerOf(bn), auc = [];
     while (i < L.length && L[i] && L[i].c != null && !E.auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
@@ -106,7 +107,7 @@ async function evenings() {
         const hb = await get(x.p + '/hb') || {};
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {
           if (!ctTableEmpty(plan, r, ti, hb)) continue;
-          const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res); if (!st) continue;
+          const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res, ti); if (!st) continue;
           const q = x.p + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
           if (await get(q) != null) continue;   // an app was quicker
           await put(q, st.v || st.a); moved = true; steps++;
