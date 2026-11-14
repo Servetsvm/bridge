@@ -7,7 +7,7 @@
   const VUL = ['None', 'NS', 'EW', 'Both', 'NS', 'EW', 'Both', 'None', 'Both', 'EW', 'NS', 'None', 'Both', 'NS', 'EW', 'None'];
   const vul = bn => VUL[(bn - 1) % 16];
   const listOf = l => Array.isArray(l) ? l : Object.keys(l || {}).filter(k => /^\d+$/.test(k)).sort((a, b) => a - b).map(k => l[k]);
-  function deal(E, plan, bn) { E.seed(((plan.seed >>> 0) + bn * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
+  function deal(E, plan, bn) { E.seed(((plan.seed >>> 0) + bn * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
   // each board's opening lead at a table (the first card after the bidding)
   function leads(E, plan, r, list) {
     const L = listOf(list), out = {}; let i = 0;

@@ -56,7 +56,7 @@ function ctMakePlan(x) {
   const m = {}; rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => { const id = r + '_' + ti; m[id] = {}; for (const k of [P[a].ka, P[a].kb, P[b].ka, P[b].kb]) if (k) m[id][k] = 1; }));
   let nr;
   if (x.i.mov === 'swiss') {   // Swiss: the first round drawn, the others made from the standings; every player may write at any table
-    E.seed(ctSeed(x.id + ':' + x.d + ':swiss') || 1); const o = E.shuffle([...Array(n).keys()]); nr = rounds.length;
+    E.seed(ctSeed(x.id + ':' + x.d + ':swiss') || 1); const o = E.shuffle([...Array(n).keys()]); E.seed(null); nr = rounds.length;
     rounds.length = 0; rounds.push([...Array(n / 2).keys()].map(i => [o[2 * i], o[2 * i + 1]]));
     const all = {}; for (const p of P) for (const k of [p.ka, p.kb]) if (k) all[k] = 1;
     for (const k of Object.keys(m)) delete m[k]; for (let r = 0; r < nr; r++) for (let ti = 0; ti < n / 2; ti++) m[r + '_' + ti] = { ...all };
@@ -75,7 +75,7 @@ async function ctEnsurePlan(x) {
   finally { CT.planning = false; await ctLoad(true); }
 }
 // a board of the evening: the deal from the plan's seed (board 1, 2 … with the usual dealer and vulnerability)
-function ctDeal(plan, board) { E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
+function ctDeal(plan, board) { E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
 // where a pair plays: each round its table, direction, opponents and boards
 function ctSched(plan, pi) {
   const out = [];
@@ -556,17 +556,19 @@ function ctCurRound(plan, tmap) {
 // nobody of this table here (their app in the last 90 seconds)
 function ctTableEmpty(plan, r, ti, hb) { return ctSeatsOf(plan, r, ti).every(s => !s.k || Date.now() - (+(hb || {})[s.k] || 0) > CT_AWAY); }
 // the next step of a table played by the robots: { n, a } (the action at index n) or { res: board, v } or null (round done)
+// the deal fixed the robots' dice: each decision gets fresh ones (otherwise every empty table plays the same)
+const ctFresh = () => E.seed(null);   // true chance again (a deal sets the dice)
 function ctHeadStep(plan, r, list, res) {
   const L = ctList_(list), cards = ctCardsOf(plan); let i = 0;
   for (const bn of ctBoards(plan, r)) {
     const deal = ctDeal(plan, bn), dl = dealerOf(bn), auc = [];
     while (i < L.length && L[i] && L[i].c != null && !auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
-    if (!auctionOver(auc)) { const s = (dl + auc.length) % 4, b = E.aiBid(auc, s, deal[s], cards); return { n: i, a: { s, c: b.call } }; }
+    if (!auctionOver(auc)) { const s = (dl + auc.length) % 4; ctFresh(); const b = E.aiBid(auc, s, deal[s], cards); return { n: i, a: { s, c: b.call } }; }
     const c = contractOf(auc);
     if (!c) { if (!(res || {})[bn]) return { res: bn, v: { pass: 1, ns: 0 } }; continue; }
     const g = E.newPlayState(deal, c, auc, cards);
     while (i < L.length && L[i] && L[i].k != null && !E.handsEmpty(g)) { if (E.applyCard(g, L[i].s, L[i].k)) E.collect(g); i++; }
-    if (!E.handsEmpty(g)) { const t = g.turn; return { n: i, a: { s: t, k: E.aiPlay(g, t, { budget: 250, maxSamples: 12, ddTricks: 6 }) } }; }
+    if (!E.handsEmpty(g)) { const t = g.turn; ctFresh(); return { n: i, a: { s: t, k: E.aiPlay(g, t, { budget: 250, maxSamples: 12, ddTricks: 6 }) } }; }
     if (!(res || {})[bn]) { const tr = g.tricks[sideOf(c.decl)]; return { res: bn, v: { c: [c.level, c.strain, c.dbl, c.decl], tr, ns: ctNsScore(bn, c.level, c.strain, c.dbl, c.decl, tr) } }; }
   }
   return null;

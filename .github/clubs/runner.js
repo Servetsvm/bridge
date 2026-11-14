@@ -29,7 +29,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 // as js/clubtour.js has them
 const ctCardsOf = plan => { const sys = E.sysOf(plan.sys).k, conv = { ...E.sysOf(sys).conv }; for (const k of plan.conv || []) conv[k] = true; return [{ conv, agg: 0, sys }, { conv: { ...conv }, agg: 0, sys }]; };
 const ctBoards = (plan, r) => [...Array(plan.bpr).keys()].map(i => r * plan.bpr + i + 1);
-function ctDeal(plan, board) { E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
+function ctDeal(plan, board) { E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
 function ctSeatKeys(plan, r, ti) { const [ns, ew] = plan.rounds[r][ti], A = plan.pairs[ns], B = plan.pairs[ew], k = (p, w) => p.robot ? '' : (w ? p.kb : p.ka) || ''; return [k(A, 1), k(B, 0), k(A, 0), k(B, 1)]; }
 const ctList_ = l => Array.isArray(l) ? l : Object.keys(l || {}).sort((a, b) => a - b).map(k => l[k]);
 function ctCurRound(plan, tmap) {
@@ -38,17 +38,19 @@ function ctCurRound(plan, tmap) {
 }
 const ctTableEmpty = (plan, r, ti, hb) => ctSeatKeys(plan, r, ti).every(k => !k || Date.now() - (+(hb || {})[k] || 0) > AWAY);
 function ctNsScore(bn, level, strain, dbl, decl, tr) { const sc = E.scoreOf(level, strain, dbl, E.vulOf(bn, decl), tr); return E.sideOf(decl) === 0 ? sc : -sc; }
+// the deal fixed the robots' dice: each decision gets fresh ones (otherwise every empty table plays the same)
+const ctFresh = () => E.seed(null);   // true chance again (a deal sets the dice)
 function ctHeadStep(plan, r, list, res) {
   const L = ctList_(list), cards = ctCardsOf(plan); let i = 0;
   for (const bn of ctBoards(plan, r)) {
     const deal = ctDeal(plan, bn), dl = E.dealerOf(bn), auc = [];
     while (i < L.length && L[i] && L[i].c != null && !E.auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
-    if (!E.auctionOver(auc)) { const s = (dl + auc.length) % 4, b = E.aiBid(auc, s, deal[s], cards); return { n: i, a: { s, c: b.call } }; }
+    if (!E.auctionOver(auc)) { const s = (dl + auc.length) % 4; ctFresh(); const b = E.aiBid(auc, s, deal[s], cards); return { n: i, a: { s, c: b.call } }; }
     const c = E.contractOf(auc);
     if (!c) { if (!(res || {})[bn]) return { res: bn, v: { pass: 1, ns: 0 } }; continue; }
     const g = E.newPlayState(deal, c, auc, cards);
     while (i < L.length && L[i] && L[i].k != null && !E.handsEmpty(g)) { if (E.applyCard(g, L[i].s, L[i].k)) E.collect(g); i++; }
-    if (!E.handsEmpty(g)) { const t = g.turn; return { n: i, a: { s: t, k: E.aiPlay(g, t) } }; }
+    if (!E.handsEmpty(g)) { const t = g.turn; ctFresh(); return { n: i, a: { s: t, k: E.aiPlay(g, t) } }; }
     if (!(res || {})[bn]) { const tr = g.tricks[E.sideOf(c.decl)]; return { res: bn, v: { c: [c.level, c.strain, c.dbl, c.decl], tr, ns: ctNsScore(bn, c.level, c.strain, c.dbl, c.decl, tr) } }; }
   }
   return null;
