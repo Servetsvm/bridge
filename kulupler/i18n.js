@@ -10,6 +10,7 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Start the server robots":"Sunucu robotlarını başlat",
     "Online evening: the rounds go on by themselves in Bridge Table.":"Online akşam: turlar Bridge Table’da kendiliğinden ilerler.",
     "An online evening is being played. Set up a tournament at the club anyway?":"Şu an online bir akşam oynanıyor. Yine de kulüpte turnuva kurulsun mu?",
     "Number of Rounds":"Tur sayısı",
