@@ -241,7 +241,7 @@ function scoreToIMP(diff){
 // every tournament is scored in MP and IMP together (a team match only in IMP)
 // every tournament is scored in both MP and IMP; a team match in IMPs
 const scoringShows=()=>{ const team=getState().movement==='team'; return { mp: !team, imp: true, byImp: team }; };
-const scoringName=s=>s&&s.movement==='team'?'IMP':'MP + IMP';
+const scoringName=s=>s&&s.movement==='team'?'IMP':'IMP - MP';
 const fmtImp=v=>{ const x=Math.round((v||0)*10)/10; return (x>0?'+':'')+x.toFixed(1); };
 function calcMP(){
   const boards=getBoards();const movements=getMovements();

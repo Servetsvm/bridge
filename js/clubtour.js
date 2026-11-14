@@ -30,7 +30,7 @@ function ctList() {
     const pairs = Object.entries(t.pairs || {}).filter(([, p]) => p && p.d === d).map(([pid, p]) => ({ pid, ...p }));
     const seek = Object.entries(t.seek || {}).filter(([, p]) => p && p.d === d).map(([k, p]) => ({ k, ...p }));
     const run = (t.run || {})[d] || null;
-    out.push({ club, id, i: t.info, d, pairs, seek, run, plan: run && run.plan || null });
+    out.push({ club, id, i: t.info, d, pairs, seek, run, plan: run && run.plan ? ctFill(run.plan, run.t) : null });
   }
   return out.sort((a, b) => a.d - b.d);
 }
@@ -54,8 +54,17 @@ function ctMakePlan(x) {
     rounds.push(tb); arr = [arr[0], arr[n - 1], ...arr.slice(1, n - 1)];
   }
   const m = {}; rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => { const id = r + '_' + ti; m[id] = {}; for (const k of [P[a].ka, P[a].kb, P[b].ka, P[b].kb]) if (k) m[id][k] = 1; }));
-  return { plan: { pairs: P, rounds, mov: x.i.mov || 'howell', bpr: +x.i.bpr || 3, sys: x.i.sys, conv: x.i.conv || [], sc: x.i.sc, seed: ctSeed(x.id + ':' + x.d), at: Date.now() }, m };
+  let nr;
+  if (x.i.mov === 'swiss') {   // Swiss: the first round drawn, the others made from the standings; every player may write at any table
+    E.seed(ctSeed(x.id + ':' + x.d + ':swiss') || 1); const o = E.shuffle([...Array(n).keys()]); nr = rounds.length;
+    rounds.length = 0; rounds.push([...Array(n / 2).keys()].map(i => [o[2 * i], o[2 * i + 1]]));
+    const all = {}; for (const p of P) for (const k of [p.ka, p.kb]) if (k) all[k] = 1;
+    for (const k of Object.keys(m)) delete m[k]; for (let r = 0; r < nr; r++) for (let ti = 0; ti < n / 2; ti++) m[r + '_' + ti] = { ...all };
+  }
+  return { plan: { pairs: P, rounds, ...(nr ? { nr } : {}), mov: x.i.mov || 'howell', bpr: +x.i.bpr || 3, sys: x.i.sys, conv: x.i.conv || [], sc: x.i.sc, seed: ctSeed(x.id + ':' + x.d), at: Date.now() }, m };
 }
+// the plan with the Swiss rounds that can be made now (from what the tables played)
+function ctFill(plan, tmap) { return plan && plan.mov === 'swiss' && window.CTSW ? CTSW.fill(plan, tmap, E) : plan; }
 async function ctEnsurePlan(x) {
   if (x.plan || x.d > Date.now() || !ctMine(x) || CT.planning) return;
   const p = ctMakePlan(x); if (!p) return;
@@ -97,7 +106,7 @@ function ctShow(key, err) {
   const names = typeof Net.knownNames === 'function' ? Net.knownNames() : [];
   openOv('ctour', `<h2>🏛 ${esc(i.cn || x.club)}</h2><div class="big">${esc(i.n)}</div>
     <div class="grp"><span>${T('When')}</span><b>${esc(ctWhen(x.d))}</b>${i.rep ? ' · 🔁 ' + T('every week') : ''} · ${x.d > Date.now() ? '⏳ ' + ctLeft(x.d) : '🟢 ' + T('Started')}</div>
-    <div class="grp"><span>${T('What is played')}</span>${T('{0} boards', i.b)} · ${T('{0} boards a round', i.bpr)} · ${(i.sc === 'imp' ? 'IMP' : i.sc === 'both' ? 'MP + IMP' : 'MP')} · ${T('pairs against each other')}
+    <div class="grp"><span>${T('What is played')}</span>${T('{0} boards', i.b)} · ${T('{0} boards a round', i.bpr)} · ${(i.sc === 'imp' ? 'IMP' : i.sc === 'both' ? 'IMP - MP' : 'MP')} · ${T('pairs against each other')}
       <div><b>${esc(sys)}</b>${convs ? ' · ' + esc(convs) : ''}</div><div class="muted">${T('Always played')}: ${esc(PRAC_BASICS.map(pracName).join(', '))}</div><div class="muted">${T('Everyone bids with this card, the robots too.')}</div></div>
     <div class="grp"><span>${T('Pairs registered')} (${x.pairs.length})</span>${x.pairs.length ? x.pairs.map((p, k) => `<div>${k + 1}. ${esc(p.a)} – ${esc(p.b)}</div>`).join('') : `<div class="muted">${T('Nobody yet.')}</div>`}</div>
     ${x.seek.length ? `<div class="grp"><span>🔎 ${T('Looking for a partner')}</span>${x.seek.map(s => esc(s.n)).join(', ')}<div class="muted">${T('Write to one of them, or the director pairs you.')}</div></div>` : ''}
@@ -145,7 +154,7 @@ function ctPlanHtml(x) {
   const all = `<div class="grp"><span>${T('The tables, round {0}', 1)}</span>${P.rounds[0].map(([a, b], ti) => `<div>${T('Table {0}', ti + 1)}: ${ctPairTxt(P.pairs[a])} – ${ctPairTxt(P.pairs[b])}</div>`).join('')}</div>`;
   const sit = S.length ? `<div class="row2"><button class="btn new" data-ctsit="${esc(x.club + '|' + x.id)}">🪑 ${T('Sit down at your table')}</button></div>` : '';
   const res = `<div class="row2"><button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}">📊 ${T('Results')}</button></div>`;
-  return sit + mineH + all + res + `<div class="muted">${T('{0} rounds of {1} boards; every table of a round plays the same boards.', P.rounds.length, P.bpr)}</div>`;
+  return sit + mineH + all + res + `<div class="muted">${T('{0} rounds of {1} boards; every table of a round plays the same boards.', P.nr || P.rounds.length, P.bpr)}${P.mov === 'swiss' ? ' ' + T('Swiss: each next round is made from the standings when every table has finished.') : ''}</div>`;
 }
 // 15 minutes before the start a registered player is told (once), on any screen
 function ctRemind() {
@@ -268,12 +277,15 @@ async function ctBeat() {
 async function ctSit(key, r0) {
   const x = ctFind(key); if (!x || !x.plan) return;
   const pi = ctMyPair(x.plan); if (pi < 0) return;
-  const S = ctSched(x.plan, pi), r = r0 != null ? r0 : +(localStorage.getItem('ct-r-' + x.id + x.d) || 0), s = S.find(q => q.r === r) || S[0];
+  const S = ctSched(x.plan, pi), r = r0 != null ? r0 : +(localStorage.getItem('ct-r-' + x.id + x.d) || 0);
+  let s = S.find(q => q.r === r);
+  if (!s && x.plan.mov === 'swiss' && r > 0 && r < (x.plan.nr || 0)) { flash('⏳ ' + T('The next round is being made from the standings…'), 2500); setTimeout(() => ctLoad(true).then(() => ctSit(key, r)), 5000); return; }
+  s = s || S[0];
   if (!s) return;
   try { await ctSession(); } catch (e) { flash(T('Could not send — sign in with your name and PIN first.'), 2500); return; }
   const seats = ctSeatsOf(x.plan, s.r, s.ti), seat = seats.findIndex(q => q.k === ctMe());
   clearInterval(CT.pollT); clearInterval(CT.beatT);
-  CT.tbl = { key, id: x.id, d: x.d, p: ctRunP(x), plan: x.plan, r: s.r, ti: s.ti, tid: s.r + '_' + s.ti, seats, seat, boards: ctBoards(x.plan, s.r), n: 0, hb: {}, name: x.i.n, rounds: x.plan.rounds.length };
+  CT.tbl = { key, id: x.id, d: x.d, p: ctRunP(x), plan: x.plan, r: s.r, ti: s.ti, tid: s.r + '_' + s.ti, seats, seat, boards: ctBoards(x.plan, s.r), n: 0, hb: {}, name: x.i.n, rounds: x.plan.nr || x.plan.rounds.length };
   try { localStorage.setItem('ct-r-' + x.id + x.d, String(s.r)); } catch (e) {}
   CT.sc = null; closeOv();
   let hb0 = 0; try { hb0 = +(await Net.Cloud.get(CT.tbl.p + '/hb/' + Net.fbKey(myNm()))) || 0; } catch (e) {}
@@ -324,7 +336,7 @@ async function ctWaitRound(t, next) {
     const w = CT.waiting; if (!w) { clearInterval(CT.waitT); return; }
     const left = await ctTablesLeft(p, plan, r);
     if (CT.waiting !== w) return;
-    if (!left.length) { clearInterval(CT.waitT); CT.waiting = null; if (ui.overlay === 'ctwait') closeOv(); flash('🪑 ' + T('Every table has finished: round {0}', next + 1), 2500); ctSit(key, next); return; }
+    if (!left.length) { clearInterval(CT.waitT); CT.waiting = null; if (ui.overlay === 'ctwait') closeOv(); flash('🪑 ' + T('Every table has finished: round {0}', next + 1), 2500); ctLoad(true).then(() => ctSit(key, next)); return; }
     if (ui.overlay === 'ctwait' || !ui.overlay) ctWaitShow(left);
     if (++w.k % 4 === 0) beat();
   };
@@ -348,7 +360,7 @@ async function ctSlowCheck() {
 // offers to sit down again
 function ctLeave() { clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = null; }
 // a game kept from before a reload: the table is read again from the database (not the copy on this device)
-setTimeout(() => { if (typeof ui !== 'undefined' && ui.saved && ui.saved.ct) ui.saved = null; if (typeof G !== 'undefined' && G && G.ct && !CT.tbl) { G = null; if (typeof render === 'function') render(); } }, 500);
+setTimeout(() => { if (typeof ui !== 'undefined' && ui.saved && ui.saved.ct) ui.saved = null; if (typeof G !== 'undefined' && G && G.ct && !CT.tbl) { CT.resume = { key: G.ct.key, r: G.ct.r, id: G.id }; G = null; if (typeof render === 'function') render(); } }, 500);
 
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek],[data-ctsit],[data-ctrobot],[data-ctskip]'); if (!t) return;
@@ -376,7 +388,7 @@ function ctRuns(club) {
   for (const [c, L] of Object.entries(CT.all || {})) {
     if (club && c !== club) continue;
     for (const [id, t] of Object.entries(L || {})) for (const [d, run] of Object.entries((t && t.run) || {})) {
-      if (run && run.plan) out.push({ club: c, id, d: +d, i: t.info || {}, plan: run.plan, run });
+      if (run && run.plan) out.push({ club: c, id, d: +d, i: t.info || {}, plan: ctFill(run.plan, run.t), run });
     }
   }
   return out.sort((a, b) => b.d - a.d);
@@ -456,7 +468,7 @@ function ctPBN() {
   const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d); if (!x) return;
   const RK = '23456789TJQKA', hand = h => [3, 2, 1, 0].map(s => h.filter(c => (c / 13 | 0) === s).map(c => RK[c % 13]).sort((a, b) => RK.indexOf(b) - RK.indexOf(a)).join('')).join('.');
   const V = ['None', 'NS', 'EW', 'All'], vul = bn => { const ns = E.vulOf(bn, 0), ew = E.vulOf(bn, 1); return V[(ns ? 1 : 0) + (ew ? 2 : 0)]; };
-  const n = x.plan.rounds.length * x.plan.bpr, out = [];
+  const n = (x.plan.nr || x.plan.rounds.length) * x.plan.bpr, out = [];
   for (let bn = 1; bn <= n; bn++) { const d = ctDeal(x.plan, bn), dl = E.dealerOf(bn); out.push(`[Event "${String(x.i.n || '').replace(/"/g, "'")}"]\n[Date "${new Date(x.d).toISOString().slice(0, 10).replace(/-/g, '.')}"]\n[Board "${bn}"]\n[Dealer "${'NESW'[dl]}"]\n[Vulnerable "${vul(bn)}"]\n[Deal "N:${[0, 1, 2, 3].map(s => hand(d[s])).join(' ')}"]\n`); }
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([out.join('\n')], { type: 'text/plain' })); a.download = (x.i.n || 'club') .replace(/[^\w-]+/g, '_') + '-' + new Date(x.d).toISOString().slice(0, 10) + '.pbn'; a.click();
 }
@@ -481,12 +493,12 @@ document.addEventListener('click', e => {
 });
 
 setTimeout(async function ctResume() {
-  if (typeof G === 'undefined' || !G || !G.ct || CT.tbl || CT.waiting) return;
+  const z = CT.resume; CT.resume = null;
+  if (!z || CT.tbl || CT.waiting) return;
   try { await ctLoad(true); } catch (e) { return; }
-  let key = G.ct.key; if (!key) { const x = ctList().find(y => String(G.id || '').startsWith('ct' + y.id + y.d)); if (x) key = x.club + '|' + x.id; }
+  let key = z.key; if (!key) { const x = ctList().find(y => String(z.id || '').startsWith('ct' + y.id + y.d)); if (x) key = x.club + '|' + x.id; }
   const x = key && ctFind(key);
-  if (x && x.plan && ctMyPair(x.plan) >= 0) ctSit(key, G.ct.r);
-  else { G = idleG(); save(); render(); }   // that evening is over (or watching it only): home
+  if (x && x.plan && ctMyPair(x.plan) >= 0 && ctCurRound(x.plan, x.run && x.run.t) >= 0) ctSit(key, z.r);   // that evening is over (or only watched): home
 }, 1500);
 
 /* the director's look at a club table (from the Clubs admin): each board's calls and cards, from the table's list */
@@ -564,11 +576,11 @@ async function ctHeadMine() {
   try {
     for (const x of L) {
       const pi = ctMyPair(x.plan); if (pi < 0) continue;
-      const p = ctRunP(x), tmap = await Net.Cloud.get(p + '/t') || {}, r = ctCurRound(x.plan, tmap); if (r < 0) continue;
-      const ti = x.plan.rounds[r].findIndex(([a, b]) => a === pi || b === pi); if (ti < 0) continue;
+      const p = ctRunP(x), tmap = await Net.Cloud.get(p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
+      const ti = plan.rounds[r].findIndex(([a, b]) => a === pi || b === pi); if (ti < 0) continue;
       const hb = await Net.Cloud.get(p + '/hb') || {};
-      if (!ctTableEmpty(x.plan, r, ti, hb)) continue;
-      const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(x.plan, r, tb.a, tb.res);
+      if (!ctTableEmpty(plan, r, ti, hb)) continue;
+      const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res);
       if (!st) continue;
       if (st.res) await Net.Cloud.put(p + '/t/' + r + '_' + ti + '/res/' + st.res, st.v);
       else await Net.Cloud.put(p + '/t/' + r + '_' + ti + '/a/' + st.n, st.a).catch(() => {});
@@ -583,7 +595,7 @@ async function ctMyScore() {
   const t = CT.tbl; if (!t || t.watch) return;
   try {
     const tmap = await Net.Cloud.get(t.p + '/t') || {}, x = ctFind(t.key), pi = ctMyPair(t.plan); if (pi < 0) return;
-    const S = ctScore({ plan: t.plan, run: { t: tmap }, i: (x && x.i) || {} }), k = S.rank.findIndex(q => q.p === t.plan.pairs[pi]), me = S.rank[k];
+    const S = ctScore({ plan: ctFill(t.plan, tmap), run: { t: tmap }, i: (x && x.i) || {} }), k = S.rank.findIndex(q => q.p === t.plan.pairs[pi]), me = S.rank[k];
     let last = null, lb = -1;
     for (const [bn, L] of Object.entries(S.boards)) for (const q of L) if ((q.ns === pi || q.ew === pi) && +bn > lb) { lb = +bn; last = q.ns === pi ? { mp: q.mp, imp: q.imp } : { mp: 100 - q.mp, imp: -q.imp }; }
     CT.sc = me ? { pct: me.pct, imp: me.imp, n: me.n, pos: k + 1, of: S.rank.length, last } : { pct: 0, imp: 0, n: 0, last: null };

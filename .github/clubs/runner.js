@@ -17,8 +17,9 @@ const AWAY = 90e3, LIVE = 6 * 3600e3;
 // the engine, as in the page
 const ctx = { window: {}, console, performance, setTimeout, clearTimeout, WebAssembly, TextDecoder, TextEncoder, URL, crypto: globalThis.crypto, atob: globalThis.atob };
 ctx.window.window = ctx.window; ctx.self = ctx.window; vm.createContext(ctx);
-for (const file of ['dds.js', 'core.js', 'bidding.js', 'play.js']) vm.runInContext(fs.readFileSync(root + 'js/' + file, 'utf8'), ctx, { filename: file });
+for (const file of ['dds.js', 'core.js', 'bidding.js', 'play.js', 'clubswiss.js']) vm.runInContext(fs.readFileSync(root + 'js/' + file, 'utf8'), ctx, { filename: file });
 const E = {}; for (const fn of ctx.window.BRIDGE) fn(E);
+const ctFill = (plan, tmap) => plan && plan.mov === 'swiss' ? ctx.window.CTSW.fill(plan, tmap, E) : plan;   // the Swiss rounds made so far
 
 const url = p => DB + '/' + p.split('/').map(encodeURIComponent).join('/') + '.json?auth=' + encodeURIComponent(SECRET);
 async function get(p) { const r = await fetch(url(p)); if (!r.ok) throw new Error('GET ' + r.status); return r.json(); }
@@ -58,7 +59,7 @@ async function evenings() {
   const out = [], ot = await get('ot') || {};
   for (const [club, T] of Object.entries(ot)) for (const [tid, t] of Object.entries(T || {})) for (const [d, run] of Object.entries((t && t.run) || {})) {
     if (!run || !run.plan || +d > Date.now() || Date.now() - +d > LIVE) continue;
-    if (ctCurRound(run.plan, run.t) < 0) continue;   // finished
+    if (ctCurRound(ctFill(run.plan, run.t), run.t) < 0) continue;   // finished
     out.push({ p: 'ot/' + club + '/' + tid + '/run/' + d, plan: run.plan, name: (t.info && t.info.n) || tid });
   }
   return out;
@@ -75,11 +76,11 @@ async function evenings() {
     if (Date.now() - beat > 30e3) { beat = Date.now(); for (const x of L) await put(x.p + '/bot', Date.now()).catch(() => {}); }   // the director sees the server's robots at work
     for (const x of L) {
       try {
-        const tmap = await get(x.p + '/t') || {}, r = ctCurRound(x.plan, tmap); if (r < 0) continue;
+        const tmap = await get(x.p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
         const hb = await get(x.p + '/hb') || {};
-        for (let ti = 0; ti < x.plan.rounds[r].length; ti++) {
-          if (!ctTableEmpty(x.plan, r, ti, hb)) continue;
-          const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(x.plan, r, tb.a, tb.res); if (!st) continue;
+        for (let ti = 0; ti < plan.rounds[r].length; ti++) {
+          if (!ctTableEmpty(plan, r, ti, hb)) continue;
+          const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res); if (!st) continue;
           const q = x.p + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
           if (await get(q) != null) continue;   // an app was quicker
           await put(q, st.v || st.a); moved = true; steps++;
@@ -89,4 +90,9 @@ async function evenings() {
     await wait(moved ? 1000 : 4000);
   }
   console.log('Steps played:', steps);
+  // stopped by the time limit with an evening still being played: the next run at once
+  if (L.length && Date.now() >= LIMIT && process.env.GH_TOKEN && process.env.GITHUB_REPOSITORY) {
+    const r = await fetch('https://api.github.com/repos/' + process.env.GITHUB_REPOSITORY + '/actions/workflows/clubs.yml/dispatches', { method: 'POST', headers: { Authorization: 'Bearer ' + process.env.GH_TOKEN, Accept: 'application/vnd.github+json' }, body: JSON.stringify({ ref: 'main' }) }).catch(() => null);
+    console.log('::notice::Next run started: ' + (r && r.status));
+  }
 })().catch(e => { console.log('::error::' + e.message); process.exit(0); });

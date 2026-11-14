@@ -10,7 +10,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 484;
+const APP_V = 486;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -1936,7 +1936,7 @@ function tourResume() {
 /* tournament types, as on the big bridge sites: each fills in the options (custom keeps them as they are) */
 // every tournament is scored in both MP % and IMP, shown together; IMP pairs is only kept for old tournaments
 const TOUR_KINDS = {
-  speed: { icon: '⚡', n: 'Speedball', d: 'Individual with robots, 4 boards, 3 hours: a quick tournament.', set: { format: 'ind', n: 4, scoring: 'mp', hours: 3 } },
+  speed: { icon: '⚡', n: 'Quick tournament', d: 'Individual with robots, 4 boards, 3 hours: a quick tournament.', set: { format: 'ind', n: 4, scoring: 'mp', hours: 3 } },
   robot: { icon: '🤖', n: 'Robot individual', d: 'Everyone plays the same 8 boards with robots, kept for a day.', set: { format: 'ind', n: 8, scoring: 'mp', hours: 24 } },
   daylong: { icon: '🌙', n: 'Daylong', d: '12 boards with robots, play them any time during the day.', set: { format: 'ind', n: 12, scoring: 'imp', hours: 24 } },
   pairs: { icon: '👥', n: 'Pairs', d: 'Pairs at tables: every table plays the same 8 boards; N–S and E–W pairs are scored in both matchpoints and IMPs.', set: { format: 'tables', n: 8, scoring: 'mp', hours: 72, tables: 2 } },

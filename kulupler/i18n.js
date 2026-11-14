@@ -10,6 +10,16 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Are you sure?":"Emin misiniz?",
+    "Yes":"Evet",
+    "Start the tournament now?":"Turnuva şimdi başlatılsın mı?",
+    "Delete this online tournament with its registrations?":"Bu online turnuva kayıtlarıyla birlikte silinsin mi?",
+    "Remove this pair?":"Bu çift çıkarılsın mı?",
+    "Save this score?":"Bu skor kaydedilsin mi?",
+    "Start a test tournament with 4 robot pairs now?":"4 robot çiftle test turnuvası şimdi başlatılsın mı?",
+    "Pairings":"Eşleşmeler",
+    "IMP - MP":"IMP - MP",
+    "Swiss — after each round the pairs with similar scores meet":"Swiss — her turdan sonra puanı yakın çiftler karşılaşır",
     "Test tournament with robots":"Robotlarla test turnuvası",
     "Bidding and play":"Açış ve oyun",
     "Correct the score":"Skoru düzelt",
@@ -38,7 +48,7 @@
     "last seen":"son görülme",
     "Log":"Kayıtlar",
     "Watch":"İzle",
-    "Barometer / Speedball — every table plays the same boards each round, then the pairs move":"Barometre / Speedball — her turda tüm masalar aynı board’ları oynar, sonra çiftler hareket eder",
+    "Barometer — every table plays the same boards each round, then the pairs move":"Barometre — her turda tüm masalar aynı board’ları oynar, sonra çiftler hareket eder",
     "At the club":"Kulüpte",
     "Online (from home)":"Online (evden)",
     "Spectator mode: players may watch the tables":"Seyirci modu: oyuncular masaları izleyebilir",

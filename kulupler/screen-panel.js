@@ -22,7 +22,7 @@ function renderScreenPanel(){
         </div>
       </div>
       <div class="sb-tabs">
-        <button class="sb-tab ${screenTab==='speed'?'active':''}" onclick="setScreenTab('speed',this)">⚡ Speedball</button>
+        <button class="sb-tab ${screenTab==='speed'?'active':''}" onclick="setScreenTab('speed',this)">🔀 <span>Pairings</span></button>
         <button class="sb-tab ${screenTab==='overall'?'active':''}" onclick="setScreenTab('overall',this)">🌐 Overall</button>
         <button class="sb-tab ${screenTab==='ns'?'active':''}" onclick="setScreenTab('ns',this)">🔵 NS</button>
         <button class="sb-tab ${screenTab==='ew'?'active':''}" onclick="setScreenTab('ew',this)">🟡 EW</button>
@@ -126,7 +126,7 @@ window.setScreenTab=function(tab,btn){
   document.getElementById('sbContent').innerHTML=renderSbTab(allRows);
 };
 
-// Speedball: this round's pairings, so each player finds the pair they meet, the table, the seats and the boards
+// the round's pairings, so each player finds the pair they meet, the table, the seats and the boards
 let _sbPair=null;
 window.sbFindPair=function(id){ _sbPair=_sbPair===id?null:id; const c=document.getElementById('sbContent'); if(c) c.innerHTML=renderSpeedTab(); };
 function renderSpeedTab(){
