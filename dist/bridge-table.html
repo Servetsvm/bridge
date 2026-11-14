@@ -10153,7 +10153,7 @@ let T_FORCE = null;
 function T(s, ...a) { let r = (I18N[T_FORCE || SET.lang] || {})[s] || s; a.forEach((v, i) => { r = r.split('{' + i + '}').join(v); }); return r; }
 
 // the version of the app (the same number as in sw.js), shown at the bottom of Settings
-const APP_V = 513;
+const APP_V = 514;
 let SEAT_AB = 'NESW';
 // a robot bid explanation in the chosen language: the phrases of BID_PH, longest first, whole words only
 const BID_RE = {};
@@ -13051,7 +13051,7 @@ function showSettings() {
   openOv('set', `<h2>${T('Settings')}</h2>
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
-   <div class="grp"><span>${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>
+   ${typeof Net !== 'undefined' && Net.isAdmin() ? `<div class="grp"><span>👑 ${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>` : ''}
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
    <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
    <div class="grp"><span>${T('Correct the robots')}</span>${seg('fixbot', [[1, T('On')], [0, T('Off')]], SET.fixBot ? 1 : 0)}<div class="muted">${T("When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.")}</div></div>
@@ -13661,7 +13661,7 @@ document.addEventListener('click', ev_ => {
       if (canFix()) { if (UNDO.some(u => u.by === 'robotfix')) askYes(T("Take back the robot's card?"), fixUndo); else fixUndo(); break; }
       flash('🤖 ' + T('The robots do not accept an undo'), 1800); break;
     }
-    case "sDeal": showDealEntry(); break;
+    case "sDeal": if (typeof Net !== 'undefined' && Net.isAdmin()) showDealEntry(); break;   // the administrator only
     case "dPlay": startEnteredDeal(); break;
     case "dWatch": startEnteredDeal(true); break;
     case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;
