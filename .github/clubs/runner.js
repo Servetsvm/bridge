@@ -10,7 +10,7 @@ const fs = require('fs'), path = require('path'), vm = require('vm');
 const root = path.resolve(__dirname, '../..') + '/';
 const DB = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app';
 const SECRET = process.env.FIREBASE_DB_SECRET || '';
-if (!SECRET) { console.log('No FIREBASE_DB_SECRET: nothing to do.'); process.exit(0); }
+if (!SECRET) { console.log('::warning::No FIREBASE_DB_SECRET secret: nothing to do.'); process.exit(0); }
 const LIMIT = Date.now() + (+process.env.RUN_MIN || 345) * 60e3;   // GitHub stops a job after six hours
 const AWAY = 90e3, LIVE = 6 * 3600e3;
 
@@ -65,12 +65,14 @@ async function evenings() {
 }
 (async () => {
   let L = await evenings(), seen = Date.now(), look = Date.now(), steps = 0;
-  if (!L.length) { console.log('No online club evening now.'); return; }
-  console.log('Playing on:', L.map(x => x.name).join(', '));
+  if (!L.length) { console.log('::notice::Database reached; no online club evening being played now.'); return; }
+  console.log('::notice::Playing on: ' + L.map(x => x.name).join(', '));
+  let beat = 0;
   while (Date.now() < LIMIT) {
     if (Date.now() - look > 60e3) { L = await evenings().catch(() => L); look = Date.now(); if (L.length) seen = Date.now(); }
     if (!L.length && Date.now() - seen > 10 * 60e3) break;   // nothing for ten minutes: the next run looks again
     let moved = false;
+    if (Date.now() - beat > 30e3) { beat = Date.now(); for (const x of L) await put(x.p + '/bot', Date.now()).catch(() => {}); }   // the director sees the server's robots at work
     for (const x of L) {
       try {
         const tmap = await get(x.p + '/t') || {}, r = ctCurRound(x.plan, tmap); if (r < 0) continue;
@@ -87,4 +89,4 @@ async function evenings() {
     await wait(moved ? 1000 : 4000);
   }
   console.log('Steps played:', steps);
-})().catch(e => { console.log(e.message); process.exit(0); });
+})().catch(e => { console.log('::error::' + e.message); process.exit(0); });

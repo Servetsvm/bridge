@@ -10,6 +10,7 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Test tournament with robots":"Robotlarla test turnuvası",
     "Bidding and play":"Açış ve oyun",
     "Correct the score":"Skoru düzelt",
     "Contract":"Kontrat",

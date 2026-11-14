@@ -33,6 +33,9 @@ window.setAdminTab=function(tab,btn){
 };
 function renderAdminTab(){
   const c=document.getElementById('adminContent');if(!c)return;
+  // the online tournament's form being filled in is never drawn again: only the list of tournaments above it
+  if(adminTab==='setup'&&typeof setupOnline!=='undefined'&&setupOnline&&document.getElementById('otFormBox')&&typeof OT!=='undefined'&&!OT.force){ otManageRefresh(); return; }
+  if(typeof OT!=='undefined') OT.force=false;
   const ot=k=>typeof otTabSlot==='function'?otTabSlot(k):'';
   const m={setup:renderSetup,players:()=>(typeof otPlayersSlot==='function'?otPlayersSlot():'')+renderPlayersAdmin(),movement:()=>ot('movement')+renderMovement(),tables:()=>ot('tables')+renderTables(),boards:()=>ot('boards')+renderBoards(),history:()=>ot('history')+renderHistory(),log:()=>ot('log')+renderLog()};
   const fin=getState().status==='finished';

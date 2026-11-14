@@ -44,13 +44,13 @@ function otFormHtml(M, ed) {
   return `<div class="field"><label>Base system</label><select id="otSys" onchange="otPreview()">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
       <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;"><span>Always played</span>: ${M.convs.filter(x => x.basic).map(x => cleanData(x.n)).join(', ')}</div>
       <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
-      <div style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.filter(x => x.basic).map(x => `<label style="display:block;color:var(--text3);"><input type="checkbox" checked disabled> ${cleanData(x.n)}</label>`).join('')}${M.convs.filter(x => !x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}" onchange="otPreview()"> ${cleanData(x.n)}</label>`).join('')}</div>
+      <div style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.filter(x => x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}" onchange="otPreview()"> ${cleanData(x.n)}</label>`).join('')}${M.convs.filter(x => !x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}" onchange="otPreview()"> ${cleanData(x.n)}</label>`).join('')}</div>
       <div class="field"><label>Name</label><input id="otName" maxlength="60" placeholder="Empty: the system and the conventions" oninput="otPreview()"></div>
       <div class="field-row"><div class="field"><label>Day</label><input id="otDay" type="date" value="${ymd}" onchange="otPreview()"></div><div class="field"><label>Start time</label><input id="otTime" type="time" value="19:00" onchange="otPreview()"></div></div>
       <label style="display:block;margin:6px 0;"><input id="otRep" type="checkbox" onchange="otPreview()"> 🔁 <span>Every week at this time</span></label>
       <div class="field-row"><div class="field"><label>Boards</label><select id="otB" onchange="otPreview()">${[12, 16, 18, 20, 24, 27].map(n => `<option ${n === 18 ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
       <div class="field"><label>Boards a round</label><select id="otBpr" onchange="otPreview()">${[2, 3, 4].map(n => `<option ${n === 3 ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-      <div class="field"><label>Scoring</label><select id="otSc" onchange="otPreview()"><option value="mp">MP</option><option value="imp">IMP</option></select></div></div>
+      <div class="field"><label>Scoring</label><select id="otSc" onchange="otPreview()"><option value="mp">MP</option><option value="imp">IMP</option><option value="both">MP + IMP</option></select></div></div>
       <div class="field"><label>Movement</label><select id="otMov" onchange="otPreview()">${Object.entries(OT_MOV).map(([k, n]) => `<option value="${k}">${n}</option>`).join('')}</select>
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">An odd number of pairs gets a robot pair; a pair can also play with a robot partner.</div></div>
       <label style="display:block;margin:6px 0;"><input id="otWatch" type="checkbox" checked> 👁 <span>Spectator mode: players may watch the tables</span></label>
@@ -64,17 +64,25 @@ function otRead() {
   const sysN = ((M.systems.find(x => x.k === v('otSys')) || {}).n || v('otSys')).replace(/ \(.*\)$/, '');
   const auto = sysN + (conv.length ? ' · ' + conv.map(k => (M.convs.find(x => x.k === k) || {}).n || k).join(', ') : '');
   return { n: (v('otName').trim() || auto).slice(0, 60), at: Date.parse(v('otDay') + 'T' + (v('otTime') || '19:00')), b: +v('otB') || 18, bpr: +v('otBpr') || 3,
-    sc: v('otSc') === 'imp' ? 'imp' : 'mp', sys: v('otSys') || 'sayc', conv, mov: OT_MOV[v('otMov')] ? v('otMov') : 'howell', rep: (document.getElementById('otRep') || {}).checked ? 1 : 0, watch: (document.getElementById('otWatch') || {}).checked ? 1 : 0, sysN };
+    sc: ['imp', 'both'].includes(v('otSc')) ? v('otSc') : 'mp', sys: v('otSys') || 'sayc', conv, mov: OT_MOV[v('otMov')] ? v('otMov') : 'howell', rep: (document.getElementById('otRep') || {}).checked ? 1 : 0, watch: (document.getElementById('otWatch') || {}).checked ? 1 : 0, sysN };
 }
 // the line shown before saving: "SAYC · RKCB 0314, Stayman · Sat 14 Nov 20:00 / 18 boards · 3 boards a round · MP · Howell"
 window.otPreview = function () {
   const el = document.getElementById('otPrev'); if (!el) return;
   const i = otRead(), M = OT.meta || { convs: [] };
-  el.innerHTML = `<b>${cleanData(i.n)}</b>${i.at ? ' · ' + otWhen(i.at) : ''}${i.rep ? ' · 🔁' : ''}<div style="font-size:0.8rem;">${i.b} <span>boards</span> · ${i.bpr} <span>boards a round</span> · ${i.sc === 'imp' ? 'IMP' : 'MP'} · ${cleanData(i.sysN)}${i.conv.length ? ' · ' + i.conv.map(k => cleanData((M.convs.find(x => x.k === k) || {}).n || k)).join(', ') : ''} · ${cleanData(OT_MOV[i.mov].split(' — ')[0])}</div>`;
+  el.innerHTML = `<b>${cleanData(i.n)}</b>${i.at ? ' · ' + otWhen(i.at) : ''}${i.rep ? ' · 🔁' : ''}<div style="font-size:0.8rem;">${i.b} <span>boards</span> · ${i.bpr} <span>boards a round</span> · ${(i.sc === 'imp' ? 'IMP' : i.sc === 'both' ? 'MP + IMP' : 'MP')} · ${cleanData(i.sysN)}${i.conv.length ? ' · ' + i.conv.map(k => cleanData((M.convs.find(x => x.k === k) || {}).n || k)).join(', ') : ''} · ${cleanData(OT_MOV[i.mov].split(' — ')[0])}</div>`;
 };
 // Tournament Setup with 🌐 Online chosen: the online tournament's form in place of the club room's
 let setupOnline = false;
-window.setSetupOnline = function (on) { setupOnline = !!on; OT.edit = null; renderAdminTab(); };
+window.setSetupOnline = function (on) { setupOnline = !!on; OT.edit = null; otRerender(); };
+// the whole setup drawn again (the form too): another tournament to change, saved, cancelled
+function otRerender() { OT.force = true; renderAdminTab(); }
+// only the tournaments' list above the form (registrations, live state)
+async function otManageRefresh() {
+  const m = document.getElementById('otManage'); if (!m) return;
+  if (m.querySelector('[id^=otpf-] input')) return;   // a pair being changed there
+  await otLoad(); m.innerHTML = otManageHtml(OT.meta || { systems: [], convs: [] });
+}
 const otRefresh = () => { if (adminTab === 'setup' && setupOnline) renderAdminTab(); };
 // Tournament Setup with "Online (from home)": the club's online tournaments (to change, start now, players), then the form
 function otSetupCard() {
@@ -82,9 +90,9 @@ function otSetupCard() {
     await Promise.all([otLoad(), otMeta()]);
     const box = document.getElementById('otSetupBox'); if (!box) return;
     const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, ed = OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info;
-    box.innerHTML = otManageHtml(M) + `<div class="card"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '➕ <span>New online tournament</span>'}</div>${otFormHtml(M, ed)}${ed ? '<button class="btn btn-sm" style="margin-top:6px;" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button>' : ''}</div>`;
+    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '➕ <span>New online tournament</span>'}</div>${otFormHtml(M, ed)}${ed ? '<button class="btn btn-sm" style="margin-top:6px;" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button>' : ''}</div>`;
     otPreview();
-    clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (!(adminTab === 'setup' && setupOnline)) return; const f = document.activeElement; if (OT.edit || (f && f.closest && f.closest('#adminContent input, #adminContent select'))) { OT.liveT = setTimeout(again, 20000); return; } renderAdminTab(); }, 20000);   // new registrations and the live state, every 20 seconds
+    clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (!(adminTab === 'setup' && setupOnline)) return; otManageRefresh(); OT.liveT = setTimeout(again, 20000); }, 20000);   // only the list above the form   // new registrations and the live state, every 20 seconds
   }, 0);
   return `<div class="card"><div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span>⚙️</span> Tournament Setup
       <span style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-sm" onclick="setSetupOnline(false)">🏛 <span>At the club</span></button><button class="btn btn-sm btn-gold" disabled>🌐 <span>Online (from home)</span></button></span></div>
@@ -108,7 +116,7 @@ function otManageHtml(M) {
     const i = t.info, d = otNext(i), started = !!(t.run && t.run[d] && t.run[d].plan);
     const P = Object.entries(t.pairs || {}).filter(([, p]) => p && p.d === d), S = Object.entries(t.seek || {}).filter(([, p]) => p && p.d === d);
     return `<div class="card"><b>🌐 ${cleanData(i.n)}</b> <small>· ${otWhen(d)}${i.rep ? ' · 🔁 <span>every week</span>' : ''}${started ? ' · 🟢 <span>Started</span>' : ''}</small>
-      <div style="font-size:0.78rem;color:var(--text2);">${i.b} <span>boards</span> · ${i.bpr} <span>boards a round</span> · ${i.sc === 'imp' ? 'IMP' : 'MP'} · ${cleanData((M.systems.find(x => x.k === i.sys) || {}).n || i.sys)}${(i.conv || []).length ? ' · ' + (i.conv || []).map(k => cleanData((M.convs.find(x => x.k === k) || {}).n || k)).join(', ') : ''} · ${cleanData((OT_MOV[i.mov] || OT_MOV.howell).split(' — ')[0])}${i.watch ? ' · 👁' : ''}</div>
+      <div style="font-size:0.78rem;color:var(--text2);">${i.b} <span>boards</span> · ${i.bpr} <span>boards a round</span> · ${(i.sc === 'imp' ? 'IMP' : i.sc === 'both' ? 'MP + IMP' : 'MP')} · ${cleanData((M.systems.find(x => x.k === i.sys) || {}).n || i.sys)}${(i.conv || []).length ? ' · ' + (i.conv || []).map(k => cleanData((M.convs.find(x => x.k === k) || {}).n || k)).join(', ') : ''} · ${cleanData((OT_MOV[i.mov] || OT_MOV.howell).split(' — ')[0])}${i.watch ? ' · 👁' : ''}</div>
       <div style="margin-top:6px;"><b>${P.length}</b> <span>pairs registered</span></div>
       ${P.map(([pid, p], k) => `<div style="display:flex;align-items:center;gap:6px;margin:2px 0;" id="otp-${id}-${pid}">${k + 1}. ${cleanData(p.a)} – ${cleanData(p.b)} <button class="btn btn-sm" onclick="otPairForm('${id}','${pid}')">✏️</button>${started ? '' : `<button class="btn btn-sm btn-red" onclick="otPairDel('${id}','${pid}')">🗑</button>`}</div>`).join('')}
       ${started ? '' : `<div style="margin-top:4px;"><button class="btn btn-sm" onclick="otPairForm('${id}','')">➕ <span>Add a pair</span></button></div>`}<div id="otpf-${id}"></div>
@@ -117,7 +125,7 @@ function otManageHtml(M) {
       <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;">${started ? '' : `<button class="btn btn-sm btn-gold" onclick="otStartNow('${id}')">▶ <span>Start now</span></button>`}<button class="btn btn-sm" onclick="otEdit('${id}')">✏️ <span>Change</span></button><button class="btn btn-sm" onclick="otResults('${id}')">📊 <span>Results</span></button><button class="btn btn-sm" onclick="otRefresh()">🔄</button><button class="btn btn-sm btn-red" onclick="otDelete('${id}')">🗑 <span>Delete</span></button></div></div>`;
   }).join('');
 }
-window.otEdit = function (id) { OT.edit = id; renderAdminTab(); setTimeout(() => { const f = document.getElementById('otSys'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); };
+window.otEdit = function (id) { OT.edit = id; otRerender(); setTimeout(() => { const f = document.getElementById('otSys'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300); };
 const otPut = async (p, v, m) => { const r = await fetch(await otUrl(p), { method: m || 'PUT', headers: { 'Content-Type': 'application/json' }, body: v === undefined ? undefined : JSON.stringify(v) }); if (!r.ok) throw new Error(r.status); };
 // the registrations of the occurrence old go to the occurrence nw (a new day or time, or started now)
 async function otMove(id, old, nw) {
@@ -139,7 +147,7 @@ window.otSave = async function () {
     const id = OT.edit || Date.now().toString(36), old = ed ? otNext(ed.info) : 0;
     await otPut('/' + id + '/info', info);
     if (ed) await otMove(id, old, otNext(info));   // the pairs registered stay registered at the new time
-    toast('✅ Saved'); OT.edit = null; renderAdminTab();
+    toast('✅ Saved'); OT.edit = null; otRerender();
   } catch (e) { toast('❌ Could not save'); } finally { OT.busy = false; }
 };
 // start now: the start is set to now and the evening's plan is made at once (from the pairs registered)
@@ -333,8 +341,9 @@ window.otOpenRes = function (id, d, tab) {
 function otPresenceHtml(x) {
   const hb = (x.run && x.run.hb) || {}, now = Date.now(), L = [];
   for (const p of x.plan.pairs) if (!p.robot) for (const [n, k] of [[p.a, p.ka], [p.b, p.kb]]) if (k) { const ts = +hb[k] || 0; L.push({ n, on: now - ts < 90e3, ts }); }
-  if (!L.length) return '';
-  return '<div style="margin-top:8px;font-size:0.8rem;"><b><span>Players</span></b>' + L.map(p => '<div>' + (p.on ? '🟢 ' : '🔴 ') + cleanData(p.n) + (p.on ? '' : ' · <span>away: the robot plays for them</span>' + (p.ts ? ' · <span>last seen</span> ' + new Date(p.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '')) + '</div>').join('') + '</div>';
+  const bot = x.run && +x.run.bot, botTxt = bot ? '<div style="margin-top:4px;">🤖 <span>Server robots</span>: ' + (now - bot < 120e3 ? '🟢 ' : '⚪ ') + new Date(bot).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '</div>' : '';
+  if (!L.length) return botTxt;
+  return botTxt + '<div style="margin-top:8px;font-size:0.8rem;"><b><span>Players</span></b>' + L.map(p => '<div>' + (p.on ? '🟢 ' : '🔴 ') + cleanData(p.n) + (p.on ? '' : ' · <span>away: the robot plays for them</span>' + (p.ts ? ' · <span>last seen</span> ' + new Date(p.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '')) + '</div>').join('') + '</div>';
 }
 // a board's bidding and play (read from the table's list)
 window.otPlay = async function (r, ti, bn) {
@@ -394,12 +403,29 @@ async function otRobots() {
           if (!P.ctTableEmpty(run.plan, r, ti, hb)) continue;
           const tb = tmap[r + '_' + ti] || {}, st = P.ctHeadStep(run.plan, r, tb.a, tb.res); if (!st) continue;
           const q = base + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
-          if (await get(q.slice(base.length)) != null) return;   // written meanwhile by another app: the next look reads it
+          if (await get(q.slice(base.length)) != null) continue;   // written meanwhile by another app: the next look reads it
           await fetch(await otUrl(q), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(st.v || st.a) });
-          return;   // one step a time
+          // one step at each table, every table at once
         }
       }
     }
   } catch (e) {} finally { OT.headBusy = false; }
 }
 setInterval(otRobots, 1500);
+
+/* Servet's test: an online tournament started now where every seat is a robot (made-up names); the robots play it
+   from this page (and the GitHub run), so the whole evening can be watched and its results looked at */
+window.otTestRobots = async function () {
+  const P = otP(); if (!P || !confirm('Start a test tournament with 4 robot pairs now?')) return;
+  const N = ['Ingrid', 'Lars', 'Sofia', 'Mateo', 'Yuki', 'Omar', 'Elif', 'Jonas', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Hanna', 'Karim', 'Amara', 'Felix', 'Leila', 'Tomás', 'Mei', 'Pavel'].sort(() => Math.random() - 0.5);
+  const id = Date.now().toString(36), at = Date.now() - 1000, f = otRead();
+  const info = { n: '🧪 Test · ' + f.sysN, at, b: 12, bpr: 3, sc: 'both', sys: f.sys, conv: f.conv, mov: 'howell', rep: 0, watch: 1, test: 1, st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
+  const pairs = [0, 1, 2, 3].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
+  try {
+    await otPut('/' + id + '/info', info);
+    for (const p of pairs) { const { pid, ...v } = p; await otPut('/' + id + '/pairs/' + pid, v); }
+    const plan = P.ctMakePlan({ id, d: at, i: info, pairs });
+    await otPut('/' + id + '/run/' + at, plan, 'PATCH');
+    toast('🧪 ' + info.n); await otLoad(); otRerender();
+  } catch (e) { toast('❌ Could not start'); }
+};
