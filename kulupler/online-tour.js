@@ -377,6 +377,7 @@ async function otRobots() {
         if (await get('/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
         const tmap = await get('/t') || {}, plan = P.ctFill(run.plan, tmap), r = P.ctCurRound(plan, tmap); if (r < 0) continue;
         const hb = await get('/hb') || {};
+        if (t.info.wait && !hb[t.info.wait]) continue;   // Servet's test: nothing played before he sits down
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {
           if (!P.ctTableEmpty(plan, r, ti, hb)) continue;
           const tb = tmap[r + '_' + ti] || {}, st = P.ctHeadStep(plan, r, tb.a, tb.res, ti); if (!st) continue;
@@ -398,10 +399,10 @@ window.otTestRobots = async function (play, bm) {
   const f0 = otRead(), np = Math.max(2, Math.floor(f0.np / 2));
   const P = otP(); if (!P) return;
   let my = null; if (play) { try { const [n, k] = P.eval('[myNm(), ctMe()]'); if (n && k) my = { n: String(n).slice(0, 20), k }; } catch (e) {} if (!my) { toast('❌ ' + otL('Sign in with your name first.')); return; } }
-  if (!await otAsk(otL('Start a test tournament with robots now?') + ' (' + f0.np + ' ' + otL('players') + ' · ' + np + ' ' + otL('pairs') + ')' + (my ? '<br>🪑 ' + otL('You play too, with a robot partner.') : '') + (bm ? '<br>📟 ' + otL('After each board you enter the score on the Bridgemate.') : ''))) return;
+  if (!await otAsk(otL('Start a test tournament with robots now?') + ' (' + f0.np + ' ' + otL('players') + ' · ' + np + ' ' + otL('pairs') + ')' + (my ? '<br>🪑 ' + otL('You play too, with a robot partner.') + ' ' + otL('Nothing is played until you sit down.') : '') + (bm ? '<br>📟 ' + otL('After each board you enter the score on the Bridgemate.') : ''))) return;
   const N = ['Ingrid', 'Lars', 'Sofia', 'Mateo', 'Yuki', 'Omar', 'Elif', 'Jonas', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Hanna', 'Karim', 'Amara', 'Felix', 'Leila', 'Tomás', 'Mei', 'Pavel'].sort(() => Math.random() - 0.5);
   const id = Date.now().toString(36), at = Date.now() - 1000, f = otRead();
-  const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, np: f.np, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, ...(bm ? { bm: 1 } : {}), st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
+  const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, np: f.np, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, ...(bm ? { bm: 1 } : {}), ...(my ? { wait: my.k } : {}), st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
   while (N.length < 2 * np) N.push('Robot ' + (N.length + 1));
   const pairs = [...Array(np).keys()].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
   if (my) Object.assign(pairs[0], { pid: 'me', a: my.n, ka: my.k });   // his partner stays a robot

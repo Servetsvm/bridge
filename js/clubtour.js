@@ -698,6 +698,7 @@ async function ctHeadMine() {
       const p = ctRunP(x), tmap = await Net.Cloud.get(p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
       const ti = plan.rounds[r].findIndex(([a, b]) => a === pi || b === pi); if (ti < 0) continue;
       const hb = await Net.Cloud.get(p + '/hb') || {};
+      if (x.i && x.i.wait && !hb[x.i.wait]) continue;   // Servet's test: nothing played before he sits down
       if (!ctTableEmpty(plan, r, ti, hb)) continue;
       const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res, ti);
       if (!st) continue;

@@ -53,6 +53,7 @@
     "IMP - MP":"IMP - MP",
     "Swiss — after each round the pairs with similar scores meet":"Swiss — her turdan sonra puanı yakın çiftler karşılaşır",
     "Test tournament with robots":"Robotlarla test turnuvası",
+    "Nothing is played until you sit down.":"Sen oturana kadar hiçbir masada oynanmaz.",
     "At the club, with real cards (the Bridgemate test)":"Kulüpte, gerçek kartlarla (Bridgemate testi)",
     "I use the Bridgemate (at my table)":"Bridgemate'i ben kullanayım (masamda)",
     "After each board you enter the score on the Bridgemate.":"Her elden sonra skoru Bridgemate'e sen giriyorsun.",

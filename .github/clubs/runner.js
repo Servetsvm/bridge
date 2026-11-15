@@ -106,6 +106,7 @@ async function evenings() {
         if (await get(x.p + '/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
         const tmap = await get(x.p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
         const hb = await get(x.p + '/hb') || {};
+        if (x.info && x.info.wait && !hb[x.info.wait]) continue;   // Servet's test: nothing played before he sits down
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {
           if (!ctTableEmpty(plan, r, ti, hb)) continue;
           const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res, ti); if (!st) continue;
