@@ -349,12 +349,12 @@ async function otClubBoard(key) {
   const t = (OT.list || {})[o.tid], run = t && t.run && t.run[o.d]; if (!run || !run.plan) return null;
   const r = await fetch(await otUrl('/' + o.tid + '/run/' + o.d + '/t'), { cache: 'no-store' }), tmap = r.ok ? (await r.json()) || {} : {};
   const [tb, rd, bn] = key.split('_').map(Number);
-  return { P, plan: P.ctFill(run.plan, tmap), list: (tmap[(rd - 1) + '_' + (tb - 1)] || {}).a, r: rd - 1, bn };
+  return { P, plan: P.ctFill(run.plan, tmap), list: (tmap[(rd - 1) + '_' + (tb - 1)] || {}).a, r: rd - 1, bn, ti: tb - 1 };
 }
 const otPop = (title, html) => { otStyle(); openModal(title, '<div class="otbox" style="overflow-x:auto;">' + html + '</div>', '<button class="btn btn-gold" onclick="closeModal()">' + otL('OK') + '</button>'); };
 window.otClubPlay = async function (key) {
   const x = await otClubBoard(key); if (!x) return;
-  otPop('👁 ' + otL('Bidding and play'), x.P.ctPlayHtml(x.plan, x.r, x.list, x.bn));
+  otPop('👁 ' + otL('Bidding and play'), x.P.ctPlayHtml(x.plan, x.r, x.list, x.bn, x.ti));
 };
 window.otClubDD = async function (key) {
   const x = await otClubBoard(key); if (!x) return;

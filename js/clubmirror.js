@@ -10,10 +10,12 @@
   function ctPbnDeal(str) { const m = /^([NESW]):\s*(.+)$/.exec(String(str || '').trim()); if (!m) return null; const first = 'NESW'.indexOf(m[1]), hs = m[2].trim().split(/\s+/); if (hs.length !== 4) return null; const out = [[], [], [], []], RK = '23456789TJQKA'; hs.forEach((h, k) => { const ss = h.split('.'); if (ss.length !== 4) return; ss.forEach((cs, j) => { for (const ch of cs.toUpperCase().replace('10', 'T')) { const r = RK.indexOf(ch); if (r >= 0) out[(first + k) % 4].push((3 - j) * 13 + r); } }); }); return out.every(h => h.length === 13) ? out.map(h => h.sort((a, b) => b - a)) : null; }
   function deal(E, plan, bn) { const f = plan.deals && ctPbnDeal(plan.deals[bn - 1]); if (f) return f; E.seed(((plan.seed >>> 0) + bn * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
   // each board's opening lead at a table (the first card after the bidding)
-  function leads(E, plan, r, list) {
-    const L = listOf(list), out = {}; let i = 0;
+  // a table's board set (Howell, Mitchell: its own; otherwise the round's), as js/clubtour.js has it
+  const setOf = (plan, r, ti) => ti != null && plan.bs && plan.bs[r] && plan.bs[r][ti] != null && plan.bs[r][ti] >= 0 ? plan.bs[r][ti] : r;
+  function leads(E, plan, r, list, ti) {
+    const L = listOf(list), out = {}; let i = 0, s0 = setOf(plan, r, ti);
     for (let k = 0; k < plan.bpr; k++) {
-      const bn = r * plan.bpr + k + 1, auc = [];
+      const bn = s0 * plan.bpr + k + 1, auc = [];
       while (i < L.length && L[i] && L[i].c != null && !E.auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
       if (!E.auctionOver(auc)) break;
       if (!E.contractOf(auc)) continue;
@@ -28,8 +30,9 @@
     const pairs = {}, movements = {}, boards = {}, hands = [];
     plan.pairs.forEach((p, i) => { pairs['p' + (i + 1)] = { id: 'p' + (i + 1), name: p.robot ? '🤖 Robot' : (p.a + ' – ' + p.b), dir: '', startTable: 0, isPhantom: false, online: 1 }; });
     plan.rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => {
-      movements[(r + 1) + '_' + (ti + 1)] = { ns: 'p' + (a + 1), ew: 'p' + (b + 1), boardStart: r * bpr + 1, boardEnd: r * bpr + bpr };
-      const T = (tmap || {})[r + '_' + ti] || {}, ld = leads(E, plan, r, T.a);
+      const s0 = setOf(plan, r, ti);
+      movements[(r + 1) + '_' + (ti + 1)] = { ns: 'p' + (a + 1), ew: 'p' + (b + 1), boardStart: s0 * bpr + 1, boardEnd: s0 * bpr + bpr };
+      const T = (tmap || {})[r + '_' + ti] || {}, ld = leads(E, plan, r, T.a, ti);
       for (const [bn, v] of Object.entries(T.res || {})) {
         if (!v) continue;
         const key = (ti + 1) + '_' + (r + 1) + '_' + bn, base = { vuln: vul(+bn), status: 'done', online: 1, adjusted: !!v.adj, time: new Date(at + 60e3 * (r * bpr + 1)).toISOString() };

@@ -29,7 +29,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 // as js/clubtour.js has them
 function ctCardOf(sys, conv) { const k = E.sysOf(sys).k, c = { ...E.sysOf(k).conv }; for (const x of conv || []) c[x] = true; return { conv: c, agg: 0, sys: k }; }
 function ctCardsOf(plan, r, ti) { const t = r != null && plan.rounds[r] && plan.rounds[r][ti], P = t ? [plan.pairs[t[0]], plan.pairs[t[1]]] : []; return [0, 1].map(k => P[k] && P[k].sys ? ctCardOf(P[k].sys, []) : ctCardOf(plan.sys, plan.conv)); }
-const ctBoards = (plan, r) => [...Array(plan.bpr).keys()].map(i => r * plan.bpr + i + 1);
+const ctSetOf = (plan, r, ti) => ti != null && plan.bs && plan.bs[r] && plan.bs[r][ti] != null && plan.bs[r][ti] >= 0 ? plan.bs[r][ti] : r;
+const ctBoards = (plan, r, ti) => { const s = ctSetOf(plan, r, ti); return [...Array(plan.bpr).keys()].map(i => s * plan.bpr + i + 1); };
 function ctPbnDeal(str) { const m = /^([NESW]):\s*(.+)$/.exec(String(str || '').trim()); if (!m) return null; const first = 'NESW'.indexOf(m[1]), hs = m[2].trim().split(/\s+/); if (hs.length !== 4) return null; const out = [[], [], [], []], RK = '23456789TJQKA'; hs.forEach((h, k) => { const ss = h.split('.'); if (ss.length !== 4) return; ss.forEach((cs, j) => { for (const ch of cs.toUpperCase().replace('10', 'T')) { const r = RK.indexOf(ch); if (r >= 0) out[(first + k) % 4].push((3 - j) * 13 + r); } }); }); return out.every(h => h.length === 13) ? out.map(h => h.sort((a, b) => b - a)) : null; }
 function ctDeal(plan, board) { const f = plan.deals && ctPbnDeal(plan.deals[board - 1]); if (f) return f; E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
 function ctSeatKeys(plan, r, ti) { const [ns, ew] = plan.rounds[r][ti], A = plan.pairs[ns], B = plan.pairs[ew], k = (p, w) => p.robot ? '' : (w ? p.kb : p.ka) || ''; return [k(A, 1), k(B, 0), k(A, 0), k(B, 1)]; }
@@ -44,7 +45,7 @@ function ctNsScore(bn, level, strain, dbl, decl, tr) { const sc = E.scoreOf(leve
 const ctFresh = () => E.seed(null);   // true chance again (a deal sets the dice)
 function ctHeadStep(plan, r, list, res, ti) {
   const L = ctList_(list), cards = ctCardsOf(plan, r, ti); let i = 0;
-  for (const bn of ctBoards(plan, r)) {
+  for (const bn of ctBoards(plan, r, ti)) {
     const deal = ctDeal(plan, bn), dl = E.dealerOf(bn), auc = [];
     while (i < L.length && L[i] && L[i].c != null && !E.auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
     if (!E.auctionOver(auc)) { const s = (dl + auc.length) % 4; ctFresh(); const b = E.aiBid(auc, s, deal[s], cards); return { n: i, a: { s, c: b.call } }; }

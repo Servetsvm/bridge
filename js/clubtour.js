@@ -42,6 +42,73 @@ const ctMine = x => x.pairs.find(p => p.ka === ctMe() || p.kb === ctMe());
    boards (so each board is compared across all the tables). m: who sits at each table (the database lets only them
    write that table). The deals come from the plan's seed, the same on every device. */
 function ctSeed(str) { let h = 2166136261; for (const ch of str) h = Math.imul(h ^ ch.charCodeAt(0), 16777619); return h >>> 0; }
+// the board sets of a Howell or Mitchell evening: bs[round][table] = its set (boards set*bpr+1 …). No pair meets a set
+// twice; the tables of a round play different sets where they can.
+// Each table of the evening is an edge between its two pairs. Every pair plays every set once, so a set is a perfect
+// matching of the pairs: the sets are taken one by one, each a perfect matching of the tables still free, its tables
+// from rounds that do not have it yet where it can; a dead end starts again in another order. Then two sets are swapped
+// along chains of tables (Kempe chains: no pair meets a set twice still) while fewer tables of a round share one.
+// Seeded: every app finds the same sets
+function ctBoardSets(rounds, n, seed) {
+  const R = rounds.length;
+  let h = (seed >>> 0) || 1; const rnd = () => { h = (h + 0x6D2B79F5) >>> 0; let t = h; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const clashes = bs => bs.reduce((k, row) => k + row.length - new Set(row).size, 0);
+  const E0 = []; rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => E0.push({ r, ti, a, b })));
+  // the sets as perfect matchings, one after the other
+  const build = () => {
+    const free = new Set(E0), bs = rounds.map(tb => tb.map(() => -1));
+    for (let s = 0; s < R; s++) {
+      const inc = [...Array(n)].map(() => []); for (const e of free) { inc[e.a].push(e); inc[e.b].push(e); }
+      const taken = new Array(n).fill(false), rUsed = new Map(), pick = []; let steps = 0;
+      const go = () => {
+        let v = -1, best = null;   // the pair with the fewest tables left first
+        for (let p = 0; p < n; p++) if (!taken[p]) { const o = inc[p].filter(e => !taken[e.a === p ? e.b : e.a]); if (!best || o.length < best.length) { v = p; best = o; if (!o.length) break; } }
+        if (v < 0) return true;
+        if (!best.length || ++steps > 4000) return false;
+        shuffle(best).sort((x, y) => (rUsed.get(x.r) || 0) - (rUsed.get(y.r) || 0));   // a round without this set first
+        for (const e of best) {
+          const w = e.a === v ? e.b : e.a; taken[v] = taken[w] = true; rUsed.set(e.r, (rUsed.get(e.r) || 0) + 1); pick.push(e);
+          if (go()) return true;
+          taken[v] = taken[w] = false; rUsed.set(e.r, rUsed.get(e.r) - 1); pick.pop();
+        }
+        return false;
+      };
+      if (!go()) return null;
+      for (const e of pick) { free.delete(e); bs[e.r][e.ti] = s; }
+    }
+    return bs;
+  };
+  // fewer tables of a round sharing a set: Kempe chains of two sets swapped
+  const improve = bs0 => {
+    const E = E0.map(e => ({ ...e, c: bs0[e.r][e.ti] }));
+    const at = [...Array(n)].map(() => new Map()); for (const e of E) { at[e.a].set(e.c, e); at[e.b].set(e.c, e); }
+    const cnt = rounds.map(() => new Map()); for (const e of E) cnt[e.r].set(e.c, (cnt[e.r].get(e.c) || 0) + 1);
+    const share = (r, c) => Math.max(0, (cnt[r].get(c) || 0) - 1), move = (x, from, to) => { cnt[x.r].set(from, cnt[x.r].get(from) - 1); cnt[x.r].set(to, (cnt[x.r].get(to) || 0) + 1); };
+    let cost = clashes(bs0);
+    for (let it = 0; it < 6000 && cost > 0; it++) {
+      const e = E[Math.floor(rnd() * E.length)], d = Math.floor(rnd() * R), c = e.c; if (d === c) continue;
+      const chain = new Set([e]), todo = [e];
+      while (todo.length) { const x = todo.pop(); for (const p of [x.a, x.b]) for (const k of [c, d]) { const y = at[p].get(k); if (y && !chain.has(y)) { chain.add(y); todo.push(y); } } }
+      const rs = new Set([...chain].map(x => x.r)); let before = 0, after = 0;
+      for (const r of rs) before += share(r, c) + share(r, d);
+      for (const x of chain) move(x, x.c, x.c === c ? d : c);
+      for (const r of rs) after += share(r, c) + share(r, d);
+      if (after <= before) {
+        for (const x of chain) { at[x.a].delete(x.c); at[x.b].delete(x.c); }
+        for (const x of chain) { x.c = x.c === c ? d : c; at[x.a].set(x.c, x); at[x.b].set(x.c, x); }
+        cost += after - before;
+      } else for (const x of chain) move(x, x.c === c ? d : c, x.c);
+    }
+    const bs = rounds.map(tb => tb.map(() => -1)); for (const e of E) bs[e.r][e.ti] = e.c; return bs;
+  };
+  const floor = rounds.reduce((k, tb) => k + Math.max(0, tb.length - R), 0);   // more tables than sets: some must share
+  let best = null;
+  for (let a = 0; a < 12 && !(best && clashes(best) <= floor); a++) { const b = build(); if (b) { const v = improve(b); if (!best || clashes(v) < clashes(best)) best = v; } }
+  return best || improve(rounds.map((tb, r) => tb.map(() => r)));   // none found: from every round on one set
+}
+// a table's boards: its own set (Howell, Mitchell), else the round's
+const ctSetOf = (plan, r, ti) => ti != null && plan.bs && plan.bs[r] && plan.bs[r][ti] != null && plan.bs[r][ti] >= 0 ? plan.bs[r][ti] : r;
 function ctMakePlan(x) {
   const P = x.pairs.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0) || String(a.pid).localeCompare(String(b.pid))).map(p => ({ a: p.a, b: p.b, ka: p.ka, kb: p.kb, ...(p.sys ? { sys: p.sys } : {}) }));
   if (P.length < 1) return null;   // one pair plays the robot pair
@@ -61,7 +128,8 @@ function ctMakePlan(x) {
     const all = {}; for (const p of P) for (const k of [p.ka, p.kb]) if (k) all[k] = 1;
     for (const k of Object.keys(m)) delete m[k]; for (let r = 0; r < nr; r++) for (let ti = 0; ti < n / 2; ti++) m[r + '_' + ti] = { ...all };
   }
-  return { plan: { pairs: P, rounds, ...(nr ? { nr } : {}), mov: x.i.mov || 'howell', bpr: +x.i.bpr || 3, sys: x.i.sys, conv: x.i.conv || [], sc: x.i.sc, seed: ctSeed(x.id + ':' + x.d), ...(Array.isArray(x.i.deals) && x.i.deals.length ? { deals: x.i.deals } : {}), at: Date.now() }, m };
+  const bs = !nr && rounds.length > 1 && rounds[0].length > 1 && ['howell', 'mitchell'].includes(x.i.mov || 'howell') ? ctBoardSets(rounds, n, ctSeed(x.id + ':' + x.d + ':sets')) : null;
+  return { plan: { pairs: P, rounds, ...(nr ? { nr } : {}), ...(bs ? { bs } : {}), mov: x.i.mov || 'howell', bpr: +x.i.bpr || 3, sys: x.i.sys, conv: x.i.conv || [], sc: x.i.sc, seed: ctSeed(x.id + ':' + x.d), ...(Array.isArray(x.i.deals) && x.i.deals.length ? { deals: x.i.deals } : {}), at: Date.now() }, m };
 }
 // the plan with the Swiss rounds that can be made now (from what the tables played)
 // an online evening as the club's own tournament (the Clubs admin's tabs)
@@ -84,7 +152,7 @@ function ctSched(plan, pi) {
   plan.rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => {
     if (a !== pi && b !== pi) return;
     const ns = a === pi, opp = plan.pairs[ns ? b : a];
-    out.push({ r, ti, ns, opp, from: r * plan.bpr + 1, to: r * plan.bpr + plan.bpr });
+    const s = ctSetOf(plan, r, ti); out.push({ r, ti, ns, opp, from: s * plan.bpr + 1, to: s * plan.bpr + plan.bpr });
   }));
   return out;
 }
@@ -192,7 +260,7 @@ function ctSeatsOf(plan, r, ti) {
   const s = (p, w) => p.robot ? { n: T('Robot'), k: '' } : { n: w ? p.b : p.a, k: w ? p.kb : p.ka };
   return [s(A, 1), s(B, 0), s(A, 0), s(B, 1)];
 }
-const ctBoards = (plan, r) => [...Array(plan.bpr).keys()].map(i => r * plan.bpr + i + 1);
+const ctBoards = (plan, r, ti) => { const s = ctSetOf(plan, r, ti); return [...Array(plan.bpr).keys()].map(i => s * plan.bpr + i + 1); };
 // who decides a seat now: its player (present), else the robots of the runner's device; dummy goes with declarer
 function ctPresent(k) { const t = CT.tbl; return !!k && (k === ctMe() || (t && t.hb && Date.now() - (+t.hb[k] || 0) < CT_AWAY)); }
 function ctRunner() { const t = CT.tbl; if (!t) return ''; const ks = t.seats.map(s => s.k).filter(ctPresent).sort(); return ks[0] || ctMe(); }
@@ -294,7 +362,7 @@ async function ctSit(key, r0) {
   try { await ctSession(); } catch (e) { flash(T('Could not send — sign in with your name and PIN first.'), 2500); return; }
   const seats = ctSeatsOf(x.plan, s.r, s.ti), seat = seats.findIndex(q => q.k === ctMe());
   clearInterval(CT.pollT); clearInterval(CT.beatT);
-  CT.tbl = { key, id: x.id, d: x.d, p: ctRunP(x), plan: x.plan, r: s.r, ti: s.ti, tid: s.r + '_' + s.ti, seats, seat, boards: ctBoards(x.plan, s.r), n: 0, hb: {}, name: x.i.n, rounds: x.plan.nr || x.plan.rounds.length };
+  CT.tbl = { key, id: x.id, d: x.d, p: ctRunP(x), plan: x.plan, r: s.r, ti: s.ti, tid: s.r + '_' + s.ti, seats, seat, boards: ctBoards(x.plan, s.r, s.ti), n: 0, hb: {}, name: x.i.n, rounds: x.plan.nr || x.plan.rounds.length };
   try { localStorage.setItem('ct-r-' + x.id + x.d, String(s.r)); } catch (e) {}
   CT.sc = null; closeOv();
   let hb0 = 0; try { hb0 = +(await Net.Cloud.get(CT.tbl.p + '/hb/' + Net.fbKey(myNm()))) || 0; } catch (e) {}
@@ -518,11 +586,9 @@ function ctScore(x, over) {
 }
 // a board is over when every table of its round has played it (all the tables of a round play the same boards):
 // until then its results, hands and double dummy are not shown, so nobody sees a board still being played elsewhere
-function ctBoardOver(x, bn) {
-  const P = x.plan, r = Math.floor((+bn - 1) / P.bpr), tb = P.rounds[r]; if (!tb || !tb.length) return false;
-  return tb.every((_, ti) => !!((((x.run.t || {})[r + '_' + ti]) || {}).res || {})[bn]);
-}
-const ctBoardLeft = (x, bn) => { const P = x.plan, r = Math.floor((+bn - 1) / P.bpr), tb = P.rounds[r] || []; return [tb.filter((_, ti) => !!((((x.run.t || {})[r + '_' + ti]) || {}).res || {})[bn]).length, tb.length]; };
+const ctTablesOf = (P, bn) => { const out = []; P.rounds.forEach((tb, r) => tb.forEach((_, ti) => { if (ctBoards(P, r, ti).includes(+bn)) out.push(r + '_' + ti); })); return out; };
+function ctBoardOver(x, bn) { const L = ctTablesOf(x.plan, bn); return L.length > 0 && L.every(k => !!(((x.run.t || {})[k] || {}).res || {})[bn]); }
+const ctBoardLeft = (x, bn) => { const L = ctTablesOf(x.plan, bn); return [L.filter(k => !!(((x.run.t || {})[k] || {}).res || {})[bn]).length, L.length]; };
 // the club's online rating, from every evening in turn
 function ctRating(club) {
   const R = {};
@@ -592,7 +658,7 @@ async function ctWatch(tid) {
   const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d); if (!x) return;
   const [rr, ti] = tid.split('_').map(Number);
   clearInterval(CT.pollT); clearInterval(CT.beatT);
-  CT.tbl = { key: r.club + '|' + r.id, id: r.id, d: r.d, p: 'ot/' + encodeURIComponent(r.club) + '/' + encodeURIComponent(r.id) + '/run/' + r.d, plan: x.plan, r: rr, ti, tid, seats: ctSeatsOf(x.plan, rr, ti), seat: 2, boards: ctBoards(x.plan, rr), n: 0, hb: {}, name: x.i.n, rounds: x.plan.rounds.length, watch: true };
+  CT.tbl = { key: r.club + '|' + r.id, id: r.id, d: r.d, p: 'ot/' + encodeURIComponent(r.club) + '/' + encodeURIComponent(r.id) + '/run/' + r.d, plan: x.plan, r: rr, ti, tid, seats: ctSeatsOf(x.plan, rr, ti), seat: 2, boards: ctBoards(x.plan, rr, ti), n: 0, hb: {}, name: x.i.n, rounds: x.plan.rounds.length, watch: true };
   closeOv(); await ctRebuild(); CT.pollT = setInterval(ctPoll, 2000);
   flash('👁 ' + T('Round {0} · table {1}', rr + 1, ti + 1), 2000);
 }
@@ -618,10 +684,10 @@ setTimeout(async function ctResume() {
 }, 1500);
 
 /* the director's look at a club table (from the Clubs admin): each board's calls and cards, from the table's list */
-function ctTablePlay(plan, r, list) {
+function ctTablePlay(plan, r, list, ti) {
   const L = Array.isArray(list) ? list : Object.keys(list || {}).sort((a, b) => a - b).map(k => list[k]), out = [];
   let i = 0;
-  for (const bn of ctBoards(plan, r)) {
+  for (const bn of ctBoards(plan, r, ti)) {
     const auc = [], cards = [];
     while (i < L.length && L[i] && L[i].c != null && !auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
     const over = auctionOver(auc), c = over ? contractOf(auc) : null;
@@ -636,8 +702,8 @@ const ctCardTxt = k => SUIT[S(k)] + RTXT[R(k)];
 // North-South's score of a contract made with tr tricks on board bn
 function ctNsScore(bn, level, strain, dbl, decl, tr) { const sc = scoreOf(level, strain, dbl, vulOf(bn, decl), tr); return sideOf(decl) === 0 ? sc : -sc; }
 // one board as the director sees it: the hands, the bidding and every trick (who led, who won)
-function ctPlayHtml(plan, r, list, bn) {
-  const b = ctTablePlay(plan, r, list).find(x => x.bn === bn);
+function ctPlayHtml(plan, r, list, bn, ti) {
+  const b = ctTablePlay(plan, r, list, ti).find(x => x.bn === bn);
   if (!b) return '<div>' + T('Not played yet') + '</div>';
   const SN = ['N', 'E', 'S', 'W'], d0 = dealerOf(bn), red = t => /[♥♦]/.test(t) ? ' style="color:#c4122f"' : '';
   const cells = []; for (let k = 0; k < d0; k++) cells.push(''); for (const a of b.auc) cells.push(ctCallTxt(a.call));
@@ -671,7 +737,7 @@ function ctTableEmpty(plan, r, ti, hb) { return ctSeatsOf(plan, r, ti).every(s =
 const ctFresh = () => E.seed(null);   // true chance again (a deal sets the dice)
 function ctHeadStep(plan, r, list, res, ti) {
   const L = ctList_(list), cards = ctCardsOf(plan, r, ti); let i = 0;
-  for (const bn of ctBoards(plan, r)) {
+  for (const bn of ctBoards(plan, r, ti)) {
     const deal = ctDeal(plan, bn), dl = dealerOf(bn), auc = [];
     while (i < L.length && L[i] && L[i].c != null && !auctionOver(auc)) { auc.push({ seat: L[i].s, call: L[i].c }); i++; }
     if (!auctionOver(auc)) { const s = (dl + auc.length) % 4; ctFresh(); const b = E.aiBid(auc, s, deal[s], cards); return { n: i, a: { s, c: b.call } }; }
@@ -728,7 +794,7 @@ async function ctMyScore() {
 function ctPairsHtml(x) {
   const P = x.plan, r0 = ctCurRound(P, x.run && x.run.t), r = r0 < 0 ? P.rounds.length - 1 : r0, tb = P.rounds[r] || [];
   const pn = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b), mine = ctMyPair(P), pick = CT.pick != null ? CT.pick : mine;
-  const ti = tb.findIndex(([a, b]) => a === pick || b === pick), from = r * P.bpr + 1, to = from + P.bpr - 1;
+  const ti = tb.findIndex(([a, b]) => a === pick || b === pick), fromOf = k => ctSetOf(P, r, k) * P.bpr + 1, from = fromOf(ti), to = from + P.bpr - 1;
   const found = pick >= 0 && ti >= 0 ? (() => { const [a, b] = tb[ti], ns = a === pick; return `<div class="okmsg" style="font-size:16px;line-height:1.6;"><b>${pn(P.pairs[pick])}</b><br>🪑 ${T('Table {0}', ti + 1)} · ${ns ? T('North-South') : T('East-West')}<br>${T('against')} ${pn(P.pairs[ns ? b : a])}<br>🃏 ${T('Boards {0}', from + '-' + to)}</div>`; })() : '';
   return `<div class="big">${r0 < 0 ? '🏁 ' + T('Finished') + ' · ' : ''}${T('Round {0}', r + 1)} / ${P.nr || P.rounds.length}</div>${found}
     <div class="muted">${T('Tap your pair to see your table.')}</div>
@@ -736,6 +802,6 @@ function ctPairsHtml(x) {
       return `<div class="ctcardt${a === pick || b === pick ? ' me' : ''}"><div class="cth"><b>🪑 ${T('Table {0}', k + 1)}</b><span>${done >= P.bpr ? '✅' : done ? '⏳ ' + done + '/' + P.bpr : ''}</span></div>`
         + `<div class="ctp" data-ctpick="${a}"><small>${T('North-South')} · ${T('Pair {0}', a + 1)}</small>${pn(P.pairs[a])}</div>`
         + `<div class="ctp" data-ctpick="${b}"><small>${T('East-West')} · ${T('Pair {0}', b + 1)}</small>${pn(P.pairs[b])}</div>`
-        + `<div class="ctb">🃏 ${T('Boards {0}', `<b>${from}-${to}</b>`)}</div></div>`; }).join('')}</div>
+        + `<div class="ctb">🃏 ${T('Boards {0}', `<b>${fromOf(k)}-${fromOf(k) + P.bpr - 1}</b>`)}</div></div>`; }).join('')}</div>
     ${P.mov === 'swiss' && r0 >= 0 ? '<div class="muted">' + T('Swiss: each next round is made from the standings when every table has finished.') + '</div>' : ''}`;
 }
