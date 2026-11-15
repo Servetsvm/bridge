@@ -751,93 +751,130 @@ window.bmEnterBoard=function(boardNo){
   renderBoardForm(boardNo,vuln,existing);
 };
 
-function renderBoardForm(boardNo,vuln,existing){
-  if(bmPollInterval){clearInterval(bmPollInterval);bmPollInterval=null;}
-  const s=getState();
-  const m=getMovements()[s.currentRound+'_'+bmTableNo]||{};
-  const vulCls=vuln==='Both'?'both':vuln==='NS'?'ns':vuln==='EW'?'ew':'none';
-  const vulTxt=vuln==='Both'?'BOTH VUL':vuln==='None'?'NO VUL':vuln+' VUL';
-  const num=x=>(x||'').replace(/[^0-9]/g,'')||'?';
-  // Bridgemate III: a colour touch screen; every step is one tap on a large key
-  document.getElementById('panelContent').innerHTML=`
-    <div class="bm3">
+// Bridgemate III, one step a screen (each fits a phone): the contract → who played it (the compass: North at the top
+// with the player's name, South below, East and West at the sides) → the opening lead → the tricks declarer took →
+// the result to confirm. After the opponents' approval: the other tables' results on this board, then the next board
+let bmStepNo = 'contract';
+const BM_DIRS = ['N', 'E', 'S', 'W'];
+function renderBoardForm(boardNo, vuln, existing) {
+  if (bmPollInterval) { clearInterval(bmPollInterval); bmPollInterval = null; }
+  if (existing && existing.contract === 'PASS') boardForm.isPass = true;
+  else if (existing && !existing.adjusted && existing.level) Object.assign(boardForm, { level: existing.level, suit: existing.suit, declarer: existing.declarer, doubled: existing.doubled || '', result: existing.result || 0, leadSuit: existing.leadSuit || '', leadRank: existing.leadRank || '', _tricksSet: true });
+  boardForm._editing = !!existing;
+  bmStepNo = 'contract'; bm3Draw();
+}
+// the names of a pair's two players ("A & B" at the club, "A – B" online)
+const bmNames = p => { const n = String((p && p.name) || ''); if (!n || /^(NS|EW|Pair|Par|Çift)\s*\d+$/i.test(n.trim())) return ['', '']; const x = n.includes(' & ') ? n.split(' & ') : n.split(/\s+[–-]\s+/); return [x[0] || '', x[1] || '']; };
+const bmTricks = () => boardForm.level ? boardForm.level + 6 + (boardForm.result || 0) : null;
+function bm3Score() { const f = boardForm; return f.isPass ? 0 : f.level && f.suit && f.declarer ? calcScore(f.level, f.suit, f.declarer, f.result || 0, f.vuln, f.doubled) : null; }
+function bm3Draw() {
+  const L = v => window.i18nText ? i18nText(v) : v, f = boardForm, s = getState(), boardNo = f.boardNo;
+  const m = getMovements()[s.currentRound + '_' + bmTableNo] || {}, P = getPairs(), num = x => (x || '').replace(/[^0-9]/g, '') || '?';
+  const vuln = f.vuln, vulCls = vuln === 'Both' ? 'both' : vuln === 'NS' ? 'ns' : vuln === 'EW' ? 'ew' : 'none', vulTxt = vuln === 'Both' ? 'BOTH VUL' : vuln === 'None' ? 'NO VUL' : vuln + ' VUL';
+  const red = x => x === '♦' || x === '♥';
+  const su = x => x ? (red(x) ? `<span class="red">${x}</span>` : x) : '';
+  const contr = f.isPass ? 'PASS' : f.level ? f.level + su(f.suit) + (f.doubled || '') + (f.declarer ? ' ' + f.declarer : '') : '—';
+  const lead = f.leadSuit && f.leadRank ? su(f.leadSuit) + f.leadRank : '—', tr = bmTricks(), sc = bm3Score();
+  const resTxt = f.isPass ? 'PASS' : tr == null || !f.declarer || bmStepNo === 'contract' || bmStepNo === 'decl' || bmStepNo === 'lead' || !f._tricksSet ? '—' : f.result === 0 ? '=' : f.result > 0 ? '+' + f.result : String(f.result);
+  const key = (on, label, act, cls) => `<button class="bm3-key${cls ? ' ' + cls : ''}${on ? ' active' : ''}" onclick="${act}">${label}</button>`;
+  let body = '', back = '', next = '';
+  if (bmStepNo === 'contract') {
+    body = `<div class="bm3-step">${L('Contract')}</div>
+      <div class="bm3-keys k4">${[1, 2, 3, 4, 5, 6, 7].map(l => key(f.level === l && !f.isPass, l, `bmSet('lvl',${l})`)).join('')}${key(f.isPass, 'PASS', "bmSet('pass')", 'pass')}</div>
+      <div class="bm3-keys k5">${['♣', '♦', '♥', '♠', 'NT'].map(x => key(f.suit === x && !f.isPass, x, `bmSet('suit','${x}')`, 'suit' + (red(x) ? ' red' : ''))).join('')}</div>
+      <div class="bm3-keys k3">${key(!f.doubled, '—', "bmSet('dbl','')")}${key(f.doubled === 'X', 'X', "bmSet('dbl','X')", 'dbl')}${key(f.doubled === 'XX', 'XX', "bmSet('dbl','XX')", 'dbl')}</div>`;
+    back = `<button class="bm3-cancel" onclick="renderTableDetail(${bmTableNo})">✕ ${L('Cancel')}</button>`;
+    next = `<button class="bm3-ok" onclick="bmGo(1)"${f.isPass || (f.level && f.suit) ? '' : ' disabled'}>${L('Next')} ›</button>`;
+  } else if (bmStepNo === 'decl') {
+    const [n1, s1] = bmNames(P[m.ns]), [e1, w1] = bmNames(P[m.ew]), nm = { N: n1, S: s1, E: e1, W: w1 };
+    const seat = d => `<button class="bm3-seat ${d === 'N' || d === 'S' ? 'ns' : 'ew'}${f.declarer === d ? ' active' : ''}" onclick="bmSet('decl','${d}')"><b>${d}</b><small>${cleanData(nm[d] || '')}</small></button>`;
+    body = `<div class="bm3-step">${L('Who played the contract?')}</div>
+      <div class="bm3-compass"><span></span>${seat('N')}<span></span>${seat('W')}<div class="bm3-tbl">${contr}</div>${seat('E')}<span></span>${seat('S')}<span></span></div>`;
+    back = `<button class="bm3-cancel" onclick="bmGo(-1)">‹ ${L('Back')}</button>`;
+    next = `<button class="bm3-ok" onclick="bmGo(1)"${f.declarer ? '' : ' disabled'}>${L('Next')} ›</button>`;
+  } else if (bmStepNo === 'lead') {
+    body = `<div class="bm3-step">${L('Opening lead')}</div>
+      <div class="bm3-keys k4">${['♣', '♦', '♥', '♠'].map(x => key(f.leadSuit === x, x, `bmSet('ls','${x}')`, 'suit' + (red(x) ? ' red' : ''))).join('')}</div>
+      <div class="bm3-keys k7">${['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'].map(r => key(f.leadRank === r, r, `bmSet('lr','${r}')`)).join('')}</div>`;
+    back = `<button class="bm3-cancel" onclick="bmGo(-1)">‹ ${L('Back')}</button>`;
+    next = `<button class="bm3-ok" onclick="bmGo(1)"${f.leadSuit && f.leadRank ? '' : ' disabled'}>${L('Next')} ›</button>`;
+  } else if (bmStepNo === 'tricks') {
+    body = `<div class="bm3-step">${L('Tricks taken by declarer')}</div>
+      <div class="bm3-keys k7">${[...Array(14).keys()].map(t => key(tr === t && f._tricksSet, t, `bmSet('tr',${t})`, t >= f.level + 6 ? 'res made' : 'res down')).join('')}</div>`;
+    back = `<button class="bm3-cancel" onclick="bmGo(-1)">‹ ${L('Back')}</button>`;
+    next = `<button class="bm3-ok" onclick="bmGo(1)"${f._tricksSet ? '' : ' disabled'}>${L('Next')} ›</button>`;
+  } else {   // the result to confirm
+    const rr = f.isPass ? L('Passed out') : f.result === 0 ? L('made exactly') : f.result > 0 ? '+' + f.result + ' ' + L('overtricks') : Math.abs(f.result) + ' ' + L('down');
+    body = `<div class="bm3-step">${L('Result')}</div>
+      <div class="bm3-sum">${f.isPass ? '' : `<div><span>${L('Declarer')}</span><b>${f.declarer}</b></div><div><span>${L('Opening lead')}</span><b>${lead}</b></div><div><span>${L('Tricks')}</span><b>${tr}</b></div>`}<div><span>${L('Result')}</span><b>${rr}</b></div><div class="big"><span>NS</span><b>${sc > 0 ? '+' : ''}${sc}</b></div></div>`;
+    back = `<button class="bm3-cancel" onclick="bmGo(-1)">‹ ${L('Back')}</button>`;
+    next = `<button class="bm3-ok" onclick="saveBoardAndSendApproval(${boardNo})">✓ ${L('Confirm')}</button>`;
+  }
+  document.getElementById('panelContent').innerHTML = `
+    <div class="bm3 bm3w">
       <div class="bm3-screen">
-        <div class="bm3-bar">
-          <span class="td">${CLUB_NAME?'🏛':'♠'}</span>
-          <div class="ev"><b>${s.name||'Bridge Tournament'}</b>Table ${bmTableNo} – Round ${s.currentRound}</div>
-        </div>
+        <div class="bm3-bar"><span class="td">${CLUB_NAME ? '🏛' : '♠'}</span><div class="ev"><b>${cleanData(s.name || 'Bridge Tournament')}</b>${L('Table')} ${bmTableNo} – ${L('Round')} ${s.currentRound}</div></div>
         <div class="bm3-head">
-          <div class="bm3-board"><small>Board</small><b>${boardNo}</b><span class="bm3-vul ${vulCls}">${vulTxt}</span></div>
-          ${existing?'<div class="bm3-edit">editing</div>':''}
+          <div class="bm3-board"><small>${L('Board')}</small><b>${boardNo}</b><span class="bm3-vul ${vulCls}">${vulTxt}</span></div>
+          ${f._editing ? `<div class="bm3-edit">${L('editing')}</div>` : ''}
           <div class="bm3-pairs"><div><i>NS</i>${num(m.ns)}</div><div><i>EW</i>${num(m.ew)}</div></div>
         </div>
         <div class="bm3-display">
-          <div class="bm3-contract" id="lcdContr">—</div>
-          <div class="bm3-sub"><span id="lcdLead">Lead: —</span><span id="lcdResult">Result: —</span></div>
-          <div class="bm3-score"><small>NS</small><b id="spVal">—</b></div>
+          <div class="bm3-contract">${contr}</div>
+          <div class="bm3-sub"><span>${L('Lead')}: ${lead}</span><span>${L('Result')}: ${resTxt}</span></div>
+          <div class="bm3-score"><small>NS</small><b>${sc == null || bmStepNo !== 'confirm' && !f.isPass ? '—' : (sc > 0 ? '+' : '') + sc}</b></div>
         </div>
-
-        <div class="bm3-step">Contract</div>
-        <div class="bm3-keys k4">
-          ${[1,2,3,4,5,6,7].map(l=>`<button class="bm3-key" id="lv${l}" onclick="setLvl(${l})">${l}</button>`).join('')}
-          <button class="bm3-key pass" id="lvP" onclick="setPass()">PASS</button>
-        </div>
-        <div class="bm3-keys k5">
-          <button class="bm3-key suit" id="s♣" onclick="setSuit('♣')">♣</button>
-          <button class="bm3-key suit red" id="s♦" onclick="setSuit('♦')">♦</button>
-          <button class="bm3-key suit red" id="s♥" onclick="setSuit('♥')">♥</button>
-          <button class="bm3-key suit" id="s♠" onclick="setSuit('♠')">♠</button>
-          <button class="bm3-key suit" id="sNT" onclick="setSuit('NT')">NT</button>
-        </div>
-        <div class="bm3-keys k3">
-          <button class="bm3-key" id="lvN" onclick="setDbl('')">—</button>
-          <button class="bm3-key dbl" id="lvX" onclick="setDbl('X')">X</button>
-          <button class="bm3-key dbl" id="lvXX" onclick="setDbl('XX')">XX</button>
-        </div>
-
-        <div class="bm3-step">Declarer</div>
-        <div class="bm3-keys k4">
-          <button class="bm3-key ns" id="dN" onclick="setDecl('N')">N</button>
-          <button class="bm3-key ew" id="dE" onclick="setDecl('E')">E</button>
-          <button class="bm3-key ns" id="dS" onclick="setDecl('S')">S</button>
-          <button class="bm3-key ew" id="dW" onclick="setDecl('W')">W</button>
-        </div>
-
-        <!-- the opening lead once the contract and declarer are in, the result once the lead is -->
-        <div id="bm3Lead" style="display:none">
-        <div class="bm3-step">Opening lead</div>
-        <div class="bm3-keys k4">
-          <button class="bm3-key suit" id="ld♣" onclick="setLeadSuit('♣')">♣</button>
-          <button class="bm3-key suit red" id="ld♦" onclick="setLeadSuit('♦')">♦</button>
-          <button class="bm3-key suit red" id="ld♥" onclick="setLeadSuit('♥')">♥</button>
-          <button class="bm3-key suit" id="ld♠" onclick="setLeadSuit('♠')">♠</button>
-        </div>
-        <div class="bm3-keys k7 small">
-          ${['A','K','Q','J','10','9','8','7','6','5','4','3','2'].map(r=>`<button class="bm3-key" id="lr${r}" onclick="setLeadRank('${r}')">${r}</button>`).join('')}
-        </div>
-        </div>
-        <div id="bm3Res" style="display:none">
-        <div class="bm3-step">Result <small id="resLabel"></small></div>
-        <div class="bm3-keys k7" id="resTiles"></div>
-        </div>
-
-        <div class="bm3-actions">
-          <button class="bm3-cancel" onclick="renderTableDetail(${bmTableNo})">✕ Cancel</button>
-          <button class="bm3-ok" onclick="saveBoardAndSendApproval(${boardNo})">✓ OK</button>
-        </div>
+        <div class="bm3-body">${body}</div>
+        <div class="bm3-actions">${back}${next}</div>
       </div>
     </div>`;
-  renderResTiles();
-  if(existing&&!existing.adjusted&&existing.level){
-    setLvl(existing.level);setSuit(existing.suit);setDecl(existing.declarer);
-    setDbl(existing.doubled||'');
-    boardForm.result=existing.result||0;renderResTiles();
-    if(existing.leadSuit)setLeadSuit(existing.leadSuit);
-    if(existing.leadRank)setLeadRank(existing.leadRank);
-    updateLCD();updateScore();
-  } else if(existing&&existing.contract==='PASS') setPass();
-  else setDbl('');
 }
+const BM_STEPS = ['contract', 'decl', 'lead', 'tricks', 'confirm'];
+window.bmGo = function (d) {
+  const f = boardForm; let i = BM_STEPS.indexOf(bmStepNo) + d;
+  if (f.isPass) i = d > 0 ? BM_STEPS.length - 1 : 0;   // passed out: from the contract straight to the result
+  bmStepNo = BM_STEPS[Math.max(0, Math.min(BM_STEPS.length - 1, i))]; bm3Draw();
+};
+// a key: the step's choice; a step with one choice goes on by itself
+window.bmSet = function (k, v) {
+  const f = boardForm;
+  if (k === 'lvl') { f.level = v; f.isPass = false; }
+  else if (k === 'pass') { f.isPass = !f.isPass; if (f.isPass) Object.assign(f, { level: null, suit: null, declarer: null, doubled: '', result: 0, leadSuit: '', leadRank: '' }); }
+  else if (k === 'suit') { f.suit = v; f.isPass = false; }
+  else if (k === 'dbl') f.doubled = v;
+  else if (k === 'decl') { f.declarer = v; bm3Draw(); setTimeout(() => { if (bmStepNo === 'decl') bmGo(1); }, 220); return; }
+  else if (k === 'ls') f.leadSuit = v;
+  else if (k === 'lr') { f.leadRank = v; if (f.leadSuit) { bm3Draw(); setTimeout(() => { if (bmStepNo === 'lead') bmGo(1); }, 220); return; } }
+  else if (k === 'tr') { f.result = v - (f.level + 6); f._tricksSet = true; bm3Draw(); setTimeout(() => { if (bmStepNo === 'tricks') bmGo(1); }, 220); return; }
+  bm3Draw();
+};
+// after the approval: the other tables' results on this board (and this table's), then the next board's number
+window.bmShowOthers = function (boardNo) {
+  if (bmPollInterval) { clearInterval(bmPollInterval); bmPollInterval = null; }
+  const L = v => window.i18nText ? i18nText(v) : v, s = getState(), mine = getBoards()[bmTableNo + '_' + s.currentRound + '_' + boardNo];
+  const o = getOtherTablesSameBoard(boardNo, bmTableNo, s.currentRound).filter(x => !x.pending);
+  const row = (t, c, sc, me) => `<div class="bm3-orow${me ? ' me' : ''}"><span>${L('Table')} ${t}</span><span>${cleanData(c || '')}</span><b>${typeof sc === 'number' ? (sc > 0 ? '+' : '') + sc : '—'}</b></div>`;
+  document.getElementById('panelContent').innerHTML = `
+    <div class="bm3 bm3w"><div class="bm3-screen">
+      <div class="bm3-bar"><span class="td">${CLUB_NAME ? '🏛' : '♠'}</span><div class="ev"><b>${cleanData(s.name || 'Bridge Tournament')}</b>${L('Table')} ${bmTableNo} – ${L('Round')} ${s.currentRound}</div></div>
+      <div class="bm3-display"><div class="bm3-contract">${L('Board')} ${boardNo} ✓</div><div class="bm3-sub"><span>${L('Other tables on this board')}</span></div></div>
+      <div class="bm3-body"><div class="bm3-others">${mine ? row(bmTableNo, mine.contract, mine.nsScore, true) : ''}${o.map(x => row(x.table, x.contract, x.nsScore)).join('') || `<div class="bm3-note">${L('No other table has finished this board yet.')}</div>`}</div></div>
+      <div class="bm3-actions"><span></span><button class="bm3-ok" onclick="bmAskNext()">${L('Continue')} ›</button></div>
+    </div></div>`;
+};
+// the next board: its number asked (the boards of this round not yet played here); none left: the table's screen
+window.bmAskNext = function () {
+  const L = v => window.i18nText ? i18nText(v) : v, s = getState(), m = getMovements()[s.currentRound + '_' + bmTableNo] || {}, B = getBoards(), left = [];
+  for (let b = m.boardStart || 1; b <= (m.boardEnd || 0); b++) if (!(B[bmTableNo + '_' + s.currentRound + '_' + b] || {}).status) left.push(b);
+  if (!left.length) { renderTableDetail(bmTableNo); return; }
+  document.getElementById('panelContent').innerHTML = `
+    <div class="bm3 bm3w"><div class="bm3-screen">
+      <div class="bm3-bar"><span class="td">${CLUB_NAME ? '🏛' : '♠'}</span><div class="ev"><b>${cleanData(s.name || 'Bridge Tournament')}</b>${L('Table')} ${bmTableNo} – ${L('Round')} ${s.currentRound}</div></div>
+      <div class="bm3-display"><div class="bm3-contract">${L('Next board number?')}</div></div>
+      <div class="bm3-body"><div class="bm3-keys k4">${left.map(b => `<button class="bm3-key" onclick="bmEnterBoard(${b})">${b}</button>`).join('')}</div></div>
+      <div class="bm3-actions"><button class="bm3-cancel" onclick="renderTableDetail(${bmTableNo})">${L('Table')}</button><span></span></div>
+    </div></div>`;
+};
 
 const bm3Mark=(prefix,id)=>{ document.querySelectorAll('[id^="'+prefix+'"]').forEach(b=>b.classList.remove('active')); document.getElementById(id)?.classList.add('active'); };
 function setLvl(l){
@@ -1011,8 +1048,8 @@ function renderApprovalWaiting(boardNo,boardData,key){
         delete aps[key];setApprovals(aps);
       }
       addLog('ok','Board '+boardNo+' approved',boardData.contract||'PASS');
-      toast('✅ Approved! Next board.');
-      renderTableDetail(bmTableNo);
+      toast('✅ Approved!');
+      bmShowOthers(boardNo);
     }
   },1500);
 };
@@ -1028,7 +1065,7 @@ window.bmSelfApprove=function(key,tableNo){
   if(bmPollInterval){clearInterval(bmPollInterval);bmPollInterval=null;}
   addLog('ok',`Board approved (self)`,key);
   toast('✅ Score saved!');
-  renderTableDetail(tableNo);
+  bmShowOthers(+String(key).split('_')[2]);
 };
 
 // ══════════════════════════════════════════════════════

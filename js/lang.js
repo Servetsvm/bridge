@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Who played the contract?": "Kontratı kim oynadı?", "Tricks taken by declarer": "Yapanın aldığı löve", "Other tables on this board": "Bu eldeki diğer masalar", "No other table has finished this board yet.": "Bu eli henüz başka masa bitirmedi.", "Confirm": "Onayla", "made exactly": "tam yapıldı",
     "Lead": "Atak", "The opponents approved the score.": "Rakipler skoru onayladı.", "Your entry matches the board as played.": "Girdiğin, masada oynanan elle aynı.", "As played at the table": "Masada oynanan", "Choose the contract first": "Önce kontratı seç", "Send the score": "Skoru gönder", "Round over": "Tur bitti", "Move instructions": "Hareket bilgisi", "Next": "Sonraki",
     "Boards {0}": "El {0}",
     "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Hâlâ oynanıyor ({1} masadan {0} tanesi bitirdi): bütün masalar bitirince gösterilir.", "No board is over yet.": "Henüz biten el yok.",
@@ -444,6 +445,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Who played the contract?": "Hvem spilte kontrakten?", "Tricks taken by declarer": "Stikk tatt av spillefører", "Other tables on this board": "Andre bord på dette spillet", "No other table has finished this board yet.": "Ingen andre bord har spilt ferdig dette spillet ennå.", "Confirm": "Bekreft", "made exactly": "akkurat hjemme",
     "Lead": "Utspill", "The opponents approved the score.": "Motstanderne godkjente scoren.", "Your entry matches the board as played.": "Det du la inn stemmer med spillet slik det ble spilt.", "As played at the table": "Slik det ble spilt ved bordet", "Choose the contract first": "Velg kontrakten først", "Send the score": "Send scoren", "Round over": "Runden er over", "Move instructions": "Flytteinstruksjoner", "Next": "Neste",
     "Boards {0}": "Spill {0}",
     "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Spilles fortsatt ({0} av {1} bord ferdige): vises når alle bordene har spilt det.", "No board is over yet.": "Ingen spill er ferdige ennå.",
@@ -883,6 +885,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Who played the contract?": "¿Quién jugó el contrato?", "Tricks taken by declarer": "Bazas del declarante", "Other tables on this board": "Otras mesas en esta mano", "No other table has finished this board yet.": "Ninguna otra mesa ha terminado esta mano todavía.", "Confirm": "Confirmar", "made exactly": "cumplido justo",
     "Lead": "Salida", "The opponents approved the score.": "Los rivales aprobaron el resultado.", "Your entry matches the board as played.": "Lo que anotaste coincide con la mano jugada.", "As played at the table": "Como se jugó en la mesa", "Choose the contract first": "Elige primero el contrato", "Send the score": "Enviar el resultado", "Round over": "Ronda terminada", "Move instructions": "Instrucciones de cambio", "Next": "Siguiente",
     "Boards {0}": "Manos {0}",
     "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Todavía se está jugando ({0} de {1} mesas han terminado): se muestra cuando todas las mesas lo hayan jugado.", "No board is over yet.": "Todavía no ha terminado ninguna mano.",
@@ -1350,6 +1353,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Who played the contract?": "Qui a joué le contrat ?", "Tricks taken by declarer": "Levées du déclarant", "Other tables on this board": "Les autres tables sur cette donne", "No other table has finished this board yet.": "Aucune autre table n’a encore fini cette donne.", "Confirm": "Confirmer", "made exactly": "juste fait",
     "Lead": "Entame", "The opponents approved the score.": "Les adversaires ont validé la marque.", "Your entry matches the board as played.": "Ta saisie correspond à la donne jouée.", "As played at the table": "Tel que joué à la table", "Choose the contract first": "Choisis d’abord le contrat", "Send the score": "Envoyer la marque", "Round over": "Tour terminé", "Move instructions": "Instructions de déplacement", "Next": "Suivant",
     "Boards {0}": "Donnes {0}",
     "Still being played ({0} of {1} tables done): shown when every table has finished it.": "En cours ({0} tables sur {1} ont fini) : affichée quand toutes les tables l’auront jouée.", "No board is over yet.": "Aucune donne n’est encore terminée.",
@@ -1817,6 +1821,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Who played the contract?": "Chi ha giocato il contratto?", "Tricks taken by declarer": "Prese del dichiarante", "Other tables on this board": "Gli altri tavoli su questa smazzata", "No other table has finished this board yet.": "Nessun altro tavolo ha ancora finito questa smazzata.", "Confirm": "Conferma", "made exactly": "mantenuto esatto",
     "Lead": "Attacco", "The opponents approved the score.": "Gli avversari hanno approvato il punteggio.", "Your entry matches the board as played.": "Ciò che hai inserito corrisponde alla smazzata giocata.", "As played at the table": "Come giocata al tavolo", "Choose the contract first": "Scegli prima il contratto", "Send the score": "Invia il punteggio", "Round over": "Turno finito", "Move instructions": "Istruzioni di spostamento", "Next": "Avanti",
     "Boards {0}": "Smazzate {0}",
     "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Ancora in gioco ({0} tavoli su {1} hanno finito): si vede quando tutti i tavoli l’hanno giocata.", "No board is over yet.": "Nessuna smazzata è ancora finita.",
@@ -2284,6 +2289,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Who played the contract?": "Wer hat den Kontrakt gespielt?", "Tricks taken by declarer": "Stiche des Alleinspielers", "Other tables on this board": "Die anderen Tische an diesem Board", "No other table has finished this board yet.": "Noch kein anderer Tisch hat dieses Board beendet.", "Confirm": "Bestätigen", "made exactly": "genau erfüllt",
     "Lead": "Ausspiel", "The opponents approved the score.": "Die Gegner haben das Ergebnis bestätigt.", "Your entry matches the board as played.": "Deine Eingabe stimmt mit dem gespielten Board überein.", "As played at the table": "Wie am Tisch gespielt", "Choose the contract first": "Wähle zuerst den Kontrakt", "Send the score": "Ergebnis senden", "Round over": "Runde beendet", "Move instructions": "Wechselanweisungen", "Next": "Weiter",
     "Boards {0}": "Boards {0}",
     "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Wird noch gespielt ({0} von {1} Tischen fertig): erscheint, wenn alle Tische es gespielt haben.", "No board is over yet.": "Noch kein Board ist fertig.",
@@ -2751,6 +2757,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Who played the contract?": "Кто играл контракт?", "Tricks taken by declarer": "Взятки разыгрывающего", "Other tables on this board": "Другие столы на этой сдаче", "No other table has finished this board yet.": "Ни один другой стол ещё не закончил эту сдачу.", "Confirm": "Подтвердить", "made exactly": "ровно",
     "Lead": "Первый ход", "The opponents approved the score.": "Соперники подтвердили результат.", "Your entry matches the board as played.": "Введённое совпадает со сданной игрой.", "As played at the table": "Как сыграно за столом", "Choose the contract first": "Сначала выбери контракт", "Send the score": "Отправить результат", "Round over": "Тур окончен", "Move instructions": "Куда переходить", "Next": "Дальше",
     "Boards {0}": "Сдачи {0}",
     "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Ещё играется ({0} из {1} столов закончили): покажется, когда все столы её сыграют.", "No board is over yet.": "Ни одна сдача ещё не закончена.",
@@ -3218,6 +3225,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Who played the contract?": "Kto rozgrywał kontrakt?", "Tricks taken by declarer": "Lewy rozgrywającego", "Other tables on this board": "Inne stoły w tym rozdaniu", "No other table has finished this board yet.": "Żaden inny stół nie skończył jeszcze tego rozdania.", "Confirm": "Potwierdź", "made exactly": "dokładnie zrobiony",
     "Lead": "Wist", "The opponents approved the score.": "Przeciwnicy zatwierdzili wynik.", "Your entry matches the board as played.": "Twój zapis zgadza się z rozegranym rozdaniem.", "As played at the table": "Jak zagrano przy stole", "Choose the contract first": "Najpierw wybierz kontrakt", "Send the score": "Wyślij wynik", "Round over": "Runda zakończona", "Move instructions": "Instrukcje zmiany", "Next": "Dalej",
     "Boards {0}": "Rozdania {0}",
     "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Wciąż w grze ({0} z {1} stołów skończyło): pokaże się, gdy wszystkie stoły je zagrają.", "No board is over yet.": "Żadne rozdanie jeszcze się nie skończyło.",
@@ -3685,6 +3693,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Who played the contract?": "谁打的定约？", "Tricks taken by declarer": "庄家赢墩数", "Other tables on this board": "本副牌的其他桌", "No other table has finished this board yet.": "还没有其他桌打完这副牌。", "Confirm": "确认", "made exactly": "刚好完成",
     "Lead": "首攻", "The opponents approved the score.": "对手已确认成绩。", "Your entry matches the board as played.": "你的输入与实际打牌一致。", "As played at the table": "桌上实际打法", "Choose the contract first": "请先选择定约", "Send the score": "发送成绩", "Round over": "本轮结束", "Move instructions": "换桌说明", "Next": "下一步",
     "Boards {0}": "牌 {0}",
     "Still being played ({0} of {1} tables done): shown when every table has finished it.": "仍在进行中（{1} 张桌子中已有 {0} 张打完）：所有桌子打完后才会显示。", "No board is over yet.": "还没有打完的牌。",

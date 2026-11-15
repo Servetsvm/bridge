@@ -2164,3 +2164,22 @@ body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradi
 .ctcardt .ctb{margin-top:6px;font-size:14px}
 .clubtools.ct2{grid-template-columns:repeat(2,minmax(0,1fr))}
 #ov .ctbm3{margin:-4px auto 0}
+
+/* Bridgemate III step by step: the compass (who played), the result to confirm, the other tables; each step one screen */
+.bm3w .bm3-body{flex:1;display:flex;flex-direction:column;min-height:0}
+.bm3-compass{display:grid;grid-template-columns:1fr 1.2fr 1fr;grid-template-rows:repeat(3,minmax(64px,1fr));gap:8px;padding:6px 12px;flex:1;max-height:330px}
+.bm3-seat{border:1px solid #d9dee3;border-radius:12px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:#1b1b1b;font:inherit}
+.bm3-seat b{font-size:1.7rem;line-height:1}.bm3-seat small{font-size:.78rem;color:#55606b;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+.bm3-seat.ns b{color:#1f5d36}.bm3-seat.ew b{color:#a15c00}
+.bm3-seat.active{background:#2a7de1;border-color:#2a7de1}.bm3-seat.active b,.bm3-seat.active small{color:#fff}
+.bm3-tbl{display:flex;align-items:center;justify-content:center;background:#1f5d36;color:#fff;border-radius:10px;font-weight:800;font-size:1.1rem;text-align:center}
+.bm3-tbl .red{color:#ff9a9a}
+.bm3-sum{margin:4px 12px;display:flex;flex-direction:column;gap:6px}
+.bm3-sum div{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #eef0f2;padding:4px 2px;font-size:1rem}
+.bm3-sum div span{color:#6d6d6d}.bm3-sum div.big b{font-size:1.8rem}
+.bm3-others{margin:4px 12px;display:flex;flex-direction:column;gap:4px;overflow:auto}
+.bm3-orow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid #e3e7eb;border-radius:8px;padding:7px 10px;font-size:.95rem}
+.bm3-orow.me{background:#e8f1fc;border-color:#2a7de1}
+.bm3-key.res.made{color:#1f5d36}.bm3-key.res.down{color:#b3261e}
+@media (max-height:640px){ .bm3w .bm3-key{min-height:42px} .bm3w .bm3-display{margin:6px 12px;padding:6px 10px} .bm3w .bm3-head{padding-top:6px} .bm3w .bm3-step{padding-top:6px} }
+.bm3w .red,.bm3-sum .red{color:#d32f2f}
