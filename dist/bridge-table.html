@@ -2205,6 +2205,15 @@ body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradi
 .brrow.bad{border-left-color:#c62828}
 .brrow.good{border-left-color:#2e7d32}
 .brrow small{display:block;opacity:.7;margin-bottom:2px}
+/* club pairings: a card for each table */
+.ctcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:8px 0}
+.ctcardt{border:1px solid rgba(127,127,127,.35);border-radius:12px;padding:8px 10px;text-align:left;background:rgba(127,127,127,.06)}
+.ctcardt.me{border:2px solid #d4a72c;background:rgba(212,167,44,.14)}
+.ctcardt .cth{display:flex;justify-content:space-between;align-items:center;font-size:17px;margin-bottom:6px}
+.ctcardt .ctp{cursor:pointer;padding:4px 6px;border-radius:8px;margin:3px 0;background:rgba(127,127,127,.1);font-weight:600}
+.ctcardt .ctp:hover{background:rgba(127,127,127,.2)}
+.ctcardt .ctp small{display:block;font-weight:400;opacity:.7;font-size:12px}
+.ctcardt .ctb{margin-top:6px;font-size:14px}
 
 </style>
 
@@ -5442,6 +5451,8 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Boards {0}": "El {0}",
+    "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Hâlâ oynanıyor ({1} masadan {0} tanesi bitirdi): bütün masalar bitirince gösterilir.", "No board is over yet.": "Henüz biten el yok.",
     "Rate this answer: the robots' chats are kept without names or cards to improve the robots": "Bu cevabı değerlendir: robot sohbetleri robotları geliştirmek için isimsiz ve kartsız saklanır", "Robots' chats": "Robot sohbetleri", "The review key (set once on the Worker) is kept on this device only.": "İnceleme anahtarı (aracıya bir kez girilen) sadece bu cihazda saklanır.", "Review key": "İnceleme anahtarı", "Change the key": "Anahtarı değiştir", "Nothing here yet.": "Henüz bir şey yok.", "Last {0} days": "Son {0} gün", "answers": "cevap",
     "I haven't bid yet.": "Henüz teklif vermedim.", "nothing special — no better call.": "özel bir şey yok — daha iyi bir teklif yoktu.", "My {0}: {1}": "{0} teklifim: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Kusura bakma, el sürerken briç konuşamayız 😉 El bitince sor.", "I'm good, thanks! And you?": "İyiyim, teşekkürler! Sen nasılsın?", "Fine, thanks — enjoying the game!": "İyiyim, sağ ol — oyunun keyfini çıkarıyorum!", "Hi {0}! Good luck 🙂": "Merhaba {0}! Bol şans 🙂", "Hello! Nice to play with you.": "Merhaba! Seninle oynamak güzel.", "Hi! 👋": "Selam! 👋", "You're welcome!": "Rica ederim!", "No problem, partner. Next one!": "Sorun değil ortak. Sıradaki ele!", "Don't worry, it happens.": "Takma kafana, olur böyle.", "Thanks! 😊": "Teşekkürler! 😊", "Thank you!": "Teşekkür ederim!", "Good luck to you too!": "Sana da bol şans!", "Let's keep playing!": "Oynamaya devam!", "Hmm… let me think about the cards.": "Hmm… kartları bir düşüneyim.", "We made it! 🙂": "Yaptık! 🙂", "Well played, partner! 👍": "İyi oynadın ortak! 👍", "Well played!": "İyi oynadın!", "Sorry partner, my fault.": "Kusura bakma ortak, benim hatam.", "Unlucky.": "Şanssızlık.", "Nice defence, partner! 👍": "Güzel savunma ortak! 👍",
     "Tap for the details": "Ayrıntılar için dokun",
@@ -5880,6 +5891,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Boards {0}": "Spill {0}",
+    "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Spilles fortsatt ({0} av {1} bord ferdige): vises når alle bordene har spilt det.", "No board is over yet.": "Ingen spill er ferdige ennå.",
     "Rate this answer: the robots' chats are kept without names or cards to improve the robots": "Vurder dette svaret: robotsamtalene lagres uten navn og kort for å forbedre robotene", "Robots' chats": "Robotsamtaler", "The review key (set once on the Worker) is kept on this device only.": "Gjennomgangsnøkkelen (satt én gang på Workeren) lagres bare på denne enheten.", "Review key": "Gjennomgangsnøkkel", "Change the key": "Bytt nøkkel", "Nothing here yet.": "Ingenting her ennå.", "Last {0} days": "Siste {0} dager", "answers": "svar",
     "I haven't bid yet.": "Jeg har ikke meldt ennå.", "nothing special — no better call.": "ikke noe spesielt — ingen bedre melding.", "My {0}: {1}": "Min {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Beklager, vi kan ikke snakke om meldingene under spillet 😉 Spør meg etterpå.", "I'm good, thanks! And you?": "Bare bra, takk! Og du?", "Fine, thanks — enjoying the game!": "Fint, takk — jeg koser meg!", "Hi {0}! Good luck 🙂": "Hei {0}! Lykke til 🙂", "Hello! Nice to play with you.": "Hei! Hyggelig å spille med deg.", "Hi! 👋": "Hei! 👋", "You're welcome!": "Bare hyggelig!", "No problem, partner. Next one!": "Ikke noe problem, makker. Neste!", "Don't worry, it happens.": "Ikke tenk på det, sånt skjer.", "Thanks! 😊": "Takk! 😊", "Thank you!": "Tusen takk!", "Good luck to you too!": "Lykke til du også!", "Let's keep playing!": "Vi spiller videre!", "Hmm… let me think about the cards.": "Hmm… la meg tenke på kortene.", "We made it! 🙂": "Vi klarte det! 🙂", "Well played, partner! 👍": "Godt spilt, makker! 👍", "Well played!": "Godt spilt!", "Sorry partner, my fault.": "Beklager makker, min feil.", "Unlucky.": "Uflaks.", "Nice defence, partner! 👍": "Fint forsvar, makker! 👍",
     "Tap for the details": "Trykk for detaljer",
@@ -6316,6 +6329,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Boards {0}": "Manos {0}",
+    "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Todavía se está jugando ({0} de {1} mesas han terminado): se muestra cuando todas las mesas lo hayan jugado.", "No board is over yet.": "Todavía no ha terminado ninguna mano.",
     "Rate this answer: the robots' chats are kept without names or cards to improve the robots": "Valora esta respuesta: las charlas con los robots se guardan sin nombres ni cartas para mejorar los robots",
     "I haven't bid yet.": "Todavía no he hablado.", "nothing special — no better call.": "nada especial — no había mejor voz.", "My {0}: {1}": "Mi {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Lo siento, no podemos hablar de la subasta durante la mano 😉 Pregúntame después.", "I'm good, thanks! And you?": "¡Bien, gracias! ¿Y tú?", "Fine, thanks — enjoying the game!": "Bien, gracias — ¡disfrutando de la partida!", "Hi {0}! Good luck 🙂": "¡Hola {0}! Suerte 🙂", "Hello! Nice to play with you.": "¡Hola! Un placer jugar contigo.", "Hi! 👋": "¡Hola! 👋", "You're welcome!": "¡De nada!", "No problem, partner. Next one!": "No pasa nada, compañero. ¡A la siguiente!", "Don't worry, it happens.": "Tranquilo, pasa.", "Thanks! 😊": "¡Gracias! 😊", "Thank you!": "¡Muchas gracias!", "Good luck to you too!": "¡Suerte a ti también!", "Let's keep playing!": "¡Sigamos jugando!", "Hmm… let me think about the cards.": "Mmm… déjame pensar en las cartas.", "We made it! 🙂": "¡Lo cumplimos! 🙂", "Well played, partner! 👍": "¡Bien jugado, compañero! 👍", "Well played!": "¡Bien jugado!", "Sorry partner, my fault.": "Perdona compañero, culpa mía.", "Unlucky.": "Mala suerte.", "Nice defence, partner! 👍": "¡Buena defensa, compañero! 👍",
     "Tap for the details": "Toca para ver los detalles",
@@ -6780,6 +6795,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Boards {0}": "Donnes {0}",
+    "Still being played ({0} of {1} tables done): shown when every table has finished it.": "En cours ({0} tables sur {1} ont fini) : affichée quand toutes les tables l’auront jouée.", "No board is over yet.": "Aucune donne n’est encore terminée.",
     "Rate this answer: the robots' chats are kept without names or cards to improve the robots": "Note cette réponse : les discussions avec les robots sont gardées sans noms ni cartes pour améliorer les robots",
     "I haven't bid yet.": "Je n'ai pas encore parlé.", "nothing special — no better call.": "rien de spécial — pas de meilleure enchère.", "My {0}: {1}": "Mon {0} : {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Désolé, on ne parle pas des enchères pendant la donne 😉 Demande-moi après.", "I'm good, thanks! And you?": "Ça va bien, merci ! Et toi ?", "Fine, thanks — enjoying the game!": "Bien, merci — je profite de la partie !", "Hi {0}! Good luck 🙂": "Salut {0} ! Bonne chance 🙂", "Hello! Nice to play with you.": "Bonjour ! Ravi de jouer avec toi.", "Hi! 👋": "Salut ! 👋", "You're welcome!": "De rien !", "No problem, partner. Next one!": "Pas de souci, partenaire. À la suivante !", "Don't worry, it happens.": "Ne t'inquiète pas, ça arrive.", "Thanks! 😊": "Merci ! 😊", "Thank you!": "Merci beaucoup !", "Good luck to you too!": "Bonne chance à toi aussi !", "Let's keep playing!": "On continue !", "Hmm… let me think about the cards.": "Hmm… laisse-moi réfléchir aux cartes.", "We made it! 🙂": "On a gagné ! 🙂", "Well played, partner! 👍": "Bien joué, partenaire ! 👍", "Well played!": "Bien joué !", "Sorry partner, my fault.": "Désolé partenaire, ma faute.", "Unlucky.": "Pas de chance.", "Nice defence, partner! 👍": "Belle défense, partenaire ! 👍",
     "Tap for the details": "Touchez pour les détails",
@@ -7244,6 +7261,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Boards {0}": "Smazzate {0}",
+    "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Ancora in gioco ({0} tavoli su {1} hanno finito): si vede quando tutti i tavoli l’hanno giocata.", "No board is over yet.": "Nessuna smazzata è ancora finita.",
     "Rate this answer: the robots' chats are kept without names or cards to improve the robots": "Valuta questa risposta: le chat con i robot sono conservate senza nomi né carte per migliorare i robot",
     "I haven't bid yet.": "Non ho ancora dichiarato.", "nothing special — no better call.": "niente di speciale — nessuna dichiarazione migliore.", "My {0}: {1}": "Il mio {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Scusa, non possiamo parlare della licita durante la mano 😉 Chiedimelo dopo.", "I'm good, thanks! And you?": "Bene, grazie! E tu?", "Fine, thanks — enjoying the game!": "Bene, grazie — mi sto divertendo!", "Hi {0}! Good luck 🙂": "Ciao {0}! Buona fortuna 🙂", "Hello! Nice to play with you.": "Ciao! Piacere di giocare con te.", "Hi! 👋": "Ciao! 👋", "You're welcome!": "Prego!", "No problem, partner. Next one!": "Nessun problema, partner. Alla prossima!", "Don't worry, it happens.": "Non preoccuparti, capita.", "Thanks! 😊": "Grazie! 😊", "Thank you!": "Grazie mille!", "Good luck to you too!": "Buona fortuna anche a te!", "Let's keep playing!": "Continuiamo a giocare!", "Hmm… let me think about the cards.": "Mmm… fammi pensare alle carte.", "We made it! 🙂": "Fatto! 🙂", "Well played, partner! 👍": "Ben giocato, partner! 👍", "Well played!": "Ben giocato!", "Sorry partner, my fault.": "Scusa partner, colpa mia.", "Unlucky.": "Sfortuna.", "Nice defence, partner! 👍": "Bella difesa, partner! 👍",
     "Tap for the details": "Tocca per i dettagli",
@@ -7708,6 +7727,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Boards {0}": "Boards {0}",
+    "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Wird noch gespielt ({0} von {1} Tischen fertig): erscheint, wenn alle Tische es gespielt haben.", "No board is over yet.": "Noch kein Board ist fertig.",
     "Rate this answer: the robots' chats are kept without names or cards to improve the robots": "Bewerte diese Antwort: Die Robotergespräche werden ohne Namen und Karten gespeichert, um die Roboter zu verbessern",
     "I haven't bid yet.": "Ich habe noch nicht geboten.", "nothing special — no better call.": "nichts Besonderes — kein besseres Gebot.", "My {0}: {1}": "Mein {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Sorry, über die Reizung reden wir nicht während des Boards 😉 Frag mich danach.", "I'm good, thanks! And you?": "Gut, danke! Und dir?", "Fine, thanks — enjoying the game!": "Gut, danke — ich genieße das Spiel!", "Hi {0}! Good luck 🙂": "Hallo {0}! Viel Glück 🙂", "Hello! Nice to play with you.": "Hallo! Schön, mit dir zu spielen.", "Hi! 👋": "Hi! 👋", "You're welcome!": "Gern geschehen!", "No problem, partner. Next one!": "Kein Problem, Partner. Nächstes!", "Don't worry, it happens.": "Keine Sorge, das passiert.", "Thanks! 😊": "Danke! 😊", "Thank you!": "Vielen Dank!", "Good luck to you too!": "Dir auch viel Glück!", "Let's keep playing!": "Weiter geht’s!", "Hmm… let me think about the cards.": "Hmm… lass mich über die Karten nachdenken.", "We made it! 🙂": "Geschafft! 🙂", "Well played, partner! 👍": "Gut gespielt, Partner! 👍", "Well played!": "Gut gespielt!", "Sorry partner, my fault.": "Sorry Partner, mein Fehler.", "Unlucky.": "Pech.", "Nice defence, partner! 👍": "Schöne Verteidigung, Partner! 👍",
     "Tap for the details": "Für Details tippen",
@@ -8172,6 +8193,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Boards {0}": "Сдачи {0}",
+    "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Ещё играется ({0} из {1} столов закончили): покажется, когда все столы её сыграют.", "No board is over yet.": "Ни одна сдача ещё не закончена.",
     "Rate this answer: the robots' chats are kept without names or cards to improve the robots": "Оцени этот ответ: переписка с роботами хранится без имён и карт, чтобы улучшать роботов",
     "I haven't bid yet.": "Я ещё не заявлял.", "nothing special — no better call.": "ничего особенного — лучшей заявки не было.", "My {0}: {1}": "Моя {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Извини, во время сдачи о торговле не говорим 😉 Спроси после.", "I'm good, thanks! And you?": "Хорошо, спасибо! А ты?", "Fine, thanks — enjoying the game!": "Отлично, спасибо — наслаждаюсь игрой!", "Hi {0}! Good luck 🙂": "Привет, {0}! Удачи 🙂", "Hello! Nice to play with you.": "Привет! Приятно с тобой играть.", "Hi! 👋": "Привет! 👋", "You're welcome!": "Пожалуйста!", "No problem, partner. Next one!": "Ничего страшного, партнёр. Следующая!", "Don't worry, it happens.": "Не переживай, бывает.", "Thanks! 😊": "Спасибо! 😊", "Thank you!": "Большое спасибо!", "Good luck to you too!": "И тебе удачи!", "Let's keep playing!": "Играем дальше!", "Hmm… let me think about the cards.": "Хм… дай подумать о картах.", "We made it! 🙂": "Сделали! 🙂", "Well played, partner! 👍": "Хорошо сыграно, партнёр! 👍", "Well played!": "Хорошо сыграно!", "Sorry partner, my fault.": "Извини, партнёр, моя ошибка.", "Unlucky.": "Не повезло.", "Nice defence, partner! 👍": "Отличная защита, партнёр! 👍",
     "Tap for the details": "Нажмите для подробностей",
@@ -8636,6 +8659,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Boards {0}": "Rozdania {0}",
+    "Still being played ({0} of {1} tables done): shown when every table has finished it.": "Wciąż w grze ({0} z {1} stołów skończyło): pokaże się, gdy wszystkie stoły je zagrają.", "No board is over yet.": "Żadne rozdanie jeszcze się nie skończyło.",
     "Rate this answer: the robots' chats are kept without names or cards to improve the robots": "Oceń tę odpowiedź: rozmowy z robotami są zapisywane bez imion i kart, aby ulepszać roboty",
     "I haven't bid yet.": "Jeszcze nie licytowałem.", "nothing special — no better call.": "nic specjalnego — nie było lepszej odzywki.", "My {0}: {1}": "Moje {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Przepraszam, w trakcie rozdania nie rozmawiamy o licytacji 😉 Zapytaj potem.", "I'm good, thanks! And you?": "Dobrze, dzięki! A ty?", "Fine, thanks — enjoying the game!": "W porządku, dzięki — świetnie się gra!", "Hi {0}! Good luck 🙂": "Cześć {0}! Powodzenia 🙂", "Hello! Nice to play with you.": "Cześć! Miło z tobą grać.", "Hi! 👋": "Cześć! 👋", "You're welcome!": "Nie ma za co!", "No problem, partner. Next one!": "Nic się nie stało, partnerze. Następne!", "Don't worry, it happens.": "Nie martw się, zdarza się.", "Thanks! 😊": "Dzięki! 😊", "Thank you!": "Dziękuję!", "Good luck to you too!": "Tobie też powodzenia!", "Let's keep playing!": "Gramy dalej!", "Hmm… let me think about the cards.": "Hmm… niech pomyślę o kartach.", "We made it! 🙂": "Udało się! 🙂", "Well played, partner! 👍": "Dobrze zagrane, partnerze! 👍", "Well played!": "Dobrze zagrane!", "Sorry partner, my fault.": "Przepraszam partnerze, mój błąd.", "Unlucky.": "Pech.", "Nice defence, partner! 👍": "Świetna obrona, partnerze! 👍",
     "Tap for the details": "Dotknij, aby zobaczyć szczegóły",
@@ -9100,6 +9125,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Boards {0}": "牌 {0}",
+    "Still being played ({0} of {1} tables done): shown when every table has finished it.": "仍在进行中（{1} 张桌子中已有 {0} 张打完）：所有桌子打完后才会显示。", "No board is over yet.": "还没有打完的牌。",
     "Rate this answer: the robots' chats are kept without names or cards to improve the robots": "评价这个回答：与机器人的聊天会在不含姓名和牌的情况下保存，用于改进机器人",
     "I haven't bid yet.": "我还没叫牌。", "nothing special — no better call.": "没什么特别——没有更好的叫品。", "My {0}: {1}": "我的{0}：{1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "抱歉，打牌过程中不能讨论叫牌 😉 这副牌结束后再问我。", "I'm good, thanks! And you?": "我很好，谢谢！你呢？", "Fine, thanks — enjoying the game!": "很好，谢谢——玩得很开心！", "Hi {0}! Good luck 🙂": "你好{0}！祝你好运 🙂", "Hello! Nice to play with you.": "你好！很高兴和你一起打牌。", "Hi! 👋": "嗨！👋", "You're welcome!": "不客气！", "No problem, partner. Next one!": "没关系，搭档。下一副！", "Don't worry, it happens.": "别担心，常有的事。", "Thanks! 😊": "谢谢！😊", "Thank you!": "谢谢你！", "Good luck to you too!": "也祝你好运！", "Let's keep playing!": "我们继续吧！", "Hmm… let me think about the cards.": "嗯……让我想想牌。", "We made it! 🙂": "我们做成了！🙂", "Well played, partner! 👍": "打得好，搭档！👍", "Well played!": "打得好！", "Sorry partner, my fault.": "抱歉搭档，是我的错。", "Unlucky.": "运气不好。", "Nice defence, partner! 👍": "防守得漂亮，搭档！👍",
     "Tap for the details": "点击查看详情",
@@ -17342,6 +17369,13 @@ function ctScore(x) {
     .filter(r => r.n).sort((a, b) => imp ? b.imp - a.imp : b.pct - a.pct);
   return { boards, rank, imp };
 }
+// a board is over when every table of its round has played it (all the tables of a round play the same boards):
+// until then its results, hands and double dummy are not shown, so nobody sees a board still being played elsewhere
+function ctBoardOver(x, bn) {
+  const P = x.plan, r = Math.floor((+bn - 1) / P.bpr), tb = P.rounds[r]; if (!tb || !tb.length) return false;
+  return tb.every((_, ti) => !!((((x.run.t || {})[r + '_' + ti]) || {}).res || {})[bn]);
+}
+const ctBoardLeft = (x, bn) => { const P = x.plan, r = Math.floor((+bn - 1) / P.bpr), tb = P.rounds[r] || []; return [tb.filter((_, ti) => !!((((x.run.t || {})[r + '_' + ti]) || {}).res || {})[bn]).length, tb.length]; };
 // the club's online rating, from every evening in turn
 function ctRating(club) {
   const R = {};
@@ -17369,7 +17403,7 @@ function ctShowResults(club, id, d, tab) {
   let body = '';
   if (t === 'pair') body = ctPairsHtml(x);
   else if (t === 'rank') body = S.rank.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Pair')}</th><th>MP %</th><th>IMP</th><th>${T('Boards')}</th></tr></thead><tbody>${S.rank.map((r, k) => `<tr${[r.p.ka, r.p.kb].includes(ctMe()) ? ' class="me"' : ''}><td>${k + 1}</td><td>${pn(r.p)}</td><td>${S.imp ? '' : '<b>'}${r.pct.toFixed(1)}%${S.imp ? '' : '</b>'}</td><td>${S.imp ? '<b>' : ''}${fmtSigned(r.imp)}${S.imp ? '</b>' : ''}</td><td>${r.n}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Ranked by {0}', S.imp ? 'IMP' : 'MP %')}</div>` : `<div class="muted">${T('No results yet.')}</div>`;
-  else if (t === 'boards') body = Object.keys(S.boards).sort((a, b) => a - b).map(bn => `<div class="grp"><span>${T('Board {0}', bn)} <button class="btn mini-btn" data-ctdd="${bn}">🎯 ${T('Double dummy')}</button></span>
+  else if (t === 'boards') body = Object.keys(S.boards).sort((a, b) => a - b).map(bn => !ctBoardOver(x, bn) ? `<div class="grp"><span>${T('Board {0}', bn)}</span><div class="muted">⏳ ${T('Still being played ({0} of {1} tables done): shown when every table has finished it.', ...ctBoardLeft(x, bn))}</div></div>` : `<div class="grp"><span>${T('Board {0}', bn)} <button class="btn mini-btn" data-ctdd="${bn}">🎯 ${T('Double dummy')}</button></span>
       <div id="ctdd${bn}"></div>
       <table class="res"><tbody>${S.boards[bn].map(q => `<tr><td>${pn(P.pairs[q.ns])}<br><small>${pn(P.pairs[q.ew])}</small></td><td>${ctCon(q.v)}${q.v.tr != null ? ' · ' + T('{0} tricks', q.v.tr) : ''}</td><td><b>${fmtSigned(q.v.ns || 0)}</b></td><td>${Math.round(q.mp)}%<br><small>${fmtSigned(q.imp)} IMP</small></td></tr>`).join('')}</tbody></table></div>`).join('') || `<div class="muted">${T('No results yet.')}</div>`;
   else if (t === 'rating') { const L = ctRating(club); body = L.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th>${T('Rating')}</th><th>${T('Evenings')}</th></tr></thead><tbody>${L.map((r, k) => `<tr><td>${k + 1}</td><td>${esc(r.n)}</td><td><b>${Math.round(r.r)}</b></td><td>${r.g}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Everyone starts at 1500; each evening moves it by the pair\'s result.')}</div>` : `<div class="muted">${T('No results yet.')}</div>`; }
@@ -17390,7 +17424,7 @@ function ctDDHtml(plan, bn) {
   }
 }
 function ctDD(bn) {
-  const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d), el = $('ctdd' + bn); if (!x || !el) return;
+  const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d), el = $('ctdd' + bn); if (!x || !el || !ctBoardOver(x, bn)) return;
   el.innerHTML = '⏳'; setTimeout(() => { el.innerHTML = ctDDHtml(x.plan, bn); }, 30);
 }
 // the evening's deals as a PBN file
@@ -17399,7 +17433,9 @@ function ctPBN() {
   const RK = '23456789TJQKA', hand = h => [3, 2, 1, 0].map(s => h.filter(c => (c / 13 | 0) === s).map(c => RK[c % 13]).sort((a, b) => RK.indexOf(b) - RK.indexOf(a)).join('')).join('.');
   const V = ['None', 'NS', 'EW', 'All'], vul = bn => { const ns = E.vulOf(bn, 0), ew = E.vulOf(bn, 1); return V[(ns ? 1 : 0) + (ew ? 2 : 0)]; };
   const n = (x.plan.nr || x.plan.rounds.length) * x.plan.bpr, out = [];
-  for (let bn = 1; bn <= n; bn++) { const d = ctDeal(x.plan, bn), dl = E.dealerOf(bn); out.push(`[Event "${String(x.i.n || '').replace(/"/g, "'")}"]\n[Date "${new Date(x.d).toISOString().slice(0, 10).replace(/-/g, '.')}"]\n[Board "${bn}"]\n[Dealer "${'NESW'[dl]}"]\n[Vulnerable "${vul(bn)}"]\n[Deal "N:${[0, 1, 2, 3].map(s => hand(d[s])).join(' ')}"]\n`); }
+  for (let bn = 1; bn <= n; bn++) { if (!ctBoardOver(x, bn)) continue;   // only the boards every table has finished
+    const d = ctDeal(x.plan, bn), dl = E.dealerOf(bn); out.push(`[Event "${String(x.i.n || '').replace(/"/g, "'")}"]\n[Date "${new Date(x.d).toISOString().slice(0, 10).replace(/-/g, '.')}"]\n[Board "${bn}"]\n[Dealer "${'NESW'[dl]}"]\n[Vulnerable "${vul(bn)}"]\n[Deal "N:${[0, 1, 2, 3].map(s => hand(d[s])).join(' ')}"]\n`); }
+  if (!out.length) { flash(T('No board is over yet.'), 2200); return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([out.join('\n')], { type: 'text/plain' })); a.download = (x.i.n || 'club') .replace(/[^\w-]+/g, '_') + '-' + new Date(x.d).toISOString().slice(0, 10) + '.pbn'; a.click();
 }
 // watching a table (its round still going): the game read from the list as the players see it, every hand open
@@ -17546,7 +17582,11 @@ function ctPairsHtml(x) {
   const found = pick >= 0 && ti >= 0 ? (() => { const [a, b] = tb[ti], ns = a === pick; return `<div class="okmsg" style="font-size:16px;line-height:1.6;"><b>${pn(P.pairs[pick])}</b><br>🪑 ${T('Table {0}', ti + 1)} · ${ns ? T('North-South') : T('East-West')}<br>${T('against')} ${pn(P.pairs[ns ? b : a])}<br>🃏 ${T('Boards')} ${from}-${to}</div>`; })() : '';
   return `<div class="big">${r0 < 0 ? '🏁 ' + T('Finished') + ' · ' : ''}${T('Round {0}', r + 1)} / ${P.nr || P.rounds.length}</div>${found}
     <div class="muted">${T('Tap your pair to see your table.')}</div>
-    <table class="res"><thead><tr><th>${T('Table')}</th><th>N/S</th><th>E/W</th><th>${T('Boards')}</th></tr></thead><tbody>${tb.map(([a, b], k) => `<tr${a === pick || b === pick ? ' class="me"' : ''}><td><b>${k + 1}</b></td><td data-ctpick="${a}" style="cursor:pointer">${pn(P.pairs[a])}</td><td data-ctpick="${b}" style="cursor:pointer">${pn(P.pairs[b])}</td><td>${from}-${to}</td></tr>`).join('')}</tbody></table>
+    <div class="ctcards">${tb.map(([a, b], k) => { const done = Object.values((((x.run && x.run.t || {})[r + '_' + k]) || {}).res || {}).filter(Boolean).length;
+      return `<div class="ctcardt${a === pick || b === pick ? ' me' : ''}"><div class="cth"><b>🪑 ${T('Table {0}', k + 1)}</b><span>${done >= P.bpr ? '✅' : done ? '⏳ ' + done + '/' + P.bpr : ''}</span></div>`
+        + `<div class="ctp" data-ctpick="${a}"><small>${T('North-South')} · ${T('Pair {0}', a + 1)}</small>${pn(P.pairs[a])}</div>`
+        + `<div class="ctp" data-ctpick="${b}"><small>${T('East-West')} · ${T('Pair {0}', b + 1)}</small>${pn(P.pairs[b])}</div>`
+        + `<div class="ctb">🃏 ${T('Boards {0}', `<b>${from}-${to}</b>`)}</div></div>`; }).join('')}</div>
     ${P.mov === 'swiss' && r0 >= 0 ? '<div class="muted">' + T('Swiss: each next round is made from the standings when every table has finished.') + '</div>' : ''}`;
 }
 

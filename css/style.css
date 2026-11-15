@@ -2153,3 +2153,12 @@ body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradi
 .brrow.bad{border-left-color:#c62828}
 .brrow.good{border-left-color:#2e7d32}
 .brrow small{display:block;opacity:.7;margin-bottom:2px}
+/* club pairings: a card for each table */
+.ctcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:8px 0}
+.ctcardt{border:1px solid rgba(127,127,127,.35);border-radius:12px;padding:8px 10px;text-align:left;background:rgba(127,127,127,.06)}
+.ctcardt.me{border:2px solid #d4a72c;background:rgba(212,167,44,.14)}
+.ctcardt .cth{display:flex;justify-content:space-between;align-items:center;font-size:17px;margin-bottom:6px}
+.ctcardt .ctp{cursor:pointer;padding:4px 6px;border-radius:8px;margin:3px 0;background:rgba(127,127,127,.1);font-weight:600}
+.ctcardt .ctp:hover{background:rgba(127,127,127,.2)}
+.ctcardt .ctp small{display:block;font-weight:400;opacity:.7;font-size:12px}
+.ctcardt .ctb{margin-top:6px;font-size:14px}

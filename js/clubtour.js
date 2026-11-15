@@ -423,6 +423,13 @@ function ctScore(x) {
     .filter(r => r.n).sort((a, b) => imp ? b.imp - a.imp : b.pct - a.pct);
   return { boards, rank, imp };
 }
+// a board is over when every table of its round has played it (all the tables of a round play the same boards):
+// until then its results, hands and double dummy are not shown, so nobody sees a board still being played elsewhere
+function ctBoardOver(x, bn) {
+  const P = x.plan, r = Math.floor((+bn - 1) / P.bpr), tb = P.rounds[r]; if (!tb || !tb.length) return false;
+  return tb.every((_, ti) => !!((((x.run.t || {})[r + '_' + ti]) || {}).res || {})[bn]);
+}
+const ctBoardLeft = (x, bn) => { const P = x.plan, r = Math.floor((+bn - 1) / P.bpr), tb = P.rounds[r] || []; return [tb.filter((_, ti) => !!((((x.run.t || {})[r + '_' + ti]) || {}).res || {})[bn]).length, tb.length]; };
 // the club's online rating, from every evening in turn
 function ctRating(club) {
   const R = {};
@@ -450,7 +457,7 @@ function ctShowResults(club, id, d, tab) {
   let body = '';
   if (t === 'pair') body = ctPairsHtml(x);
   else if (t === 'rank') body = S.rank.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Pair')}</th><th>MP %</th><th>IMP</th><th>${T('Boards')}</th></tr></thead><tbody>${S.rank.map((r, k) => `<tr${[r.p.ka, r.p.kb].includes(ctMe()) ? ' class="me"' : ''}><td>${k + 1}</td><td>${pn(r.p)}</td><td>${S.imp ? '' : '<b>'}${r.pct.toFixed(1)}%${S.imp ? '' : '</b>'}</td><td>${S.imp ? '<b>' : ''}${fmtSigned(r.imp)}${S.imp ? '</b>' : ''}</td><td>${r.n}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Ranked by {0}', S.imp ? 'IMP' : 'MP %')}</div>` : `<div class="muted">${T('No results yet.')}</div>`;
-  else if (t === 'boards') body = Object.keys(S.boards).sort((a, b) => a - b).map(bn => `<div class="grp"><span>${T('Board {0}', bn)} <button class="btn mini-btn" data-ctdd="${bn}">🎯 ${T('Double dummy')}</button></span>
+  else if (t === 'boards') body = Object.keys(S.boards).sort((a, b) => a - b).map(bn => !ctBoardOver(x, bn) ? `<div class="grp"><span>${T('Board {0}', bn)}</span><div class="muted">⏳ ${T('Still being played ({0} of {1} tables done): shown when every table has finished it.', ...ctBoardLeft(x, bn))}</div></div>` : `<div class="grp"><span>${T('Board {0}', bn)} <button class="btn mini-btn" data-ctdd="${bn}">🎯 ${T('Double dummy')}</button></span>
       <div id="ctdd${bn}"></div>
       <table class="res"><tbody>${S.boards[bn].map(q => `<tr><td>${pn(P.pairs[q.ns])}<br><small>${pn(P.pairs[q.ew])}</small></td><td>${ctCon(q.v)}${q.v.tr != null ? ' · ' + T('{0} tricks', q.v.tr) : ''}</td><td><b>${fmtSigned(q.v.ns || 0)}</b></td><td>${Math.round(q.mp)}%<br><small>${fmtSigned(q.imp)} IMP</small></td></tr>`).join('')}</tbody></table></div>`).join('') || `<div class="muted">${T('No results yet.')}</div>`;
   else if (t === 'rating') { const L = ctRating(club); body = L.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th>${T('Rating')}</th><th>${T('Evenings')}</th></tr></thead><tbody>${L.map((r, k) => `<tr><td>${k + 1}</td><td>${esc(r.n)}</td><td><b>${Math.round(r.r)}</b></td><td>${r.g}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Everyone starts at 1500; each evening moves it by the pair\'s result.')}</div>` : `<div class="muted">${T('No results yet.')}</div>`; }
@@ -471,7 +478,7 @@ function ctDDHtml(plan, bn) {
   }
 }
 function ctDD(bn) {
-  const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d), el = $('ctdd' + bn); if (!x || !el) return;
+  const r = CT.res, x = r && ctRuns(r.club).find(y => y.id === r.id && y.d === r.d), el = $('ctdd' + bn); if (!x || !el || !ctBoardOver(x, bn)) return;
   el.innerHTML = '⏳'; setTimeout(() => { el.innerHTML = ctDDHtml(x.plan, bn); }, 30);
 }
 // the evening's deals as a PBN file
@@ -480,7 +487,9 @@ function ctPBN() {
   const RK = '23456789TJQKA', hand = h => [3, 2, 1, 0].map(s => h.filter(c => (c / 13 | 0) === s).map(c => RK[c % 13]).sort((a, b) => RK.indexOf(b) - RK.indexOf(a)).join('')).join('.');
   const V = ['None', 'NS', 'EW', 'All'], vul = bn => { const ns = E.vulOf(bn, 0), ew = E.vulOf(bn, 1); return V[(ns ? 1 : 0) + (ew ? 2 : 0)]; };
   const n = (x.plan.nr || x.plan.rounds.length) * x.plan.bpr, out = [];
-  for (let bn = 1; bn <= n; bn++) { const d = ctDeal(x.plan, bn), dl = E.dealerOf(bn); out.push(`[Event "${String(x.i.n || '').replace(/"/g, "'")}"]\n[Date "${new Date(x.d).toISOString().slice(0, 10).replace(/-/g, '.')}"]\n[Board "${bn}"]\n[Dealer "${'NESW'[dl]}"]\n[Vulnerable "${vul(bn)}"]\n[Deal "N:${[0, 1, 2, 3].map(s => hand(d[s])).join(' ')}"]\n`); }
+  for (let bn = 1; bn <= n; bn++) { if (!ctBoardOver(x, bn)) continue;   // only the boards every table has finished
+    const d = ctDeal(x.plan, bn), dl = E.dealerOf(bn); out.push(`[Event "${String(x.i.n || '').replace(/"/g, "'")}"]\n[Date "${new Date(x.d).toISOString().slice(0, 10).replace(/-/g, '.')}"]\n[Board "${bn}"]\n[Dealer "${'NESW'[dl]}"]\n[Vulnerable "${vul(bn)}"]\n[Deal "N:${[0, 1, 2, 3].map(s => hand(d[s])).join(' ')}"]\n`); }
+  if (!out.length) { flash(T('No board is over yet.'), 2200); return; }
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([out.join('\n')], { type: 'text/plain' })); a.download = (x.i.n || 'club') .replace(/[^\w-]+/g, '_') + '-' + new Date(x.d).toISOString().slice(0, 10) + '.pbn'; a.click();
 }
 // watching a table (its round still going): the game read from the list as the players see it, every hand open
@@ -627,6 +636,10 @@ function ctPairsHtml(x) {
   const found = pick >= 0 && ti >= 0 ? (() => { const [a, b] = tb[ti], ns = a === pick; return `<div class="okmsg" style="font-size:16px;line-height:1.6;"><b>${pn(P.pairs[pick])}</b><br>🪑 ${T('Table {0}', ti + 1)} · ${ns ? T('North-South') : T('East-West')}<br>${T('against')} ${pn(P.pairs[ns ? b : a])}<br>🃏 ${T('Boards')} ${from}-${to}</div>`; })() : '';
   return `<div class="big">${r0 < 0 ? '🏁 ' + T('Finished') + ' · ' : ''}${T('Round {0}', r + 1)} / ${P.nr || P.rounds.length}</div>${found}
     <div class="muted">${T('Tap your pair to see your table.')}</div>
-    <table class="res"><thead><tr><th>${T('Table')}</th><th>N/S</th><th>E/W</th><th>${T('Boards')}</th></tr></thead><tbody>${tb.map(([a, b], k) => `<tr${a === pick || b === pick ? ' class="me"' : ''}><td><b>${k + 1}</b></td><td data-ctpick="${a}" style="cursor:pointer">${pn(P.pairs[a])}</td><td data-ctpick="${b}" style="cursor:pointer">${pn(P.pairs[b])}</td><td>${from}-${to}</td></tr>`).join('')}</tbody></table>
+    <div class="ctcards">${tb.map(([a, b], k) => { const done = Object.values((((x.run && x.run.t || {})[r + '_' + k]) || {}).res || {}).filter(Boolean).length;
+      return `<div class="ctcardt${a === pick || b === pick ? ' me' : ''}"><div class="cth"><b>🪑 ${T('Table {0}', k + 1)}</b><span>${done >= P.bpr ? '✅' : done ? '⏳ ' + done + '/' + P.bpr : ''}</span></div>`
+        + `<div class="ctp" data-ctpick="${a}"><small>${T('North-South')} · ${T('Pair {0}', a + 1)}</small>${pn(P.pairs[a])}</div>`
+        + `<div class="ctp" data-ctpick="${b}"><small>${T('East-West')} · ${T('Pair {0}', b + 1)}</small>${pn(P.pairs[b])}</div>`
+        + `<div class="ctb">🃏 ${T('Boards {0}', `<b>${from}-${to}</b>`)}</div></div>`; }).join('')}</div>
     ${P.mov === 'swiss' && r0 >= 0 ? '<div class="muted">' + T('Swiss: each next round is made from the standings when every table has finished.') + '</div>' : ''}`;
 }
