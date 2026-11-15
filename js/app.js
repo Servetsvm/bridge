@@ -1199,7 +1199,7 @@ function botSay(seat, text, ms) {
   const gen = BOT.gen;
   setTimeout(() => {
     if (gen !== BOT.gen) return;   // the chat was cleared meanwhile
-    BOT.chat.push({ from: botName(seat), text, ts: Date.now() }); if (BOT.chat.length > 120) BOT.chat.shift();
+    BOT.chat.push({ from: botName(seat), seat, text, ts: Date.now() }); if (BOT.chat.length > 120) BOT.chat.shift();
     if (!(ui.dockOpen || dockWide())) { Net.st.unread = (Net.st.unread || 0) + 1; flash(botName(seat) + ': ' + text, 3200); ui.toastChat = true; }
     renderDock(); renderBar();
   }, ms || 900 + Math.random() * 1400);
@@ -1207,7 +1207,7 @@ function botSay(seat, text, ms) {
 function botChatHtml() {
   const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myNm() || T('You');
   return BOT.chat.slice(-80).map(m => `<div class="cm${m.me ? ' me' : ''}"><b>${esc(m.me ? me : m.from)}</b> ${symText(esc(m.text))}<small>${t(m.ts)}</small></div>`).join('')
-    || `<div class="muted">${T('Say hello to {0}, {1} and {2}', ...[1, 2, 3].map(r => botName((U() + r) % 4)))}</div>`;
+    || `<div class="muted">${T('Say hello to {0}, {1} and {2}', ...[1, 2, 3].map(r => botName((U() + r) % 4)))}${BOT_AI ? `<br><small>${T('The robots answer with an AI (Cloudflare Workers AI): what you write to them is sent there, never your cards.')}</small>` : ''}</div>`;
 }
 const callWord = c => c === 'P' ? T('Pass') : callTxt(c);
 // a call that seat made, and what it meant (the explanation the robots bid by)
@@ -1226,7 +1226,7 @@ const BOT_RE = {
   thx: /thank|thx|teşekkür|tesekkur|sağol|sagol|sağ ol|takk|gracias|merci|grazie|danke|спасибо|dzięki|dziekuje|dziękuję|谢谢|多谢/i,
   wp: /well played|nice|good job|bravo|helal|aferin|iyi oyna|güzel|godt spilt|bra|bien jugado|bien joué|ben giocato|gut gespielt|молодец|хорошо сыгр|dobrze zagra|super|打得好|厉害|👍|👏/i,
   sorry: /sorry|sori|pardon|özür|kusura|beklager|unnskyld|perdón|perdon|lo siento|désolé|desole|scusa|entschuldig|извини|простите|przepraszam|对不起|抱歉/i,
-  why: /why|neden|niye|niçin|ne demek|anlamı|hvorfor|betyr|por qué|porque|que significa|pourquoi|perché|cosa significa|warum|was bedeutet|почему|что значит|dlaczego|co znaczy|为什么|什么意思|\?/i,
+  why: /why|neden|niye|niçin|ne demek|anlamı|hvorfor|betyr|por qué|que significa|pourquoi|perché|cosa significa|warum|was bedeutet|почему|что значит|dlaczego|co znaczy|为什么|什么意思/i,
   gl: /good luck|iyi şanslar|bol şans|lykke til|suerte|bonne chance|buona fortuna|viel glück|удачи|powodzenia|祝你好运|加油/i,
 };
 // the call written in the message: 2♥, 2h, 2 hearts in a few languages, 3NT / 3SA / 3BT
@@ -1251,6 +1251,14 @@ function botSend(text) {
     const r = call != null ? botExplain(who, call) || botExplain(who) : botExplain(who);
     return botSay(who, r);
   }
+  // a greeting to the whole table: each robot answers by itself; anything else: the robot asked answers with the AI,
+  // and with its own short answers when the AI cannot be reached (none set up, the day's free allowance used up, offline)
+  if (BOT_RE.hi.test(text) && !named) { const all = [p, (me + 1) % 4, (me + 3) % 4].filter(() => Math.random() < .8); (all.length ? all : [p]).forEach((s, i) => botSay(s, pick([T('Hi {0}! Good luck 🙂', myNm() || ''), T('Hello! Nice to play with you.'), T('Hi! 👋')]).replace(/ +!/, '!'), 900 + i * 1300 + Math.random() * 800)); return; }
+  if (BOT_AI) { botAI(to, text).then(r => botSay(to, r, 300 + Math.random() * 700)).catch(() => botRule(to, text, named)); return; }
+  botRule(to, text, named);
+}
+function botRule(to, text, named) {
+  const me = U(), p = pd(me);
   if (BOT_RE.how.test(text)) return botSay(to, pick([T("I'm good, thanks! And you?"), T('Fine, thanks — enjoying the game!')]));
   if (BOT_RE.hi.test(text)) { const all = named ? [to] : [p, (me + 1) % 4, (me + 3) % 4].filter(() => Math.random() < .8); (all.length ? all : [p]).forEach((s, i) => botSay(s, pick([T('Hi {0}! Good luck 🙂', myNm() || ''), T('Hello! Nice to play with you.'), T('Hi! 👋')]).replace(/ +!/, '!'), 900 + i * 1300 + Math.random() * 800)); return; }
   if (BOT_RE.thx.test(text)) return botSay(to, pick([T("You're welcome!"), '🙂']));
@@ -1258,6 +1266,28 @@ function botSend(text) {
   if (BOT_RE.wp.test(text)) return botSay(to, pick([T('Thanks! 😊'), T('Thank you!'), '😊']));
   if (BOT_RE.gl.test(text)) return botSay(to, T('Good luck to you too!'));
   botSay(to, pick(['🙂', T("Let's keep playing!"), T('Hmm… let me think about the cards.')]));
+}
+// the robots' AI (a Cloudflare Worker, .github/botchat): it gets what everyone at the table sees, never a hand
+const BOT_AI = (() => { try { return localStorage.getItem('bridge-bot-ai') || ''; } catch (e) { return ''; } })() || '';   // the Worker's address (a test one can be set in localStorage)
+const SEAT_EN = ['North', 'East', 'South', 'West'];
+function botTableState() {
+  const g = G.play, st = { phase: G.phase === 'bid' ? 'bidding' : G.phase === 'play' ? 'play' : 'the board is over' };
+  st.auction = G.auction.map(a => SEAT_EN[a.seat] + ' ' + callTxt(a.call)).join(', ');
+  if (g && g.contract) { const c = g.contract; st.contract = callTxt(B(c.level, c.strain)) + (c.dbl === 2 ? 'XX' : c.dbl ? 'X' : '') + ' by ' + SEAT_EN[c.decl]; st.tricks = 'North-South ' + g.tricks[0] + ', East-West ' + g.tricks[1]; }
+  const e = G.result; if (e && e.c) { const d = e.tricks - e.c.level - 6; st.result = d >= 0 ? 'made' + (d ? ' +' + d : '') : 'down ' + -d; } else if (e && e.passed) st.result = 'passed out';
+  return st;
+}
+async function botAI(seat, text) {
+  const me = U(), role = s => sideOf(s) === sideOf(me) ? 'partner' : 'opponent';
+  const body = { lang: SET.lang || 'en', text, me: myNm() || '', meSeat: SEAT_EN[me], bot: { name: botName(seat), seat: SEAT_EN[seat], role: role(seat) },
+    others: [1, 2, 3].map(r => (me + r) % 4).filter(s => s !== seat).map(s => ({ name: botName(s), seat: SEAT_EN[s], role: role(s) })),
+    table: botTableState(), history: BOT.chat.slice(-9, -1).map(m => ({ mine: !!m.me, from: m.from || '', text: m.text })) };
+  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 8000);
+  try {
+    const r = await fetch(BOT_AI, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
+    const j = await r.json(); if (!r.ok || !j.reply) throw new Error(j.error || r.status);
+    return String(j.reply).slice(0, 280);
+  } finally { clearTimeout(tm); }
 }
 // the end of a board: now and then a word from the table, as people do
 function botBoardEnd(e) {
