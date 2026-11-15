@@ -6,5 +6,5 @@ compatibility_date = "2026-11-01"
 binding = "AI"
 
 [vars]
-# a bigger model answers better but uses more of the free daily allowance, e.g. "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
-MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8-fast"
+# the best Turkish of the free models tried (Nov 2026); "@cf/meta/llama-3.1-8b-instruct-fp8-fast" is cheaper (more answers a day) but weaker
+MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"

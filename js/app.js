@@ -1268,7 +1268,7 @@ function botRule(to, text, named) {
   botSay(to, pick(['🙂', T("Let's keep playing!"), T('Hmm… let me think about the cards.')]));
 }
 // the robots' AI (a Cloudflare Worker, .github/botchat): it gets what everyone at the table sees, never a hand
-const BOT_AI = (() => { try { return localStorage.getItem('bridge-bot-ai') || ''; } catch (e) { return ''; } })() || '';   // the Worker's address (a test one can be set in localStorage)
+const BOT_AI = (() => { try { return localStorage.getItem('bridge-bot-ai') || ''; } catch (e) { return ''; } })() || 'https://bridge-bots.bridgetable.workers.dev/';   // the Worker's address (a test one can be set in localStorage)
 const SEAT_EN = ['North', 'East', 'South', 'West'];
 function botTableState() {
   const g = G.play, st = { phase: G.phase === 'bid' ? 'bidding' : G.phase === 'play' ? 'play' : 'the board is over' };
@@ -1282,7 +1282,7 @@ async function botAI(seat, text) {
   const body = { lang: SET.lang || 'en', text, me: myNm() || '', meSeat: SEAT_EN[me], bot: { name: botName(seat), seat: SEAT_EN[seat], role: role(seat) },
     others: [1, 2, 3].map(r => (me + r) % 4).filter(s => s !== seat).map(s => ({ name: botName(s), seat: SEAT_EN[s], role: role(s) })),
     table: botTableState(), history: BOT.chat.slice(-9, -1).map(m => ({ mine: !!m.me, from: m.from || '', text: m.text })) };
-  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 8000);
+  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 12000);
   try {
     const r = await fetch(BOT_AI, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
     const j = await r.json(); if (!r.ok || !j.reply) throw new Error(j.error || r.status);

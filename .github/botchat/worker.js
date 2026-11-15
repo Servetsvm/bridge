@@ -10,6 +10,12 @@ const LANGS = { en: 'English', tr: 'Turkish', no: 'Norwegian (bokmål)', es: 'Sp
 // a few messages a minute and a day's worth per address (per Worker instance: a soft limit against abuse)
 const HITS = new Map(), PER_MIN = 8, PER_DAY = 300;
 
+// "are you a robot / a bot / an AI / a human?": never left to the model (a small one says "I'm human"); an honest answer
+const ASK_BOT = /\b(robot|bot|ai|a\.i\.|human|real person|chatgpt|gpt|ia)\b|robot|yapay zek|insan m[ıi]s[ıi]n|ger[çc]ek (bir )?(insan|ki[şs]i)|menneske|kunstig intelligens|künstliche intelligenz|ekte person|humano|persona real|humain|vraie personne|umano|persona vera|mensch|echte person|робот|бот\b|человек|нейросет|\bии\b|człowiek|prawdziw|sztuczn|机器人|人工智能|真人|是人/i;
+const BOT_SAYS = { en: "I'm one of the table's robots 🙂 But I love a good game of bridge!", tr: 'Masanın robotlarından biriyim 🙂 Ama iyi bir briç oyununa bayılırım!', no: 'Jeg er en av robotene ved bordet 🙂 Men jeg elsker et godt parti bridge!', es: 'Soy uno de los robots de la mesa 🙂 ¡Pero me encanta una buena partida de bridge!', fr: 'Je suis l’un des robots de la table 🙂 Mais j’adore une bonne partie de bridge !', it: 'Sono uno dei robot del tavolo 🙂 Ma adoro una bella partita a bridge!', de: 'Ich bin einer der Roboter am Tisch 🙂 Aber ich liebe eine gute Partie Bridge!', ru: 'Я один из роботов за этим столом 🙂 Но очень люблю хорошую партию в бридж!', pl: 'Jestem jednym z robotów przy stole 🙂 Ale uwielbiam dobrą partię brydża!', zh: '我是这张桌上的机器人之一 🙂 不过我很喜欢打一局好桥牌！' };
+// an answer that claims to be a person is not sent (the site answers by itself)
+const SAYS_HUMAN = /i('| a)m (a )?(real )?(human|person)|not a (robot|bot)|insan[ıi]m|robot de[ğg]il|jeg er (et )?menneske|ikke en robot|soy (un )?humano|no soy un robot|je suis (un )?humain|pas un robot|sono (un )?umano|non sono un robot|ich bin (ein )?mensch|kein roboter|я человек|не робот|jestem człowiekiem|nie jestem robotem|我是人|不是机器人/i;
+
 const clip = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u001f]+/g, ' ').trim().slice(0, n);
 
 function limited(ip) {
@@ -41,7 +47,7 @@ function prompt(b) {
     + `- You do not know anyone's cards. Never reveal or hint at your own cards or what you plan to bid or play: in bridge that is not allowed. During the board do not talk about the bidding or the play with your partner; after the board you may chat about it in general.\n`
     + `- Do not invent explanations of bids; if asked what a bid meant, say they can ask about the bid itself (for example "why 2♥?").\n`
     + `- Be polite, warm and family-friendly. Politely decline anything offensive, sexual, political or not about a friendly game, and never ask for personal information.\n`
-    + `- Stay in your role as a player at this table. But if the player sincerely asks whether you are a robot, a bot or an AI, say honestly and lightly that you are one of the table's robots.\n`
+    + `- You are one of the table's robots: never claim to be a human or a real person, and do not invent a personal life (a home town, a job, a family). You also do not need to bring up being a robot: talk like a friendly player about the game, the board and the table.\n`
     + `- Answer with the message only: no name, no quotes.`;
 }
 
@@ -63,12 +69,13 @@ export default {
     if (limited(req.headers.get('CF-Connecting-IP') || 'x')) return json({ error: 'slow down' }, 429);
     let b; try { b = await req.json(); } catch (e) { return json({ error: 'bad request' }, 400); }
     const text = clip(b && b.text, 300); if (!text) return json({ error: 'empty' }, 400);
+    if (ASK_BOT.test(text)) return json({ reply: BOT_SAYS[b.lang] || BOT_SAYS.en });
     const messages = [{ role: 'system', content: prompt(b) }, ...history(b), { role: 'user', content: text }];
     try {
       const r = await env.AI.run(env.MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8-fast', { messages, max_tokens: 90, temperature: 0.8 });
       let reply = clip(r && r.response, 400).replace(/^["“]|["”]$/g, '');
       reply = reply.replace(new RegExp('^' + clip(b.bot && b.bot.name, 30).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*:\\s*', 'i'), '');
-      if (!reply) return json({ error: 'no answer' }, 502);
+      if (!reply || SAYS_HUMAN.test(reply)) return json({ error: 'no answer' }, 502);
       return json({ reply: reply.slice(0, 280) });
     } catch (e) {
       return json({ error: 'ai unavailable' }, 503);   // the day's free allowance used up, or the model busy: the site answers by itself
