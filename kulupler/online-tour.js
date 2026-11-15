@@ -99,7 +99,7 @@ function otSetupCard() {
     await Promise.all([otLoad(), otMeta()]);
     const box = document.getElementById('otSetupBox'); if (!box) return;
     const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, ed = OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info;
-    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <button class="btn btn-sm btn-gold" onclick="window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml','_blank','noopener')">🤖 <span>Start the server robots</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<button class="btn btn-sm" style="margin-top:6px;" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button>' : ''}</div>`;
+    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <button class="btn btn-sm" onclick="otTestRobots(true)">🧪🪑 <span>Test tournament — I play too</span></button> <button class="btn btn-sm btn-gold" onclick="window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml','_blank','noopener')">🤖 <span>Start the server robots</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<button class="btn btn-sm" style="margin-top:6px;" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button>' : ''}</div>`;
     otPreview();
     clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (!(adminTab === 'setup' && setupOnline)) return; otManageRefresh(); OT.liveT = setTimeout(again, 20000); }, 20000);   // only the list above the form   // new registrations and the live state, every 20 seconds
   }, 0);
@@ -347,14 +347,18 @@ setInterval(otRobots, 1500);
 
 /* Servet's test: an online tournament started now where every seat is a robot (made-up names); the robots play it
    from this page (and the GitHub run), so the whole evening can be watched and its results looked at */
-window.otTestRobots = async function () {
+// play: Servet plays too — his pair (with a robot partner) is the first one, so his table's "Sit down" is his
+window.otTestRobots = async function (play) {
   const f0 = otRead(), np = Math.max(2, Math.floor(f0.np / 2));
-  const P = otP(); if (!P || !await otAsk(otL('Start a test tournament with robots now?') + ' (' + f0.np + ' ' + otL('players') + ' · ' + np + ' ' + otL('pairs') + ')')) return;
+  const P = otP(); if (!P) return;
+  let my = null; if (play) { try { const [n, k] = P.eval('[myNm(), ctMe()]'); if (n && k) my = { n: String(n).slice(0, 20), k }; } catch (e) {} if (!my) { toast('❌ ' + otL('Sign in with your name first.')); return; } }
+  if (!await otAsk(otL('Start a test tournament with robots now?') + ' (' + f0.np + ' ' + otL('players') + ' · ' + np + ' ' + otL('pairs') + ')' + (my ? '<br>🪑 ' + otL('You play too, with a robot partner.') : ''))) return;
   const N = ['Ingrid', 'Lars', 'Sofia', 'Mateo', 'Yuki', 'Omar', 'Elif', 'Jonas', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Hanna', 'Karim', 'Amara', 'Felix', 'Leila', 'Tomás', 'Mei', 'Pavel'].sort(() => Math.random() - 0.5);
   const id = Date.now().toString(36), at = Date.now() - 1000, f = otRead();
   const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, np: f.np, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
   while (N.length < 2 * np) N.push('Robot ' + (N.length + 1));
   const pairs = [...Array(np).keys()].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
+  if (my) Object.assign(pairs[0], { pid: 'me', a: my.n, ka: my.k });   // his partner stays a robot
   try {
     await otPut('/' + id + '/info', info);
     for (const p of pairs) { const { pid, ...v } = p; await otPut('/' + id + '/pairs/' + pid, v); }
