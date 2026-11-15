@@ -26,7 +26,9 @@ let CLUB_INFO=null;   // the resolved club's info (name, owner)
 // the super admin's test mode (this tab only): the tournament lives under bm/test, the club's real one is not touched
 const bgTestKey=id=>'bgTest:'+id;
 // (opened from Bridge Table's Clubs, the super admin's Test column: the address says test=1)
-function bgTestOn(){ return false; }   // the test mode is closed: an address with test=1 opens the club's real tournament
+// the super admin's test tournament (opened from Bridge Table's Clubs → 🧪 Test): its own place in the database (bm/test),
+// this tab only; the club's real tournament is not touched
+function bgTestOn(id){ try{ return !!(id||CLUB_ID)&&new URLSearchParams(location.search).get('test')==='1'; }catch(e){ return false; } }
 function setClub(id){
   CLUB_ID=id;
   FBURL=FB_BASE+'/clubs/'+id+'/bm'+(bgTestOn(id)?'/test':'');
