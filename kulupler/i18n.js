@@ -53,6 +53,7 @@
     "IMP - MP":"IMP - MP",
     "Swiss — after each round the pairs with similar scores meet":"Swiss — her turdan sonra puanı yakın çiftler karşılaşır",
     "Test tournament with robots":"Robotlarla test turnuvası",
+    "This tournament is still shown at the club, but its online tournament is gone.":"Bu turnuva kulüpte hâlâ görünüyor, ama online turnuvası artık yok.",
     "Test tournament — I play too":"Test turnuvası — ben de oynayayım",
     "You play too, with a robot partner.":"Sen de bir robot ortakla oynuyorsun.",
     "Sign in with your name first.":"Önce adınla giriş yap.",

@@ -13,7 +13,7 @@ async function otUrl(p) { const token = await authToken(); return otRoot() + '/o
 function otNext(i) { let t = +i.at || 0; if (i.rep) while (t + 4 * 3600e3 < Date.now()) t += 7 * 864e5; return t; }
 const otWhen = t => new Date(t).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 async function otLoad() {
-  try { const r = await fetch(await otUrl(''), { cache: 'no-store' }); OT.list = r.ok ? (await r.json()) || {} : {}; OT.at = Date.now(); } catch (e) { OT.list = OT.list || {}; }
+  try { const r = await fetch(await otUrl(''), { cache: 'no-store' }); OT.list = r.ok ? (await r.json()) || {} : {}; OT.ok = r.ok; OT.at = Date.now(); } catch (e) { OT.list = OT.list || {}; OT.ok = false; }
 }
 // the director's page (any tab): the club's online tournaments read again every 20 seconds, for the robots and the club's tabs
 async function otFresh() { if (CLUB_ID && document.getElementById('adminContent') && (!OT.list || Date.now() - (OT.at || 0) > 20e3)) await otLoad(); }
@@ -99,7 +99,8 @@ function otSetupCard() {
     await Promise.all([otLoad(), otMeta()]);
     const box = document.getElementById('otSetupBox'); if (!box) return;
     const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, ed = OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info;
-    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <button class="btn btn-sm" onclick="otTestRobots(true)">🧪🪑 <span>Test tournament — I play too</span></button>${Object.values(OT.list || {}).some(t => t && t.info && t.info.test) ? ' <button class="btn btn-sm btn-red" onclick="otTestDelete()">🗑 <span>Delete the test tournament</span></button>' : ''} <button class="btn btn-sm btn-gold" onclick="window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml','_blank','noopener')">🤖 <span>Start the server robots</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-sm" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button><button class="btn btn-sm btn-red" onclick="otDelete(OT.edit)">🗑 <span>Delete</span></button></div>' : ''}</div>`;
+    const orph = otOrphan();
+    box.innerHTML = (orph ? `<div class="card"><b>🌐 ${cleanData(orph.name || '')}</b> <small>· 🟢 <span>Round</span> ${orph.currentRound || '?'}/${orph.roundCount || '?'}</small><div style="font-size:0.78rem;color:var(--text2);margin:4px 0 8px;"><span>This tournament is still shown at the club, but its online tournament is gone.</span></div><button class="btn btn-sm btn-red" onclick="otOrphanDelete()">🗑 <span>Delete</span></button></div>` : '') + `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <button class="btn btn-sm" onclick="otTestRobots(true)">🧪🪑 <span>Test tournament — I play too</span></button>${Object.values(OT.list || {}).some(t => t && t.info && t.info.test) ? ' <button class="btn btn-sm btn-red" onclick="otTestDelete()">🗑 <span>Delete the test tournament</span></button>' : ''} <button class="btn btn-sm btn-gold" onclick="window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml','_blank','noopener')">🤖 <span>Start the server robots</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-sm" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button><button class="btn btn-sm btn-red" onclick="otDelete(OT.edit)">🗑 <span>Delete</span></button></div>' : ''}</div>`;
     otPreview();
     clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (!(adminTab === 'setup' && setupOnline)) return; otManageRefresh(); OT.liveT = setTimeout(again, 20000); }, 20000);   // only the list above the form   // new registrations and the live state, every 20 seconds
   }, 0);
@@ -175,15 +176,30 @@ window.otStartNow = async function (id) {
     toast('▶ Started'); renderAdminTab(); if (P && P.ctLoad) P.ctLoad(true);
   } catch (e) { toast('❌ Could not start'); }
 };
+// the club's own copy of an online evening (otMirror: the top bar's round, Players, Tables, Boards …) away with it
+async function otClearMirror(ids) {
+  const st = getState(), o = st && st.online; if (!o || (ids && !ids.includes(o.tid))) return;
+  await Promise.all(['state', 'pairs', 'boards', 'movements', 'approvals', 'hands', 'dd', 'tableLocks'].map(k => DB.del(k)));
+  Object.keys(_cache).filter(k => k !== 'playerdb').forEach(k => delete _cache[k]);
+  if (typeof refreshTopbar === 'function') refreshTopbar();
+}
+// an evening still shown at the club (the copy) whose online tournament is gone
+const otOrphan = () => { const st = getState(), o = st && st.online; return OT.ok && o && o.tid && !(OT.list || {})[o.tid] && st.status !== 'finished' ? st : null; };
+window.otOrphanDelete = async function () {
+  const st = otOrphan(); if (!st) return;
+  if (!await otAsk(otL('Delete this online tournament with its registrations?') + '<br><b>' + cleanData(st.name || '') + '</b>')) return;
+  try { await otPut('/' + st.online.tid, undefined, 'DELETE'); } catch (e) {}
+  try { await otClearMirror(); toast('🗑'); OT.edit = null; await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not delete'); }
+};
 // every test tournament of this club away (the real ones are not touched)
 window.otTestDelete = async function () {
   const ids = Object.entries(OT.list || {}).filter(([, t]) => t && t.info && t.info.test).map(([id]) => id); if (!ids.length) return;
   if (!await otAsk(otL('Delete the test tournament?'))) return;
-  try { for (const id of ids) await otPut('/' + id, undefined, 'DELETE'); toast('🗑'); OT.edit = null; await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not delete'); }
+  try { for (const id of ids) await otPut('/' + id, undefined, 'DELETE'); await otClearMirror(ids); toast('🗑'); OT.edit = null; await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not delete'); }
 };
 window.otDelete = async function (id) {
   if (!await otAsk(otL('Delete this online tournament with its registrations?'))) return;
-  try { await otPut('/' + id, undefined, 'DELETE'); toast('🗑'); OT.edit = null; renderAdminTab(); } catch (e) { toast('❌ Could not delete'); }
+  try { await otPut('/' + id, undefined, 'DELETE'); await otClearMirror([id]); toast('🗑'); OT.edit = null; await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not delete'); }
 };
 // a player's key as Bridge Table keeps it (a robot partner has none)
 const otKey = n => /^robot$/i.test(String(n).trim()) ? '' : (otP() && otP().Net && otP().Net.ruleKey ? otP().Net.ruleKey(n) : String(n).trim().toLowerCase());
