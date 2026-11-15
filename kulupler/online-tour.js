@@ -409,7 +409,7 @@ async function otMirror() {
   const P = otP(); if (OT.mirBusy || !P || !P.ctMirror || typeof role === 'undefined' || role !== 'admin' || !CLUB_ID) return;
   await otFresh(); if (!OT.list) return;
   let best = null;
-  for (const [id, t] of Object.entries(OT.list)) for (const [d, run] of Object.entries((t && t.run) || {})) if (run && run.plan && +d <= Date.now() && Date.now() - +d < 8 * 3600e3 && (!best || +d > best.d)) best = { id, d: +d, t, run };
+  for (const [id, t] of Object.entries(OT.list)) if (!(t && t.info && t.info.test)) for (const [d, run] of Object.entries((t && t.run) || {})) if (run && run.plan && +d <= Date.now() && Date.now() - +d < 8 * 3600e3 && (!best || +d > best.d)) best = { id, d: +d, t, run };
   if (!best) return;
   OT.mirBusy = true;
   try {

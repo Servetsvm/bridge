@@ -59,7 +59,9 @@ function ctHeadStep(plan, r, list, res, ti) {
 }
 
 // the evening as the club's own tournament (as the director's Clubs page does it): pairs, tables, boards, hands, archive
+// a test evening (Servet's robot test) stays out of the club's own data
 async function mirror(x) {
+  if (x.info && x.info.test) return;
   const bm = 'gate/clubs/' + x.club + '/bm', tmap = await get(x.p + '/t') || {}, plan = ctFill(x.plan, tmap);
   const M = ctx.window.CTMIR.build(E, plan, x.info, tmap, x.d, x.tid), s = await get(bm + '/state') || {};
   const mine = !!(s.online && s.online.tid === x.tid && +s.online.d === x.d);
