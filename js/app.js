@@ -4271,8 +4271,10 @@ const testClubs = L => { const b = L.filter(t => /beykoz/i.test(t.c || t.club));
 async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];
-    const otOf = c => typeof ctList === 'function' ? [ctFirst(ctList().filter(x => x.club === c))].filter(Boolean) : [];   // one evening a club
-    const otRows = c => otOf(c).map(x => `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`).join('');
+    const otOf = c => typeof ctList === 'function' ? [ctFirst(ctList().filter(x => x.club === c && !x.i.test))].filter(Boolean) : [];   // one evening a club
+    const otTests = c => typeof ctList === 'function' ? ctList().filter(x => x.club === c && x.i.test) : [];   // Servet's online tests: under Test
+    const otCard = x => `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`;
+    const otRows = c => otOf(c).map(otCard).join('');
     const otLive = c => otOf(c).find(x => x.plan);   // an online evening being played: the club's tournament now
     const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
       (ui.clubOpen !== t.club ? '' : t.tb ? (ui.clubTaken && ui.clubTaken[t.club] ? (L => L.length ? `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${L.map(n => `<button class="bm3-key" data-clubtn="${esc(t.club)}|${t.p}|${n}">${n}</button>`).join('')}</div></div>` : `<div class="muted">${T('Every table is taken.')}</div>`)([...Array(t.tb).keys()].map(i => i + 1).filter(n => !ui.clubTaken[t.club].has(n))) : `<div class="muted">${T('Loading…')}</div>`) + `<div class="row2"><button class="btn" data-clubadmin="${esc(t.club)}">⚙️ ${T('Admin')}</button></div>`
@@ -4280,7 +4282,7 @@ async function showClubs() {
     openOv('clubs', `<h2>🏛 ${T('Clubs')}</h2>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}
       ${typeof Net !== 'undefined' && Net.isAdmin() && L.length ? `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('A test tournament at a club: only you see it, the club\'s real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.')}</div>${testClubs(L).map(t => { const x = (ui.clubTest || {})[t.club], free = x && x.st && x.st.status === 'running' ? [...Array(x.st.tableCount || 0).keys()].map(i => i + 1).filter(n => !x.taken.has(n)) : null;
-        return `<div class="clubrow"><b>🧪 ${esc(t.c || t.club)}</b>${free ? ` <small>🟢 ${T('Round {0}', x.st.currentRound)}</small><div class="bm3-keys k4 sbpick">${free.map(n => `<button class="bm3-key" data-clubtt="${esc(t.club)}|${n}">${n}</button>`).join('')}</div>` : ''}<div class="row2"><button class="btn" data-clubtest="${esc(t.club)}">⚙️ ${T('Admin')}</button></div></div>`; }).join('')}</div>` : ''}
+        return `<div class="clubrow"><b>🧪 ${esc(t.c || t.club)}</b>${free ? ` <small>🟢 ${T('Round {0}', x.st.currentRound)}</small><div class="bm3-keys k4 sbpick">${free.map(n => `<button class="bm3-key" data-clubtt="${esc(t.club)}|${n}">${n}</button>`).join('')}</div>` : ''}${otTests(t.club).map(otCard).join('')}<div class="row2"><button class="btn" data-clubtest="${esc(t.club)}">⚙️ ${T('Admin')}</button></div></div>`; }).join('')}</div>` : ''}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
   };
   if (ui.overlay !== 'clubs') ui.clubLive = null;
