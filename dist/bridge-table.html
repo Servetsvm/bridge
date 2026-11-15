@@ -11422,15 +11422,15 @@ function botSay(seat, text, ms) {
   const gen = BOT.gen;
   setTimeout(() => {
     if (gen !== BOT.gen) return;   // the chat was cleared meanwhile
-    BOT.chat.push({ from: botName(seat), seat, text, ts: Date.now() }); if (BOT.chat.length > 120) BOT.chat.shift();
-    if (!(ui.dockOpen || dockWide())) { Net.st.unread = (Net.st.unread || 0) + 1; flash(botName(seat) + ': ' + text, 3200); ui.toastChat = true; }
+    BOT.chat.push({ from: seatName(seat), seat, text, ts: Date.now() }); if (BOT.chat.length > 120) BOT.chat.shift();
+    if (!(ui.dockOpen || dockWide())) { Net.st.unread = (Net.st.unread || 0) + 1; flash(seatName(seat) + ': ' + text, 3200); ui.toastChat = true; }
     renderDock(); renderBar();
   }, ms || 900 + Math.random() * 1400);
 }
 function botChatHtml() {
   const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myNm() || T('You');
   return BOT.chat.slice(-80).map(m => `<div class="cm${m.me ? ' me' : ''}"><b>${esc(m.me ? me : m.from)}</b> ${symText(esc(m.text))}<small>${t(m.ts)}</small></div>`).join('')
-    || `<div class="muted">${T('Say hello to {0}, {1} and {2}', ...[1, 2, 3].map(r => botName((U() + r) % 4)))}${BOT_AI ? `<br><small>${T('The robots answer with an AI (Cloudflare Workers AI): what you write to them is sent there, never your cards.')}</small>` : ''}</div>`;
+    || `<div class="muted">${T('Say hello to {0}, {1} and {2}', ...[1, 2, 3].map(r => seatName((U() + r) % 4)))}${BOT_AI ? `<br><small>${T('The robots answer with an AI (Cloudflare Workers AI): what you write to them is sent there, never your cards.')}</small>` : ''}</div>`;
 }
 const callWord = c => c === 'P' ? T('Pass') : callTxt(c);
 // a call that seat made, and what it meant (the explanation the robots bid by)
@@ -11454,7 +11454,8 @@ const BOT_RE = {
 };
 // the call written in the message: 2♥, 2h, 2 hearts in a few languages, 3NT / 3SA / 3BT
 function callIn(text) {
-  const m = String(text).toLowerCase().match(/([1-7])\s*(nt|sa|bt|nt|sk|bez|♣|♦|♥|♠|c|d|h|s|sinek|karo|kupa|pik|kløver|ruter|hjerter|spar|trébol|diamante|corazón|corazon|pica|trèfle|carreau|cœur|coeur|pique|fiori|quadri|cuori|picche|treff|kreuz|karo|herz|pik|трефы|бубны|черви|пики|trefl|karo|kier|pik|梅花|方块|红心|黑桃|无将)/u);
+  // the suit words first and whole (so "1 sinek" is not read as 1 s = spades), the single letters last
+  const m = String(text).toLowerCase().match(/([1-7])\s*(sinek|karo|kupa|pik|kløver|ruter|hjerter|spar|trébol|trebol|diamantes?|corazón|corazon|picas?|trèfle|trefle|carreau|cœur|coeur|pique|fiori|quadri|cuori|picche|treff|kreuz|herz|трефы?|бубны?|черви|пики?|trefl|kier|梅花|方块|红心|黑桃|无将|nt|sa|bt|sk|bez|♣|♦|♥|♠|[cdhs])(?!\p{L})/u);
   if (!m) return null;
   const w = m[2], st = /^(nt|sa|bt|sk|bez|无将)$/.test(w) ? 4 : /♠|^s$|pik|spar|pica|pique|picche|пики|黑桃/.test(w) ? 3 : /♥|^h$|kupa|hjerter|coraz|c(œ|oe)ur|cuori|herz|черви|kier|红心/.test(w) ? 2 : /♦|^d$|karo|ruter|diamante|carreau|quadri|бубны|方块/.test(w) ? 1 : 0;
   return B(+m[1], st);
@@ -11463,8 +11464,9 @@ function botSend(text) {
   text = String(text || '').trim().slice(0, 300); if (!text) return;
   BOT.chat.push({ me: true, text, ts: Date.now() }); renderDock();
   const me = U(), p = pd(me), lo = text.toLowerCase();
-  // who is asked: a robot by its name or its seat, otherwise your partner
-  let to = [1, 2, 3].map(r => (me + r) % 4).find(s => lo.includes(botName(s).toLowerCase()) || lo.includes(String(SEAT[s] || '').toLowerCase()));
+  // who is asked: "partner" in any language, a robot by its name or its seat, otherwise your partner
+  const PARTNER = /\b(ortak|ortağım|ortagim|partner|partnerim|makker|compañero|companero|compañera|partenaire|compagno|compagna|partnerze|partnera)|партн[её]р|搭档/i;
+  let to = PARTNER.test(lo) ? p : [1, 2, 3].map(r => (me + r) % 4).find(s => lo.includes(seatName(s).toLowerCase().split(' ')[0]) || lo.includes(String(SEAT[s] || '').toLowerCase()));
   const named = to != null; if (!named) to = p;
   const call = callIn(text), done = G.phase === 'done';
   if (call != null || BOT_RE.why.test(text) && !BOT_RE.how.test(text)) {
@@ -11502,8 +11504,8 @@ function botTableState() {
 }
 async function botAI(seat, text) {
   const me = U(), role = s => sideOf(s) === sideOf(me) ? 'partner' : 'opponent';
-  const body = { lang: SET.lang || 'en', text, me: myNm() || '', meSeat: SEAT_EN[me], bot: { name: botName(seat), seat: SEAT_EN[seat], role: role(seat) },
-    others: [1, 2, 3].map(r => (me + r) % 4).filter(s => s !== seat).map(s => ({ name: botName(s), seat: SEAT_EN[s], role: role(s) })),
+  const body = { lang: SET.lang || 'en', text, me: myNm() || '', meSeat: SEAT_EN[me], bot: { name: seatName(seat), seat: SEAT_EN[seat], role: role(seat) },
+    others: [1, 2, 3].map(r => (me + r) % 4).filter(s => s !== seat).map(s => ({ name: seatName(s), seat: SEAT_EN[s], role: role(s) })),
     table: botTableState(), history: BOT.chat.slice(-9, -1).map(m => ({ mine: !!m.me, from: m.from || '', text: m.text })) };
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 12000);
   try {
