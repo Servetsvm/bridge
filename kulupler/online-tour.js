@@ -100,7 +100,7 @@ function otSetupCard() {
     const box = document.getElementById('otSetupBox'); if (!box) return;
     const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, ed = OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info;
     const orph = otOrphan();
-    box.innerHTML = (orph ? `<div class="card"><b>🌐 ${cleanData(orph.name || '')}</b> <small>· 🟢 <span>Round</span> ${orph.currentRound || '?'}/${orph.roundCount || '?'}</small><div style="font-size:0.78rem;color:var(--text2);margin:4px 0 8px;"><span>This tournament is still shown at the club, but its online tournament is gone.</span></div><button class="btn btn-sm btn-red" onclick="otOrphanDelete()">🗑 <span>Delete</span></button></div>` : '') + `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed && !(typeof bgTestOn === 'function' && bgTestOn()) ? `<div class="card" id="otTestCard"><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkBm" onchange="otTestTick()"> 📟 <span>Bridgemate test (at the club, with robots)</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkRob" checked onchange="otTestTick()"> 🧪 <span>Test tournament with robots</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkMe" onchange="otTestTick()"> 🪑 <span>I play too</span></label><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;"><button class="btn btn-sm btn-gold" onclick="otTestGo()">▶ <span>Start the test tournament</span></button>${Object.values(OT.list || {}).some(t => t && t.info && t.info.test) ? ' <button class="btn btn-sm btn-red" onclick="otTestDelete()">🗑 <span>Delete the test tournament</span></button>' : ''} <button class="btn btn-sm btn-gold" onclick="window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml','_blank','noopener')">🤖 <span>Start the server robots</span></button> <small style="color:var(--text3);">Servet</small></div></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-sm" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button><button class="btn btn-sm btn-red" onclick="otDelete(OT.edit)">🗑 <span>Delete</span></button></div>' : ''}</div>`;
+    box.innerHTML = (orph ? `<div class="card"><b>🌐 ${cleanData(orph.name || '')}</b> <small>· 🟢 <span>Round</span> ${orph.currentRound || '?'}/${orph.roundCount || '?'}</small><div style="font-size:0.78rem;color:var(--text2);margin:4px 0 8px;"><span>This tournament is still shown at the club, but its online tournament is gone.</span></div><button class="btn btn-sm btn-red" onclick="otOrphanDelete()">🗑 <span>Delete</span></button></div>` : '') + `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed && !(typeof bgTestOn === 'function' && bgTestOn()) ? `<div class="card" id="otTestCard"><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkClub" onchange="otTestTick(this)"> 🏛 <span>At the club, with real cards (the Bridgemate test)</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkRob" checked onchange="otTestTick(this)"> 🧪 <span>Test tournament with robots</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkMe" onchange="otTestTick(this)"> 🪑 <span>I play too</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkBm" onchange="otTestTick(this)"> 📟 <span>I use the Bridgemate (at my table)</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkSrv" onchange="otTestTick(this)"> 🤖 <span>Start the server robots</span></label><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;"><button class="btn btn-sm btn-gold" onclick="otTestGo()">▶ <span>Start the test tournament</span></button>${Object.values(OT.list || {}).some(t => t && t.info && t.info.test) ? ' <button class="btn btn-sm btn-red" onclick="otTestDelete()">🗑 <span>Delete the test tournament</span></button>' : ''} <small style="color:var(--text3);">Servet</small></div></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-sm" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button><button class="btn btn-sm btn-red" onclick="otDelete(OT.edit)">🗑 <span>Delete</span></button></div>' : ''}</div>`;
     otPreview();
     clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (!(adminTab === 'setup' && setupOnline)) return; otManageRefresh(); OT.liveT = setTimeout(again, 20000); }, 20000);   // only the list above the form   // new registrations and the live state, every 20 seconds
   }, 0);
@@ -192,15 +192,21 @@ window.otOrphanDelete = async function () {
   try { await otClearMirror(); toast('🗑'); OT.edit = null; await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not delete'); }
 };
 // the tick boxes: the Bridgemate test is played at the club (the robots and your own seat come with it)
-window.otTestTick = function () {
-  const bm = document.getElementById('otTkBm'), on = bm && bm.checked;
-  for (const id of ['otTkRob', 'otTkMe']) { const x = document.getElementById(id); if (x) { x.disabled = on; if (on) x.checked = id === 'otTkRob'; x.parentElement.style.opacity = on ? '.5' : ''; } }
+window.otTestTick = function (el) {
+  const g = id => document.getElementById(id) || {}, club = g('otTkClub').checked;
+  // the Bridgemate at my table needs my own seat
+  if (el && el.id === 'otTkBm' && el.checked) g('otTkMe').checked = true;
+  if (el && el.id === 'otTkMe' && !el.checked) g('otTkBm').checked = false;
+  // at the club: the robots and my own table come with it; the online choices are not used
+  for (const id of ['otTkRob', 'otTkMe', 'otTkBm', 'otTkSrv']) { const x = g(id); if (x.parentElement) { x.disabled = club; x.parentElement.style.opacity = club ? '.5' : ''; } }
 };
 window.otTestGo = function () {
   const ck = id => !!(document.getElementById(id) || {}).checked;
-  if (ck('otTkBm')) return otBmTest();
+  if (ck('otTkClub')) return otBmTest();
   if (!ck('otTkRob')) { toast('☝️ ' + otL('Choose a test first.')); return; }
-  otTestRobots(ck('otTkMe'));
+  // the server robots' page opened now, while the tap is fresh (a later window would be blocked)
+  if (ck('otTkSrv')) window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml', '_blank', 'noopener');
+  otTestRobots(ck('otTkMe'), ck('otTkMe') && ck('otTkBm'));
 };
 // the club's test tournament (as at the club: the tables, the Bridgemate, the robots at the other tables): this page
 // again in test mode, its setup "At the club"
@@ -388,14 +394,14 @@ setInterval(otRobots, 1500);
 /* Servet's test: an online tournament started now where every seat is a robot (made-up names); the robots play it
    from this page (and the GitHub run), so the whole evening can be watched and its results looked at */
 // play: Servet plays too — his pair (with a robot partner) is the first one, so his table's "Sit down" is his
-window.otTestRobots = async function (play) {
+window.otTestRobots = async function (play, bm) {
   const f0 = otRead(), np = Math.max(2, Math.floor(f0.np / 2));
   const P = otP(); if (!P) return;
   let my = null; if (play) { try { const [n, k] = P.eval('[myNm(), ctMe()]'); if (n && k) my = { n: String(n).slice(0, 20), k }; } catch (e) {} if (!my) { toast('❌ ' + otL('Sign in with your name first.')); return; } }
-  if (!await otAsk(otL('Start a test tournament with robots now?') + ' (' + f0.np + ' ' + otL('players') + ' · ' + np + ' ' + otL('pairs') + ')' + (my ? '<br>🪑 ' + otL('You play too, with a robot partner.') : ''))) return;
+  if (!await otAsk(otL('Start a test tournament with robots now?') + ' (' + f0.np + ' ' + otL('players') + ' · ' + np + ' ' + otL('pairs') + ')' + (my ? '<br>🪑 ' + otL('You play too, with a robot partner.') : '') + (bm ? '<br>📟 ' + otL('After each board you enter the score on the Bridgemate.') : ''))) return;
   const N = ['Ingrid', 'Lars', 'Sofia', 'Mateo', 'Yuki', 'Omar', 'Elif', 'Jonas', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Hanna', 'Karim', 'Amara', 'Felix', 'Leila', 'Tomás', 'Mei', 'Pavel'].sort(() => Math.random() - 0.5);
   const id = Date.now().toString(36), at = Date.now() - 1000, f = otRead();
-  const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, np: f.np, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
+  const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, np: f.np, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, ...(bm ? { bm: 1 } : {}), st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
   while (N.length < 2 * np) N.push('Robot ' + (N.length + 1));
   const pairs = [...Array(np).keys()].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
   if (my) Object.assign(pairs[0], { pid: 'me', a: my.n, ka: my.k });   // his partner stays a robot

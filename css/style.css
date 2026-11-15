@@ -2163,3 +2163,10 @@ body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradi
 .ctcardt .ctp small{display:block;font-weight:400;opacity:.7;font-size:12px}
 .ctcardt .ctb{margin-top:6px;font-size:14px}
 .clubtools.ct2{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* the Bridgemate of Servet's online test: a green LCD and keys, as on the club's device */
+.bmlcd{background:#9db88a;color:#18240f;border:3px solid #3c4a33;border-radius:8px;padding:6px 10px;font-family:"Share Tech Mono",ui-monospace,Consolas,monospace;font-size:16px;line-height:1.5;margin:6px 0 10px;box-shadow:inset 0 2px 6px rgba(0,0,0,.35);text-align:left}
+.bmlcd .inv{background:#18240f;color:#9db88a;padding:0 6px;border-radius:3px;display:inline-block}
+.bmkeys{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0}
+.bmk{min-width:42px;height:40px;padding:0 8px;border-radius:9px;border:1px solid #2b3440;background:linear-gradient(180deg,#4a5563,#2e3742);color:#fff;font-weight:700;font-size:17px;cursor:pointer;box-shadow:0 2px 0 #1a1f26}
+.bmk.on{background:linear-gradient(180deg,#f2c94c,#c9a227);color:#1d1d1d;border-color:#9c7d14}
+.bmk .sym.red{color:#ff7b7b}.bmk.on .sym.red{color:#b3141e}
