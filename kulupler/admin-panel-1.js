@@ -266,7 +266,7 @@ function renderSetup(){
         <option value="swiss" ${s.movement==='swiss'?'selected':''}>Swiss — pairings adapt to standings each round</option>
         <option value="social" ${s.movement==='social'?'selected':''}>Social Bridge — pairs stay at their table, each table plays any free board</option>
       </select>
-      <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="movHint">${isTeam?'Team Match: 2 teams, 2 or more pairs per team, two-table mirrored boards and IMP scoring.':'Mitchell: NS fixed, EW moves. Howell: everyone moves. Barometer: like Howell, but every table plays the same boards at the same time (one copy of the boards per table). Swiss: pairing is re-computed automatically after every round. In every movement the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).'}</div>
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="movHint">${isTeam?'Team Match: 2 teams, 2 or more pairs per team, two-table mirrored boards and IMP scoring.':'Mitchell: NS fixed, EW moves; the boards go round the tables, so each table plays its own boards. Howell: everyone moves; the boards go round the tables too. Barometer: like Howell, but every round all the tables play the same boards at the same time (one copy of the boards per table). Swiss: the pairing is made again from the standings after every round; all the tables play the same boards. In Mitchell, Howell and Barometer the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).'}</div>
     </div>
     <div class="field" id="aSocialField" style="display:${s.movement==='social'?'block':'none'};">
       <label>Number of boards</label>
