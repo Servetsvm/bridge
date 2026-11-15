@@ -1159,7 +1159,34 @@ function seatName(seat) {
   if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
   // a robots' table's seat taken: the robots keep their names (while the system stays that table's)
   if (!online() && SET.rtNames && SET.rtNames.sys === SET.sys && SET.rtNames.n[seat]) return SET.rtNames.n[seat];
-  return online() && Net.st.names[seat] ? Net.st.names[seat] : T('Robot');
+  return online() && Net.st.names[seat] ? Net.st.names[seat] : online() ? T('Robot') : botName(seat);
+}
+// the robots of a game at home get people's first names (mostly from the player's language, some from elsewhere), the same
+// three all day and new ones the next day, so the table feels like one with people at it
+const BOT_NAMES = {
+  tr: ['Ayşe', 'Mehmet', 'Zeynep', 'Ahmet', 'Elif', 'Mustafa', 'Selin', 'Emre', 'Deniz', 'Burak', 'Gül', 'Kerem', 'Nesrin', 'Orhan', 'Leyla', 'Cem'],
+  no: ['Ingrid', 'Lars', 'Kari', 'Ola', 'Silje', 'Erik', 'Hanne', 'Magnus', 'Tone', 'Bjørn', 'Liv', 'Sindre', 'Marit', 'Håkon'],
+  es: ['Lucía', 'Javier', 'Carmen', 'Pablo', 'Elena', 'Diego', 'Marta', 'Sergio', 'Isabel', 'Andrés', 'Rocío', 'Álvaro'],
+  fr: ['Camille', 'Julien', 'Claire', 'Antoine', 'Sophie', 'Mathieu', 'Élodie', 'Nicolas', 'Chloé', 'Pierre', 'Margaux', 'Hugo'],
+  it: ['Giulia', 'Marco', 'Chiara', 'Luca', 'Francesca', 'Matteo', 'Elena', 'Davide', 'Sara', 'Paolo', 'Alessia', 'Giorgio'],
+  de: ['Anna', 'Lukas', 'Katrin', 'Jonas', 'Sabine', 'Felix', 'Julia', 'Stefan', 'Lena', 'Tobias', 'Birgit', 'Max'],
+  ru: ['Анна', 'Дмитрий', 'Ольга', 'Сергей', 'Наталья', 'Алексей', 'Елена', 'Иван', 'Мария', 'Павел', 'Татьяна', 'Михаил'],
+  pl: ['Anna', 'Piotr', 'Katarzyna', 'Tomasz', 'Magdalena', 'Paweł', 'Agnieszka', 'Marcin', 'Ewa', 'Krzysztof', 'Joanna', 'Michał'],
+  zh: ['李娜', '王伟', '张敏', '刘洋', '陈静', '杨磊', '赵丽', '黄强', '周婷', '吴昊', '徐芳', '孙杰'],
+  en: ['Emma', 'James', 'Olivia', 'Daniel', 'Sarah', 'Michael', 'Grace', 'Thomas', 'Hannah', 'David', 'Lucy', 'Oliver', 'Rachel', 'Peter'],
+};
+const BOT_WORLD = ['Astrid', 'Mateo', 'Leila', 'Yuki', 'Rafael', 'Ingrid', 'Omar', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Amara', 'Tomás', 'Hanna', 'Karim', 'Nora', 'Arjun'];
+let botCache = null;
+function botName(seat) {
+  const d = new Date(), day = d.getFullYear() * 1000 + d.getMonth() * 40 + d.getDate(), L = SET.lang || 'en', me = (myNm() || '').trim().toLowerCase();
+  if (!botCache || botCache.day !== day || botCache.L !== L || botCache.me !== me) {
+    const own = BOT_NAMES[L] || BOT_NAMES.en, pool = own.concat(L === 'zh' || L === 'ru' ? [] : BOT_WORLD.slice(0, 6)).filter(n => n.toLowerCase() !== me);
+    let x = day | 0;   // the same day picks the same names
+    const rnd = () => { x = (Math.imul(x ^ (x >>> 15), 2246822507) + 0x6D2B79F5) | 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; }, n = [];
+    while (n.length < 4) { const p = pool[Math.floor(rnd() * pool.length)]; if (!n.includes(p)) n.push(p); }
+    botCache = { day, L, me, n };
+  }
+  return botCache.n[seat];
 }
 function seatLabel(seat) {
   const g = G.play, tags = [];
