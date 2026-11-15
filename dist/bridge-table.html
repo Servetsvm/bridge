@@ -11579,7 +11579,9 @@ function layoutFans() {
       el.classList.toggle("ovl", ov < 0);
       el.style.setProperty("--cw", cw + "px"); el.style.setProperty("--ov", ov + "px"); if (el.parentElement) el.parentElement.style.setProperty("--fcw", cw + "px"); return;
     }
-    const cw = Math.max(28, Math.min(max * big, W / (1 + (n - 1) * 0.44)));
+    // low enough for the hands to stay in view: two fans (your hand and the dummy or partner opposite, a system table) share the height
+    const fans = document.querySelectorAll('#pos0 .fan, #pos2 .fan').length, hmax = innerHeight * (fans > 1 ? 0.16 : 0.27) / 1.42;
+    const cw = Math.max(28, Math.min(max * big, W / (1 + (n - 1) * 0.44), hmax));
     const step = n > 1 ? Math.min(cw * 1.04, (W - cw) / (n - 1)) : 0;
     el.style.setProperty('--cw', cw + 'px'); el.style.setProperty('--ov', (step - cw) + 'px');
   });
