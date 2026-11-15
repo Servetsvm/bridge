@@ -100,7 +100,7 @@ function otSetupCard() {
     const box = document.getElementById('otSetupBox'); if (!box) return;
     const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, ed = OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info;
     const orph = otOrphan();
-    box.innerHTML = (orph ? `<div class="card"><b>🌐 ${cleanData(orph.name || '')}</b> <small>· 🟢 <span>Round</span> ${orph.currentRound || '?'}/${orph.roundCount || '?'}</small><div style="font-size:0.78rem;color:var(--text2);margin:4px 0 8px;"><span>This tournament is still shown at the club, but its online tournament is gone.</span></div><button class="btn btn-sm btn-red" onclick="otOrphanDelete()">🗑 <span>Delete</span></button></div>` : '') + `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed && !(typeof bgTestOn === 'function' && bgTestOn()) ? `<div class="card" id="otTestCard"><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkClub" onchange="otTestTick(this)"> 🏛 <span>At the club, with real cards (the Bridgemate test)</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkRob" checked onchange="otTestTick(this)"> 🧪 <span>Test tournament with robots</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkMe" onchange="otTestTick(this)"> 🪑 <span>I play too</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkBm" onchange="otTestTick(this)"> 📟 <span>I use the Bridgemate (at my table)</span></label><label style="display:flex;align-items:center;gap:8px;margin:4px 0;cursor:pointer;"><input type="checkbox" id="otTkSrv" onchange="otTestTick(this)"> 🤖 <span>Start the server robots</span></label><div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;"><button class="btn btn-sm btn-gold" onclick="otTestGo()">▶ <span>Start the test tournament</span></button>${Object.values(OT.list || {}).some(t => t && t.info && t.info.test) ? ' <button class="btn btn-sm btn-red" onclick="otTestDelete()">🗑 <span>Delete the test tournament</span></button>' : ''} <small style="color:var(--text3);">Servet</small></div></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-sm" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button><button class="btn btn-sm btn-red" onclick="otDelete(OT.edit)">🗑 <span>Delete</span></button></div>' : ''}</div>`;
+    box.innerHTML = (orph ? `<div class="card"><b>🌐 ${cleanData(orph.name || '')}</b> <small>· 🟢 <span>Round</span> ${orph.currentRound || '?'}/${orph.roundCount || '?'}</small><div style="font-size:0.78rem;color:var(--text2);margin:4px 0 8px;"><span>This tournament is still shown at the club, but its online tournament is gone.</span></div><button class="btn btn-sm btn-red" onclick="otOrphanDelete()">🗑 <span>Delete</span></button></div>` : '') + `<div id="otManage">${otManageHtml(M)}</div>` + '' + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-sm" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button><button class="btn btn-sm btn-red" onclick="otDelete(OT.edit)">🗑 <span>Delete</span></button></div>' : ''}</div>`;
     otPreview();
     clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (!(adminTab === 'setup' && setupOnline)) return; otManageRefresh(); OT.liveT = setTimeout(again, 20000); }, 20000);   // only the list above the form   // new registrations and the live state, every 20 seconds
   }, 0);
@@ -190,30 +190,6 @@ window.otOrphanDelete = async function () {
   if (!await otAsk(otL('Delete this online tournament with its registrations?') + '<br><b>' + cleanData(st.name || '') + '</b>')) return;
   try { await otPut('/' + st.online.tid, undefined, 'DELETE'); } catch (e) {}
   try { await otClearMirror(); toast('🗑'); OT.edit = null; await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not delete'); }
-};
-// the tick boxes: the Bridgemate test is played at the club (the robots and your own seat come with it)
-window.otTestTick = function (el) {
-  const g = id => document.getElementById(id) || {}, club = g('otTkClub').checked;
-  // the Bridgemate at my table needs my own seat
-  if (el && el.id === 'otTkBm' && el.checked) g('otTkMe').checked = true;
-  if (el && el.id === 'otTkMe' && !el.checked) g('otTkBm').checked = false;
-  // at the club: the robots and my own table come with it; the online choices are not used
-  for (const id of ['otTkRob', 'otTkMe', 'otTkBm', 'otTkSrv']) { const x = g(id); if (x.parentElement) { x.disabled = club; x.parentElement.style.opacity = club ? '.5' : ''; } }
-};
-window.otTestGo = function () {
-  const ck = id => !!(document.getElementById(id) || {}).checked;
-  if (ck('otTkClub')) return otBmTest();
-  if (!ck('otTkRob')) { toast('☝️ ' + otL('Choose a test first.')); return; }
-  // the server robots' page opened now, while the tap is fresh (a later window would be blocked)
-  if (ck('otTkSrv')) window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml', '_blank', 'noopener');
-  otTestRobots(ck('otTkMe'), ck('otTkMe') && ck('otTkBm'));
-};
-// the club's test tournament (as at the club: the tables, the Bridgemate, the robots at the other tables): this page
-// again in test mode, its setup "At the club"
-window.otBmTest = function () {
-  const q = new URLSearchParams(location.search); q.set('club', CLUB_ID); q.set('role', 'admin'); q.set('test', '1'); q.delete('ot'); q.delete('admin');
-  if (document.getElementById('otPlayers')) { const f = otRead(); q.set('tp', f.np); q.set('tb', f.bpr); q.set('tm', f.mov); }
-  location.href = location.pathname + '?' + q.toString();
 };
 // every test tournament of this club away (the real ones are not touched)
 window.otTestDelete = async function () {
@@ -392,29 +368,76 @@ async function otRobots() {
 }
 setInterval(otRobots, 1500);
 
-/* Servet's test: an online tournament started now where every seat is a robot (made-up names); the robots play it
-   from this page (and the GitHub run), so the whole evening can be watched and its results looked at */
-// play: Servet plays too — his pair (with a robot partner) is the first one, so his table's "Sit down" is his
-window.otTestRobots = async function (play, bm) {
-  const f0 = otRead(), np = Math.max(2, Math.floor(f0.np / 2));
-  const P = otP(); if (!P) return;
-  let my = null; if (play) { try { const [n, k] = P.eval('[myNm(), ctMe()]'); if (n && k) my = { n: String(n).slice(0, 20), k }; } catch (e) {} if (!my) { toast('❌ ' + otL('Sign in with your name first.')); return; } }
-  if (!await otAsk(otL('Start a test tournament with robots now?') + ' (' + f0.np + ' ' + otL('players') + ' · ' + np + ' ' + otL('pairs') + ')' + (my ? '<br>🪑 ' + otL('You play too, with a robot partner.') + ' ' + otL('Nothing is played until you sit down.') : '') + (bm ? '<br>📟 ' + otL('After each board you enter the score on the Bridgemate.') : ''))) return;
-  const N = ['Ingrid', 'Lars', 'Sofia', 'Mateo', 'Yuki', 'Omar', 'Elif', 'Jonas', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Hanna', 'Karim', 'Amara', 'Felix', 'Leila', 'Tomás', 'Mei', 'Pavel'].sort(() => Math.random() - 0.5);
-  const id = Date.now().toString(36), at = Date.now() - 1000, f = otRead();
-  const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, np: f.np, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, ...(bm ? { bm: 1 } : {}), ...(my ? { wait: my.k } : {}), st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
+/* Servet's online test, on the test page (Bridge Table → Clubs → Test → Beykoz → Admin): an online evening played with
+   robots, its system and conventions chosen here. Start asks which table he sits at first; only then is the evening
+   made: he is North-South at that table in round 1 (a robot partner), robots sit everywhere else, nothing is played
+   until he has sat down, and Bridge Table seats him there at once */
+function otTestCard() {
+  setTimeout(async () => {
+    await Promise.all([otLoad(), otMeta()]);
+    const box = document.getElementById('otTestBox'); if (!box) return;
+    const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, L = otL;
+    const running = Object.entries(OT.list || {}).filter(([, t]) => t && t.info && t.info.test);
+    box.innerHTML = `<div class="card-title"><span>🌐</span> <span>Online test with robots</span></div>
+      ${running.length ? `<div style="font-size:0.8rem;color:var(--gold);margin-bottom:8px;">🟢 ${running.map(([, t]) => cleanData(t.info.n)).join(', ')}</div>` : ''}
+      <div class="field-row">
+        <div class="field"><label>Number of Players</label><input type="number" id="otPlayers" value="16" min="4" max="60" step="4"></div>
+        <div class="field"><label>Boards per Round</label><input type="number" id="otBpr" value="3" min="1" max="8"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Number of Rounds</label><input type="number" id="otRounds" value="6" min="1" max="20"></div>
+        <div class="field"><label>Movement</label><select id="otMov">${Object.entries(OT_MOV).map(([k, n]) => `<option value="${k}" ${k === 'howell' ? 'selected' : ''}>${n.split(' — ')[0]}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label>Base system</label><select id="otSys">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
+      <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
+      <div style="max-height:200px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.filter(x => x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}"> ${cleanData(x.n)}</label>`).join('')}</div>
+      <label style="display:flex;align-items:center;gap:8px;margin:10px 0 4px;cursor:pointer;"><input type="checkbox" id="otTkBm"> 📟 <span>I use the Bridgemate (at my table)</span></label>
+      <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <button class="btn btn-gold" onclick="otTestStart()">▶ <span>Start the test tournament</span></button>
+        <a class="btn btn-sm" href="https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml" target="_blank" rel="noopener">🤖 <span>Start the server robots</span></a>
+        ${running.length ? '<button class="btn btn-sm btn-red" onclick="otTestDelete()">🗑 <span>Delete the test tournament</span></button>' : ''}
+      </div>
+      <div style="font-size:0.75rem;color:var(--text3);margin-top:6px;">${L('You choose your table first; robots sit at all the other seats. While you play, your own app plays the robots of the other tables.')}</div>`;
+  }, 0);
+  return '<div class="card" id="otTestBox" style="border:2px dashed var(--gold);">⏳</div>';
+}
+// the robot pairs of the test (made-up names); their order is the plan's order (by ts)
+function otTestPairs(np, at) {
+  const N = ['Ingrid', 'Lars', 'Sofia', 'Mateo', 'Yuki', 'Omar', 'Elif', 'Jonas', 'Chloé', 'Viktor', 'Ananya', 'Kenji', 'Hanna', 'Karim', 'Amara', 'Felix', 'Leila', 'Tomás', 'Mei', 'Pavel'];
   while (N.length < 2 * np) N.push('Robot ' + (N.length + 1));
-  const pairs = [...Array(np).keys()].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
-  if (my) Object.assign(pairs[0], { pid: 'me', a: my.n, ka: my.k });   // his partner stays a robot
+  return [...Array(np).keys()].map(k => ({ pid: 'r' + k, a: N[2 * k] + ' 🤖', b: N[2 * k + 1] + ' 🤖', ka: '', kb: '', d: at, ts: at + k }));
+}
+// Start: the tables as they will be, and the question which one he sits at
+window.otTestStart = function () {
+  const P = otP(); if (!P) return;
+  let my = null; try { const [n, k] = P.eval('[myNm(), ctMe()]'); if (n && k) my = { n: String(n).slice(0, 20), k }; } catch (e) {}
+  if (!my) { toast('❌ ' + otL('Sign in with your name first.')); return; }
+  const f = otRead(), np = Math.max(2, Math.floor(f.np / 2)), tables = Math.ceil(np / 2);
+  OT.testNew = { f, np, my, bm: !!(document.getElementById('otTkBm') || {}).checked };
+  openModal('🪑 ' + otL('Which table do you sit at?'), `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${otL('Nothing is played until you sit down.')}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">${[...Array(tables).keys()].map(t => `<button class="btn btn-gold" style="min-height:52px;font-size:1.2rem;" onclick="otTestSit(${t})">${t + 1}</button>`).join('')}</div>`,
+    '<button class="btn" onclick="closeModal()">' + otL('Cancel') + '</button>');
+};
+// the table chosen: the evening made with him North-South there in round 1, then Bridge Table seats him
+window.otTestSit = async function (ti) {
+  const P = otP(), x = OT.testNew; if (!P || !x) return; closeModal(); OT.testNew = null;
+  const { f, np, my, bm } = x, id = Date.now().toString(36), at = Date.now() - 1000;
+  const info = { n: '🧪 Test · ' + f.sysN, at, b: f.b, bpr: f.bpr, np: f.np, sc: 'both', sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: 1, test: 1, ...(bm ? { bm: 1 } : {}), wait: my.k, st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: at };
+  const pairs = otTestPairs(np, at);
+  // his pair: the one at North-South of the chosen table in round 1 (the plan's order is the pairs' order)
+  const pre = P.ctMakePlan({ id, d: at, i: info, pairs }), tb = pre && pre.plan.rounds[0][ti];
+  const pi = tb ? tb[0] : 0; if (pairs[pi]) Object.assign(pairs[pi], { pid: 'me', a: my.n, ka: my.k });
   try {
     await otPut('/' + id + '/info', info);
     for (const p of pairs) { const { pid, ...v } = p; await otPut('/' + id + '/pairs/' + pid, v); }
     const plan = P.ctMakePlan({ id, d: at, i: info, pairs });
     await otPut('/' + id + '/run/' + at, plan, 'PATCH');
-    toast('🧪 ' + info.n); await otLoad(); otRerender();
+    toast('🧪 ' + info.n + ' · ' + otL('Table') + ' ' + (ti + 1));
+    await otLoad();
+    // Bridge Table: to the table now
+    P.ctLoad(true).then(() => { if (typeof P.closeClubs === 'function') P.closeClubs(); if (typeof P.ctSit === 'function') P.ctSit(CLUB_ID + '|' + id); });
   } catch (e) { toast('❌ Could not start'); }
 };
-
 // a question on our own page (in the page's language), not the browser's box: true for Yes
 const otL = v => window.i18nText ? i18nText(v) : v;
 function otAsk(msg) {
