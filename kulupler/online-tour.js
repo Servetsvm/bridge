@@ -408,6 +408,8 @@ function otTestPairs(np, at) {
 }
 // Start: the tables as they will be, and the question which one he sits at
 window.otTestStart = function () {
+  // the server robots' page in a new tab, now while the tap is fresh (a later one would be blocked)
+  try { window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml', '_blank', 'noopener'); } catch (e) {}
   const P = otP(); if (!P) return;
   let my = null; try { const [n, k] = P.eval('[myNm(), ctMe()]'); if (n && k) my = { n: String(n).slice(0, 20), k }; } catch (e) {}
   if (!my) { toast('❌ ' + otL('Sign in with your name first.')); return; }
