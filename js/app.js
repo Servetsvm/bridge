@@ -1206,8 +1206,7 @@ function botSay(seat, text, ms) {
 }
 function botChatHtml() {
   const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myNm() || T('You');
-  return BOT.chat.slice(-80).map(m => `<div class="cm${m.me ? ' me' : ''}"><b>${esc(m.me ? me : m.from)}</b> ${symText(esc(m.text))}<small>${t(m.ts)}</small></div>`).join('')
-    || `<div class="muted">${T('Say hello to {0}, {1} and {2}', ...[1, 2, 3].map(r => seatName((U() + r) % 4)))}${BOT_AI ? `<br><small>${T('The robots answer with an AI (Cloudflare Workers AI): what you write to them is sent there, never your cards.')}</small>` : ''}</div>`;
+  return BOT.chat.slice(-80).map(m => `<div class="cm${m.me ? ' me' : ''}"><b>${esc(m.me ? me : m.from)}</b> ${symText(esc(m.text))}<small>${t(m.ts)}</small></div>`).join('');
 }
 const callWord = c => c === 'P' ? T('Pass') : callTxt(c);
 // a call that seat made, and what it meant (the explanation the robots bid by)
