@@ -954,6 +954,7 @@ function finishBoard() {
   }
   if (typeof Net !== 'undefined' && Net.noteBoard && !guest()) Net.noteBoard(act);
   G.result = e; G.phase = 'done'; if (!e.passed) sfx(e.us >= 0 ? 'good' : 'bad');
+  if (botTable()) botBoardEnd(e);
   if (online() && !guest()) Net.boardDone(e);
   if (G.ct) ctBoardDone(e);
   if (G.tprac) { const c = tourCompare(G.tprac.id, G.tprac.b, e); if (c) { e.tprac = c; flash('🏆 ' + T('Against the tournament ({0} players): {1} IMP · {2}%', c.n, fmtSigned(c.imp), c.mp), 4500); } }
@@ -1188,6 +1189,85 @@ function botName(seat) {
   }
   return botCache.n[seat];
 }
+/* ---- a game with the robots: the real bidding box, and a table chat where the robots answer in your language ----
+   The robots answer from a few rules (no AI behind them): greetings, thanks, sorry, well played, and what a call meant —
+   an opponent explains its calls at any time; your partner, as at a real table, only after the board. */
+const botTable = () => !!G && !online() && !G.ct && !G.rtv && !G.watch && !G.pz && G.phase !== 'idle';
+const realBox = () => botTable() && SET.realBox !== false;
+const BOT = { chat: [], gen: 0 };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function botSay(seat, text, ms) {
+  const gen = BOT.gen;
+  setTimeout(() => {
+    if (gen !== BOT.gen) return;   // the chat was cleared meanwhile
+    BOT.chat.push({ from: botName(seat), text, ts: Date.now() }); if (BOT.chat.length > 120) BOT.chat.shift();
+    if (!(ui.dockOpen || dockWide())) { Net.st.unread = (Net.st.unread || 0) + 1; flash(botName(seat) + ': ' + text, 3200); ui.toastChat = true; }
+    renderDock(); renderBar();
+  }, ms || 900 + Math.random() * 1400);
+}
+function botChatHtml() {
+  const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myNm() || T('You');
+  return BOT.chat.slice(-80).map(m => `<div class="cm${m.me ? ' me' : ''}"><b>${esc(m.me ? me : m.from)}</b> ${symText(esc(m.text))}<small>${t(m.ts)}</small></div>`).join('')
+    || `<div class="muted">${T('Say hello to {0}, {1} and {2}', ...[1, 2, 3].map(r => botName((U() + r) % 4)))}</div>`;
+}
+const callWord = c => c === 'P' ? T('Pass') : callTxt(c);
+// a call that seat made, and what it meant (the explanation the robots bid by)
+function botExplain(seat, want) {
+  const A = G.auction, last = f => { for (let k = A.length - 1; k >= 0; k--) if (A[k].seat === seat && f(A[k].call)) return k; return -1; };
+  let i = want != null ? last(c => c === want) : last(c => c !== 'P');
+  if (want == null && i < 0) i = last(() => true);
+  if (i < 0) return want != null ? null : T("I haven't bid yet.");
+  const c = A[i].call, m = E.explainCall(A.slice(0, i), seat, c, G.cards) || {};
+  const why = String(bidTxt(String(m.t || '').replace(/^Pass:\s*/, '')) || '').replace(/<[^>]*>/g, '').trim() || T('nothing special — no better call.');
+  return T('My {0}: {1}', callWord(c), why);
+}
+const BOT_RE = {
+  hi: /\b(hi|hello|hey|merhaba|selam|slm|mrb|hei|hallo|hola|salut|bonjour|ciao|privet|cześć|czesc|witam|dzień dobry)\b|привет|здравствуй|你好|您好|hej/i,
+  how: /how are you|nasılsın|naber|hvordan går|hvordan har du|qué tal|como estás|ça va|comment vas|come stai|wie geht|как дела|jak się masz|你好吗|怎么样/i,
+  thx: /thank|thx|teşekkür|tesekkur|sağol|sagol|sağ ol|takk|gracias|merci|grazie|danke|спасибо|dzięki|dziekuje|dziękuję|谢谢|多谢/i,
+  wp: /well played|nice|good job|bravo|helal|aferin|iyi oyna|güzel|godt spilt|bra|bien jugado|bien joué|ben giocato|gut gespielt|молодец|хорошо сыгр|dobrze zagra|super|打得好|厉害|👍|👏/i,
+  sorry: /sorry|sori|pardon|özür|kusura|beklager|unnskyld|perdón|perdon|lo siento|désolé|desole|scusa|entschuldig|извини|простите|przepraszam|对不起|抱歉/i,
+  why: /why|neden|niye|niçin|ne demek|anlamı|hvorfor|betyr|por qué|porque|que significa|pourquoi|perché|cosa significa|warum|was bedeutet|почему|что значит|dlaczego|co znaczy|为什么|什么意思|\?/i,
+  gl: /good luck|iyi şanslar|bol şans|lykke til|suerte|bonne chance|buona fortuna|viel glück|удачи|powodzenia|祝你好运|加油/i,
+};
+// the call written in the message: 2♥, 2h, 2 hearts in a few languages, 3NT / 3SA / 3BT
+function callIn(text) {
+  const m = String(text).toLowerCase().match(/([1-7])\s*(nt|sa|bt|nt|sk|bez|♣|♦|♥|♠|c|d|h|s|sinek|karo|kupa|pik|kløver|ruter|hjerter|spar|trébol|diamante|corazón|corazon|pica|trèfle|carreau|cœur|coeur|pique|fiori|quadri|cuori|picche|treff|kreuz|karo|herz|pik|трефы|бубны|черви|пики|trefl|karo|kier|pik|梅花|方块|红心|黑桃|无将)/u);
+  if (!m) return null;
+  const w = m[2], st = /^(nt|sa|bt|sk|bez|无将)$/.test(w) ? 4 : /♠|^s$|pik|spar|pica|pique|picche|пики|黑桃/.test(w) ? 3 : /♥|^h$|kupa|hjerter|coraz|c(œ|oe)ur|cuori|herz|черви|kier|红心/.test(w) ? 2 : /♦|^d$|karo|ruter|diamante|carreau|quadri|бубны|方块/.test(w) ? 1 : 0;
+  return B(+m[1], st);
+}
+function botSend(text) {
+  text = String(text || '').trim().slice(0, 300); if (!text) return;
+  BOT.chat.push({ me: true, text, ts: Date.now() }); renderDock();
+  const me = U(), p = pd(me), lo = text.toLowerCase();
+  // who is asked: a robot by its name or its seat, otherwise your partner
+  let to = [1, 2, 3].map(r => (me + r) % 4).find(s => lo.includes(botName(s).toLowerCase()) || lo.includes(String(SEAT[s] || '').toLowerCase()));
+  const named = to != null; if (!named) to = p;
+  const call = callIn(text), done = G.phase === 'done';
+  if (call != null || BOT_RE.why.test(text) && !BOT_RE.how.test(text)) {
+    let who = to;
+    if (call != null && !named) { const a = [...G.auction].reverse().find(x => x.call === call && x.seat !== me); if (a) who = a.seat; }
+    if (who === p && !done && G.phase !== 'idle') return botSay(p, T("Sorry, we can't talk about the bidding during the board 😉 Ask me after it."));
+    const r = call != null ? botExplain(who, call) || botExplain(who) : botExplain(who);
+    return botSay(who, r);
+  }
+  if (BOT_RE.how.test(text)) return botSay(to, pick([T("I'm good, thanks! And you?"), T('Fine, thanks — enjoying the game!')]));
+  if (BOT_RE.hi.test(text)) { const all = named ? [to] : [p, (me + 1) % 4, (me + 3) % 4].filter(() => Math.random() < .8); (all.length ? all : [p]).forEach((s, i) => botSay(s, pick([T('Hi {0}! Good luck 🙂', myNm() || ''), T('Hello! Nice to play with you.'), T('Hi! 👋')]).replace(/ +!/, '!'), 900 + i * 1300 + Math.random() * 800)); return; }
+  if (BOT_RE.thx.test(text)) return botSay(to, pick([T("You're welcome!"), '🙂']));
+  if (BOT_RE.sorry.test(text)) return botSay(to, pick([T('No problem, partner. Next one!'), T("Don't worry, it happens.")]));
+  if (BOT_RE.wp.test(text)) return botSay(to, pick([T('Thanks! 😊'), T('Thank you!'), '😊']));
+  if (BOT_RE.gl.test(text)) return botSay(to, T('Good luck to you too!'));
+  botSay(to, pick(['🙂', T("Let's keep playing!"), T('Hmm… let me think about the cards.')]));
+}
+// the end of a board: now and then a word from the table, as people do
+function botBoardEnd(e) {
+  if (!e || e.passed || Math.random() > .4) return;
+  const me = U(), p = pd(me), opp = (me + 1 + 2 * Math.floor(Math.random() * 2)) % 4, ours = sideOf(e.c.decl) === sideOf(me), made = e.tricks >= e.c.level + 6;
+  if (ours && made) { if (e.c.decl === p) botSay(p, T('We made it! 🙂'), 1500); else if (Math.random() < .6) botSay(p, T('Well played, partner! 👍'), 1500); else botSay(opp, T('Well played!'), 1500); }
+  else if (ours) botSay(p, e.c.decl === p ? T('Sorry partner, my fault.') : T('Unlucky.'), 1500);
+  else if (!made) botSay(p, T('Nice defence, partner! 👍'), 1500);
+}
 function seatLabel(seat) {
   const g = G.play, tags = [];
   if (seat === G.dealer && G.phase === 'bid') tags.push('<span class="tag">D</span>');
@@ -1393,10 +1473,18 @@ function renderBidbox() {
   const bb = $('bidbox');
   if (G.phase !== 'bid' || bidTurn() !== meSeat()) { bb.innerHTML = ''; bb.dataset.k = ''; bb.hidden = true; return; }
   bb.hidden = false; const L = legalCalls(G.auction, U());
-  const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
+  if (realBox()) {
+    // a bidding box as on a real table: a red box with a card for each bid (NT ♠ ♥ ♦ ♣ as on the box), one tap bids;
+    // a level with no bid left is pushed down (only the card edges show); Pass, X and XX at the front
+    const rows = [1, 2, 3, 4, 5, 6, 7].map(l => `<div class="rbrow${L.some(c => isNum(c) && LV(c) === l) ? '' : ' used'}">${[4, 3, 2, 1, 0].map(s => { const c = B(l, s); return `<button data-call="${c}" class="rbc s${s}${red(s) ? ' r' : ''}" ${L.includes(c) ? '' : 'disabled'}><b>${l}</b>${s === 4 ? 'NT' : STR[s]}</button>`; }).join('')}</div>`).join('');
+    const html = pracHintHtml() + `<div class="rbox"><div class="rbfront"><button data-call="P" class="rbp">${esc(T('Pass')).toLocaleUpperCase()}</button><button data-call="X" class="rbx" title="${T('Double')}" ${L.includes('X') ? '' : 'disabled'}>X</button><button data-call="XX" class="rbxx" title="${T('Redouble')}" ${L.includes('XX') ? '' : 'disabled'}>XX</button><button class="rbsw" data-rbsw="0" title="${T('Plain bidding box')}">▦</button></div><div class="rbstack">${rows}</div></div><div class="bpeek" id="bidHover" hidden></div>`;
+    if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; }
+    return;
+  }
+  const lv =[1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st s${s}${red(s) ? " r" : ""}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
   // two rows, as on the big bridge sites: Pass, X, XX and the levels; then the suits of the chosen level
-  let html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
+  let html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}${botTable() ? `<button class="rbsw" data-rbsw="1" title="${T('Real bidding box')}">🟥</button>` : ''}</div><div class="row r2">${sts}</div>`;
   // what the calls of the chosen level mean, before one is made (the call under the mouse shows in #bidHover)
   const mean = c => { const m = E.explainCall(G.auction, U(), c, G.cards) || {}; return `<div class="bpk"><b>${callHtml(c)}</b> ${symText(bidTxt(m.t || ''))}</div>`; };
   html += `<div class="bpeek" id="bidHover" hidden></div>` + (ui.selLvl && SET.expl ? `<div class="bpeek">${[0, 1, 2, 3, 4].map(st => B(ui.selLvl, st)).filter(c => L.includes(c)).map(mean).join('')}</div>` : '');
@@ -1466,7 +1554,7 @@ function renderDock() {
   const show = !athome && (wide || ui.dockOpen);
   document.body.classList.toggle('withdock', !athome && wide);
   d.hidden = !show; if (!show) return;
-  const tbl = online(), tab = tbl ? (ui.dockTab || 'table') : 'lobby';
+  const tbl = online() || botTable(), tab = tbl ? (ui.dockTab || 'table') : 'lobby';
   const key = tab + ':' + tbl + ':' + SET.lang;
   if (d.dataset.key !== key) {
     d.dataset.key = key;
@@ -1477,7 +1565,7 @@ function renderDock() {
       <div class="pmto" id="dPmTo"></div>
       </div></div><div class="composer"><button class="btn rcpt" id="dRcpt" title="${T("Who gets the message")}">${rcptLabel("dock")}</button><textarea class="cmsg" id="dMsg" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="dSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div>`;
   }
-  const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
+  const html = tab === 'table' ? (online() ? Net.tchatHtml() : botChatHtml()) : Net.lchatHtml(), L = $('dList');
   { const p = $('dPlayers'), h = tab === 'table' ? '' : Net.playersHtml(); if (p && p.innerHTML !== h) p.innerHTML = h; }   // the players beside the lobby chat
   updateRcpt();
   { const p = $("dPmTo"), h = tab !== "table" && ui.pmTo ? `🔒 ${T("Private message to {0}", esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : ""; if (p && p.innerHTML !== h) p.innerHTML = h; }
@@ -1492,7 +1580,7 @@ function renderDock() {
 function dockSend(text) {
   text = String(text || '').trim(); if (!text) return;
   if (champLive()) { flash(T('The lobby chat is closed while you play in the championship.'), 2600); return; }
-  if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else lobbySend(text);
+  if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else if (botTable() && (ui.dockTab || 'table') === 'table' && !ui.pmTo) botSend(text); else lobbySend(text);
   // the panel stays open after sending; it is closed with ✕
   renderDock();
 }
@@ -3470,11 +3558,12 @@ document.addEventListener('click', ev_ => {
   if (t.id === "dSend") { const i = $("dMsg"); if (i) { dockSend(i.value); i.value = ""; } return; }
   if (t.id === "dClose") { ui.dockOpen = false; renderDock(); return; }
   // clear the chat shown in the panel on this device (the lobby chat stays cleared; the table chat until new messages)
-  if (t.id === "dClear") { if (online() && (ui.dockTab || "table") === "table") { Net.st.chat.length = 0; Net.st.unread = 0; renderDock(); } else Net.lclear(); return; }
+  if (t.id === "dClear") { if (botTable() && !online() && (ui.dockTab || "table") === "table") { BOT.chat.length = 0; BOT.gen++; Net.st.unread = 0; renderDock(); } else if (online() && (ui.dockTab || "table") === "table") { Net.st.chat.length = 0; Net.st.unread = 0; renderDock(); } else Net.lclear(); return; }
   if (t.id === "chatBtn" || t.id === "bChat") { ui.menu = false; toggleDock(); renderBar(); return; }
   if (t.id === "bStart") { if (online() && !guest() && G.phase === "lobby") { Net.note((Net.st.names[SET.seat] || "Host") + " started the game"); if (Net.st.tour) tableBoard(); else newBoard(); } return; }
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
+  if (t.dataset.rbsw) { SET.realBox = t.dataset.rbsw === '1'; Store.saveSettings(SET); renderBidbox(); return; }
   if (t.dataset.call != null && G.phase === 'bid' && bidTurn() === U()) { const v = t.dataset.call; const c = (v === 'P' || v === 'X' || v === 'XX') ? v : +v; if (c !== -1) { const al = ui.alertOn ? (ui.alertTxt || '').trim() || T('Alert') : null; ui.alertOn = false; ui.alertTxt = ''; makeCall(U(), c, undefined, al); } return; }
   if (t.dataset.c != null && t.classList.contains('play')) { const c = +t.dataset.c; const seat = G.play.turn; if (G.play.hands[seat].includes(c)) playCard(seat, c); return; }
   if (t.closest('.seg') && ui.overlay !== 'sb') {   // social bridge handles its own (social.js)
@@ -4328,7 +4417,7 @@ function addFriendFrom(btn) {
    or one player (a private message) ---- */
 function rcptLabel(where) {
   if (ui.pmTo) return '🔒 ' + ui.pmTo + ' ▾';
-  if (where === 'dock' && online() && (ui.dockTab || 'table') === 'table') return '🃏 ▾';
+  if (where === 'dock' && (online() || botTable()) && (ui.dockTab || 'table') === 'table') return '🃏 ▾';
   return '🌐 ▾';
 }
 function updateRcpt() {
@@ -4337,7 +4426,7 @@ function updateRcpt() {
 function showRcptMenu(btn) {
   const where = btn.id === 'dRcpt' ? 'dock' : 'home';
   const people = [...new Set([...Net.knownNames(), ...friends()])].slice(0, 30);
-  const opts = (where === 'dock' && online() ? [['table', '🃏 ' + T('Table')]] : []).concat([['lobby', '🌐 ' + T('Lobby')]], people.map(n => ['pm:' + n, '🔒 ' + n]));
+  const opts = (where === 'dock' && (online() || botTable()) ? [['table', '🃏 ' + T('Table')]] : []).concat([['lobby', '🌐 ' + T('Lobby')]], people.map(n => ['pm:' + n, '🔒 ' + n]));
   const old = document.querySelector('.rcptmenu'); if (old) old.remove();
   const m = document.createElement('div'); m.className = 'rcptmenu';
   m.innerHTML = opts.map(([v, l]) => `<button data-rcpt="${esc(v)}">${esc(l)}</button>`).join('');

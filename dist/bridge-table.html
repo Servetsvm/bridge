@@ -2194,6 +2194,34 @@ body.homev2 .rtcard .rtchip.rtclaude small,.rtrows .rtclaude small{font-size:11.
 body.homev2 .rtcard .rtchip.rtduel,.rtrows .rtduel{background:linear-gradient(120deg,#8a2c2c 0%,#c0623a 60%,#e0a040 100%)}
 body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradient(120deg,#1f6b3a 0%,#2f8a52 100%);box-shadow:0 0 0 2px #ffd54a inset}
 .rtrows .rtclaudes .rtclaude,body.homev2 .rtcard .rtrows .rtclaudes .rtchip.rtclaude{grid-column:auto;width:100%;min-width:0}
+/* the real bidding box (a game with the robots): a red plastic box, a card for each bid standing in rows (level 1 at
+   the back), the levels with no bid left pushed down so only their edges show; Pass, X and XX at the front */
+#bidbox .rbox{display:flex;gap:10px;align-items:stretch;background:linear-gradient(180deg,#e0353a 0%,#c41f26 45%,#9b1219 100%);border-radius:10px 10px 16px 16px;padding:8px 10px 12px;box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 -7px 0 rgba(0,0,0,.28),inset 0 0 0 1px rgba(0,0,0,.25),0 8px 16px rgba(0,0,0,.45)}
+#bidbox .rbfront{display:flex;flex-direction:column;gap:4px;width:clamp(64px,16%,104px);flex:none}
+#bidbox .rbstack{flex:1;display:flex;flex-direction:column;min-width:0;background:rgba(0,0,0,.28);border-radius:6px;padding:4px 4px 2px;box-shadow:inset 0 3px 6px rgba(0,0,0,.45)}
+#bidbox .rbrow{display:flex;gap:3px;position:relative;margin-top:-3px}
+#bidbox .rbrow:first-child{margin-top:0}
+#bidbox button.rbc{flex:1;min-width:0;height:30px;padding:0 4px;display:flex;align-items:center;justify-content:center;gap:1px;font-weight:800;font-size:19px;line-height:1;background:linear-gradient(180deg,#fff 0%,#f6f3ea 70%,#e6e0d0 100%);color:#1d1d1d;border:1px solid #9d9585;border-radius:6px 6px 3px 3px;box-shadow:0 -2px 3px rgba(0,0,0,.18),inset 0 1px 0 #fff;transition:transform .12s;opacity:1}
+#bidbox button.rbc b{font-size:.88em;margin-right:1px}
+#bidbox button.rbc.s4{font-size:15px;color:#1b2a4e}
+#bidbox button.rbc.r{color:#c62828}
+body.four #bidbox button.rbc.s0{color:#1a8a3a}
+body.four #bidbox button.rbc.s1{color:#e07000}
+#bidbox button.rbc:not(:disabled):hover{transform:translateY(-6px);box-shadow:0 4px 8px rgba(0,0,0,.35)}
+#bidbox button.rbc:disabled{opacity:1;filter:saturate(.25) brightness(.78);cursor:default;box-shadow:none}
+#bidbox .rbrow.used{height:7px;overflow:hidden;margin-top:-1px}
+#bidbox .rbrow.used+.rbrow:not(.used){margin-top:2px}
+#bidbox .rbrow.used button.rbc{height:7px;font-size:0;border-radius:3px 3px 0 0}
+#bidbox .rbfront button{flex:1;min-height:0;padding:2px 0;border-radius:7px 7px 4px 4px;font-weight:900;font-size:17px;line-height:1;letter-spacing:.06em;color:#fff;border:1px solid rgba(0,0,0,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 2px 3px rgba(0,0,0,.3)}
+#bidbox .rbfront .rbp{flex:1.6;background:linear-gradient(180deg,#2f9a62,#1f7046);font-size:15px}
+#bidbox .rbfront .rbx{background:linear-gradient(180deg,#e04848,#b51e22)}
+#bidbox .rbfront .rbxx{background:linear-gradient(180deg,#3b6fc4,#1f4a94)}
+#bidbox .rbfront button:disabled{opacity:1;filter:saturate(.2) brightness(.8)}
+#bidbox .rbfront button:not(:disabled):hover{filter:brightness(1.12)}
+#bidbox .rbfront .rbsw{flex:none;height:20px;font-size:12px;background:rgba(0,0,0,.25);border-color:transparent;box-shadow:none;color:#ffd6d6}
+#bidbox .row button.rbsw{flex:none;width:30px;font-size:13px;background:transparent;box-shadow:none;border:0}
+@media (max-height:640px){ #bidbox .rbox{padding:5px 7px 8px;gap:7px} #bidbox button.rbc{height:24px;font-size:16px} #bidbox button.rbc.s4{font-size:13px} #bidbox .rbfront button{font-size:14px} #bidbox .rbfront .rbp{font-size:12px} }
+@media (max-width:480px){ #bidbox .rbox{padding:5px 6px 8px;gap:6px} #bidbox button.rbc{font-size:15px;padding:0 1px} #bidbox button.rbc.s4{font-size:12px} #bidbox .rbfront{width:56px} #bidbox .rbfront .rbp{font-size:11px;letter-spacing:0} }
 
 </style>
 
@@ -5431,6 +5459,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Plain bidding box": "Düz teklif kutusu", "Real bidding box": "Gerçek teklif kutusu", "Say hello to {0}, {1} and {2}": "{0}, {1} ve {2} ile selamlaş", "I haven't bid yet.": "Henüz teklif vermedim.", "nothing special — no better call.": "özel bir şey yok — daha iyi bir teklif yoktu.", "My {0}: {1}": "{0} teklifim: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Kusura bakma, el sürerken briç konuşamayız 😉 El bitince sor.", "I'm good, thanks! And you?": "İyiyim, teşekkürler! Sen nasılsın?", "Fine, thanks — enjoying the game!": "İyiyim, sağ ol — oyunun keyfini çıkarıyorum!", "Hi {0}! Good luck 🙂": "Merhaba {0}! Bol şans 🙂", "Hello! Nice to play with you.": "Merhaba! Seninle oynamak güzel.", "Hi! 👋": "Selam! 👋", "You're welcome!": "Rica ederim!", "No problem, partner. Next one!": "Sorun değil ortak. Sıradaki ele!", "Don't worry, it happens.": "Takma kafana, olur böyle.", "Thanks! 😊": "Teşekkürler! 😊", "Thank you!": "Teşekkür ederim!", "Good luck to you too!": "Sana da bol şans!", "Let's keep playing!": "Oynamaya devam!", "Hmm… let me think about the cards.": "Hmm… kartları bir düşüneyim.", "We made it! 🙂": "Yaptık! 🙂", "Well played, partner! 👍": "İyi oynadın ortak! 👍", "Well played!": "İyi oynadın!", "Sorry partner, my fault.": "Kusura bakma ortak, benim hatam.", "Unlucky.": "Şanssızlık.", "Nice defence, partner! 👍": "Güzel savunma ortak! 👍",
     "Tap for the details": "Ayrıntılar için dokun",
     "Watch again": "Tekrar seyret",
     "Watch on the table": "Masada izle",
@@ -5867,6 +5896,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Plain bidding box": "Vanlig meldeboks", "Real bidding box": "Ekte meldeboks", "Say hello to {0}, {1} and {2}": "Si hei til {0}, {1} og {2}", "I haven't bid yet.": "Jeg har ikke meldt ennå.", "nothing special — no better call.": "ikke noe spesielt — ingen bedre melding.", "My {0}: {1}": "Min {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Beklager, vi kan ikke snakke om meldingene under spillet 😉 Spør meg etterpå.", "I'm good, thanks! And you?": "Bare bra, takk! Og du?", "Fine, thanks — enjoying the game!": "Fint, takk — jeg koser meg!", "Hi {0}! Good luck 🙂": "Hei {0}! Lykke til 🙂", "Hello! Nice to play with you.": "Hei! Hyggelig å spille med deg.", "Hi! 👋": "Hei! 👋", "You're welcome!": "Bare hyggelig!", "No problem, partner. Next one!": "Ikke noe problem, makker. Neste!", "Don't worry, it happens.": "Ikke tenk på det, sånt skjer.", "Thanks! 😊": "Takk! 😊", "Thank you!": "Tusen takk!", "Good luck to you too!": "Lykke til du også!", "Let's keep playing!": "Vi spiller videre!", "Hmm… let me think about the cards.": "Hmm… la meg tenke på kortene.", "We made it! 🙂": "Vi klarte det! 🙂", "Well played, partner! 👍": "Godt spilt, makker! 👍", "Well played!": "Godt spilt!", "Sorry partner, my fault.": "Beklager makker, min feil.", "Unlucky.": "Uflaks.", "Nice defence, partner! 👍": "Fint forsvar, makker! 👍",
     "Tap for the details": "Trykk for detaljer",
     "Watch again": "Se igjen",
     "Watch on the table": "Se på bordet",
@@ -6301,6 +6331,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Plain bidding box": "Caja de subastas sencilla", "Real bidding box": "Caja de subastas real", "Say hello to {0}, {1} and {2}": "Saluda a {0}, {1} y {2}", "I haven't bid yet.": "Todavía no he hablado.", "nothing special — no better call.": "nada especial — no había mejor voz.", "My {0}: {1}": "Mi {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Lo siento, no podemos hablar de la subasta durante la mano 😉 Pregúntame después.", "I'm good, thanks! And you?": "¡Bien, gracias! ¿Y tú?", "Fine, thanks — enjoying the game!": "Bien, gracias — ¡disfrutando de la partida!", "Hi {0}! Good luck 🙂": "¡Hola {0}! Suerte 🙂", "Hello! Nice to play with you.": "¡Hola! Un placer jugar contigo.", "Hi! 👋": "¡Hola! 👋", "You're welcome!": "¡De nada!", "No problem, partner. Next one!": "No pasa nada, compañero. ¡A la siguiente!", "Don't worry, it happens.": "Tranquilo, pasa.", "Thanks! 😊": "¡Gracias! 😊", "Thank you!": "¡Muchas gracias!", "Good luck to you too!": "¡Suerte a ti también!", "Let's keep playing!": "¡Sigamos jugando!", "Hmm… let me think about the cards.": "Mmm… déjame pensar en las cartas.", "We made it! 🙂": "¡Lo cumplimos! 🙂", "Well played, partner! 👍": "¡Bien jugado, compañero! 👍", "Well played!": "¡Bien jugado!", "Sorry partner, my fault.": "Perdona compañero, culpa mía.", "Unlucky.": "Mala suerte.", "Nice defence, partner! 👍": "¡Buena defensa, compañero! 👍",
     "Tap for the details": "Toca para ver los detalles",
     "Watch again": "Ver otra vez",
     "Watch on the table": "Ver en la mesa",
@@ -6763,6 +6794,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Plain bidding box": "Boîte à enchères simple", "Real bidding box": "Vraie boîte à enchères", "Say hello to {0}, {1} and {2}": "Dis bonjour à {0}, {1} et {2}", "I haven't bid yet.": "Je n'ai pas encore parlé.", "nothing special — no better call.": "rien de spécial — pas de meilleure enchère.", "My {0}: {1}": "Mon {0} : {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Désolé, on ne parle pas des enchères pendant la donne 😉 Demande-moi après.", "I'm good, thanks! And you?": "Ça va bien, merci ! Et toi ?", "Fine, thanks — enjoying the game!": "Bien, merci — je profite de la partie !", "Hi {0}! Good luck 🙂": "Salut {0} ! Bonne chance 🙂", "Hello! Nice to play with you.": "Bonjour ! Ravi de jouer avec toi.", "Hi! 👋": "Salut ! 👋", "You're welcome!": "De rien !", "No problem, partner. Next one!": "Pas de souci, partenaire. À la suivante !", "Don't worry, it happens.": "Ne t'inquiète pas, ça arrive.", "Thanks! 😊": "Merci ! 😊", "Thank you!": "Merci beaucoup !", "Good luck to you too!": "Bonne chance à toi aussi !", "Let's keep playing!": "On continue !", "Hmm… let me think about the cards.": "Hmm… laisse-moi réfléchir aux cartes.", "We made it! 🙂": "On a gagné ! 🙂", "Well played, partner! 👍": "Bien joué, partenaire ! 👍", "Well played!": "Bien joué !", "Sorry partner, my fault.": "Désolé partenaire, ma faute.", "Unlucky.": "Pas de chance.", "Nice defence, partner! 👍": "Belle défense, partenaire ! 👍",
     "Tap for the details": "Touchez pour les détails",
     "Watch again": "Revoir",
     "Watch on the table": "Regarder sur la table",
@@ -7225,6 +7257,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Plain bidding box": "Bidding box semplice", "Real bidding box": "Bidding box vera", "Say hello to {0}, {1} and {2}": "Saluta {0}, {1} e {2}", "I haven't bid yet.": "Non ho ancora dichiarato.", "nothing special — no better call.": "niente di speciale — nessuna dichiarazione migliore.", "My {0}: {1}": "Il mio {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Scusa, non possiamo parlare della licita durante la mano 😉 Chiedimelo dopo.", "I'm good, thanks! And you?": "Bene, grazie! E tu?", "Fine, thanks — enjoying the game!": "Bene, grazie — mi sto divertendo!", "Hi {0}! Good luck 🙂": "Ciao {0}! Buona fortuna 🙂", "Hello! Nice to play with you.": "Ciao! Piacere di giocare con te.", "Hi! 👋": "Ciao! 👋", "You're welcome!": "Prego!", "No problem, partner. Next one!": "Nessun problema, partner. Alla prossima!", "Don't worry, it happens.": "Non preoccuparti, capita.", "Thanks! 😊": "Grazie! 😊", "Thank you!": "Grazie mille!", "Good luck to you too!": "Buona fortuna anche a te!", "Let's keep playing!": "Continuiamo a giocare!", "Hmm… let me think about the cards.": "Mmm… fammi pensare alle carte.", "We made it! 🙂": "Fatto! 🙂", "Well played, partner! 👍": "Ben giocato, partner! 👍", "Well played!": "Ben giocato!", "Sorry partner, my fault.": "Scusa partner, colpa mia.", "Unlucky.": "Sfortuna.", "Nice defence, partner! 👍": "Bella difesa, partner! 👍",
     "Tap for the details": "Tocca per i dettagli",
     "Watch again": "Guarda di nuovo",
     "Watch on the table": "Guarda al tavolo",
@@ -7687,6 +7720,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Plain bidding box": "Einfache Bietbox", "Real bidding box": "Echte Bietbox", "Say hello to {0}, {1} and {2}": "Sag hallo zu {0}, {1} und {2}", "I haven't bid yet.": "Ich habe noch nicht geboten.", "nothing special — no better call.": "nichts Besonderes — kein besseres Gebot.", "My {0}: {1}": "Mein {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Sorry, über die Reizung reden wir nicht während des Boards 😉 Frag mich danach.", "I'm good, thanks! And you?": "Gut, danke! Und dir?", "Fine, thanks — enjoying the game!": "Gut, danke — ich genieße das Spiel!", "Hi {0}! Good luck 🙂": "Hallo {0}! Viel Glück 🙂", "Hello! Nice to play with you.": "Hallo! Schön, mit dir zu spielen.", "Hi! 👋": "Hi! 👋", "You're welcome!": "Gern geschehen!", "No problem, partner. Next one!": "Kein Problem, Partner. Nächstes!", "Don't worry, it happens.": "Keine Sorge, das passiert.", "Thanks! 😊": "Danke! 😊", "Thank you!": "Vielen Dank!", "Good luck to you too!": "Dir auch viel Glück!", "Let's keep playing!": "Weiter geht’s!", "Hmm… let me think about the cards.": "Hmm… lass mich über die Karten nachdenken.", "We made it! 🙂": "Geschafft! 🙂", "Well played, partner! 👍": "Gut gespielt, Partner! 👍", "Well played!": "Gut gespielt!", "Sorry partner, my fault.": "Sorry Partner, mein Fehler.", "Unlucky.": "Pech.", "Nice defence, partner! 👍": "Schöne Verteidigung, Partner! 👍",
     "Tap for the details": "Für Details tippen",
     "Watch again": "Nochmal ansehen",
     "Watch on the table": "Am Tisch zusehen",
@@ -8149,6 +8183,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Plain bidding box": "Обычный биддинг-бокс", "Real bidding box": "Настоящий биддинг-бокс", "Say hello to {0}, {1} and {2}": "Поздоровайся с {0}, {1} и {2}", "I haven't bid yet.": "Я ещё не заявлял.", "nothing special — no better call.": "ничего особенного — лучшей заявки не было.", "My {0}: {1}": "Моя {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Извини, во время сдачи о торговле не говорим 😉 Спроси после.", "I'm good, thanks! And you?": "Хорошо, спасибо! А ты?", "Fine, thanks — enjoying the game!": "Отлично, спасибо — наслаждаюсь игрой!", "Hi {0}! Good luck 🙂": "Привет, {0}! Удачи 🙂", "Hello! Nice to play with you.": "Привет! Приятно с тобой играть.", "Hi! 👋": "Привет! 👋", "You're welcome!": "Пожалуйста!", "No problem, partner. Next one!": "Ничего страшного, партнёр. Следующая!", "Don't worry, it happens.": "Не переживай, бывает.", "Thanks! 😊": "Спасибо! 😊", "Thank you!": "Большое спасибо!", "Good luck to you too!": "И тебе удачи!", "Let's keep playing!": "Играем дальше!", "Hmm… let me think about the cards.": "Хм… дай подумать о картах.", "We made it! 🙂": "Сделали! 🙂", "Well played, partner! 👍": "Хорошо сыграно, партнёр! 👍", "Well played!": "Хорошо сыграно!", "Sorry partner, my fault.": "Извини, партнёр, моя ошибка.", "Unlucky.": "Не повезло.", "Nice defence, partner! 👍": "Отличная защита, партнёр! 👍",
     "Tap for the details": "Нажмите для подробностей",
     "Watch again": "Смотреть снова",
     "Watch on the table": "Смотреть за столом",
@@ -8611,6 +8646,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Plain bidding box": "Zwykły bidding box", "Real bidding box": "Prawdziwy bidding box", "Say hello to {0}, {1} and {2}": "Przywitaj się z {0}, {1} i {2}", "I haven't bid yet.": "Jeszcze nie licytowałem.", "nothing special — no better call.": "nic specjalnego — nie było lepszej odzywki.", "My {0}: {1}": "Moje {0}: {1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "Przepraszam, w trakcie rozdania nie rozmawiamy o licytacji 😉 Zapytaj potem.", "I'm good, thanks! And you?": "Dobrze, dzięki! A ty?", "Fine, thanks — enjoying the game!": "W porządku, dzięki — świetnie się gra!", "Hi {0}! Good luck 🙂": "Cześć {0}! Powodzenia 🙂", "Hello! Nice to play with you.": "Cześć! Miło z tobą grać.", "Hi! 👋": "Cześć! 👋", "You're welcome!": "Nie ma za co!", "No problem, partner. Next one!": "Nic się nie stało, partnerze. Następne!", "Don't worry, it happens.": "Nie martw się, zdarza się.", "Thanks! 😊": "Dzięki! 😊", "Thank you!": "Dziękuję!", "Good luck to you too!": "Tobie też powodzenia!", "Let's keep playing!": "Gramy dalej!", "Hmm… let me think about the cards.": "Hmm… niech pomyślę o kartach.", "We made it! 🙂": "Udało się! 🙂", "Well played, partner! 👍": "Dobrze zagrane, partnerze! 👍", "Well played!": "Dobrze zagrane!", "Sorry partner, my fault.": "Przepraszam partnerze, mój błąd.", "Unlucky.": "Pech.", "Nice defence, partner! 👍": "Świetna obrona, partnerze! 👍",
     "Tap for the details": "Dotknij, aby zobaczyć szczegóły",
     "Watch again": "Obejrzyj ponownie",
     "Watch on the table": "Oglądaj przy stole",
@@ -9073,6 +9109,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Plain bidding box": "普通叫牌盒", "Real bidding box": "真实叫牌盒", "Say hello to {0}, {1} and {2}": "跟{0}、{1}和{2}打个招呼", "I haven't bid yet.": "我还没叫牌。", "nothing special — no better call.": "没什么特别——没有更好的叫品。", "My {0}: {1}": "我的{0}：{1}", "Sorry, we can't talk about the bidding during the board 😉 Ask me after it.": "抱歉，打牌过程中不能讨论叫牌 😉 这副牌结束后再问我。", "I'm good, thanks! And you?": "我很好，谢谢！你呢？", "Fine, thanks — enjoying the game!": "很好，谢谢——玩得很开心！", "Hi {0}! Good luck 🙂": "你好{0}！祝你好运 🙂", "Hello! Nice to play with you.": "你好！很高兴和你一起打牌。", "Hi! 👋": "嗨！👋", "You're welcome!": "不客气！", "No problem, partner. Next one!": "没关系，搭档。下一副！", "Don't worry, it happens.": "别担心，常有的事。", "Thanks! 😊": "谢谢！😊", "Thank you!": "谢谢你！", "Good luck to you too!": "也祝你好运！", "Let's keep playing!": "我们继续吧！", "Hmm… let me think about the cards.": "嗯……让我想想牌。", "We made it! 🙂": "我们做成了！🙂", "Well played, partner! 👍": "打得好，搭档！👍", "Well played!": "打得好！", "Sorry partner, my fault.": "抱歉搭档，是我的错。", "Unlucky.": "运气不好。", "Nice defence, partner! 👍": "防守得漂亮，搭档！👍",
     "Tap for the details": "点击查看详情",
     "Watch again": "再看一遍",
     "Watch on the table": "在牌桌上观看",
@@ -11159,6 +11196,7 @@ function finishBoard() {
   }
   if (typeof Net !== 'undefined' && Net.noteBoard && !guest()) Net.noteBoard(act);
   G.result = e; G.phase = 'done'; if (!e.passed) sfx(e.us >= 0 ? 'good' : 'bad');
+  if (botTable()) botBoardEnd(e);
   if (online() && !guest()) Net.boardDone(e);
   if (G.ct) ctBoardDone(e);
   if (G.tprac) { const c = tourCompare(G.tprac.id, G.tprac.b, e); if (c) { e.tprac = c; flash('🏆 ' + T('Against the tournament ({0} players): {1} IMP · {2}%', c.n, fmtSigned(c.imp), c.mp), 4500); } }
@@ -11393,6 +11431,85 @@ function botName(seat) {
   }
   return botCache.n[seat];
 }
+/* ---- a game with the robots: the real bidding box, and a table chat where the robots answer in your language ----
+   The robots answer from a few rules (no AI behind them): greetings, thanks, sorry, well played, and what a call meant —
+   an opponent explains its calls at any time; your partner, as at a real table, only after the board. */
+const botTable = () => !!G && !online() && !G.ct && !G.rtv && !G.watch && !G.pz && G.phase !== 'idle';
+const realBox = () => botTable() && SET.realBox !== false;
+const BOT = { chat: [], gen: 0 };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+function botSay(seat, text, ms) {
+  const gen = BOT.gen;
+  setTimeout(() => {
+    if (gen !== BOT.gen) return;   // the chat was cleared meanwhile
+    BOT.chat.push({ from: botName(seat), text, ts: Date.now() }); if (BOT.chat.length > 120) BOT.chat.shift();
+    if (!(ui.dockOpen || dockWide())) { Net.st.unread = (Net.st.unread || 0) + 1; flash(botName(seat) + ': ' + text, 3200); ui.toastChat = true; }
+    renderDock(); renderBar();
+  }, ms || 900 + Math.random() * 1400);
+}
+function botChatHtml() {
+  const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myNm() || T('You');
+  return BOT.chat.slice(-80).map(m => `<div class="cm${m.me ? ' me' : ''}"><b>${esc(m.me ? me : m.from)}</b> ${symText(esc(m.text))}<small>${t(m.ts)}</small></div>`).join('')
+    || `<div class="muted">${T('Say hello to {0}, {1} and {2}', ...[1, 2, 3].map(r => botName((U() + r) % 4)))}</div>`;
+}
+const callWord = c => c === 'P' ? T('Pass') : callTxt(c);
+// a call that seat made, and what it meant (the explanation the robots bid by)
+function botExplain(seat, want) {
+  const A = G.auction, last = f => { for (let k = A.length - 1; k >= 0; k--) if (A[k].seat === seat && f(A[k].call)) return k; return -1; };
+  let i = want != null ? last(c => c === want) : last(c => c !== 'P');
+  if (want == null && i < 0) i = last(() => true);
+  if (i < 0) return want != null ? null : T("I haven't bid yet.");
+  const c = A[i].call, m = E.explainCall(A.slice(0, i), seat, c, G.cards) || {};
+  const why = String(bidTxt(String(m.t || '').replace(/^Pass:\s*/, '')) || '').replace(/<[^>]*>/g, '').trim() || T('nothing special — no better call.');
+  return T('My {0}: {1}', callWord(c), why);
+}
+const BOT_RE = {
+  hi: /\b(hi|hello|hey|merhaba|selam|slm|mrb|hei|hallo|hola|salut|bonjour|ciao|privet|cześć|czesc|witam|dzień dobry)\b|привет|здравствуй|你好|您好|hej/i,
+  how: /how are you|nasılsın|naber|hvordan går|hvordan har du|qué tal|como estás|ça va|comment vas|come stai|wie geht|как дела|jak się masz|你好吗|怎么样/i,
+  thx: /thank|thx|teşekkür|tesekkur|sağol|sagol|sağ ol|takk|gracias|merci|grazie|danke|спасибо|dzięki|dziekuje|dziękuję|谢谢|多谢/i,
+  wp: /well played|nice|good job|bravo|helal|aferin|iyi oyna|güzel|godt spilt|bra|bien jugado|bien joué|ben giocato|gut gespielt|молодец|хорошо сыгр|dobrze zagra|super|打得好|厉害|👍|👏/i,
+  sorry: /sorry|sori|pardon|özür|kusura|beklager|unnskyld|perdón|perdon|lo siento|désolé|desole|scusa|entschuldig|извини|простите|przepraszam|对不起|抱歉/i,
+  why: /why|neden|niye|niçin|ne demek|anlamı|hvorfor|betyr|por qué|porque|que significa|pourquoi|perché|cosa significa|warum|was bedeutet|почему|что значит|dlaczego|co znaczy|为什么|什么意思|\?/i,
+  gl: /good luck|iyi şanslar|bol şans|lykke til|suerte|bonne chance|buona fortuna|viel glück|удачи|powodzenia|祝你好运|加油/i,
+};
+// the call written in the message: 2♥, 2h, 2 hearts in a few languages, 3NT / 3SA / 3BT
+function callIn(text) {
+  const m = String(text).toLowerCase().match(/([1-7])\s*(nt|sa|bt|nt|sk|bez|♣|♦|♥|♠|c|d|h|s|sinek|karo|kupa|pik|kløver|ruter|hjerter|spar|trébol|diamante|corazón|corazon|pica|trèfle|carreau|cœur|coeur|pique|fiori|quadri|cuori|picche|treff|kreuz|karo|herz|pik|трефы|бубны|черви|пики|trefl|karo|kier|pik|梅花|方块|红心|黑桃|无将)/u);
+  if (!m) return null;
+  const w = m[2], st = /^(nt|sa|bt|sk|bez|无将)$/.test(w) ? 4 : /♠|^s$|pik|spar|pica|pique|picche|пики|黑桃/.test(w) ? 3 : /♥|^h$|kupa|hjerter|coraz|c(œ|oe)ur|cuori|herz|черви|kier|红心/.test(w) ? 2 : /♦|^d$|karo|ruter|diamante|carreau|quadri|бубны|方块/.test(w) ? 1 : 0;
+  return B(+m[1], st);
+}
+function botSend(text) {
+  text = String(text || '').trim().slice(0, 300); if (!text) return;
+  BOT.chat.push({ me: true, text, ts: Date.now() }); renderDock();
+  const me = U(), p = pd(me), lo = text.toLowerCase();
+  // who is asked: a robot by its name or its seat, otherwise your partner
+  let to = [1, 2, 3].map(r => (me + r) % 4).find(s => lo.includes(botName(s).toLowerCase()) || lo.includes(String(SEAT[s] || '').toLowerCase()));
+  const named = to != null; if (!named) to = p;
+  const call = callIn(text), done = G.phase === 'done';
+  if (call != null || BOT_RE.why.test(text) && !BOT_RE.how.test(text)) {
+    let who = to;
+    if (call != null && !named) { const a = [...G.auction].reverse().find(x => x.call === call && x.seat !== me); if (a) who = a.seat; }
+    if (who === p && !done && G.phase !== 'idle') return botSay(p, T("Sorry, we can't talk about the bidding during the board 😉 Ask me after it."));
+    const r = call != null ? botExplain(who, call) || botExplain(who) : botExplain(who);
+    return botSay(who, r);
+  }
+  if (BOT_RE.how.test(text)) return botSay(to, pick([T("I'm good, thanks! And you?"), T('Fine, thanks — enjoying the game!')]));
+  if (BOT_RE.hi.test(text)) { const all = named ? [to] : [p, (me + 1) % 4, (me + 3) % 4].filter(() => Math.random() < .8); (all.length ? all : [p]).forEach((s, i) => botSay(s, pick([T('Hi {0}! Good luck 🙂', myNm() || ''), T('Hello! Nice to play with you.'), T('Hi! 👋')]).replace(/ +!/, '!'), 900 + i * 1300 + Math.random() * 800)); return; }
+  if (BOT_RE.thx.test(text)) return botSay(to, pick([T("You're welcome!"), '🙂']));
+  if (BOT_RE.sorry.test(text)) return botSay(to, pick([T('No problem, partner. Next one!'), T("Don't worry, it happens.")]));
+  if (BOT_RE.wp.test(text)) return botSay(to, pick([T('Thanks! 😊'), T('Thank you!'), '😊']));
+  if (BOT_RE.gl.test(text)) return botSay(to, T('Good luck to you too!'));
+  botSay(to, pick(['🙂', T("Let's keep playing!"), T('Hmm… let me think about the cards.')]));
+}
+// the end of a board: now and then a word from the table, as people do
+function botBoardEnd(e) {
+  if (!e || e.passed || Math.random() > .4) return;
+  const me = U(), p = pd(me), opp = (me + 1 + 2 * Math.floor(Math.random() * 2)) % 4, ours = sideOf(e.c.decl) === sideOf(me), made = e.tricks >= e.c.level + 6;
+  if (ours && made) { if (e.c.decl === p) botSay(p, T('We made it! 🙂'), 1500); else if (Math.random() < .6) botSay(p, T('Well played, partner! 👍'), 1500); else botSay(opp, T('Well played!'), 1500); }
+  else if (ours) botSay(p, e.c.decl === p ? T('Sorry partner, my fault.') : T('Unlucky.'), 1500);
+  else if (!made) botSay(p, T('Nice defence, partner! 👍'), 1500);
+}
 function seatLabel(seat) {
   const g = G.play, tags = [];
   if (seat === G.dealer && G.phase === 'bid') tags.push('<span class="tag">D</span>');
@@ -11598,10 +11715,18 @@ function renderBidbox() {
   const bb = $('bidbox');
   if (G.phase !== 'bid' || bidTurn() !== meSeat()) { bb.innerHTML = ''; bb.dataset.k = ''; bb.hidden = true; return; }
   bb.hidden = false; const L = legalCalls(G.auction, U());
-  const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
+  if (realBox()) {
+    // a bidding box as on a real table: a red box with a card for each bid (NT ♠ ♥ ♦ ♣ as on the box), one tap bids;
+    // a level with no bid left is pushed down (only the card edges show); Pass, X and XX at the front
+    const rows = [1, 2, 3, 4, 5, 6, 7].map(l => `<div class="rbrow${L.some(c => isNum(c) && LV(c) === l) ? '' : ' used'}">${[4, 3, 2, 1, 0].map(s => { const c = B(l, s); return `<button data-call="${c}" class="rbc s${s}${red(s) ? ' r' : ''}" ${L.includes(c) ? '' : 'disabled'}><b>${l}</b>${s === 4 ? 'NT' : STR[s]}</button>`; }).join('')}</div>`).join('');
+    const html = pracHintHtml() + `<div class="rbox"><div class="rbfront"><button data-call="P" class="rbp">${esc(T('Pass')).toLocaleUpperCase()}</button><button data-call="X" class="rbx" title="${T('Double')}" ${L.includes('X') ? '' : 'disabled'}>X</button><button data-call="XX" class="rbxx" title="${T('Redouble')}" ${L.includes('XX') ? '' : 'disabled'}>XX</button><button class="rbsw" data-rbsw="0" title="${T('Plain bidding box')}">▦</button></div><div class="rbstack">${rows}</div></div><div class="bpeek" id="bidHover" hidden></div>`;
+    if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; }
+    return;
+  }
+  const lv =[1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st s${s}${red(s) ? " r" : ""}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
   // two rows, as on the big bridge sites: Pass, X, XX and the levels; then the suits of the chosen level
-  let html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
+  let html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}${botTable() ? `<button class="rbsw" data-rbsw="1" title="${T('Real bidding box')}">🟥</button>` : ''}</div><div class="row r2">${sts}</div>`;
   // what the calls of the chosen level mean, before one is made (the call under the mouse shows in #bidHover)
   const mean = c => { const m = E.explainCall(G.auction, U(), c, G.cards) || {}; return `<div class="bpk"><b>${callHtml(c)}</b> ${symText(bidTxt(m.t || ''))}</div>`; };
   html += `<div class="bpeek" id="bidHover" hidden></div>` + (ui.selLvl && SET.expl ? `<div class="bpeek">${[0, 1, 2, 3, 4].map(st => B(ui.selLvl, st)).filter(c => L.includes(c)).map(mean).join('')}</div>` : '');
@@ -11671,7 +11796,7 @@ function renderDock() {
   const show = !athome && (wide || ui.dockOpen);
   document.body.classList.toggle('withdock', !athome && wide);
   d.hidden = !show; if (!show) return;
-  const tbl = online(), tab = tbl ? (ui.dockTab || 'table') : 'lobby';
+  const tbl = online() || botTable(), tab = tbl ? (ui.dockTab || 'table') : 'lobby';
   const key = tab + ':' + tbl + ':' + SET.lang;
   if (d.dataset.key !== key) {
     d.dataset.key = key;
@@ -11682,7 +11807,7 @@ function renderDock() {
       <div class="pmto" id="dPmTo"></div>
       </div></div><div class="composer"><button class="btn rcpt" id="dRcpt" title="${T("Who gets the message")}">${rcptLabel("dock")}</button><textarea class="cmsg" id="dMsg" rows="1" maxlength="300" placeholder="${T('Write a message…')}"></textarea><button class="btn sendb" id="dSend" title="${T("Send")}" aria-label="${T("Send")}">➤</button></div>`;
   }
-  const html = tab === 'table' ? Net.tchatHtml() : Net.lchatHtml(), L = $('dList');
+  const html = tab === 'table' ? (online() ? Net.tchatHtml() : botChatHtml()) : Net.lchatHtml(), L = $('dList');
   { const p = $('dPlayers'), h = tab === 'table' ? '' : Net.playersHtml(); if (p && p.innerHTML !== h) p.innerHTML = h; }   // the players beside the lobby chat
   updateRcpt();
   { const p = $("dPmTo"), h = tab !== "table" && ui.pmTo ? `🔒 ${T("Private message to {0}", esc(ui.pmTo))} <button class="btn mini-btn" data-pmx="1">✕</button>` : ""; if (p && p.innerHTML !== h) p.innerHTML = h; }
@@ -11697,7 +11822,7 @@ function renderDock() {
 function dockSend(text) {
   text = String(text || '').trim(); if (!text) return;
   if (champLive()) { flash(T('The lobby chat is closed while you play in the championship.'), 2600); return; }
-  if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else lobbySend(text);
+  if (online() && (ui.dockTab || 'table') === 'table') Net.sendChat(text); else if (botTable() && (ui.dockTab || 'table') === 'table' && !ui.pmTo) botSend(text); else lobbySend(text);
   // the panel stays open after sending; it is closed with ✕
   renderDock();
 }
@@ -13675,11 +13800,12 @@ document.addEventListener('click', ev_ => {
   if (t.id === "dSend") { const i = $("dMsg"); if (i) { dockSend(i.value); i.value = ""; } return; }
   if (t.id === "dClose") { ui.dockOpen = false; renderDock(); return; }
   // clear the chat shown in the panel on this device (the lobby chat stays cleared; the table chat until new messages)
-  if (t.id === "dClear") { if (online() && (ui.dockTab || "table") === "table") { Net.st.chat.length = 0; Net.st.unread = 0; renderDock(); } else Net.lclear(); return; }
+  if (t.id === "dClear") { if (botTable() && !online() && (ui.dockTab || "table") === "table") { BOT.chat.length = 0; BOT.gen++; Net.st.unread = 0; renderDock(); } else if (online() && (ui.dockTab || "table") === "table") { Net.st.chat.length = 0; Net.st.unread = 0; renderDock(); } else Net.lclear(); return; }
   if (t.id === "chatBtn" || t.id === "bChat") { ui.menu = false; toggleDock(); renderBar(); return; }
   if (t.id === "bStart") { if (online() && !guest() && G.phase === "lobby") { Net.note((Net.st.names[SET.seat] || "Host") + " started the game"); if (Net.st.tour) tableBoard(); else newBoard(); } return; }
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
+  if (t.dataset.rbsw) { SET.realBox = t.dataset.rbsw === '1'; Store.saveSettings(SET); renderBidbox(); return; }
   if (t.dataset.call != null && G.phase === 'bid' && bidTurn() === U()) { const v = t.dataset.call; const c = (v === 'P' || v === 'X' || v === 'XX') ? v : +v; if (c !== -1) { const al = ui.alertOn ? (ui.alertTxt || '').trim() || T('Alert') : null; ui.alertOn = false; ui.alertTxt = ''; makeCall(U(), c, undefined, al); } return; }
   if (t.dataset.c != null && t.classList.contains('play')) { const c = +t.dataset.c; const seat = G.play.turn; if (G.play.hands[seat].includes(c)) playCard(seat, c); return; }
   if (t.closest('.seg') && ui.overlay !== 'sb') {   // social bridge handles its own (social.js)
@@ -14533,7 +14659,7 @@ function addFriendFrom(btn) {
    or one player (a private message) ---- */
 function rcptLabel(where) {
   if (ui.pmTo) return '🔒 ' + ui.pmTo + ' ▾';
-  if (where === 'dock' && online() && (ui.dockTab || 'table') === 'table') return '🃏 ▾';
+  if (where === 'dock' && (online() || botTable()) && (ui.dockTab || 'table') === 'table') return '🃏 ▾';
   return '🌐 ▾';
 }
 function updateRcpt() {
@@ -14542,7 +14668,7 @@ function updateRcpt() {
 function showRcptMenu(btn) {
   const where = btn.id === 'dRcpt' ? 'dock' : 'home';
   const people = [...new Set([...Net.knownNames(), ...friends()])].slice(0, 30);
-  const opts = (where === 'dock' && online() ? [['table', '🃏 ' + T('Table')]] : []).concat([['lobby', '🌐 ' + T('Lobby')]], people.map(n => ['pm:' + n, '🔒 ' + n]));
+  const opts = (where === 'dock' && (online() || botTable()) ? [['table', '🃏 ' + T('Table')]] : []).concat([['lobby', '🌐 ' + T('Lobby')]], people.map(n => ['pm:' + n, '🔒 ' + n]));
   const old = document.querySelector('.rcptmenu'); if (old) old.remove();
   const m = document.createElement('div'); m.className = 'rcptmenu';
   m.innerHTML = opts.map(([v, l]) => `<button data-rcpt="${esc(v)}">${esc(l)}</button>`).join('');
