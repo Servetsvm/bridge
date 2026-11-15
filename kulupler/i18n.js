@@ -199,6 +199,8 @@
     "At the table, type its number":"Masaya oturunca masanın numarasını gir",
     "This is not the table your pair goes to.":"Çiftinin gideceği masa bu değil.",
     "Sit here anyway":"Yine de buraya otur",
+    "Table {0} is already open on another phone. Go on with this phone too?":"Masa {0} başka bir telefonda zaten açık. Bu telefonla da devam edilsin mi?",
+    "Go on with this phone":"Bu telefonla devam et",
     "Previous":"Önceki",
     "Next":"Sonraki",
     "Results":"Sonuçlar",

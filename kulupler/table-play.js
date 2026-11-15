@@ -540,9 +540,19 @@ window.bgMoveTo=function(t,nextR,from){
   window._bgEndOf=null;
   // a test tournament: this table has seen where to go; the next round may start
   if(typeof bgTestOn==='function'&&bgTestOn()){ DB.get('ready').then(v=>{ const r=v||{}; r[(nextR-1)+'_'+from]=true; DB.set('ready',r); }).catch(()=>{}); }
-  // the pair moves: this device leaves its table now (another device may take it) and the player types the new
-  // table's number when sitting down there
-  if(t!==from){ try{ unlockTable(from); }catch(e){} bmTableNo=null; window.bmCodeTable=null; bgNewTableEntry(t,nextR,from); return; }
+  // the pair moves: this device leaves its table now (another device may take it) and goes with its player straight
+  // to the new table (no number to type); there the new players confirm who sits where and the boards follow.
+  // Whoever signs out leaves the table free: another player picks its number and goes on.
+  if(t!==from){ try{ unlockTable(from); }catch(e){} bmTableNo=null; window.bmCodeTable=null; bgAutoSit(t,nextR,from); return; }
+  bmShowWaiting(t,nextR);
+};
+// the new table taken by this device; if another phone already has it open there, the player chooses: this phone
+// too, or the table numbers (the old screen) to sit elsewhere
+window.bgAutoSit=async function(t,nextR,from){
+  const L=window.i18nText?i18nText:x=>x;
+  if(isTableLocked(t)&&!await confirmDialog(L('Table {0} is already open on another phone. Go on with this phone too?').replace('{0}',t),{title:'Table '+t,confirmLabel:L('Go on with this phone'),danger:false})){ bgNewTableEntry(t,nextR,from); return; }
+  lockTable(t); bmTableNo=t; window.bmCodeTable=t;
+  try{ if(typeof bgTestOn==='function'&&bgTestOn()) sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(t)); }catch(e){}
   bmShowWaiting(t,nextR);
 };
 window.bgNewTableEntry=function(t,nextR,from){
