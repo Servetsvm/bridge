@@ -14585,7 +14585,7 @@ async function clubTaken(club, test) {
   } catch (e) { return { st: null, taken: new Set() }; }
 }
 // the clubs offered for a test tournament: Beykoz (all of them when there is none)
-const testClubs = L => { const b = L.filter(t => /beykoz/i.test(t.c || t.club)); return b.length ? b : L; };
+const testClubs = L => L.filter(t => /beykoz/i.test(t.c || t.club));   // the test: Beykoz only
 async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];

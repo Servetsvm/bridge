@@ -379,7 +379,7 @@ function otTestCard() {
     const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, L = otL;
     const running = Object.entries(OT.list || {}).filter(([, t]) => t && t.info && t.info.test);
     box.innerHTML = `<div class="card-title"><span>🌐</span> <span>Online test with robots</span></div>
-      ${running.length ? `<div style="font-size:0.8rem;color:var(--gold);margin-bottom:8px;">🟢 ${running.map(([, t]) => cleanData(t.info.n)).join(', ')}</div>` : ''}
+      ${running.map(([id, t]) => `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px;padding:8px;border:1px solid var(--border);border-radius:8px;"><span style="flex:1;min-width:140px;">🟢 <b>${cleanData(t.info.n)}</b></span><button class="btn btn-sm btn-gold" onclick="otTestGoSit('${id}')">🪑 <span>Sit down at your table</span></button><button class="btn btn-sm btn-red" onclick="otDelete('${id}')">🗑 <span>Delete</span></button></div>`).join('')}
       <div class="field-row">
         <div class="field"><label>Number of Players</label><input type="number" id="otPlayers" value="16" min="4" max="60" step="4"></div>
         <div class="field"><label>Boards per Round</label><input type="number" id="otBpr" value="3" min="1" max="8"></div>
@@ -390,12 +390,11 @@ function otTestCard() {
       </div>
       <div class="field"><label>Base system</label><select id="otSys">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
       <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
-      <div style="max-height:200px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.filter(x => x.basic).map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}"> ${cleanData(x.n)}</label>`).join('')}</div>
+      <div style="max-height:200px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}"> ${cleanData(x.n)}</label>`).join('')}</div>
       <label style="display:flex;align-items:center;gap:8px;margin:10px 0 4px;cursor:pointer;"><input type="checkbox" id="otTkBm"> 📟 <span>I use the Bridgemate (at my table)</span></label>
       <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
         <button class="btn btn-gold" onclick="otTestStart()">▶ <span>Start the test tournament</span></button>
-        <a class="btn btn-sm" href="https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml" target="_blank" rel="noopener">🤖 <span>Start the server robots</span></a>
-        ${running.length ? '<button class="btn btn-sm btn-red" onclick="otTestDelete()">🗑 <span>Delete the test tournament</span></button>' : ''}
+        <a class="btn btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--text);background:var(--surface2);border:1px solid var(--border);padding:8px 12px;border-radius:10px;font-weight:600;font-size:0.85rem;" href="https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml" target="_blank" rel="noopener noreferrer">🤖 <span>Start the server robots</span></a>
       </div>
       <div style="font-size:0.75rem;color:var(--text3);margin-top:6px;">${L('You choose your table first; robots sit at all the other seats. While you play, your own app plays the robots of the other tables.')}</div>`;
   }, 0);
@@ -435,8 +434,13 @@ window.otTestSit = async function (ti) {
     toast('🧪 ' + info.n + ' · ' + otL('Table') + ' ' + (ti + 1));
     await otLoad();
     // Bridge Table: to the table now
-    P.ctLoad(true).then(() => { if (typeof P.closeClubs === 'function') P.closeClubs(); if (typeof P.ctSit === 'function') P.ctSit(CLUB_ID + '|' + id); });
+    otTestGoSit(id);
   } catch (e) { toast('❌ Could not start'); }
+};
+// to the table in Bridge Table: its own function does it (this page goes away when the clubs window closes)
+window.otTestGoSit = function (id) {
+  const P = otP(); if (!P) return;
+  try { P.eval('(k => ctLoad(true).then(() => { if (typeof closeClubs === "function") closeClubs(); ctSit(k); }))')(CLUB_ID + '|' + id); } catch (e) { toast('❌'); }
 };
 // a question on our own page (in the page's language), not the browser's box: true for Yes
 const otL = v => window.i18nText ? i18nText(v) : v;
@@ -457,6 +461,7 @@ async function otMirror() {
   const P = otP(); if (OT.mirBusy || !P || !P.ctMirror || typeof role === 'undefined' || role !== 'admin' || !CLUB_ID) return;
   await otFresh(); if (!OT.list) return;
   let best = null;
+  if (typeof bgTestOn === 'function' && bgTestOn()) return;   // the test page: its own test tournament at the club, not the online one
   for (const [id, t] of Object.entries(OT.list)) for (const [d, run] of Object.entries((t && t.run) || {})) if (run && run.plan && +d <= Date.now() && Date.now() - +d < 8 * 3600e3) { const test = !!(t && t.info && t.info.test); if (!best || (best.test && !test) || (best.test === test && +d > best.d)) best = { id, d: +d, t, run, test }; }
   if (!best) return;
   OT.mirBusy = true;

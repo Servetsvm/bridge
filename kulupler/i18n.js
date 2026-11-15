@@ -53,6 +53,7 @@
     "IMP - MP":"IMP - MP",
     "Swiss — after each round the pairs with similar scores meet":"Swiss — her turdan sonra puanı yakın çiftler karşılaşır",
     "Test tournament with robots":"Robotlarla test turnuvası",
+    "Sit down at your table":"Masana otur",
     "Online test with robots":"Robotlarla online test",
     "Which table do you sit at?":"Hangi masaya oturacaksın?",
     "You choose your table first; robots sit at all the other seats. While you play, your own app plays the robots of the other tables.":"Önce masanı seçersin; diğer bütün koltuklara robotlar oturur. Sen oynarken diğer masaların robotlarını senin uygulaman oynatır.",
