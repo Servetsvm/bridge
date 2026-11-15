@@ -1189,11 +1189,10 @@ function botName(seat) {
   }
   return botCache.n[seat];
 }
-/* ---- a game with the robots: the real bidding box, and a table chat where the robots answer in your language ----
+/* ---- a game with the robots: a table chat where the robots answer in your language ----
    The robots answer from a few rules (no AI behind them): greetings, thanks, sorry, well played, and what a call meant —
    an opponent explains its calls at any time; your partner, as at a real table, only after the board. */
 const botTable = () => !!G && !online() && !G.ct && !G.rtv && !G.watch && !G.pz && G.phase !== 'idle';
-const realBox = () => botTable() && SET.realBox !== false;
 const BOT = { chat: [], gen: 0 };
 const pick = a => a[Math.floor(Math.random() * a.length)];
 function botSay(seat, text, ms) {
@@ -1473,18 +1472,10 @@ function renderBidbox() {
   const bb = $('bidbox');
   if (G.phase !== 'bid' || bidTurn() !== meSeat()) { bb.innerHTML = ''; bb.dataset.k = ''; bb.hidden = true; return; }
   bb.hidden = false; const L = legalCalls(G.auction, U());
-  if (realBox()) {
-    // a bidding box as on a real table: a red box with a card for each bid (NT ♠ ♥ ♦ ♣ as on the box), one tap bids;
-    // a level with no bid left is pushed down (only the card edges show); Pass, X and XX at the front
-    const rows = [1, 2, 3, 4, 5, 6, 7].map(l => `<div class="rbrow${L.some(c => isNum(c) && LV(c) === l) ? '' : ' used'}">${[4, 3, 2, 1, 0].map(s => { const c = B(l, s); return `<button data-call="${c}" class="rbc s${s}${red(s) ? ' r' : ''}" ${L.includes(c) ? '' : 'disabled'}><b>${l}</b>${s === 4 ? 'NT' : STR[s]}</button>`; }).join('')}</div>`).join('');
-    const html = pracHintHtml() + `<div class="rbox"><div class="rbfront"><button data-call="P" class="rbp">${esc(T('Pass')).toLocaleUpperCase()}</button><button data-call="X" class="rbx" title="${T('Double')}" ${L.includes('X') ? '' : 'disabled'}>X</button><button data-call="XX" class="rbxx" title="${T('Redouble')}" ${L.includes('XX') ? '' : 'disabled'}>XX</button><button class="rbsw" data-rbsw="0" title="${T('Plain bidding box')}">▦</button></div><div class="rbstack">${rows}</div></div><div class="bpeek" id="bidHover" hidden></div>`;
-    if (bb.dataset.k !== html) { bb.dataset.k = html; bb.innerHTML = html; }
-    return;
-  }
   const lv =[1, 2, 3, 4, 5, 6, 7].map(l => `<button data-lvl="${l}" class="${ui.selLvl === l ? 'sel' : ''}" ${L.some(c => isNum(c) && LV(c) === l) ? '' : 'disabled'}>${l}</button>`).join('');
   const sts = [0, 1, 2, 3, 4].map(s => { const c = ui.selLvl ? B(ui.selLvl, s) : -1; return `<button data-call="${c}" class="st s${s}${red(s) ? " r" : ""}${s === 4 ? ' nt' : ''}" ${ui.selLvl && L.includes(c) ? '' : 'disabled'}>${STR[s]}</button>`; }).join('');
   // two rows, as on the big bridge sites: Pass, X, XX and the levels; then the suits of the chosen level
-  let html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}${botTable() ? `<button class="rbsw" data-rbsw="1" title="${T('Real bidding box')}">🟥</button>` : ''}</div><div class="row r2">${sts}</div>`;
+  let html = pracHintHtml() + `<div class="row r1"><button data-call="P" class="pass">${T("Pass")}</button><button data-call="X" class="dbl" title="${T("Double")}" ${L.includes("X") ? "" : "disabled"}>X</button><button data-call="XX" class="rdbl" title="${T("Redouble")}" ${L.includes("XX") ? "" : "disabled"}>XX</button>${lv}</div><div class="row r2">${sts}</div>`;
   // what the calls of the chosen level mean, before one is made (the call under the mouse shows in #bidHover)
   const mean = c => { const m = E.explainCall(G.auction, U(), c, G.cards) || {}; return `<div class="bpk"><b>${callHtml(c)}</b> ${symText(bidTxt(m.t || ''))}</div>`; };
   html += `<div class="bpeek" id="bidHover" hidden></div>` + (ui.selLvl && SET.expl ? `<div class="bpeek">${[0, 1, 2, 3, 4].map(st => B(ui.selLvl, st)).filter(c => L.includes(c)).map(mean).join('')}</div>` : '');
@@ -3563,7 +3554,6 @@ document.addEventListener('click', ev_ => {
   if (t.id === "bStart") { if (online() && !guest() && G.phase === "lobby") { Net.note((Net.st.names[SET.seat] || "Host") + " started the game"); if (Net.st.tour) tableBoard(); else newBoard(); } return; }
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
-  if (t.dataset.rbsw) { SET.realBox = t.dataset.rbsw === '1'; Store.saveSettings(SET); renderBidbox(); return; }
   if (t.dataset.call != null && G.phase === 'bid' && bidTurn() === U()) { const v = t.dataset.call; const c = (v === 'P' || v === 'X' || v === 'XX') ? v : +v; if (c !== -1) { const al = ui.alertOn ? (ui.alertTxt || '').trim() || T('Alert') : null; ui.alertOn = false; ui.alertTxt = ''; makeCall(U(), c, undefined, al); } return; }
   if (t.dataset.c != null && t.classList.contains('play')) { const c = +t.dataset.c; const seat = G.play.turn; if (G.play.hands[seat].includes(c)) playCard(seat, c); return; }
   if (t.closest('.seg') && ui.overlay !== 'sb') {   // social bridge handles its own (social.js)
