@@ -17395,9 +17395,10 @@ function ctRating(club) {
 }
 const ctCon = v => v.pass ? T('Pass') : v.c ? v.c[0] + CT_SN[v.c[1]] + (v.c[2] === 2 ? 'XX' : v.c[2] ? 'X' : '') + ' ' + SEAT_AB[v.c[3]] : '—';
 // the evening's results: the ranking, then each board with every table, the double dummy on request
-function ctShowResults(club, id, d, tab) {
+// only: the Pairings button — the pairings alone (no other tabs, no PBN)
+function ctShowResults(club, id, d, tab, only) {
   const x = ctRuns(club).find(y => y.id === id && (!d || y.d === +d)); if (!x) { flash(T('No results yet.'), 2000); return; }
-  CT.res = { club, id, d: x.d, tab: tab || CT.res && CT.res.tab || 'rank' };
+  CT.res = { club, id, d: x.d, tab: only ? 'pair' : tab || CT.res && CT.res.tab || 'rank', only: !!only };
   if (CT.res.tab === 'live' && !(x.i.watch || CT.adminView)) CT.res.tab = 'rank';   // watching only when the director allowed it (or for the director)
   const S = ctScore(x), SR = ctScore(x, true), P = x.plan, pn = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b), t = CT.res.tab;
   const tabs = `<div class="seg" data-seg="ctrestab">${[['pair', '🔀 ' + T('Pairings')], ['rank', '🏆 ' + T('Ranking')], ['boards', '🃏 ' + T('The boards')], ['rating', '🏅 ' + T('Club rating')], ...(x.i.watch || CT.adminView ? [['live', '👁 ' + T('Watch')]] : [])].map(([v, l]) => `<button data-ctres="${v}" class="${t === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
@@ -17409,6 +17410,7 @@ function ctShowResults(club, id, d, tab) {
       <table class="res"><tbody>${S.boards[bn].map(q => `<tr><td>${pn(P.pairs[q.ns])}<br><small>${pn(P.pairs[q.ew])}</small></td><td>${ctCon(q.v)}${q.v.tr != null ? ' · ' + T('{0} tricks', q.v.tr) : ''}</td><td><b>${fmtSigned(q.v.ns || 0)}</b></td><td>${Math.round(q.mp)}%<br><small>${fmtSigned(q.imp)} IMP</small></td></tr>`).join('')}</tbody></table></div>`).join('') || `<div class="muted">${T('No results yet.')}</div>`;
   else if (t === 'rating') { const L = ctRating(club); body = L.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th>${T('Rating')}</th><th>${T('Evenings')}</th></tr></thead><tbody>${L.map((r, k) => `<tr><td>${k + 1}</td><td>${esc(r.n)}</td><td><b>${Math.round(r.r)}</b></td><td>${r.g}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Everyone starts at 1500; each evening moves it by the pair\'s result.')}</div>` : `<div class="muted">${T('No results yet.')}</div>`; }
   else body = P.rounds.map((tb, r) => `<div class="grp"><span>${T('Round {0}', r + 1)}</span>${tb.map(([a, b], ti) => { const n = Object.values((((x.run.t || {})[r + '_' + ti]) || {}).res || {}).filter(Boolean).length; return `<div class="row2" style="align-items:center"><span>${T('Table {0}', ti + 1)}: ${pn(P.pairs[a])} / ${pn(P.pairs[b])} · ${n}/${P.bpr}</span>${n < P.bpr ? `<button class="btn mini-btn" data-ctwatch="${r}_${ti}">👁 ${T('Watch')}</button>` : ''}</div>`; }).join('')}</div>`).join('');
+  if (only) { openOv('ctres', `<h2>🔀 ${esc(x.i.n || '')}</h2><div class="muted">🏛 ${esc(x.i.cn || club)} · ${esc(ctWhen(x.d))}</div>${body}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   openOv('ctres', `<h2>📊 ${esc(x.i.n || '')}</h2><div class="muted">🏛 ${esc(x.i.cn || club)} · ${esc(ctWhen(x.d))}</div>${tabs}${body}
     <div class="row2"><button class="btn" data-ctpbn="1">⬇ PBN</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
@@ -17452,8 +17454,8 @@ document.addEventListener('click', e => {
   const a = e.target.closest('[data-ctadmin]');   // the club's admin: the Clubs sign-in (the club's password), then the tournament to change
   if (a) { const [c, i] = a.dataset.ctadmin.split('|'); closeOv(); openClubs('club=' + encodeURIComponent(c) + '&role=admin&admin=1&ot=' + encodeURIComponent(i)); return; }
   const t = e.target.closest('[data-ctres],[data-ctdd],[data-ctpbn],[data-ctwatch],[data-ctresopen],[data-ctpick]'); if (!t) return;
-  if (t.dataset.ctresopen) { const [c, i] = t.dataset.ctresopen.split('|'); ctShowResults(c, i, null, t.dataset.cttab); }
-  else if (t.dataset.ctpick != null && CT.res) { CT.pick = +t.dataset.ctpick === CT.pick ? null : +t.dataset.ctpick; ctShowResults(CT.res.club, CT.res.id, CT.res.d, 'pair'); }
+  if (t.dataset.ctresopen) { const [c, i] = t.dataset.ctresopen.split('|'); ctShowResults(c, i, null, t.dataset.cttab, t.dataset.cttab === 'pair'); }
+  else if (t.dataset.ctpick != null && CT.res) { CT.pick = +t.dataset.ctpick === CT.pick ? null : +t.dataset.ctpick; ctShowResults(CT.res.club, CT.res.id, CT.res.d, 'pair', CT.res.only); }
   else if (t.dataset.ctres && CT.res) ctShowResults(CT.res.club, CT.res.id, CT.res.d, t.dataset.ctres);
   else if (t.dataset.ctdd) ctDD(t.dataset.ctdd);
   else if (t.dataset.ctpbn) ctPBN();
@@ -17580,7 +17582,7 @@ function ctPairsHtml(x) {
   const P = x.plan, r0 = ctCurRound(P, x.run && x.run.t), r = r0 < 0 ? P.rounds.length - 1 : r0, tb = P.rounds[r] || [];
   const pn = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b), mine = ctMyPair(P), pick = CT.pick != null ? CT.pick : mine;
   const ti = tb.findIndex(([a, b]) => a === pick || b === pick), from = r * P.bpr + 1, to = from + P.bpr - 1;
-  const found = pick >= 0 && ti >= 0 ? (() => { const [a, b] = tb[ti], ns = a === pick; return `<div class="okmsg" style="font-size:16px;line-height:1.6;"><b>${pn(P.pairs[pick])}</b><br>🪑 ${T('Table {0}', ti + 1)} · ${ns ? T('North-South') : T('East-West')}<br>${T('against')} ${pn(P.pairs[ns ? b : a])}<br>🃏 ${T('Boards')} ${from}-${to}</div>`; })() : '';
+  const found = pick >= 0 && ti >= 0 ? (() => { const [a, b] = tb[ti], ns = a === pick; return `<div class="okmsg" style="font-size:16px;line-height:1.6;"><b>${pn(P.pairs[pick])}</b><br>🪑 ${T('Table {0}', ti + 1)} · ${ns ? T('North-South') : T('East-West')}<br>${T('against')} ${pn(P.pairs[ns ? b : a])}<br>🃏 ${T('Boards {0}', from + '-' + to)}</div>`; })() : '';
   return `<div class="big">${r0 < 0 ? '🏁 ' + T('Finished') + ' · ' : ''}${T('Round {0}', r + 1)} / ${P.nr || P.rounds.length}</div>${found}
     <div class="muted">${T('Tap your pair to see your table.')}</div>
     <div class="ctcards">${tb.map(([a, b], k) => { const done = Object.values((((x.run && x.run.t || {})[r + '_' + k]) || {}).res || {}).filter(Boolean).length;
