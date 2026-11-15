@@ -403,11 +403,12 @@ function ctRuns(club) {
   }
   return out.sort((a, b) => b.d - a.d);
 }
-function ctScore(x) {
+// over: only the boards every table of their round has finished (the ranking, your score, the rating)
+function ctScore(x, over) {
   const P = x.plan, boards = {};
   P.rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => {
     const res = (((x.run.t || {})[r + '_' + ti]) || {}).res || {};
-    for (const [bn, v] of Object.entries(res)) if (v) (boards[bn] || (boards[bn] = [])).push({ r, ti, ns: a, ew: b, v });
+    for (const [bn, v] of Object.entries(res)) if (v && (!over || ctBoardOver(x, bn))) (boards[bn] || (boards[bn] = [])).push({ r, ti, ns: a, ew: b, v });
   }));
   const tot = P.pairs.map(() => ({ mp: 0, n: 0, imp: 0 })), imp = P.sc === 'imp' || x.i.sc === 'imp';
   for (const L of Object.values(boards)) {
@@ -434,7 +435,7 @@ const ctBoardLeft = (x, bn) => { const P = x.plan, r = Math.floor((+bn - 1) / P.
 function ctRating(club) {
   const R = {};
   for (const x of ctRuns(club).slice().reverse()) {
-    const S = ctScore(x);
+    const S = ctScore(x, true);
     for (const r of S.rank) {
       if (r.p.robot) continue;
       const delta = S.imp ? (r.n ? r.imp / r.n * 4 : 0) : (r.pct - 50) * 0.6;
@@ -452,11 +453,11 @@ function ctShowResults(club, id, d, tab) {
   const x = ctRuns(club).find(y => y.id === id && (!d || y.d === +d)); if (!x) { flash(T('No results yet.'), 2000); return; }
   CT.res = { club, id, d: x.d, tab: tab || CT.res && CT.res.tab || 'rank' };
   if (CT.res.tab === 'live' && !(x.i.watch || CT.adminView)) CT.res.tab = 'rank';   // watching only when the director allowed it (or for the director)
-  const S = ctScore(x), P = x.plan, pn = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b), t = CT.res.tab;
+  const S = ctScore(x), SR = ctScore(x, true), P = x.plan, pn = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b), t = CT.res.tab;
   const tabs = `<div class="seg" data-seg="ctrestab">${[['pair', '🔀 ' + T('Pairings')], ['rank', '🏆 ' + T('Ranking')], ['boards', '🃏 ' + T('The boards')], ['rating', '🏅 ' + T('Club rating')], ...(x.i.watch || CT.adminView ? [['live', '👁 ' + T('Watch')]] : [])].map(([v, l]) => `<button data-ctres="${v}" class="${t === v ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   let body = '';
   if (t === 'pair') body = ctPairsHtml(x);
-  else if (t === 'rank') body = S.rank.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Pair')}</th><th>MP %</th><th>IMP</th><th>${T('Boards')}</th></tr></thead><tbody>${S.rank.map((r, k) => `<tr${[r.p.ka, r.p.kb].includes(ctMe()) ? ' class="me"' : ''}><td>${k + 1}</td><td>${pn(r.p)}</td><td>${S.imp ? '' : '<b>'}${r.pct.toFixed(1)}%${S.imp ? '' : '</b>'}</td><td>${S.imp ? '<b>' : ''}${fmtSigned(r.imp)}${S.imp ? '</b>' : ''}</td><td>${r.n}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Ranked by {0}', S.imp ? 'IMP' : 'MP %')}</div>` : `<div class="muted">${T('No results yet.')}</div>`;
+  else if (t === 'rank') body = SR.rank.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Pair')}</th><th>MP %</th><th>IMP</th><th>${T('Boards')}</th></tr></thead><tbody>${SR.rank.map((r, k) => `<tr${[r.p.ka, r.p.kb].includes(ctMe()) ? ' class="me"' : ''}><td>${k + 1}</td><td>${pn(r.p)}</td><td>${SR.imp ? '' : '<b>'}${r.pct.toFixed(1)}%${SR.imp ? '' : '</b>'}</td><td>${SR.imp ? '<b>' : ''}${fmtSigned(r.imp)}${SR.imp ? '</b>' : ''}</td><td>${r.n}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Ranked by {0}', SR.imp ? 'IMP' : 'MP %')}</div>` : `<div class="muted">${T('No results yet.')}</div>`;
   else if (t === 'boards') body = Object.keys(S.boards).sort((a, b) => a - b).map(bn => !ctBoardOver(x, bn) ? `<div class="grp"><span>${T('Board {0}', bn)}</span><div class="muted">⏳ ${T('Still being played ({0} of {1} tables done): shown when every table has finished it.', ...ctBoardLeft(x, bn))}</div></div>` : `<div class="grp"><span>${T('Board {0}', bn)} <button class="btn mini-btn" data-ctdd="${bn}">🎯 ${T('Double dummy')}</button></span>
       <div id="ctdd${bn}"></div>
       <table class="res"><tbody>${S.boards[bn].map(q => `<tr><td>${pn(P.pairs[q.ns])}<br><small>${pn(P.pairs[q.ew])}</small></td><td>${ctCon(q.v)}${q.v.tr != null ? ' · ' + T('{0} tricks', q.v.tr) : ''}</td><td><b>${fmtSigned(q.v.ns || 0)}</b></td><td>${Math.round(q.mp)}%<br><small>${fmtSigned(q.imp)} IMP</small></td></tr>`).join('')}</tbody></table></div>`).join('') || `<div class="muted">${T('No results yet.')}</div>`;
@@ -619,7 +620,7 @@ async function ctMyScore() {
   const t = CT.tbl; if (!t || t.watch) return;
   try {
     const tmap = await Net.Cloud.get(t.p + '/t') || {}, x = ctFind(t.key), pi = ctMyPair(t.plan); if (pi < 0) return;
-    const S = ctScore({ plan: ctFill(t.plan, tmap), run: { t: tmap }, i: (x && x.i) || {} }), k = S.rank.findIndex(q => q.p === t.plan.pairs[pi]), me = S.rank[k];
+    const S = ctScore({ plan: ctFill(t.plan, tmap), run: { t: tmap }, i: (x && x.i) || {} }, true), k = S.rank.findIndex(q => q.p === t.plan.pairs[pi]), me = S.rank[k];
     let last = null, lb = -1;
     for (const [bn, L] of Object.entries(S.boards)) for (const q of L) if ((q.ns === pi || q.ew === pi) && +bn > lb) { lb = +bn; last = q.ns === pi ? { mp: q.mp, imp: q.imp } : { mp: 100 - q.mp, imp: -q.imp }; }
     CT.sc = me ? { pct: me.pct, imp: me.imp, n: me.n, pos: k + 1, of: S.rank.length, last } : { pct: 0, imp: 0, n: 0, last: null };
