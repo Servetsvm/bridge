@@ -3565,7 +3565,6 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; const c = ui.clubOpen; showClubs(); if (c) clubTaken(c).then(x => { (ui.clubTaken = ui.clubTaken || {})[c] = x.taken; if (ui.overlay === 'clubs') showClubs(); }); return; }
   if (t.dataset.clubmov) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubmov) + '&movement=1'); return; }
   if (t.dataset.clubscr) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubscr) + '&role=screen'); return; }
-  if (t.dataset.clubtt && typeof Net !== 'undefined' && Net.isAdmin()) { const [c, n] = t.dataset.clubtt.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&tn=' + n + '&test=1'); return; }
   if (t.dataset.clubtest && typeof Net !== 'undefined' && Net.isAdmin()) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubtest) + '&role=admin&test=1'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
@@ -4281,8 +4280,8 @@ async function showClubs() {
         : otLive(t.club) ? `<div class="row2"><button class="btn" data-clubadmin="${esc(t.club)}">⚙️ ${T('Admin')}</button></div>` : `<div class="muted">${T('No tournament at this club now.')}</div><div class="row2"><button class="btn gold" data-clubadmin="${esc(t.club)}">➕ ${T('Set up a tournament')}</button></div>`) + (ui.clubOpen !== t.club ? '' : (x => x ? `<div class="row3 clubtools ct2"><button class="btn gold" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button><button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button></div>` : `<div class="row3 clubtools ct2"><button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button><button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button></div>`)(otLive(t.club))) + `</div>`).join('');
     openOv('clubs', `<h2>🏛 ${T('Clubs')}</h2>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}
-      ${typeof Net !== 'undefined' && Net.isAdmin() && L.length ? `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('A test tournament at a club: only you see it, the club\'s real tournament is not touched; the players have names from the TBF list and the robots play by themselves, round after round.')}</div>${testClubs(L).map(t => { const x = (ui.clubTest || {})[t.club], free = x && x.st && x.st.status === 'running' ? [...Array(x.st.tableCount || 0).keys()].map(i => i + 1).filter(n => !x.taken.has(n)) : null;
-        return `<div class="clubrow"><b>🧪 ${esc(t.c || t.club)}</b>${free ? ` <small>🟢 ${T('Round {0}', x.st.currentRound)}</small><div class="bm3-keys k4 sbpick">${free.map(n => `<button class="bm3-key" data-clubtt="${esc(t.club)}|${n}">${n}</button>`).join('')}</div>` : ''}${otTests(t.club).map(otCard).join('')}<div class="row2"><button class="btn" data-clubtest="${esc(t.club)}">⚙️ ${T('Admin')}</button></div></div>`; }).join('')}</div>` : ''}
+      ${typeof Net !== 'undefined' && Net.isAdmin() && L.length ? `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('An online test with robots: only you see it, the club\'s real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.')}</div>${testClubs(L).map(t => {
+        return `<div class="clubrow"><b>🧪 ${esc(t.c || t.club)}</b>${otTests(t.club).map(otCard).join('')}<div class="row2"><button class="btn" data-clubtest="${esc(t.club)}">⚙️ ${T('Admin')}</button></div></div>`; }).join('')}</div>` : ''}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
   };
   if (ui.overlay !== 'clubs') ui.clubLive = null;
@@ -4300,7 +4299,6 @@ async function showClubs() {
     const rest = Object.entries(cl || {}).filter(([id, c]) => c && c.a !== false && !live.some(t => t.club === id)).map(([club, c]) => ({ club, c: c.n })).sort((a, b) => String(a.c).localeCompare(String(b.c)));
     ui.clubLive = [...live, ...rest];
     if (ui.overlay === 'clubs') draw();
-    if (Net.isAdmin()) { ui.clubTest = {}; await Promise.all(ui.clubLive.map(async t => { ui.clubTest[t.club] = await clubTaken(t.club, true); })); if (ui.overlay === 'clubs') draw(); }
   }
 }
 /* Clubs: the club tournaments (in kulupler/, once BridgeGate) open here, full screen above the home page, under a bar with

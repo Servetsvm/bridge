@@ -7,6 +7,8 @@ let adminTab='setup';
 function renderAdminPanel(){
   const otq=new URLSearchParams(location.search).get('ot');
   if(otq&&!window._otOpened&&typeof OT!=='undefined'){ window._otOpened=1; adminTab='setup'; setupOnline=true; OT.edit=otq; }
+  // the test page (Clubs → Test → Beykoz → Admin): only the online test with robots (cards played in Bridge Table)
+  if(bgTestOn()){ document.getElementById('panelContent').innerHTML=`<div class="admin-wrap"><div id="adminContent">${typeof otTestCard==='function'?otTestCard():''}</div></div>`; return; }
   document.getElementById('panelContent').innerHTML=`
     <div class="admin-wrap">
       ${isSuper()?testBarHtml():''}
@@ -34,6 +36,7 @@ window.setAdminTab=function(tab,btn){
 };
 function renderAdminTab(){
   const c=document.getElementById('adminContent');if(!c)return;
+  if(bgTestOn()){ c.innerHTML=typeof otTestCard==='function'?otTestCard():''; return; }   // the test page: the online test only
   // the online tournament's form being filled in is never drawn again: only the list of tournaments above it
   if(adminTab==='setup'&&typeof setupOnline!=='undefined'&&setupOnline&&document.getElementById('otFormBox')&&typeof OT!=='undefined'&&!OT.force){ otManageRefresh(); return; }
   if(typeof OT!=='undefined') OT.force=false;
