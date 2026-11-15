@@ -800,7 +800,7 @@ function bm3Draw() {
     next = `<button class="bm3-ok" onclick="bmGo(1)"${f.leadSuit && f.leadRank ? '' : ' disabled'}>${L('Next')} ›</button>`;
   } else if (bmStepNo === 'tricks') {
     body = `<div class="bm3-step">${L('Tricks taken by declarer')}</div>
-      <div class="bm3-keys k7">${[...Array(14).keys()].map(t => key(tr === t && f._tricksSet, t, `bmSet('tr',${t})`, t >= f.level + 6 ? 'res made' : 'res down')).join('')}</div>`;
+      <div class="bm3-keys k7">${[...Array(14).keys()].map(t => key(tr === t && f._tricksSet, (t - f.level - 6 === 0 ? "=" : (t - f.level - 6 > 0 ? "+" : "") + (t - f.level - 6)) + `<small>${t}</small>`, `bmSet('tr',${t})`, t >= f.level + 6 ? 'res made' : 'res down')).join('')}</div>`;
     back = `<button class="bm3-cancel" onclick="bmGo(-1)">‹ ${L('Back')}</button>`;
     next = `<button class="bm3-ok" onclick="bmGo(1)"${f._tricksSet ? '' : ' disabled'}>${L('Next')} ›</button>`;
   } else {   // the result to confirm

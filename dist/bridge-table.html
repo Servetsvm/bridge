@@ -2235,6 +2235,15 @@ body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradi
 .bm3-key.res.made{color:#1f5d36}.bm3-key.res.down{color:#b3261e}
 @media (max-height:640px){ .bm3w .bm3-key{min-height:42px} .bm3w .bm3-display{margin:6px 12px;padding:6px 10px} .bm3w .bm3-head{padding-top:6px} .bm3w .bm3-step{padding-top:6px} }
 .bm3w .red,.bm3-sum .red{color:#d32f2f}
+/* the Bridgemate's suits in their colours: spades black, hearts red, clubs and diamonds black and red (green and
+   orange with the four-colour deck); a result key with its tricks under it */
+.bmsy{font-family:"Segoe UI Symbol","Apple Symbols","Noto Sans Symbols 2",sans-serif}
+.bmsy.s3,.bmsy.s0{color:#111}.bmsy.s2,.bmsy.s1{color:#d32f2f}
+body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
+.bm3-key.active .bmsy{color:#fff}
+.bm3-tbl .bmsy{color:#fff}
+.bm3-key.res{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.bm3-key.res small{font-size:.62em;font-weight:600;opacity:.6}
 
 </style>
 
@@ -5472,6 +5481,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "The tournament is over": "Turnuva bitti", "Every table has finished: the results are ready.": "Bütün masalar bitirdi: sonuçlar hazır.", "Over for your table; {0} tables are still playing.": "Senin masan için bitti; {0} masa hâlâ oynuyor.", "See the results": "Sonuçlara bak",
     "Who played the contract?": "Kontratı kim oynadı?", "Tricks taken by declarer": "Yapanın aldığı löve", "Other tables on this board": "Bu eldeki diğer masalar", "No other table has finished this board yet.": "Bu eli henüz başka masa bitirmedi.", "Confirm": "Onayla", "made exactly": "tam yapıldı",
     "Lead": "Atak", "The opponents approved the score.": "Rakipler skoru onayladı.", "Your entry matches the board as played.": "Girdiğin, masada oynanan elle aynı.", "As played at the table": "Masada oynanan", "Choose the contract first": "Önce kontratı seç", "Send the score": "Skoru gönder", "Round over": "Tur bitti", "Move instructions": "Hareket bilgisi", "Next": "Sonraki",
     "Boards {0}": "El {0}",
@@ -5914,6 +5924,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "The tournament is over": "Turneringen er over", "Every table has finished: the results are ready.": "Alle bordene er ferdige: resultatene er klare.", "Over for your table; {0} tables are still playing.": "Ferdig for ditt bord; {0} bord spiller fortsatt.", "See the results": "Se resultatene",
     "Who played the contract?": "Hvem spilte kontrakten?", "Tricks taken by declarer": "Stikk tatt av spillefører", "Other tables on this board": "Andre bord på dette spillet", "No other table has finished this board yet.": "Ingen andre bord har spilt ferdig dette spillet ennå.", "Confirm": "Bekreft", "made exactly": "akkurat hjemme",
     "Lead": "Utspill", "The opponents approved the score.": "Motstanderne godkjente scoren.", "Your entry matches the board as played.": "Det du la inn stemmer med spillet slik det ble spilt.", "As played at the table": "Slik det ble spilt ved bordet", "Choose the contract first": "Velg kontrakten først", "Send the score": "Send scoren", "Round over": "Runden er over", "Move instructions": "Flytteinstruksjoner", "Next": "Neste",
     "Boards {0}": "Spill {0}",
@@ -6354,6 +6365,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "The tournament is over": "El torneo ha terminado", "Every table has finished: the results are ready.": "Todas las mesas han terminado: los resultados están listos.", "Over for your table; {0} tables are still playing.": "Terminado para tu mesa; {0} mesas siguen jugando.", "See the results": "Ver los resultados",
     "Who played the contract?": "¿Quién jugó el contrato?", "Tricks taken by declarer": "Bazas del declarante", "Other tables on this board": "Otras mesas en esta mano", "No other table has finished this board yet.": "Ninguna otra mesa ha terminado esta mano todavía.", "Confirm": "Confirmar", "made exactly": "cumplido justo",
     "Lead": "Salida", "The opponents approved the score.": "Los rivales aprobaron el resultado.", "Your entry matches the board as played.": "Lo que anotaste coincide con la mano jugada.", "As played at the table": "Como se jugó en la mesa", "Choose the contract first": "Elige primero el contrato", "Send the score": "Enviar el resultado", "Round over": "Ronda terminada", "Move instructions": "Instrucciones de cambio", "Next": "Siguiente",
     "Boards {0}": "Manos {0}",
@@ -6822,6 +6834,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "The tournament is over": "Le tournoi est terminé", "Every table has finished: the results are ready.": "Toutes les tables ont fini : les résultats sont prêts.", "Over for your table; {0} tables are still playing.": "Fini pour ta table ; {0} tables jouent encore.", "See the results": "Voir les résultats",
     "Who played the contract?": "Qui a joué le contrat ?", "Tricks taken by declarer": "Levées du déclarant", "Other tables on this board": "Les autres tables sur cette donne", "No other table has finished this board yet.": "Aucune autre table n’a encore fini cette donne.", "Confirm": "Confirmer", "made exactly": "juste fait",
     "Lead": "Entame", "The opponents approved the score.": "Les adversaires ont validé la marque.", "Your entry matches the board as played.": "Ta saisie correspond à la donne jouée.", "As played at the table": "Tel que joué à la table", "Choose the contract first": "Choisis d’abord le contrat", "Send the score": "Envoyer la marque", "Round over": "Tour terminé", "Move instructions": "Instructions de déplacement", "Next": "Suivant",
     "Boards {0}": "Donnes {0}",
@@ -7290,6 +7303,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "The tournament is over": "Il torneo è finito", "Every table has finished: the results are ready.": "Tutti i tavoli hanno finito: i risultati sono pronti.", "Over for your table; {0} tables are still playing.": "Finito per il tuo tavolo; {0} tavoli stanno ancora giocando.", "See the results": "Vedi i risultati",
     "Who played the contract?": "Chi ha giocato il contratto?", "Tricks taken by declarer": "Prese del dichiarante", "Other tables on this board": "Gli altri tavoli su questa smazzata", "No other table has finished this board yet.": "Nessun altro tavolo ha ancora finito questa smazzata.", "Confirm": "Conferma", "made exactly": "mantenuto esatto",
     "Lead": "Attacco", "The opponents approved the score.": "Gli avversari hanno approvato il punteggio.", "Your entry matches the board as played.": "Ciò che hai inserito corrisponde alla smazzata giocata.", "As played at the table": "Come giocata al tavolo", "Choose the contract first": "Scegli prima il contratto", "Send the score": "Invia il punteggio", "Round over": "Turno finito", "Move instructions": "Istruzioni di spostamento", "Next": "Avanti",
     "Boards {0}": "Smazzate {0}",
@@ -7758,6 +7772,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "The tournament is over": "Das Turnier ist zu Ende", "Every table has finished: the results are ready.": "Alle Tische sind fertig: die Ergebnisse stehen fest.", "Over for your table; {0} tables are still playing.": "Für deinen Tisch vorbei; {0} Tische spielen noch.", "See the results": "Ergebnisse ansehen",
     "Who played the contract?": "Wer hat den Kontrakt gespielt?", "Tricks taken by declarer": "Stiche des Alleinspielers", "Other tables on this board": "Die anderen Tische an diesem Board", "No other table has finished this board yet.": "Noch kein anderer Tisch hat dieses Board beendet.", "Confirm": "Bestätigen", "made exactly": "genau erfüllt",
     "Lead": "Ausspiel", "The opponents approved the score.": "Die Gegner haben das Ergebnis bestätigt.", "Your entry matches the board as played.": "Deine Eingabe stimmt mit dem gespielten Board überein.", "As played at the table": "Wie am Tisch gespielt", "Choose the contract first": "Wähle zuerst den Kontrakt", "Send the score": "Ergebnis senden", "Round over": "Runde beendet", "Move instructions": "Wechselanweisungen", "Next": "Weiter",
     "Boards {0}": "Boards {0}",
@@ -8226,6 +8241,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "The tournament is over": "Турнир окончен", "Every table has finished: the results are ready.": "Все столы закончили: результаты готовы.", "Over for your table; {0} tables are still playing.": "Для твоего стола всё; ещё играют {0} столов.", "See the results": "Посмотреть результаты",
     "Who played the contract?": "Кто играл контракт?", "Tricks taken by declarer": "Взятки разыгрывающего", "Other tables on this board": "Другие столы на этой сдаче", "No other table has finished this board yet.": "Ни один другой стол ещё не закончил эту сдачу.", "Confirm": "Подтвердить", "made exactly": "ровно",
     "Lead": "Первый ход", "The opponents approved the score.": "Соперники подтвердили результат.", "Your entry matches the board as played.": "Введённое совпадает со сданной игрой.", "As played at the table": "Как сыграно за столом", "Choose the contract first": "Сначала выбери контракт", "Send the score": "Отправить результат", "Round over": "Тур окончен", "Move instructions": "Куда переходить", "Next": "Дальше",
     "Boards {0}": "Сдачи {0}",
@@ -8694,6 +8710,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "The tournament is over": "Turniej się skończył", "Every table has finished: the results are ready.": "Wszystkie stoły skończyły: wyniki są gotowe.", "Over for your table; {0} tables are still playing.": "Koniec dla twojego stołu; {0} stołów jeszcze gra.", "See the results": "Zobacz wyniki",
     "Who played the contract?": "Kto rozgrywał kontrakt?", "Tricks taken by declarer": "Lewy rozgrywającego", "Other tables on this board": "Inne stoły w tym rozdaniu", "No other table has finished this board yet.": "Żaden inny stół nie skończył jeszcze tego rozdania.", "Confirm": "Potwierdź", "made exactly": "dokładnie zrobiony",
     "Lead": "Wist", "The opponents approved the score.": "Przeciwnicy zatwierdzili wynik.", "Your entry matches the board as played.": "Twój zapis zgadza się z rozegranym rozdaniem.", "As played at the table": "Jak zagrano przy stole", "Choose the contract first": "Najpierw wybierz kontrakt", "Send the score": "Wyślij wynik", "Round over": "Runda zakończona", "Move instructions": "Instrukcje zmiany", "Next": "Dalej",
     "Boards {0}": "Rozdania {0}",
@@ -9162,6 +9179,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "The tournament is over": "比赛结束了", "Every table has finished: the results are ready.": "所有桌都已打完：成绩已出。", "Over for your table; {0} tables are still playing.": "你这桌已结束；还有 {0} 桌在打。", "See the results": "查看成绩",
     "Who played the contract?": "谁打的定约？", "Tricks taken by declarer": "庄家赢墩数", "Other tables on this board": "本副牌的其他桌", "No other table has finished this board yet.": "还没有其他桌打完这副牌。", "Confirm": "确认", "made exactly": "刚好完成",
     "Lead": "首攻", "The opponents approved the score.": "对手已确认成绩。", "Your entry matches the board as played.": "你的输入与实际打牌一致。", "As played at the table": "桌上实际打法", "Choose the contract first": "请先选择定约", "Send the score": "发送成绩", "Round over": "本轮结束", "Move instructions": "换桌说明", "Next": "下一步",
     "Boards {0}": "牌 {0}",
@@ -17115,6 +17133,8 @@ function ctMakePlan(x) {
     rounds.push(tb); arr = [arr[0], arr[n - 1], ...arr.slice(1, n - 1)];
   }
   const m = {}; rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => { const id = r + '_' + ti; m[id] = {}; for (const k of [P[a].ka, P[a].kb, P[b].ka, P[b].kb]) if (k) m[id][k] = 1; }));
+  // Servet's test: whoever plays in it may write at every table (his app plays the robots of the empty ones)
+  if (x.i && x.i.test) { const ks = P.flatMap(p => [p.ka, p.kb]).filter(Boolean); for (const id of Object.keys(m)) for (const k of ks) m[id][k] = 1; }
   let nr;
   if (x.i.mov === 'swiss') {   // Swiss: the first round drawn, the others made from the standings; every player may write at any table
     E.seed(ctSeed(x.id + ':' + x.d + ':swiss') || 1); const o = E.shuffle([...Array(n).keys()]); E.seed(null); nr = rounds.length;
@@ -17384,7 +17404,7 @@ function ctBmShow(e, then) {
 function ctBmPlayed(e) {
   if (!e || e.passed) return T('Pass');
   const rc = e.c, rl = e.pl && e.pl[0] && e.pl[0][0];
-  return rc ? rc.level + (rc.strain === 4 ? 'NT' : STR[rc.strain]) + (rc.dbl === 2 ? ' XX' : rc.dbl ? ' X' : '') + ' ' + SEAT_AB[rc.decl] + (rl ? ' · ' + T('Lead') + ' ' + RTXT[R(rl[1])] + SUIT[S(rl[1])] : '') + ' · ' + T('{0} tricks', e.tricks) : '';
+  return rc ? rc.level + (rc.strain === 4 ? 'NT' : ctBmS(rc.strain)) + (rc.dbl === 2 ? ' XX' : rc.dbl ? ' X' : '') + ' ' + SEAT_AB[rc.decl] + (rl ? ' · ' + T('Lead') + ' ' + RTXT[R(rl[1])] + ctBmS(S(rl[1])) : '') + ' · ' + T('{0} tricks', e.tricks) : '';
 }
 function ctBmScore(v, bn) {
   if (v.pass) return 0;
@@ -17399,24 +17419,25 @@ function ctBmHead(bn) {
     + (bn ? `<div class="bm3-head"><div class="bm3-board"><small>${T('Board')}</small><b>${bn}</b><span class="bm3-vul ${cls}">${vt}</span></div><div class="bm3-pairs"><div><i>NS</i>${tb[0] != null ? tb[0] + 1 : '?'}</div><div><i>EW</i>${tb[1] != null ? tb[1] + 1 : '?'}</div></div></div>` : '');
 }
 const CT_BM_STEPS = ['contract', 'decl', 'lead', 'tricks', 'confirm'];
-const ctBmSym = s => s === 4 ? 'NT' : `<span class="${red(s) ? 'red' : ''}">${STR[s]}</span>`;
+const ctBmS = s => `<span class="bmsy s${s}">${SUIT[s]}</span>`;   // a suit in its colour (the four-colour deck too)
+const ctBmSym = s => s === 4 ? 'NT' : ctBmS(s);
 // one step a screen, as the club's Bridgemate III: the contract → who played it (the compass) → the lead → the tricks
 // → the result to confirm; then the opponents' approval and the other tables on this board, then the next board
 function ctBmDraw() {
   const v = CT_BM.v, e = CT_BM.e, bn = e.board, step = CT_BM.step, t = CT.tbl;
   const con = v.pass ? 'PASS' : v.lvl ? v.lvl + (v.st >= 0 ? ctBmSym(v.st) : '') + (v.dbl === 2 ? 'XX' : v.dbl ? 'X' : '') + (v.decl >= 0 ? ' ' + SEAT_AB[v.decl] : '') : '—';
-  const lead = v.ls >= 0 && v.lr >= 0 ? RTXT[v.lr] + `<span class="${red(v.ls) ? 'red' : ''}">${SUIT[v.ls]}</span>` : '—';
+  const lead = v.ls >= 0 && v.lr >= 0 ? RTXT[v.lr] + ctBmS(v.ls) : '—';
   const res = v.pass ? 'PASS' : v.tr == null ? '—' : v.tr - v.lvl - 6 === 0 ? '=' : (v.tr - v.lvl - 6 > 0 ? '+' : '') + (v.tr - v.lvl - 6);
   const full = v.pass || (v.lvl && v.st >= 0 && v.decl >= 0 && v.tr != null && v.ls >= 0 && v.lr >= 0), sc = full ? ctBmScore(v, bn) : null;
   const key = (k, l, on, cls) => `<button class="bm3-key${cls ? ' ' + cls : ''}${on ? ' active' : ''}" data-bm="${k}">${l}</button>`;
   const display = `<div class="bm3-display"><div class="bm3-contract">${con}</div><div class="bm3-sub"><span>${T('Lead')}: ${lead}</span><span>${T('Result')}: ${res}</span></div><div class="bm3-score"><small>NS</small><b>${sc == null || step !== 'confirm' && step !== 'done' ? '—' : fmtSigned(sc)}</b></div></div>`;
-  const hint = `<div class="bm3-note" style="padding:2px 12px">🧪 ${T('As played at the table')}: <b>${esc(ctBmPlayed(e))}</b></div>`;
+  const hint = `<div class="bm3-note" style="padding:2px 12px">🧪 ${T('As played at the table')}: <b>${ctBmPlayed(e)}</b></div>`;
   const backB = `<button class="bm3-cancel" data-bm="back">‹ ${T('Back')}</button>`, nextB = on => `<button class="bm3-ok" data-bm="go"${on ? '' : ' disabled'}>${T('Next')} ›</button>`;
   let body = '', actions = '';
   if (step === 'contract') {
     body = `<div class="bm3-step">${T('Contract')}</div>
       <div class="bm3-keys k4">${[1, 2, 3, 4, 5, 6, 7].map(l => key('l' + l, l, v.lvl === l)).join('')}${key('pass', 'PASS', v.pass, 'pass')}</div>
-      <div class="bm3-keys k5">${[0, 1, 2, 3, 4].map(s => key('s' + s, s === 4 ? 'NT' : STR[s], v.st === s, 'suit' + (red(s) ? ' red' : ''))).join('')}</div>
+      <div class="bm3-keys k5">${[0, 1, 2, 3, 4].map(s => key('s' + s, s === 4 ? 'NT' : ctBmS(s), v.st === s, 'suit')).join('')}</div>
       <div class="bm3-keys k3">${key('x0', '—', !v.dbl)}${key('x1', 'X', v.dbl === 1, 'dbl')}${key('x2', 'XX', v.dbl === 2, 'dbl')}</div>`;
     actions = `<span></span>${nextB(v.pass || (v.lvl && v.st >= 0))}`;
   } else if (step === 'decl') {
@@ -17428,12 +17449,12 @@ function ctBmDraw() {
     actions = backB + nextB(v.decl >= 0);
   } else if (step === 'lead') {
     body = `<div class="bm3-step">${T('Lead')}</div>
-      <div class="bm3-keys k4">${[0, 1, 2, 3].map(s => key('ls' + s, SUIT[s], v.ls === s, 'suit' + (red(s) ? ' red' : ''))).join('')}</div>
+      <div class="bm3-keys k4">${[0, 1, 2, 3].map(s => key('ls' + s, ctBmS(s), v.ls === s, 'suit')).join('')}</div>
       <div class="bm3-keys k7">${[12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map(r => key('lr' + r, RTXT[r], v.lr === r)).join('')}</div>`;
     actions = backB + nextB(v.ls >= 0 && v.lr >= 0);
   } else if (step === 'tricks') {
     body = `<div class="bm3-step">${T('Tricks taken by declarer')}</div>
-      <div class="bm3-keys k7">${[...Array(14).keys()].map(n => key('t' + n, n, v.tr === n, n >= v.lvl + 6 ? 'res made' : 'res down')).join('')}</div>`;
+      <div class="bm3-keys k7">${[...Array(14).keys()].map(n => key('t' + n, (n - v.lvl - 6 === 0 ? '=' : (n - v.lvl - 6 > 0 ? '+' : '') + (n - v.lvl - 6)) + `<small>${n}</small>`, v.tr === n, n >= v.lvl + 6 ? 'res made' : 'res down')).join('')}</div>`;
     actions = backB + nextB(v.tr != null);
   } else if (step === 'confirm') {
     const r = v.tr - v.lvl - 6, rr = v.pass ? T('Pass') : r === 0 ? T('made exactly') : r > 0 ? '+' + r : r;
@@ -17448,7 +17469,7 @@ function ctBmDraw() {
     const row = (ti, c, ns, me) => `<div class="bm3-orow${me ? ' me' : ''}"><span>${T('Table {0}', ti + 1)}</span><span>${c}</span><b>${fmtSigned(ns || 0)}</b></div>`;
     const cTxt = o => o.pass ? 'PASS' : o.c ? o.c[0] + ctBmSym(o.c[1]) + (o.c[2] === 2 ? 'XX' : o.c[2] ? 'X' : '') + ' ' + SEAT_AB[o.c[3]] : '';
     body = `<div class="bm3-step">🤖 ${T('The opponents approved the score.')}</div>
-      <div class="bm3-note" style="padding:2px 12px">${same ? '✅ ' + T('Your entry matches the board as played.') : '⚠ ' + T('As played at the table') + ': ' + esc(ctBmPlayed(e))}</div>
+      <div class="bm3-note" style="padding:2px 12px">${same ? '✅ ' + T('Your entry matches the board as played.') : '⚠ ' + T('As played at the table') + ': ' + ctBmPlayed(e)}</div>
       <div class="bm3-step">${T('Other tables on this board')}</div>
       <div class="bm3-others">${row(t.ti, con, sc, true)}${others.map(x => row(x.ti, cTxt(x.o), x.o.ns)).join('') || `<div class="bm3-note">${T('No other table has finished this board yet.')}</div>`}</div>`;
     actions = `<span></span><button class="bm3-ok" data-bm="next">${T('Continue')} ›</button>`;
@@ -17494,9 +17515,32 @@ function ctGoNext() {
   if (ctBmOn() && G.ct.i + 1 >= t.boards.length && t.r + 1 < t.rounds && !t.bmMoved) { ctBmMove(() => { t.bmMoved = 1; ctGoNext(); }); return; }
   if (G.ct.i + 1 < t.boards.length) { ctStartBoard(G.ct.i + 1); ctPoll(); return; }
   if (t.r + 1 < t.rounds) { ctWaitRound(t, t.r + 1); return; }
+  const bmEnd = ctBmOn() ? { key: t.key, id: t.id, d: t.d } : null;
   clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = null;
   flash('🏁 ' + T('The tournament is over for you — thank you!'), 4000); G = null; goHome();
+  if (bmEnd) setTimeout(() => ctBmEnd(bmEnd), 400);
 }
+// the end of the evening on the Bridgemate (Servet's test): over for this table; the results once every table is done
+async function ctBmEnd(e) {
+  CT_BM.end = e;
+  try { await ctLoad(true); } catch (er) {}
+  const [club, id] = String(e.key).split('|'), x = ctRuns(club).find(y => y.id === id && y.d === +e.d);
+  const left = x ? x.plan.rounds.reduce((k, tb, r) => k + tb.filter((_, ti) => Object.values((((x.run.t || {})[r + '_' + ti]) || {}).res || {}).filter(Boolean).length < x.plan.bpr).length, 0) : 0;
+  const all = x && left === 0;
+  openOv('ctbm', `<div class="bm3 bm3w ctbm3"><div class="bm3-screen">
+    <div class="bm3-bar"><span class="td">🏛</span><div class="ev"><b>${esc(x ? x.i.n || '' : '')}</b>${esc(x ? x.i.cn || club : club)}</div></div>
+    <div class="bm3-display"><div class="bm3-contract">🏁 ${T('The tournament is over')}</div><div class="bm3-sub"><span>${all ? T('Every table has finished: the results are ready.') : T('Over for your table; {0} tables are still playing.', left)}</span></div></div>
+    <div class="bm3-body"></div>
+    <div class="bm3-actions">${all ? `<button class="bm3-cancel" data-bmend="home">${T('Close')}</button><button class="bm3-ok" data-bmend="res">📊 ${T('See the results')}</button>` : `<button class="bm3-cancel" data-bmend="home">${T('Close')}</button><button class="bm3-ok" data-bmend="again">🔄 ${T('Refresh')}</button>`}</div>
+  </div></div>`);
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest && ev.target.closest('[data-bmend]'); if (!b || ui.overlay !== 'ctbm' || !CT_BM.end) return;
+  const k = b.dataset.bmend, e = CT_BM.end, [club, id] = String(e.key).split('|');
+  if (k === 'home') { CT_BM.end = null; closeOv(); return; }
+  if (k === 'again') { ctBmEnd(e); return; }
+  if (k === 'res') { CT_BM.end = null; ctShowResults(club, id, e.d, 'rank'); }
+});
 // a board finished here: its result for the club's list (written by every app of the table: the same values)
 function ctBoardDone(e) {
   const t = CT.tbl; if (!t || t.watch || !e) return;
@@ -17795,6 +17839,30 @@ async function ctHeadMine() {
   } catch (e) {} finally { CT.headBusy = false; }
 }
 setInterval(ctHeadMine, 2500);
+// Servet's test evening: while he plays (at his table, or waiting for the next round) his own app plays the robots of
+// every other empty table too — one step at each, every few seconds — so the evening goes on without the clubs
+// program's page open and without the GitHub run (the database lets him write at any table of a test: his key is in m)
+CT.testBusy = false;
+async function ctHeadTest() {
+  if (CT.testBusy || !myNm() || document.hidden) return;
+  const t = CT.tbl || CT.waiting; if (!t || !t.key) return;
+  const x = ctFind(t.key); if (!x || !x.i || !x.i.test || !x.plan) return;
+  CT.testBusy = true;
+  try {
+    const p = ctRunP(x); if (await Net.Cloud.get(p + '/plan/bpr') == null) return;   // deleted meanwhile
+    const tmap = await Net.Cloud.get(p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) return;
+    const hb = await Net.Cloud.get(p + '/hb') || {}, mine = CT.tbl && !CT.tbl.watch ? CT.tbl.ti : -1;
+    for (let ti = 0; ti < plan.rounds[r].length; ti++) {
+      if (ti === mine && CT.tbl && CT.tbl.r === r) continue;   // my own table: I play it
+      if (!ctTableEmpty(plan, r, ti, hb)) continue;
+      const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res, ti); if (!st) continue;
+      const q = p + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
+      if (await Net.Cloud.get(q) != null) continue;   // another app was quicker
+      await Net.Cloud.put(q, st.v || st.a).catch(() => {});
+    }
+  } catch (e) {} finally { CT.testBusy = false; }
+}
+setInterval(ctHeadTest, 3000);
 
 // your pair's score in this evening so far (the box at the top while you play): MP %, IMP, place, the last board
 async function ctMyScore() {

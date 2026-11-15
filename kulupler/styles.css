@@ -583,3 +583,5 @@ body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}
 .bm3-key.res.made{color:#1f5d36}.bm3-key.res.down{color:#b3261e}
 @media (max-height:640px){ .bm3w .bm3-key{min-height:42px} .bm3w .bm3-display{margin:6px 12px;padding:6px 10px} .bm3w .bm3-head{padding-top:6px} .bm3w .bm3-step{padding-top:6px} }
 .bm3w .red,.bm3-sum .red{color:#d32f2f}
+.bm3-key.res{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.bm3-key.res small{font-size:.62em;font-weight:600;opacity:.6}

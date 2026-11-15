@@ -121,6 +121,8 @@ function ctMakePlan(x) {
     rounds.push(tb); arr = [arr[0], arr[n - 1], ...arr.slice(1, n - 1)];
   }
   const m = {}; rounds.forEach((tb, r) => tb.forEach(([a, b], ti) => { const id = r + '_' + ti; m[id] = {}; for (const k of [P[a].ka, P[a].kb, P[b].ka, P[b].kb]) if (k) m[id][k] = 1; }));
+  // Servet's test: whoever plays in it may write at every table (his app plays the robots of the empty ones)
+  if (x.i && x.i.test) { const ks = P.flatMap(p => [p.ka, p.kb]).filter(Boolean); for (const id of Object.keys(m)) for (const k of ks) m[id][k] = 1; }
   let nr;
   if (x.i.mov === 'swiss') {   // Swiss: the first round drawn, the others made from the standings; every player may write at any table
     E.seed(ctSeed(x.id + ':' + x.d + ':swiss') || 1); const o = E.shuffle([...Array(n).keys()]); E.seed(null); nr = rounds.length;
@@ -390,7 +392,7 @@ function ctBmShow(e, then) {
 function ctBmPlayed(e) {
   if (!e || e.passed) return T('Pass');
   const rc = e.c, rl = e.pl && e.pl[0] && e.pl[0][0];
-  return rc ? rc.level + (rc.strain === 4 ? 'NT' : STR[rc.strain]) + (rc.dbl === 2 ? ' XX' : rc.dbl ? ' X' : '') + ' ' + SEAT_AB[rc.decl] + (rl ? ' · ' + T('Lead') + ' ' + RTXT[R(rl[1])] + SUIT[S(rl[1])] : '') + ' · ' + T('{0} tricks', e.tricks) : '';
+  return rc ? rc.level + (rc.strain === 4 ? 'NT' : ctBmS(rc.strain)) + (rc.dbl === 2 ? ' XX' : rc.dbl ? ' X' : '') + ' ' + SEAT_AB[rc.decl] + (rl ? ' · ' + T('Lead') + ' ' + RTXT[R(rl[1])] + ctBmS(S(rl[1])) : '') + ' · ' + T('{0} tricks', e.tricks) : '';
 }
 function ctBmScore(v, bn) {
   if (v.pass) return 0;
@@ -405,24 +407,25 @@ function ctBmHead(bn) {
     + (bn ? `<div class="bm3-head"><div class="bm3-board"><small>${T('Board')}</small><b>${bn}</b><span class="bm3-vul ${cls}">${vt}</span></div><div class="bm3-pairs"><div><i>NS</i>${tb[0] != null ? tb[0] + 1 : '?'}</div><div><i>EW</i>${tb[1] != null ? tb[1] + 1 : '?'}</div></div></div>` : '');
 }
 const CT_BM_STEPS = ['contract', 'decl', 'lead', 'tricks', 'confirm'];
-const ctBmSym = s => s === 4 ? 'NT' : `<span class="${red(s) ? 'red' : ''}">${STR[s]}</span>`;
+const ctBmS = s => `<span class="bmsy s${s}">${SUIT[s]}</span>`;   // a suit in its colour (the four-colour deck too)
+const ctBmSym = s => s === 4 ? 'NT' : ctBmS(s);
 // one step a screen, as the club's Bridgemate III: the contract → who played it (the compass) → the lead → the tricks
 // → the result to confirm; then the opponents' approval and the other tables on this board, then the next board
 function ctBmDraw() {
   const v = CT_BM.v, e = CT_BM.e, bn = e.board, step = CT_BM.step, t = CT.tbl;
   const con = v.pass ? 'PASS' : v.lvl ? v.lvl + (v.st >= 0 ? ctBmSym(v.st) : '') + (v.dbl === 2 ? 'XX' : v.dbl ? 'X' : '') + (v.decl >= 0 ? ' ' + SEAT_AB[v.decl] : '') : '—';
-  const lead = v.ls >= 0 && v.lr >= 0 ? RTXT[v.lr] + `<span class="${red(v.ls) ? 'red' : ''}">${SUIT[v.ls]}</span>` : '—';
+  const lead = v.ls >= 0 && v.lr >= 0 ? RTXT[v.lr] + ctBmS(v.ls) : '—';
   const res = v.pass ? 'PASS' : v.tr == null ? '—' : v.tr - v.lvl - 6 === 0 ? '=' : (v.tr - v.lvl - 6 > 0 ? '+' : '') + (v.tr - v.lvl - 6);
   const full = v.pass || (v.lvl && v.st >= 0 && v.decl >= 0 && v.tr != null && v.ls >= 0 && v.lr >= 0), sc = full ? ctBmScore(v, bn) : null;
   const key = (k, l, on, cls) => `<button class="bm3-key${cls ? ' ' + cls : ''}${on ? ' active' : ''}" data-bm="${k}">${l}</button>`;
   const display = `<div class="bm3-display"><div class="bm3-contract">${con}</div><div class="bm3-sub"><span>${T('Lead')}: ${lead}</span><span>${T('Result')}: ${res}</span></div><div class="bm3-score"><small>NS</small><b>${sc == null || step !== 'confirm' && step !== 'done' ? '—' : fmtSigned(sc)}</b></div></div>`;
-  const hint = `<div class="bm3-note" style="padding:2px 12px">🧪 ${T('As played at the table')}: <b>${esc(ctBmPlayed(e))}</b></div>`;
+  const hint = `<div class="bm3-note" style="padding:2px 12px">🧪 ${T('As played at the table')}: <b>${ctBmPlayed(e)}</b></div>`;
   const backB = `<button class="bm3-cancel" data-bm="back">‹ ${T('Back')}</button>`, nextB = on => `<button class="bm3-ok" data-bm="go"${on ? '' : ' disabled'}>${T('Next')} ›</button>`;
   let body = '', actions = '';
   if (step === 'contract') {
     body = `<div class="bm3-step">${T('Contract')}</div>
       <div class="bm3-keys k4">${[1, 2, 3, 4, 5, 6, 7].map(l => key('l' + l, l, v.lvl === l)).join('')}${key('pass', 'PASS', v.pass, 'pass')}</div>
-      <div class="bm3-keys k5">${[0, 1, 2, 3, 4].map(s => key('s' + s, s === 4 ? 'NT' : STR[s], v.st === s, 'suit' + (red(s) ? ' red' : ''))).join('')}</div>
+      <div class="bm3-keys k5">${[0, 1, 2, 3, 4].map(s => key('s' + s, s === 4 ? 'NT' : ctBmS(s), v.st === s, 'suit')).join('')}</div>
       <div class="bm3-keys k3">${key('x0', '—', !v.dbl)}${key('x1', 'X', v.dbl === 1, 'dbl')}${key('x2', 'XX', v.dbl === 2, 'dbl')}</div>`;
     actions = `<span></span>${nextB(v.pass || (v.lvl && v.st >= 0))}`;
   } else if (step === 'decl') {
@@ -434,12 +437,12 @@ function ctBmDraw() {
     actions = backB + nextB(v.decl >= 0);
   } else if (step === 'lead') {
     body = `<div class="bm3-step">${T('Lead')}</div>
-      <div class="bm3-keys k4">${[0, 1, 2, 3].map(s => key('ls' + s, SUIT[s], v.ls === s, 'suit' + (red(s) ? ' red' : ''))).join('')}</div>
+      <div class="bm3-keys k4">${[0, 1, 2, 3].map(s => key('ls' + s, ctBmS(s), v.ls === s, 'suit')).join('')}</div>
       <div class="bm3-keys k7">${[12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0].map(r => key('lr' + r, RTXT[r], v.lr === r)).join('')}</div>`;
     actions = backB + nextB(v.ls >= 0 && v.lr >= 0);
   } else if (step === 'tricks') {
     body = `<div class="bm3-step">${T('Tricks taken by declarer')}</div>
-      <div class="bm3-keys k7">${[...Array(14).keys()].map(n => key('t' + n, n, v.tr === n, n >= v.lvl + 6 ? 'res made' : 'res down')).join('')}</div>`;
+      <div class="bm3-keys k7">${[...Array(14).keys()].map(n => key('t' + n, (n - v.lvl - 6 === 0 ? '=' : (n - v.lvl - 6 > 0 ? '+' : '') + (n - v.lvl - 6)) + `<small>${n}</small>`, v.tr === n, n >= v.lvl + 6 ? 'res made' : 'res down')).join('')}</div>`;
     actions = backB + nextB(v.tr != null);
   } else if (step === 'confirm') {
     const r = v.tr - v.lvl - 6, rr = v.pass ? T('Pass') : r === 0 ? T('made exactly') : r > 0 ? '+' + r : r;
@@ -454,7 +457,7 @@ function ctBmDraw() {
     const row = (ti, c, ns, me) => `<div class="bm3-orow${me ? ' me' : ''}"><span>${T('Table {0}', ti + 1)}</span><span>${c}</span><b>${fmtSigned(ns || 0)}</b></div>`;
     const cTxt = o => o.pass ? 'PASS' : o.c ? o.c[0] + ctBmSym(o.c[1]) + (o.c[2] === 2 ? 'XX' : o.c[2] ? 'X' : '') + ' ' + SEAT_AB[o.c[3]] : '';
     body = `<div class="bm3-step">🤖 ${T('The opponents approved the score.')}</div>
-      <div class="bm3-note" style="padding:2px 12px">${same ? '✅ ' + T('Your entry matches the board as played.') : '⚠ ' + T('As played at the table') + ': ' + esc(ctBmPlayed(e))}</div>
+      <div class="bm3-note" style="padding:2px 12px">${same ? '✅ ' + T('Your entry matches the board as played.') : '⚠ ' + T('As played at the table') + ': ' + ctBmPlayed(e)}</div>
       <div class="bm3-step">${T('Other tables on this board')}</div>
       <div class="bm3-others">${row(t.ti, con, sc, true)}${others.map(x => row(x.ti, cTxt(x.o), x.o.ns)).join('') || `<div class="bm3-note">${T('No other table has finished this board yet.')}</div>`}</div>`;
     actions = `<span></span><button class="bm3-ok" data-bm="next">${T('Continue')} ›</button>`;
@@ -500,9 +503,32 @@ function ctGoNext() {
   if (ctBmOn() && G.ct.i + 1 >= t.boards.length && t.r + 1 < t.rounds && !t.bmMoved) { ctBmMove(() => { t.bmMoved = 1; ctGoNext(); }); return; }
   if (G.ct.i + 1 < t.boards.length) { ctStartBoard(G.ct.i + 1); ctPoll(); return; }
   if (t.r + 1 < t.rounds) { ctWaitRound(t, t.r + 1); return; }
+  const bmEnd = ctBmOn() ? { key: t.key, id: t.id, d: t.d } : null;
   clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = null;
   flash('🏁 ' + T('The tournament is over for you — thank you!'), 4000); G = null; goHome();
+  if (bmEnd) setTimeout(() => ctBmEnd(bmEnd), 400);
 }
+// the end of the evening on the Bridgemate (Servet's test): over for this table; the results once every table is done
+async function ctBmEnd(e) {
+  CT_BM.end = e;
+  try { await ctLoad(true); } catch (er) {}
+  const [club, id] = String(e.key).split('|'), x = ctRuns(club).find(y => y.id === id && y.d === +e.d);
+  const left = x ? x.plan.rounds.reduce((k, tb, r) => k + tb.filter((_, ti) => Object.values((((x.run.t || {})[r + '_' + ti]) || {}).res || {}).filter(Boolean).length < x.plan.bpr).length, 0) : 0;
+  const all = x && left === 0;
+  openOv('ctbm', `<div class="bm3 bm3w ctbm3"><div class="bm3-screen">
+    <div class="bm3-bar"><span class="td">🏛</span><div class="ev"><b>${esc(x ? x.i.n || '' : '')}</b>${esc(x ? x.i.cn || club : club)}</div></div>
+    <div class="bm3-display"><div class="bm3-contract">🏁 ${T('The tournament is over')}</div><div class="bm3-sub"><span>${all ? T('Every table has finished: the results are ready.') : T('Over for your table; {0} tables are still playing.', left)}</span></div></div>
+    <div class="bm3-body"></div>
+    <div class="bm3-actions">${all ? `<button class="bm3-cancel" data-bmend="home">${T('Close')}</button><button class="bm3-ok" data-bmend="res">📊 ${T('See the results')}</button>` : `<button class="bm3-cancel" data-bmend="home">${T('Close')}</button><button class="bm3-ok" data-bmend="again">🔄 ${T('Refresh')}</button>`}</div>
+  </div></div>`);
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest && ev.target.closest('[data-bmend]'); if (!b || ui.overlay !== 'ctbm' || !CT_BM.end) return;
+  const k = b.dataset.bmend, e = CT_BM.end, [club, id] = String(e.key).split('|');
+  if (k === 'home') { CT_BM.end = null; closeOv(); return; }
+  if (k === 'again') { ctBmEnd(e); return; }
+  if (k === 'res') { CT_BM.end = null; ctShowResults(club, id, e.d, 'rank'); }
+});
 // a board finished here: its result for the club's list (written by every app of the table: the same values)
 function ctBoardDone(e) {
   const t = CT.tbl; if (!t || t.watch || !e) return;
@@ -801,6 +827,30 @@ async function ctHeadMine() {
   } catch (e) {} finally { CT.headBusy = false; }
 }
 setInterval(ctHeadMine, 2500);
+// Servet's test evening: while he plays (at his table, or waiting for the next round) his own app plays the robots of
+// every other empty table too — one step at each, every few seconds — so the evening goes on without the clubs
+// program's page open and without the GitHub run (the database lets him write at any table of a test: his key is in m)
+CT.testBusy = false;
+async function ctHeadTest() {
+  if (CT.testBusy || !myNm() || document.hidden) return;
+  const t = CT.tbl || CT.waiting; if (!t || !t.key) return;
+  const x = ctFind(t.key); if (!x || !x.i || !x.i.test || !x.plan) return;
+  CT.testBusy = true;
+  try {
+    const p = ctRunP(x); if (await Net.Cloud.get(p + '/plan/bpr') == null) return;   // deleted meanwhile
+    const tmap = await Net.Cloud.get(p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) return;
+    const hb = await Net.Cloud.get(p + '/hb') || {}, mine = CT.tbl && !CT.tbl.watch ? CT.tbl.ti : -1;
+    for (let ti = 0; ti < plan.rounds[r].length; ti++) {
+      if (ti === mine && CT.tbl && CT.tbl.r === r) continue;   // my own table: I play it
+      if (!ctTableEmpty(plan, r, ti, hb)) continue;
+      const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res, ti); if (!st) continue;
+      const q = p + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
+      if (await Net.Cloud.get(q) != null) continue;   // another app was quicker
+      await Net.Cloud.put(q, st.v || st.a).catch(() => {});
+    }
+  } catch (e) {} finally { CT.testBusy = false; }
+}
+setInterval(ctHeadTest, 3000);
 
 // your pair's score in this evening so far (the box at the top while you play): MP %, IMP, place, the last board
 async function ctMyScore() {

@@ -2183,3 +2183,12 @@ body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradi
 .bm3-key.res.made{color:#1f5d36}.bm3-key.res.down{color:#b3261e}
 @media (max-height:640px){ .bm3w .bm3-key{min-height:42px} .bm3w .bm3-display{margin:6px 12px;padding:6px 10px} .bm3w .bm3-head{padding-top:6px} .bm3w .bm3-step{padding-top:6px} }
 .bm3w .red,.bm3-sum .red{color:#d32f2f}
+/* the Bridgemate's suits in their colours: spades black, hearts red, clubs and diamonds black and red (green and
+   orange with the four-colour deck); a result key with its tricks under it */
+.bmsy{font-family:"Segoe UI Symbol","Apple Symbols","Noto Sans Symbols 2",sans-serif}
+.bmsy.s3,.bmsy.s0{color:#111}.bmsy.s2,.bmsy.s1{color:#d32f2f}
+body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
+.bm3-key.active .bmsy{color:#fff}
+.bm3-tbl .bmsy{color:#fff}
+.bm3-key.res{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.bm3-key.res small{font-size:.62em;font-weight:600;opacity:.6}
