@@ -99,7 +99,7 @@ function otSetupCard() {
     await Promise.all([otLoad(), otMeta()]);
     const box = document.getElementById('otSetupBox'); if (!box) return;
     const M = OT.meta || { systems: [{ k: 'sayc', n: 'SAYC' }], convs: [] }, ed = OT.edit && OT.list && OT.list[OT.edit] && OT.list[OT.edit].info;
-    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <button class="btn btn-sm" onclick="otTestRobots(true)">🧪🪑 <span>Test tournament — I play too</span></button> <button class="btn btn-sm btn-gold" onclick="window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml','_blank','noopener')">🤖 <span>Start the server robots</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<button class="btn btn-sm" style="margin-top:6px;" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button>' : ''}</div>`;
+    box.innerHTML = `<div id="otManage">${otManageHtml(M)}</div>` + (typeof isSuper === 'function' && isSuper() && !ed ? `<div class="card"><button class="btn btn-sm" onclick="otTestRobots()">🧪 <span>Test tournament with robots</span></button> <button class="btn btn-sm" onclick="otTestRobots(true)">🧪🪑 <span>Test tournament — I play too</span></button>${Object.values(OT.list || {}).some(t => t && t.info && t.info.test) ? ' <button class="btn btn-sm btn-red" onclick="otTestDelete()">🗑 <span>Delete the test tournament</span></button>' : ''} <button class="btn btn-sm btn-gold" onclick="window.open('https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml','_blank','noopener')">🤖 <span>Start the server robots</span></button> <small style="color:var(--text3);">Servet</small></div>` : '') + `<div class="card" id="otFormBox"><div class="card-title">${ed ? '✏️ <span>Change the tournament</span>' : '<span>⚙️</span> <span>Tournament Setup</span>'}</div>${otFormHtml(M, ed)}${ed ? '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;"><button class="btn btn-sm" onclick="setSetupOnline(true)">✖ <span>Cancel</span></button><button class="btn btn-sm btn-red" onclick="otDelete(OT.edit)">🗑 <span>Delete</span></button></div>' : ''}</div>`;
     otPreview();
     clearTimeout(OT.liveT); OT.liveT = setTimeout(function again() { if (!(adminTab === 'setup' && setupOnline)) return; otManageRefresh(); OT.liveT = setTimeout(again, 20000); }, 20000);   // only the list above the form   // new registrations and the live state, every 20 seconds
   }, 0);
@@ -174,6 +174,12 @@ window.otStartNow = async function (id) {
     }
     toast('▶ Started'); renderAdminTab(); if (P && P.ctLoad) P.ctLoad(true);
   } catch (e) { toast('❌ Could not start'); }
+};
+// every test tournament of this club away (the real ones are not touched)
+window.otTestDelete = async function () {
+  const ids = Object.entries(OT.list || {}).filter(([, t]) => t && t.info && t.info.test).map(([id]) => id); if (!ids.length) return;
+  if (!await otAsk(otL('Delete the test tournament?'))) return;
+  try { for (const id of ids) await otPut('/' + id, undefined, 'DELETE'); toast('🗑'); OT.edit = null; await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not delete'); }
 };
 window.otDelete = async function (id) {
   if (!await otAsk(otL('Delete this online tournament with its registrations?'))) return;
