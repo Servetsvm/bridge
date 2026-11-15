@@ -232,6 +232,8 @@ function renderTeamMatchCard(){
 // ── Setup ──
 function renderSetup(){
   if(bgTestOn()&&typeof setupOnline!=='undefined') setupOnline=false;   // the test tournament is played at the club (the Bridgemate): no online one from here
+  // the numbers brought from the online setup (Bridgemate test): put in the form once, before a test tournament is set up
+  if(bgTestOn()&&!window._bgPrefilled&&!(getState().tableCount>0)){ const q=new URLSearchParams(location.search); if(q.get('tp')){ window._bgPrefilled=1; setTimeout(()=>{ const set=(id,v)=>{ const e=document.getElementById(id); if(e&&v!=null&&v!=='') e.value=v; }; set('aPlayers',q.get('tp')); set('aBPR',q.get('tb')); if(['mitchell','howell','barometer','swiss'].includes(q.get('tm'))) set('aMovement',q.get('tm')); try{ adminUpdateCalc(); }catch(e){} },60); } }
   if(typeof setupOnline!=='undefined'&&setupOnline&&typeof otSetupCard==='function') return otSetupCard();
   const s=getState();
   const playerCount=parseInt(s._setupPlayers||0);
