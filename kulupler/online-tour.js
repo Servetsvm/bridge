@@ -434,14 +434,18 @@ async function otMirror() {
   const P = otP(); if (OT.mirBusy || !P || !P.ctMirror || typeof role === 'undefined' || role !== 'admin' || !CLUB_ID) return;
   await otFresh(); if (!OT.list) return;
   let best = null;
-  for (const [id, t] of Object.entries(OT.list)) for (const [d, run] of Object.entries((t && t.run) || {})) if (run && run.plan && +d <= Date.now() && Date.now() - +d < 8 * 3600e3 && (!best || +d > best.d)) best = { id, d: +d, t, run };
+  for (const [id, t] of Object.entries(OT.list)) for (const [d, run] of Object.entries((t && t.run) || {})) if (run && run.plan && +d <= Date.now() && Date.now() - +d < 8 * 3600e3) { const test = !!(t && t.info && t.info.test); if (!best || (best.test && !test) || (best.test === test && +d > best.d)) best = { id, d: +d, t, run, test }; }
   if (!best) return;
   OT.mirBusy = true;
   try {
     const base = '/' + best.id + '/run/' + best.d, r = await fetch(await otUrl(base + '/t'), { cache: 'no-store' }), tmap = r.ok ? (await r.json()) || {} : {};
     const plan = P.ctFill(best.run.plan, tmap), M = P.ctMirror(plan, best.t.info || {}, tmap, best.d, best.id); if (!M) return;
     const s = await DB.get('state') || {}, mine = !!(s.online && s.online.tid === best.id && +s.online.d === best.d);
-    if (!mine && s.status === 'running') return;   // a tournament at the club is being played
+    if (!mine && s.status === 'running') {
+      if (!s.online) return;   // a tournament at the club is being played
+      const cur = OT.list[s.online.tid], live = cur && cur.run && cur.run[s.online.d] && Date.now() - +s.online.d < 8 * 3600e3 && P.ctCurRound(P.ctFill(cur.run[s.online.d].plan, cur.run[s.online.d].t), cur.run[s.online.d].t) >= 0;
+      if (live && !(cur.info && cur.info.test && !best.test)) return;   // another evening still played: its copy stays (a test gives way to a real one)
+    }
     if (mine) {   // the director's corrections in Boards: to the evening too
       const cb = await DB.get('boards') || {}, SN = ['♣', '♦', '♥', '♠', 'NT'];
       for (const [k, v] of Object.entries(cb)) {

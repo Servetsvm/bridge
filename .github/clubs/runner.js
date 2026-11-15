@@ -59,11 +59,16 @@ function ctHeadStep(plan, r, list, res, ti) {
 }
 
 // the evening as the club's own tournament (as the director's Clubs page does it): pairs, tables, boards, hands, archive
-async function mirror(x) {
+async function mirror(x, L) {
   const bm = 'gate/clubs/' + x.club + '/bm', tmap = await get(x.p + '/t') || {}, plan = ctFill(x.plan, tmap);
   const M = ctx.window.CTMIR.build(E, plan, x.info, tmap, x.d, x.tid), s = await get(bm + '/state') || {};
   const mine = !!(s.online && s.online.tid === x.tid && +s.online.d === x.d);
-  if (!mine && s.status === 'running') return;   // a tournament at the club
+  if (!mine && s.status === 'running') {
+    if (!s.online) return;   // a tournament at the club
+    const cur = (L || []).find(y => y.club === x.club && y.tid === s.online.tid && y.d === +s.online.d);   // that evening still played
+    if (cur && !(cur.info && cur.info.test && !(x.info && x.info.test))) return;   // its copy stays (a test gives way to a real one)
+  }
+  if (x.info && x.info.test && (L || []).some(y => y.club === x.club && !(y.info && y.info.test))) return;   // a real evening at this club: the copy is its
   if (!mine) for (const k of ['approvals', 'tableLocks', 'dd']) await put(bm + '/' + k, {});
   for (const k of ['pairs', 'movements', 'hands']) await put(bm + '/' + k, M[k]);
   const cb = mine ? await get(bm + '/boards') || {} : {};
@@ -99,7 +104,7 @@ async function evenings() {
     if (Date.now() - look > 60e3) { L = await evenings().catch(() => L); look = Date.now(); if (L.length) seen = Date.now(); }
     if (!L.length && Date.now() - seen > 10 * 60e3) break;   // nothing for ten minutes: the next run looks again
     let moved = false;
-    if (Date.now() - (mirAt || 0) > 10e3) { mirAt = Date.now(); for (const x of L) await mirror(x).catch(e => console.log('mirror', e.message)); }
+    if (Date.now() - (mirAt || 0) > 10e3) { mirAt = Date.now(); for (const x of L) await mirror(x, L).catch(e => console.log('mirror', e.message)); }
     if (Date.now() - beat > 30e3) { beat = Date.now(); for (const x of L) await put(x.p + '/bot', Date.now()).catch(() => {}); }   // the director sees the server's robots at work
     for (const x of L) {
       try {
