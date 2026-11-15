@@ -39,3 +39,22 @@ Then reload. `localStorage.removeItem('bridge-bot-ai')` turns the test address o
 - `MODEL` in `wrangler.toml`: `@cf/meta/llama-3.1-8b-instruct-fp8-fast` uses about 5 Neurons per answer. The free
   allowance is 10,000 Neurons a day, about 2,000 answers. A bigger model answers better but uses more of the allowance.
 - The allowed sites (`ORIGINS`) and the per-address limits (`PER_MIN`, `PER_DAY`) are at the top of `worker.js`.
+
+## The log, 👍/👎 and the review
+
+Every answer is kept in the D1 database `bridge-botchat` (binding `DB`, table in `schema.sql`) for 90 days. It holds what
+the player wrote, what the robot answered, the language, the robot's name and role, the phase, the player's 👍/👎, and
+whether the answer was held back (⛔: the model said it was a person). It never holds the player's name, a card or an IP
+address.
+
+- Players rate an AI answer with 👍/👎 under it in the table chat.
+- The administrator reads the log in the site: 👑 Admin → 💬 Robots' chats. The first time, enter the review key there;
+  it is kept on that device only. Set the key once on the Worker (it asks for the value; choose a long one):
+
+  ```bash
+  cd .github/botchat
+  npx wrangler secret put REVIEW_KEY
+  ```
+
+- From the command line: `npx wrangler d1 execute bridge-botchat --remote --command "SELECT * FROM chat WHERE rate < 0 ORDER BY ts DESC LIMIT 50"`.
+- A new table on a new database: `npx wrangler d1 execute bridge-botchat --remote --file=schema.sql`.

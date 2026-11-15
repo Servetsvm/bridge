@@ -8,3 +8,9 @@ binding = "AI"
 [vars]
 # the best Turkish of the free models tried (Nov 2026); "@cf/meta/llama-3.1-8b-instruct-fp8-fast" is cheaper (more answers a day) but weaker
 MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+
+# the robots' chats (no player names, no cards), kept 90 days, for reviewing and improving the answers
+[[d1_databases]]
+binding = "DB"
+database_name = "bridge-botchat"
+database_id = "c2f75df4-949d-441d-b344-41509bc64da4"

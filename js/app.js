@@ -1195,18 +1195,20 @@ function botName(seat) {
 const botTable = () => !!G && !online() && !G.ct && !G.rtv && !G.watch && !G.pz && G.phase !== 'idle';
 const BOT = { chat: [], gen: 0 };
 const pick = a => a[Math.floor(Math.random() * a.length)];
-function botSay(seat, text, ms) {
+function botSay(seat, text, ms, aiId) {
   const gen = BOT.gen;
   setTimeout(() => {
     if (gen !== BOT.gen) return;   // the chat was cleared meanwhile
-    BOT.chat.push({ from: seatName(seat), seat, text, ts: Date.now() }); if (BOT.chat.length > 120) BOT.chat.shift();
+    BOT.chat.push({ from: seatName(seat), seat, text, ts: Date.now(), aiId: aiId || null, rate: 0 }); if (BOT.chat.length > 120) BOT.chat.shift();
     if (!(ui.dockOpen || dockWide())) { Net.st.unread = (Net.st.unread || 0) + 1; flash(seatName(seat) + ': ' + text, 3200); ui.toastChat = true; }
     renderDock(); renderBar();
   }, ms || 900 + Math.random() * 1400);
 }
 function botChatHtml() {
   const t = ts => new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), me = myNm() || T('You');
-  return BOT.chat.slice(-80).map(m => `<div class="cm${m.me ? ' me' : ''}"><b>${esc(m.me ? me : m.from)}</b> ${symText(esc(m.text))}<small>${t(m.ts)}</small></div>`).join('');
+  // an AI answer can be rated 👍/👎 (kept with the chat, without names or cards, to improve the robots)
+  const rate = m => !m.aiId ? '' : `<span class="crate">${[[1, '👍'], [-1, '👎']].filter(([v]) => !m.rate || m.rate === v).map(([v, e]) => `<button data-brate="${m.aiId}:${v}" class="${m.rate === v ? 'on' : ''}" title="${T('Rate this answer: the robots\' chats are kept without names or cards to improve the robots')}" ${m.rate ? 'disabled' : ''}>${e}</button>`).join('')}</span>`;
+  return BOT.chat.slice(-80).map(m => `<div class="cm${m.me ? ' me' : ''}"><b>${esc(m.me ? me : m.from)}</b> ${symText(esc(m.text))}<small>${t(m.ts)}</small>${rate(m)}</div>`).join('');
 }
 const callWord = c => c === 'P' ? T('Pass') : callTxt(c);
 // a call that seat made, and what it meant (the explanation the robots bid by)
@@ -1255,7 +1257,7 @@ function botSend(text) {
   // a greeting to the whole table: each robot answers by itself; anything else: the robot asked answers with the AI,
   // and with its own short answers when the AI cannot be reached (none set up, the day's free allowance used up, offline)
   if (BOT_RE.hi.test(text) && !named) { const all = [p, (me + 1) % 4, (me + 3) % 4].filter(() => Math.random() < .8); (all.length ? all : [p]).forEach((s, i) => botSay(s, pick([T('Hi {0}! Good luck 🙂', myNm() || ''), T('Hello! Nice to play with you.'), T('Hi! 👋')]).replace(/ +!/, '!'), 900 + i * 1300 + Math.random() * 800)); return; }
-  if (BOT_AI) { botAI(to, text).then(r => botSay(to, r, 300 + Math.random() * 700)).catch(() => botRule(to, text, named)); return; }
+  if (BOT_AI) { botAI(to, text).then(r => botSay(to, r.reply, 300 + Math.random() * 700, r.id)).catch(() => botRule(to, text, named)); return; }
   botRule(to, text, named);
 }
 function botRule(to, text, named) {
@@ -1287,8 +1289,24 @@ async function botAI(seat, text) {
   try {
     const r = await fetch(BOT_AI, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
     const j = await r.json(); if (!r.ok || !j.reply) throw new Error(j.error || r.status);
-    return String(j.reply).slice(0, 280);
+    return { reply: String(j.reply).slice(0, 280), id: /^[0-9a-f-]{36}$/.test(j.id || '') ? j.id : null };
   } finally { clearTimeout(tm); }
+}
+/* the administrator's review of the robots' chats (the Worker's log, read with the review key kept on this device):
+   the 👎 answers first, then all, the 👍 ones and the answers that were held back (the model said it was a person) */
+async function showBotReview(f) {
+  let key = ''; try { key = localStorage.getItem('bridge-bot-review') || ''; } catch (e) {}
+  const tabs = [['bad', '👎'], ['all', T('All')], ['good', '👍'], ['blocked', '⛔']].map(([k, l]) => `<button class="btn mini-btn${k === f ? ' gold' : ''}" data-brf="${k}">${l}</button>`).join('');
+  const shell = body => openOv('botrev', `<h2>💬 ${T("Robots' chats")}</h2>${body}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  if (!key) { shell(`<div class="muted">${T('The review key (set once on the Worker) is kept on this device only.')}</div><div class="row2"><input class="tok" id="brKey" type="password" autocomplete="off" placeholder="${T('Review key')}"><button class="btn gold" id="brKeySave">${T('Save')}</button></div>`); return; }
+  shell(`<div class="row2 brtabs">${tabs}</div><div class="muted">${T('Loading…')}</div>`);
+  let d;
+  try { const r = await fetch(BOT_AI.replace(/\/$/, '') + '/review?days=30&f=' + f, { headers: { Authorization: 'Bearer ' + key } }); d = await r.json(); if (!r.ok) throw new Error(d.error || r.status); }
+  catch (e) { shell(`<div class="row2 brtabs">${tabs}</div><div class="muted">⚠ ${esc(String(e.message || e))}</div><div class="row2"><button class="btn mini-btn" id="brKeyForget">${T('Change the key')}</button></div>`); return; }
+  if (ui.overlay !== 'botrev') return;
+  const st = d.stats || {}, day = ts => new Date(ts).toLocaleString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const rows = (d.rows || []).map(x => `<div class="brrow${x.rate < 0 ? ' bad' : x.rate > 0 ? ' good' : ''}"><small>${day(x.ts)} · ${esc(x.lang || '')} · ${esc(x.bot || '')} (${x.role === 'partner' ? T('partner') : T('opponent')}) · ${esc(x.phase || '')}${x.src === 'blocked' ? ' · ⛔' : x.src === 'fixed' ? ' · 🔒' : ''}${x.rate ? ' · ' + (x.rate > 0 ? '👍' : '👎') : ''}</small><div>🙂 ${esc(x.text || '')}</div><div>🤖 ${esc(x.reply || '')}</div></div>`).join('') || `<div class="muted">${T('Nothing here yet.')}</div>`;
+  shell(`<div class="row2 brtabs">${tabs}</div><div class="muted">${T('Last {0} days', d.days)}: ${st.n || 0} ${T('answers')} · 👍 ${st.up || 0} · 👎 ${st.down || 0} · ⛔ ${st.blocked || 0}</div><div class="brlist">${rows}</div>`);
 }
 // the end of a board: now and then a word from the table, as people do
 function botBoardEnd(e) {
@@ -3502,7 +3520,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
   if (t.dataset.pldet) { ev_.preventDefault(); ui.plOpen = ui.plOpen === t.dataset.pldet ? null : t.dataset.pldet; showPlayers(); return; }
-  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="admBotChat">💬 ${T('Robots\' chats')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
@@ -3584,6 +3602,11 @@ document.addEventListener('click', ev_ => {
   if (t.id === "chatBtn" || t.id === "bChat") { ui.menu = false; toggleDock(); renderBar(); return; }
   if (t.id === "bStart") { if (online() && !guest() && G.phase === "lobby") { Net.note((Net.st.names[SET.seat] || "Host") + " started the game"); if (Net.st.tour) tableBoard(); else newBoard(); } return; }
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
+  if (t.dataset.brate) { const [id, v] = t.dataset.brate.split(':'), m = BOT.chat.find(x => x.aiId === id); if (m && !m.rate) { m.rate = +v; renderDock(); fetch(BOT_AI.replace(/\/$/, '') + '/rate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, v: +v }) }).catch(() => {}); } return; }
+  if (t.id === 'admBotChat') { showBotReview('bad'); return; }
+  if (t.dataset.brf) { showBotReview(t.dataset.brf); return; }
+  if (t.id === 'brKeySave') { const i = $('brKey'); try { localStorage.setItem('bridge-bot-review', (i && i.value || '').trim()); } catch (e) {} showBotReview('bad'); return; }
+  if (t.id === 'brKeyForget') { try { localStorage.removeItem('bridge-bot-review'); } catch (e) {} showBotReview('bad'); return; }
   if (t.dataset.lvl) { ui.selLvl = +t.dataset.lvl; renderBidbox(); return; }
   if (t.dataset.call != null && G.phase === 'bid' && bidTurn() === U()) { const v = t.dataset.call; const c = (v === 'P' || v === 'X' || v === 'XX') ? v : +v; if (c !== -1) { const al = ui.alertOn ? (ui.alertTxt || '').trim() || T('Alert') : null; ui.alertOn = false; ui.alertTxt = ''; makeCall(U(), c, undefined, al); } return; }
   if (t.dataset.c != null && t.classList.contains('play')) { const c = +t.dataset.c; const seat = G.play.turn; if (G.play.hands[seat].includes(c)) playCard(seat, c); return; }

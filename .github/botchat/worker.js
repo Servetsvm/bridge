@@ -58,25 +58,62 @@ function history(b) {
   }));
 }
 
+/* ---- the log (D1, binding DB): every answer with what the player wrote — no player names, no cards, no addresses —
+   kept 90 days; the player's 👍/👎 on it; the administrator reads it at /review with the REVIEW_KEY secret ---- */
+const KEEP_DAYS = 90;
+function logChat(env, ctx, b, text, reply, src) {
+  if (!env.DB) return null;
+  const id = crypto.randomUUID(), bot = b.bot || {}, now = Date.now();
+  const run = async () => {
+    await env.DB.prepare('INSERT INTO chat (id, ts, lang, bot, role, phase, text, reply, src) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+      .bind(id, now, clip(b.lang, 5), clip(bot.name, 30), bot.role === 'partner' ? 'partner' : 'opponent', clip(b.table && b.table.phase, 20), text, reply, src).run();
+    if (Math.random() < 0.01) await env.DB.prepare('DELETE FROM chat WHERE ts < ?').bind(now - KEEP_DAYS * 864e5).run();
+  };
+  ctx.waitUntil(run().catch(() => {}));
+  return id;
+}
+const sameKey = (a, b) => { a = String(a || ''); b = String(b || ''); if (!a || a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; };
+
+async function review(req, env, json) {
+  const key = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!env.REVIEW_KEY || !sameKey(key, env.REVIEW_KEY)) return json({ error: 'forbidden' }, 403);
+  if (!env.DB) return json({ error: 'no log' }, 500);
+  const u = new URL(req.url), f = u.searchParams.get('f') || 'all', days = Math.min(90, +u.searchParams.get('days') || 7), since = Date.now() - days * 864e5;
+  const where = f === 'bad' ? 'AND rate < 0' : f === 'good' ? 'AND rate > 0' : f === 'blocked' ? "AND src = 'blocked'" : '';
+  const rows = await env.DB.prepare(`SELECT id, ts, lang, bot, role, phase, text, reply, src, rate FROM chat WHERE ts > ? ${where} ORDER BY ts DESC LIMIT 300`).bind(since).all();
+  const st = await env.DB.prepare('SELECT COUNT(*) AS n, SUM(rate > 0) AS up, SUM(rate < 0) AS down, SUM(src = \'blocked\') AS blocked FROM chat WHERE ts > ?').bind(since).first();
+  return json({ days, stats: st, rows: rows.results || [] });
+}
+
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const origin = req.headers.get('Origin') || '';
     const ok = ORIGINS.some(r => r.test(origin));
-    const cors = { 'Access-Control-Allow-Origin': ok ? origin : 'https://servetsvm.github.io', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Vary': 'Origin' };
-    const json = (o, status) => new Response(JSON.stringify(o), { status: status || 200, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8' } });
+    const cors = { 'Access-Control-Allow-Origin': ok ? origin : 'https://servetsvm.github.io', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Vary': 'Origin' };
+    const json = (o, status) => new Response(JSON.stringify(o), { status: status || 200, headers: { ...cors, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' } });
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
+    const path = new URL(req.url).pathname.replace(/\/+$/, '');
+    if (path === '/review' && req.method === 'GET') return review(req, env, json);
     if (req.method !== 'POST' || !ok) return json({ error: 'forbidden' }, 403);
     if (limited(req.headers.get('CF-Connecting-IP') || 'x')) return json({ error: 'slow down' }, 429);
     let b; try { b = await req.json(); } catch (e) { return json({ error: 'bad request' }, 400); }
+    // the player's 👍 (1) or 👎 (-1) on an answer of the last day
+    if (path === '/rate') {
+      const id = String(b && b.id || ''), v = b && b.v === 1 ? 1 : b && b.v === -1 ? -1 : 0;
+      if (!/^[0-9a-f-]{36}$/.test(id) || !v || !env.DB) return json({ error: 'bad request' }, 400);
+      ctx.waitUntil(env.DB.prepare('UPDATE chat SET rate = ? WHERE id = ? AND ts > ?').bind(v, id, Date.now() - 864e5).run().catch(() => {}));
+      return json({ ok: true });
+    }
     const text = clip(b && b.text, 300); if (!text) return json({ error: 'empty' }, 400);
-    if (ASK_BOT.test(text)) return json({ reply: BOT_SAYS[b.lang] || BOT_SAYS.en });
+    if (ASK_BOT.test(text)) { const reply = BOT_SAYS[b.lang] || BOT_SAYS.en; return json({ reply, id: logChat(env, ctx, b, text, reply, 'fixed') }); }
     const messages = [{ role: 'system', content: prompt(b) }, ...history(b), { role: 'user', content: text }];
     try {
       const r = await env.AI.run(env.MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8-fast', { messages, max_tokens: 90, temperature: 0.8 });
       let reply = clip(r && r.response, 400).replace(/^["“]|["”]$/g, '');
       reply = reply.replace(new RegExp('^' + clip(b.bot && b.bot.name, 30).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*:\\s*', 'i'), '');
-      if (!reply || SAYS_HUMAN.test(reply)) return json({ error: 'no answer' }, 502);
-      return json({ reply: reply.slice(0, 280) });
+      if (!reply || SAYS_HUMAN.test(reply)) { logChat(env, ctx, b, text, reply, 'blocked'); return json({ error: 'no answer' }, 502); }   // kept, to see what the model tried to say
+      reply = reply.slice(0, 280);
+      return json({ reply, id: logChat(env, ctx, b, text, reply, 'ai') });
     } catch (e) {
       return json({ error: 'ai unavailable' }, 503);   // the day's free allowance used up, or the model busy: the site answers by itself
     }
