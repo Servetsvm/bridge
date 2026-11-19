@@ -21,7 +21,7 @@ const SB = (() => {
   const newCode = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 6; i++) s += A[Math.floor(Math.random() * A.length)]; return s; };
   const fmtDate = ts => new Date(ts).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   const signed = v => (v > 0 ? '+' : '') + v;
-  const sym = s => s === 4 ? 'NT' : `<span class="${s === 1 || s === 2 ? 'red' : ''}">${SUITS[s]}</span>`;
+  const sym = s => s === 4 ? 'NT' : `<span class="bmsy s${s}">${SUITS[s]}</span>`;   // each suit its own colour
   const isAdm = () => Net.isAdmin && Net.isAdmin();
   const SEATK = { n: 0, e: 1, s: 2, w: 3 };
   // the player signed in on this device (name and PIN), as the database rules know it
@@ -519,7 +519,7 @@ const SB = (() => {
       </div>
       <div class="bm3-step">${T('Contract')}</div>
       ${keys('l', 'k4', [...[1, 2, 3, 4, 5, 6, 7].map(n => [n, n]), [0, T('Pass'), 'pass']], f.l)}
-      ${f.l ? `${keys('s', 'k5', [0, 1, 2, 3, 4].map(i => [i, i === 4 ? 'NT' : SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.s)}
+      ${f.l ? `${keys('s', 'k5', [0, 1, 2, 3, 4].map(i => [i, i === 4 ? 'NT' : sym(i), 'suit']), f.s)}
       ${keys('x', 'k3', [[0, '—'], [1, 'X', 'dbl'], [2, 'XX', 'dbl']], f.x)}
       <div class="bm3-step">${T('Declarer')}</div>
       ${isOne() ? keys('d', 'k2', [[0, SEAT_AB[0] + SEAT_AB[2]], [1, SEAT_AB[1] + SEAT_AB[3]]], f.d == null ? null : E.sideOf(f.d)) : keys('d', 'k4', [0, 1, 2, 3].map(s => [s, SEAT_AB[s]]), f.d)}` : ''}

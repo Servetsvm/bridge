@@ -2193,3 +2193,15 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .bm3-tbl .bmsy{color:#fff}
 .bm3-key.res{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 .bm3-key.res small{font-size:.62em;font-weight:600;opacity:.6}
+
+/* BridgeScore (online evening, Social Bridge) in the club's green; each suit its own colour: ♣ green, ♦ orange, ♥ red, ♠ navy */
+.bmsy.s0,body.four .bmsy.s0{color:#0f7a37}.bmsy.s1,body.four .bmsy.s1{color:#e67e00}.bmsy.s2{color:#d32f2f}.bmsy.s3{color:#1b2a4a}
+.bm3-key.active .bmsy,.bm3-tbl .bmsy{color:#fff!important}
+.bm3-screen{background:#e3efe6}
+.bm3-display{background:#fff}
+.bm3-key,.bm3-seat{background:#fff;border-color:#c5d8ca}
+.bm3-key.active,.bm3-seat.active{background:#1f5d36;border-color:#1f5d36}
+.bm3-ok{background:#1f5d36}
+.bm3-cancel{background:#fff;border-color:#c5d8ca}
+.bm3-orow{background:#fff}.bm3-orow.me{background:#d4ead9;border-color:#1f5d36}
+.bm3-sum div{border-bottom-color:#c5d8ca}
