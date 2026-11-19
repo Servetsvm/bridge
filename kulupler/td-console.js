@@ -8,8 +8,8 @@ const L=v=>window.i18nText?i18nText(v):v;
 const TDC={v:'home',w:null,t:null,r:null};
 window.TDC=TDC;
 // on by default on a phone; the choice is kept on this device
-window.tdcOn=()=>{ try{ const v=localStorage.getItem('bg_tdc'); if(v!=null) return v==='1'; }catch(e){} return window.innerWidth<700; };
-window.tdcSet=on=>{ try{ localStorage.setItem('bg_tdc',on?'1':'0'); }catch(e){} TDC.v='home'; TDC.w=null; renderAdminPanel(); };
+window.tdcOn=()=>{ try{ const v=localStorage.getItem('bg_tdc2'); if(v!=null) return v==='1'; }catch(e){} return true; };
+window.tdcSet=on=>{ try{ localStorage.setItem('bg_tdc2',on?'1':'0'); }catch(e){} TDC.v='home'; TDC.w=null; TDC.arc=null; renderAdminPanel(); };
 
 // the full panel and its tabs come only when chosen; the TD's screen is drawn again when the tournament changes
 const _rap=window.renderAdminPanel||renderAdminPanel;
@@ -27,7 +27,7 @@ renderAdminTab=window.renderAdminTab=function(){
 const _tcs=window.tdCallsShow;
 if(_tcs) window.tdCallsShow=function(v){ _tcs(v); tdcLive(); };
 // drawn again by itself only where nothing is being typed or chosen
-function tdcLive(){ if(role!=='admin'||!tdcOn()||!document.querySelector('.tdc')) return; if(document.getElementById('modalBg')?.classList.contains('open')) return; if(['run','table','home'].includes(TDC.v)) tdcDraw(); }
+function tdcLive(){ if(role!=='admin'||!tdcOn()||!document.querySelector('.tdc')) return; if(document.getElementById('modalBg')?.classList.contains('open')) return; if(['run','table','home','arc'].includes(TDC.v)) tdcDraw(); }
 
 const num=x=>(x||'').replace(/[^0-9]/g,'')||'?';
 const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board']];
@@ -44,22 +44,26 @@ function tdcDraw(){
   const s=getState();
   if(TDC.v==='setup') return drawSetup();
   if(TDC.v==='table'&&TDC.t) return drawTable();
+  if(TDC.v==='hist') return drawHist();
+  if(TDC.v==='arc'&&getArchives()[TDC.arc]) return drawArc();
+  if(TDC.v==='tab') return drawTab();
   if(s.status==='running'&&s.tableCount>0) return drawRun();
   return drawHome();
 }
 window.tdcDraw=tdcDraw;
 
 // ── no tournament, one set up, or one finished ──
-function drawHome(){
+function drawHome(){ TDC.arc=null;
   const s=getState(), set=s.status==='setup'&&s.roundCount>0, fin=s.status==='finished';
   const mv=(MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||'';
-  const sum=set||fin?`<div class="bm3-sum"><div><span>${L('Tournament')}</span><b>${cleanData(s.name||'')}</b></div><div><span>${L('Movement')}</span><b>${L(mv)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount}</b></div><div><span>${L('Boards')}</span><b>${s.totalBoards}</b></div></div>`:'';
+  const sum=set||fin?`<div class="bm3-sum"><div><span>${L('Tournament')}</span><b>${cleanData(s.name||'')}</b></div><div><span>${L('Movement')}</span><b>${L(mv)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount||'—'}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount||'—'}</b></div><div><span>${L('Boards')}</span><b>${s.totalBoards||'—'}</b></div></div>`:'';
   const body=`${fin?`<div class="bm3-step">🏁 ${L('Tournament finished')}</div>`:set?`<div class="bm3-step">⏳ ${L('Ready to start')}</div>`:`<div class="bm3-step">${L('No tournament now')}</div>`}${sum}
-    <div class="tdc-tools">${set?`<button class="btn" onclick="tdcSetupStart()">↺ ${L('Set up again')}</button>`:''}<button class="btn" onclick="ccResultsIndex()">📄 ${L('Results')}</button>${set?`<button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button>`:''}</div>${set?moreHtml():''}`;
+    <div class="tdc-tools">${set?`<button class="btn" onclick="tdcSetupStart()">↺ ${L('Set up again')}</button>`:''}<button class="btn" onclick="ccResultsIndex()">📄 ${L('Results')}</button>${set?`<button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button>`:''}</div>${set?moreHtml():''}${menuHtml()}`;
   frame(fin?L('Tournament finished'):set?L('Ready to start'):L('New tournament'),body,
     set?`<button class="bm3-cancel" onclick="tdcSetupStart()">↺</button><button class="bm3-ok" onclick="tdcStart()">▶ ${L('Start round 1')}</button>`
        :`<span></span><button class="bm3-ok" onclick="tdcSetupStart()">➕ ${L('New tournament')}</button>`);
 }
+const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-tools">${[['setup','⚙️','Setup'],['players','👥','Players'],['movement','🔄','Movement'],['tables','🃏','Tables'],['boards','📊','Boards'],['log','📋','Log']].map(([k,i,n])=>`<button class="btn" onclick="tdcTab('${k}')">${i} ${L(n)}</button>`).join('')}<button class="btn" onclick="tdcGo('hist')">📜 ${L('Old tournaments')}</button><button class="btn" onclick="openPlayerRegistry()">📇 ${L('Player list')}</button><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>`;
 const moreHtml=()=>{ const s=getState(), h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>
   <div class="bm3-step">${L('More')}</div><div class="tdc-tools"><button class="btn" onclick="tdcStall()">⚠️ ${L('Slow table')}: ${s.stallAlertMinutes||15} min</button><button class="btn" onclick="adminExport()">⬇ ${L('Export')}</button><button class="btn" onclick="adminImportOpen()">⬆ ${L('Import')}</button><button class="btn tdc-red" onclick="adminReset()">🗑 ${L('Reset')}</button></div>`; };
 window.tdcStall=function(){ const s=getState(); openModal('⚠️ '+L('Slow table'),`<div class="field"><label>${L('Alarm when a table has entered no score for this many minutes')}</label><input type="number" id="tdcStallMin" min="1" max="90" value="${s.stallAlertMinutes||15}"></div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcStallOk()">OK</button>`); };
@@ -109,7 +113,7 @@ function tableInfo(t,s,B,A,calls,thr){
   const call=!!(calls&&calls[t]), slow=d<n&&Date.now()-last>thr*60e3;
   return {m,n,d,pend,call,slow,done:n>0&&d>=n};
 }
-function drawRun(){
+function drawRun(){ TDC.arc=null;
   const s=getState(), B=getBoards(), A=getApprovals(), calls=_cache['tdcalls']||{}, thr=s.stallAlertMinutes||15;
   let tot=0,dn=0; const tiles=[];
   for(let t=1;t<=s.tableCount;t++){ const i=tableInfo(t,s,B,A,calls,thr); tot+=i.n; dn+=i.d;
@@ -119,7 +123,7 @@ function drawRun(){
   const sub=`<div class="tdc-round"><b>${L('Round')} ${s.currentRound} / ${s.roundCount}</b><span>${dn}/${tot} ${L('boards')}</span><div class="tdc-bar"><i style="width:${tot?Math.round(dn/tot*100):0}%"></i></div></div>`;
   const body=`<div class="tdc-tiles">${tiles.join('')}</div>
     <div class="tdc-legend"><span class="done">✓ ${L('Finished')}</span><span class="pend">⏳ ${L('Waiting for OK')}</span><span class="slow">⚠️ ${L('Slow')}</span><span class="call">📣 ${L('Calls the TD')}</span></div>
-    <div class="tdc-tools"><button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button><button class="btn" onclick="tdcScreen()">📺 ${L('Screen')}</button><button class="btn" onclick="bgShowPlayersLink()">🔗 ${L('Link')}</button><button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>${moreHtml()}`;
+    <div class="tdc-tools"><button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button><button class="btn" onclick="tdcScreen()">📺 ${L('Screen')}</button><button class="btn" onclick="bgShowPlayersLink()">🔗 ${L('Link')}</button><button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>${moreHtml()}${menuHtml()}`;
   const next=last||social?`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcFinish()">🏁 ${L('Finish the tournament')}</button>`:`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcNext()">⏭ ${L('Round')} ${s.currentRound+1}</button>`;
   frame(cleanData(s.name||''),body,`<button class="bm3-cancel" onclick="tdcReload()">↻</button>`+next,sub);
 }
@@ -135,32 +139,70 @@ window.tdcFinish=async function(){
   await adminFinish(); TDC.v='home'; tdcDraw();
 };
 
-// ── one table: its round (‹ ›), its pairs, each board with ✏️ (the BridgeScore steps), not played, ADJ, delete ──
+// ── one table: its round (‹ ›), its pairs, each board (tap: its BridgeScore), not played, ADJ, delete — the running
+//    tournament or an archived one (TDC.arc) ──
+const D=()=>{ const A=TDC.arc!=null?getArchives()[TDC.arc]:null; return A?{a:A,s:A.state||{},B:A.boards||{},M:A.movements||{},P:A.pairs||{},AP:{}}:{a:null,s:getState(),B:getBoards(),M:getMovements(),P:getPairs(),AP:getApprovals()}; };
+const tdcPut=(k,v)=>{ if(TDC.arc!=null){ const A=getArchives(), x=A[TDC.arc]; if(!x) return; x.boards=x.boards||{}; if(v) x.boards[k]=v; else delete x.boards[k]; setArchives(A); return; } bmTdPut(k,v); };
 function drawTable(){
-  const s=getState(), t=TDC.t; TDC.r=Math.max(1,Math.min(s.currentRound||1,TDC.r||s.currentRound||1));
-  const r=TDC.r, m=getMovements()[r+'_'+t]||{}, B=getBoards(), A=getApprovals(), P=getPairs();
-  const pn=id=>{ const p=P[id]; return p?(p.isPhantom?'👻':cleanData(splitPairName(p.name||'').filter(Boolean).join(' – ')||'—')):'—'; };
+  const d=D(), s=d.s, t=TDC.t, top=d.a?(s.roundCount||1):(s.currentRound||1); TDC.r=Math.max(1,Math.min(top,TDC.r||top));
+  const r=TDC.r, m=d.M[r+'_'+t]||{};
+  const pn=id=>{ const p=d.P[id]; return p?(p.isPhantom?'👻':cleanData(splitPairName(p.name||'').filter(Boolean).join(' – ')||'—')):'—'; };
   let rows='';
   for(let b=m.boardStart||1;b<=(m.boardEnd||0);b++){
-    const k=t+'_'+r+'_'+b, d=B[k], ap=A[k];
-    rows+=`<div class="bm3-tdrow"><b onclick="tdcEdit('${k}')">${b}</b><span onclick="tdcEdit('${k}')">${d?cleanData(bmTdText(d)):ap?'⏳ '+cleanData(ap.contract||''):'—'} <i class="tdgo">✏️ ${L('Correct')}</i></span><div>
-      <button onclick="tdcEdit('${k}')">✏️</button><button onclick="tdcNP('${k}')">${L('Not played')}</button><button onclick="tdcAdj('${k}',${b})">ADJ</button>${d||ap?`<button class="del" onclick="tdcDel('${k}',${b})">🗑</button>`:''}</div></div>`;
+    const k=t+'_'+r+'_'+b, x=d.B[k], ap=d.AP[k];
+    rows+=`<div class="bm3-tdrow"><b onclick="tdcEdit('${k}')">${b}</b><span onclick="tdcEdit('${k}')">${x?cleanData(bmTdText(x)):ap?'⏳ '+cleanData(ap.contract||''):'—'} <i class="tdgo">✏️ ${L('Correct')}</i></span><div>
+      <button onclick="tdcNP('${k}')">${L('Not played')}</button><button onclick="tdcAdj('${k}',${b})">ADJ</button>${x||ap?`<button class="del" onclick="tdcDel('${k}',${b})">🗑</button>`:''}</div></div>`;
   }
-  const calls=_cache['tdcalls']||{};
-  const sub=`<div class="bm3-tdnav"><button onclick="tdcGo('table',{r:${r-1}})"${r>1?'':' disabled'}>‹</button><b>${L('Table')} ${t} · ${L('Round')} ${r}</b><span>NS ${num(m.ns)} ${pn(m.ns)}<br>EW ${num(m.ew)} ${pn(m.ew)}</span><button onclick="tdcGo('table',{r:${r+1}})"${r<s.currentRound?'':' disabled'}>›</button></div>
+  const calls=d.a?{}:(_cache['tdcalls']||{}), nT=s.tableCount||0;
+  const sub=`<div class="bm3-tdnav"><button onclick="tdcGo('table',{r:${r-1}})"${r>1?'':' disabled'}>‹</button><b>${L('Table')} ${t} · ${L('Round')} ${r}</b><span>NS ${num(m.ns)} ${pn(m.ns)}<br>EW ${num(m.ew)} ${pn(m.ew)}</span><button onclick="tdcGo('table',{r:${r+1}})"${r<top?'':' disabled'}>›</button></div>
+    ${d.a?`<div class="tdc-tnav">${Array.from({length:nT},(_,i)=>i+1).map(n=>`<button class="${n===t?'on':''}" onclick="tdcGo('table',{t:${n}})">${n}</button>`).join('')}</div>`:''}
     ${calls[t]?`<div class="tdc-callrow">📣 ${L('This table calls the TD')} <button onclick="tdCallDone(${t})">✓ ${L('Answered')}</button></div>`:''}`;
   const body=`<div class="bm3-tdlist">${rows||`<div class="bm3-note">${L('No boards')}</div>`}</div>
-    <div class="tdc-tools"><button class="btn" onclick="tdNames(${t},${r},'admin')">👥 ${L('Players')}</button>${r===s.currentRound?`<button class="btn" onclick="tdcFree(${t})">🚪 ${L('Free the table')}</button>`:''}</div>`;
-  frame(L('Table')+' '+t,body,`<span></span><button class="bm3-ok" onclick="tdcGo('run',{t:null,r:null})">‹ ${L('All tables')}</button>`,sub);
+    <div class="tdc-tools"><button class="btn" onclick="tdNames(${t},${r},'admin',${d.a?TDC.arc:'undefined'})">👥 ${L('Players')}</button>${!d.a&&r===s.currentRound?`<button class="btn" onclick="tdcFree(${t})">🚪 ${L('Free the table')}</button>`:''}</div>`;
+  frame((d.a?'📜 '+cleanData(s.name||'')+' · ':'')+L('Table')+' '+t,body,`<span></span><button class="bm3-ok" onclick="${d.a?"tdcGo('arc',{t:null,r:null})":"tdcGo('run',{t:null,r:null})"}">‹ ${d.a?L('Back'):L('All tables')}</button>`,sub);
 }
-window.tdcEdit=k=>{ adminEditBoard(k); };
-window.tdcNP=k=>{ bmTdPut(k,{contract:'Not played',notPlayed:true,status:'done',td:true,time:new Date().toISOString()}); addLog('warn','TD: not played',k); tdcDraw(); };
-window.tdcDel=async(k,b)=>{ if(!await confirmDialog(L('Delete this board result? It cannot be undone; the board is entered again.'),{title:L('Board')+' '+b,confirmLabel:L('Delete')})) return; bmTdPut(k,null); addLog('warn','TD: result deleted',k); tdcDraw(); };
+window.tdcEdit=k=>{ const [t,r,b]=String(k).split('_').map(Number); if(TDC.arc!=null){ window._tdEdit={back:'admin',r,arc:TDC.arc}; bmTableNo=t; bmEnterBoard(b); return; } adminEditBoard(k); };
+window.tdcNP=k=>{ tdcPut(k,{contract:'Not played',notPlayed:true,status:'done',td:true,time:new Date().toISOString()}); addLog('warn','TD: not played',k); tdcDraw(); };
+window.tdcDel=async(k,b)=>{ if(!await confirmDialog(L('Delete this board result? It cannot be undone; the board is entered again.'),{title:L('Board')+' '+b,confirmLabel:L('Delete')})) return; tdcPut(k,null); addLog('warn','TD: result deleted',k); tdcDraw(); };
 window.tdcAdj=function(k,b){
   const o=v=>['A+','A','A-'].map(x=>`<option value="${x}"${x===v?' selected':''}>${x==='A+'?L('Average plus')+' (60%)':x==='A'?L('Average')+' (50%)':L('Average minus')+' (40%)'}</option>`).join('');
   openModal(L('Adjusted score')+' · '+L('Board')+' '+b,`<div class="field"><label>NS</label><select id="tdAdjNS">${o('A')}</select></div><div class="field"><label>EW</label><select id="tdAdjEW">${o('A')}</select></div>`,
     `<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcAdjOk('${k}')">OK</button>`);
 };
-window.tdcAdjOk=function(k){ const ns=document.getElementById('tdAdjNS').value, ew=document.getElementById('tdAdjEW').value; bmTdPut(k,{contract:`ADJ(${ns}/${ew})`,nsScore:ns,ewScore:ew,status:'done',adjusted:true,td:true,time:new Date().toISOString()}); addLog('warn','TD: adjusted score',k+' '+ns+'/'+ew); closeModal(); tdcDraw(); };
+window.tdcAdjOk=function(k){ const ns=document.getElementById('tdAdjNS').value, ew=document.getElementById('tdAdjEW').value; tdcPut(k,{contract:`ADJ(${ns}/${ew})`,nsScore:ns,ewScore:ew,status:'done',adjusted:true,td:true,time:new Date().toISOString()}); addLog('warn','TD: adjusted score',k+' '+ns+'/'+ew); closeModal(); tdcDraw(); };
 window.tdcFree=async t=>{ await adminKickTable(t); tdcDraw(); };
+
+// ── the old tournaments: each one opened, its boards and names corrected, its results, PBN, PDF, renamed, deleted ──
+const dd=x=>{ const d=new Date(x||0); return isNaN(d)?'':String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); };
+function drawHist(){
+  TDC.arc=null;
+  const A=getArchives()||[];
+  const body=A.length?`<div class="tdc-hist">${A.map((a,i)=>`<button class="tdc-hrow" onclick="tdcGo('arc',{arc:${i},t:null,r:null})"><b>${cleanData((a.state&&a.state.name)||L('Tournament'))}</b><span>${dd(a.finished)} · ${(a.state&&a.state.tableCount)||0} ${L('tables')} · ${(a.state&&a.state.roundCount)||0} ${L('rounds')}</span></button>`).join('')}</div>`:`<div class="bm3-note" style="padding:12px">${L('No archived tournaments')}</div>`;
+  frame('📜 '+L('Old tournaments'),body,`<span></span><button class="bm3-ok" onclick="tdcGo('home')">‹ ${L('Back')}</button>`);
+}
+function drawArc(){
+  const i=TDC.arc, a=getArchives()[i], s=a.state||{}, M=a.movements||{}, B=a.boards||{};
+  let grid='';
+  for(let r=1;r<=(s.roundCount||0);r++){
+    let tiles='';
+    for(let t=1;t<=(s.tableCount||0);t++){ const m=M[r+'_'+t]; if(!m) continue; let n=0,d=0; for(let b=m.boardStart||1;b<=(m.boardEnd||0);b++){ n++; if((B[t+'_'+r+'_'+b]||{}).status) d++; }
+      tiles+=`<button class="tdc-tile${d>=n&&n?' done':''}" onclick="tdcGo('table',{t:${t},r:${r}})"><b>${t}</b><small>${d}/${n}</small><i>${num(m.ns)}–${num(m.ew)}</i></button>`; }
+    grid+=`<div class="bm3-step">${L('Round')} ${r}</div><div class="tdc-tiles">${tiles}</div>`;
+  }
+  const sub=`<div class="bm3-sum"><div><span>${L('Date')}</span><b>${dd(a.finished)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount||0}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount||0}</b></div></div>
+    <div class="tdc-tools"><button class="btn" onclick="ccResultsPage(${i})">📄 ${L('Results')}</button><button class="btn" onclick="exportArchivePBN(${i})">🃏 PBN</button><button class="btn" onclick="archivePDF(${i})">🖨 PDF</button><button class="btn" onclick="tdcArcName()">✏️ ${L('Rename')}</button><button class="btn tdc-red" onclick="tdcArcDel()">🗑 ${L('Delete')}</button></div>`;
+  frame('📜 '+cleanData(s.name||''),`<div class="bm3-note" style="padding:0 12px">${L('Tap a table to correct its boards and names; the ranking is worked out again.')}</div>${grid}`,`<span></span><button class="bm3-ok" onclick="tdcGo('hist')">‹ ${L('Old tournaments')}</button>`,sub);
+}
+window.tdcArcName=function(){ const a=getArchives()[TDC.arc]; if(!a) return; openModal('✏️ '+L('Rename'),`<div class="field"><label>${L('Tournament')}</label><input id="tdcArcN" maxlength="40" value="${cleanData((a.state&&a.state.name)||'')}"></div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcArcNameOk()">OK</button>`); };
+window.tdcArcNameOk=function(){ const v=(document.getElementById('tdcArcN').value||'').trim().slice(0,40); if(!v) return; const A=getArchives(), a=A[TDC.arc]; if(!a) return; a.state=a.state||{}; a.state.name=v; setArchives(A); addLog('ok','Archived tournament renamed',v); closeModal(); tdcDraw(); };
+window.tdcArcDel=async function(){ const n=(getArchives()||[]).length; await adminDeleteArchive(TDC.arc); if((getArchives()||[]).length<n){ TDC.arc=null; tdcGo('hist'); } };
+
+// ── every tab of the full panel, inside the BridgeScore (the same boxes and buttons) ──
+const TABS={setup:['⚙️','Setup'],players:['👥','Players'],movement:['🔄','Movement'],tables:['🃏','Tables'],boards:['📊','Boards'],history:['📜','History'],log:['📋','Log']};
+window.tdcTab=k=>{ TDC.tab=k; tdcGo('tab'); };
+function drawTab(){
+  const k=TDC.tab||'setup', t=TABS[k]||TABS.setup;
+  frame(t[0]+' '+L(t[1]),`<div class="tdc-tabnav">${Object.entries(TABS).map(([x,[i,n]])=>`<button class="${x===k?'on':''}" onclick="tdcTab('${x}')">${i} ${L(n)}</button>`).join('')}</div><div id="adminContent" class="tdc-tab"></div>`,`<span></span><button class="bm3-ok" onclick="tdcGo('home')">‹ BridgeScore</button>`);
+  adminTab=k; _rat();
+}
 })();

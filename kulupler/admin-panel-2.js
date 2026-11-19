@@ -710,7 +710,7 @@ function renderHistory(){
         <span class="rc-num">${a.state.name}</span>
         <span class="rc-stat">${a.state.tableCount} tables · ${a.state.roundCount} rounds · ${new Date(a.finished).toLocaleDateString()}</span>
       </div>
-      <button class="btn btn-blue btn-sm" onclick="viewArchive(${i})">View Results</button> <button class="btn btn-gold btn-sm" onclick="ccResultsPage(${i})">📄 Results page</button> <button class="btn btn-red btn-sm" onclick="adminDeleteArchive(${i})">🗑 Delete</button>
+      <button class="btn btn-blue btn-sm" onclick="viewArchive(${i})">View Results</button> <button class="btn btn-gold btn-sm" onclick="ccResultsPage(${i})">📄 Results page</button>${typeof tdcGo==='function'?` <button class="btn btn-green btn-sm" onclick="localStorage.setItem('bg_tdc2','1');tdcGo('arc',{arc:${i},t:null,r:null})">✏️ ${i18nText('Correct')}</button>`:''} <button class="btn btn-red btn-sm" onclick="adminDeleteArchive(${i})">🗑 Delete</button>
     </div>`).join('')}
   </div>`;
 }

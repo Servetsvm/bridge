@@ -741,13 +741,13 @@ window.savePairNames=function(nsId,ewId,tableNo){
 
 // ── Board Entry Form ──
 window.bmEnterBoard=function(boardNo){
-  const m0=getMovements()[bmRound()+'_'+bmTableNo]||{};
+  const m0=bmXM()[bmRound()+'_'+bmTableNo]||{};
   if(m0.social&&bmTableNo&&!window._tdEdit){ (async()=>{ try{ const L=(await DB.get('boardLocks'))||{}, put=async(b,v)=>fetch(await fbUrl('/boardLocks/'+b+'.json'),{method:'PUT',body:JSON.stringify(v)});
     for(const [b,l] of Object.entries(L)) if(l&&+l.t===+bmTableNo&&+b!==+boardNo) await put(b,null);
     await put(boardNo,{t:bmTableNo,at:Date.now()}); const N={}; for(const [b,l] of Object.entries(L)) if(!(l&&+l.t===+bmTableNo)) N[b]=l; N[boardNo]={t:bmTableNo,at:Date.now()}; _cache['boardLocks']=N; }catch(e){} })(); }
   const vuln=getVuln(boardNo);
   const key=bmTableNo+'_'+bmRound()+'_'+boardNo;
-  const existing=getBoards()[key]||(window._tdEdit?getApprovals()[key]:null);   // the TD: a result still waiting for the OK is corrected too
+  const existing=bmXB()[key]||(window._tdEdit&&!bmArc()?getApprovals()[key]:null);   // the TD: a result still waiting for the OK is corrected too
   boardForm={level:null,suit:null,declarer:null,result:0,doubled:'',leadSuit:'',leadRank:'',isPass:false,vuln,boardNo};
   if(!existing)boardForm._startTime=Date.now();
   renderBoardForm(boardNo,vuln,existing);
@@ -773,8 +773,8 @@ function bm3Score() { const f = boardForm; return f.notPlayed ? null : f.isPass 
 // each suit its own colour: ♠ navy, ♥ red, ♦ orange, ♣ green
 const bmSuitCls = x => ({ '♠': 'sS', '♥': 'sH', '♦': 'sD', '♣': 'sC' })[x] || '';
 function bm3Draw() {
-  const L = v => window.i18nText ? i18nText(v) : v, f = boardForm, s = getState(), boardNo = f.boardNo;
-  const m = getMovements()[bmRound() + '_' + bmTableNo] || {}, P = getPairs(), num = x => (x || '').replace(/[^0-9]/g, '') || '?';
+  const L = v => window.i18nText ? i18nText(v) : v, f = boardForm, s = bmXS(), boardNo = f.boardNo;
+  const m = bmXM()[bmRound() + '_' + bmTableNo] || {}, P = bmXP(), num = x => (x || '').replace(/[^0-9]/g, '') || '?';
   const vuln = f.vuln, vulCls = vuln === 'Both' ? 'both' : vuln === 'NS' ? 'ns' : vuln === 'EW' ? 'ew' : 'none', vulTxt = vuln === 'Both' ? 'BOTH VUL' : vuln === 'None' ? 'NO VUL' : vuln + ' VUL';
   const red = x => x === '♦' || x === '♥';
   const su = x => x ? `<span class="${bmSuitCls(x)}">${x}</span>` : '';
@@ -979,6 +979,7 @@ window.saveBoardAndSendApproval=function(boardNo){
   }
 
   // the TD's correction: saved at once, back to where the TD came from
+  if(window._tdEdit&&bmArc()){ const k2=bmTableNo+'_'+bmRound()+'_'+boardNo, A=getArchives(), a=A[window._tdEdit.arc]; a.boards=a.boards||{}; a.boards[k2]={...boardData,status:'done',td:true,manualEdit:true,time:new Date().toISOString()}; setArchives(A); addLog('warn','TD: archived board corrected',(a.state&&a.state.name||'')+' '+k2+' '+(boardData.contract||'')); toast('✅ '+BM_L('Saved')); bmEntryCancel(); return; }
   if(window._tdEdit){ const k2=bmTableNo+'_'+bmRound()+'_'+boardNo, bs=getBoards(); bs[k2]={...boardData,status:'done',td:true,manualEdit:true,time:new Date().toISOString()}; setBoards(bs); const A=getApprovals(); if(A[k2]){ delete A[k2]; setApprovals(A); } addLog('warn','TD: board corrected',k2+' '+(boardData.contract||'')); toast('✅ '+BM_L('Saved')); bmEntryCancel(); return; }
   // Store pending approval
   const aps=getApprovals();
@@ -1193,6 +1194,10 @@ window.tdCallsShow=function(v){
 window.tdCallDone=t=>{ DB.del('tdcalls/'+t); const v={..._cache['tdcalls']||{}}; delete v[t]; _cache['tdcalls']=v; tdCallsShow(v); };
 
 // the round a board is entered for: the TD may correct an earlier one
+// an archived tournament being corrected by the TD (its index), or the running one
+const bmArc=()=>window._tdEdit&&window._tdEdit.arc!=null?getArchives()[window._tdEdit.arc]:null;
+const bmXB=()=>{ const a=bmArc(); return a?(a.boards||{}):getBoards(); }, bmXM=()=>{ const a=bmArc(); return a?(a.movements||{}):getMovements(); };
+const bmXP=()=>{ const a=bmArc(); return a?(a.pairs||{}):getPairs(); }, bmXS=()=>{ const a=bmArc(); return a?(a.state||{}):getState(); };
 const bmRound=()=>(window._tdEdit&&window._tdEdit.r)||getState().currentRound;
 // leaving a board's entry: the table, the TD's menu or the TD's screen
 window.bmEntryCancel=function(){
@@ -1205,10 +1210,10 @@ window.bmEntryCancel=function(){
 window.adminEditBoard=function(key){ const [t,r,b]=String(key).split('_').map(Number); if(!t||!r||!b) return; window._tdEdit={back:'admin',r}; bmTableNo=t; bmEnterBoard(b); };
 // the names at a table as on the BridgeScore: the four seats round the table; a seat: a member number (NBF / TBF) or a name
 let _tdN=null;
-window.tdNames=function(t,r,back){
-  const s=getState(); r=r||s.currentRound; const m=getMovements()[r+'_'+t]||{}, P=getPairs();
+window.tdNames=function(t,r,back,arc){
+  const a=arc!=null?getArchives()[arc]:null, s=a?a.state||{}:getState(); r=r||s.currentRound; const m=(a?a.movements||{}:getMovements())[r+'_'+t]||{}, P=a?a.pairs||{}:getPairs();
   const [N,S]=splitPairName((P[m.ns]||{}).name||''), [E,W]=splitPairName((P[m.ew]||{}).name||'');
-  _tdN={t,r,ns:m.ns,ew:m.ew,back,seats:{N,S,E,W}}; tdNamesDraw();
+  _tdN={t,r,ns:m.ns,ew:m.ew,back,arc,seats:{N,S,E,W}}; tdNamesDraw();
 };
 function tdNamesDraw(){
   const e=_tdN, st=e.seats, seat=k=>`<button class="pe-pos pe-${k}" onclick="tdSeatEdit('${k}')"><small>${BM_L(BG_SEATS[k])}</small><b>${st[k]?cleanData(st[k]):'＋'}</b></button>`;
@@ -1239,8 +1244,8 @@ window.tdSeatLook=function(){
 window.tdSeatPick=async function(num){ const n=await memberName(num); if(n){ _tdN.seats[_tdN.k]=n.slice(0,40); tdNamesDraw(); } };
 window.tdSeatOk=async function(){ let v=(document.getElementById('tdpeInput')?.value||'').trim(); if(/^\d{1,8}$/.test(v)) v=(await memberName(v))||v; _tdN.seats[_tdN.k]=v.slice(0,40); tdNamesDraw(); };
 window.tdNamesSave=function(){
-  const e=_tdN, st=e.seats, P=getPairs();
+  const e=_tdN, st=e.seats, A=e.arc!=null?getArchives():null, P=A?(A[e.arc].pairs||{}):getPairs();
   if(e.ns&&P[e.ns]) P[e.ns].name=joinPairName(st.N,st.S); if(e.ew&&P[e.ew]) P[e.ew].name=joinPairName(st.E,st.W);
-  setPairs(P); PlayerDB.save([st.N,st.S,st.E,st.W].filter(Boolean)); addLog('ok','TD: names',joinPairName(st.N,st.S)+' vs '+joinPairName(st.E,st.W)); toast('✅ '+BM_L('Saved')); tdNamesBack();
+  if(A) setArchives(A); else setPairs(P); PlayerDB.save([st.N,st.S,st.E,st.W].filter(Boolean)); addLog('ok','TD: names',joinPairName(st.N,st.S)+' vs '+joinPairName(st.E,st.W)); toast('✅ '+BM_L('Saved')); tdNamesBack();
 };
 window.tdNamesBack=function(){ const b=_tdN&&_tdN.back; _tdN=null; if(b==='admin'){ adminTab='tables'; renderAdminPanel(); } else bmTdMenu(_tdR); };

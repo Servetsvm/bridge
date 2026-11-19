@@ -658,3 +658,18 @@ body.bg-device .bm-devbar:has(.bm3-tdbtns),.bm3-bar:has(.bm3-tdbtns){grid-templa
 .bm3-tdrow > b,.bm3-tdrow > span{cursor:pointer}
 .bm3-tdrow .tdgo{font-style:normal;font-size:.72rem;font-weight:700;color:#1f5d36;background:#e3efe6;border-radius:6px;padding:1px 6px;margin-left:4px;white-space:nowrap}
 .tdc-tools .btn.tdc-red{color:#b3261e}
+/* the TD's BridgeScore on a PC too: one wide green screen; the full panel's tabs inside it in the light colours */
+#panelContent > .bm3.tdc{max-width:1000px;margin:0 auto}
+.tdc{--bg:#fff;--surface:#fff;--surface2:#eef5f0;--surface3:#e3efe6;--border:#c5d8ca;--border2:#b4cbb9;--text:#1b1b1b;--text2:#3c4650;--text3:#6d6d6d;--gold:#1f5d36;--gold2:#174a2b;--golddim:#d4ead9;--blue:#2a6fd6;--bluedim:#e6f0fc}
+.tdc .tdc-tab{padding:8px 12px;color:#1b1b1b}
+.tdc .tdc-tab .card{background:#fff;border:1px solid #c5d8ca;color:#1b1b1b}
+.tdc .tdc-tab input,.tdc .tdc-tab select,.tdc .tdc-tab textarea{background:#fff;color:#1b1b1b;border:1px solid #b4cbb9}
+.tdc-tabnav{display:flex;gap:6px;overflow-x:auto;padding:10px 12px 2px}
+.tdc-tabnav button{flex:none;border:1px solid #c5d8ca;background:#fff;color:#1f5d36;border-radius:18px;padding:7px 12px;font:700 .82rem 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
+.tdc-tabnav button.on{background:#1f5d36;color:#fff;border-color:#1f5d36}
+.tdc-tnav{display:flex;gap:5px;flex-wrap:wrap;padding:4px 12px}
+.tdc-tnav button{min-width:38px;height:34px;border:1px solid #c5d8ca;background:#fff;border-radius:8px;font-weight:800;cursor:pointer}
+.tdc-tnav button.on{background:#1f5d36;color:#fff;border-color:#1f5d36}
+.tdc-hist{display:flex;flex-direction:column;gap:6px;padding:10px 12px}
+.tdc-hrow{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px;border:1px solid #c5d8ca;border-radius:10px;background:#fff;color:#1b1b1b;cursor:pointer;font-family:inherit}
+.tdc-hrow b{color:#1f5d36;font-size:1rem}.tdc-hrow span{font-size:.8rem;color:#55606b}
