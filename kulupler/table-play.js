@@ -747,7 +747,7 @@ window.bmEnterBoard=function(boardNo){
     await put(boardNo,{t:bmTableNo,at:Date.now()}); const N={}; for(const [b,l] of Object.entries(L)) if(!(l&&+l.t===+bmTableNo)) N[b]=l; N[boardNo]={t:bmTableNo,at:Date.now()}; _cache['boardLocks']=N; }catch(e){} })(); }
   const vuln=getVuln(boardNo);
   const key=bmTableNo+'_'+bmRound()+'_'+boardNo;
-  const existing=getBoards()[key];
+  const existing=getBoards()[key]||(window._tdEdit?getApprovals()[key]:null);   // the TD: a result still waiting for the OK is corrected too
   boardForm={level:null,suit:null,declarer:null,result:0,doubled:'',leadSuit:'',leadRank:'',isPass:false,vuln,boardNo};
   if(!existing)boardForm._startTime=Date.now();
   renderBoardForm(boardNo,vuln,existing);
@@ -1104,11 +1104,10 @@ function bmAskPw(){ return new Promise(res=>{
 }); }
 async function bmTdAuth(){
   if(Date.now()<_tdOk) return true;
-  const sv=typeof tdSaved==='function'?tdSaved(CLUB_ID):null;
-  const pw=(sv&&sv.pw)||await bmAskPw(); if(!pw) return false;
+  const pw=await bmAskPw(); if(!pw) return false;
   let ok=false; try{ ok=await startSession('admin',CLUB_ID,pw); }catch(e){}
   // only the check: this table keeps writing with its own session (not the TD's)
-  if(!sv){ try{ const token=await authToken(); const uid=window._authUid; if(token&&uid) await fetch(FB_BASE+'/csess/'+uid+'.json?auth='+token,{method:'DELETE'}); }catch(e){} }
+  { try{ const token=await authToken(); const uid=window._authUid; if(token&&uid) await fetch(FB_BASE+'/csess/'+uid+'.json?auth='+token,{method:'DELETE'}); }catch(e){} }
   if(!ok){ toast('❌ '+BM_L('Wrong password')); return false; }
   _tdOk=Date.now()+10*60e3; return true;
 }
@@ -1122,7 +1121,7 @@ window.bmTdMenu=async function(r){
   let rows='';
   for(let b=m.boardStart||1;b<=(m.boardEnd||0);b++){
     const k=t+'_'+_tdR+'_'+b, d=B[k];
-    rows+=`<div class="bm3-tdrow"><b>${b}</b><span>${cleanData(bmTdText(d))}</span><div>
+    rows+=`<div class="bm3-tdrow"><b onclick="bmTdEdit(${b})">${b}</b><span onclick="bmTdEdit(${b})">${cleanData(bmTdText(d))} <i class="tdgo">✏️ ${BM_L('Correct')}</i></span><div>
       <button onclick="bmTdEdit(${b})" title="${BM_L('Enter again')}">✏️</button>
       <button onclick="bmTdNP('${k}')">${BM_L('Not played')}</button><button onclick="bmTdAdj('${k}',${b})">ADJ</button>
       ${d?`<button class="del" onclick="bmTdDel('${k}',${b})">🗑</button>`:''}</div></div>`;

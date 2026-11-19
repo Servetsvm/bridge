@@ -655,3 +655,6 @@ body.bg-device .bm-devbar:has(.bm3-tdbtns),.bm3-bar:has(.bm3-tdbtns){grid-templa
 .tdc-callrow{margin:6px 12px 0;padding:8px 10px;border-radius:10px;background:#f2c94c;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .tdc-callrow button{border:0;background:#1f5d36;color:#fff;border-radius:7px;padding:6px 10px;font-weight:800;cursor:pointer}
 .tdc .bm3-tdnav span{font-size:.78rem;line-height:1.35}
+.bm3-tdrow > b,.bm3-tdrow > span{cursor:pointer}
+.bm3-tdrow .tdgo{font-style:normal;font-size:.72rem;font-weight:700;color:#1f5d36;background:#e3efe6;border-radius:6px;padding:1px 6px;margin-left:4px;white-space:nowrap}
+.tdc-tools .btn.tdc-red{color:#b3261e}

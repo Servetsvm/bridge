@@ -55,11 +55,15 @@ function drawHome(){
   const mv=(MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||'';
   const sum=set||fin?`<div class="bm3-sum"><div><span>${L('Tournament')}</span><b>${cleanData(s.name||'')}</b></div><div><span>${L('Movement')}</span><b>${L(mv)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount}</b></div><div><span>${L('Boards')}</span><b>${s.totalBoards}</b></div></div>`:'';
   const body=`${fin?`<div class="bm3-step">🏁 ${L('Tournament finished')}</div>`:set?`<div class="bm3-step">⏳ ${L('Ready to start')}</div>`:`<div class="bm3-step">${L('No tournament now')}</div>`}${sum}
-    <div class="tdc-tools">${set?`<button class="btn" onclick="tdcSetupStart()">↺ ${L('Set up again')}</button>`:''}<button class="btn" onclick="ccResultsIndex()">📄 ${L('Results')}</button>${set?`<button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button>`:''}</div>`;
+    <div class="tdc-tools">${set?`<button class="btn" onclick="tdcSetupStart()">↺ ${L('Set up again')}</button>`:''}<button class="btn" onclick="ccResultsIndex()">📄 ${L('Results')}</button>${set?`<button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button>`:''}</div>${set?moreHtml():''}`;
   frame(fin?L('Tournament finished'):set?L('Ready to start'):L('New tournament'),body,
     set?`<button class="bm3-cancel" onclick="tdcSetupStart()">↺</button><button class="bm3-ok" onclick="tdcStart()">▶ ${L('Start round 1')}</button>`
        :`<span></span><button class="bm3-ok" onclick="tdcSetupStart()">➕ ${L('New tournament')}</button>`);
 }
+const moreHtml=()=>{ const s=getState(), h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>
+  <div class="bm3-step">${L('More')}</div><div class="tdc-tools"><button class="btn" onclick="tdcStall()">⚠️ ${L('Slow table')}: ${s.stallAlertMinutes||15} min</button><button class="btn" onclick="adminExport()">⬇ ${L('Export')}</button><button class="btn" onclick="adminImportOpen()">⬆ ${L('Import')}</button><button class="btn tdc-red" onclick="adminReset()">🗑 ${L('Reset')}</button></div>`; };
+window.tdcStall=function(){ const s=getState(); openModal('⚠️ '+L('Slow table'),`<div class="field"><label>${L('Alarm when a table has entered no score for this many minutes')}</label><input type="number" id="tdcStallMin" min="1" max="90" value="${s.stallAlertMinutes||15}"></div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcStallOk()">OK</button>`); };
+window.tdcStallOk=function(){ const v=parseInt(document.getElementById('tdcStallMin').value); if(!(v>=1&&v<=90)){ toast('❌ 1 – 90'); return; } const s=getState(); s.stallAlertMinutes=v; setState(s); closeModal(); tdcDraw(); };
 window.tdcStart=async function(){ await adminStart(); TDC.v='run'; tdcDraw(); };
 
 // ── the setup with keys: the movement, the players, the boards (and the Swiss rounds) ──
@@ -115,7 +119,7 @@ function drawRun(){
   const sub=`<div class="tdc-round"><b>${L('Round')} ${s.currentRound} / ${s.roundCount}</b><span>${dn}/${tot} ${L('boards')}</span><div class="tdc-bar"><i style="width:${tot?Math.round(dn/tot*100):0}%"></i></div></div>`;
   const body=`<div class="tdc-tiles">${tiles.join('')}</div>
     <div class="tdc-legend"><span class="done">✓ ${L('Finished')}</span><span class="pend">⏳ ${L('Waiting for OK')}</span><span class="slow">⚠️ ${L('Slow')}</span><span class="call">📣 ${L('Calls the TD')}</span></div>
-    <div class="tdc-tools"><button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button><button class="btn" onclick="tdcScreen()">📺 ${L('Screen')}</button><button class="btn" onclick="bgShowPlayersLink()">🔗 ${L('Link')}</button><button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>`;
+    <div class="tdc-tools"><button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button><button class="btn" onclick="tdcScreen()">📺 ${L('Screen')}</button><button class="btn" onclick="bgShowPlayersLink()">🔗 ${L('Link')}</button><button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>${moreHtml()}`;
   const next=last||social?`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcFinish()">🏁 ${L('Finish the tournament')}</button>`:`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcNext()">⏭ ${L('Round')} ${s.currentRound+1}</button>`;
   frame(cleanData(s.name||''),body,`<button class="bm3-cancel" onclick="tdcReload()">↻</button>`+next,sub);
 }
@@ -139,7 +143,7 @@ function drawTable(){
   let rows='';
   for(let b=m.boardStart||1;b<=(m.boardEnd||0);b++){
     const k=t+'_'+r+'_'+b, d=B[k], ap=A[k];
-    rows+=`<div class="bm3-tdrow"><b>${b}</b><span>${d?cleanData(bmTdText(d)):ap?'⏳ '+cleanData(ap.contract||''):'—'}</span><div>
+    rows+=`<div class="bm3-tdrow"><b onclick="tdcEdit('${k}')">${b}</b><span onclick="tdcEdit('${k}')">${d?cleanData(bmTdText(d)):ap?'⏳ '+cleanData(ap.contract||''):'—'} <i class="tdgo">✏️ ${L('Correct')}</i></span><div>
       <button onclick="tdcEdit('${k}')">✏️</button><button onclick="tdcNP('${k}')">${L('Not played')}</button><button onclick="tdcAdj('${k}',${b})">ADJ</button>${d||ap?`<button class="del" onclick="tdcDel('${k}',${b})">🗑</button>`:''}</div></div>`;
   }
   const calls=_cache['tdcalls']||{};

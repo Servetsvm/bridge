@@ -47,7 +47,7 @@ const isClubAdmin=()=>{ const u=me(); return !!u&&(isSuper()||(CLUB_INFO&&CLUB_I
 
 // the TD of a club: this device keeps the club password and the TD's name after the first sign-in
 const tdSaved=club=>{ try{ return JSON.parse(localStorage.getItem('bg_td:'+club)||'null'); }catch(e){ return null; } };
-const tdSave=(club,pw)=>{ try{ const u=me(); localStorage.setItem('bg_td:'+club,JSON.stringify({pw:String(pw),n:(u&&u.name)||''})); }catch(e){} };
+const tdSave=(club,pw)=>{ try{ const u=me(); localStorage.setItem('bg_td:'+club,JSON.stringify({pw:String(pw),n:(u&&u.name)||'',k:(u&&u.key)||''})); }catch(e){} };
 const tdForget=club=>{ try{ localStorage.removeItem('bg_td:'+club); }catch(e){} };
 // the table this phone sits at (its code, number, round): opened again it comes back there
 const bmSeatOf=club=>{ try{ return JSON.parse(localStorage.getItem('bg_seat:'+club)||'null'); }catch(e){ return null; } };
@@ -152,7 +152,7 @@ async function initClubGate(){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
       if(roleParam!=='table') document.body.classList.remove('bg-device');   // the admin's sign-in keeps the usual look
       if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
-      if(roleParam==='admin'){ const td=tdSaved(id); if(td&&td.pw){ document.getElementById('pwInput').value=td.pw; window._tdAuto=true; setTimeout(()=>doLogin(),50); } else setTimeout(()=>document.getElementById('pwInput')?.focus(),100); }
+      if(roleParam==='admin'){ const td=tdSaved(id), me0=me(); if(td&&td.pw&&td.k&&me0&&td.k===me0.key){ document.getElementById('pwInput').value=td.pw; window._tdAuto=true; setTimeout(()=>doLogin(),50); } else setTimeout(()=>document.getElementById('pwInput')?.focus(),100); }
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(async()=>{ await doLogin();
         // back at a table that is no longer this phone's (a new tournament, new codes): the table is chosen again, no code asked
