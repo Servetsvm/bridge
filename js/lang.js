@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Çalışacağın konvansiyonu seç (ya da Kapalı), sonra ▶ Başla",
+    "My convention card": "Konvansiyon kartım",
     "TD": "TD",
     "Social Bridge": "Sosyal Bridge",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Robotlarla online test: sadece sen görürsün, kulübün gerçek turnuvalarına dokunulmaz. Yönetici'den kur, masanı seç ve kartlarını oyna; diğer bütün koltuklara robotlar oturur.",
@@ -449,6 +451,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Velg en konvensjon å øve på (eller Av), så ▶ Start",
+    "My convention card": "Mitt konvensjonskort",
     "TD": "TD",
     "Social Bridge": "Sosial bridge",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "En nettest med roboter: bare du ser den, klubbens ekte turneringer røres ikke. Sett den opp under Administrator, velg bordet ditt og spill kortene dine; roboter setter seg på alle de andre plassene.",
@@ -893,6 +897,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Elige una convención para practicar (o Desactivado) y luego ▶ Empezar",
+    "My convention card": "Mi tarjeta de convenciones",
     "TD": "Director",
     "Social Bridge": "Bridge social",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Una prueba en línea con robots: solo tú la ves, los torneos reales del club no se tocan. Prepárala en Administrador, elige tu mesa y juega tus cartas; los robots ocupan todos los demás asientos.",
@@ -1365,6 +1371,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Choisis une convention à travailler (ou Désactivé), puis ▶ Commencer",
+    "My convention card": "Ma carte de conventions",
     "TD": "Arbitre",
     "Social Bridge": "Bridge social",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Un test en ligne avec des robots : toi seul le vois, les vrais tournois du club ne sont pas touchés. Prépare-le dans Administration, choisis ta table et joue tes cartes ; les robots prennent toutes les autres places.",
@@ -1837,6 +1845,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Scegli una convenzione da esercitare (o Spento), poi ▶ Inizia",
+    "My convention card": "La mia carta delle convenzioni",
     "TD": "Arbitro",
     "Social Bridge": "Bridge sociale",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Una prova online con i robot: la vedi solo tu, i tornei veri del circolo non vengono toccati. Preparala in Amministratore, scegli il tuo tavolo e gioca le tue carte; i robot occupano tutti gli altri posti.",
@@ -2309,6 +2319,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Wähle eine Konvention zum Üben (oder Aus), dann ▶ Start",
+    "My convention card": "Meine Konventionskarte",
     "TD": "TL",
     "Social Bridge": "Geselliges Bridge",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Ein Online-Test mit Robotern: nur du siehst ihn, die echten Turniere des Clubs bleiben unberührt. Richte ihn unter Admin ein, wähle deinen Tisch und spiel deine Karten; Roboter setzen sich auf alle anderen Plätze.",
@@ -2781,6 +2793,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Выбери конвенцию для тренировки (или Выкл.), затем ▶ Начать",
+    "My convention card": "Моя конвенционная карта",
     "TD": "Судья",
     "Social Bridge": "Социальный бридж",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Онлайн-тест с роботами: видишь только ты, настоящие турниры клуба не затрагиваются. Настрой его в разделе «Администратор», выбери стол и играй свои карты; на все остальные места садятся роботы.",
@@ -3253,6 +3267,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Wybierz konwencję do ćwiczenia (lub Wyłączone), potem ▶ Start",
+    "My convention card": "Moja karta konwencji",
     "TD": "Sędzia",
     "Social Bridge": "Brydż towarzyski",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Test online z robotami: widzisz go tylko ty, prawdziwe turnieje klubu pozostają nietknięte. Przygotuj go w Administratorze, wybierz stół i graj swoimi kartami; roboty zajmują wszystkie inne miejsca.",
@@ -3725,6 +3741,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Choose a convention to practise (or Off), then ▶ Start": "选择要练习的约定（或关闭），然后点 ▶ 开始",
+    "My convention card": "我的约定卡",
     "TD": "裁判",
     "Social Bridge": "社交桥牌",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "与机器人的在线测试：只有你能看到，俱乐部的正式比赛不受影响。在“管理”中设置，选择你的桌并打你的牌；其他所有座位由机器人坐。",

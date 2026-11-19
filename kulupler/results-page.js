@@ -228,13 +228,14 @@ function indexHtml(){
   const dd=d=>String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
   return `<div class="ccr"><div class="bar"><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>
     <div class="ihead"><span></span><h1>${L('Results')}</h1><span></span></div><div class="iclub">${esc(CLUB_NAME||'')}</div>
+    <div class="rtabs"><a class="on">📄 ${L('Results')}</a><a onclick="ccRatingPage()">🏅 ${L('Club rating')}</a></div>
     ${years.length?`<div class="ytabs">${years.map(y=>`<a class="${y===IDXY?'on':''}" onclick="ccResultsYear(${y})">${y}</a>`).join('')}</div>
     ${months.map(m=>`<div class="imon">${esc(m.t)}</div><div>${m.rows.map(x=>`<div class="ir" onclick="ccResultsPage(${x.i})"><span>${dd(x.d)}</span><a href="#" onclick="return false">${esc(x.name)}</a></div>`).join('')}</div>`).join('')}`:`<div class="inone">${L('No results yet.')}</div>`}</div>`;
 }
-window.ccResultsYear=function(y){ IDXY=y; const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}</style>${indexHtml()}`; };
+window.ccResultsYear=function(y){ IDXY=y; const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}${typeof RT_CSS!=='undefined'?RT_CSS:''}</style>${indexHtml()}`; };
 window.ccResultsIndex=async function(){
   try{ await DB.get('archives'); }catch(e){}
-  const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}</style>${indexHtml()}`; el.scrollTop=0;
+  const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}${typeof RT_CSS!=='undefined'?RT_CSS:''}</style>${indexHtml()}`; el.scrollTop=0;
 };
 // the movement: for each round, at each table the North-South and East-West pairs (number and names) and the boards;
 // a pair chosen: only its own way round (table, its seats, its opponents, the boards)
@@ -275,4 +276,59 @@ window.ccMovementPage=async function(){
   // the page follows the tournament (a new round, a Swiss pairing)
   clearInterval(window._ccMovT); window._ccMovT=setInterval(async()=>{ const L=document.getElementById('ccLayer'); if(!L||L.hidden||!L.querySelector('.mpick,.inone')){ clearInterval(window._ccMovT); return; } try{ await Promise.all(['state','movements','pairs'].map(k=>DB.get(k))); }catch(e){} const top=L.scrollTop; L.innerHTML=`<style>${CSS}${MOV_CSS}</style>${movementHtml()}`; L.scrollTop=top; },15000);
 };
+
+// ══════════════════════════════════════════════════════
+//  THE CLUB'S RATING: every finished tournament in turn (oldest first); each player starts at 1500 and moves
+//  0.6 points for each percent above or below 50. Each player's page: the tournaments, partners, results, rating
+// ══════════════════════════════════════════════════════
+const RT_CSS=`.ccr .rtabs{display:flex;gap:6px;margin:0 0 12px}.ccr .rtabs a{padding:8px 16px;border:1px solid #cfe0d4;border-radius:20px;color:#1d5534;cursor:pointer;text-decoration:none;font-weight:700}.ccr .rtabs a.on{background:#1d5534;color:#fff;border-color:#1d5534}
+.ccr .rt td.nm{text-align:left;cursor:pointer;color:#1d5534;font-weight:700}.ccr .rt td.nm:hover{text-decoration:underline}
+.ccr .rkc{display:inline-block;min-width:34px;padding:2px 5px;margin-right:6px;border:1px solid #c9d1d8;border-radius:5px;background:#fff;font-weight:800;text-align:center;font-size:.9rem}
+.ccr .rkc.s0{color:#0f7a37}.ccr .rkc.s1{color:#e67e00}.ccr .rkc.s2{color:#d32f2f}.ccr .rkc.s3{color:#1b2a4a}
+.ccr.pp h1{display:flex;align-items:center;gap:8px}.ccr.pp .big{font-size:2.2rem;font-weight:800;color:#1d5534}.ccr.pp .sub{color:#555;margin:2px 0 14px}
+.ccr .up{color:#1f7a3d;font-weight:700}.ccr .dn{color:#c62828;font-weight:700}`;
+const rtKey=n=>String(n||'').trim().toLocaleLowerCase('tr').replace(/\s+/g,' ');
+function clubRating(){
+  const arc=(getArchives()||[]).map((a,i)=>({a,i,d:+new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d>0).sort((x,y)=>x.d-y.d);
+  const R={};
+  for(const {a,i,d} of arc){
+    const mp=calcMP(a.boards||{},a.movements||{}), P=a.pairs||{};
+    const rows=Object.keys(P).filter(id=>!P[id].isPhantom&&mp[id]&&mp[id].top>0).map(id=>({id,pct:mp[id].mp/mp[id].top*100})).sort((x,y)=>y.pct-x.pct);
+    rows.forEach((r,k)=>{
+      const [p1,p2]=splitPairName(P[r.id].name||''), delta=(r.pct-50)*0.6;
+      for(const [me,pa] of [[p1,p2],[p2,p1]]){ if(!me) continue; const key=rtKey(me);
+        const e=R[key]||(R[key]={n:me,r:1500,g:0,h:[]}); e.r+=delta; e.g++; e.n=me;
+        e.h.push({i,d,t:(a.state&&a.state.name)||'',pa,pct:r.pct,place:k+1,of:rows.length,delta,r:e.r}); }
+    });
+  }
+  return R;
+}
+// the player's card (from their Bridge Table card, e.g. ♦10), when Bridge Table knows them
+function rtCard(n){
+  try{ const P=window.parent; if(!P||P===window||!P.eval) return '';
+    const i=P.eval('(n=>{ try{ const p=Net.profOf(n); const r=p&&cardRank(p,n); return r?r.i:null; }catch(e){ return null; } })')(n);
+    if(i==null) return ''; const t=P.eval('rankTxt')(i); return `<span class="rkc s${Math.floor(i/13)}">${esc(t)}</span>`;
+  }catch(e){ return ''; }
+}
+let RTV='list';
+function ratingHtml(){
+  const L=v=>window.i18nText?i18nText(v):v, R=Object.values(clubRating()).sort((a,b)=>b.r-a.r);
+  return `<div class="ccr"><div class="bar"><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>
+    <div class="ihead"><span></span><h1>${L('Club rating')}</h1><span></span></div><div class="iclub">${esc(CLUB_NAME||'')}</div>
+    <div class="rtabs"><a onclick="ccResultsIndex()">📄 ${L('Results')}</a><a class="on">🏅 ${L('Club rating')}</a></div>
+    ${R.length?`<table class="rank rt"><thead><tr><th>#</th><th>${L('Player')}</th><th>${L('Rating')}</th><th>${L('Tournaments')}</th></tr></thead><tbody>${R.map((e,k)=>`<tr><td>${k+1}</td><td class="nm" onclick="ccPlayerPage('${esc(rtKey(e.n)).replace(/'/g,"\\'")}')">${rtCard(e.n)}${esc(e.n)}</td><td class="n"><b>${Math.round(e.r)}</b></td><td class="n">${e.g}</td></tr>`).join('')}</tbody></table>`:`<div class="inone">${L('No results yet.')}</div>`}</div>`;
+}
+function playerHtml(key){
+  const L=v=>window.i18nText?i18nText(v):v, e=clubRating()[key];
+  if(!e) return ratingHtml();
+  const all=Object.values(clubRating()).sort((a,b)=>b.r-a.r), place=all.findIndex(x=>rtKey(x.n)===key)+1;
+  const dd=d=>{ const x=new Date(d); return String(x.getDate()).padStart(2,'0')+'.'+String(x.getMonth()+1).padStart(2,'0')+'.'+x.getFullYear(); };
+  return `<div class="ccr pp"><div class="bar"><button class="btn btn-ghost" onclick="ccRatingPage()">‹ ${L('Club rating')}</button><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>
+    <h1>${rtCard(e.n)}${esc(e.n)}</h1><div class="big">${Math.round(e.r)}</div>
+    <div class="sub">${L('Club rating')} · #${place} / ${all.length} · ${e.g} ${L('Tournaments').toLowerCase()}</div>
+    <table class="rank"><thead><tr><th>${L('Date')}</th><th>${L('Tournament')}</th><th>${L('Partner')}</th><th>%</th><th>#</th><th>±</th><th>${L('Rating')}</th></tr></thead><tbody>
+    ${e.h.slice().reverse().map(h=>`<tr class="pr" onclick="ccResultsPage(${h.i})"><td>${dd(h.d)}</td><td class="nm">${esc(h.t)}</td><td class="nm">${esc(h.pa||'')}</td><td class="n">${h.pct.toFixed(1)}</td><td class="n">${h.place}/${h.of}</td><td class="n ${h.delta>=0?'up':'dn'}">${h.delta>=0?'+':''}${h.delta.toFixed(1)}</td><td class="n">${Math.round(h.r)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+window.ccRatingPage=async function(){ try{ await DB.get('archives'); }catch(e){} const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}${RT_CSS}</style>${ratingHtml()}`; el.scrollTop=0; };
+window.ccPlayerPage=function(key){ const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}${RT_CSS}</style>${playerHtml(key)}`; el.scrollTop=0; };
 })();

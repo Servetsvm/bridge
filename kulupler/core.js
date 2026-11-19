@@ -246,8 +246,8 @@ const fmtImp=v=>{ const x=Math.round((v||0)*10)/10; return (x>0?'+':'')+x.toFixe
 // the TD's adjusted scores: average plus (60%), average (50%), average minus (40%), nothing
 const ADJ_PCT={'A+':0.6,'A':0.5,'A-':0.4,'0':0};
 const ADJ_IMP={'A+':3,'A':0,'A-':-3,'0':-8};
-function calcMP(){
-  const boards=getBoards();const movements=getMovements();
+function calcMP(B,M){
+  const boards=B||getBoards();const movements=M||getMovements();
   const boardScores={};
   Object.entries(boards).forEach(([key,b])=>{
     if(b.status!=='done')return;

@@ -818,26 +818,7 @@ window.archivePDF=function(i){
   else setTimeout(()=>win.print(),80);
 };
 
-function calcMPFromData(boards,movements){
-  const boardScores={};
-  Object.entries(boards).forEach(([key,b])=>{
-    if(b.status!=='done')return;const[t,r,bn]=key.split('_');
-    // Same fix as calcMP() — group by board number only, not round+board.
-    const groupKey=bn;
-    if(!boardScores[groupKey])boardScores[groupKey]=[];const m=movements[r+'_'+t]||{};
-    if(typeof b.nsScore!=='number')return;
-    boardScores[groupKey].push({ns:m.ns,ew:m.ew,nsScore:b.nsScore});
-  });
-  const pairMP={};
-  Object.entries(boardScores).forEach(([,scores])=>{
-    const n=scores.length;if(n<2)return;const top=(n-1)*2;
-    scores.forEach(s=>{let nsMP=0,ewMP=0;scores.forEach(s2=>{if(s===s2)return;if(s.nsScore>s2.nsScore)nsMP+=2;else if(s.nsScore===s2.nsScore){nsMP++;ewMP++;}else ewMP+=2;});
-      if(s.ns){if(!pairMP[s.ns])pairMP[s.ns]={mp:0,boards:0,top:0};pairMP[s.ns].mp+=nsMP;pairMP[s.ns].boards++;pairMP[s.ns].top+=top;}
-      if(s.ew){if(!pairMP[s.ew])pairMP[s.ew]={mp:0,boards:0,top:0};pairMP[s.ew].mp+=ewMP;pairMP[s.ew].boards++;pairMP[s.ew].top+=top;}
-    });
-  });
-  return pairMP;
-}
+function calcMPFromData(boards,movements){ return calcMP(boards||{},movements||{}); }
 
 
 // ── Log ──

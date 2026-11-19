@@ -1789,7 +1789,7 @@ function pracHtml() {
       ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       <div class="pdh">${T('On defence: discards')}</div>${CARD_KEYS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
-  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Deal practice')}</button><button class="btn mini-btn prx" id="pdClose" title="${T('Close')}">✕</button></div></div>
+  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Start')}</button><button class="btn mini-btn prx" id="pdClose" title="${T('Close')}">✕</button></div></div>
     <div class="prrow2">
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${SET.sys === 'none' ? '—' : esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
@@ -1832,7 +1832,7 @@ function homeShell2() {
       <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2mid"><div class="h2chips" id="hMe"></div><button class="hpz" id="hPuzzle"></button><span id="hAdm"></span></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
       <div class="h2pr"><div class="h2play">
         <button class="h2fan h2fango" id="bGoFan" aria-hidden="true" tabindex="-1">${fan}</button>
-        <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><div class="h2btns"><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📚 ${T('Practise conventions')}</button></div></div>
+        <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><div class="h2btns"><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📋 ${T('My convention card')}</button></div></div>
       </div>
       </div>
       <div class="h2tiles">
@@ -3511,8 +3511,9 @@ document.addEventListener('click', ev_ => {
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
   if (t.id === "pdProg") { SET.progOpen = !SET.progOpen; Store.saveSettings(SET); render(); return; }
   if (t.id === "pdWeak") { const w = pracWeak(); if (!w.length) return; SET.practice = ""; w.forEach(k => togglePractice(k, true)); flash("🎯 " + T("Practising {0}: the next deals use it", pracNames()), 2200); ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
-  if (t.id === "pdPlay") { if (!pracList().length) { ui.pracDrop = "conv"; render(); return; } ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
+  if (t.id === "pdPlay") { ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
   // Play offline: the title and the fan of cards start too
+  if ((t.id === "bGo" || t.id === "bGoTitle" || t.id === "bGoFan") && !(ui.saved && ui.saved.phase !== "done")) { ui.pracOpen = 1; ui.pracDrop = "conv"; render(); const p = $("hPrac"); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); flash(T("Choose a convention to practise (or Off), then ▶ Start"), 2600); return; }   // a new game: the convention first
   if (t.id === "bGo" || t.id === "bGoTitle" || t.id === "bGoFan" || t.id === "clGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
@@ -3539,7 +3540,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvCopy') { const txt = (ui.cvList || []).map(r => '# ' + r.ad + ' (' + (r.kim || '') + ', ' + new Date(r.ts).toLocaleDateString() + ')\n' + (r.acik || '') + (r.ornek ? '\n' + r.ornek : '')).join('\n\n'); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash('📋 ' + T('Copied'), 1500)).catch(() => prompt(T('Copy'), txt)); return; }
   // beside Play offline: the conventions to practise open (the drop-down of the practice card, scrolled to)
   if (t.id === 'pdClose') { ui.pracOpen = 0; ui.pracDrop = null; render(); return; }
-  if (t.id === 'bConvGo') { ui.pracOpen = 1; ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  if (t.id === 'bConvGo') { ui.hsec = 'conv'; render(); const p = $('hSec'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }   // the player's convention card
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   // the robots' table: open it, its tabs, a call's meaning, a board played before
   if (t.dataset.rtk === 'claude' && t.dataset.rtopen) { claudeOv(); return; }   // the Claude system: try it yourself, watch the robots, read how it works
