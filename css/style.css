@@ -2205,3 +2205,15 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .bm3-cancel{background:#fff;border-color:#c5d8ca}
 .bm3-orow{background:#fff}.bm3-orow.me{background:#d4ead9;border-color:#1f5d36}
 .bm3-sum div{border-bottom-color:#c5d8ca}
+.rtgt td b{color:#3fb56f}
+/* our own look, not a hardware device: no black case, no label on top; the screen is a plain green card */
+.bm3{background:transparent!important;box-shadow:none!important;padding:0!important;border-radius:0!important}
+.bm3::before{display:none!important;content:none!important}
+.bm3-screen{border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.18)}
+#panelContent > .bm3{padding:0!important}
+@media (min-width:700px){
+  body.bg-device .bm-devbar{border:0!important;border-radius:14px 14px 0 0!important;padding-top:10px!important}
+  body.bg-device .bm-devbar::before{display:none!important;content:none!important}
+  body.bg-device #panelContent{border:0!important;border-radius:0 0 14px 14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+  body.bg-device .login-box{border:0!important;border-radius:14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+}

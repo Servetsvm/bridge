@@ -1534,7 +1534,7 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .tgatebtn{text-align:center;text-decoration:none;font-size:1.05rem;padding:12px}
 .tonh{margin:4px 0 8px;font-size:1rem}
 .hbtns a.btn{text-decoration:none;display:flex;align-items:center;justify-content:center}
-/* Social bridge: the score entry looks like a Bridgemate III (as BridgeGate's table screen) */
+/* Social bridge: the score entry looks like a BridgeScore (as BridgeGate's table screen) */
 .bm3{max-width:440px;margin:0 auto;padding:30px 10px 14px;background:#111;border-radius:30px;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 2px #2a2a2a;position:relative;}
 .bm3::before{content:'Bridge Table';position:absolute;top:7px;left:50%;transform:translateX(-50%);color:#fff;font:800 .82rem/1 'DM Sans',sans-serif;letter-spacing:.3px;background:#111;padding:2px 10px;border-radius:5px;box-shadow:inset 0 0 0 1px #3a3a3a;}
 .bm3-screen{background:#fff;border-radius:12px;overflow:hidden;color:#1b1b1b;font-family:'DM Sans',system-ui,sans-serif;}
@@ -1591,7 +1591,7 @@ body.classic .btn.bad,.btn.bad{background:#d0453b;color:#fff;border-color:#a8342
 .sbchg{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;background:#1f5d36;color:#fff}
 .sbchg .sbtno{font-size:22px;font-weight:800}
 .sbchg .btn{font-size:16px;font-weight:700;padding:10px 14px}
-/* Social bridge for a player: a Bridgemate III — green bar, white screen; a device on a computer */
+/* Social bridge for a player: a BridgeScore — green bar, white screen; a device on a computer */
 .sheet.sbfull{background:#fff;color:#1b1b1b;padding:0 12px 12px}
 .sbbar{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;background:#1f5d36;color:#fff;padding:10px 12px;margin:0 -12px;font-size:13px;position:sticky;top:0;z-index:2}
 .sbbar .td{background:#2e7a4b;border-radius:6px;padding:4px 8px}.sbbar .ev{text-align:center;line-height:1.3}.sbbar .ev b{display:block;font-size:14px}
@@ -2215,9 +2215,10 @@ body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradi
 .ctcardt .ctp small{display:block;font-weight:400;opacity:.7;font-size:12px}
 .ctcardt .ctb{margin-top:6px;font-size:14px}
 .clubtools.ct2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.clubtools.ct4{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:420px){.clubtools.ct4{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #ov .ctbm3{margin:-4px auto 0}
 
-/* Bridgemate III step by step: the compass (who played), the result to confirm, the other tables; each step one screen */
+/* BridgeScore step by step: the compass (who played), the result to confirm, the other tables; each step one screen */
 .bm3w .bm3-body{flex:1;display:flex;flex-direction:column;min-height:0}
 .bm3-compass{display:grid;grid-template-columns:1fr 1.2fr 1fr;grid-template-rows:repeat(3,minmax(64px,1fr));gap:8px;padding:6px 12px;flex:1;max-height:330px}
 .bm3-seat{border:1px solid #d9dee3;border-radius:12px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:#1b1b1b;font:inherit}
@@ -2235,7 +2236,7 @@ body.homev2 .rtcard .rtchip.rtduel.on,.rtrows .rtduel.on{background:linear-gradi
 .bm3-key.res.made{color:#1f5d36}.bm3-key.res.down{color:#b3261e}
 @media (max-height:640px){ .bm3w .bm3-key{min-height:42px} .bm3w .bm3-display{margin:6px 12px;padding:6px 10px} .bm3w .bm3-head{padding-top:6px} .bm3w .bm3-step{padding-top:6px} }
 .bm3w .red,.bm3-sum .red{color:#d32f2f}
-/* the Bridgemate's suits in their colours: spades black, hearts red, clubs and diamonds black and red (green and
+/* the BridgeScore's suits in their colours: spades black, hearts red, clubs and diamonds black and red (green and
    orange with the four-colour deck); a result key with its tricks under it */
 .bmsy{font-family:"Segoe UI Symbol","Apple Symbols","Noto Sans Symbols 2",sans-serif}
 .bmsy.s3,.bmsy.s0{color:#111}.bmsy.s2,.bmsy.s1{color:#d32f2f}
@@ -2244,6 +2245,30 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .bm3-tbl .bmsy{color:#fff}
 .bm3-key.res{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 .bm3-key.res small{font-size:.62em;font-weight:600;opacity:.6}
+
+/* BridgeScore (online evening, Social Bridge) in the club's green; each suit its own colour: ♣ green, ♦ orange, ♥ red, ♠ navy */
+.bmsy.s0,body.four .bmsy.s0{color:#0f7a37}.bmsy.s1,body.four .bmsy.s1{color:#e67e00}.bmsy.s2{color:#d32f2f}.bmsy.s3{color:#1b2a4a}
+.bm3-key.active .bmsy,.bm3-tbl .bmsy{color:#fff!important}
+.bm3-screen{background:#e3efe6}
+.bm3-display{background:#fff}
+.bm3-key,.bm3-seat{background:#fff;border-color:#c5d8ca}
+.bm3-key.active,.bm3-seat.active{background:#1f5d36;border-color:#1f5d36}
+.bm3-ok{background:#1f5d36}
+.bm3-cancel{background:#fff;border-color:#c5d8ca}
+.bm3-orow{background:#fff}.bm3-orow.me{background:#d4ead9;border-color:#1f5d36}
+.bm3-sum div{border-bottom-color:#c5d8ca}
+.rtgt td b{color:#3fb56f}
+/* our own look, not a hardware device: no black case, no label on top; the screen is a plain green card */
+.bm3{background:transparent!important;box-shadow:none!important;padding:0!important;border-radius:0!important}
+.bm3::before{display:none!important;content:none!important}
+.bm3-screen{border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.18)}
+#panelContent > .bm3{padding:0!important}
+@media (min-width:700px){
+  body.bg-device .bm-devbar{border:0!important;border-radius:14px 14px 0 0!important;padding-top:10px!important}
+  body.bg-device .bm-devbar::before{display:none!important;content:none!important}
+  body.bg-device #panelContent{border:0!important;border-radius:0 0 14px 14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+  body.bg-device .login-box{border:0!important;border-radius:14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+}
 
 </style>
 
@@ -5481,6 +5506,10 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Çalışacağın konvansiyonu seç (ya da Kapalı), sonra ▶ Başla",
+    "My convention card": "Konvansiyon kartım",
+    "TD": "TD",
+    "Social Bridge": "Sosyal Bridge",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Robotlarla online test: sadece sen görürsün, kulübün gerçek turnuvalarına dokunulmaz. Yönetici'den kur, masanı seç ve kartlarını oyna; diğer bütün koltuklara robotlar oturur.",
     "The tournament is over": "Turnuva bitti", "Every table has finished: the results are ready.": "Bütün masalar bitirdi: sonuçlar hazır.", "Over for your table; {0} tables are still playing.": "Senin masan için bitti; {0} masa hâlâ oynuyor.", "See the results": "Sonuçlara bak",
     "Who played the contract?": "Kontratı kim oynadı?", "Tricks taken by declarer": "Yapanın aldığı löve", "Other tables on this board": "Bu eldeki diğer masalar", "No other table has finished this board yet.": "Bu eli henüz başka masa bitirmedi.", "Confirm": "Onayla", "made exactly": "tam yapıldı",
@@ -5925,6 +5954,10 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Velg en konvensjon å øve på (eller Av), så ▶ Start",
+    "My convention card": "Mitt konvensjonskort",
+    "TD": "TD",
+    "Social Bridge": "Sosial bridge",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "En nettest med roboter: bare du ser den, klubbens ekte turneringer røres ikke. Sett den opp under Administrator, velg bordet ditt og spill kortene dine; roboter setter seg på alle de andre plassene.",
     "The tournament is over": "Turneringen er over", "Every table has finished: the results are ready.": "Alle bordene er ferdige: resultatene er klare.", "Over for your table; {0} tables are still playing.": "Ferdig for ditt bord; {0} bord spiller fortsatt.", "See the results": "Se resultatene",
     "Who played the contract?": "Hvem spilte kontrakten?", "Tricks taken by declarer": "Stikk tatt av spillefører", "Other tables on this board": "Andre bord på dette spillet", "No other table has finished this board yet.": "Ingen andre bord har spilt ferdig dette spillet ennå.", "Confirm": "Bekreft", "made exactly": "akkurat hjemme",
@@ -6367,6 +6400,10 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Elige una convención para practicar (o Desactivado) y luego ▶ Empezar",
+    "My convention card": "Mi tarjeta de convenciones",
+    "TD": "Director",
+    "Social Bridge": "Bridge social",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Una prueba en línea con robots: solo tú la ves, los torneos reales del club no se tocan. Prepárala en Administrador, elige tu mesa y juega tus cartas; los robots ocupan todos los demás asientos.",
     "The tournament is over": "El torneo ha terminado", "Every table has finished: the results are ready.": "Todas las mesas han terminado: los resultados están listos.", "Over for your table; {0} tables are still playing.": "Terminado para tu mesa; {0} mesas siguen jugando.", "See the results": "Ver los resultados",
     "Who played the contract?": "¿Quién jugó el contrato?", "Tricks taken by declarer": "Bazas del declarante", "Other tables on this board": "Otras mesas en esta mano", "No other table has finished this board yet.": "Ninguna otra mesa ha terminado esta mano todavía.", "Confirm": "Confirmar", "made exactly": "cumplido justo",
@@ -6837,6 +6874,10 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Choisis une convention à travailler (ou Désactivé), puis ▶ Commencer",
+    "My convention card": "Ma carte de conventions",
+    "TD": "Arbitre",
+    "Social Bridge": "Bridge social",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Un test en ligne avec des robots : toi seul le vois, les vrais tournois du club ne sont pas touchés. Prépare-le dans Administration, choisis ta table et joue tes cartes ; les robots prennent toutes les autres places.",
     "The tournament is over": "Le tournoi est terminé", "Every table has finished: the results are ready.": "Toutes les tables ont fini : les résultats sont prêts.", "Over for your table; {0} tables are still playing.": "Fini pour ta table ; {0} tables jouent encore.", "See the results": "Voir les résultats",
     "Who played the contract?": "Qui a joué le contrat ?", "Tricks taken by declarer": "Levées du déclarant", "Other tables on this board": "Les autres tables sur cette donne", "No other table has finished this board yet.": "Aucune autre table n’a encore fini cette donne.", "Confirm": "Confirmer", "made exactly": "juste fait",
@@ -7307,6 +7348,10 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Scegli una convenzione da esercitare (o Spento), poi ▶ Inizia",
+    "My convention card": "La mia carta delle convenzioni",
+    "TD": "Arbitro",
+    "Social Bridge": "Bridge sociale",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Una prova online con i robot: la vedi solo tu, i tornei veri del circolo non vengono toccati. Preparala in Amministratore, scegli il tuo tavolo e gioca le tue carte; i robot occupano tutti gli altri posti.",
     "The tournament is over": "Il torneo è finito", "Every table has finished: the results are ready.": "Tutti i tavoli hanno finito: i risultati sono pronti.", "Over for your table; {0} tables are still playing.": "Finito per il tuo tavolo; {0} tavoli stanno ancora giocando.", "See the results": "Vedi i risultati",
     "Who played the contract?": "Chi ha giocato il contratto?", "Tricks taken by declarer": "Prese del dichiarante", "Other tables on this board": "Gli altri tavoli su questa smazzata", "No other table has finished this board yet.": "Nessun altro tavolo ha ancora finito questa smazzata.", "Confirm": "Conferma", "made exactly": "mantenuto esatto",
@@ -7777,6 +7822,10 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Wähle eine Konvention zum Üben (oder Aus), dann ▶ Start",
+    "My convention card": "Meine Konventionskarte",
+    "TD": "TL",
+    "Social Bridge": "Geselliges Bridge",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Ein Online-Test mit Robotern: nur du siehst ihn, die echten Turniere des Clubs bleiben unberührt. Richte ihn unter Admin ein, wähle deinen Tisch und spiel deine Karten; Roboter setzen sich auf alle anderen Plätze.",
     "The tournament is over": "Das Turnier ist zu Ende", "Every table has finished: the results are ready.": "Alle Tische sind fertig: die Ergebnisse stehen fest.", "Over for your table; {0} tables are still playing.": "Für deinen Tisch vorbei; {0} Tische spielen noch.", "See the results": "Ergebnisse ansehen",
     "Who played the contract?": "Wer hat den Kontrakt gespielt?", "Tricks taken by declarer": "Stiche des Alleinspielers", "Other tables on this board": "Die anderen Tische an diesem Board", "No other table has finished this board yet.": "Noch kein anderer Tisch hat dieses Board beendet.", "Confirm": "Bestätigen", "made exactly": "genau erfüllt",
@@ -8247,6 +8296,10 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Выбери конвенцию для тренировки (или Выкл.), затем ▶ Начать",
+    "My convention card": "Моя конвенционная карта",
+    "TD": "Судья",
+    "Social Bridge": "Социальный бридж",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Онлайн-тест с роботами: видишь только ты, настоящие турниры клуба не затрагиваются. Настрой его в разделе «Администратор», выбери стол и играй свои карты; на все остальные места садятся роботы.",
     "The tournament is over": "Турнир окончен", "Every table has finished: the results are ready.": "Все столы закончили: результаты готовы.", "Over for your table; {0} tables are still playing.": "Для твоего стола всё; ещё играют {0} столов.", "See the results": "Посмотреть результаты",
     "Who played the contract?": "Кто играл контракт?", "Tricks taken by declarer": "Взятки разыгрывающего", "Other tables on this board": "Другие столы на этой сдаче", "No other table has finished this board yet.": "Ни один другой стол ещё не закончил эту сдачу.", "Confirm": "Подтвердить", "made exactly": "ровно",
@@ -8717,6 +8770,10 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Choose a convention to practise (or Off), then ▶ Start": "Wybierz konwencję do ćwiczenia (lub Wyłączone), potem ▶ Start",
+    "My convention card": "Moja karta konwencji",
+    "TD": "Sędzia",
+    "Social Bridge": "Brydż towarzyski",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Test online z robotami: widzisz go tylko ty, prawdziwe turnieje klubu pozostają nietknięte. Przygotuj go w Administratorze, wybierz stół i graj swoimi kartami; roboty zajmują wszystkie inne miejsca.",
     "The tournament is over": "Turniej się skończył", "Every table has finished: the results are ready.": "Wszystkie stoły skończyły: wyniki są gotowe.", "Over for your table; {0} tables are still playing.": "Koniec dla twojego stołu; {0} stołów jeszcze gra.", "See the results": "Zobacz wyniki",
     "Who played the contract?": "Kto rozgrywał kontrakt?", "Tricks taken by declarer": "Lewy rozgrywającego", "Other tables on this board": "Inne stoły w tym rozdaniu", "No other table has finished this board yet.": "Żaden inny stół nie skończył jeszcze tego rozdania.", "Confirm": "Potwierdź", "made exactly": "dokładnie zrobiony",
@@ -9187,6 +9244,10 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Choose a convention to practise (or Off), then ▶ Start": "选择要练习的约定（或关闭），然后点 ▶ 开始",
+    "My convention card": "我的约定卡",
+    "TD": "裁判",
+    "Social Bridge": "社交桥牌",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "与机器人的在线测试：只有你能看到，俱乐部的正式比赛不受影响。在“管理”中设置，选择你的桌并打你的牌；其他所有座位由机器人坐。",
     "The tournament is over": "比赛结束了", "Every table has finished: the results are ready.": "所有桌都已打完：成绩已出。", "Over for your table; {0} tables are still playing.": "你这桌已结束；还有 {0} 桌在打。", "See the results": "查看成绩",
     "Who played the contract?": "谁打的定约？", "Tricks taken by declarer": "庄家赢墩数", "Other tables on this board": "本副牌的其他桌", "No other table has finished this board yet.": "还没有其他桌打完这副牌。", "Confirm": "确认", "made exactly": "刚好完成",
@@ -12116,7 +12177,7 @@ function pracHtml() {
       ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       <div class="pdh">${T('On defence: discards')}</div>${CARD_KEYS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
-  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Deal practice')}</button><button class="btn mini-btn prx" id="pdClose" title="${T('Close')}">✕</button></div></div>
+  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Start')}</button><button class="btn mini-btn prx" id="pdClose" title="${T('Close')}">✕</button></div></div>
     <div class="prrow2">
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${SET.sys === 'none' ? '—' : esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
@@ -12159,13 +12220,13 @@ function homeShell2() {
       <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2mid"><div class="h2chips" id="hMe"></div><button class="hpz" id="hPuzzle"></button><span id="hAdm"></span></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
       <div class="h2pr"><div class="h2play">
         <button class="h2fan h2fango" id="bGoFan" aria-hidden="true" tabindex="-1">${fan}</button>
-        <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><div class="h2btns"><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📚 ${T('Practise conventions')}</button></div></div>
+        <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><div class="h2btns"><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📋 ${T('My convention card')}</button></div></div>
       </div>
       </div>
       <div class="h2tiles">
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
-        ${tile('id="sbOpen" type="button"', '🃏', T('Team match'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
+        ${tile('id="sbOpen" type="button"', '🃏', T('Social Bridge'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
@@ -12681,6 +12742,7 @@ function nextTourBoard() {
 // opening an online table always asks first: public (listed in the lobby) or private (only invited players)
 function showOpenChoice() {
   if (online()) { Net.panel(); return; }
+  closeOv(); ui.saved = null; Net.openTable(false); return;   // the table opens at once (no choice first)
   openOv('open', `<h2>🌐 ${T('Open an online table')}</h2>
     <button class="btn new choice" data-open="pub"><b>🌍 ${T('Open table')}</b></button>
     <button class="btn choice" data-open="priv"><b>🔒 ${T('Private table')}</b></button>
@@ -13838,8 +13900,9 @@ document.addEventListener('click', ev_ => {
   // Start: you play with robots; your table shows in the lobby and others can ask to join (you accept)
   if (t.id === "pdProg") { SET.progOpen = !SET.progOpen; Store.saveSettings(SET); render(); return; }
   if (t.id === "pdWeak") { const w = pracWeak(); if (!w.length) return; SET.practice = ""; w.forEach(k => togglePractice(k, true)); flash("🎯 " + T("Practising {0}: the next deals use it", pracNames()), 2200); ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
-  if (t.id === "pdPlay") { if (!pracList().length) { ui.pracDrop = "conv"; render(); return; } ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
+  if (t.id === "pdPlay") { ui.pracDrop = null; Net.st.soloPub = true; closeOv(); resume(); return; }
   // Play offline: the title and the fan of cards start too
+  if ((t.id === "bGo" || t.id === "bGoTitle" || t.id === "bGoFan") && !(ui.saved && ui.saved.phase !== "done")) { ui.pracOpen = 1; ui.pracDrop = "conv"; render(); const p = $("hPrac"); if (p) p.scrollIntoView({ behavior: "smooth", block: "start" }); flash(T("Choose a convention to practise (or Off), then ▶ Start"), 2600); return; }   // a new game: the convention first
   if (t.id === "bGo" || t.id === "bGoTitle" || t.id === "bGoFan" || t.id === "clGo") { Net.st.soloPub = true; closeOv(); resume(); return; }
   if (t.id === 'pdSys' || t.id === 'pdConv') { const k = t.id === 'pdSys' ? 'sys' : 'conv'; ui.pracDrop = ui.pracDrop === k ? null : k; render(); return; }
   if (t.id === 'pdDone') { ui.pracDrop = null; render(); return; }
@@ -13866,7 +13929,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'cvCopy') { const txt = (ui.cvList || []).map(r => '# ' + r.ad + ' (' + (r.kim || '') + ', ' + new Date(r.ts).toLocaleDateString() + ')\n' + (r.acik || '') + (r.ornek ? '\n' + r.ornek : '')).join('\n\n'); (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(() => flash('📋 ' + T('Copied'), 1500)).catch(() => prompt(T('Copy'), txt)); return; }
   // beside Play offline: the conventions to practise open (the drop-down of the practice card, scrolled to)
   if (t.id === 'pdClose') { ui.pracOpen = 0; ui.pracDrop = null; render(); return; }
-  if (t.id === 'bConvGo') { ui.pracOpen = 1; ui.pracDrop = 'conv'; render(); const p = $('hPrac'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  if (t.id === 'bConvGo') { ui.hsec = 'conv'; render(); const p = $('hSec'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }   // the player's convention card
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   // the robots' table: open it, its tabs, a call's meaning, a board played before
   if (t.dataset.rtk === 'claude' && t.dataset.rtopen) { claudeOv(); return; }   // the Claude system: try it yourself, watch the robots, read how it works
@@ -13889,10 +13952,11 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hLearn') { showLearn(); return; }
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
-  if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; const c = ui.clubOpen; showClubs(); if (c) clubTaken(c).then(x => { (ui.clubTaken = ui.clubTaken || {})[c] = x.taken; if (ui.overlay === 'clubs') showClubs(); }); return; }
+  if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
   if (t.dataset.clubmov) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubmov) + '&movement=1'); return; }
   if (t.dataset.clubscr) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubscr) + '&role=screen'); return; }
-  if (t.dataset.clubtest && typeof Net !== 'undefined' && Net.isAdmin()) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubtest) + '&role=admin&test=1'); return; }
+  if (t.dataset.clubplay) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubplay)); return; }
+  if (t.dataset.clubres) { window.open(location.pathname + '?kulup=' + encodeURIComponent('?club=' + t.dataset.clubres + '&results=1'), '_blank'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
   // the online team match: a new tournament of the Team match type, set up at once
@@ -14588,27 +14652,23 @@ async function clubTaken(club, test) {
   try {
     const [st, lk] = await Promise.all([Net.Cloud.get(base + '/state'), Net.Cloud.get(base + '/tableLocks')]);
     const r = st && st.currentRound, out = new Set();
-    for (const [k, v] of Object.entries(lk || {})) if (r && k.startsWith(r + '_')) out.add(+k.split('_')[1] || (v && +v.tableNo));
+    const t0 = Date.parse((st && st._startedAt) || 0) || 0;   // a lock left by the last tournament does not take a table
+    for (const [k, v] of Object.entries(lk || {})) if (r && k.startsWith(r + '_') && ((v && v.lockedAt) || 0) >= t0) out.add(+k.split('_')[1] || (v && +v.tableNo));
     return { st, taken: out };
   } catch (e) { return { st: null, taken: new Set() }; }
 }
-// the clubs offered for a test tournament: Beykoz (all of them when there is none)
-const testClubs = L => L.filter(t => /beykoz/i.test(t.c || t.club));   // the test: Beykoz only
 async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];
     const otOf = c => typeof ctList === 'function' ? [ctFirst(ctList().filter(x => x.club === c && !x.i.test))].filter(Boolean) : [];   // one evening a club
-    const otTests = c => typeof ctList === 'function' ? ctList().filter(x => x.club === c && x.i.test) : [];   // Servet's online tests: under Test
     const otCard = x => `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`;
     const otRows = c => otOf(c).map(otCard).join('');
     const otLive = c => otOf(c).find(x => x.plan);   // an online evening being played: the club's tournament now
     const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
-      (ui.clubOpen !== t.club ? '' : t.tb ? (ui.clubTaken && ui.clubTaken[t.club] ? (L => L.length ? `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${L.map(n => `<button class="bm3-key" data-clubtn="${esc(t.club)}|${t.p}|${n}">${n}</button>`).join('')}</div></div>` : `<div class="muted">${T('Every table is taken.')}</div>`)([...Array(t.tb).keys()].map(i => i + 1).filter(n => !ui.clubTaken[t.club].has(n))) : `<div class="muted">${T('Loading…')}</div>`) + `<div class="row2"><button class="btn" data-clubadmin="${esc(t.club)}">⚙️ ${T('Admin')}</button></div>`
-        : otLive(t.club) ? `<div class="row2"><button class="btn" data-clubadmin="${esc(t.club)}">⚙️ ${T('Admin')}</button></div>` : `<div class="muted">${T('No tournament at this club now.')}</div><div class="row2"><button class="btn gold" data-clubadmin="${esc(t.club)}">➕ ${T('Set up a tournament')}</button></div>`) + (ui.clubOpen !== t.club ? '' : (x => x ? `<div class="row3 clubtools ct2"><button class="btn gold" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button><button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button></div>` : `<div class="row3 clubtools ct2"><button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button><button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button></div>`)(otLive(t.club))) + `</div>`).join('');
+      (ui.clubOpen !== t.club ? '' : (t.tb ? `<div class="row2"><button class="btn gold" data-clubplay="${esc(t.club)}">🪑 ${T('Players')}</button></div>` : otLive(t.club) ? '' : `<div class="muted">${T('No tournament at this club now.')}</div>`) +
+        (x => `<div class="row4 clubtools ct4"><button class="btn" data-clubadmin="${esc(t.club)}">🧑‍⚖️ ${T('TD')}</button>` + (x ? `<button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button>` : `<button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button>`) + `<button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button><button class="btn" data-clubres="${esc(t.club)}">📄 ${T('Results')}</button></div>`)(otLive(t.club))) + `</div>`).join('');
     openOv('clubs', `<h2>🏛 ${T('Clubs')}</h2>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}
-      ${typeof Net !== 'undefined' && Net.isAdmin() && L.length ? `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('An online test with robots: only you see it, the club\'s real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.')}</div>${testClubs(L).map(t => {
-        return `<div class="clubrow"><b>🧪 ${esc(t.c || t.club)}</b>${otTests(t.club).map(otCard).join('')}<div class="row2"><button class="btn" data-clubtest="${esc(t.club)}">⚙️ ${T('Admin')}</button></div></div>`; }).join('')}</div>` : ''}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
   };
   if (ui.overlay !== 'clubs') ui.clubLive = null;
@@ -16182,7 +16242,7 @@ const Net = (() => {
     st.priv = !!priv; st.invited = [];
     st.msg = 'Opening the table…'; panel();
     try {
-      await claimSlot();
+      for (let i = 0; i < 3 && !st.slot; i++) { await claimSlot(); if (!st.slot && i < 2) await new Promise(r => setTimeout(r, 1500)); }
       if (!st.slot) throw new Error('Could not reach the connection service. Try again in a moment.');
       becomeHost();
       // the table starts as an empty waiting room: no cards until everyone is seated and the host presses Start
@@ -16779,7 +16839,6 @@ const Net = (() => {
         <div class="muted">${T('Anyone who opens the app link while your table is open can ask to join; you accept or decline each request. Keep this app open while you play: your device runs the table. Robots play any seat that is empty or whose player leaves.')}</div>
         ${st.msg ? `<div class="err">${esc(T(st.msg))}</div>` : ''}
         ${scoreHtml()}
-        <div class="grp"><span>🏆 ${T('Online tournaments')}</span><div id="nTours">${typeof toursHtml === 'function' ? toursHtml() : ''}</div></div>
         <div class="row2"><button class="btn" id="nStop">${T('Close the table')}</button><button class="btn gold" id="oClose">${T('Done')}</button></div>`);
       return;
     }
@@ -16789,7 +16848,6 @@ const Net = (() => {
       <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" readonly value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Open tables')}</span>${tablesHtml()}</div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
-      <div class="grp"><span>🏆 ${T('Online tournaments')}</span><div id="nTours">${typeof toursHtml === 'function' ? toursHtml() : ''}</div></div>
       <div class="row2"><button class="btn new" id="nStart">${T('Open an online table')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
   }
   const panelRefresh = () => { if (ui.overlay === 'net') panel(); };
@@ -16827,7 +16885,7 @@ const Net = (() => {
       case 'nStart': {
         const n = document.getElementById('nName');
         setName((n && n.value.trim()) || myName() || 'Host');
-        showOpenChoice(); break;   // public or private first
+        closeOv(); if (typeof ui !== 'undefined') ui.saved = null; if (!st.on) host(false); else panel(); break;   // the table opens at once
       }
       case 'nFind': findTables(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
@@ -17398,10 +17456,10 @@ async function ctSit(key, r0) {
   CT.pollT = setInterval(ctPoll, 1500); CT.beatT = setInterval(ctBeat, 20e3);
   flash('🪑 ' + T('Round {0} · table {1}', s.r + 1, s.ti + 1), 2500);
 }
-/* Servet's online test with the Bridgemate (the test tournament's "I use the Bridgemate"): after each board at his table
-   the result is entered as on a club's Bridgemate — contract, declarer, lead, tricks — the score shown, the opponents
+/* Servet's online test with the BridgeScore (the test tournament's "I use the BridgeScore"): after each board at his table
+   the result is entered as on a club's BridgeScore — contract, declarer, lead, tricks — the score shown, the opponents
    (robots) approve, and the entry is checked against the board as it was played; at the end of the round the
-   Bridgemate's move screen (the next table, the seat, the opponents, the boards). For trying the Bridgemate only: the
+   BridgeScore's move screen (the next table, the seat, the opponents, the boards). For trying the BridgeScore only: the
    evening's results come from the play itself */
 const ctBmOn = () => { const t = CT.tbl, x = t && ctFind(t.key); return !!(x && x.i && x.i.bm && !t.watch); };
 const CT_BM = { e: null, then: null, v: null, done: false };
@@ -17420,7 +17478,7 @@ function ctBmScore(v, bn) {
   const sc = scoreOf(v.lvl, v.st, v.dbl, vulOf(bn, v.decl), v.tr);
   return sideOf(v.decl) === 0 ? sc : -sc;
 }
-// the Bridgemate III's frame: the bar (the evening, the table and round), the board, its vulnerability and the pairs
+// the BridgeScore's frame: the bar (the evening, the table and round), the board, its vulnerability and the pairs
 function ctBmHead(bn) {
   const t = CT.tbl, x = ctFind(t.key) || { i: {} }, tb = (t.plan.rounds[t.r] || [])[t.ti] || [];
   const ns = vulOf(bn, 0), ew = vulOf(bn, 1), cls = ns && ew ? 'both' : ns ? 'ns' : ew ? 'ew' : 'none', vt = ns && ew ? 'BOTH VUL' : ns ? 'NS VUL' : ew ? 'EW VUL' : 'NO VUL';
@@ -17430,7 +17488,7 @@ function ctBmHead(bn) {
 const CT_BM_STEPS = ['contract', 'decl', 'lead', 'tricks', 'confirm'];
 const ctBmS = s => `<span class="bmsy s${s}">${SUIT[s]}</span>`;   // a suit in its colour (the four-colour deck too)
 const ctBmSym = s => s === 4 ? 'NT' : ctBmS(s);
-// one step a screen, as the club's Bridgemate III: the contract → who played it (the compass) → the lead → the tricks
+// one step a screen, as the club's BridgeScore: the contract → who played it (the compass) → the lead → the tricks
 // → the result to confirm; then the opponents' approval and the other tables on this board, then the next board
 function ctBmDraw() {
   const v = CT_BM.v, e = CT_BM.e, bn = e.board, step = CT_BM.step, t = CT.tbl;
@@ -17469,7 +17527,7 @@ function ctBmDraw() {
     const r = v.tr - v.lvl - 6, rr = v.pass ? T('Pass') : r === 0 ? T('made exactly') : r > 0 ? '+' + r : r;
     body = `<div class="bm3-step">${T('Result')}</div>
       <div class="bm3-sum">${v.pass ? '' : `<div><span>${T('Declarer')}</span><b>${SEAT_AB[v.decl]}</b></div><div><span>${T('Lead')}</span><b>${lead}</b></div><div><span>${T('Tricks')}</span><b>${v.tr}</b></div>`}<div><span>${T('Result')}</span><b>${rr}</b></div><div class="big"><span>NS</span><b>${fmtSigned(sc)}</b></div></div>`;
-    actions = backB + `<button class="bm3-ok" data-bm="ok">✓ ${T('Confirm')}</button>`;
+    actions = backB + `<button class="bm3-ok" data-bm="ok">✓ OK</button>`;
   } else if (step === 'done') {   // approved: the check against the board as played, the other tables on this board
     const rc = e.c, rl = e.pl && e.pl[0] && e.pl[0][0];
     const same = v.pass ? !!e.passed : !e.passed && rc && v.lvl === rc.level && v.st === rc.strain && v.dbl === rc.dbl && v.decl === rc.decl && v.tr === e.tricks && (!rl || (v.ls === S(rl[1]) && v.lr === R(rl[1])));
@@ -17487,7 +17545,7 @@ function ctBmDraw() {
   openOv('ctbm', `<div class="bm3 bm3w ctbm3"><div class="bm3-screen">${ctBmHead(bn)}${display}${step === 'done' ? '' : hint}<div class="bm3-body">${body}</div><div class="bm3-actions">${actions}</div></div></div>`);
   if (keep && sh()) sh().scrollTop = keep;
 }
-// the end of the round: where this pair goes next, as the Bridgemate shows it
+// the end of the round: where this pair goes next, as the BridgeScore shows it
 function ctBmMove(then) {
   const t = CT.tbl, pi = ctMyPair(t.plan), nx = ctSched(t.plan, pi).find(s => s.r === t.r + 1);
   CT_BM.then = then; CT_BM.e = null;
@@ -17519,7 +17577,7 @@ function ctGoNext() {
   const t = CT.tbl; if (!t || !G || !G.ct) return;
   if (t.watch) { ctLeave(); G = idleG(); save(); render(); return; }   // watching: back home
   if (G.phase !== 'done') { flash(T('Finish this tournament board first'), 2000); return; }
-  // the Bridgemate test: the score entered for this board, then (the round over) the move screen
+  // the BridgeScore test: the score entered for this board, then (the round over) the move screen
   if (ctBmOn() && G.result && !(t.bmOk || {})[G.board]) { const bn = G.board; ctBmShow(G.result, () => { (t.bmOk = t.bmOk || {})[bn] = 1; ctGoNext(); }); return; }
   if (ctBmOn() && G.ct.i + 1 >= t.boards.length && t.r + 1 < t.rounds && !t.bmMoved) { ctBmMove(() => { t.bmMoved = 1; ctGoNext(); }); return; }
   if (G.ct.i + 1 < t.boards.length) { ctStartBoard(G.ct.i + 1); ctPoll(); return; }
@@ -17529,7 +17587,7 @@ function ctGoNext() {
   flash('🏁 ' + T('The tournament is over for you — thank you!'), 4000); G = null; goHome();
   if (bmEnd) setTimeout(() => ctBmEnd(bmEnd), 400);
 }
-// the end of the evening on the Bridgemate (Servet's test): over for this table; the results once every table is done
+// the end of the evening on the BridgeScore (Servet's test): over for this table; the results once every table is done
 async function ctBmEnd(e) {
   CT_BM.end = e;
   try { await ctLoad(true); } catch (er) {}
@@ -17693,7 +17751,7 @@ function ctShowResults(club, id, d, tab, only) {
   else if (t === 'boards') body = Object.keys(S.boards).sort((a, b) => a - b).map(bn => !ctBoardOver(x, bn) ? `<div class="grp"><span>${T('Board {0}', bn)}</span><div class="muted">⏳ ${T('Still being played ({0} of {1} tables done): shown when every table has finished it.', ...ctBoardLeft(x, bn))}</div></div>` : `<div class="grp"><span>${T('Board {0}', bn)} <button class="btn mini-btn" data-ctdd="${bn}">🎯 ${T('Double dummy')}</button></span>
       <div id="ctdd${bn}"></div>
       <table class="res"><tbody>${S.boards[bn].map(q => `<tr><td>${pn(P.pairs[q.ns])}<br><small>${pn(P.pairs[q.ew])}</small></td><td>${ctCon(q.v)}${q.v.tr != null ? ' · ' + T('{0} tricks', q.v.tr) : ''}</td><td><b>${fmtSigned(q.v.ns || 0)}</b></td><td>${Math.round(q.mp)}%<br><small>${fmtSigned(q.imp)} IMP</small></td></tr>`).join('')}</tbody></table></div>`).join('') || `<div class="muted">${T('No results yet.')}</div>`;
-  else if (t === 'rating') { const L = ctRating(club); body = L.length ? `<table class="res"><thead><tr><th>#</th><th>${T('Player')}</th><th>${T('Rating')}</th><th>${T('Evenings')}</th></tr></thead><tbody>${L.map((r, k) => `<tr><td>${k + 1}</td><td>${esc(r.n)}</td><td><b>${Math.round(r.r)}</b></td><td>${r.g}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Everyone starts at 1500; each evening moves it by the pair\'s result.')}</div>` : `<div class="muted">${T('No results yet.')}</div>`; }
+  else if (t === 'rating') { const L = ctRating(club); body = L.length ? `<table class="res rtgt"><thead><tr><th>#</th><th>${T('Player')}</th><th>${T('Rating')}</th><th>${T('Evenings')}</th></tr></thead><tbody>${L.map((r, k) => `<tr><td>${k + 1}</td><td>${esc(r.n)}</td><td><b>${Math.round(r.r)}</b></td><td>${r.g}</td></tr>`).join('')}</tbody></table><div class="muted">${T('Everyone starts at 1500; each evening moves it by the pair\'s result.')}</div>` : `<div class="muted">${T('No results yet.')}</div>`; }
   else body = P.rounds.map((tb, r) => `<div class="grp"><span>${T('Round {0}', r + 1)}</span>${tb.map(([a, b], ti) => { const n = Object.values((((x.run.t || {})[r + '_' + ti]) || {}).res || {}).filter(Boolean).length; return `<div class="row2" style="align-items:center"><span>${T('Table {0}', ti + 1)}: ${pn(P.pairs[a])} / ${pn(P.pairs[b])} · ${n}/${P.bpr}</span>${n < P.bpr ? `<button class="btn mini-btn" data-ctwatch="${r}_${ti}">👁 ${T('Watch')}</button>` : ''}</div>`; }).join('')}</div>`).join('');
   if (only) { openOv('ctres', `<h2>🔀 ${esc(x.i.n || '')}</h2><div class="muted">🏛 ${esc(x.i.cn || club)} · ${esc(ctWhen(x.d))}</div>${body}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   openOv('ctres', `<h2>📊 ${esc(x.i.n || '')}</h2><div class="muted">🏛 ${esc(x.i.cn || club)} · ${esc(ctWhen(x.d))}</div>${tabs}${body}
@@ -17928,7 +17986,7 @@ const SB = (() => {
   const newCode = () => { const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let s = ''; for (let i = 0; i < 6; i++) s += A[Math.floor(Math.random() * A.length)]; return s; };
   const fmtDate = ts => new Date(ts).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   const signed = v => (v > 0 ? '+' : '') + v;
-  const sym = s => s === 4 ? 'NT' : `<span class="${s === 1 || s === 2 ? 'red' : ''}">${SUITS[s]}</span>`;
+  const sym = s => s === 4 ? 'NT' : `<span class="bmsy s${s}">${SUITS[s]}</span>`;   // each suit its own colour
   const isAdm = () => Net.isAdmin && Net.isAdmin();
   const SEATK = { n: 0, e: 1, s: 2, w: 3 };
   // the player signed in on this device (name and PIN), as the database rules know it
@@ -18194,17 +18252,13 @@ const SB = (() => {
   }
   const seen = g => !g.test;
   const tests = () => isAdm() ? (sb.list || []).filter(g => g.test).sort((a, b) => b.ts - a.ts) : [];
-  // the super admin's Test column: his test games and a new one (every kind: matches, round robin, Howell, single table)
-  const testHtml = () => !isAdm() ? '' : `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.')}</div>
-    ${tests().map(g => `<div class="sbtrow"><b>${esc(g.n)}</b><small>${fmtDate(g.ts)} · ${g.st === 'done' ? T('Finished') : T('Running')}</small><button class="btn new mini-btn" data-sbopen="${g.id}">${T('Open')}</button><button class="btn tdel mini-btn" data-sbdel="${g.id}">✕</button></div>`).join('')}
-    <div class="row2"><button class="btn gold" id="sbNewTest">🧪 ${T('New test game')}</button>${tests().length ? `<button class="btn tdel" id="sbDelTests">🗑 ${T('Delete all test games')}</button>` : ''}</div></div>`;
   const runningGames = () => (sb.list || []).filter(g => seen(g) && g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
   function entryHtml() {
     const R = runningGames();
-    return `<h2>🃏 ${T('Team match')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
+    return `<h2>🃏 ${T('Social Bridge')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
       ${g.fmt === 'rr' || g.type === 'howell' ? `<div class="row2"><button class="btn new" data-sbent="${g.id}:0">▶ ${T('Open')}</button></div>` : `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>${legend(g)}`}
       ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
-      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>` + testHtml();
+      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   // a team match: the tables of each match and who sits North-South there
   const legend = m => !isTeam(m) || isRR(m) ? '' : `<div class="tmleg">${[...Array(Math.floor(m.tb / 2)).keys()].map(i => { const a = teamName(2 * i + 1, m), b = teamName(2 * i + 2, m);
@@ -18267,10 +18321,9 @@ const SB = (() => {
       <td data-l="${T('Tables')}" class="n">${g.tb}${isTeam(g) ? `<small>${T('{0} teams', g.tb)}</small>` : ''}</td><td data-l="${T('Boards')}" class="n">${g.bd}</td>
       <td data-l="${T('Status')}">${g.st === 'done' ? `<span class="tst">${T('Finished')}</span>` : `<span class="tst run">${T('Running')}</span>`}</td>
       <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${canManage(g) ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
-    return `<h2>🃏 ${T('Team match')}</h2>
+    return `<h2>🃏 ${T('Social Bridge')}</h2>
       <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')} ${T('A round robin of teams or a Howell pairs game can be chosen too.')}</div>
       <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button></div>
-      ${testHtml()}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
@@ -18411,7 +18464,7 @@ const SB = (() => {
     const need = f.l ? f.l + 6 : 0;
     const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
     const okb = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null), ok = okb && (!isOne() || validH(f.h));
-    // the screen of a Bridgemate III: the contract and the N-S score on the display, then one row of large keys per step
+    // the screen of a BridgeScore: the contract and the N-S score on the display, then one row of large keys per step
     const ns = ok ? (f.l ? nsScore(b, f) : 0) : null;
     const contract = f.l === 0 ? T('Pass') : f.l ? `${f.l}${f.s != null ? sym(f.s) : ''}${f.x === 1 ? ' X' : f.x === 2 ? ' XX' : ''}${f.d != null ? ' ' + declTxt(f.d) : ''}` : '—';
     const vul = [E.vulOf(b, 0), E.vulOf(b, 1)], vc = vul[0] && vul[1] ? 'both' : vul[0] ? 'ns' : vul[1] ? 'ew' : 'none';
@@ -18431,7 +18484,7 @@ const SB = (() => {
       </div>
       <div class="bm3-step">${T('Contract')}</div>
       ${keys('l', 'k4', [...[1, 2, 3, 4, 5, 6, 7].map(n => [n, n]), [0, T('Pass'), 'pass']], f.l)}
-      ${f.l ? `${keys('s', 'k5', [0, 1, 2, 3, 4].map(i => [i, i === 4 ? 'NT' : SUITS[i], 'suit' + (i === 1 || i === 2 ? ' red' : '')]), f.s)}
+      ${f.l ? `${keys('s', 'k5', [0, 1, 2, 3, 4].map(i => [i, i === 4 ? 'NT' : sym(i), 'suit']), f.s)}
       ${keys('x', 'k3', [[0, '—'], [1, 'X', 'dbl'], [2, 'XX', 'dbl']], f.x)}
       <div class="bm3-step">${T('Declarer')}</div>
       ${isOne() ? keys('d', 'k2', [[0, SEAT_AB[0] + SEAT_AB[2]], [1, SEAT_AB[1] + SEAT_AB[3]]], f.d == null ? null : E.sideOf(f.d)) : keys('d', 'k4', [0, 1, 2, 3].map(s => [s, SEAT_AB[s]]), f.d)}` : ''}

@@ -589,6 +589,8 @@ window.performLogout=async function(){
   finishLogoutUI();
 };
 function finishLogoutUI(){
+  // inside Bridge Table: back to its Clubs window (the club is chosen there; no sign-in form is left behind)
+  try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ document.getElementById('app').style.display='none'; setTimeout(()=>{ Promise.resolve(endSession()).finally(()=>{ try{ P.setTimeout(()=>{ P.closeClubs(); if(typeof P.showClubs==='function') P.showClubs(); },0); }catch(e){} }); },800); return; } }catch(e){}
   setTimeout(endSession, 1500);   // this device may no longer change anything (after the last writes have gone out)
   document.getElementById('app').style.display='none';
   document.getElementById('loginScreen').style.display='flex';

@@ -723,7 +723,7 @@ window.adminExport=function(){
   const data={state:getState(),pairs:getPairs(),boards:getBoards(),movements:getMovements(),logs:getLogs()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);const a=document.createElement('a');
-  a.href=url;a.download='bridgemate_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);
+  a.href=url;a.download='bridgescore_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url);
   toast('✅ Exported');
 };
 window.adminImportOpen=function(){
@@ -789,7 +789,7 @@ const PlayerDB = {
     const data = { exported: new Date().toISOString(), players: this.getAll() };
     const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = 'bridgemate-players-'+new Date().toISOString().slice(0,10)+'.json';
+    a.download = 'bridgescore-players-'+new Date().toISOString().slice(0,10)+'.json';
     a.click();
   },
   import(json){

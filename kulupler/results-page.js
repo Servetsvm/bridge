@@ -282,11 +282,11 @@ window.ccMovementPage=async function(){
 //  0.6 points for each percent above or below 50. Each player's page: the tournaments, partners, results, rating
 // ══════════════════════════════════════════════════════
 const RT_CSS=`.ccr .rtabs{display:flex;gap:6px;margin:0 0 12px}.ccr .rtabs a{padding:8px 16px;border:1px solid #cfe0d4;border-radius:20px;color:#1d5534;cursor:pointer;text-decoration:none;font-weight:700}.ccr .rtabs a.on{background:#1d5534;color:#fff;border-color:#1d5534}
-.ccr .rt td.nm{text-align:left;cursor:pointer;color:#1d5534;font-weight:700}.ccr .rt td.nm:hover{text-decoration:underline}
+.ccr .rtg td.nm{text-align:left;cursor:pointer;color:#1d5534;font-weight:700}.ccr .rtg td.nm:hover{text-decoration:underline}
 .ccr .rkc{display:inline-block;min-width:34px;padding:2px 5px;margin-right:6px;border:1px solid #c9d1d8;border-radius:5px;background:#fff;font-weight:800;text-align:center;font-size:.9rem}
 .ccr .rkc.s0{color:#0f7a37}.ccr .rkc.s1{color:#e67e00}.ccr .rkc.s2{color:#d32f2f}.ccr .rkc.s3{color:#1b2a4a}
 .ccr.pp h1{display:flex;align-items:center;gap:8px}.ccr.pp .big{font-size:2.2rem;font-weight:800;color:#1d5534}.ccr.pp .sub{color:#555;margin:2px 0 14px}
-.ccr .up{color:#1f7a3d;font-weight:700}.ccr .dn{color:#c62828;font-weight:700}`;
+.ccr .rtg td.n b{color:#1d5534;font-size:1.05rem}.ccr.pp .big{color:#1d5534}.ccr .up{color:#1f7a3d;font-weight:700}.ccr .dn{color:#c62828;font-weight:700}`;
 const rtKey=n=>String(n||'').trim().toLocaleLowerCase('tr').replace(/\s+/g,' ');
 function clubRating(){
   const arc=(getArchives()||[]).map((a,i)=>({a,i,d:+new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d>0).sort((x,y)=>x.d-y.d);
@@ -316,7 +316,7 @@ function ratingHtml(){
   return `<div class="ccr"><div class="bar"><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>
     <div class="ihead"><span></span><h1>${L('Club rating')}</h1><span></span></div><div class="iclub">${esc(CLUB_NAME||'')}</div>
     <div class="rtabs"><a onclick="ccResultsIndex()">📄 ${L('Results')}</a><a class="on">🏅 ${L('Club rating')}</a></div>
-    ${R.length?`<table class="rank rt"><thead><tr><th>#</th><th>${L('Player')}</th><th>${L('Rating')}</th><th>${L('Tournaments')}</th></tr></thead><tbody>${R.map((e,k)=>`<tr><td>${k+1}</td><td class="nm" onclick="ccPlayerPage('${esc(rtKey(e.n)).replace(/'/g,"\\'")}')">${rtCard(e.n)}${esc(e.n)}</td><td class="n"><b>${Math.round(e.r)}</b></td><td class="n">${e.g}</td></tr>`).join('')}</tbody></table>`:`<div class="inone">${L('No results yet.')}</div>`}</div>`;
+    ${R.length?`<table class="rank rtg"><thead><tr><th>#</th><th>${L('Player')}</th><th>${L('Rating')}</th><th>${L('Tournaments')}</th></tr></thead><tbody>${R.map((e,k)=>`<tr><td>${k+1}</td><td class="nm" onclick="ccPlayerPage('${esc(rtKey(e.n)).replace(/'/g,"\\'")}')">${rtCard(e.n)}${esc(e.n)}</td><td class="n"><b>${Math.round(e.r)}</b></td><td class="n">${e.g}</td></tr>`).join('')}</tbody></table>`:`<div class="inone">${L('No results yet.')}</div>`}</div>`;
 }
 function playerHtml(key){
   const L=v=>window.i18nText?i18nText(v):v, e=clubRating()[key];

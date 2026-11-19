@@ -703,3 +703,14 @@ html.embed body.bg-device .login-logo{display:block!important}
 .bm3t .sbb{border-radius:12px;box-shadow:0 1px 0 #c5d8ca}
 .bm3t .sbb.me{cursor:pointer}
 .bm3-display{box-shadow:0 1px 0 #c5d8ca}
+/* our own look, not a hardware device: no black case, no label on top; the screen is a plain green card */
+.bm3{background:transparent!important;box-shadow:none!important;padding:0!important;border-radius:0!important}
+.bm3::before{display:none!important;content:none!important}
+.bm3-screen{border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.18)}
+#panelContent > .bm3{padding:0!important}
+@media (min-width:700px){
+  body.bg-device .bm-devbar{border:0!important;border-radius:14px 14px 0 0!important;padding-top:10px!important}
+  body.bg-device .bm-devbar::before{display:none!important;content:none!important}
+  body.bg-device #panelContent{border:0!important;border-radius:0 0 14px 14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+  body.bg-device .login-box{border:0!important;border-radius:14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
+}
