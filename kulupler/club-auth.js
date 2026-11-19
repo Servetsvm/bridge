@@ -118,7 +118,7 @@ async function initClubGate(){
   let id=params.get('club');
   const roleParam=params.get('role');
   // a table (or the entry screen of a running tournament) is shown as a BridgeScore from the first moment
-  if(params.get('admin')!=='1'&&(roleParam==='table'||!params.get('club'))) document.body.classList.add('bg-device');
+  if(roleParam!=='screen') document.body.classList.add('bg-device');   // every sign-in screen as a BridgeScore
   const fromLink=!!id;
   if(id&&(params.get('results')==='1'||params.get('movement')==='1')&&me()){
     await window.bridgeSession(); const info=await checkClubExists(id); if(info){ CLUB_INFO=info; setClub(id); CLUB_NAME=info.name||CLUB_NAME; window._ccResultsOnly=true; document.getElementById('loginScreen').style.display='none'; if(params.get('movement')==='1') await ccMovementPage(); else await ccResultsIndex(); return; }
@@ -150,7 +150,6 @@ async function initClubGate(){
     }
     if(info&&(info.active!==false||isSuper())&&(fromLink||ownClub)){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
-      if(roleParam!=='table') document.body.classList.remove('bg-device');   // the admin's sign-in keeps the usual look
       if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
       if(roleParam==='admin'){ const td=tdSaved(id), me0=me(); if(td&&td.pw&&td.k&&me0&&td.k===me0.key){ document.getElementById('pwInput').value=td.pw; window._tdAuto=true; setTimeout(()=>doLogin(),50); } else setTimeout(()=>document.getElementById('pwInput')?.focus(),100); }
       // a table's own link carries its code (&t=0003): it signs in at once
@@ -179,12 +178,12 @@ async function initClubGate(){
   renderClubGate();
 }
 // a club's admin: the club's ID, then its password
-const clubAdminBox=()=>`<div style="font-size:0.72rem;color:var(--text3);margin:14px 0 4px;">⚙️ Club admin</div><div class="pw-wrap"><input type="text" id="adminClubId" maxlength="40" placeholder="Club ID" autocomplete="off" onkeydown="if(event.key==='Enter')clubAdminGo()"></div><button class="btn-primary" onclick="clubAdminGo()">Continue</button>`;
+const clubAdminBox=()=>`<div style="font-size:0.72rem;color:var(--text3);margin:14px 0 4px;">🧑‍⚖️ TD</div><div class="pw-wrap"><input type="text" id="adminClubId" maxlength="40" placeholder="Club ID" autocomplete="off" onkeydown="if(event.key==='Enter')clubAdminGo()"></div><button class="btn-primary" onclick="clubAdminGo()">Continue</button>`;
 window.clubAdminGo=async function(){
   const id=(document.getElementById('adminClubId')?.value||'').trim().toLowerCase();
   const err=document.getElementById('clubErr'); if(err) err.textContent='';
   if(!id){ if(err) err.textContent='❌ Enter the club ID'; return; }
-  if(await openClub(id, err)){ document.body.classList.remove('bg-device'); selRole('admin'); setTimeout(()=>document.getElementById('pwInput')?.focus(),100); }
+  if(await openClub(id, err)){ selRole('admin'); setTimeout(()=>document.getElementById('pwInput')?.focus(),100); }
 };
 // the entry screen of the tournaments running now: each with its table number keys, and Admin for its club's admin
 async function renderEntry(live){
@@ -201,7 +200,7 @@ async function renderEntry(live){
     <div class="bm3-keys k4" style="padding:0;">${Array.from({length:t.tb||0},(_,i)=>i+1).filter(n=>!taken[k].has(n)).map(n=>`<button class="bm3-key" onclick="location.replace('${go(t,'&role=table&p='+t.p+'&tn='+n)}')">${n}</button>`).join('')}</div>
     ${own[k]?`<button class="btn-primary" style="margin-top:10px;" onclick="location.replace('${go(t,'&role=admin')}')">🧑‍⚖️ TD</button>`:''}</div></div>`).join('')
     +(isSuper()||Object.keys(await myClubs()).length?`<a href="${location.pathname}?admin=1" style="display:inline-block;margin-top:10px;font-size:0.75rem;color:var(--text3);">🏛 My clubs</a>`:'')
-    +`<div class="bg-newtour">${clubAdminBox()}<div style="font-size:0.72rem;color:var(--text3);margin-top:6px;">A club's admin signs in here to set up a new tournament.</div></div>`;
+    +`<div class="bg-newtour">${clubAdminBox()}<div style="font-size:0.72rem;color:var(--text3);margin-top:6px;">The TD signs in here to set up and run a tournament.</div></div>`;
   document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');
 }
 // the club tournaments running now (gate/live: name, club, tables, table code prefix)
@@ -211,7 +210,7 @@ async function liveTournaments(){
   }catch(e){ return []; }
 }
 async function renderClubGate(live){
-  if(!live) document.body.classList.remove('bg-device');
+  document.body.classList.add('bg-device');
   const g=document.getElementById('clubGate'); g.style.display='block';
   const u=me(), box=document.getElementById('myClubsBox');
   document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');

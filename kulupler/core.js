@@ -1,7 +1,8 @@
 // ══════════════════════════════════════════════════════
 //  THEME
 // ══════════════════════════════════════════════════════
-(function(){const t=localStorage.getItem('bmTheme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
+// the clubs program looks like the BridgeScore everywhere (its green on light); only the results screen on a TV keeps the dark theme
+(function(){const scr=new URLSearchParams(location.search).get('role')==='screen';const t=scr?(localStorage.getItem('bmTheme')||'dark'):'light';document.documentElement.setAttribute('data-theme',t);if(!scr)document.documentElement.setAttribute('data-bs','1');})();
 window.toggleTheme=function(){const h=document.documentElement;const n=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('bmTheme',n);};
 
 // ══════════════════════════════════════════════════════

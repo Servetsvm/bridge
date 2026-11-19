@@ -673,3 +673,22 @@ body.bg-device .bm-devbar:has(.bm3-tdbtns),.bm3-bar:has(.bm3-tdbtns){grid-templa
 .tdc-hist{display:flex;flex-direction:column;gap:6px;padding:10px 12px}
 .tdc-hrow{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:10px 12px;border:1px solid #c5d8ca;border-radius:10px;background:#fff;color:#1b1b1b;cursor:pointer;font-family:inherit}
 .tdc-hrow b{color:#1f5d36;font-size:1rem}.tdc-hrow span{font-size:.8rem;color:#55606b}
+
+/* ── the whole clubs program in the BridgeScore's colours: its green on light (the TV screen keeps the dark theme) ── */
+[data-bs]{--bg:#e3efe6;--surface:#fff;--surface2:#eef5f0;--surface3:#dcebe0;--border:#c5d8ca;--border2:#b4cbb9;--text:#1b1b1b;--text2:#3c4650;--text3:#6d7a72;
+  --gold:#1f5d36;--gold2:#2e7a4b;--golddim:#d4ead9;--green:#1f7a3d;--greendim:rgba(31,122,61,.12);--red:#c62828;--blue:#2a6fd6;--purple:#7a4fb5}
+[data-bs] body{background:#e3efe6}
+[data-bs] .topbar{background:#1f5d36;border-bottom:0;color:#fff}
+[data-bs] .topbar .tbtn,[data-bs] .topbar a.tbtn{background:#2e7a4b;color:#fff;border-color:#2e7a4b}
+[data-bs] .topbar #topbarRole,[data-bs] .topbar #topbarRound,[data-bs] .topbar #topbarClub{color:#fff}
+[data-bs] .theme-toggle-login,[data-bs] button[onclick="toggleTheme()"]{display:none}
+[data-bs] .card{background:#fff;border-color:#c5d8ca}
+[data-bs] .admin-tab{background:#fff;color:#1f5d36;border-color:#c5d8ca;font-weight:700}
+[data-bs] .admin-tab.active{background:#1f5d36;color:#fff;border-color:#1f5d36}
+[data-bs] .btn-primary{box-shadow:0 4px 0 #134029}
+[data-bs] input,[data-bs] select,[data-bs] textarea{color-scheme:light}
+body.bg-device .btn-primary,body.bg-device #panelContent .btn-gold{background:#1f5d36;border-color:#1f5d36}
+body.bg-device .login-logo{border-radius:0}
+html.embed body.bg-device .login-logo{display:block!important}
+[data-bs] .topbar .topbar-badge,[data-bs] .topbar .topbar-round,[data-bs] .topbar .topbar-club,[data-bs] .topbar #connBadge{background:#2e7a4b!important;color:#fff!important;border-color:#2e7a4b!important}
+[data-bs] .topbar .topbar-logo{color:#fff}

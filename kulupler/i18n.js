@@ -53,6 +53,7 @@
     "IMP - MP":"IMP - MP",
     "Swiss — after each round the pairs with similar scores meet":"Swiss — her turdan sonra puanı yakın çiftler karşılaşır",
     "Test tournament with robots":"Robotlarla test turnuvası",
+    "The TD signs in here to set up and run a tournament.":"TD turnuva kurmak ve yönetmek için buradan girer.",
     "Tap a table to correct its boards and names; the ranking is worked out again.":"Ellerini ve isimlerini düzeltmek için bir masaya dokun; sıralama yeniden hesaplanır.",
     "Rename":"Adını değiştir",
     "Log out":"Çıkış",
