@@ -187,10 +187,6 @@ window.ccTableSection=function(tableNo,doneBoards){
     if(!doneBoards.length){ el.innerHTML=''; return; }
     const dds=doneBoards.filter(b=>handOf(b));
     el.innerHTML=dds.length?`<div class="cc-tbl"><div class="cc-tbtns">${dds.map(b=>`<button class="btn btn-ghost btn-sm" onclick="ccShowDD('${esc(b)}')">🎯 DD · ${esc(b)}</button>`).join('')}</div></div>`:'';
-    // the board just finished: its double dummy once, by itself
-    window._ccSeen=window._ccSeen||new Set();
-    const lastB=doneBoards[doneBoards.length-1], k=tableNo+'_'+lastB;
-    if(handOf(lastB)&&ddOf(lastB)&&!window._ccSeen.has(k)&&!document.querySelector('#modalBg.open')&&document.getElementById('ccLayer')?.hidden!==false){ window._ccSeen.add(k); ccShowDD(lastB); }
   };
   draw();
   if(Date.now()-lastFetch>8000){ lastFetch=Date.now(); Promise.all([DB.get('hands'),DB.get('dd')]).then(draw).catch(()=>{}); }

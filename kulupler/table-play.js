@@ -51,7 +51,8 @@ function renderTablePanel(){
     return;
   }
   if(window.bmCodeTable){
-    const n=window.bmCodeTable;
+    let n=window.bmCodeTable;
+    { const sv=bmSeatOf(CLUB_ID); if(sv&&sv.c===window._bgCode&&sv.sid&&sv.sid===s._startedAt&&+sv.r===+s.currentRound&&+sv.t>0&&+sv.t<=s.tableCount) n=window.bmCodeTable=+sv.t; }
     if(n<1||n>s.tableCount){ c.innerHTML=`<div class="empty-state"><div class="empty-icon">❌</div><div style="font-weight:600;">Table ${n} is not in this tournament</div></div>`; return; }
     const seat=bmSeatOf(CLUB_ID);
     if(seat&&+seat.t===+n&&+seat.r===+s.currentRound&&seat.sid&&seat.sid===s._startedAt&&Date.now()-seat.at<12*3600e3){ lockTable(n); bmTableNo=n; renderTableDetail(n); return; }   // back at its table (the phone slept)
@@ -298,17 +299,14 @@ function renderTableDetail(tableNo){
     const score=done&&typeof bl.data.nsScore==='number'?(bl.data.nsScore>0?'+':'')+bl.data.nsScore+' NS':done?'✓':'';
     const cmp=cmpOf(bl);
     const busy=!done&&!pend&&busyAt(bl.boardNo);
-    return `<button class="sbb${done?' me':''}${isNext?' some':''}${pend?' pend':''}${busy?' busy':''}" ${!done&&!pend&&!approvalPending&&!busy?`onclick="bmEnterBoard(${bl.boardNo})"`:'disabled'}><b>${bl.boardNo}</b><small>${done?'✓ '+score:pend?'⏳':busy?'🔒 '+busy:isNext?'▶':'—'}</small>${cmp?`<i>${cmp}</i>`:''}</button>`;
+    return `<button class="sbb${done?' me':''}${isNext?' some':''}${pend?' pend':''}${busy?' busy':''}" ${done?`onclick="bmShowOthers(${bl.boardNo},1)"`:!pend&&!approvalPending&&!busy?`onclick="bmEnterBoard(${bl.boardNo})"`:'disabled'}><b>${bl.boardNo}</b><small>${done?'✓ '+score:pend?'⏳':busy?'🔒 '+busy:isNext?'▶':'—'}</small>${cmp?`<i>${cmp}</i>`:''}</button>`;
   }).join('');
   document.getElementById('panelContent').innerHTML=`
     <div class="bm3t">
-      <div class="sbchg"><span class="sbtno">Table ${tableNo}</span></div>
-      <div class="bm3t-info">Round ${s.currentRound} · NS ${nsNum} – EW ${ewNum} · Boards ${m.boardStart||'?'} – ${m.boardEnd||'?'}</div>
-      <div class="bm3t-names">${pN||pS?`<span><b>NS</b> ${[pN,pS].filter(Boolean).join(' – ')}</span>`:''}${pE||pW?`<span><b>EW</b> ${[pE,pW].filter(Boolean).join(' – ')}</span>`:''}</div>
+      <div class="bm3t-pairs"><div><i>NS ${nsNum}</i><b>${[pN,pS].filter(Boolean).map(cleanData).join(' – ')||'—'}</b></div><div><i>EW ${ewNum}</i><b>${[pE,pW].filter(Boolean).map(cleanData).join(' – ')||'—'}</b></div></div>
       ${isPhantom?`<div class="bm3t-note">👻 Phantom pair — sit out</div>`:''}
       ${allDone?`<div class="bm3-step">All Boards Complete ✓</div>`:''}
       <div class="sbgrid">${tiles}</div>
-      <div id="ccTable"></div>
       ${approvalPending?`<div class="bm3t-pendrow">${boardsHTML}</div>`:''}
       <div id="boardsSection">${actionHTML}</div>
     </div>`;
@@ -362,9 +360,8 @@ function renderTableDetail(tableNo){
     return '<div class="card" style="margin-top:10px;"><div class="card-title"><span>📊</span> Same board — other results</div>'+html+'</div>';
   }
 
-  document.getElementById('panelContent').querySelector('#boardsSection')?.insertAdjacentHTML('beforeend',buildDetailOtherHTML());
-  // the boards played: their double dummy, or a button to photograph their hands (cardcam.js)
-  if(typeof ccTableSection==='function') ccTableSection(tableNo,boardList.filter(bl=>bl.data&&bl.data.status==='done').map(bl=>String(bl.boardNo)));
+  // the other tables' results and the double dummy are on each finished board's own screen (tap its tile)
+  if(typeof DB!=='undefined'&&Date.now()-(window._bgHandsAt||0)>15000){ window._bgHandsAt=Date.now(); Promise.all([DB.get('hands'),DB.get('dd')]).catch(()=>{}); }
 
   // Auto-poll for approvals
   if(bmPollInterval)clearInterval(bmPollInterval);
@@ -811,8 +808,8 @@ function bm3Draw() {
     next = `<button class="bm3-ok" onclick="bmGo(1)"${f._tricksSet ? '' : ' disabled'}>${L('Next')} ›</button>`;
   } else {   // the result to confirm
     const rr = f.notPlayed ? L('Not played') : f.isPass ? L('Passed out') : f.result === 0 ? L('made exactly') : f.result > 0 ? '+' + f.result + ' ' + L('overtricks') : Math.abs(f.result) + ' ' + L('down');
-    body = `<div class="bm3-step">${L('Result')}</div>
-      <div class="bm3-sum">${f.isPass || f.notPlayed ? '' : `<div><span>${L('Declarer')}</span><b>${f.declarer}</b></div><div><span>${L('Opening lead')}</span><b>${lead}</b></div><div><span>${L('Tricks')}</span><b>${tr}</b></div>`}<div><span>${L('Result')}</span><b>${rr}</b></div>${f.notPlayed ? '' : `<div class="big"><span>NS</span><b>${sc > 0 ? '+' : ''}${sc}</b></div>`}</div>`;
+    body = `<div class="bm3-step">${L('Check and confirm')}</div>
+      <div class="bm3-final"><b>${rr}</b>${f.isPass || f.notPlayed ? '' : `<span>${tr} ${L('tricks')}</span>`}</div>`;
     back = `<button class="bm3-cancel" onclick="bmGo(-1)">‹ ${L('Back')}</button>`;
     next = `<button class="bm3-ok" onclick="saveBoardAndSendApproval(${boardNo})">✓ OK</button>`;
   }
@@ -857,7 +854,7 @@ window.bmSet = function (k, v) {
   bm3Draw();
 };
 // after the approval: the other tables' results on this board (and this table's), then the next board's number
-window.bmShowOthers = function (boardNo) {
+window.bmShowOthers = function (boardNo, back) {
   if (bmPollInterval) { clearInterval(bmPollInterval); bmPollInterval = null; }
   const L = v => window.i18nText ? i18nText(v) : v, s = getState(), mine = getBoards()[bmTableNo + '_' + s.currentRound + '_' + boardNo];
   const o = getOtherTablesSameBoard(boardNo, bmTableNo, s.currentRound).filter(x => !x.pending);
@@ -867,7 +864,8 @@ window.bmShowOthers = function (boardNo) {
       <div class="bm3-bar"><span class="td">${CLUB_NAME ? '🏛' : '♠'}</span><div class="ev"><b>${cleanData(s.name || 'Bridge Tournament')}</b>${L('Table')} ${bmTableNo} – ${L('Round')} ${s.currentRound}</div>${bmBarBtns()}</div>
       <div class="bm3-display"><div class="bm3-contract">${L('Board')} ${boardNo} ✓</div><div class="bm3-sub"><span>${L('Other tables on this board')}</span></div></div>
       <div class="bm3-body"><div class="bm3-others">${mine ? row(bmTableNo, mine.contract, mine.nsScore, true) : ''}${o.map(x => row(x.table, x.contract, x.nsScore)).join('') || `<div class="bm3-note">${L('No other table has finished this board yet.')}</div>`}</div></div>
-      <div class="bm3-actions"><span></span><button class="bm3-ok" onclick="bmAskNext()">${L('Continue')} ›</button></div>
+      ${typeof ccShowDD === 'function' && (_cache['hands'] || []).some(h => String(h.board) === String(boardNo)) ? `<div class="bm3-tdtools" style="grid-template-columns:1fr"><button class="btn" onclick="ccShowDD('${boardNo}')">🎯 ${L('Double dummy')}</button></div>` : ''}
+      <div class="bm3-actions">${back ? `<span></span><button class="bm3-ok" onclick="renderTableDetail(${bmTableNo})">‹ ${L('Table')}</button>` : `<span></span><button class="bm3-ok" onclick="bmAskNext()">${L('Continue')} ›</button>`}</div>
     </div></div>`;
 };
 // the next board: its number asked (the boards of this round not yet played here); none left: the table's screen
@@ -970,7 +968,7 @@ window.saveBoardAndSendApproval=function(boardNo){
     if(!boardForm.level||!boardForm.suit||!boardForm.declarer){toast('❌ Select level, suit and declarer');return;}
     if(!boardForm.leadSuit||!boardForm.leadRank){toast('❌ Choose the opening lead');return;}   // every result is entered with its opening lead
     const nsScore=calcScore(boardForm.level,boardForm.suit,boardForm.declarer,boardForm.result,boardForm.vuln,boardForm.doubled);
-    const contract=boardForm.level+boardForm.suit+(boardForm.doubled||'')+' '+boardForm.declarer+(boardForm.result>=0?' +'+(boardForm.result||'='):(boardForm.result));
+    const contract=boardForm.level+boardForm.suit+(boardForm.doubled||'')+' '+boardForm.declarer+(boardForm.result>0?' +'+boardForm.result:boardForm.result===0?' =':' '+boardForm.result);
     const lead=boardForm.leadSuit&&boardForm.leadRank?boardForm.leadSuit+boardForm.leadRank:'';
     boardData={contract,level:boardForm.level,suit:boardForm.suit,declarer:boardForm.declarer,result:boardForm.result,doubled:boardForm.doubled,lead,leadSuit:boardForm.leadSuit||'',leadRank:boardForm.leadRank||'',vuln:boardForm.vuln,nsScore,ewScore:-nsScore,adjusted:false};
   }
@@ -1027,25 +1025,14 @@ function renderApprovalWaiting(boardNo,boardData,key){
     return '';
   }
   const otherTablesHTML=buildOtherHTML();
+  const L=v=>window.i18nText?i18nText(v):v;
   document.getElementById('panelContent').innerHTML=`
-    <div class="bm-device" style="max-width:360px;">
-      <div class="bm-lcd">
-        <div class="bm-lcd-row inv">Board ${String(boardNo).padStart(2,' ')} — Awaiting Approval</div>
-        <div class="bm-lcd-row">Contract: ${(boardData.contract||'PASS')}</div>
-        <div class="bm-lcd-row">NS Score: ${String(scoreStr)}</div>
-        <div class="bm-lcd-row blink" style="color:var(--gold);">Waiting for opponent to confirm...</div>
-      </div>
-      <div class="approval-screen">
-        <div class="approval-title">⏳ Waiting for opponent to confirm</div>
-        <div class="approval-contract">${boardData.contract||'PASS'}</div>
-        <div class="approval-score" style="color:${scoreColor};">NS: ${scoreStr}</div>
-        <div class="approval-waiting">Waiting for opponent device to confirm...</div>
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <button class="btn btn-ghost btn-full" onclick="bmCancelApproval('${key}');renderTableDetail(${bmTableNo});">✕ Cancel</button>
-          <button class="btn btn-green btn-full" onclick="bmSelfApprove('${key}',${bmTableNo})">✅ OK</button>
-        </div>
-      </div>
-    </div>`;
+    <div class="bm3 bm3w"><div class="bm3-screen">
+      <div class="bm3-display"><div class="bm3-contract">${L('Board')} ${boardNo} · ${cleanData(boardData.contract||'PASS')}</div><div class="bm3-sub"><span>${L('Lead')}: ${cleanData(boardData.lead||'—')}</span></div><div class="bm3-score"><small>NS</small><b style="color:${scoreColor}">${scoreStr}</b></div></div>
+      <div class="bm3-step">⏳ ${L('Opponents: check and press OK')}</div>
+      <div class="bm3-body"></div>
+      <div class="bm3-actions"><button class="bm3-cancel" onclick="bmCancelApproval('${key}');renderTableDetail(${bmTableNo});">‹ ${L('Back')}</button><button class="bm3-ok" onclick="bmSelfApprove('${key}',${bmTableNo})">✓ OK</button></div>
+    </div></div>`;
 
   // Poll for approval + refresh other tables info
   if(bmPollInterval)clearInterval(bmPollInterval);
@@ -1110,7 +1097,7 @@ async function bmTdAuth(){
   // only the check: this table keeps writing with its own session (not the TD's)
   { try{ const token=await authToken(); const uid=window._authUid; if(token&&uid) await fetch(FB_BASE+'/csess/'+uid+'.json?auth='+token,{method:'DELETE'}); }catch(e){} }
   if(!ok){ toast('❌ '+BM_L('Wrong password')); return false; }
-  _tdOk=Date.now()+10*60e3; return true;
+  _tdOk=Infinity; return true;   // until the TD closes the menu
 }
 const bmTdText=d=>!d?'—':d.notPlayed?BM_L('Not played'):d.adjusted?'ADJ '+d.nsScore+' / '+d.ewScore:(d.contract||'')+(typeof d.nsScore==='number'?' · NS '+(d.nsScore>0?'+':'')+d.nsScore:'');
 // the TD's menu: this table's rounds (‹ ›), each board's result with delete, not played and adjusted score
@@ -1136,7 +1123,7 @@ window.bmTdMenu=async function(r){
       <div class="bm3-actions"><span></span><button class="bm3-ok" onclick="bmTdClose()">${BM_L('Close')}</button></div>
     </div></div>`;
 };
-window.bmTdClose=()=>{ _tdR=null; renderTableDetail(bmTableNo); };
+window.bmTdClose=()=>{ _tdR=null; _tdOk=0; renderTableDetail(bmTableNo); };
 const bmTdPut=(k,v)=>{ const B=getBoards(); if(v) B[k]=v; else delete B[k]; setBoards(B); const A=getApprovals(); if(A[k]){ delete A[k]; setApprovals(A); } };
 window.bmTdDel=async function(k,b){
   if(!await confirmDialog(BM_L('Delete this board result? It cannot be undone; the board is entered again.'),{title:BM_L('Board')+' '+b,confirmLabel:BM_L('Delete')})) return;
@@ -1163,7 +1150,7 @@ window.bmTdTable=function(){
 window.bmTdTableOk=function(k){
   closeModal(); if(k===bmTableNo){ bmTdMenu(_tdR); return; }
   try{ unlockTable(bmTableNo); }catch(e){}
-  bmTableNo=k; window.bmCodeTable=k; lockTable(k); addLog('warn','TD: table changed','→ '+k); _tdR=null; renderTableDetail(k);
+  bmTableNo=k; window.bmCodeTable=k; lockTable(k); addLog('warn','TD: table changed','→ '+k); _tdR=null; _tdOk=0; renderTableDetail(k);
 };
 // the players' names at this table: a member number (NBF / TBF) or a name
 window.bmTdPlayers=function(){ tdNames(bmTableNo,_tdR,'menu'); };

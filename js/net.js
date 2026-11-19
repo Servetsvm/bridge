@@ -1236,7 +1236,7 @@ const Net = (() => {
     st.priv = !!priv; st.invited = [];
     st.msg = 'Opening the table…'; panel();
     try {
-      await claimSlot();
+      for (let i = 0; i < 3 && !st.slot; i++) { await claimSlot(); if (!st.slot && i < 2) await new Promise(r => setTimeout(r, 1500)); }
       if (!st.slot) throw new Error('Could not reach the connection service. Try again in a moment.');
       becomeHost();
       // the table starts as an empty waiting room: no cards until everyone is seated and the host presses Start
@@ -1833,7 +1833,6 @@ const Net = (() => {
         <div class="muted">${T('Anyone who opens the app link while your table is open can ask to join; you accept or decline each request. Keep this app open while you play: your device runs the table. Robots play any seat that is empty or whose player leaves.')}</div>
         ${st.msg ? `<div class="err">${esc(T(st.msg))}</div>` : ''}
         ${scoreHtml()}
-        <div class="grp"><span>🏆 ${T('Online tournaments')}</span><div id="nTours">${typeof toursHtml === 'function' ? toursHtml() : ''}</div></div>
         <div class="row2"><button class="btn" id="nStop">${T('Close the table')}</button><button class="btn gold" id="oClose">${T('Done')}</button></div>`);
       return;
     }
@@ -1843,7 +1842,6 @@ const Net = (() => {
       <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" readonly value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Open tables')}</span>${tablesHtml()}</div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
-      <div class="grp"><span>🏆 ${T('Online tournaments')}</span><div id="nTours">${typeof toursHtml === 'function' ? toursHtml() : ''}</div></div>
       <div class="row2"><button class="btn new" id="nStart">${T('Open an online table')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
   }
   const panelRefresh = () => { if (ui.overlay === 'net') panel(); };
@@ -1881,7 +1879,7 @@ const Net = (() => {
       case 'nStart': {
         const n = document.getElementById('nName');
         setName((n && n.value.trim()) || myName() || 'Host');
-        showOpenChoice(); break;   // public or private first
+        closeOv(); if (typeof ui !== 'undefined') ui.saved = null; if (!st.on) host(false); else panel(); break;   // the table opens at once
       }
       case 'nFind': findTables(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;

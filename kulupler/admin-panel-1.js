@@ -104,7 +104,7 @@ function bgSimResult(b,t,round){
   let result=[0,0,0,1,1,-1,-1,2,-2][Math.floor(r()*9)]; result=Math.max(-(level+6),Math.min(7-level,result));
   const vuln=getVuln(b), nsScore=calcScore(level,suit,d,result,vuln,'');
   const ls=['♠','♥','♦','♣'][Math.floor(r()*4)], lr=['2','3','4','5','6','7','K','Q','J','10'][Math.floor(r()*10)];
-  return {contract:level+suit+' '+d+(result>=0?' +'+(result||'='):result),level,suit,declarer:d,result,doubled:'',lead:ls+lr,leadSuit:ls,leadRank:lr,vuln,nsScore,ewScore:-nsScore,adjusted:false,status:'done',time:new Date().toISOString(),sim:1};
+  return {contract:level+suit+' '+d+(result>0?' +'+result:result===0?' =':' '+result),level,suit,declarer:d,result,doubled:'',lead:ls+lr,leadSuit:ls,leadRank:lr,vuln,nsScore,ewScore:-nsScore,adjusted:false,status:'done',time:new Date().toISOString(),sim:1};
 }
 // every few seconds: each robot table plays its next board of the round; a round played everywhere (my table too)
 // starts the next one, the last one finishes the tournament

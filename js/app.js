@@ -2354,6 +2354,7 @@ function nextTourBoard() {
 // opening an online table always asks first: public (listed in the lobby) or private (only invited players)
 function showOpenChoice() {
   if (online()) { Net.panel(); return; }
+  closeOv(); ui.saved = null; Net.openTable(false); return;   // the table opens at once (no choice first)
   openOv('open', `<h2>🌐 ${T('Open an online table')}</h2>
     <button class="btn new choice" data-open="pub"><b>🌍 ${T('Open table')}</b></button>
     <button class="btn choice" data-open="priv"><b>🔒 ${T('Private table')}</b></button>
