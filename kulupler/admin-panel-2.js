@@ -612,22 +612,9 @@ window.adminEditTable=function(t){
       </div>
     </div>`;
   }
-  openModal(`Table ${t} — Round ${s.currentRound}`,rows,`<button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn btn-purple" onclick="closeModal();adminAdjScore(${t})">⚖️ ADJ</button>`);
+  openModal(`Table ${t} — Round ${s.currentRound}`,rows,`<button class="btn btn-ghost" onclick="closeModal()">Close</button><button class="btn" onclick="closeModal();tdNames(${t},null,'admin')">👥 ${i18nText('Players')}</button><button class="btn btn-purple" onclick="closeModal();adminAdjScore(${t})">⚖️ ADJ</button>`);
 };
 
-window.adminEditBoard=function(key,t){
-  const boards=getBoards();const d=boards[key]||{};
-  const[tbl,rnd,brd]=key.split('_');
-  openModal(`Edit Board ${brd} (Table ${tbl}, Round ${rnd})`,`
-    <div class="field"><label>Contract</label><input id="ebContract" value="${d.contract||''}"></div>
-    <div class="field-row">
-      <div class="field"><label>NS Score</label><input type="number" id="ebNS" value="${typeof d.nsScore==='number'?d.nsScore:0}"></div>
-      <div class="field"><label>EW Score</label><input type="number" id="ebEW" value="${typeof d.ewScore==='number'?d.ewScore:0}"></div>
-    </div>
-    <div class="field"><label>Note</label><input id="ebNote" value="${d.note||''}"></div>`,
-    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-     <button class="btn btn-gold" onclick="adminSaveBoard('${key}',${t})">Save</button>`);
-};
 window.adminSaveBoard=function(key,t){
   const boards=getBoards();const d=boards[key]||{};
   const contract=document.getElementById('ebContract').value.trim();

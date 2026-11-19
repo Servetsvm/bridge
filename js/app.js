@@ -4263,7 +4263,8 @@ async function clubTaken(club, test) {
   try {
     const [st, lk] = await Promise.all([Net.Cloud.get(base + '/state'), Net.Cloud.get(base + '/tableLocks')]);
     const r = st && st.currentRound, out = new Set();
-    for (const [k, v] of Object.entries(lk || {})) if (r && k.startsWith(r + '_')) out.add(+k.split('_')[1] || (v && +v.tableNo));
+    const t0 = Date.parse((st && st._startedAt) || 0) || 0;   // a lock left by the last tournament does not take a table
+    for (const [k, v] of Object.entries(lk || {})) if (r && k.startsWith(r + '_') && ((v && v.lockedAt) || 0) >= t0) out.add(+k.split('_')[1] || (v && +v.tableNo));
     return { st, taken: out };
   } catch (e) { return { st: null, taken: new Set() }; }
 }

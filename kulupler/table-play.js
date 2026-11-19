@@ -23,8 +23,8 @@ function unlockAllMyTables(){
   if(bmTableNo)unlockTable(bmTableNo);
 }
 function isTableLocked(tableNo){
-  const locks=getTableLocks();
-  return!!locks[tableLockKey(tableNo)];
+  const locks=getTableLocks(), l=locks[tableLockKey(tableNo)];
+  return !!l&&(l.lockedAt||0)>=(Date.parse(getState()._startedAt||0)||0);   // a lock from the last tournament does not count
 }
 let bmTableNo=null;
 let bmSide='ns'; // 'ns' or 'ew' — which side is this device
@@ -54,7 +54,7 @@ function renderTablePanel(){
     const n=window.bmCodeTable;
     if(n<1||n>s.tableCount){ c.innerHTML=`<div class="empty-state"><div class="empty-icon">❌</div><div style="font-weight:600;">Table ${n} is not in this tournament</div></div>`; return; }
     const seat=bmSeatOf(CLUB_ID);
-    if(seat&&+seat.t===+n&&+seat.r===+s.currentRound&&Date.now()-seat.at<12*3600e3){ lockTable(n); bmTableNo=n; renderTableDetail(n); return; }   // back at its table (the phone slept)
+    if(seat&&+seat.t===+n&&+seat.r===+s.currentRound&&seat.sid&&seat.sid===s._startedAt&&Date.now()-seat.at<12*3600e3){ lockTable(n); bmTableNo=n; renderTableDetail(n); return; }   // back at its table (the phone slept)
     lockTable(n); bmTableNo=n; bmShowNewPlayers(n, s.currentRound);
     return;
   }
@@ -90,7 +90,7 @@ window.bgPlayerEntry=async function(prefix){
   if(!pe){ pe=document.createElement('div'); pe.id='playerEntry'; box.appendChild(pe); }
   const s=await DB.get('state')||{};
   // the tables taken this round are not offered
-  const lk=await DB.get('tableLocks')||{}, taken=new Set(Object.keys(lk).filter(k=>k.startsWith(s.currentRound+'_')).map(k=>+k.split('_')[1]));
+  const lk=await DB.get('tableLocks')||{}, t0=Date.parse(s._startedAt||0)||0, taken=new Set(Object.keys(lk).filter(k=>k.startsWith(s.currentRound+'_')&&((lk[k]&&lk[k].lockedAt)||0)>=t0).map(k=>+k.split('_')[1]));
   if(s.status!=='running'){ pe.innerHTML=`<div class="empty-state"><div class="empty-icon">⏳</div><div style="font-weight:600;margin-bottom:4px;">Tournament not started</div><div style="font-size:0.82rem;">Ask the director to start the tournament</div></div><button class="btn-primary" onclick="bgPlayerEntry('${prefix}')">↻</button>`; return; }
   pe.innerHTML=`<div class="bm-lcd" style="text-align:center;margin-bottom:10px;"><div class="bm-lcd-row inv" style="display:inline-block;">${s.name||'BridgeGate'}</div><div class="bm-lcd-row" style="text-align:center;color:var(--text);">Select your table number</div></div>
     <div class="bm3-keys k4" style="padding:0;">${Array.from({length:s.tableCount||0},(_,i)=>i+1).filter(n=>!taken.has(n)).map(n=>`<button class="bm3-key" onclick="bgPlayerNames('${prefix}',${n})">${n}</button>`).join('')}</div>`;
@@ -741,12 +741,12 @@ window.savePairNames=function(nsId,ewId,tableNo){
 
 // ── Board Entry Form ──
 window.bmEnterBoard=function(boardNo){
-  const m0=getMovements()[getState().currentRound+'_'+bmTableNo]||{};
-  if(m0.social&&bmTableNo){ (async()=>{ try{ const L=(await DB.get('boardLocks'))||{}, put=async(b,v)=>fetch(await fbUrl('/boardLocks/'+b+'.json'),{method:'PUT',body:JSON.stringify(v)});
+  const m0=getMovements()[bmRound()+'_'+bmTableNo]||{};
+  if(m0.social&&bmTableNo&&!window._tdEdit){ (async()=>{ try{ const L=(await DB.get('boardLocks'))||{}, put=async(b,v)=>fetch(await fbUrl('/boardLocks/'+b+'.json'),{method:'PUT',body:JSON.stringify(v)});
     for(const [b,l] of Object.entries(L)) if(l&&+l.t===+bmTableNo&&+b!==+boardNo) await put(b,null);
     await put(boardNo,{t:bmTableNo,at:Date.now()}); const N={}; for(const [b,l] of Object.entries(L)) if(!(l&&+l.t===+bmTableNo)) N[b]=l; N[boardNo]={t:bmTableNo,at:Date.now()}; _cache['boardLocks']=N; }catch(e){} })(); }
   const vuln=getVuln(boardNo);
-  const key=bmTableNo+'_'+getState().currentRound+'_'+boardNo;
+  const key=bmTableNo+'_'+bmRound()+'_'+boardNo;
   const existing=getBoards()[key];
   boardForm={level:null,suit:null,declarer:null,result:0,doubled:'',leadSuit:'',leadRank:'',isPass:false,vuln,boardNo};
   if(!existing)boardForm._startTime=Date.now();
@@ -774,7 +774,7 @@ function bm3Score() { const f = boardForm; return f.notPlayed ? null : f.isPass 
 const bmSuitCls = x => ({ '♠': 'sS', '♥': 'sH', '♦': 'sD', '♣': 'sC' })[x] || '';
 function bm3Draw() {
   const L = v => window.i18nText ? i18nText(v) : v, f = boardForm, s = getState(), boardNo = f.boardNo;
-  const m = getMovements()[s.currentRound + '_' + bmTableNo] || {}, P = getPairs(), num = x => (x || '').replace(/[^0-9]/g, '') || '?';
+  const m = getMovements()[bmRound() + '_' + bmTableNo] || {}, P = getPairs(), num = x => (x || '').replace(/[^0-9]/g, '') || '?';
   const vuln = f.vuln, vulCls = vuln === 'Both' ? 'both' : vuln === 'NS' ? 'ns' : vuln === 'EW' ? 'ew' : 'none', vulTxt = vuln === 'Both' ? 'BOTH VUL' : vuln === 'None' ? 'NO VUL' : vuln + ' VUL';
   const red = x => x === '♦' || x === '♥';
   const su = x => x ? `<span class="${bmSuitCls(x)}">${x}</span>` : '';
@@ -789,7 +789,7 @@ function bm3Draw() {
       <div class="bm3-keys k1">${key(f.notPlayed, L('Not played'), "bmSet('np')", 'np')}</div>
       <div class="bm3-keys k5">${['♣', '♦', '♥', '♠', 'NT'].map(x => key(f.suit === x && !f.isPass, x, `bmSet('suit','${x}')`, 'suit ' + bmSuitCls(x))).join('')}</div>
       <div class="bm3-keys k3">${key(!f.doubled, '—', "bmSet('dbl','')")}${key(f.doubled === 'X', 'X', "bmSet('dbl','X')", 'dbl')}${key(f.doubled === 'XX', 'XX', "bmSet('dbl','XX')", 'dbl')}</div>`;
-    back = `<button class="bm3-cancel" onclick="renderTableDetail(${bmTableNo})">✕ ${L('Cancel')}</button>`;
+    back = `<button class="bm3-cancel" onclick="bmEntryCancel()">✕ ${L('Cancel')}</button>`;
     next = `<button class="bm3-ok" onclick="bmGo(1)"${f.isPass || f.notPlayed || (f.level && f.suit) ? '' : ' disabled'}>${L('Next')} ›</button>`;
   } else if (bmStepNo === 'decl') {
     const [n1, s1] = bmNames(P[m.ns]), [e1, w1] = bmNames(P[m.ew]), nm = { N: n1, S: s1, E: e1, W: w1 };
@@ -819,7 +819,7 @@ function bm3Draw() {
   document.getElementById('panelContent').innerHTML = `
     <div class="bm3 bm3w">
       <div class="bm3-screen">
-        <div class="bm3-bar"><span class="td">${CLUB_NAME ? '🏛' : '♠'}</span><div class="ev"><b>${cleanData(s.name || 'Bridge Tournament')}</b>${L('Table')} ${bmTableNo} – ${L('Round')} ${s.currentRound}</div>${bmBarBtns()}</div>
+        <div class="bm3-bar"><span class="td">${CLUB_NAME ? '🏛' : '♠'}</span><div class="ev"><b>${cleanData(s.name || 'Bridge Tournament')}</b>${L('Table')} ${bmTableNo} – ${L('Round')} ${bmRound()}</div>${bmBarBtns()}</div>
         <div class="bm3-head">
           <div class="bm3-board"><small>${L('Board')}</small><b>${boardNo}</b><span class="bm3-vul ${vulCls}">${vulTxt}</span></div>
           ${f._editing ? `<div class="bm3-edit">${L('editing')}</div>` : ''}
@@ -978,6 +978,8 @@ window.saveBoardAndSendApproval=function(boardNo){
     boardData.durationSec = Math.round((Date.now()-boardForm._startTime)/1000);
   }
 
+  // the TD's correction: saved at once, back to where the TD came from
+  if(window._tdEdit){ const k2=bmTableNo+'_'+bmRound()+'_'+boardNo, bs=getBoards(); bs[k2]={...boardData,status:'done',td:true,manualEdit:true,time:new Date().toISOString()}; setBoards(bs); const A=getApprovals(); if(A[k2]){ delete A[k2]; setApprovals(A); } addLog('warn','TD: board corrected',k2+' '+(boardData.contract||'')); toast('✅ '+BM_L('Saved')); bmEntryCancel(); return; }
   // Store pending approval
   const aps=getApprovals();
   aps[key]={...boardData,status:'pending',side:bmSide,sentTime:new Date().toISOString()};
@@ -1121,7 +1123,7 @@ window.bmTdMenu=async function(r){
   for(let b=m.boardStart||1;b<=(m.boardEnd||0);b++){
     const k=t+'_'+_tdR+'_'+b, d=B[k];
     rows+=`<div class="bm3-tdrow"><b>${b}</b><span>${cleanData(bmTdText(d))}</span><div>
-      ${_tdR===s.currentRound?`<button onclick="bmTdEdit(${b})" title="${BM_L('Enter again')}">✏️</button>`:''}
+      <button onclick="bmTdEdit(${b})" title="${BM_L('Enter again')}">✏️</button>
       <button onclick="bmTdNP('${k}')">${BM_L('Not played')}</button><button onclick="bmTdAdj('${k}',${b})">ADJ</button>
       ${d?`<button class="del" onclick="bmTdDel('${k}',${b})">🗑</button>`:''}</div></div>`;
   }
@@ -1141,7 +1143,7 @@ window.bmTdDel=async function(k,b){
   bmTdPut(k,null); addLog('warn','TD: result deleted',k); bmTdMenu(_tdR);
 };
 window.bmTdNP=function(k){ bmTdPut(k,{contract:'Not played',notPlayed:true,status:'done',td:true,time:new Date().toISOString()}); addLog('warn','TD: not played',k); bmTdMenu(_tdR); };
-window.bmTdEdit=function(b){ _tdR=null; bmEnterBoard(b); };
+window.bmTdEdit=function(b){ window._tdEdit={back:'menu',r:_tdR}; bmEnterBoard(b); };
 // an adjusted score: average minus, average or average plus for each side
 window.bmTdAdj=function(k,b){
   const o=v=>['A+','A','A-'].map(x=>`<option value="${x}"${x===v?' selected':''}>${x==='A+'?BM_L('Average plus')+' (60%)':x==='A'?BM_L('Average')+' (50%)':BM_L('Average minus')+' (40%)'}</option>`).join('');
@@ -1164,7 +1166,8 @@ window.bmTdTableOk=function(k){
   bmTableNo=k; window.bmCodeTable=k; lockTable(k); addLog('warn','TD: table changed','→ '+k); _tdR=null; renderTableDetail(k);
 };
 // the players' names at this table: a member number (NBF / TBF) or a name
-window.bmTdPlayers=function(){
+window.bmTdPlayers=function(){ tdNames(bmTableNo,_tdR,'menu'); };
+window.bmTdPlayersOld=function(){
   const s=getState(), m=getMovements()[(_tdR||s.currentRound)+'_'+bmTableNo]||{}, P=getPairs();
   const [n,so]=splitPairName((P[m.ns]||{}).name||''), [e,w]=splitPairName((P[m.ew]||{}).name||'');
   const f=(id,lab,v)=>`<div class="field"><label>${lab}</label><input id="${id}" value="${cleanData(v||'')}" data-member placeholder="${BM_L('Member number or name')}"></div>`;
@@ -1189,3 +1192,56 @@ window.tdCallsShow=function(v){
   if(last>_tdCallsSeen){ _tdCallsSeen=last; try{ const a=new (window.AudioContext||window.webkitAudioContext)(), o=a.createOscillator(), g=a.createGain(); o.frequency.value=880; g.gain.value=0.15; o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime+0.35); }catch(e){} if(navigator.vibrate) navigator.vibrate(300); }
 };
 window.tdCallDone=t=>{ DB.del('tdcalls/'+t); const v={..._cache['tdcalls']||{}}; delete v[t]; _cache['tdcalls']=v; tdCallsShow(v); };
+
+// the round a board is entered for: the TD may correct an earlier one
+const bmRound=()=>(window._tdEdit&&window._tdEdit.r)||getState().currentRound;
+// leaving a board's entry: the table, the TD's menu or the TD's screen
+window.bmEntryCancel=function(){
+  const e=window._tdEdit; window._tdEdit=null;
+  if(!e){ renderTableDetail(bmTableNo); return; }
+  if(e.back==='admin'){ bmTableNo=null; adminTab='tables'; renderAdminPanel(); return; }
+  bmTdMenu(e.r);
+};
+// the TD's screen: ✏️ on a board opens the BridgeScore at that table and round
+window.adminEditBoard=function(key){ const [t,r,b]=String(key).split('_').map(Number); if(!t||!r||!b) return; window._tdEdit={back:'admin',r}; bmTableNo=t; bmEnterBoard(b); };
+// the names at a table as on the BridgeScore: the four seats round the table; a seat: a member number (NBF / TBF) or a name
+let _tdN=null;
+window.tdNames=function(t,r,back){
+  const s=getState(); r=r||s.currentRound; const m=getMovements()[r+'_'+t]||{}, P=getPairs();
+  const [N,S]=splitPairName((P[m.ns]||{}).name||''), [E,W]=splitPairName((P[m.ew]||{}).name||'');
+  _tdN={t,r,ns:m.ns,ew:m.ew,back,seats:{N,S,E,W}}; tdNamesDraw();
+};
+function tdNamesDraw(){
+  const e=_tdN, st=e.seats, seat=k=>`<button class="pe-pos pe-${k}" onclick="tdSeatEdit('${k}')"><small>${BM_L(BG_SEATS[k])}</small><b>${st[k]?cleanData(st[k]):'＋'}</b></button>`;
+  document.getElementById('panelContent').innerHTML=`<div class="bm3t tdnames"><div class="sbchg"><span class="sbtno">👥 ${BM_L('Table')} ${e.t}</span></div><div class="bm3t-info">${BM_L('Round')} ${e.r}</div>
+    <div class="pe-table">${seat('N')}${seat('W')}<div class="pe-mid">${BM_L('Table')} ${e.t}</div>${seat('E')}${seat('S')}</div>
+    <div class="bm3-actions"><button class="bm3-cancel" onclick="tdNamesBack()">✕ ${BM_L('Cancel')}</button><button class="bm3-ok" onclick="tdNamesSave()">✓ OK</button></div></div>`;
+}
+window.tdSeatEdit=function(k){
+  _tdN.k=k;
+  document.getElementById('panelContent').innerHTML=`<div class="bm3t tdnames"><div class="sbchg"><span class="sbtno">${BM_L('Table')} ${_tdN.t} · ${BM_L(BG_SEATS[k])}</span></div>
+    <input id="tdpeInput" class="pe-input" maxlength="40" autocomplete="off" placeholder="${BM_L('Member number or name')}" value="${cleanData(_tdN.seats[k]||'')}" oninput="tdSeatLook()" onkeydown="if(event.key==='Enter')tdSeatOk()">
+    <div id="tdpeFound" class="pe-found"></div>
+    <div class="bm3-actions"><button class="bm3-cancel" onclick="tdNamesDraw()">✕ ${BM_L('Cancel')}</button><button class="bm3-ok" onclick="tdSeatOk()">✓ OK</button></div></div>`;
+  setTimeout(()=>{ const i=document.getElementById('tdpeInput'); if(i){ i.focus(); i.select(); } },60);
+};
+window.tdNamesDraw=tdNamesDraw;
+let _tdLookT=0;
+window.tdSeatLook=function(){
+  clearTimeout(_tdLookT);
+  _tdLookT=setTimeout(async()=>{
+    const v=(document.getElementById('tdpeInput')?.value||'').trim(), out=document.getElementById('tdpeFound'); if(!out) return;
+    if(/^\d{1,8}$/.test(v)){ const n=await memberName(v); out.className='pe-found'+(n?' ok':' no'); out.textContent=n?'👤 '+n:'❓ '+v; return; }
+    if(v.length<2){ out.textContent=''; return; }
+    const L=await memberSearch(v); if((document.getElementById('tdpeInput')?.value||'').trim()!==v) return;
+    out.className='pe-found pe-list'; out.innerHTML=L.map(m=>`<button type="button" class="pe-pick" onclick="tdSeatPick('${m.num}')">👤 ${m.name} <small>${m.num}</small></button>`).join('');
+  },250);
+};
+window.tdSeatPick=async function(num){ const n=await memberName(num); if(n){ _tdN.seats[_tdN.k]=n.slice(0,40); tdNamesDraw(); } };
+window.tdSeatOk=async function(){ let v=(document.getElementById('tdpeInput')?.value||'').trim(); if(/^\d{1,8}$/.test(v)) v=(await memberName(v))||v; _tdN.seats[_tdN.k]=v.slice(0,40); tdNamesDraw(); };
+window.tdNamesSave=function(){
+  const e=_tdN, st=e.seats, P=getPairs();
+  if(e.ns&&P[e.ns]) P[e.ns].name=joinPairName(st.N,st.S); if(e.ew&&P[e.ew]) P[e.ew].name=joinPairName(st.E,st.W);
+  setPairs(P); PlayerDB.save([st.N,st.S,st.E,st.W].filter(Boolean)); addLog('ok','TD: names',joinPairName(st.N,st.S)+' vs '+joinPairName(st.E,st.W)); toast('✅ '+BM_L('Saved')); tdNamesBack();
+};
+window.tdNamesBack=function(){ const b=_tdN&&_tdN.back; _tdN=null; if(b==='admin'){ adminTab='tables'; renderAdminPanel(); } else bmTdMenu(_tdR); };

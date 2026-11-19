@@ -51,7 +51,7 @@ const tdSave=(club,pw)=>{ try{ const u=me(); localStorage.setItem('bg_td:'+club,
 const tdForget=club=>{ try{ localStorage.removeItem('bg_td:'+club); }catch(e){} };
 // the table this phone sits at (its code, number, round): opened again it comes back there
 const bmSeatOf=club=>{ try{ return JSON.parse(localStorage.getItem('bg_seat:'+club)||'null'); }catch(e){ return null; } };
-window.bmSeatSave=t=>{ try{ if(role!=='table'||!CLUB_ID||!window._bgCode) return; localStorage.setItem('bg_seat:'+CLUB_ID,JSON.stringify({c:window._bgCode,p:window.bmCodePrefix||'',t,r:getState().currentRound,at:Date.now()})); }catch(e){} };
+window.bmSeatSave=t=>{ try{ if(role!=='table'||!CLUB_ID||!window._bgCode) return; localStorage.setItem('bg_seat:'+CLUB_ID,JSON.stringify({c:window._bgCode,p:window.bmCodePrefix||'',t,r:getState().currentRound,sid:getState()._startedAt||'',at:Date.now()})); }catch(e){} };
 window.bmSeatForget=()=>{ try{ localStorage.removeItem('bg_seat:'+CLUB_ID); }catch(e){} };
 // the TD's screen hears the tables' calls (once)
 window.tdCallsWatch=()=>{ if(window._tdWatch) return; window._tdWatch=true; DB.subscribe('tdcalls',v=>{ if(typeof tdCallsShow==='function') tdCallsShow(v); }); };
@@ -131,8 +131,8 @@ async function initClubGate(){
     // this phone's table in a tournament still running (it slept or was closed): straight back to it
     const sid=id||(()=>{ try{ return localStorage.getItem('bg_clubId'); }catch(e){ return null; } })(), seat=sid&&bmSeatOf(sid);
     if(seat&&/^\d{4}$/.test(seat.c||'')&&Date.now()-seat.at<12*3600e3){
-      let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+sid+'/bm/state/status.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
-      if(st==='running'){ location.replace(location.pathname+'?club='+encodeURIComponent(sid)+'&role=table&t='+seat.c); return; }
+      let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+sid+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
+      if(st&&st.status==='running'&&seat.sid&&st._startedAt===seat.sid){ location.replace(location.pathname+'?club='+encodeURIComponent(sid)+'&role=table&t='+seat.c+'&resume=1'); return; }
     }
     let live=await liveTournaments();
     if(id&&fromLink) live=live.filter(t=>t.club===id);   // Players from a club's card: that club's tables only
@@ -154,7 +154,9 @@ async function initClubGate(){
       if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
       if(roleParam==='admin'){ const td=tdSaved(id); if(td&&td.pw){ document.getElementById('pwInput').value=td.pw; window._tdAuto=true; setTimeout(()=>doLogin(),50); } else setTimeout(()=>document.getElementById('pwInput')?.focus(),100); }
       // a table's own link carries its code (&t=0003): it signs in at once
-      const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(()=>doLogin(),50); }
+      const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(async()=>{ await doLogin();
+        // back at a table that is no longer this phone's (a new tournament, new codes): the table is chosen again, no code asked
+        if(params.get('resume')&&document.getElementById('app').style.display!=='flex'){ bmSeatForget(); location.replace(location.pathname+'?club='+encodeURIComponent(id)); } },50); }
       // a screen's link (from the admin panel) opens the results screen at once
       if(roleParam==='screen') setTimeout(()=>doLogin(),50);
       // a player from Bridge Table's "Table No" (the club's table code prefix in the link): the players' names, then the table
@@ -192,7 +194,7 @@ async function renderEntry(live){
   const u=me(), go=(t,q)=>location.pathname+'?club='+encodeURIComponent(t.club)+q;
   const own=await Promise.all(live.map(async t=>{ if(isSuper()) return true; const i=await checkClubExists(t.club); return !!(i&&u&&i.owner===u.key); }));
   // the tables someone took this round are not offered
-  const taken=await Promise.all(live.map(async t=>{ try{ const [st,lk]=await Promise.all(['state','tableLocks'].map(async k=>{ const r=await fetch(await fbRootUrl('/clubs/'+t.club+'/bm/'+k+'.json'),{cache:'no-store'}); return r.ok?await r.json():null; })); const r=st&&st.currentRound; return new Set(Object.keys(lk||{}).filter(k=>r&&k.startsWith(r+'_')).map(k=>+k.split('_')[1])); }catch(e){ return new Set(); } }));
+  const taken=await Promise.all(live.map(async t=>{ try{ const [st,lk]=await Promise.all(['state','tableLocks'].map(async k=>{ const r=await fetch(await fbRootUrl('/clubs/'+t.club+'/bm/'+k+'.json'),{cache:'no-store'}); return r.ok?await r.json():null; })); const r=st&&st.currentRound; const t0=Date.parse((st&&st._startedAt)||0)||0; return new Set(Object.keys(lk||{}).filter(k=>r&&k.startsWith(r+'_')&&((lk[k]&&lk[k].lockedAt)||0)>=t0).map(k=>+k.split('_')[1])); }catch(e){ return new Set(); } }));
   // each club by its name; its table numbers (and Admin) open when it is tapped
   box.innerHTML=live.map((t,k)=>`<div class="bg-entry${live.length===1?' open':''}"><button type="button" class="bg-entry-name" onclick="this.parentNode.classList.toggle('open')">🏛 ${cleanData(t.c||'')}${t.n?' <small>'+cleanData(t.n)+'</small>':''}</button>
     <div class="bg-entry-body"><div class="bg-entry-lbl">Table No</div>
@@ -495,7 +497,7 @@ window.doLogin=async function(){
     else if(role==='table' && bmTableNo){ if(!(window._bgEndOf&&val&&val.currentRound>window._bgEndOf)) renderTableDetail(bmTableNo); }
     else if(role==='table') renderTablePanel();   // the tournament has started: this table opens
     else if(role==='admin') {
-      if(adminTab==='setup') { const c=document.getElementById('adminContent'); if(c)c.innerHTML=renderSetup(); }
+      if(adminTab==='setup'&&!setupBusy()) { const c=document.getElementById('adminContent'); if(c)c.innerHTML=renderSetup(); }
       checkRoundComplete();
     }
   });
@@ -518,7 +520,7 @@ window.doLogin=async function(){
 window.sessionContinue=function(){renderAdminPanel();};
 window.sessionNew=async function(){
   if(!await confirmDialog('This will delete the current tournament. Are you sure?',{title:'New Tournament'}))return;
-  Promise.all(['state','pairs','boards','movements','logs','approvals','hands','dd'].map(k=>DB.del(k))).then(()=>renderAdminPanel());
+  Promise.all(['state','pairs','boards','movements','logs','approvals','hands','dd','tableLocks','kicks','tdcalls'].map(k=>DB.del(k))).then(()=>renderAdminPanel());
 };
 window.doLogout=function(){
   if(role==='table'&&bmTableNo){

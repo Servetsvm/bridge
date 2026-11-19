@@ -417,6 +417,7 @@ window.adminStart=async function(){
   s._startedAt=new Date().toISOString();
   // the names come from the tables (each table enters its players), so the tournament starts without them
   s.currentRound=1;s.status='running';s._roundStartedAt=new Date().toISOString();setState(s);
+  await Promise.all([DB.set('tableLocks',{}),DB.set('approvals',{}),DB.del('kicks'),DB.del('tdcalls')]);
   setLive(true);
   addLog('ok','Round 1 started','Tournament begins');
   toast('▶ Round 1 started!');refreshTopbar();renderAdminTab();
@@ -584,11 +585,13 @@ function updateStalledBanner(stalled){
 }
 
 
+// the TD is typing in the setup form (a box or a list has the focus): it is not drawn again now
+function setupBusy(){ const a=document.activeElement, c=document.getElementById('adminContent'); return !!(a&&c&&c.contains(a)&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)); }
 function adminSetupAutoRefresh(){
   if(adminRefreshTimer)clearInterval(adminRefreshTimer);
   adminRefreshTimer=setInterval(()=>{
     if(role==='admin'){
-      if(adminTab==='setup'){ const c=document.getElementById('adminContent'); if(c)c.innerHTML=renderSetup(); }
+      if(adminTab==='setup'&&getState().status==='running'&&!setupBusy()){ const c=document.getElementById('adminContent'); if(c)c.innerHTML=renderSetup(); }
       checkRoundComplete();
     }
   },4000);
