@@ -312,7 +312,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* ── BridgeScore style score entry (as on the photos): black case, dark green header, white screen, blue keys ── */
 .bm3{max-width:440px;margin:0 auto;padding:30px 10px 14px;background:#111;border-radius:30px;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 2px #2a2a2a;position:relative;}
-.bm3::before{content:'BridgeGate';position:absolute;top:7px;left:50%;transform:translateX(-50%);color:#fff;font:800 .82rem/1 'DM Sans',sans-serif;letter-spacing:.3px;background:#111;padding:2px 10px;border-radius:5px;box-shadow:inset 0 0 0 1px #3a3a3a;}
+.bm3::before{content:'BridgeScore';position:absolute;top:7px;left:50%;transform:translateX(-50%);color:#fff;font:800 .82rem/1 'DM Sans',sans-serif;letter-spacing:.3px;background:#111;padding:2px 10px;border-radius:5px;box-shadow:inset 0 0 0 1px #3a3a3a;}
 .bm3-screen{background:#fff;border-radius:12px;overflow:hidden;color:#1b1b1b;font-family:'DM Sans',system-ui,sans-serif;}
 .bm3-bar{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;background:#1f5d36;color:#fff;padding:8px 10px;font-size:.78rem;}
 .bm3-bar .td{background:#2e7a4b;border-radius:6px;padding:4px 8px;font-weight:700;font-size:.72rem;white-space:nowrap}
@@ -419,7 +419,7 @@ body.bg-device #panelContent > .bm3 .bm3-bar{display:none}
   body.bg-device #app{background:none;align-items:center;justify-content:center;padding:20px 0}
   body.bg-device .bm-devbar,body.bg-device #panelContent{width:440px;box-sizing:border-box}
   body.bg-device .bm-devbar{border:12px solid #111;border-bottom:0;border-radius:30px 30px 0 0;padding-top:34px;position:relative}
-  body.bg-device .bm-devbar::before{content:'BridgeGate';position:absolute;top:8px;left:50%;transform:translateX(-50%);color:#fff;font:800 .8rem/1 'DM Sans',sans-serif;background:#111;padding:2px 10px;border-radius:5px;box-shadow:inset 0 0 0 1px #3a3a3a}
+  body.bg-device .bm-devbar::before{content:'BridgeScore';position:absolute;top:8px;left:50%;transform:translateX(-50%);color:#fff;font:800 .8rem/1 'DM Sans',sans-serif;background:#111;padding:2px 10px;border-radius:5px;box-shadow:inset 0 0 0 1px #3a3a3a}
   body.bg-device #panelContent{border:12px solid #111;border-top:0;border-radius:0 0 30px 30px;height:calc(100vh - 140px);overflow:auto;flex:none}
 }
 body.bg-device #panelContent .bm-device > div:first-child{flex-wrap:wrap}body.bg-device #panelContent .bm-device > div:first-child span{white-space:nowrap}
@@ -627,3 +627,31 @@ body.bg-device .bm-devbar:has(.bm3-tdbtns),.bm3-bar:has(.bm3-tdbtns){grid-templa
 #tdCalls .tdcall{display:flex;align-items:center;gap:8px;background:#f2c94c;color:#1b1b1b;border-radius:10px;padding:10px 12px;box-shadow:0 6px 18px rgba(0,0,0,.35);font-size:.9rem;animation:tdblink 1s ease-in-out 3}
 #tdCalls .tdcall button{border:0;background:#1f5d36;color:#fff;border-radius:7px;padding:5px 10px;font-weight:800;cursor:pointer}
 @keyframes tdblink{50%{transform:scale(1.06)}}
+/* ── the TD's BridgeScore: the tournament as tiles, the setup with keys ── */
+.tdc .bm3-bar{grid-template-columns:auto 1fr auto}
+.tdc-full{border:0;background:#2e7a4b;color:#fff;border-radius:8px;padding:5px 9px;font-size:1rem;cursor:pointer}
+.tdc .bm3-body{overflow:auto}
+.tdc-round{padding:10px 12px 2px;display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center}
+.tdc-round b{font-size:1.15rem;color:#1f5d36}.tdc-round span{font-size:.85rem;color:#55606b;font-weight:700}
+.tdc-bar{grid-column:1/-1;height:8px;background:#c5d8ca;border-radius:5px;overflow:hidden}.tdc-bar i{display:block;height:100%;background:#1f5d36;border-radius:5px}
+.tdc-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px;padding:10px 12px}
+.tdc-tile{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border:2px solid #c5d8ca;border-radius:12px;background:#fff;color:#1b1b1b;cursor:pointer;font-family:inherit}
+.tdc-tile b{font-size:1.6rem;line-height:1}.tdc-tile small{font-size:.8rem;font-weight:700;color:#55606b}.tdc-tile i{font-style:normal;font-size:.7rem;color:#8a949d}
+.tdc-tile.done{background:#d4ead9;border-color:#1f5d36}.tdc-tile.done small{color:#1f5d36}
+.tdc-tile.pend{background:#fff3d6;border-color:#f0c96a}
+.tdc-tile.slow{background:#fde8e6;border-color:#e5918a}.tdc-tile.slow small{color:#b3261e}
+.tdc-tile.call{background:#f2c94c;border-color:#c99a14;animation:tdblink 1s ease-in-out infinite}.tdc-tile.call small{color:#1b1b1b}
+.tdc-legend{display:flex;flex-wrap:wrap;gap:6px 12px;padding:0 12px;font-size:.72rem;color:#55606b}
+.tdc-tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;padding:12px}
+.tdc-tools .btn{background:#fff;color:#1f5d36;border:1px solid #c5d8ca;font-weight:700}
+.tdc .bm3-ok.tdc-dim{background:#6f8f79}
+.tdc-movs{display:flex;flex-direction:column;gap:6px;padding:0 12px}
+.tdc-movs .bm3-key{display:flex;flex-direction:column;align-items:flex-start;padding:8px 14px;min-height:54px;text-align:left}
+.tdc-movs .bm3-key b{font-size:1.05rem}.tdc-movs .bm3-key small{font-size:.75rem;font-weight:600;opacity:.75}
+.tdc-big{margin:4px 12px 8px;background:#fff;border:1px solid #c5d8ca;border-radius:10px;text-align:center;font-size:2.2rem;font-weight:800;padding:6px;color:#1f5d36}
+.tdc-pad .bm3-key{min-height:52px}
+.tdc-warn{color:#b3261e;padding:0 12px 6px}
+.tdc-disp .bm3-sub{flex-wrap:wrap;gap:4px 12px}.tdc-disp .bm3-contract{font-size:1.3rem}
+.tdc-callrow{margin:6px 12px 0;padding:8px 10px;border-radius:10px;background:#f2c94c;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tdc-callrow button{border:0;background:#1f5d36;color:#fff;border-radius:7px;padding:6px 10px;font-weight:800;cursor:pointer}
+.tdc .bm3-tdnav span{font-size:.78rem;line-height:1.35}
