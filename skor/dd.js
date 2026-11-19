@@ -426,7 +426,7 @@ function par(table, vul) {
   return { score: ns, level: cur.level, strain: cur.strain, decl: SEATS[cur.decl], dbl: cur.dbl, tricks: cur.tricks,
     text: cur.level + sym + (cur.dbl ? 'X' : '') + ' ' + SEATS[cur.decl] + ' ' + (diff === 0 ? '=' : diff > 0 ? '+' + diff : diff) + ', NS ' + (ns > 0 ? '+' : '') + ns };
 }
-const VUL16 = ['None', 'NS', 'EW', 'Both', 'NS', 'EW', 'Both', 'None', 'Both', 'EW', 'NS', 'None', 'Both', 'NS', 'EW', 'None'];
+const VUL16 = ['None', 'NS', 'EW', 'Both', 'NS', 'EW', 'Both', 'None', 'EW', 'Both', 'None', 'NS', 'Both', 'None', 'NS', 'EW'];
 function vulOf(board, given) {
   const v = String(given || '').toLowerCase();
   const t = v === 'ns' ? 'NS' : v === 'ew' ? 'EW' : v === 'all' || v === 'both' ? 'Both' : v === 'none' || v === 'love' || v === '-' ? 'None' : VUL16[(board - 1) % 16];

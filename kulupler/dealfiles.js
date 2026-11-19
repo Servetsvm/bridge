@@ -7,7 +7,7 @@
 // (File layouts as read by the open-source deal-convert by Michał Klichowicz.)
 const DF_RANKS='AKQJT98765432';          // the order used inside these files
 const DF_SEATS='NESW';
-const DF_VUL16=['None','NS','EW','Both','NS','EW','Both','None','Both','EW','NS','None','Both','NS','EW','None'];
+const DF_VUL16=['None','NS','EW','Both','NS','EW','Both','None','EW','Both','None','NS','Both','None','NS','EW'];
 const dfDealer=b=>DF_SEATS[(b-1)%4];
 const dfVul=b=>DF_VUL16[(b-1)%16];
 

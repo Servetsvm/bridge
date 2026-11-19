@@ -4,7 +4,7 @@
    Used by the director's Clubs page and by the GitHub run (.github/clubs/runner.js); the table devices are not used. */
 (function (W) {
   const SN = ['♣', '♦', '♥', '♠', 'NT'], SUIT = ['♣', '♦', '♥', '♠'], DIR = 'NESW', RK = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'], PB = '23456789TJQKA';
-  const VUL = ['None', 'NS', 'EW', 'Both', 'NS', 'EW', 'Both', 'None', 'Both', 'EW', 'NS', 'None', 'Both', 'NS', 'EW', 'None'];
+  const VUL = ['None', 'NS', 'EW', 'Both', 'NS', 'EW', 'Both', 'None', 'EW', 'Both', 'None', 'NS', 'Both', 'None', 'NS', 'EW'];
   const vul = bn => VUL[(bn - 1) % 16];
   const listOf = l => Array.isArray(l) ? l : Object.keys(l || {}).filter(k => /^\d+$/.test(k)).sort((a, b) => a - b).map(k => l[k]);
   function ctPbnDeal(str) { const m = /^([NESW]):\s*(.+)$/.exec(String(str || '').trim()); if (!m) return null; const first = 'NESW'.indexOf(m[1]), hs = m[2].trim().split(/\s+/); if (hs.length !== 4) return null; const out = [[], [], [], []], RK = '23456789TJQKA'; hs.forEach((h, k) => { const ss = h.split('.'); if (ss.length !== 4) return; ss.forEach((cs, j) => { for (const ch of cs.toUpperCase().replace('10', 'T')) { const r = RK.indexOf(ch); if (r >= 0) out[(first + k) % 4].push((3 - j) * 13 + r); } }); }); return out.every(h => h.length === 13) ? out.map(h => h.sort((a, b) => b - a)) : null; }

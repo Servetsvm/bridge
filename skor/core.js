@@ -184,7 +184,7 @@ function calcScore(level,suit,declarer,result,vuln,doubled){
 }
 
 function getVuln(boardNo){
-  const v=['None','NS','EW','Both','NS','EW','Both','None','Both','EW','NS','None','Both','NS','EW','None'];
+  const v=['None','NS','EW','Both','NS','EW','Both','None','EW','Both','None','NS','Both','None','NS','EW'];
   return v[(boardNo-1)%16];
 }
 
