@@ -287,17 +287,13 @@ const SB = (() => {
   }
   const seen = g => !g.test;
   const tests = () => isAdm() ? (sb.list || []).filter(g => g.test).sort((a, b) => b.ts - a.ts) : [];
-  // the super admin's Test column: his test games and a new one (every kind: matches, round robin, Howell, single table)
-  const testHtml = () => !isAdm() ? '' : `<div class="grp sbtest"><span>🧪 ${T('Test')}</span><div class="muted">${T('Only you see it: the players have names from the TBF list and the robots play the other tables by themselves.')}</div>
-    ${tests().map(g => `<div class="sbtrow"><b>${esc(g.n)}</b><small>${fmtDate(g.ts)} · ${g.st === 'done' ? T('Finished') : T('Running')}</small><button class="btn new mini-btn" data-sbopen="${g.id}">${T('Open')}</button><button class="btn tdel mini-btn" data-sbdel="${g.id}">✕</button></div>`).join('')}
-    <div class="row2"><button class="btn gold" id="sbNewTest">🧪 ${T('New test game')}</button>${tests().length ? `<button class="btn tdel" id="sbDelTests">🗑 ${T('Delete all test games')}</button>` : ''}</div></div>`;
   const runningGames = () => (sb.list || []).filter(g => seen(g) && g.st !== 'done' && Date.now() - g.ts < 24 * 3600e3);
   function entryHtml() {
     const R = runningGames();
-    return `<h2>🃏 ${T('Team match')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
+    return `<h2>🃏 ${T('Social Bridge')}</h2>` + R.map(g => `<div class="sbentry"><b>🃏 ${esc(g.n)}</b><small>${T('{0} tables', g.tb)} · ${T('{0} boards', g.bd)}</small>
       ${g.fmt === 'rr' || g.type === 'howell' ? `<div class="row2"><button class="btn new" data-sbent="${g.id}:0">▶ ${T('Open')}</button></div>` : `<div class="grp"><span>${T('Table No')}</span><div class="bm3-keys k4 sbpick">${[...Array(g.tb).keys()].map(i => `<button class="bm3-key" data-sbent="${g.id}:${i + 1}">${i + 1}</button>`).join('')}</div></div>${legend(g)}`}
       ${canManage(g) ? `<button class="btn gold sbadmin" data-sbmng="${g.id}">⚙️ ${T('Admin')}</button>` : ''}</div>`).join('')
-      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>` + testHtml();
+      + `<div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button><button class="btn" id="sbList">${T('All games')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`;
   }
   // a team match: the tables of each match and who sits North-South there
   const legend = m => !isTeam(m) || isRR(m) ? '' : `<div class="tmleg">${[...Array(Math.floor(m.tb / 2)).keys()].map(i => { const a = teamName(2 * i + 1, m), b = teamName(2 * i + 2, m);
@@ -360,10 +356,9 @@ const SB = (() => {
       <td data-l="${T('Tables')}" class="n">${g.tb}${isTeam(g) ? `<small>${T('{0} teams', g.tb)}</small>` : ''}</td><td data-l="${T('Boards')}" class="n">${g.bd}</td>
       <td data-l="${T('Status')}">${g.st === 'done' ? `<span class="tst">${T('Finished')}</span>` : `<span class="tst run">${T('Running')}</span>`}</td>
       <td class="tact"><button class="btn new" data-sbopen="${g.id}">${T('Open')}</button>${canManage(g) ? `<button class="btn tdel" data-sbdel="${g.id}" title="${T('Delete')}">✕</button>` : ''}</td></tr>`).join('');
-    return `<h2>🃏 ${T('Team match')}</h2>
+    return `<h2>🃏 ${T('Social Bridge')}</h2>
       <div class="muted">${T('Teams meet two by two with real cards: one pair of each team in the Open room, the other in the Closed room, on the same boards. The app compares the rooms in IMPs and gives the match its VPs. Anyone at a table enters the boards that table played, in any order.')} ${T('A round robin of teams or a Howell pairs game can be chosen too.')}</div>
       <div class="row2"><button class="btn gold" id="sbNew">🃏 ${T('Team match')}</button><button class="btn new" id="sbOne">🪑 ${T('Single table')}</button></div>
-      ${testHtml()}
       ${sb.err ? `<div class="no">${esc(sb.err)}</div>` : ''}
       ${sb.list == null ? `<div class="muted">${T('Loading…')}</div>` : rows ? `<div class="ttwrap"><table class="ttab sbtab"><thead><tr><th>${T('Game')}</th><th class="n">${T('Tables')}</th><th class="n">${T('Boards')}</th><th>${T('Status')}</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="muted">${T('No games yet.')}</div>`}
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`;
@@ -504,7 +499,7 @@ const SB = (() => {
     const need = f.l ? f.l + 6 : 0;
     const res = f.l ? [...Array(14).keys()].map(k => [k, k - need === 0 ? '=' : signed(k - need)]) : [];
     const okb = f.l === 0 || (f.l && f.s != null && f.d != null && f.k != null), ok = okb && (!isOne() || validH(f.h));
-    // the screen of a Bridgemate III: the contract and the N-S score on the display, then one row of large keys per step
+    // the screen of a BridgeScore: the contract and the N-S score on the display, then one row of large keys per step
     const ns = ok ? (f.l ? nsScore(b, f) : 0) : null;
     const contract = f.l === 0 ? T('Pass') : f.l ? `${f.l}${f.s != null ? sym(f.s) : ''}${f.x === 1 ? ' X' : f.x === 2 ? ' XX' : ''}${f.d != null ? ' ' + declTxt(f.d) : ''}` : '—';
     const vul = [E.vulOf(b, 0), E.vulOf(b, 1)], vc = vul[0] && vul[1] ? 'both' : vul[0] ? 'ns' : vul[1] ? 'ew' : 'none';

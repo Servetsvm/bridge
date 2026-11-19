@@ -310,7 +310,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .dd-down{color:var(--red);font-size:0.72rem;font-weight:700}
 @media (max-width:420px){.dd-diag{font-size:0.74rem;gap:4px 4px}.dd-row{grid-template-columns:70px 70px 1fr}}
 
-/* ── Bridgemate III style score entry (as on the photos): black case, dark green header, white screen, blue keys ── */
+/* ── BridgeScore style score entry (as on the photos): black case, dark green header, white screen, blue keys ── */
 .bm3{max-width:440px;margin:0 auto;padding:30px 10px 14px;background:#111;border-radius:30px;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 2px #2a2a2a;position:relative;}
 .bm3::before{content:'BridgeGate';position:absolute;top:7px;left:50%;transform:translateX(-50%);color:#fff;font:800 .82rem/1 'DM Sans',sans-serif;letter-spacing:.3px;background:#111;padding:2px 10px;border-radius:5px;box-shadow:inset 0 0 0 1px #3a3a3a;}
 .bm3-screen{background:#fff;border-radius:12px;overflow:hidden;color:#1b1b1b;font-family:'DM Sans',system-ui,sans-serif;}
@@ -386,7 +386,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 /* the WhatsApp logo / SMS bubble inside a button */
 .ico{width:1.2em;height:1.2em;vertical-align:-0.25em;display:inline-block;flex:none}
 .ico{width:1.35em;height:1.35em}
-/* a table's score entry: the Bridgemate III screen fills the whole phone (no top bar, the device edge to edge) */
+/* a table's score entry: the BridgeScore screen fills the whole phone (no top bar, the device edge to edge) */
 #app:has(#panelContent > .bm3) .topbar{display:none}
 #panelContent:has(> .bm3){padding:0;max-width:none}
 #panelContent > .bm3{max-width:none;min-height:100vh;min-height:100dvh;border-radius:0;padding:30px 8px 10px;box-sizing:border-box;display:flex;flex-direction:column}
@@ -397,7 +397,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .bg-entry-name{font-weight:700;font-size:.95rem;margin-bottom:8px}
 .bg-entry-lbl{font-size:.7rem;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 .bg-entry .bm3-key{background:var(--surface);color:var(--text);border-color:var(--border)}
-/* ── a table as a Bridgemate III: green bar, white screen; full screen on a phone, a device on a computer ── */
+/* ── a table as a BridgeScore: green bar, white screen; full screen on a phone, a device on a computer ── */
 .bm-devbar{display:none}
 body.bg-device .topbar{display:none}
 body.bg-device .bm-devbar{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;background:#1f5d36;color:#fff;padding:10px 12px;font-size:.8rem;position:sticky;top:0;z-index:5}
@@ -423,7 +423,7 @@ body.bg-device #panelContent > .bm3 .bm3-bar{display:none}
   body.bg-device #panelContent{border:12px solid #111;border-top:0;border-radius:0 0 30px 30px;height:calc(100vh - 140px);overflow:auto;flex:none}
 }
 body.bg-device #panelContent .bm-device > div:first-child{flex-wrap:wrap}body.bg-device #panelContent .bm-device > div:first-child span{white-space:nowrap}
-/* the entry screen and the players' screen as the same Bridgemate III (before the table signs in) */
+/* the entry screen and the players' screen as the same BridgeScore (before the table signs in) */
 body.bg-device #loginScreen{background:#fff;padding:0;align-items:stretch}
 body.bg-device .login-box{max-width:none;min-height:100vh;min-height:100dvh;border:0;border-radius:0;box-shadow:none;padding:0 14px 16px;background:#fff;color:#1b1b1b;
   --bg:#fff;--surface:#fff;--surface2:#eef3f7;--surface3:#e3e9ee;--border:#d9dee3;--border2:#c9d1d8;--text:#1b1b1b;--text2:#3c4650;--text3:#6d6d6d;--gold:#1f5d36;--golddim:#e8efe9}
@@ -445,7 +445,7 @@ body.bg-device .btn-primary{background:#2a7de1;color:#fff}
   body.bg-device .login-box{width:440px;max-width:440px;min-height:0;height:calc(100vh - 40px);border:12px solid #111;border-radius:30px;overflow:auto;box-sizing:border-box}
   body.bg-device .login-logo{border-radius:0}
 }
-/* ── a table's screen as a Bridgemate III ── */
+/* ── a table's screen as a BridgeScore ── */
 .bm3t{display:flex;flex-direction:column;gap:12px;color:#1b1b1b}
 .bm3t-note{text-align:center;font-size:.85rem;color:#7a4fb5}
 .bm3t-pendrow .board-item{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid #f0c96a;border-radius:10px;background:#fff3d6}
@@ -565,7 +565,7 @@ body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}
 #otFormBox label:has(input[type=checkbox]:checked){background:var(--golddim);color:var(--gold2)}
 #otFormBox div[style*="max-height:220px"]{background:var(--surface2)}
 
-/* Bridgemate III step by step: the compass (who played), the result to confirm, the other tables; each step one screen */
+/* BridgeScore step by step: the compass (who played), the result to confirm, the other tables; each step one screen */
 .bm3w .bm3-body{flex:1;display:flex;flex-direction:column;min-height:0}
 .bm3-compass{display:grid;grid-template-columns:1fr 1.2fr 1fr;grid-template-rows:repeat(3,minmax(64px,1fr));gap:8px;padding:6px 12px;flex:1;max-height:330px}
 .bm3-seat{border:1px solid #d9dee3;border-radius:12px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:#1b1b1b;font:inherit}
@@ -585,3 +585,45 @@ body.bg-device .pe-pick{background:#fff;color:#1b1b1b;border-color:#d9dee3}
 .bm3w .red,.bm3-sum .red{color:#d32f2f}
 .bm3-key.res{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
 .bm3-key.res small{font-size:.62em;font-weight:600;opacity:.6}
+
+/* ── BridgeScore in the club's green (not a white screen); each suit its own colour ── */
+.sS{color:#1b2a4a}.sH{color:#d32f2f}.sD{color:#e67e00}.sC{color:#0f7a37}
+.bm3-key.active .sS,.bm3-key.active .sH,.bm3-key.active .sD,.bm3-key.active .sC,.bm3-key.active.sS,.bm3-key.active.sH,.bm3-key.active.sD,.bm3-key.active.sC{color:#fff!important}
+.bm3-tbl .sS,.bm3-tbl .sH,.bm3-tbl .sD,.bm3-tbl .sC{color:#fff}
+.bm3-key.suit.sS{color:#1b2a4a}.bm3-key.suit.sH{color:#d32f2f}.bm3-key.suit.sD{color:#e67e00}.bm3-key.suit.sC{color:#0f7a37}
+.bm3-screen{background:#e3efe6}
+.bm3-display{background:#fff}
+.bm3-key,.bm3-seat{background:#fff;border-color:#c5d8ca}
+.bm3-key.active,.bm3-seat.active{background:#1f5d36;border-color:#1f5d36}
+.bm3-ok{background:#1f5d36}
+.bm3-cancel{background:#fff;border-color:#c5d8ca}
+.bm3-orow{background:#fff}.bm3-orow.me{background:#d4ead9;border-color:#1f5d36}
+.bm3-sum div{border-bottom-color:#c5d8ca}
+body.bg-device #app,body.bg-device #panelContent,body.bg-device #loginScreen,body.bg-device .login-box{background:#e3efe6}
+body.bg-device #panelContent{--bg:#e3efe6;--surface2:#fff;--blue:#1f5d36;--bluedim:#d4ead9}
+body.bg-device #panelContent .btn-gold,body.bg-device .btn-primary{background:#1f5d36;border-color:#1f5d36}
+.bm3t .sbb{border-color:#c5d8ca}
+.bm3-keys.k1{grid-template-columns:1fr;margin-top:6px}
+.bm3-key.np{font-size:.9rem;color:#7a4fb5;min-height:40px}
+/* the players' TD buttons in the bar; the TD's menu */
+body.bg-device .bm-devbar:has(.bm3-tdbtns),.bm3-bar:has(.bm3-tdbtns){grid-template-columns:auto 1fr auto}
+@media (max-width:380px){.bm3-tdbtns button{padding:6px 6px;font-size:.68rem}}
+.bm3-tdbtns{display:flex;gap:6px}
+.bm3-tdbtns button{border:0;border-radius:8px;padding:6px 9px;font:700 .74rem 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
+.bm3-tdcall{background:#f2c94c;color:#1b1b1b}.bm3-tdkey{background:#2e7a4b;color:#fff}
+.bm3-tdnav{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;padding:10px 12px 4px;text-align:center}
+.bm3-tdnav b{font-size:1.05rem;color:#1f5d36}.bm3-tdnav span{grid-column:2;grid-row:2;font-size:.8rem;color:#55606b}
+.bm3-tdnav button{grid-row:1/3;height:44px;border:1px solid #c5d8ca;border-radius:10px;background:#fff;font-size:1.4rem;font-weight:800;cursor:pointer}
+.bm3-tdnav button:last-child{grid-column:3}.bm3-tdnav button:disabled{opacity:.35;cursor:default}
+.bm3-tdlist{display:flex;flex-direction:column;gap:6px;padding:6px 12px;overflow:auto}
+.bm3-tdrow{display:grid;grid-template-columns:34px 1fr;gap:4px 8px;align-items:center;background:#fff;border:1px solid #c5d8ca;border-radius:10px;padding:8px 10px}
+.bm3-tdrow > b{font-size:1.3rem;color:#1f5d36;grid-row:1/3}.bm3-tdrow > span{font-size:.9rem;font-weight:600}
+.bm3-tdrow > div{display:flex;flex-wrap:wrap;gap:5px}
+.bm3-tdrow button{border:1px solid #c5d8ca;background:#eef5f0;border-radius:7px;padding:5px 8px;font:700 .78rem 'DM Sans',sans-serif;cursor:pointer;color:#1b1b1b}
+.bm3-tdrow button.del{color:#b3261e}
+.bm3-tdtools{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 12px 0}
+.bm3-tdtools .btn{background:#fff;color:#1f5d36;border:1px solid #c5d8ca;font-weight:700}
+#tdCalls{position:fixed;top:60px;right:12px;z-index:9000;display:flex;flex-direction:column;gap:6px}
+#tdCalls .tdcall{display:flex;align-items:center;gap:8px;background:#f2c94c;color:#1b1b1b;border-radius:10px;padding:10px 12px;box-shadow:0 6px 18px rgba(0,0,0,.35);font-size:.9rem;animation:tdblink 1s ease-in-out 3}
+#tdCalls .tdcall button{border:0;background:#1f5d36;color:#fff;border-radius:7px;padding:5px 10px;font-weight:800;cursor:pointer}
+@keyframes tdblink{50%{transform:scale(1.06)}}

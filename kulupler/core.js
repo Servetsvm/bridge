@@ -243,6 +243,9 @@ function scoreToIMP(diff){
 const scoringShows=()=>{ const team=getState().movement==='team'; return { mp: !team, imp: true, byImp: team }; };
 const scoringName=s=>s&&s.movement==='team'?'IMP':'IMP - MP';
 const fmtImp=v=>{ const x=Math.round((v||0)*10)/10; return (x>0?'+':'')+x.toFixed(1); };
+// the TD's adjusted scores: average plus (60%), average (50%), average minus (40%), nothing
+const ADJ_PCT={'A+':0.6,'A':0.5,'A-':0.4,'0':0};
+const ADJ_IMP={'A+':3,'A':0,'A-':-3,'0':-8};
 function calcMP(){
   const boards=getBoards();const movements=getMovements();
   const boardScores={};
@@ -255,12 +258,17 @@ function calcMP(){
     const groupKey=bn;
     if(!boardScores[groupKey])boardScores[groupKey]=[];
     const m=movements[r+'_'+t]||{};
-    if(typeof b.nsScore!=='number')return;
+    if(b.notPlayed)return;   // not played: the pairs play one board fewer
+    if(typeof b.nsScore!=='number'){ if(b.adjusted&&ADJ_PCT[b.nsScore]!=null) boardScores[groupKey].push({ns:m.ns,ew:m.ew,adj:[b.nsScore,b.ewScore]}); return; }
     boardScores[groupKey].push({ns:m.ns,ew:m.ew,nsScore:b.nsScore});
   });
   const pairMP={};
-  Object.entries(boardScores).forEach(([,scores])=>{
-    const n=scores.length;if(n<2)return;
+  const add=(id,mp,top,imp)=>{ if(!id)return; if(!pairMP[id])pairMP[id]={mp:0,boards:0,top:0,imp:0}; pairMP[id].mp+=mp;pairMP[id].boards++;pairMP[id].top+=top;pairMP[id].imp+=imp; };
+  Object.entries(boardScores).forEach(([,all])=>{
+    // an adjusted score (TD): its percentage of the board's top, ±3 IMPs (average plus / minus)
+    const scores=all.filter(x=>!x.adj), n=scores.length, atop=Math.max(2,(n-1)*2);
+    all.filter(x=>x.adj).forEach(x=>{ const [a,b]=x.adj; add(x.ns,ADJ_PCT[a]*atop,atop,ADJ_IMP[a]); add(x.ew,(ADJ_PCT[b]!=null?ADJ_PCT[b]:ADJ_PCT[a])*atop,atop,ADJ_IMP[b]!=null?ADJ_IMP[b]:ADJ_IMP[a]); });
+    if(n<2)return;
     const top=(n-1)*2;
     scores.forEach(s=>{
       let nsMP=0,ewMP=0,nsIMP=0;

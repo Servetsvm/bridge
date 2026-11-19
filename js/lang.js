@@ -3,6 +3,8 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "TD": "TD",
+    "Social Bridge": "Sosyal Bridge",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Robotlarla online test: sadece sen görürsün, kulübün gerçek turnuvalarına dokunulmaz. Yönetici'den kur, masanı seç ve kartlarını oyna; diğer bütün koltuklara robotlar oturur.",
     "The tournament is over": "Turnuva bitti", "Every table has finished: the results are ready.": "Bütün masalar bitirdi: sonuçlar hazır.", "Over for your table; {0} tables are still playing.": "Senin masan için bitti; {0} masa hâlâ oynuyor.", "See the results": "Sonuçlara bak",
     "Who played the contract?": "Kontratı kim oynadı?", "Tricks taken by declarer": "Yapanın aldığı löve", "Other tables on this board": "Bu eldeki diğer masalar", "No other table has finished this board yet.": "Bu eli henüz başka masa bitirmedi.", "Confirm": "Onayla", "made exactly": "tam yapıldı",
@@ -447,6 +449,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "TD": "TD",
+    "Social Bridge": "Sosial bridge",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "En nettest med roboter: bare du ser den, klubbens ekte turneringer røres ikke. Sett den opp under Administrator, velg bordet ditt og spill kortene dine; roboter setter seg på alle de andre plassene.",
     "The tournament is over": "Turneringen er over", "Every table has finished: the results are ready.": "Alle bordene er ferdige: resultatene er klare.", "Over for your table; {0} tables are still playing.": "Ferdig for ditt bord; {0} bord spiller fortsatt.", "See the results": "Se resultatene",
     "Who played the contract?": "Hvem spilte kontrakten?", "Tricks taken by declarer": "Stikk tatt av spillefører", "Other tables on this board": "Andre bord på dette spillet", "No other table has finished this board yet.": "Ingen andre bord har spilt ferdig dette spillet ennå.", "Confirm": "Bekreft", "made exactly": "akkurat hjemme",
@@ -889,6 +893,8 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "TD": "Director",
+    "Social Bridge": "Bridge social",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Una prueba en línea con robots: solo tú la ves, los torneos reales del club no se tocan. Prepárala en Administrador, elige tu mesa y juega tus cartas; los robots ocupan todos los demás asientos.",
     "The tournament is over": "El torneo ha terminado", "Every table has finished: the results are ready.": "Todas las mesas han terminado: los resultados están listos.", "Over for your table; {0} tables are still playing.": "Terminado para tu mesa; {0} mesas siguen jugando.", "See the results": "Ver los resultados",
     "Who played the contract?": "¿Quién jugó el contrato?", "Tricks taken by declarer": "Bazas del declarante", "Other tables on this board": "Otras mesas en esta mano", "No other table has finished this board yet.": "Ninguna otra mesa ha terminado esta mano todavía.", "Confirm": "Confirmar", "made exactly": "cumplido justo",
@@ -1359,6 +1365,8 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "TD": "Arbitre",
+    "Social Bridge": "Bridge social",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Un test en ligne avec des robots : toi seul le vois, les vrais tournois du club ne sont pas touchés. Prépare-le dans Administration, choisis ta table et joue tes cartes ; les robots prennent toutes les autres places.",
     "The tournament is over": "Le tournoi est terminé", "Every table has finished: the results are ready.": "Toutes les tables ont fini : les résultats sont prêts.", "Over for your table; {0} tables are still playing.": "Fini pour ta table ; {0} tables jouent encore.", "See the results": "Voir les résultats",
     "Who played the contract?": "Qui a joué le contrat ?", "Tricks taken by declarer": "Levées du déclarant", "Other tables on this board": "Les autres tables sur cette donne", "No other table has finished this board yet.": "Aucune autre table n’a encore fini cette donne.", "Confirm": "Confirmer", "made exactly": "juste fait",
@@ -1829,6 +1837,8 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "TD": "Arbitro",
+    "Social Bridge": "Bridge sociale",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Una prova online con i robot: la vedi solo tu, i tornei veri del circolo non vengono toccati. Preparala in Amministratore, scegli il tuo tavolo e gioca le tue carte; i robot occupano tutti gli altri posti.",
     "The tournament is over": "Il torneo è finito", "Every table has finished: the results are ready.": "Tutti i tavoli hanno finito: i risultati sono pronti.", "Over for your table; {0} tables are still playing.": "Finito per il tuo tavolo; {0} tavoli stanno ancora giocando.", "See the results": "Vedi i risultati",
     "Who played the contract?": "Chi ha giocato il contratto?", "Tricks taken by declarer": "Prese del dichiarante", "Other tables on this board": "Gli altri tavoli su questa smazzata", "No other table has finished this board yet.": "Nessun altro tavolo ha ancora finito questa smazzata.", "Confirm": "Conferma", "made exactly": "mantenuto esatto",
@@ -2299,6 +2309,8 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "TD": "TL",
+    "Social Bridge": "Geselliges Bridge",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Ein Online-Test mit Robotern: nur du siehst ihn, die echten Turniere des Clubs bleiben unberührt. Richte ihn unter Admin ein, wähle deinen Tisch und spiel deine Karten; Roboter setzen sich auf alle anderen Plätze.",
     "The tournament is over": "Das Turnier ist zu Ende", "Every table has finished: the results are ready.": "Alle Tische sind fertig: die Ergebnisse stehen fest.", "Over for your table; {0} tables are still playing.": "Für deinen Tisch vorbei; {0} Tische spielen noch.", "See the results": "Ergebnisse ansehen",
     "Who played the contract?": "Wer hat den Kontrakt gespielt?", "Tricks taken by declarer": "Stiche des Alleinspielers", "Other tables on this board": "Die anderen Tische an diesem Board", "No other table has finished this board yet.": "Noch kein anderer Tisch hat dieses Board beendet.", "Confirm": "Bestätigen", "made exactly": "genau erfüllt",
@@ -2769,6 +2781,8 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "TD": "Судья",
+    "Social Bridge": "Социальный бридж",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Онлайн-тест с роботами: видишь только ты, настоящие турниры клуба не затрагиваются. Настрой его в разделе «Администратор», выбери стол и играй свои карты; на все остальные места садятся роботы.",
     "The tournament is over": "Турнир окончен", "Every table has finished: the results are ready.": "Все столы закончили: результаты готовы.", "Over for your table; {0} tables are still playing.": "Для твоего стола всё; ещё играют {0} столов.", "See the results": "Посмотреть результаты",
     "Who played the contract?": "Кто играл контракт?", "Tricks taken by declarer": "Взятки разыгрывающего", "Other tables on this board": "Другие столы на этой сдаче", "No other table has finished this board yet.": "Ни один другой стол ещё не закончил эту сдачу.", "Confirm": "Подтвердить", "made exactly": "ровно",
@@ -3239,6 +3253,8 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "TD": "Sędzia",
+    "Social Bridge": "Brydż towarzyski",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "Test online z robotami: widzisz go tylko ty, prawdziwe turnieje klubu pozostają nietknięte. Przygotuj go w Administratorze, wybierz stół i graj swoimi kartami; roboty zajmują wszystkie inne miejsca.",
     "The tournament is over": "Turniej się skończył", "Every table has finished: the results are ready.": "Wszystkie stoły skończyły: wyniki są gotowe.", "Over for your table; {0} tables are still playing.": "Koniec dla twojego stołu; {0} stołów jeszcze gra.", "See the results": "Zobacz wyniki",
     "Who played the contract?": "Kto rozgrywał kontrakt?", "Tricks taken by declarer": "Lewy rozgrywającego", "Other tables on this board": "Inne stoły w tym rozdaniu", "No other table has finished this board yet.": "Żaden inny stół nie skończył jeszcze tego rozdania.", "Confirm": "Potwierdź", "made exactly": "dokładnie zrobiony",
@@ -3709,6 +3725,8 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "TD": "裁判",
+    "Social Bridge": "社交桥牌",
     "An online test with robots: only you see it, the club's real tournaments are not touched. Set it up in Admin, choose your table and play your cards; robots sit at all the other seats.": "与机器人的在线测试：只有你能看到，俱乐部的正式比赛不受影响。在“管理”中设置，选择你的桌并打你的牌；其他所有座位由机器人坐。",
     "The tournament is over": "比赛结束了", "Every table has finished: the results are ready.": "所有桌都已打完：成绩已出。", "Over for your table; {0} tables are still playing.": "你这桌已结束；还有 {0} 桌在打。", "See the results": "查看成绩",
     "Who played the contract?": "谁打的定约？", "Tricks taken by declarer": "庄家赢墩数", "Other tables on this board": "本副牌的其他桌", "No other table has finished this board yet.": "还没有其他桌打完这副牌。", "Confirm": "确认", "made exactly": "刚好完成",

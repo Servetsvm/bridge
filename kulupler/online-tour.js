@@ -391,7 +391,7 @@ function otTestCard() {
       <div class="field"><label>Base system</label><select id="otSys">${M.systems.map(s => `<option value="${s.k}">${cleanData(s.n)}</option>`).join('')}</select></div>
       <div style="font-size:0.78rem;color:var(--text2);margin:6px 0 2px;">Conventions everyone plays (the robots too):</div>
       <div style="max-height:200px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px;">${M.convs.map(x => `<label style="display:block;"><input type="checkbox" data-otconv="${x.k}"> ${cleanData(x.n)}</label>`).join('')}</div>
-      <label style="display:flex;align-items:center;gap:8px;margin:10px 0 4px;cursor:pointer;"><input type="checkbox" id="otTkBm"> 📟 <span>I use the Bridgemate (at my table)</span></label>
+      <label style="display:flex;align-items:center;gap:8px;margin:10px 0 4px;cursor:pointer;"><input type="checkbox" id="otTkBm"> 📟 <span>I use the BridgeScore (at my table)</span></label>
       <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
         <button class="btn btn-gold" onclick="otTestStart()">▶ <span>Start the test tournament</span></button>
         <a class="btn btn-sm" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--text);background:var(--surface2);border:1px solid var(--border);padding:8px 12px;border-radius:10px;font-weight:600;font-size:0.85rem;" href="https://github.com/Servetsvm/bridge/actions/workflows/clubs.yml" target="_blank" rel="noopener noreferrer">🤖 <span>Start the server robots</span></a>

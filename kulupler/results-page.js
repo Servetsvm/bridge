@@ -51,11 +51,11 @@ function collect(){
     .sort((a,b)=>sh.byImp?b.imp-a.imp:(b.pct-a.pct||b.mp-a.mp));
   // each board: its results, each with the match points of both sides on that board
   const by={};
-  for(const [k,b] of Object.entries(boards)){ if(!b||b.status!=='done') continue; const [t,r,bn]=k.split('_'); const m=mv[r+'_'+t]||{}; (by[bn]=by[bn]||[]).push({t:+t,r:+r,ns:m.ns,ew:m.ew,b}); }
+  for(const [k,b] of Object.entries(boards)){ if(!b||b.status!=='done'||b.notPlayed) continue; const [t,r,bn]=k.split('_'); const m=mv[r+'_'+t]||{}; (by[bn]=by[bn]||[]).push({t:+t,r:+r,ns:m.ns,ew:m.ew,b}); }
   for(const L of Object.values(by)){
     const sc=L.filter(x=>typeof x.b.nsScore==='number'), top=Math.max(0,(sc.length-1)*2);
     for(const x of L){
-      if(typeof x.b.nsScore!=='number'){ x.nsMP=x.ewMP=null; continue; }
+      if(typeof x.b.nsScore!=='number'){ x.nsMP=x.ewMP=null; if(x.b.adjusted&&typeof ADJ_PCT!=='undefined'&&ADJ_PCT[x.b.nsScore]!=null){ const at=Math.max(2,top); x.top=at; x.nsMP=ADJ_PCT[x.b.nsScore]*at; x.ewMP=(ADJ_PCT[x.b.ewScore]!=null?ADJ_PCT[x.b.ewScore]:ADJ_PCT[x.b.nsScore])*at; x.pm=x.nsMP-at/2; x.imp=ADJ_IMP[x.b.nsScore]; } continue; }
       let m=0,imp=0; for(const y of sc){ if(y===x) continue; m+=x.b.nsScore>y.b.nsScore?2:x.b.nsScore===y.b.nsScore?1:0; imp+=scoreToIMP(x.b.nsScore-y.b.nsScore); }
       x.nsMP=sc.length>1?m:null; x.ewMP=sc.length>1?top-m:null; x.pm=sc.length>1?m-top/2:null; x.imp=sc.length>1?imp/(sc.length-1):null; x.top=top;
     }

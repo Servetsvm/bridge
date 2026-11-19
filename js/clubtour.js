@@ -377,10 +377,10 @@ async function ctSit(key, r0) {
   CT.pollT = setInterval(ctPoll, 1500); CT.beatT = setInterval(ctBeat, 20e3);
   flash('🪑 ' + T('Round {0} · table {1}', s.r + 1, s.ti + 1), 2500);
 }
-/* Servet's online test with the Bridgemate (the test tournament's "I use the Bridgemate"): after each board at his table
-   the result is entered as on a club's Bridgemate — contract, declarer, lead, tricks — the score shown, the opponents
+/* Servet's online test with the BridgeScore (the test tournament's "I use the BridgeScore"): after each board at his table
+   the result is entered as on a club's BridgeScore — contract, declarer, lead, tricks — the score shown, the opponents
    (robots) approve, and the entry is checked against the board as it was played; at the end of the round the
-   Bridgemate's move screen (the next table, the seat, the opponents, the boards). For trying the Bridgemate only: the
+   BridgeScore's move screen (the next table, the seat, the opponents, the boards). For trying the BridgeScore only: the
    evening's results come from the play itself */
 const ctBmOn = () => { const t = CT.tbl, x = t && ctFind(t.key); return !!(x && x.i && x.i.bm && !t.watch); };
 const CT_BM = { e: null, then: null, v: null, done: false };
@@ -399,7 +399,7 @@ function ctBmScore(v, bn) {
   const sc = scoreOf(v.lvl, v.st, v.dbl, vulOf(bn, v.decl), v.tr);
   return sideOf(v.decl) === 0 ? sc : -sc;
 }
-// the Bridgemate III's frame: the bar (the evening, the table and round), the board, its vulnerability and the pairs
+// the BridgeScore's frame: the bar (the evening, the table and round), the board, its vulnerability and the pairs
 function ctBmHead(bn) {
   const t = CT.tbl, x = ctFind(t.key) || { i: {} }, tb = (t.plan.rounds[t.r] || [])[t.ti] || [];
   const ns = vulOf(bn, 0), ew = vulOf(bn, 1), cls = ns && ew ? 'both' : ns ? 'ns' : ew ? 'ew' : 'none', vt = ns && ew ? 'BOTH VUL' : ns ? 'NS VUL' : ew ? 'EW VUL' : 'NO VUL';
@@ -409,7 +409,7 @@ function ctBmHead(bn) {
 const CT_BM_STEPS = ['contract', 'decl', 'lead', 'tricks', 'confirm'];
 const ctBmS = s => `<span class="bmsy s${s}">${SUIT[s]}</span>`;   // a suit in its colour (the four-colour deck too)
 const ctBmSym = s => s === 4 ? 'NT' : ctBmS(s);
-// one step a screen, as the club's Bridgemate III: the contract → who played it (the compass) → the lead → the tricks
+// one step a screen, as the club's BridgeScore: the contract → who played it (the compass) → the lead → the tricks
 // → the result to confirm; then the opponents' approval and the other tables on this board, then the next board
 function ctBmDraw() {
   const v = CT_BM.v, e = CT_BM.e, bn = e.board, step = CT_BM.step, t = CT.tbl;
@@ -448,7 +448,7 @@ function ctBmDraw() {
     const r = v.tr - v.lvl - 6, rr = v.pass ? T('Pass') : r === 0 ? T('made exactly') : r > 0 ? '+' + r : r;
     body = `<div class="bm3-step">${T('Result')}</div>
       <div class="bm3-sum">${v.pass ? '' : `<div><span>${T('Declarer')}</span><b>${SEAT_AB[v.decl]}</b></div><div><span>${T('Lead')}</span><b>${lead}</b></div><div><span>${T('Tricks')}</span><b>${v.tr}</b></div>`}<div><span>${T('Result')}</span><b>${rr}</b></div><div class="big"><span>NS</span><b>${fmtSigned(sc)}</b></div></div>`;
-    actions = backB + `<button class="bm3-ok" data-bm="ok">✓ ${T('Confirm')}</button>`;
+    actions = backB + `<button class="bm3-ok" data-bm="ok">✓ OK</button>`;
   } else if (step === 'done') {   // approved: the check against the board as played, the other tables on this board
     const rc = e.c, rl = e.pl && e.pl[0] && e.pl[0][0];
     const same = v.pass ? !!e.passed : !e.passed && rc && v.lvl === rc.level && v.st === rc.strain && v.dbl === rc.dbl && v.decl === rc.decl && v.tr === e.tricks && (!rl || (v.ls === S(rl[1]) && v.lr === R(rl[1])));
@@ -466,7 +466,7 @@ function ctBmDraw() {
   openOv('ctbm', `<div class="bm3 bm3w ctbm3"><div class="bm3-screen">${ctBmHead(bn)}${display}${step === 'done' ? '' : hint}<div class="bm3-body">${body}</div><div class="bm3-actions">${actions}</div></div></div>`);
   if (keep && sh()) sh().scrollTop = keep;
 }
-// the end of the round: where this pair goes next, as the Bridgemate shows it
+// the end of the round: where this pair goes next, as the BridgeScore shows it
 function ctBmMove(then) {
   const t = CT.tbl, pi = ctMyPair(t.plan), nx = ctSched(t.plan, pi).find(s => s.r === t.r + 1);
   CT_BM.then = then; CT_BM.e = null;
@@ -498,7 +498,7 @@ function ctGoNext() {
   const t = CT.tbl; if (!t || !G || !G.ct) return;
   if (t.watch) { ctLeave(); G = idleG(); save(); render(); return; }   // watching: back home
   if (G.phase !== 'done') { flash(T('Finish this tournament board first'), 2000); return; }
-  // the Bridgemate test: the score entered for this board, then (the round over) the move screen
+  // the BridgeScore test: the score entered for this board, then (the round over) the move screen
   if (ctBmOn() && G.result && !(t.bmOk || {})[G.board]) { const bn = G.board; ctBmShow(G.result, () => { (t.bmOk = t.bmOk || {})[bn] = 1; ctGoNext(); }); return; }
   if (ctBmOn() && G.ct.i + 1 >= t.boards.length && t.r + 1 < t.rounds && !t.bmMoved) { ctBmMove(() => { t.bmMoved = 1; ctGoNext(); }); return; }
   if (G.ct.i + 1 < t.boards.length) { ctStartBoard(G.ct.i + 1); ctPoll(); return; }
@@ -508,7 +508,7 @@ function ctGoNext() {
   flash('🏁 ' + T('The tournament is over for you — thank you!'), 4000); G = null; goHome();
   if (bmEnd) setTimeout(() => ctBmEnd(bmEnd), 400);
 }
-// the end of the evening on the Bridgemate (Servet's test): over for this table; the results once every table is done
+// the end of the evening on the BridgeScore (Servet's test): over for this table; the results once every table is done
 async function ctBmEnd(e) {
   CT_BM.end = e;
   try { await ctLoad(true); } catch (er) {}
