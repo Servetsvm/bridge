@@ -2252,3 +2252,5 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .clubrow.cc5,:root[data-theme="dark"] .clubrow.cc5{background:linear-gradient(#a9e6e2,#62c7c0);border-color:#21837c;color:#0b2e2b}
 .clubrow[class*="cc"] .muted{color:inherit;opacity:.8}
 .clubrow.live,:root[data-theme="dark"] .clubrow.live{border:3px solid #1f5d36!important}
+
+.clubsfs .clubsa{min-height:48px;border-radius:14px;background:#2a2108!important;color:#ffe27a!important;border:2px solid #b8901a!important;font-weight:800}

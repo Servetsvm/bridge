@@ -120,6 +120,8 @@ async function initClubGate(){
   // a table (or the entry screen of a running tournament) is shown as a BridgeScore from the first moment
   if(roleParam!=='screen') document.body.classList.add('bg-device');   // every sign-in screen as a BridgeScore
   const fromLink=!!id;
+  // the super admin's button in Bridge Table's Clubs: straight to his sign-in
+  if(params.get('sa')==='1'){ if(me()) await window.bridgeSession(); if(isSuper()){ document.getElementById('clubGate').style.display='none'; enterSuperAdminLogin(); setTimeout(()=>document.getElementById('pwInput')?.focus(),100); return; } }
   if(id&&(params.get('results')==='1'||params.get('movement')==='1')&&me()){
     await window.bridgeSession(); const info=await checkClubExists(id); if(info){ CLUB_INFO=info; setClub(id); CLUB_NAME=info.name||CLUB_NAME; window._ccResultsOnly=true; document.getElementById('loginScreen').style.display='none'; if(params.get('movement')==='1') await ccMovementPage(); else await ccResultsIndex(); return; }
   }
