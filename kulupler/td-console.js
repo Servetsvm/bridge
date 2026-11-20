@@ -60,8 +60,7 @@ function drawHome(){ TDC.arc=null;
   const mv=(MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||'';
   const sum=`<div class="bm3-sum"><div><span>${L('Tournament')}</span><b>${cleanData(s.name||'')}</b></div><div><span>${L('Movement')}</span><b>${L(mv)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount||'—'}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount||'—'}</b></div><div><span>${L('Boards')}</span><b>${s.totalBoards||'—'}</b></div></div>`;
   const body=`<div class="bm3-step">⏳ ${L('Ready to start')}</div>${sum}
-    ${handsHtml()}
-    <div class="bm3-step">${L('Before round 1')}</div><div class="tdc-tools"><button class="btn" onclick="tdcScreen()">📺 ${L('Screen')}</button><button class="btn" onclick="bgShowPlayersLink()">🔗 ${L('Link')}</button></div>${menuHtml()}`;
+    ${handsHtml()}${menuHtml()}`;
   frame(L('Ready to start'),body,`<button class="bm3-cancel" onclick="tdcSetupStart()">↺</button><button class="bm3-ok" onclick="tdcStart()">▶ ${L('Start round 1')}</button>`);
 }
 // the players as on the BridgeScore: each table a card (its pairs); tapped, its four seats round the table
@@ -227,7 +226,7 @@ function drawArc(){
     grid+=`<div class="bm3-step">${L('Round')} ${r}</div><div class="tdc-tiles">${tiles}</div>`;
   }
   const sub=`<div class="bm3-sum"><div><span>${L('Date')}</span><b>${dd(a.finished)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount||0}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount||0}</b></div></div>
-    <div class="tdc-tools"><button class="btn" onclick="ccResultsPage(${i})">📄 ${L('Results')}</button><button class="btn" onclick="exportArchivePBN(${i})">🃏 PBN</button><button class="btn" onclick="archivePDF(${i})">🖨 PDF</button><button class="btn" onclick="tdcArcName()">✏️ ${L('Rename')}</button><button class="btn tdc-red" onclick="tdcArcDel()">🗑 ${L('Delete')}</button></div>`;
+    <div class="tdc-tools"><button class="btn" onclick="ccResultsPage(${i})">📄 ${L('Results')}</button><button class="btn" onclick="exportArchivePBN(${i})">🃏 PBN</button><button class="btn" onclick="tdcArcName()">✏️ ${L('Rename')}</button><button class="btn tdc-red" onclick="tdcArcDel()">🗑 ${L('Delete')}</button></div>`;
   frame('📜 '+cleanData(s.name||''),`<div class="bm3-note" style="padding:0 12px">${L('Tap a table to correct its boards and names; the ranking is worked out again.')}</div>${grid}`,`<span></span><button class="bm3-ok" onclick="tdcGo('hist')">‹ ${L('Old tournaments')}</button>`,sub);
 }
 window.tdcArcName=function(){ const a=getArchives()[TDC.arc]; if(!a) return; openModal('✏️ '+L('Rename'),`<div class="field"><label>${L('Tournament')}</label><input id="tdcArcN" maxlength="40" value="${cleanData((a.state&&a.state.name)||'')}"></div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcArcNameOk()">OK</button>`); };
