@@ -2254,3 +2254,27 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .clubrow.live,:root[data-theme="dark"] .clubrow.live{border:3px solid #1f5d36!important}
 
 .clubsfs .clubsa{min-height:48px;border-radius:14px;background:#2a2108!important;color:#ffe27a!important;border:2px solid #b8901a!important;font-weight:800}
+
+/* the online table's score: a scoreboard */
+.tscore .tsb{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:8px;margin:4px 0 8px}
+.tscore .tss{display:flex;flex-direction:column;align-items:center;padding:8px 6px 6px;border-radius:12px;background:rgba(0,0,0,.05);border:2px solid transparent}
+.tscore .tss em{font-style:normal;font-weight:800;letter-spacing:.08em;font-size:13px;color:var(--sheet-muted)}
+.tscore .tss em small{font-size:10px;letter-spacing:.04em;padding:1px 6px;border-radius:8px;background:var(--brass);color:var(--brass-ink);vertical-align:2px}
+.tscore .tss b{font-family:var(--f-card);font-size:38px;line-height:1.1;color:var(--sheet-ink)}
+.tscore .tss i{font-style:normal;font-size:11px;letter-spacing:.1em;color:var(--sheet-muted)}
+.tscore .tss.me{border-color:var(--brass)}
+.tscore .tss.lead{background:rgba(29,107,60,.12)}
+.tscore .tss.lead b{color:var(--pos)}
+.tscore .tsv{align-self:center;font-size:22px;color:var(--sheet-muted)}
+.tscore .tsbar{height:10px;border-radius:6px;background:#c9a09a;overflow:hidden}
+.tscore .tsbar i{display:block;height:100%;background:var(--pos);border-radius:6px 0 0 6px}
+.tscore .tsl{display:flex;justify-content:space-between;align-items:baseline;margin-top:3px;font-size:14px;color:var(--sheet-ink)}
+.tscore .tsl span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--sheet-muted)}
+.tscore .tspt{margin-top:8px;padding-top:6px;border-top:1px solid rgba(0,0,0,.1)}
+.tscore .tsf{text-align:center;font-size:12px;color:var(--sheet-muted);margin-top:6px}
+:root[data-theme="dark"] .tscore .tss{background:rgba(255,255,255,.05)}
+:root[data-theme="dark"] .tscore .tss.lead{background:rgba(80,190,120,.14)}
+:root[data-theme="dark"] .tscore .tss.lead b{color:#7fd69d}
+:root[data-theme="dark"] .tscore .tsbar{background:#6a3c38}
+:root[data-theme="dark"] .tscore .tsbar i{background:#3f9e62}
+:root[data-theme="dark"] .tscore .tspt{border-top-color:rgba(255,255,255,.12)}

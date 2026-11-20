@@ -1789,10 +1789,20 @@ const Net = (() => {
   }
   function scoreHtml() {
     const s = st.score; if (!st.on) return '';
-    const line = s ? `NS <b>${s.ins || 0}</b> – EW <b>${s.iew || 0}</b> IMP · ${s.n} ${T('boards')} <small>(${T('double dummy')}${s.wait ? ' ⏳' : ''})</small>${s.mpn ? `<br>NS <b>${Math.round(s.mp / s.mpn)}%</b> – EW <b>${100 - Math.round(s.mp / s.mpn)}%</b> MP` : ''}<br><small>${T('Points')}: NS ${s.ns} – EW ${s.ew}</small>` : '—';
+    // a scoreboard: the two sides side by side (yours marked, the side ahead lit), the MP split as a bar, then the points
+    let line = '—';
+    if (s) {
+      const me = st.watching || typeof U !== 'function' ? -1 : (U() & 1), ins = s.ins || 0, iew = s.iew || 0;
+      const mp = s.mpn ? Math.round(s.mp / s.mpn) : null;
+      const side = (k, imp, other) => `<div class="tss${imp > other ? ' lead' : ''}${me === k ? ' me' : ''}"><em>${k ? 'EW' : 'NS'}${me === k ? ` <small>${T('You')}</small>` : ''}</em><b>${imp}</b><i>IMP</i></div>`;
+      line = `<div class="tsb">${side(0, ins, iew)}<div class="tsv">–</div>${side(1, iew, ins)}</div>`
+        + (mp != null ? `<div class="tsmp"><div class="tsbar"><i style="width:${mp}%"></i></div><div class="tsl"><b>${mp}%</b><span>MP</span><b>${100 - mp}%</b></div></div>` : '')
+        + `<div class="tsl tspt"><b>${s.ns}</b><span>${T('Points')}</span><b>${s.ew}</b></div>`
+        + `<div class="tsf">${s.n} ${T('boards')} · ${T('double dummy')}${s.wait ? ' ⏳' : ''}</div>`;
+    }
     const btns = st.host ? `<button class="btn" id="nRst">${T('Reset the score')}</button>`
       : st.watching ? '' : `<button class="btn" id="nRstQ">${T('Ask to reset the score')}</button>${G && (G.phase === 'bid' || G.phase === 'play') ? `<button class="btn" id="nNdQ">${T('Ask for a new deal')}</button>` : ''}`;
-    return `<div class="grp"><span>${T('Table score')}</span><div>${line}</div><div class="row2">${btns}</div></div>`;
+    return `<div class="grp tscore"><span>${T('Table score')}</span>${line}<div class="row2">${btns}</div></div>`;
   }
   // the host answers a guest's request (a new deal during play, or a fresh score)
   function askAnswer(id, ok) {
