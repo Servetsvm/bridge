@@ -2278,3 +2278,14 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 :root[data-theme="dark"] .tscore .tsbar{background:#6a3c38}
 :root[data-theme="dark"] .tscore .tsbar i{background:#3f9e62}
 :root[data-theme="dark"] .tscore .tspt{border-top-color:rgba(255,255,255,.12)}
+
+/* the score boxes on the bar: a small table (title strip, label – value rows, a line under it) */
+.box.sbox{padding:0 0 3px;min-width:150px;align-items:stretch;overflow:hidden;gap:0}
+.box.sbox small{display:block;background:var(--felt-deep);color:var(--ink);opacity:1;text-align:center;padding:2px 8px;font-size:12px;font-weight:700;margin-bottom:2px}
+.box.sbox .srow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 10px;font-size:18px;line-height:1.15}
+.box.sbox .sl{font-size:13px;font-weight:700;letter-spacing:.04em;opacity:.65}
+.box.sbox .sv{font-weight:800;font-variant-numeric:tabular-nums}
+.box.sbox .sv.pos{color:var(--pos)}
+.box.sbox .sv.neg{color:var(--neg)}
+.box.sbox .sf{font-size:12px;padding:1px 10px 0;opacity:.7;white-space:nowrap;text-align:center;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.box.sbox{min-width:104px}.box.sbox small{font-size:10px;padding:1px 6px}.box.sbox .srow{font-size:13px;padding:0 6px;gap:6px}.box.sbox .sl{font-size:10px}.box.sbox .sf{font-size:10px;padding:0 6px}}

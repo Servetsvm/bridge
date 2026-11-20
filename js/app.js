@@ -1340,11 +1340,15 @@ function renderBar() {
   // at an online table the box shows the table score (North-South against East-West), not your own day
   const tblScore = online() && typeof Net !== "undefined" && Net.st.on ? (Net.st.score || { ns: 0, ew: 0, n: 0 }) : null;
   const cts = G && G.ct && typeof CT !== 'undefined' && CT.tbl && !CT.tbl.watch ? CT.sc : null;   // a club table: the tournament's score, not your day
-  const dayTxt = per.scored ? fmtSigned(per.impSum) + ' IMP' + (per.mpAvg != null ? ' · ' + per.mpAvg + '%' : '') : '—';
+  // a score box as a small table: a title strip, label – value rows (plus green, minus red), a line under it
+  const sv = v => v == null ? '<span class="sv">—</span>' : `<span class="sv${v > 0 ? ' pos' : v < 0 ? ' neg' : ''}">${fmtSigned(Math.round(v * 10) / 10)}</span>`;
+  const sbox = (tag, id, title, rows, foot) => `<${tag} class="box sbox"${id ? ` id="${id}" title="${title}"` : ''}><small>${title}</small>${rows.map(([l, v]) => `<span class="srow"><span class="sl">${l}</span>${v}</span>`).join('')}${foot ? `<span class="sf">${foot}</span>` : ''}</${tag}>`;
+  const pctTxt = p => p == null ? '<span class="sv">—</span>' : `<span class="sv">${p}%</span>`;
+  const lastFoot = last ? T('last:') + ' ' + (last.imp != null ? fmtSigned(last.imp) + ' · ' + last.mp + '%' : fmtSigned(last.us || 0)) : '';
   $('bar').innerHTML = `
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
    <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
-   ${tblScore ? `<button class="box" id="bTblScore" title="${T('Table score')}"><small>${T('Table score')}</small><b>NS ${tblScore.ins || 0} – EW ${tblScore.iew || 0}</b><span class="tr">IMP${tblScore.mpn ? ' · NS ' + Math.round(tblScore.mp / tblScore.mpn) + '% MP' : ''} · ${tblScore.n} ${T('boards')}${tblScore.wait ? ' ⏳' : ''}</span></button>` : cts ? `<div class="box"><small>${T('Tournament')}${cts.pos ? ' · ' + cts.pos + '/' + cts.of : ''}</small><b>${cts.n ? cts.pct.toFixed(1) + '% · ' + fmtSigned(cts.imp) + ' IMP' : '—'}</b><span class="tr">${cts.last ? T('last:') + ' ' + Math.round(cts.last.mp) + '% · ' + fmtSigned(cts.last.imp) + ' IMP' : cts.n + ' ' + T('boards')}</span></div>` : `<div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>`}
+   ${tblScore ? sbox('button', 'bTblScore', T('Table score'), [['NS', sv(tblScore.ins || 0)], ['EW', sv(tblScore.iew || 0)]], `IMP${tblScore.mpn ? ' · NS ' + Math.round(tblScore.mp / tblScore.mpn) + '%' : ''} · ${tblScore.n} ${T('boards')}${tblScore.wait ? ' ⏳' : ''}`) : cts ? sbox('div', '', T('Tournament') + (cts.pos ? ' · ' + cts.pos + '/' + cts.of : ''), [['IMP', cts.n ? sv(cts.imp) : sv(null)], ['MP', cts.n ? pctTxt(cts.pct.toFixed(1)) : pctTxt(null)]], cts.last ? T('last:') + ' ' + fmtSigned(cts.last.imp) + ' · ' + Math.round(cts.last.mp) + '%' : cts.n + ' ' + T('boards')) : sbox('div', '', T('Today'), [['IMP', per.scored ? sv(per.impSum) : sv(null)], ['MP', pctTxt(per.scored ? per.mpAvg : null)]], lastFoot)}
    <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button>
    <div class="spacer"></div>
    <div class="tools">

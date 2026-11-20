@@ -2331,6 +2331,17 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 :root[data-theme="dark"] .tscore .tsbar i{background:#3f9e62}
 :root[data-theme="dark"] .tscore .tspt{border-top-color:rgba(255,255,255,.12)}
 
+/* the score boxes on the bar: a small table (title strip, label – value rows, a line under it) */
+.box.sbox{padding:0 0 3px;min-width:150px;align-items:stretch;overflow:hidden;gap:0}
+.box.sbox small{display:block;background:var(--felt-deep);color:var(--ink);opacity:1;text-align:center;padding:2px 8px;font-size:12px;font-weight:700;margin-bottom:2px}
+.box.sbox .srow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 10px;font-size:18px;line-height:1.15}
+.box.sbox .sl{font-size:13px;font-weight:700;letter-spacing:.04em;opacity:.65}
+.box.sbox .sv{font-weight:800;font-variant-numeric:tabular-nums}
+.box.sbox .sv.pos{color:var(--pos)}
+.box.sbox .sv.neg{color:var(--neg)}
+.box.sbox .sf{font-size:12px;padding:1px 10px 0;opacity:.7;white-space:nowrap;text-align:center;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.box.sbox{min-width:104px}.box.sbox small{font-size:10px;padding:1px 6px}.box.sbox .srow{font-size:13px;padding:0 6px;gap:6px}.box.sbox .sl{font-size:10px}.box.sbox .sf{font-size:10px;padding:0 6px}}
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -11741,11 +11752,15 @@ function renderBar() {
   // at an online table the box shows the table score (North-South against East-West), not your own day
   const tblScore = online() && typeof Net !== "undefined" && Net.st.on ? (Net.st.score || { ns: 0, ew: 0, n: 0 }) : null;
   const cts = G && G.ct && typeof CT !== 'undefined' && CT.tbl && !CT.tbl.watch ? CT.sc : null;   // a club table: the tournament's score, not your day
-  const dayTxt = per.scored ? fmtSigned(per.impSum) + ' IMP' + (per.mpAvg != null ? ' · ' + per.mpAvg + '%' : '') : '—';
+  // a score box as a small table: a title strip, label – value rows (plus green, minus red), a line under it
+  const sv = v => v == null ? '<span class="sv">—</span>' : `<span class="sv${v > 0 ? ' pos' : v < 0 ? ' neg' : ''}">${fmtSigned(Math.round(v * 10) / 10)}</span>`;
+  const sbox = (tag, id, title, rows, foot) => `<${tag} class="box sbox"${id ? ` id="${id}" title="${title}"` : ''}><small>${title}</small>${rows.map(([l, v]) => `<span class="srow"><span class="sl">${l}</span>${v}</span>`).join('')}${foot ? `<span class="sf">${foot}</span>` : ''}</${tag}>`;
+  const pctTxt = p => p == null ? '<span class="sv">—</span>' : `<span class="sv">${p}%</span>`;
+  const lastFoot = last ? T('last:') + ' ' + (last.imp != null ? fmtSigned(last.imp) + ' · ' + last.mp + '%' : fmtSigned(last.us || 0)) : '';
   $('bar').innerHTML = `
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
    <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
-   ${tblScore ? `<button class="box" id="bTblScore" title="${T('Table score')}"><small>${T('Table score')}</small><b>NS ${tblScore.ins || 0} – EW ${tblScore.iew || 0}</b><span class="tr">IMP${tblScore.mpn ? ' · NS ' + Math.round(tblScore.mp / tblScore.mpn) + '% MP' : ''} · ${tblScore.n} ${T('boards')}${tblScore.wait ? ' ⏳' : ''}</span></button>` : cts ? `<div class="box"><small>${T('Tournament')}${cts.pos ? ' · ' + cts.pos + '/' + cts.of : ''}</small><b>${cts.n ? cts.pct.toFixed(1) + '% · ' + fmtSigned(cts.imp) + ' IMP' : '—'}</b><span class="tr">${cts.last ? T('last:') + ' ' + Math.round(cts.last.mp) + '% · ' + fmtSigned(cts.last.imp) + ' IMP' : cts.n + ' ' + T('boards')}</span></div>` : `<div class="box"><small>${T('Today')}</small><b>${dayTxt}</b><span class="tr">${T('last:')} ${lastTxt}</span></div>`}
+   ${tblScore ? sbox('button', 'bTblScore', T('Table score'), [['NS', sv(tblScore.ins || 0)], ['EW', sv(tblScore.iew || 0)]], `IMP${tblScore.mpn ? ' · NS ' + Math.round(tblScore.mp / tblScore.mpn) + '%' : ''} · ${tblScore.n} ${T('boards')}${tblScore.wait ? ' ⏳' : ''}`) : cts ? sbox('div', '', T('Tournament') + (cts.pos ? ' · ' + cts.pos + '/' + cts.of : ''), [['IMP', cts.n ? sv(cts.imp) : sv(null)], ['MP', cts.n ? pctTxt(cts.pct.toFixed(1)) : pctTxt(null)]], cts.last ? T('last:') + ' ' + fmtSigned(cts.last.imp) + ' · ' + Math.round(cts.last.mp) + '%' : cts.n + ' ' + T('boards')) : sbox('div', '', T('Today'), [['IMP', per.scored ? sv(per.impSum) : sv(null)], ['MP', pctTxt(per.scored ? per.mpAvg : null)]], lastFoot)}
    <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button>
    <div class="spacer"></div>
    <div class="tools">
