@@ -74,7 +74,7 @@ const MENU=[
   ['Tournament',[['tables','🃏','Tables'],['players','👥','Players'],['boards','📊','Boards']]],
   ['Hands',[['!hands','🃏','Load hand file'],['!auto','🎲','Make the boards automatically']]],
   ['Old tournaments',[['hist','📜','Old tournaments']]],
-  ['Settings',[['!stall','⚠️','Slow table'],['setup','⚙️','Setup']]],
+  ['Settings',[['!stall','⚠️','Slow table']]],
   ['Data',[['!export','⬇','Export'],['!import','⬆','Import'],['!reset','🗑','Reset']]],
   ['Log',[['log','📋','Log']]]];
 const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.map(([g,items])=>`<optgroup label="${L(g)}">${items.map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}</optgroup>`).join('')}</select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
@@ -179,7 +179,7 @@ window.tdcFinish=async function(){
 // ── one table: its round (‹ ›), its pairs, each board (tap: its BridgeScore), not played, ADJ, delete — the running
 //    tournament or an archived one (TDC.arc) ──
 const D=()=>{ const A=TDC.arc!=null?getArchives()[TDC.arc]:null; return A?{a:A,s:A.state||{},B:A.boards||{},M:A.movements||{},P:A.pairs||{},AP:{}}:{a:null,s:getState(),B:getBoards(),M:getMovements(),P:getPairs(),AP:getApprovals()}; };
-const tdcPut=(k,v)=>{ if(TDC.arc!=null){ const A=getArchives(), x=A[TDC.arc]; if(!x) return; x.boards=x.boards||{}; if(v) x.boards[k]=v; else delete x.boards[k]; setArchives(A); return; } bmTdPut(k,v); };
+const tdcPut=async(k,v)=>{ if(TDC.arc!=null){ const a0=getArchives()[TDC.arc]; if(!a0) return; const j=await archiveChange(arcKey(a0),(A,i)=>{ const x=A[i]; x.boards=x.boards||{}; if(v) x.boards[k]=v; else delete x.boards[k]; }); if(j>=0) TDC.arc=j; return; } bmTdPut(k,v); };
 function drawTable(){
   const d=D(), s=d.s, t=TDC.t, top=d.a?(s.roundCount||1):(s.currentRound||1); TDC.r=Math.max(1,Math.min(top,TDC.r||top));
   const r=TDC.r, m=d.M[r+'_'+t]||{};
@@ -199,9 +199,9 @@ function drawTable(){
   frame((d.a?'📜 '+cleanData(s.name||'')+' · ':'')+L('Table')+' '+t,body,`<span></span><button class="bm3-ok" onclick="${d.a?"tdcGo('arc',{t:null,r:null})":"tdcGo('run',{t:null,r:null})"}">‹ ${d.a?L('Back'):L('All tables')}</button>`,sub);
 }
 window.tdcEdit=k=>{ const [t,r,b]=String(k).split('_').map(Number); if(TDC.arc!=null){ window._tdEdit={back:'admin',r,arc:TDC.arc}; bmTableNo=t; bmEnterBoard(b); return; } adminEditBoard(k); };
-window.tdcNP=k=>{ tdcPut(k,{contract:'Not played',notPlayed:true,status:'done',td:true,time:new Date().toISOString()}); addLog('warn','TD: not played',k); tdcDraw(); };
-window.tdcDel=async(k,b)=>{ if(!await confirmDialog(L('Delete this board result? It cannot be undone; the board is entered again.'),{title:L('Board')+' '+b,confirmLabel:L('Delete')})) return; tdcPut(k,null); addLog('warn','TD: result deleted',k); tdcDraw(); };
-window.tdcAdj=function(k,b){ const d=D(); bmAdjScreen(k,b,(ns,ew)=>{ tdcPut(k,{contract:`ADJ(${ns}/${ew})`,nsScore:ns,ewScore:ew,status:'done',adjusted:true,td:true,time:new Date().toISOString()}); addLog('warn','TD: adjusted score',k+' '+ns+'/'+ew); tdcDraw(); },()=>tdcDraw(),d.B[k]); };
+window.tdcNP=async k=>{ await tdcPut(k,{contract:'Not played',notPlayed:true,status:'done',td:true,time:new Date().toISOString()}); addLog('warn','TD: not played',k); tdcDraw(); };
+window.tdcDel=async(k,b)=>{ if(!await confirmDialog(L('Delete this board result? It cannot be undone; the board is entered again.'),{title:L('Board')+' '+b,confirmLabel:L('Delete')})) return; await tdcPut(k,null); addLog('warn','TD: result deleted',k); tdcDraw(); };
+window.tdcAdj=function(k,b){ const d=D(); bmAdjScreen(k,b,async(ns,ew)=>{ await tdcPut(k,{contract:`ADJ(${ns}/${ew})`,nsScore:ns,ewScore:ew,status:'done',adjusted:true,td:true,time:new Date().toISOString()}); addLog('warn','TD: adjusted score',k+' '+ns+'/'+ew); tdcDraw(); },()=>tdcDraw(),d.B[k]); };
 // the full panel's table buttons (Boards, ADJ) open the table on the BridgeScore
 { const ret=f0=>function(t){ if(role==='admin'&&tdcOn()){ TDC.tab=null; tdcGo('table',{t:+t,r:getState().currentRound||1}); return; } return f0.apply(this,arguments); };
   if(window.adminEditTable) window.adminEditTable=ret(window.adminEditTable);
@@ -212,6 +212,7 @@ window.tdcFree=async t=>{ await adminKickTable(t); tdcDraw(); };
 const dd=x=>{ const d=new Date(x||0); return isNaN(d)?'':String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); };
 function drawHist(){
   TDC.arc=null;
+  if(Date.now()-(TDC.histAt||0)>3000){ TDC.histAt=Date.now(); archivesFresh().then(()=>{ if(TDC.v==='hist') drawHist(); }); }
   const A=getArchives()||[];
   const body=A.length?`<div class="tdc-hist">${A.map((a,i)=>`<button class="tdc-hrow" onclick="tdcGo('arc',{arc:${i},t:null,r:null})"><b>${cleanData((a.state&&a.state.name)||L('Tournament'))}</b><span>${dd(a.finished)} · ${(a.state&&a.state.tableCount)||0} ${L('tables')} · ${(a.state&&a.state.roundCount)||0} ${L('rounds')}</span></button>`).join('')}</div>`:`<div class="bm3-note" style="padding:12px">${L('No archived tournaments')}</div>`;
   frame('📜 '+L('Old tournaments'),body,`<span></span><button class="bm3-ok" onclick="tdcGo('home')">‹ ${L('Back')}</button>`);
@@ -230,8 +231,8 @@ function drawArc(){
   frame('📜 '+cleanData(s.name||''),`<div class="bm3-note" style="padding:0 12px">${L('Tap a table to correct its boards and names; the ranking is worked out again.')}</div>${grid}`,`<span></span><button class="bm3-ok" onclick="tdcGo('hist')">‹ ${L('Old tournaments')}</button>`,sub);
 }
 window.tdcArcName=function(){ const a=getArchives()[TDC.arc]; if(!a) return; openModal('✏️ '+L('Rename'),`<div class="field"><label>${L('Tournament')}</label><input id="tdcArcN" maxlength="40" value="${cleanData((a.state&&a.state.name)||'')}"></div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcArcNameOk()">OK</button>`); };
-window.tdcArcNameOk=function(){ const v=(document.getElementById('tdcArcN').value||'').trim().slice(0,40); if(!v) return; const A=getArchives(), a=A[TDC.arc]; if(!a) return; a.state=a.state||{}; a.state.name=v; setArchives(A); addLog('ok','Archived tournament renamed',v); closeModal(); tdcDraw(); };
-window.tdcArcDel=async function(){ const n=(getArchives()||[]).length; await adminDeleteArchive(TDC.arc); if((getArchives()||[]).length<n){ TDC.arc=null; tdcGo('hist'); } };
+window.tdcArcNameOk=async function(){ const v=(document.getElementById('tdcArcN').value||'').trim().slice(0,40); if(!v) return; const a0=getArchives()[TDC.arc]; if(!a0) return; const j=await archiveChange(arcKey(a0),(A,i)=>{ A[i].state=A[i].state||{}; A[i].state.name=v; }); if(j>=0) TDC.arc=j; addLog('ok','Archived tournament renamed',v); closeModal(); tdcDraw(); };
+window.tdcArcDel=async function(){ const a0=getArchives()[TDC.arc]; if(!a0) return; const k=arcKey(a0); await adminDeleteArchive(TDC.arc); if(!(getArchives()||[]).some(x=>arcKey(x)===k)){ TDC.arc=null; tdcGo('hist'); } };
 
 // ── every tab of the full panel, inside the BridgeScore (the same boxes and buttons) ──
 const TABS={setup:['⚙️','Setup'],players:['👥','Players'],movement:['🔄','Movement'],tables:['🃏','Tables'],boards:['📊','Boards'],history:['📜','History'],log:['📋','Log']};

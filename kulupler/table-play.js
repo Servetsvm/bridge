@@ -977,7 +977,8 @@ window.saveBoardAndSendApproval=function(boardNo){
   }
 
   // the TD's correction: saved at once, back to where the TD came from
-  if(window._tdEdit&&bmArc()){ const k2=bmTableNo+'_'+bmRound()+'_'+boardNo, A=getArchives(), a=A[window._tdEdit.arc]; a.boards=a.boards||{}; a.boards[k2]={...boardData,status:'done',td:true,manualEdit:true,time:new Date().toISOString()}; setArchives(A); addLog('warn','TD: archived board corrected',(a.state&&a.state.name||'')+' '+k2+' '+(boardData.contract||'')); toast('✅ '+BM_L('Saved')); bmEntryCancel(); return; }
+  if(window._tdEdit&&bmArc()){ const k2=bmTableNo+'_'+bmRound()+'_'+boardNo, a0=bmArc(), bd={...boardData,status:'done',td:true,manualEdit:true,time:new Date().toISOString()};
+    (async()=>{ const j=await archiveChange(arcKey(a0),(A,i)=>{ const a=A[i]; a.boards=a.boards||{}; a.boards[k2]=bd; }); if(j>=0&&typeof TDC!=='undefined') TDC.arc=j; addLog('warn','TD: archived board corrected',(a0.state&&a0.state.name||'')+' '+k2+' '+(boardData.contract||'')); toast('✅ '+BM_L('Saved')); bmEntryCancel(); })(); return; }
   if(window._tdEdit){ const k2=bmTableNo+'_'+bmRound()+'_'+boardNo, bs=getBoards(); bs[k2]={...boardData,status:'done',td:true,manualEdit:true,time:new Date().toISOString()}; setBoards(bs); const A=getApprovals(); if(A[k2]){ delete A[k2]; setApprovals(A); } addLog('warn','TD: board corrected',k2+' '+(boardData.contract||'')); toast('✅ '+BM_L('Saved')); bmEntryCancel(); return; }
   // Store pending approval
   const aps=getApprovals();
@@ -1237,9 +1238,9 @@ window.tdSeatLook=function(){
 };
 window.tdSeatPick=async function(num){ const n=await memberName(num); if(n){ _tdN.seats[_tdN.k]=n.slice(0,40); tdNamesDraw(); } };
 window.tdSeatOk=async function(){ let v=(document.getElementById('tdpeInput')?.value||'').trim(); if(/^\d{1,8}$/.test(v)) v=(await memberName(v))||v; _tdN.seats[_tdN.k]=v.slice(0,40); tdNamesDraw(); };
-window.tdNamesSave=function(){
-  const e=_tdN, st=e.seats, A=e.arc!=null?getArchives():null, P=A?(A[e.arc].pairs||{}):getPairs();
-  if(e.ns&&P[e.ns]) P[e.ns].name=joinPairName(st.N,st.S); if(e.ew&&P[e.ew]) P[e.ew].name=joinPairName(st.E,st.W);
-  if(A) setArchives(A); else setPairs(P); PlayerDB.save([st.N,st.S,st.E,st.W].filter(Boolean)); addLog('ok','TD: names',joinPairName(st.N,st.S)+' vs '+joinPairName(st.E,st.W)); toast('✅ '+BM_L('Saved')); tdNamesBack();
+window.tdNamesSave=async function(){
+  const e=_tdN, st=e.seats, nm=P=>{ if(e.ns&&P[e.ns]) P[e.ns].name=joinPairName(st.N,st.S); if(e.ew&&P[e.ew]) P[e.ew].name=joinPairName(st.E,st.W); };
+  if(e.arc!=null){ const a0=getArchives()[e.arc]; if(a0){ const j=await archiveChange(arcKey(a0),(A,i)=>{ A[i].pairs=A[i].pairs||{}; nm(A[i].pairs); }); if(j>=0&&typeof TDC!=='undefined') TDC.arc=j; } }
+  else { const P=getPairs(); nm(P); setPairs(P); } PlayerDB.save([st.N,st.S,st.E,st.W].filter(Boolean)); addLog('ok','TD: names',joinPairName(st.N,st.S)+' vs '+joinPairName(st.E,st.W)); toast('✅ '+BM_L('Saved')); tdNamesBack();
 };
 window.tdNamesBack=function(){ const b=_tdN&&_tdN.back; _tdN=null; if(b==='admin'){ adminTab='tables'; renderAdminPanel(); } else bmTdMenu(_tdR); };

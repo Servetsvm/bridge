@@ -674,7 +674,7 @@ window.adminFinish=async function(){
   setState(s);
   setLive(false);
   setTableLocks({});   // the tables are free again
-  const arc=getArchives();
+  const arc=await archivesFresh();   // the newest copy: an older one could bring deleted tournaments back
   arc.unshift({state:{...s},boards:getBoards(),pairs:getPairs(),movements:getMovements(),hands:_cache['hands']||[],dd:_cache['dd']||{},finished:s._finishedAt});
   setArchives(arc);
   addLog('ok','Tournament finished & archived','');

@@ -180,6 +180,24 @@ const setMovements=m=>DB.set('movements',m);
 const getLogs=()=>_cache['logs']||[];
 const getArchives=()=>_cache['archives']||[];
 const setArchives=a=>DB.set('archives',a);
+// the archive is changed from its newest copy in the database: another device (or an older window) may have changed it
+// since this one loaded it, and writing an old copy back brought deleted tournaments back. A tournament is found by its
+// end time and name, not by its place in a list that may be old.
+const arcKey=a=>a?String(a.finished||(a.state&&a.state._finishedAt)||'')+'|'+String((a.state&&a.state.name)||''):'';
+async function archivesFresh(){
+  let v;
+  try{ const r=await fetch(await fbUrl('/archives.json'),{cache:'no-store'}); if(!r.ok) return getArchives()||[]; v=cleanData(await r.json()); }
+  catch(e){ return getArchives()||[]; }
+  const A=Array.isArray(v)?v.filter(Boolean):Object.values(v||{}).filter(Boolean);
+  _cache['archives']=A; return A;
+}
+// change one archived tournament (fn gets the fresh list and its place); its new place is returned (-1: it is gone)
+async function archiveChange(key,fn){
+  const A=await archivesFresh(), j=A.findIndex(a=>arcKey(a)===key);
+  if(j<0) return -1;
+  fn(A,j); await setArchives(A);
+  return A.findIndex(a=>arcKey(a)===key);
+}
 const getApprovals=()=>_cache['approvals']||{};
 const setApprovals=a=>DB.set('approvals',a);
 

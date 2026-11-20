@@ -717,7 +717,7 @@ window.adminDeleteArchive=async function(i){
   const arc=getArchives(), a=arc[i]; if(!a) return;
   const L=window.i18nText?i18nText:x=>x;
   if(!await confirmDialog(L('Delete the results of this tournament? Nobody can see them afterwards, and this cannot be undone.')+'\n\n'+(a.state&&a.state.name||'')+' · '+String(a.finished||'').slice(0,10),{title:'🗑',confirmLabel:L('Delete'),danger:true})) return;
-  arc.splice(i,1); await setArchives(arc);
+  await archiveChange(arcKey(a),(A,j)=>{ A.splice(j,1); });   // from the newest copy, found by its name and end time
   addLog('warn','Archived tournament deleted',(a.state&&a.state.name||'')+' '+String(a.finished||'').slice(0,10));
   toast('🗑 '+L('Deleted')); renderAdminTab();
 };
