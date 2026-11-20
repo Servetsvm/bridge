@@ -167,6 +167,13 @@ function cands(x) {
   if (pJust && (rhoPass || x.rhoCall === 'X') && pm.tag === 'trm') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the transfer' }); return L; }
   // Texas is completed even if the next opponent doubles it
   if (pJust && (rhoPass || x.rhoCall === 'X') && pm.tag === 'texas') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the Texas transfer' }); return L; }
+  // preference: I passed partner's opening, partner has now shown a second, lower suit at the two level in competition
+  // (1♥–P–P–1NT–2♦–P): with as many cards in the first suit, back to it — it is the longer one (♠Q53 ♥987 ♦T76 ♣K542: 2♥)
+  if (pJust && rhoPass && opening && opening.seat === p && !my.length && auc.some(e => e.seat === x.seat) && isNum(opening.call) && isNum(pLast.call) && pLast !== opening) {
+    const s1 = ST(opening.call), s2 = ST(pLast.call), om = opening.m || {};
+    if (LV(opening.call) === 1 && s1 < 4 && s2 < s1 && LV(pLast.call) === 2 && ((om.len || {})[s1] || 0) >= 4 && ((pm.len || {})[s2] || 0) >= 4)
+      add(B(2, s1), h => h.len[s1] >= 2 && h.len[s1] >= h.len[s2], { len: { [s1]: 2 }, t: 'Preference: back to partner\'s first suit, the longer one' });
+  }
   if (pLast && pm.tag === 'wjs' && pJust) { add('P', () => true, { t: 'Passing partner\'s weak suit' }); return L; }
   /* Gambling 3NT: pass or correct */
   if (pJust && pm.tag === 'poc') { add(B(4, 1), h => h.len[1] >= 7, { t: 'My long suit is diamonds' }); add('P', () => true, { t: 'My long suit is clubs' }); return L; }
@@ -446,6 +453,14 @@ function cands(x) {
       return L;
     }
     // Multi 2♦ (Polish Club): 2♥ = pass or correct, 2NT asks which major
+    // Muiderberg doubled and left in for penalty (2♠–P–P–X–P–P; not straight over a takeout double): no fit for the major, both minors — run to 3♣,
+    // pass or correct, opener's 4+ card minor (2♠X with ♠T ♥K7653 ♦9764 ♣Q32 opposite ♠J9432 ♣AT876: three down)
+    if ((o === B(2, 2) || o === B(2, 3)) && otag === 'muider' && opening === pLast) {
+      const after = auc.slice(auc.indexOf(opening) + 1);
+      if (x.rhoCall === 'P' && after.filter(e => e.call === 'X').length === 1 && after.every(e => e.call === 'P' || (e.call === 'X' && sideOf(e.seat) !== sideOf(x.seat)))) {
+        add(B(3, 0), h => h.len[os] <= 1 && h.len[0] >= 3 && h.len[1] >= 3, { len: { 0: 3, 1: 3 }, tag: 'mupc', cv: 'muider', t: 'Out of the double: pass or correct, play your minor' });
+      }
+    }
     if ((o === B(2, 2) || o === B(2, 3)) && otag === 'muider' && rhoPass && fresh) {
       add(B(4, os), h => h.len[os] >= 3 && (h.hcp >= 14 || (h.len[os] >= 4 && h.hcp >= 10)), { min: 10, len: { [os]: 3 }, tag: 'stop', cv: 'muider', t: 'Game: support for the major' });
       add(B(2, 4), h => h.hcp >= 14, { min: 14, tag: 'muask', cv: 'muider', f: 1, t: 'Muiderberg 2NT: which minor? (14+ HCP, forcing)' });

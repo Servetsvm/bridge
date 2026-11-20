@@ -208,7 +208,11 @@ function attitudeCard(g, seat, follow) {
   const ls = S(g.trick[0].c), mine = asc(follow);
   if (mine.length < 2 || !DEFF.att) return mine[0];
   const myAll = inSuit(g.hands[seat], ls).map(R);
+  // partner led an honour (the K from K Q, the Q from Q J): the next card of that run held here also says "go on"
+  // (♣K led, ♣J6532 here: encourage, not the 2)
+  const pr = g.trick[0].s === pd(seat) ? R(g.trick[0].c) : -1;
   const like = myAll.some(r => r >= 10 && isMaster(g, ls * 13 + r, seat)) || (myAll.includes(10) && myAll.includes(9)) ||
+    (pr >= 10 && pr <= 12 && myAll.includes(pr - 2)) ||
     (g.trump >= 0 && ls !== g.trump && mine.length === 2 && inSuit(g.hands[seat], g.trump).length > 0);
   const spots = mine.filter(c => R(c) <= 8 && !isMaster(g, c, seat));
   if (udOn(g, seat)) return like ? mine[0] : (spots.length >= 2 ? spots[spots.length - 1] : mine[0]);   // low = yes, high = no
@@ -921,6 +925,15 @@ function ddChoose(g, seat, leg, opt) {
     const sameAs = (a, b) => { const lo = Math.min(a, b), hi = Math.max(a, b); for (let k = lo + 1; k < hi; k++) if (!gone.has(k) && !mine.has(k)) return false; return true; };
     const q = all[1], rep = q != null && leg.find(r => S(r) === S(q) && sameAs(q, r));
     if (all.length >= 2 && R(all[0]) >= 10 && R(q) === R(all[0]) - 1 && isMaster(g, all[0], seat) && rep != null && tot.get(rep) >= bv - SIG_NEAR * n) return q;
+  }
+  // a defender following low to partner's lead: the attitude card (high = go on, low = no; Lav-Liten the other way)
+  // when the samples rate it about the same, not simply the lowest, which tells partner to stop (♣K led, ♣J6532: the 6)
+  if (DEFF.att && sideOf(seat) !== sideOf(g.contract.decl) && g.trick.length && g.trick[0].s === pd(seat) && S(best) === S(g.trick[0].c)) {
+    const ls = S(best), fol = g.hands[seat].filter(c => S(c) === ls), ac = attitudeCard(g, seat, fol);
+    const gone = new Set(g.history.flatMap(t => t.cards.map(x => x.c))), mine = new Set(g.hands[seat]);
+    const sameAs = (a, b) => { const lo = Math.min(a, b), hi = Math.max(a, b); for (let k = lo + 1; k < hi; k++) if (!gone.has(k) && !mine.has(k)) return false; return true; };
+    const rep = ac != null && leg.find(r => S(r) === ls && sameAs(ac, r));
+    if (rep != null && rep !== false && ac !== best && R(best) <= 8 && R(ac) <= 8 && tot.get(rep) >= bv - SIG_NEAR * n) best = ac;
   }
   // the lesson book (opt.lessons, learned from the robots' own mistakes, double dummy): of the cards the samples rate
   // about the same, the kind the book says does better in this kind of position

@@ -2269,6 +2269,43 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
   body.bg-device #panelContent{border:0!important;border-radius:0 0 14px 14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
   body.bg-device .login-box{border:0!important;border-radius:14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
 }
+/* Clubs opens full screen (its content in the middle on a wide screen) */
+#ov:has(.sheet[data-ov="clubs"]){padding:0}
+.sheet[data-ov="clubs"]{width:100%;max-width:none;height:100%;max-height:none;border-radius:0;box-sizing:border-box;padding:16px max(16px,calc((100% - 760px)/2)) 24px;overflow:auto}
+.sheet[data-ov="clubs"] .fbar{display:none}
+/* Clubs: the list of clubs fills the screen (more clubs, smaller rows); a club tapped fills it alone */
+.sheet[data-ov="clubs"]{display:flex;flex-direction:column}
+.clubsfs{flex:1;display:flex;flex-direction:column;gap:10px;min-height:0}
+.clubsfs h2{margin:0}
+.clubsfs .clubrow{margin:0}
+.clubsfs.list .clubrow{flex:1 1 0;min-height:56px;max-height:220px;display:flex;align-items:stretch;padding:0 14px}
+.clubsfs.list .clubname{flex:1;padding:0}
+.clubsfs.list .clubname b{font-size:clamp(17px,min(calc(40vh / var(--n)),6vw),40px)}
+.clubsfs.list .clubname small{font-size:clamp(12px,calc(16vh / var(--n)),18px)}
+.clubsfs.one .clubrow{flex:1;display:flex;flex-direction:column;gap:12px;padding:12px 14px}
+.clubsfs.one .clubname b{font-size:clamp(22px,4.5vh,36px)}
+.clubsfs.one .clubrow > .row2 .btn{min-height:min(18vh,120px);font-size:clamp(18px,3vh,26px)}
+.clubsfs.one .clubtools{flex:1;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-content:stretch;margin-top:0}
+.clubsfs.one .clubtools .btn{min-height:min(16vh,120px);font-size:clamp(16px,2.6vh,22px)}
+.clubsfs.one .clubarr{display:none}
+.clubsfs .row2{margin-top:0}
+/* Clubs: the bottom buttons larger, in the cards' colours (‹ Clubs green, Close white with a green edge) */
+.clubsfs > .row2{gap:10px}
+.clubsfs > .row2 .btn{min-height:58px;font-size:18px;font-weight:800;border-radius:14px;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.clubsfs > .row2 .btn[data-clubopen]{background:#1f5d36!important;color:#fff!important;border:2px solid #174a2b!important}
+.clubsfs > .row2 #oClose{background:#fff!important;color:#1f5d36!important;border:2px solid #1f5d36!important}
+.clubsfs .clubrow > .row2 .btn[data-clubplay]{background:#1f5d36!important;color:#fff!important;border:2px solid #174a2b!important;border-radius:14px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+/* each club its own colour */
+.clubrow.cc0,:root[data-theme="dark"] .clubrow.cc0{background:linear-gradient(#ffe27a,#f2c230);border-color:#b8901a;color:#2a2108}
+.clubrow.cc1,:root[data-theme="dark"] .clubrow.cc1{background:linear-gradient(#a8e0b8,#6fc48a);border-color:#2e7d4f;color:#10301c}
+.clubrow.cc2,:root[data-theme="dark"] .clubrow.cc2{background:linear-gradient(#b9d7f7,#7fb2ea);border-color:#2f6fb3;color:#0e2742}
+.clubrow.cc3,:root[data-theme="dark"] .clubrow.cc3{background:linear-gradient(#ffc9a8,#f59b6e);border-color:#b8582a;color:#3a1708}
+.clubrow.cc4,:root[data-theme="dark"] .clubrow.cc4{background:linear-gradient(#d9c6f5,#b496e8);border-color:#6d48b0;color:#24113f}
+.clubrow.cc5,:root[data-theme="dark"] .clubrow.cc5{background:linear-gradient(#a9e6e2,#62c7c0);border-color:#21837c;color:#0b2e2b}
+.clubrow[class*="cc"] .muted{color:inherit;opacity:.8}
+.clubrow.live,:root[data-theme="dark"] .clubrow.live{border:3px solid #1f5d36!important}
+
+.clubsfs .clubsa{min-height:48px;border-radius:14px;background:#2a2108!important;color:#ffe27a!important;border:2px solid #b8901a!important;font-weight:800}
 
 </style>
 
@@ -2643,6 +2680,13 @@ function cands(x) {
   if (pJust && (rhoPass || x.rhoCall === 'X') && pm.tag === 'trm') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the transfer' }); return L; }
   // Texas is completed even if the next opponent doubles it
   if (pJust && (rhoPass || x.rhoCall === 'X') && pm.tag === 'texas') { add(pm.to, () => true, { tag: 'trc', cv: pm.cv, t: 'Completing the Texas transfer' }); return L; }
+  // preference: I passed partner's opening, partner has now shown a second, lower suit at the two level in competition
+  // (1♥–P–P–1NT–2♦–P): with as many cards in the first suit, back to it — it is the longer one (♠Q53 ♥987 ♦T76 ♣K542: 2♥)
+  if (pJust && rhoPass && opening && opening.seat === p && !my.length && auc.some(e => e.seat === x.seat) && isNum(opening.call) && isNum(pLast.call) && pLast !== opening) {
+    const s1 = ST(opening.call), s2 = ST(pLast.call), om = opening.m || {};
+    if (LV(opening.call) === 1 && s1 < 4 && s2 < s1 && LV(pLast.call) === 2 && ((om.len || {})[s1] || 0) >= 4 && ((pm.len || {})[s2] || 0) >= 4)
+      add(B(2, s1), h => h.len[s1] >= 2 && h.len[s1] >= h.len[s2], { len: { [s1]: 2 }, t: 'Preference: back to partner\'s first suit, the longer one' });
+  }
   if (pLast && pm.tag === 'wjs' && pJust) { add('P', () => true, { t: 'Passing partner\'s weak suit' }); return L; }
   /* Gambling 3NT: pass or correct */
   if (pJust && pm.tag === 'poc') { add(B(4, 1), h => h.len[1] >= 7, { t: 'My long suit is diamonds' }); add('P', () => true, { t: 'My long suit is clubs' }); return L; }
@@ -2922,6 +2966,14 @@ function cands(x) {
       return L;
     }
     // Multi 2♦ (Polish Club): 2♥ = pass or correct, 2NT asks which major
+    // Muiderberg doubled and left in for penalty (2♠–P–P–X–P–P; not straight over a takeout double): no fit for the major, both minors — run to 3♣,
+    // pass or correct, opener's 4+ card minor (2♠X with ♠T ♥K7653 ♦9764 ♣Q32 opposite ♠J9432 ♣AT876: three down)
+    if ((o === B(2, 2) || o === B(2, 3)) && otag === 'muider' && opening === pLast) {
+      const after = auc.slice(auc.indexOf(opening) + 1);
+      if (x.rhoCall === 'P' && after.filter(e => e.call === 'X').length === 1 && after.every(e => e.call === 'P' || (e.call === 'X' && sideOf(e.seat) !== sideOf(x.seat)))) {
+        add(B(3, 0), h => h.len[os] <= 1 && h.len[0] >= 3 && h.len[1] >= 3, { len: { 0: 3, 1: 3 }, tag: 'mupc', cv: 'muider', t: 'Out of the double: pass or correct, play your minor' });
+      }
+    }
     if ((o === B(2, 2) || o === B(2, 3)) && otag === 'muider' && rhoPass && fresh) {
       add(B(4, os), h => h.len[os] >= 3 && (h.hcp >= 14 || (h.len[os] >= 4 && h.hcp >= 10)), { min: 10, len: { [os]: 3 }, tag: 'stop', cv: 'muider', t: 'Game: support for the major' });
       add(B(2, 4), h => h.hcp >= 14, { min: 14, tag: 'muask', cv: 'muider', f: 1, t: 'Muiderberg 2NT: which minor? (14+ HCP, forcing)' });
@@ -3930,7 +3982,11 @@ function attitudeCard(g, seat, follow) {
   const ls = S(g.trick[0].c), mine = asc(follow);
   if (mine.length < 2 || !DEFF.att) return mine[0];
   const myAll = inSuit(g.hands[seat], ls).map(R);
+  // partner led an honour (the K from K Q, the Q from Q J): the next card of that run held here also says "go on"
+  // (♣K led, ♣J6532 here: encourage, not the 2)
+  const pr = g.trick[0].s === pd(seat) ? R(g.trick[0].c) : -1;
   const like = myAll.some(r => r >= 10 && isMaster(g, ls * 13 + r, seat)) || (myAll.includes(10) && myAll.includes(9)) ||
+    (pr >= 10 && pr <= 12 && myAll.includes(pr - 2)) ||
     (g.trump >= 0 && ls !== g.trump && mine.length === 2 && inSuit(g.hands[seat], g.trump).length > 0);
   const spots = mine.filter(c => R(c) <= 8 && !isMaster(g, c, seat));
   if (udOn(g, seat)) return like ? mine[0] : (spots.length >= 2 ? spots[spots.length - 1] : mine[0]);   // low = yes, high = no
@@ -4643,6 +4699,15 @@ function ddChoose(g, seat, leg, opt) {
     const sameAs = (a, b) => { const lo = Math.min(a, b), hi = Math.max(a, b); for (let k = lo + 1; k < hi; k++) if (!gone.has(k) && !mine.has(k)) return false; return true; };
     const q = all[1], rep = q != null && leg.find(r => S(r) === S(q) && sameAs(q, r));
     if (all.length >= 2 && R(all[0]) >= 10 && R(q) === R(all[0]) - 1 && isMaster(g, all[0], seat) && rep != null && tot.get(rep) >= bv - SIG_NEAR * n) return q;
+  }
+  // a defender following low to partner's lead: the attitude card (high = go on, low = no; Lav-Liten the other way)
+  // when the samples rate it about the same, not simply the lowest, which tells partner to stop (♣K led, ♣J6532: the 6)
+  if (DEFF.att && sideOf(seat) !== sideOf(g.contract.decl) && g.trick.length && g.trick[0].s === pd(seat) && S(best) === S(g.trick[0].c)) {
+    const ls = S(best), fol = g.hands[seat].filter(c => S(c) === ls), ac = attitudeCard(g, seat, fol);
+    const gone = new Set(g.history.flatMap(t => t.cards.map(x => x.c))), mine = new Set(g.hands[seat]);
+    const sameAs = (a, b) => { const lo = Math.min(a, b), hi = Math.max(a, b); for (let k = lo + 1; k < hi; k++) if (!gone.has(k) && !mine.has(k)) return false; return true; };
+    const rep = ac != null && leg.find(r => S(r) === ls && sameAs(ac, r));
+    if (rep != null && rep !== false && ac !== best && R(best) <= 8 && R(ac) <= 8 && tot.get(rep) >= bv - SIG_NEAR * n) best = ac;
   }
   // the lesson book (opt.lessons, learned from the robots' own mistakes, double dummy): of the cards the samples rate
   // about the same, the kind the book says does better in this kind of position
@@ -13132,6 +13197,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 589, tr: 'Oyuncuların notlarından üç şey öğrendim. Açışını pas geçtiğim ortak rekabette ikinci, daha düşük rengini söylerse (1♥–pas–pas–1SA–2♦), iki renkte eşit kartım varsa ilk renge dönüyorum: ♠Q53 ♥987 ♦T76 ♣K542 ile 2♥ (açanın ilk rengi daha uzundur). Ortağın Muiderberg açışı kontr edilip ceza pası gelirse, majörde 0–1 kart ve iki minörde 3’er kartla 3♣ (pas ya da düzelt) ile kaçıyorum: 2♠X üç down yerine minörde oynanıyor. Ortağın onörlü atağında (♣K, ♣Q, ♣A) dizinin sıradaki kartı bendeyse (♣J6532) en küçüğü değil “devam et” kartını veriyorum (♣6). 3.000’er elde denendi, robot masalarında kayıp yok.', en: 'Three things learned from players’ notes. When partner, whose opening I passed, bids a second lower suit in competition (1♥–P–P–1NT–2♦), with equal length I go back to the first suit (2♥ with ♠Q53 ♥987 ♦T76 ♣K542). When partner’s Muiderberg is doubled and left in, with 0–1 cards in the major and three of each minor I run to 3♣, pass or correct. Under partner’s honour lead, holding the next card of the run (♣J6532 under the ♣K), I encourage (♣6) rather than play the lowest.' },
   { v: 475, tr: 'Bütün konvansiyonları her sistemde 3.000’er elde denedim. Gambling 3SA kartında açıksa artık gerçekten açıyorum (sağlam 7’li minör 1♣/1♦ ile açılıyordu, 3SA hiç çıkmıyordu). Ortağım bir renkte oyuna çıktıktan sonra (1SA–2♦–2♥–3♦–4♥–4SA) bir oyuncunun 4SA’sı artık o renkte RKCB diye açıklanıyor, kantitatif değil.', en: 'I tried every convention in every system on 3,000 deals each. With Gambling 3NT on your card I now really open it (a solid seven-card minor was opened 1♣/1♦, so 3NT never came). After partner bids game in a suit (1NT–2♦–2♥–3♦–4♥–4NT) a player’s 4NT is now read as RKCB in that suit, not quantitative.' },
   { v: 460, tr: 'Uyum belli değilken 5’li renkle oyuna atlamıyorum, davet ediyorum: 1♦–1♠–1SA ile ♠AKQ84 ♥973 ♦95 ♣A76: 4♠ değil 3♠; ortak uyumsuz bir renk söylediyse 5’li kupamla 4♥’e çıkmıyorum. 9.000 elde eski robotlarla yarıştırıldı: +131 IMP. Denenip kaybettirdiği için alınmayanlar: kontraya cevapta oyuna atlamamak (−67 IMP) ve 6’lı minör desteğiyle 1SA yerine yükseltmek.', en: 'With no known fit I no longer jump to game in a five-card suit, I invite: 1♦–1♠–1NT with ♠AKQ84 ♥973 ♦95 ♣A76: 3♠, not 4♠; after partner names a suit that does not fit, no 4♥ on my five hearts. Played against the old robots on 9,000 deals: +131 IMP. Tried and left out because they lost: no game jump when answering a takeout double (−67 IMP), and raising partner’s minor with six instead of 1NT.' },
   { v: 459, tr: 'Minörde 4’ü artık “oyun” diye açıklamıyorum: 4♣/4♦ davettir, oyun 5’tir; oyuna zorlayan dizide doğrudan 5♣/5♦ diyorum (1♥–2♣–2♥ ile ♠987 ♥J ♦AJ2 ♣AJ9653: 4♣ = davet). 3.000 elde denendi; 3SA’ya daha sık geçmek ve rakibin oyununun üstünde 5’e çıkmak IMP kaybettirdiği için alınmadı.', en: 'I no longer explain four of a minor as game: 4♣/4♦ invites, game is five; in a game-forcing auction I bid 5♣/5♦ at once (1♥–2♣–2♥ with ♠987 ♥J ♦AJ2 ♣AJ9653: 4♣ invites). Tried on 3,000 deals: going to 3NT more often and pushing to five over their game lost IMPs, so they were left out.' },
@@ -13955,6 +14021,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
   if (t.dataset.clubmov) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubmov) + '&movement=1'); return; }
   if (t.dataset.clubscr) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubscr) + '&role=screen'); return; }
+  if (t.id === 'clubSuper') { closeOv(); openClubs('?sa=1'); return; }   // the super admin's sign-in (only he sees the button)
   if (t.dataset.clubplay) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubplay)); return; }
   if (t.dataset.clubres) { window.open(location.pathname + '?kulup=' + encodeURIComponent('?club=' + t.dataset.clubres + '&results=1'), '_blank'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
@@ -14573,7 +14640,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-13T20:35:01Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-20T18:55:18Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {
@@ -14664,12 +14731,14 @@ async function showClubs() {
     const otCard = x => `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`;
     const otRows = c => otOf(c).map(otCard).join('');
     const otLive = c => otOf(c).find(x => x.plan);   // an online evening being played: the club's tournament now
-    const rows = L.map(t => `<div class="clubrow${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
-      (ui.clubOpen !== t.club ? '' : (t.tb ? `<div class="row2"><button class="btn gold" data-clubplay="${esc(t.club)}">🪑 ${T('Players')}</button></div>` : otLive(t.club) ? '' : `<div class="muted">${T('No tournament at this club now.')}</div>`) +
+    const shown = ui.clubOpen ? L.filter(t => t.club === ui.clubOpen) : L;   // a club tapped: only that club, full screen
+    const clubCol = id => { let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h % 6; };   // each club its own colour (always the same)
+    const rows = shown.map(t => `<div class="clubrow cc${clubCol(t.club)}${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
+      (ui.clubOpen !== t.club ? '' : (t.tb ? `<div class="row2"><button class="btn gold" data-clubplay="${esc(t.club)}">🪑 ${T('Table No')}</button></div>` : otLive(t.club) ? '' : `<div class="muted">${T('No tournament at this club now.')}</div>`) +
         (x => `<div class="row4 clubtools ct4"><button class="btn" data-clubadmin="${esc(t.club)}">🧑‍⚖️ ${T('TD')}</button>` + (x ? `<button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button>` : `<button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button>`) + `<button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button><button class="btn" data-clubres="${esc(t.club)}">📄 ${T('Results')}</button></div>`)(otLive(t.club))) + `</div>`).join('');
-    openOv('clubs', `<h2>🏛 ${T('Clubs')}</h2>
+    openOv('clubs', `<div class="clubsfs ${ui.clubOpen ? 'one' : 'list'}" style="--n:${Math.max(1, shown.length)}"><h2>🏛 ${T('Clubs')}</h2>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}
-      <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+      <div class="row2">${ui.clubOpen ? `<button class="btn" data-clubopen="${esc(ui.clubOpen)}">‹ ${T('Clubs')}</button>` : ''}<button class="btn" id="oClose">${T('Close')}</button></div>${!ui.clubOpen && typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn clubsa" id="clubSuper">🛡️ ${T('Super admin')}</button>` : ''}</div>`);
   };
   if (ui.overlay !== 'clubs') ui.clubLive = null;
   if (typeof ctLoad === 'function') ctLoad(true).then(() => { if (ui.overlay === 'clubs') draw(); });
@@ -14706,6 +14775,8 @@ function openClubs(q) {
   v.hidden = false; document.body.classList.add('clubsopen');
   try { if (!(history.state && history.state.clubs)) history.pushState({ clubs: 1 }, ''); } catch (e) {}
 }
+// the clubs program's club picture: back to the Clubs page with that club open
+window.openClubCard = id => { closeClubs(); ui.clubOpen = id || null; showClubs(); };
 function closeClubs() { const v = $('clubView'); if (!v || v.hidden) return; v.hidden = true; $('cvFrame').replaceWith(Object.assign(document.createElement('iframe'), { id: 'cvFrame' })); document.body.classList.remove('clubsopen'); if (typeof needGate === 'function' && needGate()) showGate(); }
 window.addEventListener('popstate', () => { if (!(history.state && history.state.clubs)) closeClubs(); });
 /* the administrator deletes score history: the players listed (himself too), the ticked ones' boards removed */
