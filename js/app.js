@@ -169,22 +169,8 @@ function mergeCloud(recs, settings) {
   save(); render();
 }
 
-/* ================= device sync (GitHub gist) ================= */
-let syncTimer = null;
-const syncState = { msg: "" };
-function syncNow(quiet) {
-  if (!GitSync.enabled) return;
-  if (!navigator.onLine) { syncState.msg = "Offline — will sync when back online"; return; }
-  syncState.msg = "Syncing…"; if (ui.overlay === "set") showSettings();
-  GitSync.sync({ hist: HIST, seen: [...SEEN] }).then(m => {
-    if (!m) return;
-    HIST = m.hist.filter(h => !oldSeason(h)); SEEN = new Set(m.seen); saveSeen();
-    BOARD = Math.max(BOARD, ...HIST.map(h => h.board || 0));
-    syncState.msg = "Synced " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    save(); renderBar(); if (ui.overlay === "set") showSettings(); else if (ui.overlay === "res") showResults();
-  }).catch(e => { syncState.msg = e.message === "offline" ? "Offline — will sync when back online" : "Sync failed: " + e.message; if (ui.overlay === "set") showSettings(); });
-}
-function scheduleSync() { clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(true), 2500); if (typeof Net !== "undefined" && Net.cloudSyncSoon) Net.cloudSyncSoon(); }
+/* ================= sync with the online database (after each board) ================= */
+function scheduleSync() { if (typeof Net !== "undefined" && Net.cloudSyncSoon) Net.cloudSyncSoon(); }
 
 /* ================= virtual field (background worker) ================= */
 /* the virtual field: 4 expert robot tables play the same deal in a background worker;
@@ -3708,9 +3694,6 @@ document.addEventListener('click', ev_ => {
     case 'lFab': showLChat(); break;
     case 'oClose': closeOv(); break;
     case 'sReset': if (typeof Net !== 'undefined' && Net.isAdmin()) showWipe(); break;   // the administrator only: whose history
-    case "sSave": { const v = ($("syncToken") || {}).value; if (v) { GitSync.setToken(v); syncState.msg = ""; syncNow(); showSettings(); } break; }
-    case "sNow": syncNow(); break;
-    case "sOff": GitSync.setToken(null); syncState.msg = ""; showSettings(); break;
     case "oNext": if (guest()) { Net.send({ t: "next" }); closeOv(); } else if (G && G.tour) { closeOv(); nextTourBoard(); } else newBoard(); break;
     case 'tNew': { const t = Net.newTour(8); ui.tsel = null; render(); showTourSetup(t.id); break; }
     case 'tAddBtn': { const i = $('tAdd'), v = i && i.value.trim().slice(0, 20); if (v && ui.tsel) { ui.tsel.names.add(v); showTourSetup(ui.tsetId); } break; }
@@ -3840,8 +3823,6 @@ function start(data) {
     if (kq != null) { try { history.replaceState(null, '', location.pathname); } catch (e) {} openClubs(kq); }
     const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (kq != null) return; if (needGate()) { if (kf) ui.fbLater = kf; showGate(); } else if (kf) fbOpen(kf); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
   Store.initCloud(mergeCloud);
-  syncNow(true);
-  window.addEventListener("online", () => syncNow(true));
   // installable/offline app when served from a normal web address
   if ('serviceWorker' in navigator && document.querySelector('link[rel=manifest]') && /^https?:$/.test(location.protocol) && !/claude/.test(location.hostname)) {
     /* a new version: switched to at a quiet moment — not in the middle of bidding or play, not at an online table (the
