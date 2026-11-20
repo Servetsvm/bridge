@@ -55,6 +55,11 @@ window.bmSeatSave=t=>{ try{ if(role!=='table'||!CLUB_ID||!window._bgCode) return
 window.bmSeatForget=()=>{ try{ localStorage.removeItem('bg_seat:'+CLUB_ID); }catch(e){} };
 // the TD's screen hears the tables' calls (once)
 window.tdCallsWatch=()=>{ if(window._tdWatch) return; window._tdWatch=true; DB.subscribe('tdcalls',v=>{ if(typeof tdCallsShow==='function') tdCallsShow(v); }); };
+// the club's picture on the BridgeScore: Bridge Table's Clubs page with this club open (its Table No, TD, results)
+window.bgToClubs=function(){
+  try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ const id=CLUB_ID; P.setTimeout(()=>{ if(typeof P.openClubCard==='function') P.openClubCard(id); else { P.closeClubs(); if(typeof P.showClubs==='function') P.showClubs(); } },0); return; } }catch(e){}
+  location.href='../';
+};
 window.tdName=()=>{ const u=me(); return (u&&u.name)||''; };
 
 function showLoginForm(clubName){
@@ -625,7 +630,7 @@ function refreshTopbar(){
   // a table's device bar: the club and the tournament, the table and the round
   const bar=document.getElementById('bmDevBar');
   const MV={mitchell:'Mitchell',howell:'Howell',barometer:'Barometer',swiss:'Swiss',social:'Social Bridge',team:'Team match'}, mvn=s.movement&&MV[s.movement]?(window.i18nText?i18nText(MV[s.movement]):MV[s.movement]):'';
-  if(bar) bar.innerHTML=`<span class="td">🏛</span><div class="ev"><b>${cleanData(CLUB_NAME||'')}${s.name?' · '+cleanData(s.name):''}${mvn?' · '+mvn:''}</b>${bmTableNo?'Table '+bmTableNo:''}${bmTableNo&&s.currentRound?' – ':''}${s.currentRound?'Round '+s.currentRound:''}</div>${typeof bmBarBtns==='function'?bmBarBtns():''}`;
+  if(bar) bar.innerHTML=`<button type="button" class="td bg-toclub" onclick="bgToClubs()" title="${window.i18nText?i18nText('Clubs'):'Clubs'}">🏛</button><div class="ev"><b>${cleanData(CLUB_NAME||'')}${s.name?' · '+cleanData(s.name):''}${mvn?' · '+mvn:''}</b>${bmTableNo?'Table '+bmTableNo:''}${bmTableNo&&s.currentRound?' – ':''}${s.currentRound?'Round '+s.currentRound:''}</div>${typeof bmBarBtns==='function'?bmBarBtns():''}`;
 }
 
 // ══════════════════════════════════════════════════════

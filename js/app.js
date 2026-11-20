@@ -4321,6 +4321,8 @@ function openClubs(q) {
   v.hidden = false; document.body.classList.add('clubsopen');
   try { if (!(history.state && history.state.clubs)) history.pushState({ clubs: 1 }, ''); } catch (e) {}
 }
+// the clubs program's club picture: back to the Clubs page with that club open
+window.openClubCard = id => { closeClubs(); ui.clubOpen = id || null; showClubs(); };
 function closeClubs() { const v = $('clubView'); if (!v || v.hidden) return; v.hidden = true; $('cvFrame').replaceWith(Object.assign(document.createElement('iframe'), { id: 'cvFrame' })); document.body.classList.remove('clubsopen'); if (typeof needGate === 'function' && needGate()) showGate(); }
 window.addEventListener('popstate', () => { if (!(history.state && history.state.clubs)) closeClubs(); });
 /* the administrator deletes score history: the players listed (himself too), the ticked ones' boards removed */

@@ -748,3 +748,6 @@ html.embed body.bg-device .login-logo{display:block!important}
 .tdc-auto{align-self:center;font-size:.85rem;color:#55606b;text-align:center;font-weight:600}
 
 body.bg-device #panelContent > .bm3.tdc .bm3-bar{display:grid}
+
+.bm-devbar .bg-toclub{border:0;color:#fff;font:inherit;cursor:pointer}
+.bm-devbar .bg-toclub:hover{filter:brightness(1.15)}
