@@ -2301,3 +2301,7 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .box.cbox .cc.dec{background:rgba(217,178,92,.35)}
 .box.cbox .sl{font-size:11px}
 @media (max-width:560px){.box.cbox{min-width:92px}.box.cbox .cct{font-size:16px}.box.cbox .cc b{font-size:13px}.box.cbox .sl,.box.cbox .cc i{font-size:9px}.box.cbox .ccs{padding:1px 3px 0;gap:2px}}
+
+/* a compact bidding area: the auction pad and the bidding box no wider than they need (narrow screens: full width) */
+#table.bidding .auction,#table.bidding .expl{width:min(100%,430px)}
+#bidbox{max-width:480px}
