@@ -38,8 +38,9 @@ function frame(title,body,actions,sub){
     ${sub||''}
     <div class="bm3-body">${body}</div>
     <div class="bm3-actions">${actions||''}</div></div></div>`;
+  if(TDC.v!=='tab') tdcFill(false);   // the menu's chosen section, drawn into its box
 }
-window.tdcGo=(v,o)=>{ Object.assign(TDC,{v},o||{}); tdcDraw(); };
+window.tdcGo=(v,o)=>{ Object.assign(TDC,{v},o||{}); tdcDraw(); tdcFill(false); };
 function tdcDraw(){
   const s=getState();
   if(TDC.v==='setup') return drawSetup();
@@ -50,7 +51,7 @@ function tdcDraw(){
   if(s.status==='running'&&s.tableCount>0) return drawRun();
   return drawHome();
 }
-window.tdcDraw=tdcDraw;
+window.tdcDraw=function(){ tdcDraw(); tdcFill(false); };
 
 // ── no tournament (the setup, all on this one screen), one set up, or one finished ──
 function drawHome(){ TDC.arc=null;
@@ -62,7 +63,11 @@ function drawHome(){ TDC.arc=null;
     <div class="tdc-tools"><button class="btn" onclick="tdcSetupStart()">↺ ${L('Set up again')}</button><button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button><button class="btn" onclick="ccResultsIndex()">📄 ${L('Results')}</button></div>${moreHtml()}${menuHtml()}`;
   frame(L('Ready to start'),body,`<button class="bm3-cancel" onclick="tdcSetupStart()">↺</button><button class="bm3-ok" onclick="tdcStart()">▶ ${L('Start round 1')}</button>`);
 }
-const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-tools">${[['setup','⚙️','Setup'],['players','👥','Players'],['movement','🔄','Movement'],['tables','🃏','Tables'],['boards','📊','Boards'],['log','📋','Log']].map(([k,i,n])=>`<button class="btn" onclick="tdcTab('${k}')">${i} ${L(n)}</button>`).join('')}<button class="btn" onclick="tdcGo('hist')">📜 ${L('Old tournaments')}</button><button class="btn" onclick="openPlayerRegistry()">📇 ${L('Player list')}</button><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>`;
+const MENU=[['setup','⚙️','Setup'],['players','👥','Players'],['movement','🔄','Movement'],['tables','🃏','Tables'],['boards','📊','Boards'],['history','📜','History'],['log','📋','Log']];
+const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}<option value="hist">✏️ ${L('Old tournaments')}</option><option value="plist">📇 ${L('Player list')}</option></select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
+// the chosen section drawn into its box (the full panel's own content and buttons)
+function tdcFill(scroll){ const c=document.getElementById('adminContent'); if(!c||!TDC.tab) return; adminTab=TDC.tab; _rat(); if(scroll) c.scrollIntoView({behavior:'smooth',block:'start'}); }
+window.tdcPick=function(v){ if(v==='hist'){ TDC.tab=null; tdcGo('hist'); return; } if(v==='plist'){ openPlayerRegistry(); tdcDraw(); return; } TDC.tab=v||null; tdcDraw(); tdcFill(true); };
 const moreHtml=()=>{ const s=getState(), h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>
   <div class="bm3-step">${L('More')}</div><div class="tdc-tools"><button class="btn" onclick="tdcStall()">⚠️ ${L('Slow table')}: ${s.stallAlertMinutes||15} min</button><button class="btn" onclick="adminExport()">⬇ ${L('Export')}</button><button class="btn" onclick="adminImportOpen()">⬆ ${L('Import')}</button><button class="btn tdc-red" onclick="adminReset()">🗑 ${L('Reset')}</button></div>`; };
 window.tdcStall=function(){ const s=getState(); openModal('⚠️ '+L('Slow table'),`<div class="field"><label>${L('Alarm when a table has entered no score for this many minutes')}</label><input type="number" id="tdcStallMin" min="1" max="90" value="${s.stallAlertMinutes||15}"></div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcStallOk()">OK</button>`); };
@@ -97,7 +102,7 @@ function drawSetup(fin){
   const w=TDC.w, again=TDC.v==='setup', fs=getState().status==='finished';
   const body=`${fs&&!again?`<div class="tdc-finrow">🏁 ${L('Tournament finished')} <button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>`:''}
     <div class="bm3-step">${L('Movement')}</div>
-    <div class="tdc-movs">${MOVS.map(([k,n,d])=>`<button class="bm3-key${w.mov===k?' active':''}" onclick="tdcSet1('mov','${k}')"><b>${L(n)}</b><small>${L(d)}</small></button>`).join('')}</div>
+    <div class="tdc-pick"><select class="tdc-sel" onchange="tdcSet1('mov',this.value)">${MOVS.map(([k,n,d])=>`<option value="${k}"${w.mov===k?' selected':''}>${L(n)} — ${L(d)}</option>`).join('')}</select></div>
     <div class="bm3-step">${L('Number of players')}</div>${stepper('players',[8,12,16,20,24,28,32])}
     ${w.mov==='social'?`<div class="bm3-step">${L('Number of boards')}</div>${stepper('soc',[12,16,20,24,28,32])}`
       :`<div class="bm3-step">${L('Boards per round')}</div><div class="bm3-keys k4">${[1,2,3,4,5,6,7,8].map(n=>`<button class="bm3-key${w.bpr===n?' active':''}" onclick="tdcSet1('bpr',${n})">${n}</button>`).join('')}</div>`}
@@ -109,6 +114,7 @@ function drawSetup(fin){
 // the same setup as the full panel's form: its boxes, filled in out of sight
 window.tdcCreate=async function(){
   const w=TDC.w; if(!w) return;
+  if(TDC.tab){ TDC.tab=null; const c=document.getElementById('adminContent'); if(c) c.remove(); }
   const box=document.createElement('div'); box.style.display='none'; box.id='tdcForm';
   box.innerHTML=`<input id="aName"><select id="aMovement"><option value="${w.mov}" selected>${w.mov}</option></select><input id="aBPR" value="${w.bpr}"><input id="aPlayers" value="${+w.players||0}"><input id="aSocBoards" value="${+w.soc||0}"><input id="aSwissRounds" value="${+w.swr||0}">`;
   document.body.appendChild(box);
@@ -210,7 +216,7 @@ window.tdcArcDel=async function(){ const n=(getArchives()||[]).length; await adm
 
 // ── every tab of the full panel, inside the BridgeScore (the same boxes and buttons) ──
 const TABS={setup:['⚙️','Setup'],players:['👥','Players'],movement:['🔄','Movement'],tables:['🃏','Tables'],boards:['📊','Boards'],history:['📜','History'],log:['📋','Log']};
-window.tdcTab=k=>{ TDC.tab=k; tdcGo('tab'); };
+window.tdcTab=k=>{ TDC.v='home'; tdcPick(k); };
 function drawTab(){
   const k=TDC.tab||'setup', t=TABS[k]||TABS.setup;
   frame(t[0]+' '+L(t[1]),`<div class="tdc-tabnav">${Object.entries(TABS).map(([x,[i,n]])=>`<button class="${x===k?'on':''}" onclick="tdcTab('${x}')">${i} ${L(n)}</button>`).join('')}</div><div id="adminContent" class="tdc-tab"></div>`,`<span></span><button class="bm3-ok" onclick="tdcGo('home')">‹ BridgeScore</button>`);

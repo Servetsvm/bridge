@@ -727,3 +727,9 @@ html.embed body.bg-device .login-logo{display:block!important}
 .tdc-sumline.bad{background:#fde8e6;color:#b3261e}
 .tdc-finrow{margin:10px 12px 0;padding:8px 10px;border-radius:10px;background:#fff;border:1px solid #c5d8ca;display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:700}
 .tdc-finrow .btn{background:#fff;color:#1f5d36;border:1px solid #c5d8ca}
+/* the TD's lists: the movement and the menu (the chosen section opens below, on the same screen) */
+.tdc-pick{padding:0 12px}
+.tdc-sel{width:100%;min-height:48px;padding:0 12px;border:1px solid #c5d8ca;border-radius:10px;background:#fff;color:#1b1b1b;font:700 1rem 'DM Sans',sans-serif;cursor:pointer}
+.tdc-menu{display:grid;grid-template-columns:1fr auto;gap:8px;padding:0 12px}
+.tdc-menu .btn{background:#fff;border:1px solid #c5d8ca;font-weight:700}
+.tdc .tdc-tab{margin-top:10px;border-top:2px solid #c5d8ca}

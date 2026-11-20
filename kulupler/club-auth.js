@@ -46,16 +46,16 @@ const isSuper=()=>{ const u=me(); return !!u&&u.key==='servet'; };
 const isClubAdmin=()=>{ const u=me(); return !!u&&(isSuper()||(CLUB_INFO&&CLUB_INFO.owner===u.key)); };
 
 // the TD of a club: this device keeps the club password and the TD's name after the first sign-in
-const tdSaved=club=>{ try{ return JSON.parse(localStorage.getItem('bg_td:'+club)||'null'); }catch(e){ return null; } };
-const tdSave=(club,pw)=>{ try{ const u=me(); localStorage.setItem('bg_td:'+club,JSON.stringify({pw:String(pw),n:(u&&u.name)||'',k:(u&&u.key)||''})); }catch(e){} };
-const tdForget=club=>{ try{ localStorage.removeItem('bg_td:'+club); }catch(e){} };
+// the TD types the club's password every time: nothing is kept on the device (an old kept one is removed)
+try{ Object.keys(localStorage).filter(k=>k.startsWith('bg_td:')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+const tdSaved=()=>null;
 // the table this phone sits at (its code, number, round): opened again it comes back there
 const bmSeatOf=club=>{ try{ return JSON.parse(localStorage.getItem('bg_seat:'+club)||'null'); }catch(e){ return null; } };
 window.bmSeatSave=t=>{ try{ if(role!=='table'||!CLUB_ID||!window._bgCode) return; localStorage.setItem('bg_seat:'+CLUB_ID,JSON.stringify({c:window._bgCode,p:window.bmCodePrefix||'',t,r:getState().currentRound,sid:getState()._startedAt||'',at:Date.now()})); }catch(e){} };
 window.bmSeatForget=()=>{ try{ localStorage.removeItem('bg_seat:'+CLUB_ID); }catch(e){} };
 // the TD's screen hears the tables' calls (once)
 window.tdCallsWatch=()=>{ if(window._tdWatch) return; window._tdWatch=true; DB.subscribe('tdcalls',v=>{ if(typeof tdCallsShow==='function') tdCallsShow(v); }); };
-window.tdName=()=>{ const t=tdSaved(CLUB_ID); const u=me(); return (t&&t.n)||(u&&u.name)||''; };
+window.tdName=()=>{ const u=me(); return (u&&u.name)||''; };
 
 function showLoginForm(clubName){
   CLUB_NAME=clubName||null;
@@ -151,7 +151,7 @@ async function initClubGate(){
     if(info&&(info.active!==false||isSuper())&&(fromLink||ownClub)){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
       if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
-      if(roleParam==='admin'){ const td=tdSaved(id), me0=me(); if(td&&td.pw&&td.k&&me0&&td.k===me0.key){ document.getElementById('pwInput').value=td.pw; window._tdAuto=true; setTimeout(()=>doLogin(),50); } else setTimeout(()=>document.getElementById('pwInput')?.focus(),100); }
+      if(roleParam==='admin') setTimeout(()=>document.getElementById('pwInput')?.focus(),100);
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(async()=>{ await doLogin();
         // back at a table that is no longer this phone's (a new tournament, new codes): the table is chosen again, no code asked
@@ -434,10 +434,7 @@ window.doLogin=async function(){
   try{ ok = testT ? true : await startSession(role, CLUB_ID, pw); }
   catch(e){ if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';} err.textContent='❌ '+e.message; return; }
   if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
-  if(!ok&&role==='admin'&&window._tdAuto){ window._tdAuto=false; tdForget(CLUB_ID); document.getElementById('pwInput').value=''; err.textContent='❌ The club password has changed: type the new one'; return; }
-  window._tdAuto=false;
   if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()&&/^\d{4}$/.test(String(pw).trim())?'❌ Wrong PIN':'❌ Wrong password';return;}
-  if(role==='admin'&&!(isClubAdmin()&&/^\d{4}$/.test(String(pw).trim()))&&String(pw).trim()) tdSave(CLUB_ID,String(pw).trim());
   // the code says which table this is: prefix + table number (0003 = table 3)
   document.body.classList.toggle('bg-device',role==='table');   // a table: the BridgeScore look from here on
   if(role==='table'&&testT){ window.bmCodeTable=testT; window._bgTestTable=null; try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(testT)); }catch(e){} }
