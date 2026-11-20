@@ -376,15 +376,15 @@ window.adminSetup=async function(){
     if(tables<2){toast('❌ Need at least 8 players (2 tables)');return;}
     pairCount=tables*2+(phantom?1:0);
     if(mov==='swiss'&&phantom){toast('❌ Swiss (v1) needs a player count divisible by 4 — no bye/phantom support yet');return;}
-    if(mov==='mitchell')rounds=tables;
+    if(mov==='mitchell'){ const T=tables+(phantom?1:0); rounds=T%2?T:T-1; }   // an even number of tables: skip Mitchell, one round fewer
     else if(mov==='howell'||mov==='barometer')rounds=pairCount%2?pairCount:pairCount-1;
     else{swissRounds=parseInt(document.getElementById('aSwissRounds').value);if(isNaN(swissRounds)||swissRounds<3){toast('❌ Swiss: choose at least 3 rounds');return;}if(swissRounds>pairCount-1){toast(`❌ Swiss: max ${pairCount-1} rounds for ${pairCount} pairs`);return;}rounds=swissRounds;}
     const totalBoards=rounds*bpr;
-    if(mov==='mitchell')result=generateMitchell(tables,bpr,phantom,totalBoards);
+    if(mov==='mitchell'){ result=generateMitchell(tables,bpr,phantom,totalBoards); tables=result.tableCount; rounds=result.rounds; }
     else if(mov==='howell'||mov==='barometer')result=generateHowell(tables,bpr,totalBoards,phantom,mov==='barometer');
     else result=generateSwissRound1(pairCount,bpr,rounds);
   }
-  const totalBoards=mov==='social'?window._socialBoards:rounds*bpr;
+  const totalBoards=mov==='social'?window._socialBoards:mov==='mitchell'&&result.totalBoards?result.totalBoards:rounds*bpr;
   // the last tournament's hands and double-dummy analysis go with it (they are kept in its archive); a tournament set up
   // again before it starts keeps the hand file already loaded for it
   if(getState().status&&getState().status!=='setup'){ _cache['hands']=[]; DB.set('hands',[]); _cache['dd']={}; DB.set('dd',{}); }
@@ -520,7 +520,9 @@ function playAlertBeep(){
 
 let _stalledTablesAlerted={}; // key: `${round}_${table}` -> true once beeped
 let _stalledBannerDismissed=false;
-function checkStalledTables(){
+function checkStalledTables(){ return;   // the slow-table warning is gone (asked by the clubs)
+}
+function checkStalledTablesOld(){
   const s=getState();
   if(s.status!=='running'||!s.tableCount)return;
   const thresholdMin=s.stallAlertMinutes||15;

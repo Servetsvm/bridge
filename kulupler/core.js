@@ -310,22 +310,24 @@ function calcMP(B,M){
 //  MOVEMENT GENERATORS
 // ══════════════════════════════════════════════════════
 function generateMitchell(tableCount, boardsPerRound, hasPhantom, totalBoards){
-  const movements={};const pairs={};
-  for(let i=1;i<=tableCount;i++) pairs['ns_'+i]={id:'ns_'+i,name:'NS '+i,dir:'NS',startTable:i,isPhantom:false};
-  for(let i=1;i<=tableCount;i++) pairs['ew_'+i]={id:'ew_'+i,name:'EW '+i,dir:'EW',startTable:i,isPhantom:false};
-  if(hasPhantom){pairs['phantom']={id:'phantom',name:'Phantom',dir:'EW',startTable:0,isPhantom:true};}
-  const rounds=boardsPerRound>0?Math.floor(totalBoards/boardsPerRound):tableCount;
-  const totalBoardSets=rounds;
+  // an odd number of pairs: one table more, its last East-West pair the phantom (who meets it sits out that round)
+  const T=tableCount+(hasPhantom?1:0), movements={}, pairs={};
+  for(let i=1;i<=T;i++) pairs['ns_'+i]={id:'ns_'+i,name:'NS '+i,dir:'NS',startTable:i,isPhantom:false};
+  for(let i=1;i<=T;i++) pairs['ew_'+i]={id:'ew_'+i,name:'EW '+i,dir:'EW',startTable:i,isPhantom:false};
+  if(hasPhantom) pairs['ew_'+T]={id:'ew_'+T,name:'Phantom',dir:'EW',startTable:T,isPhantom:true};
+  // North-South stay, East-West move up a table, the boards down a table. With an even number of tables East-West would
+  // meet boards they have played: after half the rounds they skip a table, and one round fewer is played (skip Mitchell)
+  const even=T%2===0, rounds=even?T-1:T;
   for(let r=1;r<=rounds;r++){
-    for(let t=1;t<=tableCount;t++){
-      const ewIdx=((t+r-2)%tableCount)+1;
-      const boardSet=(((t-r)%tableCount+tableCount)%tableCount)%totalBoardSets;
+    const skip=even&&r>T/2?1:0;
+    for(let t=1;t<=T;t++){
+      const ewIdx=((t-1+(r-1)+skip)%T)+1;
+      const boardSet=((t-r)%T+T)%T;
       const boardStart=boardSet*boardsPerRound+1;
-      const boardEnd=Math.min(boardStart+boardsPerRound-1,totalBoards);
-      movements[r+'_'+t]={ns:'ns_'+t,ew:'ew_'+ewIdx,boardStart,boardEnd};
+      movements[r+'_'+t]={ns:'ns_'+t,ew:'ew_'+ewIdx,boardStart,boardEnd:boardStart+boardsPerRound-1};
     }
   }
-  return{movements,pairs,rounds};
+  return{movements,pairs,rounds,tableCount:T,totalBoards:T*boardsPerRound};
 }
 
 /* Howell: every pair meets every other pair once, and nobody plays the same boards twice.

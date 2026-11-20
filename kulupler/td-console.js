@@ -96,9 +96,11 @@ window.tdcStart=async function(){ await adminStart(); TDC.v='run'; tdcDraw(); };
 window.tdcInitW=function(){ const s=getState(); TDC.w={mov:s.movement&&s.movement!=='team'?s.movement:'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
 window.tdcSetupStart=function(){ tdcInitW(); TDC.v='setup'; tdcDraw(); };
 function calc(w){
-  const p=+w.players||0, tables=Math.floor(p/4), ph=p%4!==0, pc=tables*2+(ph?1:0);
-  const rounds=w.mov==='social'?1:w.mov==='mitchell'?tables:w.mov==='swiss'?(+w.swr||0):(pc%2?pc:pc-1);
-  const total=w.mov==='social'?(+w.soc||0):rounds*w.bpr;
+  const p=+w.players||0, t0=Math.floor(p/4), ph=p%4!==0, pc=t0*2+(ph?1:0), mT=t0+(ph?1:0);
+  // Mitchell: an odd number of pairs adds a table (the phantom); an even number of tables plays one round fewer (skip)
+  const tables=w.mov==='mitchell'?mT:t0;
+  const rounds=w.mov==='social'?1:w.mov==='mitchell'?(mT%2?mT:mT-1):w.mov==='swiss'?(+w.swr||0):(pc%2?pc:pc-1);
+  const total=w.mov==='social'?(+w.soc||0):w.mov==='mitchell'?mT*w.bpr:rounds*w.bpr;
   return {tables,ph,pc,rounds,total};
 }
 const LIM={players:[4,120],soc:[1,99],swr:[3,20]};
@@ -110,6 +112,7 @@ window.drawSetupNow=()=>drawSetup();
 function setupErr(){ const w=TDC.w, c=calc(w), p=+w.players||0;
   if((w.mov==='social'||w.mov==='swiss')&&!(p>=8&&p%4===0)) return L('At least 8, divisible by 4');
   if(p<8) return L('At least 8 players');
+  if(w.mov==='mitchell'&&c.tables<3) return L('Mitchell needs at least 3 tables: choose Howell');
   if(w.mov==='social'&&!((+w.soc||0)>=1&&(+w.soc)<=99)) return '1 – 99';
   if(w.mov==='swiss'&&!((+w.swr)>=3&&(+w.swr)<=c.pc-1)) return L('Number of rounds')+': 3 – '+Math.max(3,c.pc-1);
   return ''; }
@@ -145,7 +148,7 @@ window.tdcCreate=async function(){
 function tableInfo(t,s,B,A,calls,thr){
   const r=s.currentRound, m=getMovements()[r+'_'+t]||{}; let n=0,d=0,last=Date.parse(s._roundStartedAt||0)||Date.now(), pend=false;
   for(let b=m.boardStart||1;b<=(m.boardEnd||0);b++){ n++; const x=B[t+'_'+r+'_'+b]; if(x&&x.status==='done'){ d++; const tm=Date.parse(x.time||0); if(tm>last) last=tm; } if(A[t+'_'+r+'_'+b]) pend=true; }
-  const call=!!(calls&&calls[t]), slow=d<n&&Date.now()-last>thr*60e3;
+  const call=!!(calls&&calls[t]), slow=false;
   return {m,n,d,pend,call,slow,done:n>0&&d>=n};
 }
 function drawRun(){ TDC.arc=null;
@@ -155,12 +158,12 @@ function drawRun(){ TDC.arc=null;
     const st=i.call?'call':i.done?'done':i.slow?'slow':i.pend?'pend':''; if(st&&st!=='done') legend.add(st);
     tiles.push(`<button class="tdc-tile ${st}" onclick="tdcGo('table',{t:${t},r:${s.currentRound}})"><b>${t}</b><small>${i.call?'📣 TD':i.done?'✓':i.slow?'⚠️ '+i.d+'/'+i.n:i.d+'/'+i.n}</small><i>${num(i.m.ns)}–${num(i.m.ew)}</i></button>`); }
   const all=tot>0&&dn>=tot, last=s.currentRound>=s.roundCount, social=s.movement==='social';
-  const sub=`<div class="tdc-round"><b>${L('Round')} ${s.currentRound} / ${s.roundCount}</b><span>${dn}/${tot} ${L('boards')}</span><div class="tdc-bar"><i style="width:${tot?Math.round(dn/tot*100):0}%"></i></div></div>`;
+  const sub=`<div class="tdc-round"><b>${L('Round')} ${s.currentRound} / ${s.roundCount} · ${L((MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||'')}</b><span>${dn}/${tot} ${L('boards')}</span><div class="tdc-bar"><i style="width:${tot?Math.round(dn/tot*100):0}%"></i></div></div>`;
   const body=`<div class="tdc-tiles">${tiles.join('')}</div>
     ${legend.size?`<div class="tdc-legend">${[['pend','⏳','Waiting for OK'],['slow','⚠️','Slow'],['call','📣','Calls the TD']].filter(x=>legend.has(x[0])).map(([c,i,n])=>`<span class="${c}">${i} ${L(n)}</span>`).join('')}</div>`:''}
     ${menuHtml()}`;
-  const next=last||social?`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcFinish()">🏁 ${L('Finish the tournament')}</button>`:`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcNext()">⏭ ${L('Round')} ${s.currentRound+1}</button>`;
-  frame(cleanData(s.name||''),body,`<button class="bm3-cancel" onclick="tdcReload()">↻</button>`+next,sub);
+  const next=last||social?`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcFinish()">🏁 ${L('Finish the tournament')}</button>`:`<span class="tdc-auto">${L('The next round starts by itself when every table has finished.')}</span>`;
+  frame(cleanData(s.name||'')+' · '+L((MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||''),body,`<button class="bm3-cancel" onclick="tdcReload()">↻</button>`+next,sub);
 }
 window.tdcReload=async()=>{ try{ await Promise.all(['state','boards','approvals','movements','pairs','tdcalls'].map(k=>DB.get(k))); }catch(e){} tdcDraw(); };
 window.tdcScreen=()=>{ window.open(location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID)+'&role=screen','_blank'); };

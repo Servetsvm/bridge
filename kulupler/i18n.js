@@ -53,6 +53,8 @@
     "IMP - MP":"IMP - MP",
     "Swiss — after each round the pairs with similar scores meet":"Swiss — her turdan sonra puanı yakın çiftler karşılaşır",
     "Test tournament with robots":"Robotlarla test turnuvası",
+    "Mitchell needs at least 3 tables: choose Howell":"Mitchell için en az 3 masa gerekir: Howell'i seç",
+    "The next round starts by itself when every table has finished.":"Bütün masalar bitirince sonraki tur kendiliğinden başlar.",
     "Empty":"Boş",
     "The tournament now":"Şu anki turnuva",
     "Reset deletes the tournament being played: its boards, pairs and movement. Export a backup first if you may need it.":"Sıfırla oynanan turnuvayı siler: elleri, çiftleri ve hareketi. Gerekebilirse önce yedeği dışa aktar.",
