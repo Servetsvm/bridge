@@ -418,7 +418,8 @@ function generateSwissRound1(pairCount, boardsPerRound, roundCount){
   for(let i=ids.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [ids[i],ids[j]]=[ids[j],ids[i]]; }
   ids.splice(ids.indexOf('p1'),1); ids.unshift('p1');   // pair 1 stays at table 1, North-South
   const movements={};
-  for(let m=0;m<pairCount/2;m++){
+  // a half table (an odd number of pairs): the last pair drawn sits out this round; its boards do not count for it
+  for(let m=0;m<Math.floor(pairCount/2);m++){
     const table=m+1;
     const a=ids[m*2], b=ids[m*2+1];
     const ns=a, ew=b; // round 1: arbitrary — first of the shuffled pair sits NS
@@ -467,9 +468,22 @@ function pairSwissMatches(standings, history){
   return matches;
 }
 
+// the pairs that sat out a round so far (a half table): those not seated in that round
+function swissByes(movements,ids){
+  const rounds={}; for(const [k,m] of Object.entries(movements)){ const r=k.split('_')[0]; (rounds[r]=rounds[r]||new Set()).add(m.ns); rounds[r].add(m.ew); }
+  const out=new Set(); for(const seated of Object.values(rounds)) for(const id of ids) if(!seated.has(id)) out.add(id);
+  return out;
+}
 function generateSwissRoundMovements(roundNum, boardsPerRound){
-  const standings=calcSwissStandingsArray();
+  let standings=calcSwissStandingsArray();
   const history=getSwissPairingHistory(getMovements());
+  // an odd number of pairs: the lowest-placed pair that has not sat out yet sits out this round (never twice while others have not)
+  if(standings.length%2){
+    const had=swissByes(getMovements(),standings.map(x=>x.id));
+    let bi=-1; for(let i=standings.length-1;i>=0;i--){ if(standings[i].id!=='p1'&&!had.has(standings[i].id)){ bi=i; break; } }
+    if(bi<0) bi=standings.length-1;
+    standings=standings.filter((_,i)=>i!==bi);
+  }
   const matches=pairSwissMatches(standings,history);
   // pair 1 stays at table 1, North-South (every table plays the same boards, so only the table numbers change)
   const fixed=matches.findIndex(p=>p.includes('p1'));

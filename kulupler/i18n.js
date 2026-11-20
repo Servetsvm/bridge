@@ -53,6 +53,8 @@
     "IMP - MP":"IMP - MP",
     "Swiss — after each round the pairs with similar scores meet":"Swiss — her turdan sonra puanı yakın çiftler karşılaşır",
     "Test tournament with robots":"Robotlarla test turnuvası",
+    "Social Bridge: full tables only (a half table: choose Howell)":"Sosyal Bridge yalnız tam masalarla oynanır (yarım masa için Howell'i seç)",
+    "An even number of players: each pair is two players":"Oyuncu sayısı çift olmalı: her çift iki oyuncudur",
     "Mitchell needs at least 3 tables: choose Howell":"Mitchell için en az 3 masa gerekir: Howell'i seç",
     "The next round starts by itself when every table has finished.":"Bütün masalar bitirince sonraki tur kendiliğinden başlar.",
     "Empty":"Boş",

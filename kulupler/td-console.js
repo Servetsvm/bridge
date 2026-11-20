@@ -110,7 +110,8 @@ window.tdcTyped=(k,el)=>{ const v=parseInt(el.value,10); if(v>0){ TDC.w[k]=v; co
 const stepper=(k,quick)=>`<div class="tdc-stepper"><button class="bm3-key" onclick="tdcInc('${k}',-1)">−</button><input type="number" inputmode="numeric" value="${TDC.w[k]}" min="${LIM[k][0]}" max="${LIM[k][1]}" oninput="tdcTyped('${k}',this)" onchange="drawSetupNow()"><button class="bm3-key" onclick="tdcInc('${k}',1)">+</button></div>${quick?`<div class="tdc-quick">${quick.map(n=>`<button class="${+TDC.w[k]===n?'on':''}" onclick="tdcSet1('${k}',${n})">${n}</button>`).join('')}</div>`:''}`;
 window.drawSetupNow=()=>drawSetup();
 function setupErr(){ const w=TDC.w, c=calc(w), p=+w.players||0;
-  if((w.mov==='social'||w.mov==='swiss')&&!(p>=8&&p%4===0)) return L('At least 8, divisible by 4');
+  if(p%2) return L('An even number of players: each pair is two players');
+  if(w.mov==='social'&&p%4) return L('Social Bridge: full tables only (a half table: choose Howell)');
   if(p<8) return L('At least 8 players');
   if(w.mov==='mitchell'&&c.tables<3) return L('Mitchell needs at least 3 tables: choose Howell');
   if(w.mov==='social'&&!((+w.soc||0)>=1&&(+w.soc)<=99)) return '1 – 99';

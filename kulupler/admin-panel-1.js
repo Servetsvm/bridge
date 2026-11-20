@@ -375,7 +375,6 @@ window.adminSetup=async function(){
     tables=Math.floor(players/4);phantom=players%4!==0;
     if(tables<2){toast('❌ Need at least 8 players (2 tables)');return;}
     pairCount=tables*2+(phantom?1:0);
-    if(mov==='swiss'&&phantom){toast('❌ Swiss (v1) needs a player count divisible by 4 — no bye/phantom support yet');return;}
     if(mov==='mitchell'){ const T=tables+(phantom?1:0); rounds=T%2?T:T-1; }   // an even number of tables: skip Mitchell, one round fewer
     else if(mov==='howell'||mov==='barometer')rounds=pairCount%2?pairCount:pairCount-1;
     else{swissRounds=parseInt(document.getElementById('aSwissRounds').value);if(isNaN(swissRounds)||swissRounds<3){toast('❌ Swiss: choose at least 3 rounds');return;}if(swissRounds>pairCount-1){toast(`❌ Swiss: max ${pairCount-1} rounds for ${pairCount} pairs`);return;}rounds=swissRounds;}
