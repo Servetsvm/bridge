@@ -72,11 +72,10 @@ function playersHtml(){
   return `<div class="bm3-step">${L('Round')} ${r} · ${L('Tap a table to enter its players')}</div><div class="tdc-plist">${Array.from({length:n},(_,i)=>i+1).map(t=>{ const m=M[r+'_'+t]||{}; return `<button class="tdc-pcard" onclick="tdNames(${t},${r},'admin')"><b>${L('Table')} ${t}</b><span><i>NS ${num(m.ns)}</i>${pn(m.ns)}</span><span><i>EW ${num(m.ew)}</i>${pn(m.ew)}</span></button>`; }).join('')}</div>`;
 }
 const MENU=[
-  ['Tournament',[['tables','🃏','Tables'],['players','👥','Players'],['movement','🔄','Movement'],['boards','📊','Boards']]],
-  ['Share',[['!screen','📺','Screen'],['!link','🔗','Link']]],
-  ['Results',[['!results','📄','Results'],['hist','📜','Old tournaments']]],
+  ['Tournament',[['tables','🃏','Tables'],['players','👥','Players'],['boards','📊','Boards']]],
   ['Hands',[['!hands','🃏','Load hand file'],['!auto','🎲','Make the boards automatically']]],
-  ['Settings',[['!stall','⚠️','Slow table'],['setup','⚙️','Setup'],['plist','📇','Player list']]],
+  ['Old tournaments',[['hist','📜','Old tournaments']]],
+  ['Settings',[['!stall','⚠️','Slow table'],['setup','⚙️','Setup']]],
   ['Data',[['!export','⬇','Export'],['!import','⬆','Import'],['!reset','🗑','Reset']]],
   ['Log',[['log','📋','Log']]]];
 const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.map(([g,items])=>`<optgroup label="${L(g)}">${items.map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}</optgroup>`).join('')}</select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
