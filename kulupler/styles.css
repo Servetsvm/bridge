@@ -733,3 +733,10 @@ html.embed body.bg-device .login-logo{display:block!important}
 .tdc-menu{display:grid;grid-template-columns:1fr auto;gap:8px;padding:0 12px}
 .tdc-menu .btn{background:#fff;border:1px solid #c5d8ca;font-weight:700}
 .tdc .tdc-tab{margin-top:10px;border-top:2px solid #c5d8ca}
+
+.bm3-key.adjk{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:62px}
+.bm3-key.adjk b{font-size:1.3rem}.bm3-key.adjk small{font-size:.68rem;font-weight:600;opacity:.75}
+.tdc-plist{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;padding:6px 12px}
+.tdc-pcard{display:flex;flex-direction:column;gap:3px;text-align:left;padding:10px 12px;border:1px solid #c5d8ca;border-radius:12px;background:#fff;color:#1b1b1b;cursor:pointer;font-family:inherit}
+.tdc-pcard b{color:#1f5d36;font-size:1rem}.tdc-pcard span{font-size:.85rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tdc-pcard i{font-style:normal;font-size:.7rem;font-weight:800;color:#1f5d36;margin-right:6px}

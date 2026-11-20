@@ -1132,16 +1132,23 @@ window.bmTdDel=async function(k,b){
 window.bmTdNP=function(k){ bmTdPut(k,{contract:'Not played',notPlayed:true,status:'done',td:true,time:new Date().toISOString()}); addLog('warn','TD: not played',k); bmTdMenu(_tdR); };
 window.bmTdEdit=function(b){ window._tdEdit={back:'menu',r:_tdR}; bmEnterBoard(b); };
 // an adjusted score: average minus, average or average plus for each side
-window.bmTdAdj=function(k,b){
-  const o=v=>['A+','A','A-'].map(x=>`<option value="${x}"${x===v?' selected':''}>${x==='A+'?BM_L('Average plus')+' (60%)':x==='A'?BM_L('Average')+' (50%)':BM_L('Average minus')+' (40%)'}</option>`).join('');
-  openModal(BM_L('Adjusted score')+' · '+BM_L('Board')+' '+b,`<div class="field"><label>NS</label><select id="tdAdjNS">${o('A')}</select></div><div class="field"><label>EW</label><select id="tdAdjEW">${o('A')}</select></div>`,
-    `<button class="btn btn-ghost" onclick="closeModal()">${BM_L('Cancel')}</button><button class="btn btn-gold" onclick="bmTdAdjOk('${k}')">OK</button>`);
+window.bmTdAdj=function(k,b){ bmAdjScreen(k,b,(ns,ew)=>{ bmTdPut(k,{contract:`ADJ(${ns}/${ew})`,nsScore:ns,ewScore:ew,status:'done',adjusted:true,td:true,time:new Date().toISOString()}); addLog('warn','TD: adjusted score',k+' '+ns+'/'+ew); bmTdMenu(_tdR); },()=>bmTdMenu(_tdR)); };
+// the adjusted score on a BridgeScore screen (used at a table and on the TD's screen)
+let _adj=null;
+window.bmAdjScreen=function(k,b,ok,back,cur){
+  const d=cur||{}; _adj={k,b,ok,back,ns:d.adjusted?d.nsScore:'A',ew:d.adjusted?d.ewScore:'A'}; bmAdjDraw();
 };
-window.bmTdAdjOk=function(k){
-  const ns=document.getElementById('tdAdjNS').value, ew=document.getElementById('tdAdjEW').value;
-  bmTdPut(k,{contract:`ADJ(${ns}/${ew})`,nsScore:ns,ewScore:ew,status:'done',adjusted:true,td:true,time:new Date().toISOString()});
-  addLog('warn','TD: adjusted score',k+' '+ns+'/'+ew); closeModal(); bmTdMenu(_tdR);
-};
+const ADJ_OPT=[['A-','Average minus','40%'],['A','Average','50%'],['A+','Average plus','60%']];
+function bmAdjDraw(){
+  const x=_adj, row=side=>`<div class="bm3-step">${side==='ns'?'NS':'EW'}</div><div class="bm3-keys k3">${ADJ_OPT.map(([v,n,p])=>`<button class="bm3-key adjk${x[side]===v?' active':''}" onclick="bmAdjSet('${side}','${v}')"><b>${v}</b><small>${BM_L(n)} · ${p}</small></button>`).join('')}</div>`;
+  document.getElementById('panelContent').innerHTML=`<div class="bm3 bm3w"><div class="bm3-screen">
+    <div class="bm3-display"><div class="bm3-contract">${BM_L('Board')} ${x.b} · ADJ</div><div class="bm3-sub"><span>${BM_L('Adjusted score')}</span></div><div class="bm3-score"><small>NS / EW</small><b>${x.ns} / ${x.ew}</b></div></div>
+    <div class="bm3-body">${row('ns')}${row('ew')}</div>
+    <div class="bm3-actions"><button class="bm3-cancel" onclick="bmAdjBack()">‹ ${BM_L('Back')}</button><button class="bm3-ok" onclick="bmAdjOk()">✓ OK</button></div></div></div>`;
+}
+window.bmAdjSet=(side,v)=>{ _adj[side]=v; bmAdjDraw(); };
+window.bmAdjOk=()=>{ const x=_adj; _adj=null; x.ok(x.ns,x.ew); };
+window.bmAdjBack=()=>{ const x=_adj; _adj=null; x.back(); };
 // a pair sat down at the wrong table: this BridgeScore becomes the right table
 window.bmTdTable=function(){
   const n=getState().tableCount||0;
