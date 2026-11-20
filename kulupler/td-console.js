@@ -60,7 +60,8 @@ function drawHome(){ TDC.arc=null;
   const mv=(MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||'';
   const sum=`<div class="bm3-sum"><div><span>${L('Tournament')}</span><b>${cleanData(s.name||'')}</b></div><div><span>${L('Movement')}</span><b>${L(mv)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount||'—'}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount||'—'}</b></div><div><span>${L('Boards')}</span><b>${s.totalBoards||'—'}</b></div></div>`;
   const body=`<div class="bm3-step">⏳ ${L('Ready to start')}</div>${sum}
-    <div class="tdc-tools"><button class="btn" onclick="tdcSetupStart()">↺ ${L('Set up again')}</button><button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button><button class="btn" onclick="ccResultsIndex()">📄 ${L('Results')}</button></div>${moreHtml()}${menuHtml()}`;
+    ${handsHtml()}
+    <div class="bm3-step">${L('Before round 1')}</div><div class="tdc-tools"><button class="btn" onclick="tdcScreen()">📺 ${L('Screen')}</button><button class="btn" onclick="bgShowPlayersLink()">🔗 ${L('Link')}</button></div>${menuHtml()}`;
   frame(L('Ready to start'),body,`<button class="bm3-cancel" onclick="tdcSetupStart()">↺</button><button class="bm3-ok" onclick="tdcStart()">▶ ${L('Start round 1')}</button>`);
 }
 // the players as on the BridgeScore: each table a card (its pairs); tapped, its four seats round the table
@@ -70,13 +71,27 @@ function playersHtml(){
   const pn=id=>{ const p=P[id]; return p?(p.isPhantom?'👻':cleanData(splitPairName(p.name||'').filter(Boolean).join(' – ')||'—')):'—'; };
   return `<div class="bm3-step">${L('Round')} ${r} · ${L('Tap a table to enter its players')}</div><div class="tdc-plist">${Array.from({length:n},(_,i)=>i+1).map(t=>{ const m=M[r+'_'+t]||{}; return `<button class="tdc-pcard" onclick="tdNames(${t},${r},'admin')"><b>${L('Table')} ${t}</b><span><i>NS ${num(m.ns)}</i>${pn(m.ns)}</span><span><i>EW ${num(m.ew)}</i>${pn(m.ew)}</span></button>`; }).join('')}</div>`;
 }
-const MENU=[['setup','⚙️','Setup'],['players','👥','Players'],['movement','🔄','Movement'],['tables','🃏','Tables'],['boards','📊','Boards'],['history','📜','History'],['log','📋','Log']];
-const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}<option value="hist">✏️ ${L('Old tournaments')}</option><option value="plist">📇 ${L('Player list')}</option></select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
+const MENU=[
+  ['Tournament',[['tables','🃏','Tables'],['players','👥','Players'],['movement','🔄','Movement'],['boards','📊','Boards']]],
+  ['Share',[['!screen','📺','Screen'],['!link','🔗','Link']]],
+  ['Results',[['!results','📄','Results'],['hist','📜','Old tournaments']]],
+  ['Hands',[['!hands','🃏','Load hand file'],['!auto','🎲','Make the boards automatically']]],
+  ['Settings',[['!stall','⚠️','Slow table'],['setup','⚙️','Setup'],['plist','📇','Player list']]],
+  ['Data',[['!export','⬇','Export'],['!import','⬆','Import'],['!reset','🗑','Reset']]],
+  ['Log',[['log','📋','Log']]]];
+const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.map(([g,items])=>`<optgroup label="${L(g)}">${items.map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}</optgroup>`).join('')}</select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
 // the chosen section drawn into its box (the full panel's own content and buttons)
 function tdcFill(scroll){ const c=document.getElementById('adminContent'); if(!c||!TDC.tab) return; if(TDC.tab==='players'){ c.innerHTML=playersHtml(); } else { adminTab=TDC.tab; _rat(); } if(scroll) c.scrollIntoView({behavior:'smooth',block:'start'}); }
-window.tdcPick=function(v){ if(v==='hist'){ TDC.tab=null; tdcGo('hist'); return; } if(v==='plist'){ openPlayerRegistry(); tdcDraw(); return; } TDC.tab=v||null; tdcDraw(); tdcFill(true); };
-const moreHtml=()=>{ const s=getState(), h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>
-  <div class="bm3-step">${L('More')}</div><div class="tdc-tools"><button class="btn" onclick="tdcStall()">⚠️ ${L('Slow table')}: ${s.stallAlertMinutes||15} min</button><button class="btn" onclick="adminExport()">⬇ ${L('Export')}</button><button class="btn" onclick="adminImportOpen()">⬆ ${L('Import')}</button><button class="btn tdc-red" onclick="adminReset()">🗑 ${L('Reset')}</button></div>`; };
+const ACTS={screen:()=>tdcScreen(),link:()=>bgShowPlayersLink(),results:()=>ccResultsPage(),hands:()=>adminImportHandsOpen(),auto:()=>adminAutoBoardsOpen(),stall:()=>tdcStall(),export:()=>adminExport(),import:()=>adminImportOpen(),reset:()=>tdcReset()};
+window.tdcPick=function(v){
+  if(v&&v[0]==='!'){ const sel=document.querySelector('.tdc-menu select'); if(sel) sel.value=TDC.tab||''; (ACTS[v.slice(1)]||(()=>{}))(); return; }
+  if(v==='hist'){ TDC.tab=null; tdcGo('hist'); return; }
+  if(v==='plist'){ const sel=document.querySelector('.tdc-menu select'); if(sel) sel.value=TDC.tab||''; openPlayerRegistry(); return; }
+  TDC.tab=v||null; tdcDraw(); tdcFill(true); };
+// Reset deletes the tournament: asked twice
+window.tdcReset=async function(){ if(!await confirmDialog(L('Reset deletes the tournament being played: its boards, pairs and movement. Export a backup first if you may need it.'),{title:'🗑 '+L('Reset'),confirmLabel:L('Continue'),danger:true})) return; adminReset(); };
+// the hands: before round 1 (on the ready screen) and from the menu
+const handsHtml=()=>{ const h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>`; };
 window.tdcStall=function(){ const s=getState(); openModal('⚠️ '+L('Slow table'),`<div class="field"><label>${L('Alarm when a table has entered no score for this many minutes')}</label><input type="number" id="tdcStallMin" min="1" max="90" value="${s.stallAlertMinutes||15}"></div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcStallOk()">OK</button>`); };
 window.tdcStallOk=function(){ const v=parseInt(document.getElementById('tdcStallMin').value); if(!(v>=1&&v<=90)){ toast('❌ 1 – 90'); return; } const s=getState(); s.stallAlertMinutes=v; setState(s); closeModal(); tdcDraw(); };
 window.tdcStart=async function(){ await adminStart(); TDC.v='run'; tdcDraw(); };
@@ -139,15 +154,15 @@ function tableInfo(t,s,B,A,calls,thr){
 }
 function drawRun(){ TDC.arc=null;
   const s=getState(), B=getBoards(), A=getApprovals(), calls=_cache['tdcalls']||{}, thr=s.stallAlertMinutes||15;
-  let tot=0,dn=0; const tiles=[];
+  let tot=0,dn=0; const tiles=[], legend=new Set();
   for(let t=1;t<=s.tableCount;t++){ const i=tableInfo(t,s,B,A,calls,thr); tot+=i.n; dn+=i.d;
-    const st=i.call?'call':i.done?'done':i.slow?'slow':i.pend?'pend':'';
+    const st=i.call?'call':i.done?'done':i.slow?'slow':i.pend?'pend':''; if(st&&st!=='done') legend.add(st);
     tiles.push(`<button class="tdc-tile ${st}" onclick="tdcGo('table',{t:${t},r:${s.currentRound}})"><b>${t}</b><small>${i.call?'📣 TD':i.done?'✓':i.slow?'⚠️ '+i.d+'/'+i.n:i.d+'/'+i.n}</small><i>${num(i.m.ns)}–${num(i.m.ew)}</i></button>`); }
   const all=tot>0&&dn>=tot, last=s.currentRound>=s.roundCount, social=s.movement==='social';
   const sub=`<div class="tdc-round"><b>${L('Round')} ${s.currentRound} / ${s.roundCount}</b><span>${dn}/${tot} ${L('boards')}</span><div class="tdc-bar"><i style="width:${tot?Math.round(dn/tot*100):0}%"></i></div></div>`;
   const body=`<div class="tdc-tiles">${tiles.join('')}</div>
-    <div class="tdc-legend"><span class="done">✓ ${L('Finished')}</span><span class="pend">⏳ ${L('Waiting for OK')}</span><span class="slow">⚠️ ${L('Slow')}</span><span class="call">📣 ${L('Calls the TD')}</span></div>
-    <div class="tdc-tools"><button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button><button class="btn" onclick="tdcScreen()">📺 ${L('Screen')}</button><button class="btn" onclick="bgShowPlayersLink()">🔗 ${L('Link')}</button><button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>${moreHtml()}${menuHtml()}`;
+    ${legend.size?`<div class="tdc-legend">${[['pend','⏳','Waiting for OK'],['slow','⚠️','Slow'],['call','📣','Calls the TD']].filter(x=>legend.has(x[0])).map(([c,i,n])=>`<span class="${c}">${i} ${L(n)}</span>`).join('')}</div>`:''}
+    ${menuHtml()}`;
   const next=last||social?`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcFinish()">🏁 ${L('Finish the tournament')}</button>`:`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcNext()">⏭ ${L('Round')} ${s.currentRound+1}</button>`;
   frame(cleanData(s.name||''),body,`<button class="bm3-cancel" onclick="tdcReload()">↻</button>`+next,sub);
 }
