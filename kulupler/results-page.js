@@ -158,7 +158,7 @@ function pageHtml(withBar){
     }).join('')}</table></div>`:'';
     return `<div class="bd" id="b${esc(bn)}"><h3>${L('Board')} ${esc(bn)}</h3>${hd&&hd.note?`<div class="bnote">${esc(hd.note)}</div>`:''}${hd?diagram(hd,bn):''}${a?`<div class="ddbox"><h4>Double Dummy</h4>${ddHtml(a)}</div>`:''}${L2.length?`<h4>${L('Results')}</h4>`:''}${res}</div>`;
   }).join('');
-  const head=withBar?`<div class="rhead"><div><h1 class="rt">${L('Results')}</h1><a href="#" class="back" onclick="ccResultsIndex();return false;">${L('Back')}</a></div><div class="rtools"><button class="ic" title="${esc(L('Print'))}" onclick="window.print()">🖨</button><button class="ic" title="${esc(L('Close'))}" onclick="ccResultsClose()">✕</button></div></div>`:'';
+  const head=withBar?`<div class="rhead"><div><h1 class="rt">${L('Results')}</h1><a href="#" class="back" onclick="ccResultsIndex();return false;">${L('Back')}</a></div><div class="rtools"><button class="ic" title="${esc(L('Close'))}" onclick="ccResultsClose()">✕</button></div></div>`:'';
   return `<div class="ccr">${head}<h2 class="tt">${esc(s.name||L('Tournament'))} ${esc(date)}</h2>
     <div class="meta"><div>${L('Date')}: ${esc(date)}</div><div>${L('Club')}: ${esc(CLUB_NAME||'')}</div><div>${L('Boards')}: ${nums.length}, ${L('rounds')}: ${rounds}, ${L('pairs')}: ${ranking.length}</div></div>
     ${rank}<div class="bhead"><h2>${L('Boards')}</h2><div class="pgn" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div><div class="bds">${boardsHtml}</div><div class="pgn pgn2" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div>`;

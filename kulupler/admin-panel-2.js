@@ -502,7 +502,6 @@ function renderMovement(){
           <div style="font-weight:700;font-size:0.95rem;">${s.name}</div>
           <div style="font-size:0.78rem;color:var(--text2);">${s.tableCount} tables · ${s.roundCount} rounds · ${s.boardsPerRound} boards/round · ${scoringName(s)} · ${s.movement}</div>
         </div>
-        <button class="btn btn-gold btn-sm" onclick="adminPrintMovement()">🖨 Print PDF</button>
       </div>
     </div>`;
 
@@ -760,8 +759,7 @@ window.viewArchive=function(i){
     <table class="mv-table"><thead><tr><th>#</th><th>Full Name</th><th>Dir</th><th>MP</th><th>%</th></tr></thead><tbody>${rowsHTML}</tbody></table>
     ${boardRowsHTML?'<div style="font-weight:600;color:var(--gold);font-size:0.78rem;margin:10px 0 6px;">Board Results</div><table class="mv-table"><thead><tr><th>Table/R/B</th><th>NS</th><th>EW</th><th>Contract</th><th>NS Score</th></tr></thead><tbody>'+boardRowsHTML+'</tbody></table>':''}`,
     `<button class="btn btn-ghost" onclick="closeModal()">Close</button>
-     <button class="btn btn-gold btn-sm" onclick="exportArchivePBN(${i})">🃏 PBN</button>
-     <button class="btn btn-blue btn-sm" onclick="archivePDF(${i})">PDF Output</button>`);
+     <button class="btn btn-gold btn-sm" onclick="exportArchivePBN(${i})">🃏 PBN</button>`);
 };
 
 window.archivePDF=function(i){
