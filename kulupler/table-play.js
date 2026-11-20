@@ -1086,7 +1086,7 @@ window.bmCallTD=async function(){
 let _tdOk=0, _tdR=null;
 function bmAskPw(){ return new Promise(res=>{
   window._tdPwRes=v=>{ window._tdPwRes=null; closeModal(); res(v); };
-  openModal('🧑‍⚖️ TD',`<div class="field"><label>${BM_L('Club password')}</label><input id="tdPw" type="password" autocomplete="off" onkeydown="if(event.key==='Enter')_tdPwRes(this.value.trim())"></div>`,
+  openModal('🧑‍⚖️ TD',`<div class="field"><label>${BM_L('Club password')}</label><input id="tdPw" type="password" inputmode="numeric" autocomplete="off" onkeydown="if(event.key==='Enter')_tdPwRes(this.value.trim())"></div>`,
     `<button class="btn btn-ghost" onclick="_tdPwRes('')">${BM_L('Cancel')}</button><button class="btn btn-gold" onclick="_tdPwRes(document.getElementById('tdPw').value.trim())">OK</button>`);
   setTimeout(()=>document.getElementById('tdPw')?.focus(),80);
 }); }

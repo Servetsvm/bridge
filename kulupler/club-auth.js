@@ -87,8 +87,8 @@ async function myClubs(){
   try{ const r=await fetch(await fbRootUrl('/owners/'+encodeURIComponent(u.key)+'.json'),{cache:'no-store'}); return r.ok?cleanData(await r.json()||{}):{}; }catch(e){ return {}; }
 }
 // a new club: this player is its admin; the tables' prefix starts as 00 (table 1 = 0001)
-// a club's password: 8 letters and digits (no look-alikes)
-const newClubPw=()=>{ const A='abcdefghjkmnpqrstuvwxyz23456789'; let s=''; const r=crypto.getRandomValues(new Uint32Array(8)); for(const x of r) s+=A[x%A.length]; return s; };
+// a club's password: 6 digits (typed on a phone's number keys)
+const newClubPw=()=>{ let s=''; const r=crypto.getRandomValues(new Uint32Array(6)); for(const x of r) s+=String(x%10); return s; };
 // inPanel: from the super admin's panel (its own fields; he stays there)
 window.createMyClub=async function(inPanel){
   const err=document.getElementById(inPanel?'saClubErr':'clubErr');err.textContent='';
@@ -356,7 +356,7 @@ window.selRole=function(r){
   document.getElementById('pwWrap').style.display=r==='screen'?'none':'block';
   const pin=false;   // the TD (the club's owner too): the club's password, once on this device
   inp.type=r==='table'?'text':'password';
-  inp.placeholder=r==='table'?(window._bgWantTable?'Your table\'s code (4 digits)':'Table code (4 digits)'):r==='superadmin'?'Super admin password (at least 6)':pin?'Your Bridge Table PIN':'Club password'; inp.inputMode=r==='table'||pin?'numeric':'text'; inp.maxLength=r==='table'||pin?4:40;
+  inp.placeholder=r==='table'?(window._bgWantTable?'Your table\'s code (4 digits)':'Table code (4 digits)'):r==='superadmin'?'Super admin password (at least 6)':pin?'Your Bridge Table PIN':'Club password'; inp.inputMode=r==='superadmin'?'text':'numeric'; inp.maxLength=r==='table'||pin?4:40;
   const sw=document.getElementById('roleSwitch'); if(sw){ sw.style.display=r==='table'?'':'none'; sw.textContent=r==='admin'?'🃏 Table':'🧑‍⚖️ TD'; }   // the admin's sign-in has no Table switch (the tables open from Bridge Table)
 };
 window.switchAdminRole=()=>selRole(role==='admin'?'table':'admin');

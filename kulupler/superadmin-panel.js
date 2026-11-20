@@ -117,12 +117,12 @@ window.saPwPrompt=async function(i){
   let cur=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+cl.id+'/secret/pw.json'),{cache:'no-store'}); cur=r.ok?await r.json():null; }catch(e){}
   openModal('Club password', `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:6px;">${cl.name} · ID: <b>${cl.id}</b></div>
     <div style="font-size:0.85rem;color:var(--text2);">Password now:</div><div style="font-size:1.3rem;font-weight:800;letter-spacing:2px;margin:6px 0 12px;" data-i18n-ignore>${cur?cleanData(cur):'—'}</div>
-    <div class="pw-wrap"><input type="text" id="saNewPw" maxlength="40" placeholder="New password (at least 4)" autocomplete="off"></div>`,
+    <div class="pw-wrap"><input type="text" id="saNewPw" inputmode="numeric" maxlength="12" placeholder="New password (4–12 digits)" autocomplete="off"></div>`,
     `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-blue" onclick="document.getElementById('saNewPw').value=newClubPw()">🎲 New</button><button class="btn btn-gold" onclick="saPwSave(${i})">Save</button>`);
 };
 window.saPwSave=async function(i){
   const cl=SA_CLUBS[i]; const pw=(document.getElementById('saNewPw')?.value||'').trim(); if(!cl) return;
-  if(pw.length<4){ toast('❌ At least 4 characters'); return; }
+  if(!/^d{4,12}$/.test(pw)){ toast('❌ 4–12 digits'); return; }
   try{ const r=await fetch(await fbRootUrl('/clubs/'+cl.id+'/secret/pw.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(pw)}); if(!r.ok) throw new Error('HTTP '+r.status); closeModal(); toast('🔑 Password saved'); }
   catch(e){ toast('❌ Failed: '+e.message); }
 };
