@@ -200,10 +200,9 @@ async function renderEntry(live){
   box.innerHTML=live.map((t,k)=>`<div class="bg-entry${live.length===1?' open':''}"><button type="button" class="bg-entry-name" onclick="this.parentNode.classList.toggle('open')">🏛 ${cleanData(t.c||'')}${t.n?' <small>'+cleanData(t.n)+'</small>':''}</button>
     <div class="bg-entry-body"><div class="bg-entry-lbl">Table No</div>
     <div class="bm3-keys k4" style="padding:0;">${Array.from({length:t.tb||0},(_,i)=>i+1).filter(n=>!taken[k].has(n)).map(n=>`<button class="bm3-key" onclick="location.replace('${go(t,'&role=table&p='+t.p+'&tn='+n)}')">${n}</button>`).join('')}</div>
-    ${own[k]?`<button class="btn-primary" style="margin-top:10px;" onclick="location.replace('${go(t,'&role=admin')}')">🧑‍⚖️ TD</button>`:''}</div></div>`).join('')
-    +(isSuper()||Object.keys(await myClubs()).length?`<a href="${location.pathname}?admin=1" style="display:inline-block;margin-top:10px;font-size:0.75rem;color:var(--text3);">🏛 My clubs</a>`:'')
-    +`<div class="bg-newtour">${clubAdminBox()}<div style="font-size:0.72rem;color:var(--text3);margin-top:6px;">The TD signs in here to set up and run a tournament.</div></div>`;
-  document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');
+    ${own[k]?`<button class="btn-primary" style="margin-top:10px;" onclick="location.replace('${go(t,'&role=admin')}')">🧑‍⚖️ TD</button>`:''}</div></div>`).join('');
+  // the entry screen: only the club, its free tables and TD (the club ID box, My clubs and the super admin's link are gone: Bridge Table's Clubs page has them)
+  document.querySelectorAll('.superLink').forEach(a=>a.style.display='none');
 }
 // the club tournaments running now (gate/live: name, club, tables, table code prefix)
 async function liveTournaments(){
