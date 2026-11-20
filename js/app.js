@@ -1326,9 +1326,13 @@ function renderBar() {
   const dst = ['bottom:-1px;left:50%;transform:translateX(-50%)', 'left:1px;top:50%;transform:translateY(-50%)', 'top:-1px;left:50%;transform:translateX(-50%)', 'right:1px;top:50%;transform:translateY(-50%)'][rel(G.dealer)];
   let con = '—', tr = '';
   if (G.play) { const c = G.play.contract; con = `${callHtml(B(c.level, c.strain))}${c.dbl === 1 ? ' X' : c.dbl === 2 ? ' XX' : ''} <span class="sm">${SEAT[c.decl]}</span>`; const us = sideOf(u); tr = `${T('Us')} <b class="tk">${G.play.tricks[us]}</b> · ${T('Them')} <b class="tk">${G.play.tricks[1 - us]}</b>`; }
+  // the contract box (a score table like the others): the declaring side's cell shows the tricks it needs
+  const conBox = () => { const p = G.play, c = p && p.contract, us = sideOf(u), need = c ? 6 + c.level : 0;
+    const cell = (sd, l) => `<span class="cc${c && sideOf(c.decl) === sd ? ' dec' : ''}"><span class="sl">${l}</span><b>${p ? p.tricks[sd] : '–'}</b>${c && sideOf(c.decl) === sd ? `<i>/ ${need}</i>` : ''}</span>`;
+    return `<button class="box sbox cbox" id="bAuc" title="${T('Show the auction')}"><small>${T('Contract')}</small><span class="cct">${con}</span><span class="ccs">${cell(us, T('Us'))}${cell(1 - us, T('Them'))}</span></button>`; };
   if (G.rtv) { const b = G.rtv.b;
     $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
-     <button class="box" id="bAuc"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
+     ${conBox()}
      <div class="box"><b>🔴 ${esc(rtSysName(b.sys))}</b></div>
      <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
     return; }
@@ -1347,7 +1351,7 @@ function renderBar() {
   const lastFoot = last ? T('last:') + ' ' + (last.imp != null ? fmtSigned(last.imp) + ' · ' + last.mp + '%' : fmtSigned(last.us || 0)) : '';
   $('bar').innerHTML = `
    <div class="vulbox" title="Board ${b}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b}<span class="dl" style="${dst}">D</span></div>
-   <button class="box" id="bAuc" title="Show the auction"><small>${T('Contract')}</small><b>${con}</b><span class="tr">${tr || '&nbsp;'}</span></button>
+   ${conBox()}
    ${tblScore ? sbox('button', 'bTblScore', T('Table score'), [['NS', sv(tblScore.ins || 0)], ['EW', sv(tblScore.iew || 0)]], `IMP${tblScore.mpn ? ' · NS ' + Math.round(tblScore.mp / tblScore.mpn) + '%' : ''} · ${tblScore.n} ${T('boards')}${tblScore.wait ? ' ⏳' : ''}`) : cts ? sbox('div', '', T('Tournament') + (cts.pos ? ' · ' + cts.pos + '/' + cts.of : ''), [['IMP', cts.n ? sv(cts.imp) : sv(null)], ['MP', cts.n ? pctTxt(cts.pct.toFixed(1)) : pctTxt(null)]], cts.last ? T('last:') + ' ' + fmtSigned(cts.last.imp) + ' · ' + Math.round(cts.last.mp) + '%' : cts.n + ' ' + T('boards')) : sbox('div', '', T('Today'), [['IMP', per.scored ? sv(per.impSum) : sv(null)], ['MP', pctTxt(per.scored ? per.mpAvg : null)]], lastFoot)}
    <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button>
    <div class="spacer"></div>

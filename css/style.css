@@ -2280,7 +2280,7 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 :root[data-theme="dark"] .tscore .tspt{border-top-color:rgba(255,255,255,.12)}
 
 /* the score boxes on the bar: a small table (title strip, label – value rows, a line under it) */
-.box.sbox{padding:0 0 3px;min-width:150px;align-items:stretch;overflow:hidden;gap:0}
+.box.sbox{padding:0 0 3px;min-width:150px;align-items:stretch;justify-content:flex-start;overflow:hidden;gap:0}
 .box.sbox small{display:block;background:var(--felt-deep);color:var(--ink);opacity:1;text-align:center;padding:2px 8px;font-size:12px;font-weight:700;margin-bottom:2px}
 .box.sbox .srow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 10px;font-size:18px;line-height:1.15}
 .box.sbox .sl{font-size:13px;font-weight:700;letter-spacing:.04em;opacity:.65}
@@ -2289,3 +2289,15 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .box.sbox .sv.neg{color:var(--neg)}
 .box.sbox .sf{font-size:12px;padding:1px 10px 0;opacity:.7;white-space:nowrap;text-align:center;font-variant-numeric:tabular-nums}
 @media (max-width:560px){.box.sbox{min-width:104px}.box.sbox small{font-size:10px;padding:1px 6px}.box.sbox .srow{font-size:13px;padding:0 6px;gap:6px}.box.sbox .sl{font-size:10px}.box.sbox .sf{font-size:10px;padding:0 6px}}
+
+/* the contract box: the contract big, then the tricks of both sides (the declaring side with its target) */
+.box.cbox{min-width:120px}
+.box.cbox .cct{display:block;text-align:center;font-size:22px;font-weight:800;line-height:1.1;padding:1px 8px;white-space:nowrap}
+.box.cbox .cct .sm{font-size:12px;font-weight:700;opacity:.65}
+.box.cbox .ccs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:2px 6px 0}
+.box.cbox .cc{display:flex;align-items:baseline;justify-content:center;gap:4px;border-radius:5px;background:rgba(0,0,0,.06);padding:0 4px}
+.box.cbox .cc b{font-size:17px;font-variant-numeric:tabular-nums}
+.box.cbox .cc i{font-style:normal;font-size:11px;opacity:.6}
+.box.cbox .cc.dec{background:rgba(217,178,92,.35)}
+.box.cbox .sl{font-size:11px}
+@media (max-width:560px){.box.cbox{min-width:92px}.box.cbox .cct{font-size:16px}.box.cbox .cc b{font-size:13px}.box.cbox .sl,.box.cbox .cc i{font-size:9px}.box.cbox .ccs{padding:1px 3px 0;gap:2px}}
