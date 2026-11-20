@@ -122,7 +122,7 @@ window.saPwPrompt=async function(i){
 };
 window.saPwSave=async function(i){
   const cl=SA_CLUBS[i]; const pw=(document.getElementById('saNewPw')?.value||'').trim(); if(!cl) return;
-  if(!/^d{4,12}$/.test(pw)){ toast('❌ 4–12 digits'); return; }
+  if(!/^\d{4,12}$/.test(pw)){ toast('❌ 4–12 digits'); return; }
   try{ const r=await fetch(await fbRootUrl('/clubs/'+cl.id+'/secret/pw.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(pw)}); if(!r.ok) throw new Error('HTTP '+r.status); closeModal(); toast('🔑 Password saved'); }
   catch(e){ toast('❌ Failed: '+e.message); }
 };
