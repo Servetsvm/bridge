@@ -14642,11 +14642,14 @@ const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
 const ROBOT_FIX_AT = Date.parse('2026-11-20T18:55:18Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
-function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-2000))); } catch (e) {} return Promise.resolve(); }
+function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-20000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {
   try {
     const L = (await Promise.all(RT_KEYS.map(k => rtGet('errors-' + k + '.json')))).flat().filter(Boolean);
     const h = rtHidden();
+    // the hidden list keeps only the records still in the files (it was cut at 2,000, so with 2,100 records every one
+    // removed brought the oldest hidden one back)
+    if (L.length) { const here = new Set(L.map(x => 'rt:' + x.sys + ':' + x.n)), keep = [...h].filter(p => here.has(p)); if (keep.length < h.size) try { localStorage.setItem(RT_HIDE, JSON.stringify(keep)); } catch (e) {} }
     return L.map(x => ({ ...x, er: (x.er || []).map(e => Array.isArray(e) ? e : [e.t, e.s, e.c, e.b, e.lost]), path: 'rt:' + x.sys + ':' + x.n, kim: '🤖 ' + T('System table — live') + ' · ' + (RT_SYS[x.sys] || x.sys) + (x.conv ? ' · ' + pracName(x.conv) : '') })).filter(x => !h.has(x.path));
   } catch (e) { return []; }
 }
