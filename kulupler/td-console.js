@@ -45,6 +45,7 @@ function tdcDraw(){
   const s=getState();
   if(TDC.v==='setup') return drawSetup();
   if(TDC.v==='table'&&TDC.t) return drawTable();
+  if(TDC.v==='reset') return drawReset();
   if(TDC.v==='hist') return drawHist();
   if(TDC.v==='arc'&&getArchives()[TDC.arc]) return drawArc();
   if(TDC.v==='tab') return drawTab();
@@ -73,9 +74,7 @@ function playersHtml(){
 const MENU=[
   ['Tournament',[['tables','🃏','Tables'],['players','👥','Players'],['boards','📊','Boards']]],
   ['Hands',[['!hands','🃏','Load hand file'],['!auto','🎲','Make the boards automatically']]],
-  ['Old tournaments',[['hist','📜','Old tournaments']]],
-  ['Settings',[['!stall','⚠️','Slow table']]],
-  ['Data',[['!export','⬇','Export'],['!import','⬆','Import'],['!reset','🗑','Reset']]],
+  ['Data',[['!reset','🗑','Reset']]],
   ['Log',[['log','📋','Log']]]];
 const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.flatMap(([g,items])=>items).map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}</select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
 // the chosen section drawn into its box (the full panel's own content and buttons)
@@ -87,7 +86,9 @@ window.tdcPick=function(v){
   if(v==='plist'){ const sel=document.querySelector('.tdc-menu select'); if(sel) sel.value=TDC.tab||''; openPlayerRegistry(); return; }
   TDC.tab=v||null; tdcDraw(); tdcFill(true); };
 // Reset deletes the tournament: asked twice
-window.tdcReset=async function(){ if(!await confirmDialog(L('Reset deletes the tournament being played: its boards, pairs and movement. Export a backup first if you may need it.'),{title:'🗑 '+L('Reset'),confirmLabel:L('Continue'),danger:true})) return; adminReset(); };
+window.tdcReset=function(){ TDC.tab=null; tdcGo('reset'); };
+window.tdcResetNow=async function(){ await adminReset(); TDC.v='reset'; tdcDraw(); };
+window.tdcResetOld=async function(i){ const a0=getArchives()[i]; if(!a0) return; await adminDeleteArchive(i); TDC.v='reset'; tdcDraw(); };
 // the hands: before round 1 (on the ready screen) and from the menu
 const handsHtml=()=>{ const h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>`; };
 window.tdcStall=function(){ const s=getState(); openModal('⚠️ '+L('Slow table'),`<div class="field"><label>${L('Alarm when a table has entered no score for this many minutes')}</label><input type="number" id="tdcStallMin" min="1" max="90" value="${s.stallAlertMinutes||15}"></div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcStallOk()">OK</button>`); };
@@ -208,6 +209,17 @@ window.tdcAdj=function(k,b){ const d=D(); bmAdjScreen(k,b,async(ns,ew)=>{ await 
   if(window.adminAdjScore) window.adminAdjScore=ret(window.adminAdjScore); }
 window.tdcFree=async t=>{ await adminKickTable(t); tdcDraw(); };
 
+// ── Reset: the tournament now (its boards, pairs and movement) and the old tournaments, each deleted on its own ──
+function drawReset(){
+  TDC.arc=null;
+  if(Date.now()-(TDC.resAt||0)>3000){ TDC.resAt=Date.now(); archivesFresh().then(()=>{ if(TDC.v==='reset') drawReset(); }); }
+  const s=getState(), A=getArchives()||[], now=s&&s.status&&s.status!=='none'&&(s.tableCount>0||s.name);
+  const body=`<div class="bm3-step">${L('The tournament now')}</div>
+    ${now?`<div class="tdc-hrow tdc-resrow"><b>${cleanData(s.name||'')}</b><span>${s.status==='running'?'🟢 '+L('Running'):s.status==='finished'?'🏁 '+L('Finished'):'⏳ '+L('Ready to start')}</span><button class="btn tdc-red" onclick="tdcResetNow()">🗑 ${L('Reset')}</button></div>`:`<div class="bm3-note" style="padding:0 12px">${L('No tournament now')}</div>`}
+    <div class="bm3-step">${L('Old tournaments')}</div>
+    ${A.length?`<div class="tdc-hist">${A.map((a,i)=>`<div class="tdc-hrow tdc-resrow"><b>${cleanData((a.state&&a.state.name)||L('Tournament'))}</b><span>${dd(a.finished)} · ${(a.state&&a.state.tableCount)||0} ${L('tables')}</span><button class="btn tdc-red" onclick="tdcResetOld(${i})">🗑 ${L('Delete')}</button></div>`).join('')}</div>`:`<div class="bm3-note" style="padding:0 12px">${L('No archived tournaments')}</div>`}`;
+  frame('🗑 '+L('Reset'),body,`<span></span><button class="bm3-ok" onclick="tdcGo('home')">‹ ${L('Back')}</button>`);
+}
 // ── the old tournaments: each one opened, its boards and names corrected, its results, PBN, PDF, renamed, deleted ──
 const dd=x=>{ const d=new Date(x||0); return isNaN(d)?'':String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); };
 function drawHist(){

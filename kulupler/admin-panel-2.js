@@ -306,7 +306,7 @@ window.adminAutoBoardsOpen=function(){
     const d=m.data||{}, box=document.getElementById('dgBody');
     if(d.meta&&box){
       const item=c=>`<label class="dg-c"><input type="checkbox" data-dgc="${c.k}"> <span>${cleanData(c.n)}</span></label>`;
-      box.innerHTML=`<div class="field"><label>Base system</label><select id="dgSys">${d.meta.systems.map(x=>`<option value="${x.k}">${cleanData(x.n)}</option>`).join('')}</select></div>
+      box.innerHTML=`<div class="field"><label>Base system</label><select id="dgSys"><option value="" selected>— ${window.i18nText?i18nText('Empty'):'Empty'} —</option>${d.meta.systems.map(x=>`<option value="${x.k}">${cleanData(x.n)}</option>`).join('')}</select></div>
         <div class="field"><label>How many boards?</label><input type="number" id="dgN" min="1" max="99" value="${n}"></div>
         <div style="font-size:.8rem;color:var(--text2);margin:4px 0 6px;">The robots deal each board so that one of the chosen conventions comes up in the auction.</div>
         <div class="dg-mode"><button type="button" class="dg-m on" id="dgRand" onclick="adminDgMode(0)">🎲 <span>Random boards</span></button><button type="button" class="dg-m" id="dgConvM" onclick="adminDgMode(1)">📚 <span>Boards for conventions</span></button></div>

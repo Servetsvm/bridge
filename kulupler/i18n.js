@@ -53,6 +53,8 @@
     "IMP - MP":"IMP - MP",
     "Swiss — after each round the pairs with similar scores meet":"Swiss — her turdan sonra puanı yakın çiftler karşılaşır",
     "Test tournament with robots":"Robotlarla test turnuvası",
+    "Empty":"Boş",
+    "The tournament now":"Şu anki turnuva",
     "Reset deletes the tournament being played: its boards, pairs and movement. Export a backup first if you may need it.":"Sıfırla oynanan turnuvayı siler: elleri, çiftleri ve hareketi. Gerekebilirse önce yedeği dışa aktar.",
     "Settings":"Ayarlar",
     "Share":"Paylaş",
