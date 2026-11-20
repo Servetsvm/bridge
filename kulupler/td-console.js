@@ -8,7 +8,7 @@ const L=v=>window.i18nText?i18nText(v):v;
 const TDC={v:'home',w:null,t:null,r:null};
 window.TDC=TDC;
 // on by default on a phone; the choice is kept on this device
-window.tdcOn=()=>{ try{ const v=localStorage.getItem('bg_tdc2'); if(v!=null) return v==='1'; }catch(e){} return true; };
+window.tdcOn=()=>true;
 window.tdcSet=on=>{ try{ localStorage.setItem('bg_tdc2',on?'1':'0'); }catch(e){} TDC.v='home'; TDC.w=null; TDC.arc=null; renderAdminPanel(); };
 
 // the full panel and its tabs come only when chosen; the TD's screen is drawn again when the tournament changes
@@ -34,7 +34,7 @@ const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All
 function frame(title,body,actions,sub){
   const s=getState(), td=typeof tdName==='function'?tdName():'';
   document.getElementById('panelContent').innerHTML=`<div class="bm3 bm3w tdc"><div class="bm3-screen">
-    <div class="bm3-bar"><span class="td">🧑‍⚖️ TD</span><div class="ev"><b>${cleanData(CLUB_NAME||'')}${td?' · '+cleanData(td):''}</b>${cleanData(title||'')}</div><button type="button" class="tdc-full" onclick="tdcSet(false)" title="${L('Full panel')}">🖥</button></div>
+    <div class="bm3-bar"><span class="td">🧑‍⚖️ TD</span><div class="ev"><b>${cleanData(CLUB_NAME||'')}${td?' · '+cleanData(td):''}</b>${cleanData(title||'')}</div><span class="td" style="visibility:hidden" aria-hidden="true">🧑‍⚖️ TD</span></div>
     ${sub||''}
     <div class="bm3-body">${body}</div>
     <div class="bm3-actions">${actions||''}</div></div></div>`;
@@ -77,7 +77,7 @@ const MENU=[
   ['Settings',[['!stall','⚠️','Slow table']]],
   ['Data',[['!export','⬇','Export'],['!import','⬆','Import'],['!reset','🗑','Reset']]],
   ['Log',[['log','📋','Log']]]];
-const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.map(([g,items])=>`<optgroup label="${L(g)}">${items.map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}</optgroup>`).join('')}</select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
+const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.flatMap(([g,items])=>items).map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}</select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
 // the chosen section drawn into its box (the full panel's own content and buttons)
 function tdcFill(scroll){ const c=document.getElementById('adminContent'); if(!c||!TDC.tab) return; if(TDC.tab==='players'){ c.innerHTML=playersHtml(); } else { adminTab=TDC.tab; _rat(); } if(scroll) c.scrollIntoView({behavior:'smooth',block:'start'}); }
 const ACTS={screen:()=>tdcScreen(),link:()=>bgShowPlayersLink(),results:()=>ccResultsPage(),hands:()=>adminImportHandsOpen(),auto:()=>adminAutoBoardsOpen(),stall:()=>tdcStall(),export:()=>adminExport(),import:()=>adminImportOpen(),reset:()=>tdcReset()};
