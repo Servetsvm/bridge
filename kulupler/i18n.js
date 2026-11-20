@@ -53,6 +53,7 @@
     "IMP - MP":"IMP - MP",
     "Swiss — after each round the pairs with similar scores meet":"Swiss — her turdan sonra puanı yakın çiftler karşılaşır",
     "Test tournament with robots":"Robotlarla test turnuvası",
+    "Create the tournament":"Turnuvayı oluştur",
     "New password (4–12 digits)":"Yeni şifre (4–12 rakam)",
     "Opponents: check and press OK":"Rakipler: kontrol edip OK'e bassın",
     "tricks":"löve",

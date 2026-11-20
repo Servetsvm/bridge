@@ -714,3 +714,16 @@ html.embed body.bg-device .login-logo{display:block!important}
   body.bg-device #panelContent{border:0!important;border-radius:0 0 14px 14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
   body.bg-device .login-box{border:0!important;border-radius:14px!important;box-shadow:0 6px 24px rgba(0,0,0,.22)}
 }
+/* the TD's setup on one screen */
+.tdc-movs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px}
+.tdc-movs .bm3-key{min-height:48px;padding:6px 10px}
+.tdc-stepper{display:grid;grid-template-columns:56px 1fr 56px;gap:8px;padding:0 12px}
+.tdc-stepper .bm3-key{min-height:48px;font-size:1.5rem}
+.tdc-stepper input{min-width:0;text-align:center;font-size:1.6rem;font-weight:800;color:#1f5d36;background:#fff;border:1px solid #c5d8ca;border-radius:10px;font-family:inherit}
+.tdc-quick{display:flex;flex-wrap:wrap;gap:6px;padding:6px 12px 0}
+.tdc-quick button{min-width:44px;height:34px;border:1px solid #c5d8ca;background:#fff;border-radius:17px;font-weight:700;color:#1f5d36;cursor:pointer}
+.tdc-quick button.on{background:#1f5d36;color:#fff;border-color:#1f5d36}
+.tdc-sumline{margin:12px;padding:10px 12px;border-radius:10px;background:#d4ead9;color:#1f5d36;text-align:center;font-size:.95rem}
+.tdc-sumline.bad{background:#fde8e6;color:#b3261e}
+.tdc-finrow{margin:10px 12px 0;padding:8px 10px;border-radius:10px;background:#fff;border:1px solid #c5d8ca;display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:700}
+.tdc-finrow .btn{background:#fff;color:#1f5d36;border:1px solid #c5d8ca}

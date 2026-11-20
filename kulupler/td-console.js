@@ -27,7 +27,7 @@ renderAdminTab=window.renderAdminTab=function(){
 const _tcs=window.tdCallsShow;
 if(_tcs) window.tdCallsShow=function(v){ _tcs(v); tdcLive(); };
 // drawn again by itself only where nothing is being typed or chosen
-function tdcLive(){ if(role!=='admin'||!tdcOn()||!document.querySelector('.tdc')) return; if(document.getElementById('modalBg')?.classList.contains('open')) return; if(['run','table','home','arc'].includes(TDC.v)) tdcDraw(); }
+function tdcLive(){ if(role!=='admin'||!tdcOn()||!document.querySelector('.tdc')) return; if(document.getElementById('modalBg')?.classList.contains('open')) return; { const ae=document.activeElement, t=document.querySelector('.tdc'); if(ae&&t&&t.contains(ae)&&/^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return; } if(['run','table','home','arc'].includes(TDC.v)) tdcDraw(); }
 
 const num=x=>(x||'').replace(/[^0-9]/g,'')||'?';
 const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board']];
@@ -52,16 +52,15 @@ function tdcDraw(){
 }
 window.tdcDraw=tdcDraw;
 
-// ── no tournament, one set up, or one finished ──
+// ── no tournament (the setup, all on this one screen), one set up, or one finished ──
 function drawHome(){ TDC.arc=null;
   const s=getState(), set=s.status==='setup'&&s.roundCount>0, fin=s.status==='finished';
+  if(!set){ if(!TDC.w) tdcInitW(); return drawSetup(fin); }
   const mv=(MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||'';
-  const sum=set||fin?`<div class="bm3-sum"><div><span>${L('Tournament')}</span><b>${cleanData(s.name||'')}</b></div><div><span>${L('Movement')}</span><b>${L(mv)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount||'—'}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount||'—'}</b></div><div><span>${L('Boards')}</span><b>${s.totalBoards||'—'}</b></div></div>`:'';
-  const body=`${fin?`<div class="bm3-step">🏁 ${L('Tournament finished')}</div>`:set?`<div class="bm3-step">⏳ ${L('Ready to start')}</div>`:`<div class="bm3-step">${L('No tournament now')}</div>`}${sum}
-    <div class="tdc-tools">${set?`<button class="btn" onclick="tdcSetupStart()">↺ ${L('Set up again')}</button>`:''}<button class="btn" onclick="ccResultsIndex()">📄 ${L('Results')}</button>${set?`<button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button>`:''}</div>${set?moreHtml():''}${menuHtml()}`;
-  frame(fin?L('Tournament finished'):set?L('Ready to start'):L('New tournament'),body,
-    set?`<button class="bm3-cancel" onclick="tdcSetupStart()">↺</button><button class="bm3-ok" onclick="tdcStart()">▶ ${L('Start round 1')}</button>`
-       :`<span></span><button class="bm3-ok" onclick="tdcSetupStart()">➕ ${L('New tournament')}</button>`);
+  const sum=`<div class="bm3-sum"><div><span>${L('Tournament')}</span><b>${cleanData(s.name||'')}</b></div><div><span>${L('Movement')}</span><b>${L(mv)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount||'—'}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount||'—'}</b></div><div><span>${L('Boards')}</span><b>${s.totalBoards||'—'}</b></div></div>`;
+  const body=`<div class="bm3-step">⏳ ${L('Ready to start')}</div>${sum}
+    <div class="tdc-tools"><button class="btn" onclick="tdcSetupStart()">↺ ${L('Set up again')}</button><button class="btn" onclick="ccMovementPage()">🔀 ${L('Movement')}</button><button class="btn" onclick="ccResultsIndex()">📄 ${L('Results')}</button></div>${moreHtml()}${menuHtml()}`;
+  frame(L('Ready to start'),body,`<button class="bm3-cancel" onclick="tdcSetupStart()">↺</button><button class="bm3-ok" onclick="tdcStart()">▶ ${L('Start round 1')}</button>`);
 }
 const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-tools">${[['setup','⚙️','Setup'],['players','👥','Players'],['movement','🔄','Movement'],['tables','🃏','Tables'],['boards','📊','Boards'],['log','📋','Log']].map(([k,i,n])=>`<button class="btn" onclick="tdcTab('${k}')">${i} ${L(n)}</button>`).join('')}<button class="btn" onclick="tdcGo('hist')">📜 ${L('Old tournaments')}</button><button class="btn" onclick="openPlayerRegistry()">📇 ${L('Player list')}</button><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>`;
 const moreHtml=()=>{ const s=getState(), h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>
@@ -70,30 +69,42 @@ window.tdcStall=function(){ const s=getState(); openModal('⚠️ '+L('Slow tabl
 window.tdcStallOk=function(){ const v=parseInt(document.getElementById('tdcStallMin').value); if(!(v>=1&&v<=90)){ toast('❌ 1 – 90'); return; } const s=getState(); s.stallAlertMinutes=v; setState(s); closeModal(); tdcDraw(); };
 window.tdcStart=async function(){ await adminStart(); TDC.v='run'; tdcDraw(); };
 
-// ── the setup with keys: the movement, the players, the boards (and the Swiss rounds) ──
-window.tdcSetupStart=function(){ const s=getState(); TDC.w={step:'mov',mov:s.movement&&s.movement!=='team'?s.movement:'mitchell',players:String(s._setupPlayers||16),bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:String(s.movement==='social'?s.totalBoards:24),swr:String(s._setupSwissRounds||7)}; TDC.v='setup'; tdcDraw(); };
+// ── the setup on one screen: the movement, the players, the boards (and the Swiss rounds), then Create ──
+window.tdcInitW=function(){ const s=getState(); TDC.w={mov:s.movement&&s.movement!=='team'?s.movement:'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
+window.tdcSetupStart=function(){ tdcInitW(); TDC.v='setup'; tdcDraw(); };
 function calc(w){
   const p=+w.players||0, tables=Math.floor(p/4), ph=p%4!==0, pc=tables*2+(ph?1:0);
   const rounds=w.mov==='social'?1:w.mov==='mitchell'?tables:w.mov==='swiss'?(+w.swr||0):(pc%2?pc:pc-1);
   const total=w.mov==='social'?(+w.soc||0):rounds*w.bpr;
   return {tables,ph,pc,rounds,total};
 }
-const STEPS=w=>['mov','players',w.mov==='social'?'soc':'bpr',...(w.mov==='swiss'?['swr']:[]),'ok'];
-function pad(k){ return `<div class="bm3-keys k3 tdc-pad">${['1','2','3','4','5','6','7','8','9','⌫','0','C'].map(d=>`<button class="bm3-key" onclick="tdcKey('${k}','${d}')">${d}</button>`).join('')}</div>`; }
-window.tdcKey=function(k,d){ const w=TDC.w; let v=String(w[k]||''); if(d==='⌫') v=v.slice(0,-1); else if(d==='C') v=''; else if(v.length<3) v=(v==='0'?'':v)+d; w[k]=v; drawSetup(); };
-window.tdcSet1=(k,v)=>{ TDC.w[k]=v; if(k==='mov'||k==='bpr'){ tdcStep(1); return; } drawSetup(); };
-window.tdcStep=function(d){ const w=TDC.w, S=STEPS(w), i=S.indexOf(w.step)+d; if(i<0){ TDC.v='home'; TDC.w=null; tdcDraw(); return; } w.step=S[Math.min(S.length-1,i)]; drawSetup(); };
-function drawSetup(){
-  const w=TDC.w; if(!w) return tdcSetupStart();
-  const c=calc(w); let body='', ok=true;
-  const info=`<div class="bm3-display tdc-disp"><div class="bm3-contract">${L((MOVS.find(m=>m[0]===w.mov)||[])[1]||'')}</div><div class="bm3-sub"><span>${+w.players||0} ${L('players')}</span><span>${c.tables} ${L('tables')}${c.ph?' + 👻':''}</span><span>${c.rounds} ${L('rounds')}</span><span>${c.total} ${L('boards')}</span></div></div>`;
-  if(w.step==='mov') body=`<div class="bm3-step">${L('Movement')}</div><div class="tdc-movs">${MOVS.map(([k,n,d])=>`<button class="bm3-key${w.mov===k?' active':''}" onclick="tdcSet1('mov','${k}')"><b>${L(n)}</b><small>${L(d)}</small></button>`).join('')}</div>`;
-  else if(w.step==='players'){ const p=+w.players||0; ok=w.mov==='social'?p>=8&&p%4===0:w.mov==='swiss'?p>=8&&p%4===0:p>=8; body=`<div class="bm3-step">${L('Number of players')}</div><div class="tdc-big">${w.players||'—'}</div>${ok?'':`<div class="bm3-note tdc-warn">${w.mov==='social'||w.mov==='swiss'?L('At least 8, divisible by 4'):L('At least 8 players')}</div>`}${pad('players')}`; }
-  else if(w.step==='bpr') body=`<div class="bm3-step">${L('Boards per round')}</div><div class="bm3-keys k4">${[1,2,3,4,5,6,7,8].map(n=>`<button class="bm3-key${w.bpr===n?' active':''}" onclick="tdcSet1('bpr',${n})">${n}</button>`).join('')}</div>`;
-  else if(w.step==='soc'){ ok=(+w.soc||0)>=1&&(+w.soc)<=99; body=`<div class="bm3-step">${L('Number of boards')}</div><div class="tdc-big">${w.soc||'—'}</div>${pad('soc')}`; }
-  else if(w.step==='swr'){ const n=+w.swr||0; ok=n>=3&&n<=c.pc-1; body=`<div class="bm3-step">${L('Number of rounds')}</div><div class="tdc-big">${w.swr||'—'}</div>${ok?'':`<div class="bm3-note tdc-warn">3 – ${Math.max(3,c.pc-1)}</div>`}${pad('swr')}`; }
-  else body=`<div class="bm3-step">${L('Create the tournament?')}</div><div class="bm3-sum"><div><span>${L('Movement')}</span><b>${L((MOVS.find(m=>m[0]===w.mov)||[])[1])}</b></div><div><span>${L('Players')}</span><b>${w.players}</b></div><div><span>${L('Tables')}</span><b>${c.tables}${c.ph?' + 👻':''}</b></div><div><span>${L('Rounds')}</span><b>${c.rounds}</b></div><div><span>${L('Boards')}</span><b>${c.total}${w.mov==='social'?'':' ('+w.bpr+' × '+c.rounds+')'}</b></div></div>`;
-  frame(L('New tournament'),info+body,`<button class="bm3-cancel" onclick="tdcStep(-1)">‹ ${L('Back')}</button>`+(w.step==='ok'?`<button class="bm3-ok" onclick="tdcCreate()">🚀 ${L('Create')}</button>`:`<button class="bm3-ok" onclick="tdcStep(1)"${ok?'':' disabled'}>${L('Next')} ›</button>`));
+const LIM={players:[4,120],soc:[1,99],swr:[3,20]};
+window.tdcSet1=(k,v)=>{ TDC.w[k]=v; drawSetup(); };
+window.tdcInc=(k,dv)=>{ const [lo,hi]=LIM[k]; TDC.w[k]=Math.max(lo,Math.min(hi,(+TDC.w[k]||0)+dv)); drawSetup(); };
+window.tdcTyped=(k,el)=>{ const v=parseInt(el.value,10); if(v>0){ TDC.w[k]=v; const x=document.getElementById('tdcSum'); if(x) x.outerHTML=sumHtml(); const b=document.getElementById('tdcCreateBtn'); if(b) b.disabled=!!setupErr(); } };
+const stepper=(k,quick)=>`<div class="tdc-stepper"><button class="bm3-key" onclick="tdcInc('${k}',-1)">−</button><input type="number" inputmode="numeric" value="${TDC.w[k]}" min="${LIM[k][0]}" max="${LIM[k][1]}" oninput="tdcTyped('${k}',this)" onchange="drawSetupNow()"><button class="bm3-key" onclick="tdcInc('${k}',1)">+</button></div>${quick?`<div class="tdc-quick">${quick.map(n=>`<button class="${+TDC.w[k]===n?'on':''}" onclick="tdcSet1('${k}',${n})">${n}</button>`).join('')}</div>`:''}`;
+window.drawSetupNow=()=>drawSetup();
+function setupErr(){ const w=TDC.w, c=calc(w), p=+w.players||0;
+  if((w.mov==='social'||w.mov==='swiss')&&!(p>=8&&p%4===0)) return L('At least 8, divisible by 4');
+  if(p<8) return L('At least 8 players');
+  if(w.mov==='social'&&!((+w.soc||0)>=1&&(+w.soc)<=99)) return '1 – 99';
+  if(w.mov==='swiss'&&!((+w.swr)>=3&&(+w.swr)<=c.pc-1)) return L('Number of rounds')+': 3 – '+Math.max(3,c.pc-1);
+  return ''; }
+function sumHtml(){ const w=TDC.w, c=calc(w), e=setupErr();
+  return `<div id="tdcSum" class="tdc-sumline${e?' bad':''}">${e?'⚠️ '+cleanData(e):`<b>${c.tables}</b> ${L('tables')}${c.ph?' + 👻':''} · <b>${c.rounds}</b> ${L('rounds')} · <b>${c.total}</b> ${L('boards')}`}</div>`; }
+function drawSetup(fin){
+  if(!TDC.w) tdcInitW();
+  const w=TDC.w, again=TDC.v==='setup', fs=getState().status==='finished';
+  const body=`${fs&&!again?`<div class="tdc-finrow">🏁 ${L('Tournament finished')} <button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>`:''}
+    <div class="bm3-step">${L('Movement')}</div>
+    <div class="tdc-movs">${MOVS.map(([k,n,d])=>`<button class="bm3-key${w.mov===k?' active':''}" onclick="tdcSet1('mov','${k}')"><b>${L(n)}</b><small>${L(d)}</small></button>`).join('')}</div>
+    <div class="bm3-step">${L('Number of players')}</div>${stepper('players',[8,12,16,20,24,28,32])}
+    ${w.mov==='social'?`<div class="bm3-step">${L('Number of boards')}</div>${stepper('soc',[12,16,20,24,28,32])}`
+      :`<div class="bm3-step">${L('Boards per round')}</div><div class="bm3-keys k4">${[1,2,3,4,5,6,7,8].map(n=>`<button class="bm3-key${w.bpr===n?' active':''}" onclick="tdcSet1('bpr',${n})">${n}</button>`).join('')}</div>`}
+    ${w.mov==='swiss'?`<div class="bm3-step">${L('Number of rounds')}</div>${stepper('swr',null)}`:''}
+    ${sumHtml()}
+    ${again?'':menuHtml()}`;
+  frame(again?L('Set up again'):L('New tournament'),body,(again?`<button class="bm3-cancel" onclick="TDC.v='home';TDC.w=null;tdcDraw()">‹ ${L('Back')}</button>`:'<span></span>')+`<button class="bm3-ok" id="tdcCreateBtn" onclick="tdcCreate()"${setupErr()?' disabled':''}>🚀 ${L('Create the tournament')}</button>`);
 }
 // the same setup as the full panel's form: its boxes, filled in out of sight
 window.tdcCreate=async function(){
