@@ -2237,3 +2237,9 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .clubsfs.one .clubtools .btn{min-height:min(16vh,120px);font-size:clamp(16px,2.6vh,22px)}
 .clubsfs.one .clubarr{display:none}
 .clubsfs .row2{margin-top:0}
+/* Clubs: the bottom buttons larger, in the cards' colours (‹ Clubs green, Close white with a green edge) */
+.clubsfs > .row2{gap:10px}
+.clubsfs > .row2 .btn{min-height:58px;font-size:18px;font-weight:800;border-radius:14px;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.clubsfs > .row2 .btn[data-clubopen]{background:#1f5d36!important;color:#fff!important;border:2px solid #174a2b!important}
+.clubsfs > .row2 #oClose{background:#fff!important;color:#1f5d36!important;border:2px solid #1f5d36!important}
+.clubsfs .clubrow > .row2 .btn[data-clubplay]{background:#1f5d36!important;color:#fff!important;border:2px solid #174a2b!important;border-radius:14px;font-weight:800;box-shadow:0 2px 6px rgba(0,0,0,.18)}
