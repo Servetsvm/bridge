@@ -585,7 +585,7 @@ const Net = (() => {
     for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send({ t: 'lchat', m }); } catch (e) {} }
   }
   // the lobby's robot answers you when nobody else is here: its line stays on this device (the others never see it)
-  function lbot(text) { addL({ id: 'bot' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), from: T('Robot'), text: String(text || '').slice(0, 200), ts: Date.now(), bot: 1 }); }
+  function lbot(text, name) { addL({ id: 'bot' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), from: String(name || T('Robot')).slice(0, 20), text: String(text || '').slice(0, 200), ts: Date.now(), bot: 1 }); }
   // the other players in the lobby now (their app answered lately on an open lobby line)
   function lobbyOthers() {
     const me = nameKey(myName() || ''), lines = st.mesh || new Map(); let n = 0;

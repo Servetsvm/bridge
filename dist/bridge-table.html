@@ -11708,7 +11708,7 @@ function botTableState() {
 }
 async function botAI(seat, text) {
   const me = U(), role = s => sideOf(s) === sideOf(me) ? 'partner' : 'opponent';
-  const body = { lang: SET.lang || 'en', text, me: myNm() || '', meSeat: SEAT_EN[me], bot: { name: seatName(seat), seat: SEAT_EN[seat], role: role(seat) },
+  const body = { lang: chatLang(text), text, me: myNm() || '', meSeat: SEAT_EN[me], bot: { name: seatName(seat), seat: SEAT_EN[seat], role: role(seat) },
     others: [1, 2, 3].map(r => (me + r) % 4).filter(s => s !== seat).map(s => ({ name: seatName(s), seat: SEAT_EN[s], role: role(s) })),
     table: botTableState(), history: BOT.chat.slice(-9, -1).map(m => ({ mine: !!m.me, from: m.from || '', text: m.text })) };
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 12000);
@@ -14328,15 +14328,37 @@ function pmTo(name) {
 }
 // the lobby's robot (the same AI as at the robots' table, told it is the lobby): it answers only you, when nobody
 // else is in the lobby; no answer when the AI cannot be reached
+// the language a chat line is written in (its letters and common words), else the app's language: the robots answer in it
+const CHAT_LANG = {
+  tr: [/[ğışİĞŞ]/, /\b(merhaba|selam|iyi|gunler|günler|gunaydin|günaydın|aksamlar|akşamlar|nasil|nasıl|nasilsin|nasılsın|var|yok|mi|mı|mu|mü|ne|bu|bir|ve|ben|sen|biz|tesekkur|teşekkür|tesekkurler|teşekkürler|sagol|sağol|evet|hayir|hayır|kimse|oyun|oynayalim|oynayalım|oynamak|guzel|güzel|kolay|gelsin|partnerim|abi|hocam)\b/g],
+  no: [/[æøåÆØÅ]/, /\b(hei|hallo|takk|jeg|du|er|ikke|det|og|spill|spille|god|dag|morgen|kveld|hvordan|går|gar|noen|her|skal|vi|bra|makker|kan|har|hva)\b/g],
+  en: [null, /\b(hello|hi|hey|thanks|thank|the|is|are|you|what|how|good|play|playing|anyone|morning|evening|i|my|partner|nice|game|here|today)\b/g],
+  es: [/[ñ¿¡]/, /\b(hola|gracias|buenos|buenas|dias|días|que|qué|como|cómo|juego|jugar|alguien|aquí|aqui|estás|estas|bien|tardes|noches)\b/g],
+  fr: [/[çœ]/, /\b(bonjour|salut|merci|je|tu|est|avec|jouer|quelqu|ça|ca|très|tres|bonsoir|comment|vous|partenaire|bien)\b/g],
+  it: [null, /\b(ciao|grazie|buongiorno|buonasera|sono|gioco|giocare|qualcuno|come|stai|che|bene|partner|oggi)\b/g],
+  de: [/[ßäÄ]/, /\b(hallo|danke|guten|tag|ich|du|ist|nicht|spielen|jemand|wie|geht|morgen|abend|partner|gut|hier)\b/g],
+  ru: [/[а-яА-ЯёЁ]/],
+  pl: [/[łąęśżźńŁĄĘŚŻŹŃ]/, /\b(cześć|czesc|dziękuję|dziekuje|dzień|dzien|dobry|jak|się|sie|gra|grać|grac|ktoś|ktos|tutaj)\b/g],
+  zh: [/[\u4e00-\u9fff]/],
+};
+function chatLang(text) {
+  const t = String(text || '').toLowerCase(); let best = null, bs = 0;
+  for (const [k, [ch, w]] of Object.entries(CHAT_LANG)) { const sc = (ch && ch.test(t) ? 3 : 0) + (w ? (t.match(w) || []).length : 0); if (sc > bs) { bs = sc; best = k; } }
+  return best || SET.lang || 'en';
+}
+// the lobby's robot: a first name of the language you write in (the same one while the app is open)
+const LOBBY_NAMES = { tr: ['Ayşe', 'Mehmet', 'Elif', 'Emre', 'Zeynep', 'Can'], no: ['Ingrid', 'Lars', 'Kari', 'Ola', 'Silje', 'Erik'], en: ['Emma', 'Oliver', 'Grace', 'Jack'], es: ['Lucía', 'Mateo', 'Carmen', 'Diego'], fr: ['Camille', 'Louis', 'Chloé', 'Hugo'], it: ['Giulia', 'Marco', 'Sofia', 'Luca'], de: ['Anna', 'Felix', 'Lena', 'Jonas'], ru: ['Анна', 'Иван', 'Ольга', 'Дмитрий'], pl: ['Zofia', 'Jan', 'Maja', 'Piotr'], zh: ['小明', '丽丽', '小华', '晓燕'] };
+const lobbyBotName = l => (ui.lbName || (ui.lbName = {}))[l] || (ui.lbName[l] = pick(LOBBY_NAMES[l] || LOBBY_NAMES.en));
 async function lobbyBot(text) {
   if (!BOT_AI || !Net.lbot) return;
   const me = myNm() || '', L = (Net.st.lchat || []).filter(m => m.bot || m.from === me).slice(-9, -1);
-  const body = { lang: SET.lang || 'en', text, me, where: 'lobby', bot: { name: T('Robot') }, history: L.map(m => ({ mine: !m.bot, from: m.from, text: m.text })) };
+  const lang = chatLang(text), name = lobbyBotName(lang);
+  const body = { lang, text, me, where: 'lobby', bot: { name }, history: L.map(m => ({ mine: !m.bot, from: m.from, text: m.text })) };
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 12000);
   try {
     const r = await fetch(BOT_AI, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
     const j = await r.json(); if (!r.ok || !j.reply) return;
-    setTimeout(() => { Net.lbot(String(j.reply).slice(0, 200)); render(); renderDock(); }, 400 + Math.random() * 600);
+    setTimeout(() => { Net.lbot(String(j.reply).slice(0, 200), name); render(); renderDock(); }, 400 + Math.random() * 600);
   } catch (e) {} finally { clearTimeout(tm); }
 }
 function lobbySend(text) {
@@ -15663,7 +15685,7 @@ const Net = (() => {
     for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send({ t: 'lchat', m }); } catch (e) {} }
   }
   // the lobby's robot answers you when nobody else is here: its line stays on this device (the others never see it)
-  function lbot(text) { addL({ id: 'bot' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), from: T('Robot'), text: String(text || '').slice(0, 200), ts: Date.now(), bot: 1 }); }
+  function lbot(text, name) { addL({ id: 'bot' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), from: String(name || T('Robot')).slice(0, 20), text: String(text || '').slice(0, 200), ts: Date.now(), bot: 1 }); }
   // the other players in the lobby now (their app answered lately on an open lobby line)
   function lobbyOthers() {
     const me = nameKey(myName() || ''), lines = st.mesh || new Map(); let n = 0;

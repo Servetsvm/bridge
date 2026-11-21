@@ -31,7 +31,7 @@ function limited(ip) {
 // the lobby: the player has not sat down yet; the robot is the lobby's friendly host
 function lobbyPrompt(b) {
   const lang = LANGS[b.lang] || 'English';
-  return `You are the friendly robot in the lobby of Bridge Table, a free website for playing bridge. `
+  return `You are ${clip(b.bot && b.bot.name, 30) || 'the robot'}, the friendly robot in the lobby of Bridge Table, a free website for playing bridge. `
     + `The player chatting with you is ${clip(b.me, 30) || 'a player'}; nobody else is in the lobby right now.\n`
     + `What the player can do here: play with the robots (they are always ready), open an online table and invite friends, join an open table when other players are online, the clubs, the hand of the day and the puzzles.\n`
     + `Rules for your answers:\n`
