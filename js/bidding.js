@@ -103,7 +103,10 @@ function cands(x) {
     const fitOK = h => t >= 4 || h.len[t] + P.len[t] >= 8 || (h.len[t] >= 7 && h.top5(t) >= 4), fit6 = h => t >= 4 || h.len[t] + P.len[t] >= 8 || h.len[t] >= 6;
     add(B(7, t), h => count(h) === total && est(h) >= 36 && h.hcp + P.min >= 33 && queen(h) && fitOK(h), { t: 'Grand slam: we hold every key card' });
     if (t < 4) add(B(6, 4), h => count(h) >= total - 1 && !fit6(h), { t: 'Small slam in notrump: no trump fit' });
-    add(B(6, t), h => count(h) >= total - 1, { t: 'Small slam: at most one key card missing' });
+    // a key card and the trump queen both missing (the queen shown missing by the answer, or not shown and only an
+    // eight-card fit): two losers, so five (1♥–2♦–2♥–4NT–5♥ with ♥A9843 and one ace out: 5♥)
+    const qOut = h => t < 4 && mm.rkc && !h.has(t, 10) && (pm.kc === 2 ? !pm.q : h.len[t] + P.len[t] <= 8);
+    add(B(6, t), h => count(h) >= total - 1 && !(count(h) === total - 1 && qOut(h)), { t: 'Small slam: at most one key card missing' });
     add('P', () => pLast.call === B(5, t), { t: 'Two key cards missing: stop at the five level' });
     add(B(5, t), () => true, { t: 'Two key cards missing: sign off at the five level', tag: 'stop' });
     add(B(5, 4), () => true, { t: 'Two key cards missing: to play', tag: 'stop' });
