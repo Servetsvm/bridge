@@ -2349,3 +2349,19 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 /* the coach: a summary of the play, and a tip under each mistake */
 .coachsum{font-weight:700;margin:2px 0 6px}
 .coachtip{font-size:13px;opacity:.85;margin:1px 0 4px 10px}
+
+/* bidding practice with both hands */
+.bphands{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.bphand{background:rgba(0,0,0,.04);border-radius:8px;padding:6px 8px;border:2px solid transparent;font-size:15px;line-height:1.45}
+.bphand.turn{border-color:var(--brass)}
+.bphand>b{display:block;font-size:13px;margin-bottom:2px}
+.bpauc{width:100%;border-collapse:collapse;margin:6px 0;table-layout:fixed;font-size:15px}
+.bpauc th,.bpauc td{text-align:center;padding:2px;border-bottom:1px solid rgba(0,0,0,.08)}
+.bpauc th.us{color:var(--pos)}
+.bpbox{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.bpwho{font-weight:700;text-align:center}
+.bprow{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.bprow .bpp{grid-column:1/-1}
+.bpc{padding:5px 0;font-size:15px}
+.bpc:disabled{opacity:.3}
+.bpimp{font-size:20px;font-weight:800;margin-top:4px}

@@ -1895,6 +1895,7 @@ function homeShell2() {
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Social Bridge'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
+        ${tile('id="hBidPrac" type="button"', '🎯', T('Bidding practice'), T('Bid both hands, then see the best contract and the robots\' auction.'))}
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
@@ -3669,6 +3670,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bRtAgain') { rtAgain(); return; }
   if (t.id === 'bRtNext') { rtNext(); return; }
   if (t.id === 'bRtSit') { rtSitPick(); return; }
+  if (t.id === 'hBidPrac' && typeof bpNew === 'function') { bpNew(); return; }
   if (t.id === 'bTblScore') { Net.panel(); return; }
   if (t.id === 'bRtList') { rtOpen(G && G.rtv ? G.rtv.k : RT.cur); return; }
   if (t.dataset.rtsit != null) { rtSit(+t.dataset.rtsit); return; }

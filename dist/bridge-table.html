@@ -2402,6 +2402,22 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .coachsum{font-weight:700;margin:2px 0 6px}
 .coachtip{font-size:13px;opacity:.85;margin:1px 0 4px 10px}
 
+/* bidding practice with both hands */
+.bphands{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.bphand{background:rgba(0,0,0,.04);border-radius:8px;padding:6px 8px;border:2px solid transparent;font-size:15px;line-height:1.45}
+.bphand.turn{border-color:var(--brass)}
+.bphand>b{display:block;font-size:13px;margin-bottom:2px}
+.bpauc{width:100%;border-collapse:collapse;margin:6px 0;table-layout:fixed;font-size:15px}
+.bpauc th,.bpauc td{text-align:center;padding:2px;border-bottom:1px solid rgba(0,0,0,.08)}
+.bpauc th.us{color:var(--pos)}
+.bpbox{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+.bpwho{font-weight:700;text-align:center}
+.bprow{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.bprow .bpp{grid-column:1/-1}
+.bpc{padding:5px 0;font-size:15px}
+.bpc:disabled{opacity:.3}
+.bpimp{font-size:20px;font-weight:800;margin-top:4px}
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -5590,6 +5606,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Bidding practice": "Teklif alıştırması", "Bid both hands, then see the best contract and the robots' auction.": "İki elin teklifini sen ver, sonra en iyi kontratı ve robotların teklifini gör.", "You bid both hands; the opponents pass. Then your contract is compared with the best one (double dummy) and with the robots' auction.": "İki elin teklifini sen verirsin; rakipler pas geçer. Sonra kontratın en iyisiyle (double dummy) ve robotların teklifiyle karşılaştırılır.", "North (partner)": "Kuzey (partner)", "South (you)": "Güney (sen)", "Bid for {0}": "{0} için teklif ver", "Result": "Sonuç", "Your contract": "Kontratın", "Best contract": "En iyi kontrat", "The best contract!": "En iyi kontrat!", "The robots' auction": "Robotların teklifi", "Tricks double dummy": "Double dummy löveler", "This session: {0} deals, {1} IMP": "Bu oturum: {0} el, {1} IMP", "Passed out": "Pas geçildi", "New deal": "Yeni el",
     "My week": "Haftam", "This week": "Bu hafta", "Last week": "Geçen hafta", "Tricks lost as declarer": "Deklaranken kaybedilen löve", "Tricks lost in defence": "Savunmada kaybedilen löve", "Same contract as the field": "Sahayla aynı kontrat", "No boards this week yet: play a few and your report appears here.": "Bu hafta henüz el yok: birkaç el oyna, raporun burada görünür.", "Tricks lost: per board the coach checked (double dummy), {0} as declarer and {1} in defence this week.": "Kaybedilen löve: koçun kontrol ettiği el başına (double dummy); bu hafta {0} el deklaran, {1} el savunma.", "Most frequent mistakes this week": "Bu haftanın en sık hataları", "Most tricks went in your declarer play: plan the whole hand before the first card (count your winners and losers).": "Lövelerin çoğu deklaran oyununda gitti: ilk karttan önce bütün eli planla (kazananlarını ve kaybedenlerini say).", "Most tricks went in defence: think about the opening lead and watch your partner's signals.": "Lövelerin çoğu savunmada gitti: ilk atağı iyi düşün ve partnerinin işaretlerine dikkat et.", "Your most frequent mistake: {0}. The coach's tips after each board show the right card.": "En sık hatan: {0}. Her elden sonra koçun ipuçları doğru kartı gösterir.", "Your auctions often end in another contract than the field's: practise your system's bidding.": "Açık artırmaların çoğu sahadan farklı bir kontratta bitiyor: sisteminin tekliflerini çalış.", "Opening and other leads": "Atak ve renk açma", "Ruffing": "Çakma", "Ruffing too soon": "Gereksiz çakma", "Keeping honours": "Onörleri saklamak", "Discards": "Kart atma", "Second hand low": "İkinci el küçük", "Third hand high": "Üçüncü el büyük", "Taking a trick": "Leveyi almak", "Ducking": "Leveyi bırakmak", "Choice of card in a suit": "Renkte doğru kartı seçmek",
     "The right card in the suit: {0}, not {1}.": "Renkteki doğru kart: {1} değil, {0}.", "A trump lead was better: it cuts down the ruffs.": "Koz atağı daha iyiydi: çakmaları azaltır.", "A short-suit lead was better: it can give your side a ruff.": "Kısa renkten atak daha iyiydi: tarafına bir çakma kazandırabilir.", "Your long suit was the better lead: set up its long cards.": "Uzun rengin daha iyi ataktı: uzun kartlarını kur.", "Your long suit was the better lead here.": "Burada uzun rengin daha iyi ataktı.", "A trump lead was not right here: it helped the other side.": "Burada koz atağı doğru değildi: karşı tarafa yaradı.", "Another suit was the better lead: {0}.": "Başka bir renk daha iyi ataktı: {0}.", "Ruffing was better here.": "Burada çakmak daha iyiydi.", "Not ruffing was better here (keep your trumps).": "Burada çakmamak daha iyiydi (kozlarını sakla).", "Keep your honour: discard a low card.": "Onörünü sakla: küçük bir kart at.", "Discard from another suit: keep the cards that matter.": "Başka renkten at: işe yarayan kartları sakla.", "Second hand low: keeping your high card was better.": "İkinci el küçük: büyük kartını saklamak daha iyiydi.", "Third hand high: winning the trick (or forcing a high card) was better.": "Üçüncü el büyük: leveyi almak (ya da büyük kart aldırmak) daha iyiydi.", "Winning this trick was better.": "Bu leveyi almak daha iyiydi.", "Ducking (letting this trick go) was better.": "Bu leveyi bırakmak daha iyiydi.", "{0} was better.": "{0} daha iyiydi.", "Your side lost {0} tricks in the play (double dummy).": "Tarafın oyunda {0} leve kaybetti (double dummy).",
     "Privacy": "Gizlilik", "Delete my account": "Hesabımı sil", "Delete your account and all your data? The administrator deletes them within 30 days.": "Hesabın ve bütün verilerin silinsin mi? Yönetici 30 gün içinde siler.", "Please delete my account and all my data.": "Lütfen hesabımı ve bütün verilerimi silin.", "Request sent: the administrator deletes your account within 30 days.": "İstek gönderildi: yönetici hesabını 30 gün içinde siler.",
@@ -6042,6 +6059,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Bidding practice": "Meldetrening", "Bid both hands, then see the best contract and the robots' auction.": "Meld begge hendene, se så beste kontrakt og robotenes meldinger.", "You bid both hands; the opponents pass. Then your contract is compared with the best one (double dummy) and with the robots' auction.": "Du melder begge hendene; motstanderne passer. Så sammenlignes kontrakten med den beste (double dummy) og med robotenes meldinger.", "North (partner)": "Nord (makker)", "South (you)": "Syd (deg)", "Bid for {0}": "Meld for {0}", "Result": "Resultat", "Your contract": "Din kontrakt", "Best contract": "Beste kontrakt", "The best contract!": "Beste kontrakt!", "The robots' auction": "Robotenes meldinger", "Tricks double dummy": "Stikk double dummy", "This session: {0} deals, {1} IMP": "Denne økten: {0} spill, {1} IMP", "Passed out": "Passet ut", "New deal": "Ny giv",
     "My week": "Min uke", "This week": "Denne uken", "Last week": "Forrige uke", "Tricks lost as declarer": "Tapte stikk som spillefører", "Tricks lost in defence": "Tapte stikk i forsvar", "Same contract as the field": "Samme kontrakt som feltet", "No boards this week yet: play a few and your report appears here.": "Ingen spill denne uken ennå: spill noen, så kommer rapporten her.", "Tricks lost: per board the coach checked (double dummy), {0} as declarer and {1} in defence this week.": "Tapte stikk: per spill treneren sjekket (double dummy); denne uken {0} som spillefører og {1} i forsvar.", "Most frequent mistakes this week": "Ukens vanligste feil", "Most tricks went in your declarer play: plan the whole hand before the first card (count your winners and losers).": "De fleste stikkene gikk i spilleføringen: planlegg hele spillet før første kort (tell vinnere og tapere).", "Most tricks went in defence: think about the opening lead and watch your partner's signals.": "De fleste stikkene gikk i forsvar: tenk på utspillet og følg med på makkers markeringer.", "Your most frequent mistake: {0}. The coach's tips after each board show the right card.": "Din vanligste feil: {0}. Trenerens tips etter hvert spill viser riktig kort.", "Your auctions often end in another contract than the field's: practise your system's bidding.": "Meldingene dine ender ofte i en annen kontrakt enn feltets: øv på systemets meldinger.", "Opening and other leads": "Utspill", "Ruffing": "Stjeling", "Ruffing too soon": "Unødvendig stjeling", "Keeping honours": "Beholde honnører", "Discards": "Kast", "Second hand low": "Lavt i annen hånd", "Third hand high": "Høyt i tredje hånd", "Taking a trick": "Ta stikket", "Ducking": "Dukke", "Choice of card in a suit": "Riktig kort i fargen",
     "The right card in the suit: {0}, not {1}.": "Riktig kort i fargen: {0}, ikke {1}.", "A trump lead was better: it cuts down the ruffs.": "Trumfutspill var bedre: det reduserer stjelingene.", "A short-suit lead was better: it can give your side a ruff.": "Utspill i kortfarge var bedre: det kan gi dere en stjeling.", "Your long suit was the better lead: set up its long cards.": "Langfargen din var bedre utspill: spill fram lengdene.", "Your long suit was the better lead here.": "Langfargen din var bedre utspill her.", "A trump lead was not right here: it helped the other side.": "Trumfutspill var ikke riktig her: det hjalp motparten.", "Another suit was the better lead: {0}.": "En annen farge var bedre utspill: {0}.", "Ruffing was better here.": "Å stjele var bedre her.", "Not ruffing was better here (keep your trumps).": "Å ikke stjele var bedre her (behold trumfene).", "Keep your honour: discard a low card.": "Behold honnøren: kast et lavt kort.", "Discard from another suit: keep the cards that matter.": "Kast fra en annen farge: behold kortene som teller.", "Second hand low: keeping your high card was better.": "Lavt i annen hånd: å beholde det høye kortet var bedre.", "Third hand high: winning the trick (or forcing a high card) was better.": "Høyt i tredje hånd: å vinne stikket (eller tvinge fram et høyt kort) var bedre.", "Winning this trick was better.": "Å vinne dette stikket var bedre.", "Ducking (letting this trick go) was better.": "Å dukke (la stikket gå) var bedre.", "{0} was better.": "{0} var bedre.", "Your side lost {0} tricks in the play (double dummy).": "Dere tapte {0} stikk i spillet (double dummy).",
     "Privacy": "Personvern", "Delete my account": "Slett kontoen min", "Delete your account and all your data? The administrator deletes them within 30 days.": "Slette kontoen din og alle dataene dine? Administratoren sletter dem innen 30 dager.", "Please delete my account and all my data.": "Vennligst slett kontoen min og alle dataene mine.", "Request sent: the administrator deletes your account within 30 days.": "Forespørsel sendt: administratoren sletter kontoen din innen 30 dager.",
@@ -12375,6 +12393,7 @@ function homeShell2() {
         ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Social Bridge'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
+        ${tile('id="hBidPrac" type="button"', '🎯', T('Bidding practice'), T('Bid both hands, then see the best contract and the robots\' auction.'))}
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
@@ -14149,6 +14168,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bRtAgain') { rtAgain(); return; }
   if (t.id === 'bRtNext') { rtNext(); return; }
   if (t.id === 'bRtSit') { rtSitPick(); return; }
+  if (t.id === 'hBidPrac' && typeof bpNew === 'function') { bpNew(); return; }
   if (t.id === 'bTblScore') { Net.panel(); return; }
   if (t.id === 'bRtList') { rtOpen(G && G.rtv ? G.rtv.k : RT.cur); return; }
   if (t.dataset.rtsit != null) { rtSit(+t.dataset.rtsit); return; }
@@ -19121,6 +19141,101 @@ const SB = (() => {
   }
   return { open, openLink, locked, vpOf };
 })();
+
+</script>
+<script>
+/* Bridge Table — bidding practice with both hands: you see your hand and your partner's and make the calls for both
+   (the opponents pass), then the contract is compared double dummy with the best contract for your side, and the
+   robots bid the same two hands with your convention card. Loaded after app.js (uses its helpers). */
+'use strict';
+const BP = { deal: null, auc: [], dealer: 2, board: 1, done: null, n: 0, imp: 0, tries: 0 };
+const BP_SEATS = [0, 2];   // North (your partner) and South (you)
+function bpNew() {
+  const d = [...Array(52).keys()];
+  for (let k = 51; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [d[k], d[j]] = [d[j], d[k]]; }
+  const deal = [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13));
+  BP.board = 1 + Math.floor(Math.random() * 16); BP.dealer = E.dealerOf(BP.board);
+  // a deal worth bidding: your side has at least 20 points between you
+  const hcp = h => h.reduce((n, c) => n + Math.max(0, E.R(c) - 8), 0);
+  if (hcp(deal[0]) + hcp(deal[2]) < 20 && BP.tries++ < 40) return bpNew();
+  BP.tries = 0; BP.deal = deal; BP.auc = []; BP.done = null;
+  bpPasses(); bpShow();
+}
+// the opponents always pass; the turn moves on to your side
+function bpPasses() { while (!E.auctionOver(BP.auc) && !BP_SEATS.includes(bpTurn())) BP.auc.push({ seat: bpTurn(), call: 'P' }); }
+const bpTurn = () => (BP.dealer + BP.auc.length) % 4;
+function bpCall(call) {
+  if (BP.done || !BP.deal) return;
+  const seat = bpTurn(); if (!BP_SEATS.includes(seat) || !E.legalCalls(BP.auc, seat).includes(call)) return;
+  BP.auc.push({ seat, call }); bpPasses();
+  if (E.auctionOver(BP.auc)) bpFinish(); else bpShow();
+}
+// the robots bid the same two hands (the opponents pass), with your convention card
+function bpRobots() {
+  const a = [], cards = sideCards();
+  while (!E.auctionOver(a) && a.length < 40) {
+    const t = (BP.dealer + a.length) % 4;
+    if (!BP_SEATS.includes(t)) { a.push({ seat: t, call: 'P' }); continue; }
+    let r; try { r = E.aiBid(a, t, BP.deal[t], cards); } catch (e) { r = { call: 'P' }; }
+    a.push({ seat: t, call: r.call });
+  }
+  return a;
+}
+// North-South's score in a contract, double dummy (passed out: 0)
+function bpScore(c, tab) {
+  if (!c) return { sc: 0, tr: null };
+  const tr = tab[c.strain][c.decl === 0 ? 0 : 1];
+  return { sc: E.scoreOf(c.level, c.strain, c.dbl, E.vulOf(BP.board, c.decl), tr), tr };
+}
+function bpFinish() {
+  // the tricks North and South take in each strain (double dummy), and the best contract for the side
+  const tab = [0, 1, 2, 3, 4].map(st => [0, 2].map(decl => { try { const v = E.ddContract(BP.deal, { level: 1, strain: st, dbl: 0, decl }, 2e6); return v == null ? 0 : v; } catch (e) { return 0; } }));
+  let best = { sc: 0, c: null };
+  for (let st = 0; st < 5; st++) for (let i = 0; i < 2; i++) { const tr = tab[st][i], decl = i ? 2 : 0; for (let l = 1; l <= tr - 6; l++) { const sc = E.scoreOf(l, st, 0, E.vulOf(BP.board, decl), tr); if (sc > best.sc) best = { sc, c: { level: l, strain: st, dbl: 0, decl } }; } }
+  const mine = E.contractOf(BP.auc), ra = bpRobots(), rob = E.contractOf(ra);
+  const me = bpScore(mine, tab), ro = bpScore(rob, tab), imp = E.imps(me.sc - best.sc);
+  BP.done = { tab, best, mine, me, ra, rob, ro, imp }; BP.n++; BP.imp += imp;
+  bpShow();
+}
+const bpCon = c => c ? `${callHtml(E.B(c.level, c.strain))}${c.dbl === 1 ? 'X' : c.dbl === 2 ? 'XX' : ''} ${T(['North', 'East', 'South', 'West'][c.decl])}` : T('Passed out');
+const bpAuc = a => {
+  const cols = [0, 1, 2, 3], start = BP.dealer, cells = [];
+  for (let i = 0; i < start; i++) cells.push('');
+  for (const e of a) cells.push(e.call === 'P' ? T('Pass') : callHtml(e.call));
+  const rows = []; for (let i = 0; i < cells.length; i += 4) rows.push(cells.slice(i, i + 4));
+  return `<table class="bpauc"><tr>${cols.map(s => `<th${BP_SEATS.includes(s) ? ' class="us"' : ''}>${T(['North', 'East', 'South', 'West'][s])}</th>`).join('')}</tr>${rows.map(r => `<tr>${cols.map(i => `<td>${r[i] || ''}</td>`).join('')}</tr>`).join('')}</table>`;
+};
+const bpHand = (s, label) => `<div class="bphand${!BP.done && bpTurn() === s ? ' turn' : ''}"><b>${label}</b>${[3, 2, 1, 0].map(su => `<div>${suitLine(BP.deal[s], su)}</div>`).join('')}</div>`;
+function bpBox() {
+  const seat = bpTurn(), leg = E.legalCalls(BP.auc, seat);
+  const lv = [1, 2, 3, 4, 5, 6, 7].map(l => `<div class="bprow">${[0, 1, 2, 3, 4].map(st => { const c = E.B(l, st); return `<button class="btn bpc" data-bp="${c}" ${leg.includes(c) ? '' : 'disabled'}>${callHtml(c)}</button>`; }).join('')}</div>`).join('');
+  return `<div class="bpbox"><div class="bpwho">${T('Bid for {0}', T(['North', 'East', 'South', 'West'][seat]))}</div><div class="bprow"><button class="btn new bpc bpp" data-bp="P">${T('Pass')}</button></div>${lv}</div>`;
+}
+function bpShow() {
+  const vul = s => E.vulOf(BP.board, s) ? ' 🔴' : '';
+  let body = `<div class="muted">${T('You bid both hands; the opponents pass. Then your contract is compared with the best one (double dummy) and with the robots\' auction.')}</div>
+    <div class="bphands">${bpHand(0, T('North (partner)') + vul(0))}${bpHand(2, T('South (you)') + vul(2))}</div>${bpAuc(BP.auc)}`;
+  if (!BP.done) body += bpBox();
+  else {
+    const d = BP.done, st = ['♣', '♦', '♥', '♠', 'NT'];
+    body += `<div class="grp"><span>${T('Result')}</span>
+      <div>${T('Your contract')}: <b>${bpCon(d.mine)}</b>${d.mine ? ` · ${T('{0} tricks', d.me.tr)} · <b>${fmtSigned(d.me.sc)}</b>` : ''}</div>
+      <div>${T('Best contract')}: <b>${bpCon(d.best.c)}</b> · <b>${fmtSigned(d.best.sc)}</b></div>
+      <div>${T('Robots')}: <b>${bpCon(d.rob)}</b>${d.rob ? ` · <b>${fmtSigned(d.ro.sc)}</b>` : ''}</div>
+      <div class="bpimp ${d.imp >= 0 ? 'pos' : 'neg'}">${d.imp === 0 ? '✅ ' + T('The best contract!') : fmtSigned(d.imp) + ' IMP'}</div></div>
+      <details><summary>${T('The robots\' auction')}</summary>${bpAuc(d.ra)}</details>
+      <details><summary>${T('Tricks double dummy')}</summary><table class="bpauc"><tr><th></th>${st.map(x => `<th>${x}</th>`).join('')}</tr>${[0, 1].map(i => `<tr><th>${T(i ? 'South' : 'North')}</th>${d.tab.map(r => `<td>${r[i]}</td>`).join('')}</tr>`).join('')}</table></details>
+      <div class="muted">${T('This session: {0} deals, {1} IMP', BP.n, fmtSigned(BP.imp))}</div>`;
+  }
+  openOv('bp', `<h2>🎯 ${T('Bidding practice')}</h2>${body}<div class="row2">${BP.done ? `<button class="btn gold" data-bp="next">▶ ${T('Next deal')}</button>` : `<button class="btn" data-bp="skip">↻ ${T('New deal')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+document.addEventListener('click', ev => {
+  const b = ev.target.closest('[data-bp]'); if (!b) return;
+  ev.stopPropagation();
+  const v = b.dataset.bp;
+  if (v === 'next' || v === 'skip') { bpNew(); return; }
+  bpCall(v === 'P' ? 'P' : +v);
+}, true);
 
 </script>
 <!-- the fast double-dummy solver (half a megabyte) comes last: the screen shows first, the robots take it up when it is in -->
