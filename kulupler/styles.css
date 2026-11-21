@@ -768,3 +768,9 @@ body.bg-device #panelContent > .bm3.tdc .bm3-bar{display:grid}
 .bm3-bar button.tdbtn:hover{filter:brightness(1.15)}
 .tdc-setlist{display:grid;grid-template-columns:1fr;gap:8px}
 .tdc-set{width:100%;text-align:left;justify-content:flex-start;padding:12px 14px;font-size:1rem}
+
+/* the club logo as a picture, and the upload row */
+.clogo.clogo-img{object-fit:contain;background:#fff;padding:1px;width:2.6em}
+.clogo-up{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:.85rem;color:var(--text2)}
+.clogo-up .btn{cursor:pointer}
+.clogo-cur .clogo{font-size:20px;border:2px solid #d9b25c}

@@ -4274,7 +4274,7 @@ async function showClubs() {
     // the club's logo: the card its admin picked, else one given here (the honours in turn, by the clubs' order)
     const DEF = ['AS', 'KH', 'QD', 'JC', 'AH', 'KS', 'QC', 'JD'], SU = { S: '♠', H: '♥', D: '♦', C: '♣' };
     const ids = (ui.clubLive || []).map(t => t.club).sort();
-    const logo = id => { let c = (ui.clubLogos || {})[id]; if (!/^[AKQJT2-9][SHDC]$/.test(c || '')) c = DEF[Math.max(0, ids.indexOf(id)) % DEF.length];
+    const logo = id => { let c = (ui.clubLogos || {})[id]; if (/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/.test(c || '')) return `<img class="clogo clogo-img" src="${c}" alt="">`; if (!/^[AKQJT2-9][SHDC]$/.test(c || '')) c = DEF[Math.max(0, ids.indexOf(id)) % DEF.length];
       return `<span class="clogo${c[1] === 'H' || c[1] === 'D' ? ' r' : ''}"><span class="cr">${c[0] === 'T' ? '10' : c[0]}</span><span class="cs">${SU[c[1]]}</span></span>`; };
     const clubCol = id => { let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h % 6; };   // each club its own colour (always the same)
     const rows = shown.map(t => `<div class="clubrow cc${clubCol(t.club)}${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>${logo(t.club)} ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +

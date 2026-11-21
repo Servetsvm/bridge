@@ -879,7 +879,9 @@ function renderPlayersAdmin(){
 /* The club's logo: a playing card the club's admin picks (rank + suit, e.g. "AS", "TH"); Bridge Table's Clubs page shows
    it before the club's name. Kept in the club's own data (gate/clubs/<id>/bm/logo), which the club's admin may write. */
 const LOGO_SU={S:'♠',H:'♥',D:'♦',C:'♣'}, LOGO_RK='AKQJT98765432';
+const LOGO_IMG=/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/;
 function clubLogoHtml(code){
+  if(LOGO_IMG.test(code||'')) return `<img class="clogo clogo-img" src="${code}" alt="">`;
   if(!/^[AKQJT2-9][SHDC]$/.test(code||'')) return '';
   const r=code[0]==='T'?'10':code[0], red=code[1]==='H'||code[1]==='D';
   return `<span class="clogo${red?' r':''}"><span class="cr">${r}</span><span class="cs">${LOGO_SU[code[1]]}</span></span>`;
@@ -889,8 +891,24 @@ window.clubLogoPick=async function(){
   let cur=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/logo.json'),{cache:'no-store'}); cur=r.ok?await r.json():null; }catch(e){}
   const t=s=>window.i18nText?i18nText(s):s;
   const grid=['S','H','D','C'].map(su=>`<div class="clogo-row">${[...LOGO_RK].map(rk=>`<button class="clogo-btn${cur===rk+su?' on':''}" onclick="clubLogoSave('${rk+su}')">${clubLogoHtml(rk+su)}</button>`).join('')}</div>`).join('');
-  openModal(t('Club logo'), `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${t("Choose a card: it is shown before your club's name in Bridge Table's Clubs.")}</div><div class="clogo-grid">${grid}</div>`,
+  openModal(t('Club logo'), `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${t("Choose a card: it is shown before your club's name in Bridge Table's Clubs.")}</div><div class="clogo-up">${LOGO_IMG.test(cur||'')?`<span class="clogo-cur">${clubLogoHtml(cur)}</span>`:''}<label class="btn">📷 ${t('Upload a picture')}<input type="file" accept="image/*" style="display:none" onchange="clubLogoFile(this)"></label><span>${t('or choose a card:')}</span></div><div class="clogo-grid">${grid}</div>`,
     `<button class="btn" onclick="clubLogoSave(null)">${t('Default')}</button><button class="btn btn-gold" onclick="closeModal()">${t('Close')}</button>`);
+};
+// a picture from the device: made square (128 px, the whole picture in it) and kept small, in the club's data
+window.clubLogoFile=function(inp){
+  const f=inp.files&&inp.files[0]; if(!f) return;
+  const t=s=>window.i18nText?i18nText(s):s;
+  const img=new Image(), url=URL.createObjectURL(f);
+  img.onload=()=>{
+    const N=128, c=document.createElement('canvas'); c.width=c.height=N; const g=c.getContext('2d');
+    const k=Math.min(N/img.width,N/img.height), w=img.width*k, h=img.height*k;
+    g.drawImage(img,(N-w)/2,(N-h)/2,w,h); URL.revokeObjectURL(url);
+    let d=c.toDataURL('image/png'); if(d.length>60000) d=c.toDataURL('image/webp',0.85); if(d.length>60000||!LOGO_IMG.test(d)) d=c.toDataURL('image/jpeg',0.85);
+    if(d.length>60000){ toast('❌ '+t('The picture is too large')); return; }
+    clubLogoSave(d);
+  };
+  img.onerror=()=>{ URL.revokeObjectURL(url); toast('❌ '+t('Not a picture')); };
+  img.src=url;
 };
 window.clubLogoSave=async function(code){
   const t=s=>window.i18nText?i18nText(s):s;

@@ -2311,3 +2311,6 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .clogo .cr{font-size:.66em;font-weight:800}
 .clogo .cs{font-size:.72em}
 .clogo.r{color:#c4122f}
+
+/* a club's logo as a picture (uploaded by its admin) */
+.clogo.clogo-img{object-fit:contain;background:#fff;padding:1px;width:1.85em}
