@@ -88,8 +88,8 @@ async function review(req, env, json) {
 // Gemini (when the Worker has a GEMINI_KEY secret): the same messages, Google's API; null when it gives no answer, and
 // then Workers AI answers as before. The key stays a Worker secret: it is never in the site or in this file.
 async function gemini(env, messages) {
-  if (!env.GEMINI_KEY) return null;
-  const model = env.GEMINI_MODEL || 'gemini-flash-latest';
+  if (!env.GEMINI_KEY) { console.log('gemini: no key'); return null; }
+  const model = env.GEMINI_MODEL || 'gemini-flash-lite-latest';
   const sys = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
   const contents = messages.filter(m => m.role !== 'system').map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
   const ask = async think => {
@@ -98,16 +98,18 @@ async function gemini(env, messages) {
     return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_KEY },
       body: JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents, generationConfig: gen }),
-      signal: AbortSignal.timeout(9000) });
+      signal: AbortSignal.timeout(7000) });   // the site waits 12 s: time left for Workers AI
   };
+  const t0 = Date.now();
   try {
     let r = await ask(true);
     if (r.status === 400) r = await ask(false);   // a model that does not take the thinking setting
-    if (!r.ok) return null;   // the free allowance used up (429), a wrong key, the model busy: Workers AI answers
+    if (!r.ok) { console.log('gemini', r.status, (await r.text()).slice(0, 300)); return null; }   // the free allowance used up (429), a wrong key, the model busy: Workers AI answers
     const j = await r.json(), p = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
     const t = (p || []).map(x => x.text || '').join('').trim();
+    if (!t) console.log('gemini empty', JSON.stringify(j).slice(0, 300));
     return t || null;
-  } catch (e) { return null; }
+  } catch (e) { console.log('gemini threw', String(e), Date.now() - t0); return null; }
 }
 
 export default {

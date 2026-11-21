@@ -32,7 +32,7 @@ allowance used up, the model busy). Without the key nothing changes.
 1. Get a free key at https://aistudio.google.com/apikey (with your own Google account).
 2. In this folder run `npx wrangler secret put GEMINI_KEY` and paste the key when it asks. The key is kept by
    Cloudflare as a secret: it is never in the site or in this repository.
-3. The model is `GEMINI_MODEL` in `wrangler.toml` (`gemini-flash-latest`). Remove the key with
+3. The model is `GEMINI_MODEL` in `wrangler.toml` (`gemini-flash-lite-latest`: about 1 s an answer; `gemini-flash-latest` took over 9 s). Remove the key with
    `npx wrangler secret delete GEMINI_KEY`.
 
 On Gemini's free tier Google may use what is sent to improve its models: the robots' chat lines (no names, no hands)
