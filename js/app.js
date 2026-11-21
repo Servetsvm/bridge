@@ -1923,6 +1923,7 @@ function homeShell2() {
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Social Bridge'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
         ${tile('id="hBidPrac" type="button"', '🎯', T('Bidding practice'), T('Bid both hands, then see the best contract and the robots\' auction.'))}
+        ${tile('data-hsec="tours" type="button"', '🏆', T('Tournaments and lessons'), T('Make a tournament, or a lesson with your own deals (PBN/LIN).'))}
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>

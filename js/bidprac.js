@@ -56,12 +56,14 @@ function bpCall(call) {
 function bpRobots() { return bpAuction(BP.deal, BP.dealer); }
 // each of your calls against your system's call at that point, with what they mean
 function bpCheck() {
-  const cards = bpCards(), out = [];
+  const cards = bpCards(), out = []; let left = false;
   BP.auc.forEach((e, i) => {
     if (!BP_SEATS.includes(e.seat)) return;
+    if (left) { let mm = null; try { mm = E.explainCall(BP.auc.slice(0, i), e.seat, e.call, cards); } catch (x) {} out.push({ seat: e.seat, call: e.call, sys: undefined, mt: (mm && mm.t) || '', st: '' }); return; }
     const pre = BP.auc.slice(0, i); let r; try { r = E.aiBid(pre, e.seat, BP.deal[e.seat], cards); } catch (x) { r = null; }
     let mm = null; try { mm = E.explainCall(pre, e.seat, e.call, cards); } catch (x) {}
     out.push({ seat: e.seat, call: e.call, sys: r ? r.call : null, mt: (mm && mm.t) || '', st: (r && r.m && r.m.t) || '' });
+    if (r && r.call !== e.call) { left = true; out.push({ off: 1 }); }
   });
   return out;
 }
@@ -107,7 +109,7 @@ function bpShow() {
       <div>${T('Best contract')}: <b>${bpCon(d.best.c)}</b> · <b>${fmtSigned(d.best.sc)}</b></div>
       <div>${T('Robots')}: <b>${bpCon(d.rob)}</b>${d.rob ? ` · <b>${fmtSigned(d.ro.sc)}</b>` : ''}</div>
       <div class="bpimp ${d.imp >= 0 ? 'pos' : 'neg'}">${d.imp === 0 ? '✅ ' + T('The best contract!') : fmtSigned(d.imp) + ' IMP'}</div></div>
-      <div class="grp"><span>${T('Your calls and your system')}</span>${d.chk.map(x => `<div class="bpchk${x.sys === x.call ? ' ok' : ''}"><b>${T(['North', 'East', 'South', 'West'][x.seat])}</b> ${x.call === 'P' ? T('Pass') : callHtml(x.call)}${x.sys === x.call ? ' ✅' : ` → ${T('your system')}: <b>${x.sys == null ? '?' : x.sys === 'P' ? T('Pass') : callHtml(x.sys)}</b>`}${(x.sys === x.call ? x.mt : x.st) ? `<small>${symText(bidTxt(x.sys === x.call ? x.mt : x.st))}</small>` : ''}</div>`).join('')}</div>
+      <div class="grp"><span>${T('Your calls and your system')}</span>${d.chk.map(x => x.off ? `<div class="muted bpoff">↪ ${T('From here the auction left your system: no more suggestions.')}</div>` : x.sys === undefined ? `<div class="bpchk"><b>${T(['North', 'East', 'South', 'West'][x.seat])}</b> ${x.call === 'P' ? T('Pass') : callHtml(x.call)}${x.mt ? `<small>${symText(bidTxt(x.mt))}</small>` : ''}</div>` : `<div class="bpchk${x.sys === x.call ? ' ok' : ''}"><b>${T(['North', 'East', 'South', 'West'][x.seat])}</b> ${x.call === 'P' ? T('Pass') : callHtml(x.call)}${x.sys === x.call ? ' ✅' : ` → ${T('your system')}: <b>${x.sys == null ? '?' : x.sys === 'P' ? T('Pass') : callHtml(x.sys)}</b>`}${(x.sys === x.call ? x.mt : x.st) ? `<small>${symText(bidTxt(x.sys === x.call ? x.mt : x.st))}</small>` : ''}</div>`).join('')}</div>
       <details><summary>${T('The robots\' auction')}</summary>${bpAuc(d.ra)}</details>
       <details><summary>${T('Tricks double dummy')}</summary><table class="bpauc"><tr><th></th>${st.map(x => `<th>${x}</th>`).join('')}</tr>${[0, 1].map(i => `<tr><th>${T(i ? 'South' : 'North')}</th>${d.tab.map(r => `<td>${r[i]}</td>`).join('')}</tr>`).join('')}</table></details>
       <div class="muted">${T('This session: {0} deals, {1} IMP', BP.n, fmtSigned(BP.imp))}</div>`;

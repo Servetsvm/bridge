@@ -5641,6 +5641,8 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Tournaments and lessons": "Turnuvalar ve dersler", "Make a tournament, or a lesson with your own deals (PBN/LIN).": "Turnuva kur ya da kendi ellerinle (PBN/LIN) ders yap.",
+    "From here the auction left your system: no more suggestions.": "Buradan sonra açık artırma sisteminden ayrıldı: öneri gösterilmiyor.",
     "{0} deals from your file": "Dosyandan {0} el", "Random deals": "Rastgele eller", "A lesson: use the deals of a PBN or LIN file": "Ders: PBN ya da LIN dosyasındaki elleri kullan", "Everyone plays your deals; in the results you see how each player played each one.": "Herkes senin ellerini oynar; sonuçlarda her oyuncunun her eli nasıl oynadığını görürsün.", "No deals found in the file": "Dosyada el bulunamadı", "Lesson": "Ders",
     "Usage and limits": "Kullanım ve sınırlar", "Gemini is near its free daily limit: Llama answers when it is used up.": "Gemini ücretsiz günlük sınırına yakın: bitince Llama cevap verir.", "Workers AI is near its free daily limit: then the robots answer with short ready lines.": "Workers AI ücretsiz günlük sınırına yakın: bitince robotlar kısa hazır cümlelerle cevap verir.", "Many players online at once: the free database allows 100 connections.": "Aynı anda çok oyuncu çevrimiçi: ücretsiz veritabanı 100 bağlantıya izin verir.", "Everything is well within the free limits.": "Her şey ücretsiz sınırların rahatça altında.", "Robots' chat today": "Bugün robot sohbeti", "about {0} answers a day on the free plan": "ücretsiz planda günde yaklaşık {0} cevap", "the free plan has 10,000 Neurons a day": "ücretsiz planda günde 10.000 Neuron", "Last 24 hours": "Son 24 saat", "{0} kinds": "{0} çeşit", "Online database": "Online veritabanı", "Players online now": "Şu an çevrimiçi oyuncular", "the free plan allows 100 connections at once": "ücretsiz plan aynı anda 100 bağlantıya izin verir", "Players": "Oyuncular",
     "Your calls and your system": "Tekliflerin ve sistemin", "your system": "sistemin", "Practising": "Çalışılan",
@@ -6099,6 +6101,8 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Tournaments and lessons": "Turneringer og leksjoner", "Make a tournament, or a lesson with your own deals (PBN/LIN).": "Lag en turnering, eller en leksjon med dine egne giv (PBN/LIN).",
+    "From here the auction left your system: no more suggestions.": "Herfra forlot meldingene systemet ditt: ingen flere forslag.",
     "{0} deals from your file": "{0} giv fra filen din", "Random deals": "Tilfeldige giv", "A lesson: use the deals of a PBN or LIN file": "En leksjon: bruk givene i en PBN- eller LIN-fil", "Everyone plays your deals; in the results you see how each player played each one.": "Alle spiller givene dine; i resultatene ser du hvordan hver spiller spilte hvert spill.", "No deals found in the file": "Fant ingen giv i filen", "Lesson": "Leksjon",
     "Your calls and your system": "Dine meldinger og systemet ditt", "your system": "systemet ditt", "Practising": "Øver på",
     "A PBN or LIN file, a hand record or a photo. A deal you enter is practice, not scored.": "En PBN- eller LIN-fil, et spillark eller et bilde. En giv du legger inn er trening, ikke tellende.",
@@ -12465,6 +12469,7 @@ function homeShell2() {
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Social Bridge'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
         ${tile('id="hBidPrac" type="button"', '🎯', T('Bidding practice'), T('Bid both hands, then see the best contract and the robots\' auction.'))}
+        ${tile('data-hsec="tours" type="button"', '🏆', T('Tournaments and lessons'), T('Make a tournament, or a lesson with your own deals (PBN/LIN).'))}
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
@@ -19288,12 +19293,14 @@ function bpCall(call) {
 function bpRobots() { return bpAuction(BP.deal, BP.dealer); }
 // each of your calls against your system's call at that point, with what they mean
 function bpCheck() {
-  const cards = bpCards(), out = [];
+  const cards = bpCards(), out = []; let left = false;
   BP.auc.forEach((e, i) => {
     if (!BP_SEATS.includes(e.seat)) return;
+    if (left) { let mm = null; try { mm = E.explainCall(BP.auc.slice(0, i), e.seat, e.call, cards); } catch (x) {} out.push({ seat: e.seat, call: e.call, sys: undefined, mt: (mm && mm.t) || '', st: '' }); return; }
     const pre = BP.auc.slice(0, i); let r; try { r = E.aiBid(pre, e.seat, BP.deal[e.seat], cards); } catch (x) { r = null; }
     let mm = null; try { mm = E.explainCall(pre, e.seat, e.call, cards); } catch (x) {}
     out.push({ seat: e.seat, call: e.call, sys: r ? r.call : null, mt: (mm && mm.t) || '', st: (r && r.m && r.m.t) || '' });
+    if (r && r.call !== e.call) { left = true; out.push({ off: 1 }); }
   });
   return out;
 }
@@ -19339,7 +19346,7 @@ function bpShow() {
       <div>${T('Best contract')}: <b>${bpCon(d.best.c)}</b> · <b>${fmtSigned(d.best.sc)}</b></div>
       <div>${T('Robots')}: <b>${bpCon(d.rob)}</b>${d.rob ? ` · <b>${fmtSigned(d.ro.sc)}</b>` : ''}</div>
       <div class="bpimp ${d.imp >= 0 ? 'pos' : 'neg'}">${d.imp === 0 ? '✅ ' + T('The best contract!') : fmtSigned(d.imp) + ' IMP'}</div></div>
-      <div class="grp"><span>${T('Your calls and your system')}</span>${d.chk.map(x => `<div class="bpchk${x.sys === x.call ? ' ok' : ''}"><b>${T(['North', 'East', 'South', 'West'][x.seat])}</b> ${x.call === 'P' ? T('Pass') : callHtml(x.call)}${x.sys === x.call ? ' ✅' : ` → ${T('your system')}: <b>${x.sys == null ? '?' : x.sys === 'P' ? T('Pass') : callHtml(x.sys)}</b>`}${(x.sys === x.call ? x.mt : x.st) ? `<small>${symText(bidTxt(x.sys === x.call ? x.mt : x.st))}</small>` : ''}</div>`).join('')}</div>
+      <div class="grp"><span>${T('Your calls and your system')}</span>${d.chk.map(x => x.off ? `<div class="muted bpoff">↪ ${T('From here the auction left your system: no more suggestions.')}</div>` : x.sys === undefined ? `<div class="bpchk"><b>${T(['North', 'East', 'South', 'West'][x.seat])}</b> ${x.call === 'P' ? T('Pass') : callHtml(x.call)}${x.mt ? `<small>${symText(bidTxt(x.mt))}</small>` : ''}</div>` : `<div class="bpchk${x.sys === x.call ? ' ok' : ''}"><b>${T(['North', 'East', 'South', 'West'][x.seat])}</b> ${x.call === 'P' ? T('Pass') : callHtml(x.call)}${x.sys === x.call ? ' ✅' : ` → ${T('your system')}: <b>${x.sys == null ? '?' : x.sys === 'P' ? T('Pass') : callHtml(x.sys)}</b>`}${(x.sys === x.call ? x.mt : x.st) ? `<small>${symText(bidTxt(x.sys === x.call ? x.mt : x.st))}</small>` : ''}</div>`).join('')}</div>
       <details><summary>${T('The robots\' auction')}</summary>${bpAuc(d.ra)}</details>
       <details><summary>${T('Tricks double dummy')}</summary><table class="bpauc"><tr><th></th>${st.map(x => `<th>${x}</th>`).join('')}</tr>${[0, 1].map(i => `<tr><th>${T(i ? 'South' : 'North')}</th>${d.tab.map(r => `<td>${r[i]}</td>`).join('')}</tr>`).join('')}</table></details>
       <div class="muted">${T('This session: {0} deals, {1} IMP', BP.n, fmtSigned(BP.imp))}</div>`;
