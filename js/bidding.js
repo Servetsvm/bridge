@@ -1128,7 +1128,9 @@ function generic(x, h) {
   let goal;
   if (est >= 37 && lo >= 35) goal = 7;
   // a game force with a fit and two aces: a little less is enough to look for slam (1♠–2♦–3♦ with 17 and three aces)
-  else if (est >= 33 || (gf && fitLen >= 8 && est >= 31 && h.aces >= 2)) goal = 6;
+  // an eight-card fit and about 32 between us: look for slam (key cards first, so a missing pair of them stops at five)
+  // (2NT–3♣–3♥ with ♥K843 and 10: 4NT, not 4♥)
+  else if (est >= 33 || (gf && fitLen >= 8 && est >= 31 && h.aces >= 2) || (t < 4 && fitLen >= 8 && est >= 32)) goal = 6;
   else if (t < 2) {
     goal = est >= 29 ? 5 : (est >= 26 ? 4 : 0);
     // 3NT instead of a minor game only without a singleton or void in a suit our side has not bid (1♦–1♥–3♦ with ♠T and
