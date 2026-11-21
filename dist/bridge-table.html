@@ -5641,6 +5641,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "{0} deals from your file": "Dosyandan {0} el", "Random deals": "Rastgele eller", "A lesson: use the deals of a PBN or LIN file": "Ders: PBN ya da LIN dosyasındaki elleri kullan", "Everyone plays your deals; in the results you see how each player played each one.": "Herkes senin ellerini oynar; sonuçlarda her oyuncunun her eli nasıl oynadığını görürsün.", "No deals found in the file": "Dosyada el bulunamadı", "Lesson": "Ders",
     "Usage and limits": "Kullanım ve sınırlar", "Gemini is near its free daily limit: Llama answers when it is used up.": "Gemini ücretsiz günlük sınırına yakın: bitince Llama cevap verir.", "Workers AI is near its free daily limit: then the robots answer with short ready lines.": "Workers AI ücretsiz günlük sınırına yakın: bitince robotlar kısa hazır cümlelerle cevap verir.", "Many players online at once: the free database allows 100 connections.": "Aynı anda çok oyuncu çevrimiçi: ücretsiz veritabanı 100 bağlantıya izin verir.", "Everything is well within the free limits.": "Her şey ücretsiz sınırların rahatça altında.", "Robots' chat today": "Bugün robot sohbeti", "about {0} answers a day on the free plan": "ücretsiz planda günde yaklaşık {0} cevap", "the free plan has 10,000 Neurons a day": "ücretsiz planda günde 10.000 Neuron", "Last 24 hours": "Son 24 saat", "{0} kinds": "{0} çeşit", "Online database": "Online veritabanı", "Players online now": "Şu an çevrimiçi oyuncular", "the free plan allows 100 connections at once": "ücretsiz plan aynı anda 100 bağlantıya izin verir", "Players": "Oyuncular",
     "Your calls and your system": "Tekliflerin ve sistemin", "your system": "sistemin", "Practising": "Çalışılan",
     "A PBN or LIN file, a hand record or a photo. A deal you enter is practice, not scored.": "PBN ya da LIN dosyası, el kaydı ya da fotoğraf. Girdiğin el alıştırmadır, puana sayılmaz.",
@@ -6098,6 +6099,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "{0} deals from your file": "{0} giv fra filen din", "Random deals": "Tilfeldige giv", "A lesson: use the deals of a PBN or LIN file": "En leksjon: bruk givene i en PBN- eller LIN-fil", "Everyone plays your deals; in the results you see how each player played each one.": "Alle spiller givene dine; i resultatene ser du hvordan hver spiller spilte hvert spill.", "No deals found in the file": "Fant ingen giv i filen", "Lesson": "Leksjon",
     "Your calls and your system": "Dine meldinger og systemet ditt", "your system": "systemet ditt", "Practising": "Øver på",
     "A PBN or LIN file, a hand record or a photo. A deal you enter is practice, not scored.": "En PBN- eller LIN-fil, et spillark eller et bilde. En giv du legger inn er trening, ikke tellende.",
     "No taking back in a tournament": "Ingen angring i en turnering", "Taken back: this board is now practice, not scored": "Angret: dette spillet er nå trening, ikke tellende", "Taken back: practice, not scored": "Angret: trening, ikke tellende", "Nothing to take back": "Ingenting å angre",
@@ -12563,6 +12565,9 @@ function renderHome() {
 }
 /* ---- tournaments: the deals come from the tournament's number, so every player and table gets the same boards ---- */
 function tourDeal(t, b) {
+  // a lesson: the teacher's own deal for this board
+  const dl = t.deals && t.deals[b - 1];
+  if (dl && /^[0-3]{52}$/.test(dl)) { const h = [[], [], [], []]; for (let c = 0; c < 52; c++) h[+dl[c]].push(c); return h; }
   E.seed((t.seed ^ Math.imul(b, 2654435761)) >>> 0 || 1);
   const d = E.shuffle([...Array(52).keys()]);
   E.seed(null);
@@ -12828,7 +12833,9 @@ function showTourSetup(id) {
     ${team ? `<div class="muted">${T(TOUR_KINDS.teams.d)}</div>` : `<div class="grp"><span>${T('Type')}</span><div class="seg tkinds" data-seg="tkind">${Object.keys(TOUR_KINDS).filter(k => !TOUR_KINDS[k].old || k === kind).map(k => `<button data-v="${k}" class="${kind === k ? 'on' : ''}">${TOUR_KINDS[k].icon} ${T(TOUR_KINDS[k].n)}</button>`).join('')}</div>
       <div class="muted">${T(TOUR_KINDS[kind].d)}</div></div>`}
     <div class="grp"><span>${T('Tournament name')}</span><input class="tok wide" id="tName" maxlength="40" value="${esc(t.name)}"></div>
-    <div class="grp"><span>${T('Boards')}</span>${opt('tn', [4, 6, 8, 10, 12, 16, 20, 24].map(n => [n, n]), t.n)}</div>
+    <div class="grp"><span>${T('Boards')}</span>${t.deals && t.deals.length ? `<div class="okmsg">📚 ${T('{0} deals from your file', t.deals.length)} <button class="btn mini-btn" id="tFileOff" title="${T('Random deals')}">✕</button></div>` : opt('tn', [4, 6, 8, 10, 12, 16, 20, 24].map(n => [n, n]), t.n)}
+      <label class="btn" for="tFile" role="button">📄 ${T('A lesson: use the deals of a PBN or LIN file')}</label><input type="file" id="tFile" accept=".pbn,.lin,.txt,text/plain" hidden>
+      <div class="muted">${T('Everyone plays your deals; in the results you see how each player played each one.')}</div></div>
     ${team ? '' : `<div class="grp"><span>${T('Format')}</span>${opt('tformat', [['ind', '👤 ' + T('individual')], ['tables', '🃏 ' + T('at tables')]], t.format)}
       <div class="muted">${t.format === 'tables' ? T('Players sit together at tables; every table plays the same boards; robots fill empty seats. The first player named at a table opens it.') : T('Everyone plays the same deals at their own table, sitting South.')}</div></div>`}
     ${t.format === 'tables' ? `<div class="grp"><span>${T('Tables')}</span>${team ? '' : opt('ttables', [1, 2, 3, 4, 5, 6].map(n => [n, n]), tables.length)}<datalist id="tNames">${known.map(n => `<option value="${esc(n)}">`).join('')}</datalist>${seatGrid}</div>`
@@ -14115,6 +14122,7 @@ document.addEventListener('change', e => {
   if (t.id === 'hName') { try { localStorage.setItem('bridge-table-name', t.value.trim().slice(0, 20)); } catch (e) {} return; }
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === 'dFile' && t.files && t.files[0]) { importDeals(t.files[0]); t.value = ''; return; }
+  if (t.id === 'tFile' && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; f.text().then(txt => { const tr = Net.st.tours[ui.tsetId]; if (!tr) return; let L = []; try { L = readDealFile(txt) || []; } catch (e) { L = []; } if (!L.length) { flash(T('No deals found in the file'), 2500); return; } tr.deals = L.slice(0, 32).map(d => { const o = new Array(52).fill(0); d.hands.forEach((h, s) => h.forEach(c => { o[c] = s; })); return o.join(''); }); tr.n = tr.deals.length; if (/·/.test(tr.name)) tr.name = (T('Lesson') + ' · ' + new Date().toLocaleDateString()).slice(0, 40); showTourSetup(tr.id); }).catch(() => flash(T('No deals found in the file'), 2500)); return; }
   if (t.id === "hPracSel") { setPractice(t.value); render(); return; }
   if (t.id === "pdHint") { SET.pracHint = t.checked; Store.saveSettings(SET); save(); return; }
   if (t.dataset && t.dataset.wipek) { const s = ui.wipeSel || (ui.wipeSel = new Set()); if (t.checked) s.add(t.dataset.wipek); else s.delete(t.dataset.wipek); showWipe(); return; }
@@ -14240,6 +14248,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bRtAgain') { rtAgain(); return; }
   if (t.id === 'bRtNext') { rtNext(); return; }
   if (t.id === 'bRtSit') { rtSitPick(); return; }
+  if (t.id === 'tFileOff') { const tr = Net.st.tours[ui.tsetId]; if (tr) { tr.deals = []; showTourSetup(tr.id); } return; }
   if (t.id === 'hBidPrac' && typeof bpNew === 'function') { bpNew(); return; }
   if (t.id === 'bTblScore') { Net.panel(); return; }
   if (t.id === 'bRtList') { rtOpen(G && G.rtv ? G.rtv.k : RT.cur); return; }
@@ -15566,7 +15575,9 @@ const Net = (() => {
       // in advance, empty = robot), ranking by matchpoints or IMPs, and how many hours the tournament is kept
       kind: ['speed', 'robot', 'daylong', 'pairs', 'imppairs', 'teams', 'custom'].includes(t.kind) ? t.kind : 'custom',
       format: t.format === "tables" ? "tables" : "ind", scoring: t.scoring === "imp" ? "imp" : "mp", hours: [3, 24, 72].includes(+t.hours) ? +t.hours : 72, club: String(t.club || "").slice(0, 24),
-      tables: (Array.isArray(t.tables) ? t.tables : []).slice(0, 8).map(r => [0, 1, 2, 3].map(s => String((r || [])[s] || "").slice(0, 20))) };
+      tables: (Array.isArray(t.tables) ? t.tables : []).slice(0, 8).map(r => [0, 1, 2, 3].map(s => String((r || [])[s] || "").slice(0, 20))),
+      // a teacher's own deals (a lesson): for each board the seat (0-3) of each of the 52 cards
+      deals: (Array.isArray(t.deals) ? t.deals : []).slice(0, 32).map(x => String(x)).filter(x => /^[0-3]{52}$/.test(x)) };
   }
   // tournaments made by test devices while the app was being built (they reached the real lobby by mistake)
   const TEST_KEYS = ['hdr4fnhkte9muzjte04', '8bx5flpiljomv046g5q', 'yzx7gpx2u5emuzjw34j'];

@@ -206,7 +206,9 @@ const Net = (() => {
       // in advance, empty = robot), ranking by matchpoints or IMPs, and how many hours the tournament is kept
       kind: ['speed', 'robot', 'daylong', 'pairs', 'imppairs', 'teams', 'custom'].includes(t.kind) ? t.kind : 'custom',
       format: t.format === "tables" ? "tables" : "ind", scoring: t.scoring === "imp" ? "imp" : "mp", hours: [3, 24, 72].includes(+t.hours) ? +t.hours : 72, club: String(t.club || "").slice(0, 24),
-      tables: (Array.isArray(t.tables) ? t.tables : []).slice(0, 8).map(r => [0, 1, 2, 3].map(s => String((r || [])[s] || "").slice(0, 20))) };
+      tables: (Array.isArray(t.tables) ? t.tables : []).slice(0, 8).map(r => [0, 1, 2, 3].map(s => String((r || [])[s] || "").slice(0, 20))),
+      // a teacher's own deals (a lesson): for each board the seat (0-3) of each of the 52 cards
+      deals: (Array.isArray(t.deals) ? t.deals : []).slice(0, 32).map(x => String(x)).filter(x => /^[0-3]{52}$/.test(x)) };
   }
   // tournaments made by test devices while the app was being built (they reached the real lobby by mistake)
   const TEST_KEYS = ['hdr4fnhkte9muzjte04', '8bx5flpiljomv046g5q', 'yzx7gpx2u5emuzjw34j'];

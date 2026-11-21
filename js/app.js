@@ -2023,6 +2023,9 @@ function renderHome() {
 }
 /* ---- tournaments: the deals come from the tournament's number, so every player and table gets the same boards ---- */
 function tourDeal(t, b) {
+  // a lesson: the teacher's own deal for this board
+  const dl = t.deals && t.deals[b - 1];
+  if (dl && /^[0-3]{52}$/.test(dl)) { const h = [[], [], [], []]; for (let c = 0; c < 52; c++) h[+dl[c]].push(c); return h; }
   E.seed((t.seed ^ Math.imul(b, 2654435761)) >>> 0 || 1);
   const d = E.shuffle([...Array(52).keys()]);
   E.seed(null);
@@ -2288,7 +2291,9 @@ function showTourSetup(id) {
     ${team ? `<div class="muted">${T(TOUR_KINDS.teams.d)}</div>` : `<div class="grp"><span>${T('Type')}</span><div class="seg tkinds" data-seg="tkind">${Object.keys(TOUR_KINDS).filter(k => !TOUR_KINDS[k].old || k === kind).map(k => `<button data-v="${k}" class="${kind === k ? 'on' : ''}">${TOUR_KINDS[k].icon} ${T(TOUR_KINDS[k].n)}</button>`).join('')}</div>
       <div class="muted">${T(TOUR_KINDS[kind].d)}</div></div>`}
     <div class="grp"><span>${T('Tournament name')}</span><input class="tok wide" id="tName" maxlength="40" value="${esc(t.name)}"></div>
-    <div class="grp"><span>${T('Boards')}</span>${opt('tn', [4, 6, 8, 10, 12, 16, 20, 24].map(n => [n, n]), t.n)}</div>
+    <div class="grp"><span>${T('Boards')}</span>${t.deals && t.deals.length ? `<div class="okmsg">📚 ${T('{0} deals from your file', t.deals.length)} <button class="btn mini-btn" id="tFileOff" title="${T('Random deals')}">✕</button></div>` : opt('tn', [4, 6, 8, 10, 12, 16, 20, 24].map(n => [n, n]), t.n)}
+      <label class="btn" for="tFile" role="button">📄 ${T('A lesson: use the deals of a PBN or LIN file')}</label><input type="file" id="tFile" accept=".pbn,.lin,.txt,text/plain" hidden>
+      <div class="muted">${T('Everyone plays your deals; in the results you see how each player played each one.')}</div></div>
     ${team ? '' : `<div class="grp"><span>${T('Format')}</span>${opt('tformat', [['ind', '👤 ' + T('individual')], ['tables', '🃏 ' + T('at tables')]], t.format)}
       <div class="muted">${t.format === 'tables' ? T('Players sit together at tables; every table plays the same boards; robots fill empty seats. The first player named at a table opens it.') : T('Everyone plays the same deals at their own table, sitting South.')}</div></div>`}
     ${t.format === 'tables' ? `<div class="grp"><span>${T('Tables')}</span>${team ? '' : opt('ttables', [1, 2, 3, 4, 5, 6].map(n => [n, n]), tables.length)}<datalist id="tNames">${known.map(n => `<option value="${esc(n)}">`).join('')}</datalist>${seatGrid}</div>`
@@ -3575,6 +3580,7 @@ document.addEventListener('change', e => {
   if (t.id === 'hName') { try { localStorage.setItem('bridge-table-name', t.value.trim().slice(0, 20)); } catch (e) {} return; }
   if (t.id === 'dPhoto' && t.files && t.files[0]) { readPhoto(t.files[0]); t.value = ''; return; }
   if (t.id === 'dFile' && t.files && t.files[0]) { importDeals(t.files[0]); t.value = ''; return; }
+  if (t.id === 'tFile' && t.files && t.files[0]) { const f = t.files[0]; t.value = ''; f.text().then(txt => { const tr = Net.st.tours[ui.tsetId]; if (!tr) return; let L = []; try { L = readDealFile(txt) || []; } catch (e) { L = []; } if (!L.length) { flash(T('No deals found in the file'), 2500); return; } tr.deals = L.slice(0, 32).map(d => { const o = new Array(52).fill(0); d.hands.forEach((h, s) => h.forEach(c => { o[c] = s; })); return o.join(''); }); tr.n = tr.deals.length; if (/·/.test(tr.name)) tr.name = (T('Lesson') + ' · ' + new Date().toLocaleDateString()).slice(0, 40); showTourSetup(tr.id); }).catch(() => flash(T('No deals found in the file'), 2500)); return; }
   if (t.id === "hPracSel") { setPractice(t.value); render(); return; }
   if (t.id === "pdHint") { SET.pracHint = t.checked; Store.saveSettings(SET); save(); return; }
   if (t.dataset && t.dataset.wipek) { const s = ui.wipeSel || (ui.wipeSel = new Set()); if (t.checked) s.add(t.dataset.wipek); else s.delete(t.dataset.wipek); showWipe(); return; }
@@ -3700,6 +3706,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bRtAgain') { rtAgain(); return; }
   if (t.id === 'bRtNext') { rtNext(); return; }
   if (t.id === 'bRtSit') { rtSitPick(); return; }
+  if (t.id === 'tFileOff') { const tr = Net.st.tours[ui.tsetId]; if (tr) { tr.deals = []; showTourSetup(tr.id); } return; }
   if (t.id === 'hBidPrac' && typeof bpNew === 'function') { bpNew(); return; }
   if (t.id === 'bTblScore') { Net.panel(); return; }
   if (t.id === 'bRtList') { rtOpen(G && G.rtv ? G.rtv.k : RT.cur); return; }
