@@ -5,7 +5,7 @@
 const BP = { deal: null, auc: [], dealer: 2, board: 1, done: null, n: 0, imp: 0, tries: 0 };
 const BP_SEATS = [0, 2];   // North (your partner) and South (you)
 // the conventions you practise are on, even when your card has them off
-const bpCards = () => { const on = {}; for (const k of (typeof pracList === 'function' ? pracList() : [])) on[k] = true; const o = { conv: { ...SET.conv, ...on }, agg: 0, sys: SET.sys || 'twoone' }; return [o, o]; };
+const bpCards = () => { const on = {}; for (const k of (typeof pracList === 'function' ? pracList() : [])) on[k] = true; const o = { conv: { ...SET.conv, ...on }, agg: 0, sys: SET.sys && SET.sys !== 'none' ? SET.sys : 'twoone' }; return [o, o]; };
 // the robots' auction of the two hands with your card (the opponents pass)
 function bpAuction(deal, dealer) {
   const a = [], cards = bpCards();
@@ -47,7 +47,9 @@ const bpTurn = () => (BP.dealer + BP.auc.length) % 4;
 function bpCall(call) {
   if (BP.done || !BP.deal) return;
   const seat = bpTurn(); if (!BP_SEATS.includes(seat) || !E.legalCalls(BP.auc, seat).includes(call)) return;
-  BP.auc.push({ seat, call }); bpPasses();
+  // the call's meaning goes with it: the robots (and the check of your calls) read the auction through the meanings
+  let m = null; try { m = E.explainCall(BP.auc, seat, call, bpCards()); } catch (e) {}
+  BP.auc.push({ seat, call, m }); bpPasses();
   if (E.auctionOver(BP.auc)) bpFinish(); else bpShow();
 }
 // the robots bid the same two hands (the opponents pass), with your convention card
