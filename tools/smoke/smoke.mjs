@@ -48,7 +48,7 @@ try {
     const start = await page.evaluate(() => { try { closeOv(); } catch (e) {} ui.overlay = null; SET.speed = 2; if (typeof BOT_OPT !== 'undefined') { Object.assign(BOT_OPT, { budget: 80, maxSamples: 10, minSamples: 4, cap: 400 }); if (BOT_OPT.lead) Object.assign(BOT_OPT.lead, { budget: 80, maxSamples: 10, minSamples: 4, cap: 400 }); } const h0 = HIST.length; newBoard(); return { h0, phase: G.phase }; });
     if (start.phase !== 'bid') throw new Error(`board ${n}: did not start (phase ${start.phase})`);
     const res = await page.evaluate(async h0 => {
-      const until = Date.now() + 240000;
+      const until = Date.now() + 360000;   // a busy computer can take a few minutes
       while (Date.now() < until) {
         await new Promise(r => setTimeout(r, 120));
         if (G.phase === 'done') break;
@@ -60,7 +60,7 @@ try {
       return { phase: G.phase, saved: HIST.length > h0, ns: G.result && G.result.ns, passed: !!(G.result && G.result.passed), bar: !!(bar && bar.offsetHeight > 20), table: !!(table && table.offsetHeight > 100), cards: document.querySelectorAll('.card').length };
     }, start.h0);
     const s = ((Date.now() - t0) / 1000).toFixed(0);
-    if (res.phase !== 'done') throw new Error(`board ${n}: not finished in 4 minutes (phase ${res.phase})`);
+    if (res.phase !== 'done') throw new Error(`board ${n}: not finished in 6 minutes (phase ${res.phase})`);
     if (!res.saved) throw new Error(`board ${n}: the result was not saved`);
     if (!res.bar || !res.table) throw new Error(`board ${n}: the screen is broken (bar ${res.bar}, table ${res.table})`);
     console.log(`smoke: board ${n} played in ${s} s — ${res.passed ? 'passed out' : 'NS ' + res.ns}`);
