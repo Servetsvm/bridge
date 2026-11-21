@@ -36,6 +36,7 @@ function lobbyPrompt(b) {
     + `What the player can do here: play with the robots (they are always ready), open an online table and invite friends, join an open table when other players are online, the clubs, the hand of the day and the puzzles.\n`
     + `Rules for your answers:\n`
     + `- Write ONLY in ${lang}, whatever language the message is in.\n`
+    + `- The game is always called "Bridge" in every language: never translate its name (not köprü, Brücke, puente, pont, ponte, bro, мост, most, 桥).\n`
     + `- One or two short, natural sentences, like a friendly chat. An emoji now and then is fine.\n`
     + `- Talk about bridge and the website; if they want to play now, suggest playing with the robots. Do not invent features, prices, players or events.\n`
     + `- Be polite, warm and family-friendly. Politely decline anything offensive, sexual, political or not about bridge, and never ask for personal information.\n`
@@ -59,6 +60,7 @@ function prompt(b) {
     + `What everyone at the table can see: ${table || 'the board has just started.'}\n`
     + `Rules for your answers:\n`
     + `- Write ONLY in ${lang}, whatever language the message is in.\n`
+    + `- The game is always called "Bridge" in every language: never translate its name (not köprü, Brücke, puente, pont, ponte, bro, мост, most, 桥).\n`
     + `- One or two short, natural sentences, like a chat between people at a bridge club. An emoji now and then is fine.\n`
     + `- You do not know anyone's cards. Never reveal or hint at your own cards or what you plan to bid or play: in bridge that is not allowed. During the board do not talk about the bidding or the play with your partner; after the board you may chat about it in general.\n`
     + `- Do not invent explanations of bids; if asked what a bid meant, say they can ask about the bid itself (for example "why 2♥?").\n`
@@ -155,6 +157,7 @@ export default {
       let raw = await gemini(env, messages), src = 'gemini';
       if (!raw) { const r = await env.AI.run(env.MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8-fast', { messages, max_tokens: 90, temperature: 0.8 }); raw = r && r.response; src = 'ai'; }
       let reply = clip(raw, 400).replace(/^["“]|["”]$/g, '');
+      if (b.lang === 'tr') reply = reply.replace(/köprü(?=\s|[.,!?]|$)/gi, 'Bridge');   // the game's name, if a model still translated it
       reply = reply.replace(new RegExp('^' + clip(b.bot && b.bot.name, 30).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*:\\s*', 'i'), '');
       if (!reply || SAYS_HUMAN.test(reply)) { logChat(env, ctx, b, text, reply, 'blocked'); return json({ error: 'no answer' }, 502); }   // kept, to see what the model tried to say
       reply = reply.slice(0, 280);
