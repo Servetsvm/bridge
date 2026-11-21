@@ -40,6 +40,15 @@ then go to Google.
 
 The review page's `src` column says which one answered: `gemini` or `ai` (Workers AI).
 
+## Weather and looking things up
+
+- Asked about the weather, the Worker finds the town in the message and gives the robot the real forecast from
+  Open-Meteo (free, no key; cached 30 minutes).
+- Gemini is asked with Google Search, so it can look up what it does not know. On a free Gemini key Google Search may
+  have no allowance (the answer is 429): the Worker then asks without it for an hour. Enabling billing on the key in
+  Google AI Studio gives it Google Search.
+- The site waits 18 s for an answer.
+
 ## Test before publishing
 
 In the browser console on the site or a local preview, run:

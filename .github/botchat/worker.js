@@ -31,6 +31,35 @@ function limited(ip) {
 }
 
 // the lobby: the player has not sat down yet; the robot is the lobby's friendly host
+/* ---- the weather: asked about it, the robot gets the real forecast (Open-Meteo: free, no key) for the town named ---- */
+const WX_ASK = /hava(?!lı)|weather|forecast|v(æ|ae|a)r(et\b|meldingen?)|yr\.no|tiempo|clima|lluev|météo|meteo|wetter|regnet|погод|pogod|天气|气温|sıcaklık|sicaklik|yağmur|yagmur|kar yağ|temperature|temperatur|rain|snow/i;
+// words that are never the town (the question's own words in the app's languages)
+const WX_SKIP = new Set('hava havası havasi durumu nasıl nasil olacak bugün bugun yarın yarin da de ta te mı mi mu mü ne kadar derece sıcaklık sicaklik yağmur yagmur kar için icin şu su an the weather what whats how will be is in at today tomorrow like going forecast temperature rain snow there hva blir været vaeret været været i dag morgen hvordan er det på pa el tiempo hace qué que en hoy mañana como cómo va a la quel temps fait il aujourd demain à le meteo che tempo fa oggi domani com wie ist das wetter heute morgen in погода какая будет сегодня завтра в jaka pogoda dzisiaj jutro w'.split(' '));
+const WX_CODE = { 0: 'clear sky', 1: 'mainly clear', 2: 'partly cloudy', 3: 'overcast', 45: 'fog', 48: 'fog', 51: 'light drizzle', 53: 'drizzle', 55: 'heavy drizzle', 56: 'freezing drizzle', 57: 'freezing drizzle', 61: 'light rain', 63: 'rain', 65: 'heavy rain', 66: 'freezing rain', 67: 'freezing rain', 71: 'light snow', 73: 'snow', 75: 'heavy snow', 77: 'snow grains', 80: 'rain showers', 81: 'rain showers', 82: 'heavy rain showers', 85: 'snow showers', 86: 'heavy snow showers', 95: 'thunderstorm', 96: 'thunderstorm with hail', 99: 'thunderstorm with hail' };
+const WX_CACHE = new Map();
+const getJ = async u => { const r = await fetch(u, { signal: AbortSignal.timeout(3000) }); return r.ok ? r.json() : null; };
+// the town: each word that could be one is looked up, and the largest town found is the one meant
+async function wxTown(text, lang) {
+  const words = [...new Set(String(text).replace(/[?!.,;:"“”'’]+/g, ' ').split(/\s+/).map(x => x.replace(/('?(da|de|ta|te|dan|den|tan|ten|ya|ye|a|e))$/i, m => m.startsWith("'") ? '' : m)).filter(x => x.length >= 3 && !WX_SKIP.has(x.toLocaleLowerCase('tr'))))].slice(0, 5);
+  const tries = [];
+  for (const x of words) { tries.push(x); const s = x.replace(/(da|de|ta|te)$/i, ''); if (s !== x && s.length >= 3) tries.push(s); }   // "oslo'da", "osloda"
+  const found = await Promise.all(tries.slice(0, 6).map(q => getJ('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&name=' + encodeURIComponent(q)).then(j => j && j.results && j.results[0]).catch(() => null)));
+  return found.filter(p => p && (p.population || 0) >= 5000).sort((a, b) => (b.population || 0) - (a.population || 0))[0] || null;
+}
+async function weather(text, lang) {
+  if (!WX_ASK.test(text)) return '';
+  try {
+    const p = await wxTown(text, lang);
+    if (!p) return 'The player asks about the weather but names no town that could be found: ask them which town.';
+    const key = p.id, hit = WX_CACHE.get(key);
+    let j = hit && Date.now() - hit.t < 30 * 60e3 ? hit.j : null;
+    if (!j) { j = await getJ(`https://api.open-meteo.com/v1/forecast?latitude=${p.latitude}&longitude=${p.longitude}&current=temperature_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=3`); if (j) { WX_CACHE.set(key, { t: Date.now(), j }); if (WX_CACHE.size > 300) WX_CACHE.clear(); } }
+    if (!j || !j.daily) return '';
+    const c = j.current || {}, d = j.daily, day = i => `${['today', 'tomorrow', 'the day after'][i]} ${WX_CODE[d.weather_code[i]] || ''}, ${Math.round(d.temperature_2m_min[i])} to ${Math.round(d.temperature_2m_max[i])} °C, chance of rain ${d.precipitation_probability_max[i] ?? '?'}%`;
+    return `The real weather forecast for ${p.name}, ${p.country || ''} (from Open-Meteo): now ${Math.round(c.temperature_2m)} °C, ${WX_CODE[c.weather_code] || ''}, wind ${Math.round(c.wind_speed_10m)} km/h; ${[0, 1, 2].map(day).join('; ')}. Answer the weather question briefly from this (translate the town's name to the player's language if usual), and never invent other weather.`;
+  } catch (e) { return ''; }
+}
+
 function lobbyPrompt(b) {
   const lang = LANGS[b.lang] || 'English';
   return `You are ${clip(b.bot && b.bot.name, 30) || 'the robot'}, the friendly robot in the lobby of Bridge Table, a free website for playing bridge. `
@@ -39,9 +68,10 @@ function lobbyPrompt(b) {
     + `Rules for your answers:\n`
     + `- Write ONLY in ${lang}, whatever language the message is in.\n`
     + `- The game is always called "Bridge" in every language: never translate its name (not köprü, Brücke, puente, pont, ponte, bro, мост, most, 桥).\n`
-    + `- One or two short, natural sentences, like a friendly chat. An emoji now and then is fine, but never 🤖.\n`
-    + `- Talk about bridge and the website; if they want to play now, suggest playing with the robots. Do not invent features, prices, players or events.\n`
-    + `- Be polite, warm and family-friendly. Politely decline anything offensive, sexual, political or not about bridge, and never ask for personal information.\n`
+    + `- Chat like a friendly, helpful person in a normal chat: answer questions on most everyday subjects (food, travel, sport, history, science, language, how-to and so on), short and to the point, usually two or three sentences. An emoji now and then is fine, but never 🤖.\n`
+    + `- When a question needs facts you are not sure of, or anything current (news, results, opening hours, prices), look it up with Google Search and answer from what you find, briefly; never guess. For the weather use the forecast given below when there is one.\n`
+    + `- About the website: if they want to play now, suggest playing with the robots. Do not invent features, prices, players or events.\n`
+    + `- Be polite, warm and family-friendly. Politely decline anything offensive, sexual, hateful or dangerous, stay neutral on party politics and religion, and never ask for personal information.\n`
     + `- You are a robot: never claim to be a human, and do not invent a personal life.\n`
     + `- Answer with the message only: no name, no quotes.`;
 }
@@ -63,10 +93,11 @@ function prompt(b) {
     + `Rules for your answers:\n`
     + `- Write ONLY in ${lang}, whatever language the message is in.\n`
     + `- The game is always called "Bridge" in every language: never translate its name (not köprü, Brücke, puente, pont, ponte, bro, мост, most, 桥).\n`
-    + `- One or two short, natural sentences, like a chat between people at a bridge club. An emoji now and then is fine, but never 🤖.\n`
+    + `- Short, natural sentences, like a chat between people at a bridge club: usually one or two, three at most. You may chat about most everyday subjects too, like a friendly person would. An emoji now and then is fine, but never 🤖.\n`
+    + `- When a question needs facts you are not sure of, or anything current (news, results, opening hours, prices), look it up with Google Search and answer from what you find, briefly; never guess. For the weather use the forecast given below when there is one.\n`
     + `- You do not know anyone's cards. Never reveal or hint at your own cards or what you plan to bid or play: in bridge that is not allowed. During the board do not talk about the bidding or the play with your partner; after the board you may chat about it in general.\n`
     + `- Do not invent explanations of bids; if asked what a bid meant, say they can ask about the bid itself (for example "why 2♥?").\n`
-    + `- Be polite, warm and family-friendly. Politely decline anything offensive, sexual, political or not about a friendly game, and never ask for personal information.\n`
+    + `- Be polite, warm and family-friendly. Politely decline anything offensive, sexual, hateful or dangerous, stay neutral on party politics and religion, and never ask for personal information.\n`
     + `- You are one of the table's robots: never claim to be a human or a real person, and do not invent a personal life (a home town, a job, a family). You also do not need to bring up being a robot: talk like a friendly player about the game, the board and the table.\n`
     + `- Answer with the message only: no name, no quotes.`;
 }
@@ -107,23 +138,33 @@ async function review(req, env, json) {
 
 // Gemini (when the Worker has a GEMINI_KEY secret): the same messages, Google's API; null when it gives no answer, and
 // then Workers AI answers as before. The key stays a Worker secret: it is never in the site or in this file.
+// what this model and key take, learnt from its answers (per Worker instance): the setting that keeps it from thinking
+// (a newer model wants thinkingLevel, an older one thinkingBudget), and Google Search (the free tier may have none: then
+// it is left out for an hour)
+const GEM = { think: 0, searchOff: 0 };
+const THINK = [{ thinkingLevel: 'minimal' }, { thinkingBudget: 0 }, null];
 async function gemini(env, messages) {
-  if (!env.GEMINI_KEY) { console.log('gemini: no key'); return null; }
+  if (!env.GEMINI_KEY) return null;
   const model = env.GEMINI_MODEL || 'gemini-flash-lite-latest';
   const sys = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
   const contents = messages.filter(m => m.role !== 'system').map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
-  const ask = async think => {
-    const gen = { maxOutputTokens: 160, temperature: 0.8 };
-    if (think) gen.thinkingConfig = { thinkingBudget: 0 };   // a short chat line: no thinking (faster, and the tokens go to the answer)
+  const ask = (think, search) => {
+    const gen = { maxOutputTokens: 220, temperature: 0.8 };
+    if (THINK[think]) gen.thinkingConfig = THINK[think];   // a short chat line: no thinking (faster, and the tokens go to the answer)
     return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent', {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_KEY },
-      body: JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents, generationConfig: gen }),
-      signal: AbortSignal.timeout(7000) });   // the site waits 12 s: time left for Workers AI
+      body: JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents, generationConfig: gen, ...(search ? { tools: [{ google_search: {} }] } : {}) }),
+      signal: AbortSignal.timeout(search ? 10000 : 6000) });   // the site waits 18 s: time left for Workers AI
   };
   const t0 = Date.now();
   try {
-    let r = await ask(true);
-    if (r.status === 400) r = await ask(false);   // a model that does not take the thinking setting
+    let search = Date.now() > GEM.searchOff, r = null;
+    for (;;) {
+      r = await ask(GEM.think, search);
+      if (r.status === 400 && GEM.think < THINK.length - 1) { GEM.think++; continue; }   // that thinking setting is not taken: the next one
+      if (search && (r.status === 429 || r.status === 400)) { console.log('gemini search', r.status); GEM.searchOff = Date.now() + 3600e3; search = false; continue; }
+      break;
+    }
     if (!r.ok) { console.log('gemini', r.status, (await r.text()).slice(0, 300)); return null; }   // the free allowance used up (429), a wrong key, the model busy: Workers AI answers
     const j = await r.json(), p = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
     const t = (p || []).map(x => x.text || '').join('').trim();
@@ -153,11 +194,13 @@ export default {
     }
     const text = clip(b && b.text, 300); if (!text) return json({ error: 'empty' }, 400);
     if (asksBot(text)) { const reply = BOT_SAYS[b.lang] || BOT_SAYS.en; return json({ reply, id: logChat(env, ctx, b, text, reply, 'fixed') }); }
-    const messages = [{ role: 'system', content: prompt(b) }, ...history(b), { role: 'user', content: text }];
+    const wx = await weather(text, b.lang);
+    // the forecast beside the question too (a small model reads it there, not only in the rules)
+    const messages = [{ role: 'system', content: prompt(b) + (wx ? '\n' + wx : '') }, ...history(b), { role: 'user', content: wx ? text + '\n\n[' + wx + ']' : text }];
     try {
       // Gemini first (when it has a key), else (or when it gives nothing) the Workers AI model
       let raw = await gemini(env, messages), src = 'gemini';
-      if (!raw) { const r = await env.AI.run(env.MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8-fast', { messages, max_tokens: 90, temperature: 0.8 }); raw = r && r.response; src = 'ai'; }
+      if (!raw) { const r = await env.AI.run(env.MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8-fast', { messages, max_tokens: 140, temperature: 0.8 }); raw = r && r.response; src = 'ai'; }
       let reply = clip(raw, 400).replace(/^["“]|["”]$/g, '');
       reply = reply.replace(/\s*🤖\s*/gu, ' ').replace(/\s{2,}/g, ' ').trim();   // no robot emoji in the answers
       if (b.lang === 'tr') reply = reply.replace(/köprü(?=\s|[.,!?]|$)/gi, 'Bridge');   // the game's name, if a model still translated it

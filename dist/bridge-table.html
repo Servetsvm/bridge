@@ -11711,7 +11711,7 @@ async function botAI(seat, text) {
   const body = { lang: chatLang(text), text, me: myNm() || '', meSeat: SEAT_EN[me], bot: { name: seatName(seat), seat: SEAT_EN[seat], role: role(seat) },
     others: [1, 2, 3].map(r => (me + r) % 4).filter(s => s !== seat).map(s => ({ name: seatName(s), seat: SEAT_EN[s], role: role(s) })),
     table: botTableState(), history: BOT.chat.slice(-9, -1).map(m => ({ mine: !!m.me, from: m.from || '', text: m.text })) };
-  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 12000);
+  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 18000);
   try {
     const r = await fetch(BOT_AI, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
     const j = await r.json(); if (!r.ok || !j.reply) throw new Error(j.error || r.status);
@@ -14354,7 +14354,7 @@ async function lobbyBot(text) {
   const me = myNm() || '', L = (Net.st.lchat || []).filter(m => m.bot || m.from === me).slice(-9, -1);
   const lang = chatLang(text), name = lobbyBotName(lang);
   const body = { lang, text, me, where: 'lobby', bot: { name }, history: L.map(m => ({ mine: !m.bot, from: m.from, text: m.text })) };
-  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 12000);
+  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 18000);
   try {
     const r = await fetch(BOT_AI, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
     const j = await r.json(); if (!r.ok || !j.reply) return;
