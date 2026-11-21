@@ -134,6 +134,27 @@ function logChat(env, ctx, b, text, reply, src) {
 }
 const sameKey = (a, b) => { a = String(a || ''); b = String(b || ''); if (!a || a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i); return d === 0; };
 
+// a page's error: kept once per kind (the message and where), counted; the oldest go after 30 days
+async function takeError(b, env, ctx, json) {
+  if (!env.DB) return json({ ok: false });
+  const msg = clip(b.msg, 300), src = clip(b.src, 160), ver = clip(b.ver, 20);
+  if (!msg) return json({ error: 'empty' }, 400);
+  const k = (msg + '|' + src).slice(0, 460), now = Date.now();
+  ctx.waitUntil((async () => {
+    await env.DB.prepare('INSERT INTO errs (k, first, last, n, ver, msg, src, stack, ua, lang, page) VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(k) DO UPDATE SET n = n + 1, last = excluded.last, ver = excluded.ver, stack = excluded.stack, ua = excluded.ua')
+      .bind(k, now, now, ver, msg, src, clip(b.stack, 1200), clip(b.ua, 120), clip(b.lang, 5), clip(b.page, 80)).run();
+    if (Math.random() < 0.02) await env.DB.prepare('DELETE FROM errs WHERE last < ?').bind(now - 30 * 864e5).run();
+  })().catch(() => {}));
+  return json({ ok: true });
+}
+async function errors(req, env, json) {
+  const key = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!env.REVIEW_KEY || !sameKey(key, env.REVIEW_KEY)) return json({ error: 'forbidden' }, 403);
+  if (!env.DB) return json({ error: 'no log' }, 500);
+  const rows = await env.DB.prepare('SELECT last, first, n, ver, msg, src, stack, ua, lang, page FROM errs ORDER BY last DESC LIMIT 200').all();
+  return json({ rows: rows.results || [] });
+}
+
 async function review(req, env, json) {
   const key = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
   if (!env.REVIEW_KEY || !sameKey(key, env.REVIEW_KEY)) return json({ error: 'forbidden' }, 403);
@@ -191,9 +212,11 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, { headers: cors });
     const path = new URL(req.url).pathname.replace(/\/+$/, '');
     if (path === '/review' && req.method === 'GET') return review(req, env, json);
+    if (path === '/errors' && req.method === 'GET') return errors(req, env, json);
     if (req.method !== 'POST' || !ok) return json({ error: 'forbidden' }, 403);
     if (limited(req.headers.get('CF-Connecting-IP') || 'x')) return json({ error: 'slow down' }, 429);
     let b; try { b = await req.json(); } catch (e) { return json({ error: 'bad request' }, 400); }
+    if (path === '/err') return takeError(b, env, ctx, json);
     // the player's 👍 (1) or 👎 (-1) on an answer of the last day
     if (path === '/rate') {
       const id = String(b && b.id || ''), v = b && b.v === 1 ? 1 : b && b.v === -1 ? -1 : 0;

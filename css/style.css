@@ -2334,3 +2334,10 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 #bar>#bChat.hbtn{position:relative;overflow:visible;background:#2f6fb0;color:#fff;border-color:#24578c}
 #bar>#bChat.hbtn.gold{background:var(--brass);color:var(--brass-ink);animation:chatPulse 1.4s ease-in-out infinite}
 @media (max-width:600px){ #bar>.box.rtsys{display:none} }
+
+/* the administrator's list of the devices' errors */
+.errlist{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow:auto}
+.errrow{background:rgba(0,0,0,.04);border-radius:8px;padding:6px 8px}
+.errrow summary{cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.errrow summary small,.errrow>small{opacity:.7;font-size:12px;word-break:break-all}
+.errrow pre{white-space:pre-wrap;font-size:11px;max-height:200px;overflow:auto;margin:6px 0}

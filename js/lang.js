@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Errors on devices": "Cihazlardaki hatalar", "Last 30 days": "Son 30 gün", "No errors reported. 🎉": "Bildirilen hata yok. 🎉", "first": "ilk",
     "Choose a convention to practise (or Off), then ▶ Start": "Çalışacağın konvansiyonu seç (ya da Kapalı), sonra ▶ Başla",
     "My convention card": "Konvansiyon kartım",
     "TD": "TD",
@@ -451,6 +452,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Errors on devices": "Feil på enheter", "Last 30 days": "Siste 30 dager", "No errors reported. 🎉": "Ingen feil meldt. 🎉", "first": "først",
     "Choose a convention to practise (or Off), then ▶ Start": "Velg en konvensjon å øve på (eller Av), så ▶ Start",
     "My convention card": "Mitt konvensjonskort",
     "TD": "TD",

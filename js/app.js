@@ -1,5 +1,22 @@
 /* Bridge Table — screen, game flow, field comparison and settings. */
 'use strict';
+/* errors on a player's device are reported to the robots' Worker (/err): what went wrong, where, the version and the
+   browser, never a name; at most a few a visit, and none from a test server on this computer */
+(() => {
+  const URL_ = 'https://bridge-bots.bridgetable.workers.dev/err', seen = new Set(); let left = 5, ver = '';
+  try { caches.keys().then(k => { ver = (k.find(x => /^bridge-v\d+$/.test(x)) || '').replace('bridge-', ''); }).catch(() => {}); } catch (e) {}
+  if (/^(localhost|127\.|\[::1\])/.test(location.hostname) || location.protocol === 'file:') return;
+  const send = (msg, src, line, stack) => {
+    msg = String(msg || '').slice(0, 300); if (!msg || left <= 0 || /^Script error\.?$|ResizeObserver loop|Load failed|NetworkError|Failed to fetch|AbortError|The operation was aborted/i.test(msg)) return;
+    src = String(src || '').replace(location.origin, '').replace(/\?.*$/, '') + (line ? ':' + line : '');
+    if (src && /^(chrome|moz|safari)-extension:|^https?:/.test(src)) return;   // another site's or an extension's
+    const k = msg + src; if (seen.has(k)) return; seen.add(k); left--;
+    let lang = ''; try { lang = (typeof SET !== 'undefined' && SET.lang) || ''; } catch (e) {}
+    try { fetch(URL_, { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ msg, src, ver, lang, stack: String(stack || '').slice(0, 1200), ua: navigator.userAgent.slice(0, 120), page: location.pathname.slice(0, 80) }) }).catch(() => {}); } catch (e) {}
+  };
+  window.addEventListener('error', e => { if (e && e.message) send(e.message, e.filename, e.lineno, e.error && e.error.stack); });
+  window.addEventListener('unhandledrejection', e => { const r = e && e.reason; send(r && r.message || String(r), r && r.fileName || '', 0, r && r.stack); });
+})();
 const E = {}; for (const f of window.BRIDGE) f(E);
 const { SUIT, STR, RTXT, SEAT, S, R, pd, sideOf, B, LV, ST, isNum, vulOf, dealerOf, callTxt, legalCalls, isLegal, auctionOver, contractOf, ev, scoreOf } = E;
 
@@ -1280,6 +1297,19 @@ async function botAI(seat, text) {
 }
 /* the administrator's review of the robots' chats (the Worker's log, read with the review key kept on this device):
    the 👎 answers first, then all, the 👍 ones and the answers that were held back (the model said it was a person) */
+/* the administrator: the errors the players' devices reported (the Worker's list, read with the same review key) */
+async function showErrs() {
+  let key = ''; try { key = localStorage.getItem('bridge-bot-review') || ''; } catch (e) {}
+  const shell = body => openOv('errs', `<h2>🐞 ${T('Errors on devices')}</h2>${body}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  if (!key) { showBotReview('bad'); return; }   // the key is asked for there, once
+  shell(`<div class="muted">${T('Loading…')}</div>`);
+  let d; try { const r = await fetch(BOT_AI.replace(/\/$/, '') + '/errors', { headers: { Authorization: 'Bearer ' + key } }); d = await r.json(); if (!r.ok) throw new Error(d.error || r.status); }
+  catch (e) { shell(`<div class="muted">⚠ ${esc(String(e.message || e))}</div>`); return; }
+  if (ui.overlay !== 'errs') return;
+  const day = ts => new Date(ts).toLocaleString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+  const rows = (d.rows || []).map(x => `<details class="errrow"><summary><b>${esc(x.msg)}</b><small>${day(x.last)} · ${x.n}× · ${esc(x.ver || '?')} · ${esc(x.src || '')}</small></summary><pre>${esc(x.stack || '')}</pre><small>${esc(x.ua || '')} · ${esc(x.lang || '')} · ${esc(x.page || '')} · ${T('first')} ${day(x.first)}</small></details>`).join('');
+  shell(rows ? `<div class="muted">${T('Last 30 days')}: ${(d.rows || []).length}</div><div class="errlist">${rows}</div>` : `<div class="muted">${T('No errors reported. 🎉')}</div>`);
+}
 async function showBotReview(f) {
   let key = ''; try { key = localStorage.getItem('bridge-bot-review') || ''; } catch (e) {}
   const tabs = [['bad', '👎'], ['all', T('All')], ['good', '👍'], ['blocked', '⛔']].map(([k, l]) => `<button class="btn mini-btn${k === f ? ' gold' : ''}" data-brf="${k}">${l}</button>`).join('');
@@ -3517,7 +3547,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
   if (t.dataset.pldet) { ev_.preventDefault(); ui.plOpen = ui.plOpen === t.dataset.pldet ? null : t.dataset.pldet; showPlayers(); return; }
-  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="admBotChat">💬 ${T('Robots\' chats')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="admBotChat">💬 ${T('Robots\' chats')}</button><button class="btn" id="admErrs">🐞 ${T('Errors on devices')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
@@ -3603,6 +3633,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.ai != null) { ui.lastExpl = ui.lastExpl === +t.dataset.ai ? null : +t.dataset.ai; ui.hintBid = null; if (ui.overlay === 'auc') showAuction(); else render(); return; }
   if (t.dataset.brate) { const [id, v] = t.dataset.brate.split(':'), m = BOT.chat.find(x => x.aiId === id); if (m && !m.rate) { m.rate = +v; renderDock(); fetch(BOT_AI.replace(/\/$/, '') + '/rate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, v: +v }) }).catch(() => {}); } return; }
   if (t.id === 'admBotChat') { showBotReview('bad'); return; }
+  if (t.id === 'admErrs') { showErrs(); return; }
   if (t.dataset.brf) { showBotReview(t.dataset.brf); return; }
   if (t.id === 'brKeySave') { const i = $('brKey'); try { localStorage.setItem('bridge-bot-review', (i && i.value || '').trim()); } catch (e) {} showBotReview('bad'); return; }
   if (t.id === 'brKeyForget') { try { localStorage.removeItem('bridge-bot-review'); } catch (e) {} showBotReview('bad'); return; }
