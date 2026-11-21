@@ -3111,9 +3111,11 @@ function claudeOv() {
     <div class="row2"><a class="btn" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 // the home page's card: the six tables (their systems' names)
+// the systems' short names, for a phone (the whole name stays in the tooltip)
+const RT_SHORT = { sayc: 'SAYC', twoone: '2/1', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' };
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1">${esc(rtSysName(k))}</button>`).join('')}</div>`;
+  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
@@ -4054,7 +4056,7 @@ async function lobbyBot(text) {
 function lobbySend(text) {
   text = String(text || '').trim(); if (!text) return;
   if (champLive()) { flash(T('The lobby chat is closed while you play in the championship.'), 2600); return; }
-  if (ui.pmTo) Net.dmSend(ui.pmTo, text); else { Net.lsend(text); if (Net.lobbyOthers && !Net.lobbyOthers()) lobbyBot(text); }
+  if (ui.pmTo) Net.dmSend(ui.pmTo, text); else { Net.lsend(text); if (Net.lobbyOthers && !Net.lobbyOthers()) lobbyBot(text); else { const t0 = Date.now(), me = myNm(); setTimeout(() => { if (!(Net.st.lchat || []).some(m => m.ts > t0 && !m.bot && m.from !== me)) lobbyBot(text); }, 25000); } }   // others here: the robot answers when nobody has in 25 s
   // the new home page: the lobby panel closes once the message is sent (a reply lights the Lobby button)
   if (ui.hsec === 'chat' && document.body.classList.contains('homev2')) { ui.hsec = null; flash('✓ ' + T('Message sent'), 1500); }
   render(); renderDock();

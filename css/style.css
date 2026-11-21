@@ -2365,3 +2365,19 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .bpc{padding:5px 0;font-size:15px}
 .bpc:disabled{opacity:.3}
 .bpimp{font-size:20px;font-weight:800;margin-top:4px}
+
+.bpchk{padding:3px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+.bpchk small{display:block;opacity:.75;font-size:12px}
+.bpchk.ok b:first-child{color:var(--pos)}
+
+/* the system tables' card on a phone: short names, all six on one row */
+.rtchip .rtshort{display:none}
+@media (max-width:600px){
+  body.homev2 .rtcard .rtrows{grid-template-columns:repeat(6,1fr);gap:4px}
+  body.homev2 .rtcard .rtchip{padding:5px 2px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rtchip .rtfull{display:none}.rtchip .rtshort{display:inline}
+  .rtcard .rtgo{padding:8px 12px 4px}.rtcard .rtgo b{font-size:13.5px}
+}
+
+/* a window opened from the chat (the leaderboard, a player's card …) comes above the chat panel */
+.ov{z-index:50}
