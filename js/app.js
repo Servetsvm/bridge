@@ -1333,8 +1333,8 @@ function renderBar() {
   if (G.rtv) { const b = G.rtv.b;
     $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
      ${conBox()}
-     <div class="box"><b>🔴 ${esc(rtSysName(b.sys))}</b></div>
-     <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
+     <div class="box rtsys"><b>🔴 ${esc(rtSysName(b.sys))}</b></div>
+     ${typeof Net !== 'undefined' ? (n => `<button class="btn hbtn narrowonly${n ? ' gold' : ''}" id="bChat" title="${T('Chat')}"><b aria-hidden="true">💬</b><small>${T('Chat')}</small>${n ? `<span class="cbn">${n}</span>` : ''}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ''}<button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
     return; }
   const g = G.play;
   const canClaim = !G.ct && G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;

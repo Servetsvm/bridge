@@ -2381,6 +2381,12 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 @keyframes chatPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,213,74,.9)}50%{box-shadow:0 0 0 6px rgba(255,213,74,0)}}
 @media (prefers-reduced-motion:reduce){#bar .tools>#bChat.gold{animation:none}}
 
+/* the system tables' bar: the chat button there too (phones); the system's name is under the table, so a phone leaves
+   it out of the bar to make room */
+#bar>#bChat.hbtn{position:relative;overflow:visible;background:#2f6fb0;color:#fff;border-color:#24578c}
+#bar>#bChat.hbtn.gold{background:var(--brass);color:var(--brass-ink);animation:chatPulse 1.4s ease-in-out infinite}
+@media (max-width:600px){ #bar>.box.rtsys{display:none} }
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -11784,8 +11790,8 @@ function renderBar() {
   if (G.rtv) { const b = G.rtv.b;
     $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
      ${conBox()}
-     <div class="box"><b>🔴 ${esc(rtSysName(b.sys))}</b></div>
-     <button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
+     <div class="box rtsys"><b>🔴 ${esc(rtSysName(b.sys))}</b></div>
+     ${typeof Net !== 'undefined' ? (n => `<button class="btn hbtn narrowonly${n ? ' gold' : ''}" id="bChat" title="${T('Chat')}"><b aria-hidden="true">💬</b><small>${T('Chat')}</small>${n ? `<span class="cbn">${n}</span>` : ''}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ''}<button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
     return; }
   const g = G.play;
   const canClaim = !G.ct && G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;

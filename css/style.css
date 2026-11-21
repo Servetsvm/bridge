@@ -2328,3 +2328,9 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 }
 @keyframes chatPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,213,74,.9)}50%{box-shadow:0 0 0 6px rgba(255,213,74,0)}}
 @media (prefers-reduced-motion:reduce){#bar .tools>#bChat.gold{animation:none}}
+
+/* the system tables' bar: the chat button there too (phones); the system's name is under the table, so a phone leaves
+   it out of the bar to make room */
+#bar>#bChat.hbtn{position:relative;overflow:visible;background:#2f6fb0;color:#fff;border-color:#24578c}
+#bar>#bChat.hbtn.gold{background:var(--brass);color:var(--brass-ink);animation:chatPulse 1.4s ease-in-out infinite}
+@media (max-width:600px){ #bar>.box.rtsys{display:none} }
