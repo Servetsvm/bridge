@@ -12,7 +12,9 @@ const HITS = new Map(), PER_MIN = 8, PER_DAY = 300;
 
 // "are you a robot / a bot / an AI / a human?": never left to the model (a small one says "I'm human"); an honest answer
 const ASK_BOT = /\b(robot|bot|ai|a\.i\.|human|real person|chatgpt|gpt|ia)\b|robot|yapay zek|insan m[ıi]s[ıi]n|ger[çc]ek (bir )?(insan|ki[şs]i)|menneske|kunstig intelligens|künstliche intelligenz|ekte person|humano|persona real|humain|vraie personne|umano|persona vera|mensch|echte person|робот|бот\b|человек|нейросет|\bии\b|człowiek|prawdziw|sztuczn|机器人|人工智能|真人|是人/i;
-const BOT_SAYS = { en: "I'm one of the table's robots 🙂 But I love a good game of bridge!", tr: 'Masanın robotlarından biriyim 🙂 Ama iyi bir briç oyununa bayılırım!', no: 'Jeg er en av robotene ved bordet 🙂 Men jeg elsker et godt parti bridge!', es: 'Soy uno de los robots de la mesa 🙂 ¡Pero me encanta una buena partida de bridge!', fr: 'Je suis l’un des robots de la table 🙂 Mais j’adore une bonne partie de bridge !', it: 'Sono uno dei robot del tavolo 🙂 Ma adoro una bella partita a bridge!', de: 'Ich bin einer der Roboter am Tisch 🙂 Aber ich liebe eine gute Partie Bridge!', ru: 'Я один из роботов за этим столом 🙂 Но очень люблю хорошую партию в бридж!', pl: 'Jestem jednym z robotów przy stole 🙂 Ale uwielbiam dobrą partię brydża!', zh: '我是这张桌上的机器人之一 🙂 不过我很喜欢打一局好桥牌！' };
+const BOT_SAYS = { en: "I'm one of the table's robots 🙂 But I love a good game of bridge!", tr: 'Masanın robotlarından biriyim 🙂 Ama iyi bir Bridge oyununa bayılırım!', no: 'Jeg er en av robotene ved bordet 🙂 Men jeg elsker et godt parti bridge!', es: 'Soy uno de los robots de la mesa 🙂 ¡Pero me encanta una buena partida de bridge!', fr: 'Je suis l’un des robots de la table 🙂 Mais j’adore une bonne partie de bridge !', it: 'Sono uno dei robot del tavolo 🙂 Ma adoro una bella partita a bridge!', de: 'Ich bin einer der Roboter am Tisch 🙂 Aber ich liebe eine gute Partie Bridge!', ru: 'Я один из роботов за этим столом 🙂 Но очень люблю хорошую партию в Bridge!', pl: 'Jestem jednym z robotów przy stole 🙂 Ale uwielbiam dobrą partię Bridge!', zh: '我是这张桌上的机器人之一 🙂 不过我很喜欢打一局好 Bridge！' };
+const ASK_YOU = /\b(are you|r u|you a|you an|you real|you human)\b|\b(sen|siz)\b|m[ıiuü]s[ıiuü]n(ız)?\b|\b(er du|bist du|sind sie|eres|es usted|es-tu|êtes-vous|etes-vous|sei|è un|jesteś|jestes|czy jesteś)\b|(^|\s)(ты|вы)(?=\s|[?!.,]|$)|你是|你们是/i;
+const asksBot = t => ASK_BOT.test(t) && ASK_YOU.test(t);
 // an answer that claims to be a person is not sent (the site answers by itself)
 const SAYS_HUMAN = /i('| a)m (a )?(real )?(human|person)|not a (robot|bot)|insan[ıi]m|robot de[ğg]il|jeg er (et )?menneske|ikke en robot|soy (un )?humano|no soy un robot|je suis (un )?humain|pas un robot|sono (un )?umano|non sono un robot|ich bin (ein )?mensch|kein roboter|я человек|не робот|jestem człowiekiem|nie jestem robotem|我是人|不是机器人/i;
 
@@ -37,7 +39,7 @@ function lobbyPrompt(b) {
     + `Rules for your answers:\n`
     + `- Write ONLY in ${lang}, whatever language the message is in.\n`
     + `- The game is always called "Bridge" in every language: never translate its name (not köprü, Brücke, puente, pont, ponte, bro, мост, most, 桥).\n`
-    + `- One or two short, natural sentences, like a friendly chat. An emoji now and then is fine.\n`
+    + `- One or two short, natural sentences, like a friendly chat. An emoji now and then is fine, but never 🤖.\n`
     + `- Talk about bridge and the website; if they want to play now, suggest playing with the robots. Do not invent features, prices, players or events.\n`
     + `- Be polite, warm and family-friendly. Politely decline anything offensive, sexual, political or not about bridge, and never ask for personal information.\n`
     + `- You are a robot: never claim to be a human, and do not invent a personal life.\n`
@@ -61,7 +63,7 @@ function prompt(b) {
     + `Rules for your answers:\n`
     + `- Write ONLY in ${lang}, whatever language the message is in.\n`
     + `- The game is always called "Bridge" in every language: never translate its name (not köprü, Brücke, puente, pont, ponte, bro, мост, most, 桥).\n`
-    + `- One or two short, natural sentences, like a chat between people at a bridge club. An emoji now and then is fine.\n`
+    + `- One or two short, natural sentences, like a chat between people at a bridge club. An emoji now and then is fine, but never 🤖.\n`
     + `- You do not know anyone's cards. Never reveal or hint at your own cards or what you plan to bid or play: in bridge that is not allowed. During the board do not talk about the bidding or the play with your partner; after the board you may chat about it in general.\n`
     + `- Do not invent explanations of bids; if asked what a bid meant, say they can ask about the bid itself (for example "why 2♥?").\n`
     + `- Be polite, warm and family-friendly. Politely decline anything offensive, sexual, political or not about a friendly game, and never ask for personal information.\n`
@@ -150,13 +152,14 @@ export default {
       return json({ ok: true });
     }
     const text = clip(b && b.text, 300); if (!text) return json({ error: 'empty' }, 400);
-    if (ASK_BOT.test(text)) { const reply = BOT_SAYS[b.lang] || BOT_SAYS.en; return json({ reply, id: logChat(env, ctx, b, text, reply, 'fixed') }); }
+    if (asksBot(text)) { const reply = BOT_SAYS[b.lang] || BOT_SAYS.en; return json({ reply, id: logChat(env, ctx, b, text, reply, 'fixed') }); }
     const messages = [{ role: 'system', content: prompt(b) }, ...history(b), { role: 'user', content: text }];
     try {
       // Gemini first (when it has a key), else (or when it gives nothing) the Workers AI model
       let raw = await gemini(env, messages), src = 'gemini';
       if (!raw) { const r = await env.AI.run(env.MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8-fast', { messages, max_tokens: 90, temperature: 0.8 }); raw = r && r.response; src = 'ai'; }
       let reply = clip(raw, 400).replace(/^["“]|["”]$/g, '');
+      reply = reply.replace(/\s*🤖\s*/gu, ' ').replace(/\s{2,}/g, ' ').trim();   // no robot emoji in the answers
       if (b.lang === 'tr') reply = reply.replace(/köprü(?=\s|[.,!?]|$)/gi, 'Bridge');   // the game's name, if a model still translated it
       reply = reply.replace(new RegExp('^' + clip(b.bot && b.bot.name, 30).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*:\\s*', 'i'), '');
       if (!reply || SAYS_HUMAN.test(reply)) { logChat(env, ctx, b, text, reply, 'blocked'); return json({ error: 'no answer' }, 502); }   // kept, to see what the model tried to say
