@@ -3123,7 +3123,7 @@ function showSettings() {
   openOv('set', `<h2>${T('Settings')}</h2>
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
-   ${typeof Net !== 'undefined' && Net.isAdmin() ? `<div class="grp"><span>👑 ${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button></div>` : ''}
+   <div class="grp"><span>🃏 ${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button><div class="muted">${T('A PBN or LIN file, a hand record or a photo. A deal you enter is practice, not scored.')}</div></div>
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
    <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
    <div class="grp"><span>${T('Correct the robots')}</span>${seg('fixbot', [[1, T('On')], [0, T('Off')]], SET.fixBot ? 1 : 0)}<div class="muted">${T("When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.")}</div></div>
@@ -3318,7 +3318,7 @@ function startEnteredDeal(watch) {
     hands.forEach((h, s) => { if (h.length !== 13) throw new Error(T('{0} has {1} cards, it needs 13.', SEAT[s], h.length)); });
     let bn = 1; for (let b = 1; b <= 16; b++) if (dealerOf(b) === v.dealer && vulOf(b, 0) === (v.vul === 1 || v.vul === 3) && vulOf(b, 1) === (v.vul === 2 || v.vul === 3)) { bn = b; break; }
     ui.photoHands = null; ui.photoMsg = null; ui.dealForm = null;
-    closeOv(); newBoard(hands, bn);
+    closeOv(); newBoard(hands, bn); G.undo = 1; save();   // a deal you know: practice, not scored
     if (watch) { G.watch = true; clearTimeout(timer); render(); tick(); flash('🤖 ' + T('The robots are playing this deal — watch'), 2500); }
   } catch (e) { showDealEntry(e.message); }
 }
@@ -3798,7 +3798,7 @@ document.addEventListener('click', ev_ => {
       if (canFix()) { if (UNDO.some(u => u.by === 'robotfix')) askYes(T("Take back the robot's card?"), fixUndo); else fixUndo(); break; }
       flash(T('Nothing to take back'), 1500); break;
     }
-    case "sDeal": if (typeof Net !== 'undefined' && Net.isAdmin()) showDealEntry(); break;   // the administrator only
+    case "sDeal": showDealEntry(); break;   // every player (the board is practice, not scored)
     case "dPlay": startEnteredDeal(); break;
     case "dWatch": startEnteredDeal(true); break;
     case "dExpl": ui.lastExpl = null; ui.hintBid = null; render(); break;
