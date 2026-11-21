@@ -628,6 +628,7 @@ function tourSend(e) {
 // a contract and its result in a few characters, e.g. "4♠ S +1" or "3NT× W -2"
 const conTxt = e => e.passed || !e.c ? "Pass" : e.c.level + STR[e.c.strain] + (e.c.dbl === 1 ? "X" : e.c.dbl === 2 ? "XX" : "") + " " + 'NESW'[e.c.decl] + " " + (d => d > 0 ? '+' + d : d === 0 ? '=' : String(d))(e.tricks - (e.c.level + 6));
 function applyField(e, f) {
+  if (e.undo) return;   // a board with a move taken back: practice, not scored
   if (!f || !f.done || !f.tables.length) return;
   const fus = f.tables.map(t => sideOf(e.seat) === 0 ? t.ns : -t.ns);
   const cmp = E.compare(e.us, fus); e.imp = cmp.imp; e.mp = cmp.mp;
@@ -943,7 +944,7 @@ function finishBoard() {
     const sc = scoreOf(c.level, c.strain, c.dbl, vulOf(G.board, c.decl), dt), ns = sideOf(c.decl) === 0 ? sc : -sc;
     e = { id: G.id, ts: Date.now(), board: G.board, seat: U(), c: { ...c }, tricks: dt, ns, us: sideOf(U()) === 0 ? ns : -ns };
   }
-  e.deal = G.deal;
+  e.deal = G.deal; if (G.undo) e.undo = 1;
   // the auction and the cards played trick by trick, for looking back at the board from Results
   e.dealer = G.dealer;
   e.auc = G.auction.map(a => [a.seat, a.call]);
@@ -2789,7 +2790,7 @@ function showEnd() {
    </div>${e.c ? ddBox(e.c, f.dd.you) : ''}
    <div class="grp"><span>${T('Robot tables')}</span>${fieldHtml}</div>
    ${dealHtml(G.deal, U())}
-   ${anaHtml(HIST.find(h => h.id === e.id) || e)}
+   ${e.undo ? `<div class="muted">↩ ${T('Taken back: practice, not scored')}</div>` : ''}${anaHtml(HIST.find(h => h.id === e.id) || e)}
    ${rbNoteHtml(HIST.find(h => h.id === e.id) || e)}
    <div class="row2"><button class="btn gold" id="oNext">${T('Next deal')}</button>${G.champ ? '' : `<button class="btn" id="oReplay">${T('Replay this deal')}</button>`}${G.tour ? "" : `<button class="btn" id="oShare">🔗 ${T("Share")}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
@@ -3324,7 +3325,7 @@ function startEnteredDeal(watch) {
 
 const kindOf = e => e.kind || (e.tour || e.tprac ? 't' : e.online ? 'o' : 'r');
 const KIND_TIP = { t: 'Played in a tournament', o: 'Played at an online table', r: 'Played offline, with robots' };
-const kindMark = e => { const k = kindOf(e), tip = T(KIND_TIP[k]) + (k === 't' && e.tn ? ': ' + e.tn : ''); return `<span class="kmark" title="${esc(tip)}">${k === 't' ? '🏆' : k === 'o' ? '🌐' : '🤖'}</span>`; };
+const kindMark = e => { const k = kindOf(e), tip = T(KIND_TIP[k]) + (k === 't' && e.tn ? ': ' + e.tn : ''); return `<span class="kmark" title="${esc(tip)}">${k === 't' ? '🏆' : k === 'o' ? '🌐' : '🤖'}</span>${e.undo ? `<span class="kmark" title="${esc(T('Taken back: practice, not scored'))}">↩</span>` : ''}`; };
 /* the weekly report: this week against the week before, from the boards on this device — the score, the tricks the
    coach found lost in the play (declarer and defence), how often the auction reached the field's contract, the most
    frequent kinds of mistake, and one piece of advice */
@@ -3792,8 +3793,10 @@ document.addEventListener('click', ev_ => {
       if (G && G.ct) break;   // a club table: no taking back
       if (online() && !guest()) { requestUndo("host", Net.st.names[SET.seat] || "Host", SET.seat).then(ok => { if (ok === false) flash(T("Nothing to take back, or the other side said no"), 1800); }); break; }
       if (guest()) { undo(); break; }
+      if (G && (G.tour || G.tprac || G.champ || G.pz || G.rtv)) { flash('🏆 ' + T('No taking back in a tournament'), 1800); break; }
+      if (UNDO.some(u => u.by === ME())) { if (undo()) { G.undo = 1; save(); flash('↩ ' + T('Taken back: this board is now practice, not scored'), 2200); } break; }
       if (canFix()) { if (UNDO.some(u => u.by === 'robotfix')) askYes(T("Take back the robot's card?"), fixUndo); else fixUndo(); break; }
-      flash('🤖 ' + T('The robots do not accept an undo'), 1800); break;
+      flash(T('Nothing to take back'), 1500); break;
     }
     case "sDeal": if (typeof Net !== 'undefined' && Net.isAdmin()) showDealEntry(); break;   // the administrator only
     case "dPlay": startEnteredDeal(); break;
