@@ -1268,7 +1268,7 @@ function botTableState() {
 }
 async function botAI(seat, text) {
   const me = U(), role = s => sideOf(s) === sideOf(me) ? 'partner' : 'opponent';
-  const body = { lang: chatLang(text), text, me: myNm() || '', meSeat: SEAT_EN[me], bot: { name: seatName(seat), seat: SEAT_EN[seat], role: role(seat) },
+  const body = { lang: chatLang(text), text, tz: botTz(), me: myNm() || '', meSeat: SEAT_EN[me], bot: { name: seatName(seat), seat: SEAT_EN[seat], role: role(seat) },
     others: [1, 2, 3].map(r => (me + r) % 4).filter(s => s !== seat).map(s => ({ name: seatName(s), seat: SEAT_EN[s], role: role(s) })),
     table: botTableState(), history: BOT.chat.slice(-9, -1).map(m => ({ mine: !!m.me, from: m.from || '', text: m.text })) };
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 18000);
@@ -3890,7 +3890,7 @@ function pmTo(name) {
 // else is in the lobby; no answer when the AI cannot be reached
 // the language a chat line is written in (its letters and common words), else the app's language: the robots answer in it
 const CHAT_LANG = {
-  tr: [/[ğışİĞŞ]/, /\b(merhaba|selam|iyi|gunler|günler|gunaydin|günaydın|aksamlar|akşamlar|nasil|nasıl|nasilsin|nasılsın|var|yok|mi|mı|mu|mü|ne|bu|bir|ve|ben|sen|biz|tesekkur|teşekkür|tesekkurler|teşekkürler|sagol|sağol|evet|hayir|hayır|kimse|oyun|oynayalim|oynayalım|oynamak|guzel|güzel|kolay|gelsin|partnerim|abi|hocam)\b/g],
+  tr: [/[ğışİĞŞ]/, /\b(hangi|kadar|cevap|neden|niye|nerede|zaman|ama|çok|cok|gibi|daha|bugun|bugün|yarin|yarın|tarih|tarihe|saat|gün|gun|merhaba|selam|iyi|gunler|günler|gunaydin|günaydın|aksamlar|akşamlar|nasil|nasıl|nasilsin|nasılsın|var|yok|mi|mı|mu|mü|ne|bu|bir|ve|ben|sen|biz|tesekkur|teşekkür|tesekkurler|teşekkürler|sagol|sağol|evet|hayir|hayır|kimse|oyun|oynayalim|oynayalım|oynamak|guzel|güzel|kolay|gelsin|partnerim|abi|hocam)\b/g],
   no: [/[æøåÆØÅ]/, /\b(hei|hallo|takk|jeg|du|er|ikke|det|og|spill|spille|god|dag|morgen|kveld|hvordan|går|gar|noen|her|skal|vi|bra|makker|kan|har|hva)\b/g],
   en: [null, /\b(hello|hi|hey|thanks|thank|the|is|are|you|what|how|good|play|playing|anyone|morning|evening|i|my|partner|nice|game|here|today)\b/g],
   es: [/[ñ¿¡]/, /\b(hola|gracias|buenos|buenas|dias|días|que|qué|como|cómo|juego|jugar|alguien|aquí|aqui|estás|estas|bien|tardes|noches)\b/g],
@@ -3901,11 +3901,15 @@ const CHAT_LANG = {
   pl: [/[łąęśżźńŁĄĘŚŻŹŃ]/, /\b(cześć|czesc|dziękuję|dziekuje|dzień|dzien|dobry|jak|się|sie|gra|grać|grac|ktoś|ktos|tutaj)\b/g],
   zh: [/[\u4e00-\u9fff]/],
 };
+// Turkish word endings (a Turkish line with no common word: "hangi tarihe kadar cevap verebilirsin")
+const TR_END = /(m[ıiuü]s[ıiuü]n|s[ıiuü]n[ıiuü]z|[ıiuü]yor(um|sun|uz)?|acak|ecek|ab[ıi]l[ıi]r|eb[ıi]l[ıi]r|d[ıiuü]r|lar[ıi]?|ler[ıi]?|[ıiuü]m[ıiuü]z)$/;
 function chatLang(text) {
   const t = String(text || '').toLowerCase(); let best = null, bs = 0;
-  for (const [k, [ch, w]] of Object.entries(CHAT_LANG)) { const sc = (ch && ch.test(t) ? 3 : 0) + (w ? (t.match(w) || []).length : 0); if (sc > bs) { bs = sc; best = k; } }
-  return best || SET.lang || 'en';
+  for (const [k, [ch, w]] of Object.entries(CHAT_LANG)) { let sc = (ch && ch.test(t) ? 3 : 0) + (w ? (t.match(w) || []).length : 0); if (k === 'tr') sc += t.split(/\s+/).filter(x => x.length > 4 && TR_END.test(x)).length; if (sc > bs) { bs = sc; best = k; } }
+  if (best) ui.chatLang = best;   // the conversation's language, for a line that does not show its own
+  return best || ui.chatLang || SET.lang || 'en';
 }
+const botTz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } };
 // the lobby's robot: a first name of the language you write in (the same one while the app is open)
 const LOBBY_NAMES = { tr: ['Ayşe', 'Mehmet', 'Elif', 'Emre', 'Zeynep', 'Can'], no: ['Ingrid', 'Lars', 'Kari', 'Ola', 'Silje', 'Erik'], en: ['Emma', 'Oliver', 'Grace', 'Jack'], es: ['Lucía', 'Mateo', 'Carmen', 'Diego'], fr: ['Camille', 'Louis', 'Chloé', 'Hugo'], it: ['Giulia', 'Marco', 'Sofia', 'Luca'], de: ['Anna', 'Felix', 'Lena', 'Jonas'], ru: ['Анна', 'Иван', 'Ольга', 'Дмитрий'], pl: ['Zofia', 'Jan', 'Maja', 'Piotr'], zh: ['小明', '丽丽', '小华', '晓燕'] };
 const lobbyBotName = l => (ui.lbName || (ui.lbName = {}))[l] || (ui.lbName[l] = pick(LOBBY_NAMES[l] || LOBBY_NAMES.en));
@@ -3913,7 +3917,7 @@ async function lobbyBot(text) {
   if (!BOT_AI || !Net.lbot) return;
   const me = myNm() || '', L = (Net.st.lchat || []).filter(m => m.bot || m.from === me).slice(-9, -1);
   const lang = chatLang(text), name = lobbyBotName(lang);
-  const body = { lang, text, me, where: 'lobby', bot: { name }, history: L.map(m => ({ mine: !m.bot, from: m.from, text: m.text })) };
+  const body = { lang, text, me, where: 'lobby', tz: botTz(), bot: { name }, history: L.map(m => ({ mine: !m.bot, from: m.from, text: m.text })) };
   const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 18000);
   try {
     const r = await fetch(BOT_AI, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });

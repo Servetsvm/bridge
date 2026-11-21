@@ -30,6 +30,13 @@ function limited(ip) {
   return false;
 }
 
+// today's date and time where the player is (their time zone from the site; else Europe/Oslo)
+function nowLine(b) {
+  let tz = clip(b && b.tz, 40); try { new Intl.DateTimeFormat('en', { timeZone: tz }); } catch (e) { tz = ''; }
+  const d = new Intl.DateTimeFormat('en-GB', { timeZone: tz || 'Europe/Oslo', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date());
+  return `Today is ${d} where the player is (${tz || 'Europe/Oslo'}). Use this for any question about the day, the date or the time; never guess them.`;
+}
+
 // the lobby: the player has not sat down yet; the robot is the lobby's friendly host
 /* ---- the weather: asked about it, the robot gets the real forecast (Open-Meteo: free, no key) for the town named ---- */
 const WX_ASK = /hava(?!lı)|weather|forecast|v(æ|ae|a)r(et\b|meldingen?)|yr\.no|tiempo|clima|lluev|météo|meteo|wetter|regnet|погод|pogod|天气|气温|sıcaklık|sicaklik|yağmur|yagmur|kar yağ|temperature|temperatur|rain|snow/i;
@@ -196,7 +203,7 @@ export default {
     if (asksBot(text)) { const reply = BOT_SAYS[b.lang] || BOT_SAYS.en; return json({ reply, id: logChat(env, ctx, b, text, reply, 'fixed') }); }
     const wx = await weather(text, b.lang);
     // the forecast beside the question too (a small model reads it there, not only in the rules)
-    const messages = [{ role: 'system', content: prompt(b) + (wx ? '\n' + wx : '') }, ...history(b), { role: 'user', content: wx ? text + '\n\n[' + wx + ']' : text }];
+    const messages = [{ role: 'system', content: prompt(b) + '\n' + nowLine(b) + (wx ? '\n' + wx : '') }, ...history(b), { role: 'user', content: wx ? text + '\n\n[' + wx + ']' : text }];
     try {
       // Gemini first (when it has a key), else (or when it gives nothing) the Workers AI model
       let raw = await gemini(env, messages), src = 'gemini';
