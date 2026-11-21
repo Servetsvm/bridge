@@ -1102,7 +1102,10 @@ function generic(x, h) {
   // no major fit, but a solid six-card major of my own (four of the top five honours): it is trumps, not a minor fit
   // (♠AKQJT6 ♥– ♦75 ♣KJT73 after 1♦–1♠–2♦: spades, not 5♦)
   const solidM = [3, 2].find(s => h.len[s] >= 6 && h.top5(s) >= 4);
+  // partner invited the game in his minor (four of it, after notrump too): with a fit that minor is the strain
+  const pInvL = x.pa.filter(e => e.call !== 'P').pop(), pInvS = pInvL && pInvL.m && /^Invitation: game is 5/.test(pInvL.m.t || '') && isNum(pInvL.call) ? ST(pInvL.call) : -1;
   if (majorFit >= 0) t = majorFit;
+  else if (pInvS >= 0 && pInvS < 2 && h.len[pInvS] + P.len[pInvS] >= 8) t = pInvS;
   else if (solidM != null) t = solidM;
   else if ((pBidNT && oppStops) || ((h.bal || h.semi) && oppStops && minorFit < 0)) t = 4;
   else if (minorFit >= 0) t = minorFit;
@@ -1128,7 +1131,14 @@ function generic(x, h) {
   else if (est >= 33 || (gf && fitLen >= 8 && est >= 31 && h.aces >= 2)) goal = 6;
   else if (t < 2) {
     goal = est >= 29 ? 5 : (est >= 26 ? 4 : 0);
-    if (minorFit >= 0 && est >= 25 && oppStops && est < 29) { t = 4; goal = 3; }
+    // 3NT instead of a minor game only without a singleton or void in a suit our side has not bid (1♦–1♥–3♦ with ♠T and
+    // 7 HCP: not 3NT, the spades run against it)
+    const ourSuits = new Set(x.auc.filter(e => sideOf(e.seat) === sideOf(me) && isNum(e.call) && ST(e.call) < 4).map(e => ST(e.call)));
+    const unbidShort = [0, 1, 2, 3].some(s => !ourSuits.has(s) && h.len[s] <= 1);
+    // partner invited the minor game (four of the minor): a fit and a little more than a minimum accept it
+    // (1♠–1NT–2♥–4♣ with 17 and ♣T7: 5♣)
+    if (pInvS === t && fitLen >= 8 && est >= 27 && goal < 5) goal = 5;
+    if (minorFit >= 0 && est >= 25 && oppStops && est < 29 && !unbidShort && pInvS !== t) { t = 4; goal = 3; }
   }
   else if (lo >= 25 || est >= 26) goal = gameL;
   else if (hi >= 25 && est >= 23) goal = -1;
