@@ -8,6 +8,8 @@ binding = "AI"
 [vars]
 # the best Turkish of the free models tried (Nov 2026); "@cf/meta/llama-3.1-8b-instruct-fp8-fast" is cheaper (more answers a day) but weaker
 MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+# Gemini answers first when the Worker has the secret GEMINI_KEY (npx wrangler secret put GEMINI_KEY); the model it asks:
+GEMINI_MODEL = "gemini-flash-latest"
 
 # the robots' chats (no player names, no cards), kept 90 days, for reviewing and improving the answers
 [[d1_databases]]

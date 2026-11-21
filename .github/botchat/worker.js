@@ -85,6 +85,31 @@ async function review(req, env, json) {
   return json({ days, stats: st, rows: rows.results || [] });
 }
 
+// Gemini (when the Worker has a GEMINI_KEY secret): the same messages, Google's API; null when it gives no answer, and
+// then Workers AI answers as before. The key stays a Worker secret: it is never in the site or in this file.
+async function gemini(env, messages) {
+  if (!env.GEMINI_KEY) return null;
+  const model = env.GEMINI_MODEL || 'gemini-flash-latest';
+  const sys = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+  const contents = messages.filter(m => m.role !== 'system').map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+  const ask = async think => {
+    const gen = { maxOutputTokens: 160, temperature: 0.8 };
+    if (think) gen.thinkingConfig = { thinkingBudget: 0 };   // a short chat line: no thinking (faster, and the tokens go to the answer)
+    return fetch('https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_KEY },
+      body: JSON.stringify({ systemInstruction: { parts: [{ text: sys }] }, contents, generationConfig: gen }),
+      signal: AbortSignal.timeout(9000) });
+  };
+  try {
+    let r = await ask(true);
+    if (r.status === 400) r = await ask(false);   // a model that does not take the thinking setting
+    if (!r.ok) return null;   // the free allowance used up (429), a wrong key, the model busy: Workers AI answers
+    const j = await r.json(), p = j && j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts;
+    const t = (p || []).map(x => x.text || '').join('').trim();
+    return t || null;
+  } catch (e) { return null; }
+}
+
 export default {
   async fetch(req, env, ctx) {
     const origin = req.headers.get('Origin') || '';
@@ -108,12 +133,14 @@ export default {
     if (ASK_BOT.test(text)) { const reply = BOT_SAYS[b.lang] || BOT_SAYS.en; return json({ reply, id: logChat(env, ctx, b, text, reply, 'fixed') }); }
     const messages = [{ role: 'system', content: prompt(b) }, ...history(b), { role: 'user', content: text }];
     try {
-      const r = await env.AI.run(env.MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8-fast', { messages, max_tokens: 90, temperature: 0.8 });
-      let reply = clip(r && r.response, 400).replace(/^["“]|["”]$/g, '');
+      // Gemini first (when it has a key), else (or when it gives nothing) the Workers AI model
+      let raw = await gemini(env, messages), src = 'gemini';
+      if (!raw) { const r = await env.AI.run(env.MODEL || '@cf/meta/llama-3.1-8b-instruct-fp8-fast', { messages, max_tokens: 90, temperature: 0.8 }); raw = r && r.response; src = 'ai'; }
+      let reply = clip(raw, 400).replace(/^["“]|["”]$/g, '');
       reply = reply.replace(new RegExp('^' + clip(b.bot && b.bot.name, 30).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*:\\s*', 'i'), '');
       if (!reply || SAYS_HUMAN.test(reply)) { logChat(env, ctx, b, text, reply, 'blocked'); return json({ error: 'no answer' }, 502); }   // kept, to see what the model tried to say
       reply = reply.slice(0, 280);
-      return json({ reply, id: logChat(env, ctx, b, text, reply, 'ai') });
+      return json({ reply, id: logChat(env, ctx, b, text, reply, src) });
     } catch (e) {
       return json({ error: 'ai unavailable' }, 503);   // the day's free allowance used up, or the model busy: the site answers by itself
     }
