@@ -1,0 +1,9 @@
+{
+  "name": "bridge-smoke",
+  "private": true,
+  "type": "module",
+  "description": "Plays two boards in a real Chrome before each publish (see smoke.mjs)",
+  "dependencies": {
+    "puppeteer-core": "^23.11.1"
+  }
+}

@@ -1,0 +1,17 @@
+#!/bin/sh
+# Before a push: when the site's own files changed, a real Chrome plays a board (tools/smoke/smoke.mjs); a broken
+# game is not pushed. Turned on once per clone with:  git config core.hooksPath .githooks
+# (SKIP_SMOKE=1 git push … skips it, for a push that is not the site.)
+[ -n "$SKIP_SMOKE" ] && exit 0
+z=0000000000000000000000000000000000000000
+changed=""
+while read lref lsha rref rsha; do
+  [ "$lsha" = "$z" ] && continue
+  if [ "$rsha" = "$z" ]; then range="$lsha"; else range="$rsha..$lsha"; fi
+  changed="$changed $(git diff --name-only $range 2>/dev/null | grep -E '^(js/|css/|index\.html|sw\.js|kulupler/)' | head -1)"
+done
+case "$changed" in *[a-z]*) ;; *) exit 0 ;; esac
+root=$(git rev-parse --show-toplevel)
+[ -d "$root/tools/smoke/node_modules" ] || (cd "$root/tools/smoke" && npm install --no-audit --no-fund >/dev/null 2>&1)
+echo "smoke test: playing a board in Chrome before the push…"
+node "$root/tools/smoke/smoke.mjs" || { echo "smoke test FAILED: nothing was pushed"; exit 1; }

@@ -1,0 +1,25 @@
+# The smoke test on GitHub too: after a push of the site's files, Chrome plays two boards (tools/smoke/smoke.mjs).
+# A failed run is mailed to the repository's owner by GitHub.
+name: Smoke test
+on:
+  push:
+    branches: [main]
+    paths: ['js/**', 'css/**', 'index.html', 'sw.js', 'tools/smoke/**']
+  workflow_dispatch:
+jobs:
+  play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the Chrome driver
+        working-directory: tools/smoke
+        run: npm install --no-audit --no-fund
+      - name: Play two boards
+        env:
+          CHROME: /usr/bin/google-chrome
+          SMOKE_BOARDS: '2'
+        run: node tools/smoke/smoke.mjs
