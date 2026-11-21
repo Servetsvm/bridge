@@ -586,14 +586,37 @@ const Ana = {
     else if (ui.overlay === 'rev' && ui.revId === e.id) showReview(e.id);
   },
 };
+// the coach's tip for a mistake: what kind of card was better in that position (from the two cards' kinds)
+function coachTip(x) {
+  const k = x.k || '', b = x.kb || '', place = +String(x.ctx || '').slice(2), def = String(x.ctx || '')[0] === 'F', nt = String(x.ctx || '')[1] === 'N';
+  if (!k || !b) return '';
+  if (S(x.c) === S(x.b) && k === b) return T('The right card in the suit: {0}, not {1}.', cardH(x.b), cardH(x.c));
+  if (place === 0) {
+    if (b === 'T') return T('A trump lead was better: it cuts down the ruffs.');
+    if (def && b[0] === 'S' && !nt) return T('A short-suit lead was better: it can give your side a ruff.');
+    if (b[0] === 'L') return T(nt ? 'Your long suit was the better lead: set up its long cards.' : 'Your long suit was the better lead here.');
+    if (k === 'T') return T('A trump lead was not right here: it helped the other side.');
+    return T('Another suit was the better lead: {0}.', cardH(x.b));
+  }
+  if (b === 'R') return T('Ruffing was better here.');
+  if (k === 'R') return T('Not ruffing was better here (keep your trumps).');
+  if (k === 'dh' && b === 'dx') return T('Keep your honour: discard a low card.');
+  if (k[0] === 'd' && b[0] === 'd') return T('Discard from another suit: keep the cards that matter.');
+  if (place === 1 && k === 'W' && b !== 'W') return T('Second hand low: keeping your high card was better.');
+  if (place === 2 && b === 'W') return T('Third hand high: winning the trick (or forcing a high card) was better.');
+  if (b === 'W') return T('Winning this trick was better.');
+  if (k === 'W') return T('Ducking (letting this trick go) was better.');
+  return T('{0} was better.', cardH(x.b));
+}
 function anaHtml(e) {
   if (!e || !e.pl || !e.pl.length || !e.c || !e.deal) return '';
   const a = e.ana;
+  if (a === undefined && !e.anaAuto) { e.anaAuto = 1; setTimeout(() => Ana.run(e), 400); }   // the coach starts by itself
   const body = a === undefined ? `<button class="btn" data-ana="${e.id}">🔍 ${T('Check my card play')}</button><div class="muted">${T('Every card your side played is compared double dummy with the other cards it could have played.')}</div>`
     : a === 'run' ? `<div class="muted">⏳ ${T('Checking the play…')}</div>`
     : a === null ? `<div class="muted">${T('The check could not be finished on this device.')}</div>`
     : !a.length ? `<div class="okmsg">👍 ${T('No double-dummy mistakes in the card play.')}</div>`
-    : a.map(x => `<div class="anarow">${T('Trick {0}', x.t)} · ${SEAT[x.s]}: ${cardH(x.c)} → ${cardH(x.b)} <b class="pos">+${x.lost}</b></div>`).join('') + `<div class="muted">${T('→ the better card, and how many more tricks it would have taken (double dummy).')}</div>`;
+    : `<div class="coachsum">${T('Your side lost {0} tricks in the play (double dummy).', a.reduce((n, x) => n + x.lost, 0))}</div>` + a.map(x => `<div class="anarow">${T('Trick {0}', x.t)} · ${SEAT[x.s]}: ${cardH(x.c)} → ${cardH(x.b)} <b class="pos">+${x.lost}</b>${(t => t ? `<div class="coachtip">💡 ${t}</div>` : '')(coachTip(x))}</div>`).join('') + `<div class="muted">${T('→ the better card, and how many more tricks it would have taken (double dummy).')}</div>`;
   return `<div class="grp"><span>🔍 ${T('Card play check')}</span>${body}</div>`;
 }
 

@@ -2398,6 +2398,10 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .pprivacy{margin-top:8px}
 .pprivacy .btn{font-size:13px;text-decoration:none;text-align:center}
 
+/* the coach: a summary of the play, and a tip under each mistake */
+.coachsum{font-weight:700;margin:2px 0 6px}
+.coachtip{font-size:13px;opacity:.85;margin:1px 0 4px 10px}
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -4944,7 +4948,7 @@ function analysePlay(deal, c, pl, seats, limit) {
               try { if (ddAtLeast(hands, trick, s, x, lim, v[card] + 1)) v[x] = ddEval(hands, trick, s, x, lim, v[card] + 1); } catch (e) { if (e !== DDX) throw e; }
             }
             let best = card; for (const x of cand) if (v[x] != null && v[x] > v[best]) best = x;
-            if (v[best] > v[card]) out.push({ t: ti + 1, s, c: card, b: best, lost: v[best] - v[card] });
+            if (v[best] > v[card]) { const gg = { hands, trick, trump, contract: c }; out.push({ t: ti + 1, s, c: card, b: best, lost: v[best] - v[card], ctx: cardCtx(gg, s), k: cardKind(gg, s, card), kb: cardKind(gg, s, best) }); }
           }
         }
       }
@@ -5586,6 +5590,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "The right card in the suit: {0}, not {1}.": "Renkteki doğru kart: {1} değil, {0}.", "A trump lead was better: it cuts down the ruffs.": "Koz atağı daha iyiydi: çakmaları azaltır.", "A short-suit lead was better: it can give your side a ruff.": "Kısa renkten atak daha iyiydi: tarafına bir çakma kazandırabilir.", "Your long suit was the better lead: set up its long cards.": "Uzun rengin daha iyi ataktı: uzun kartlarını kur.", "Your long suit was the better lead here.": "Burada uzun rengin daha iyi ataktı.", "A trump lead was not right here: it helped the other side.": "Burada koz atağı doğru değildi: karşı tarafa yaradı.", "Another suit was the better lead: {0}.": "Başka bir renk daha iyi ataktı: {0}.", "Ruffing was better here.": "Burada çakmak daha iyiydi.", "Not ruffing was better here (keep your trumps).": "Burada çakmamak daha iyiydi (kozlarını sakla).", "Keep your honour: discard a low card.": "Onörünü sakla: küçük bir kart at.", "Discard from another suit: keep the cards that matter.": "Başka renkten at: işe yarayan kartları sakla.", "Second hand low: keeping your high card was better.": "İkinci el küçük: büyük kartını saklamak daha iyiydi.", "Third hand high: winning the trick (or forcing a high card) was better.": "Üçüncü el büyük: leveyi almak (ya da büyük kart aldırmak) daha iyiydi.", "Winning this trick was better.": "Bu leveyi almak daha iyiydi.", "Ducking (letting this trick go) was better.": "Bu leveyi bırakmak daha iyiydi.", "{0} was better.": "{0} daha iyiydi.", "Your side lost {0} tricks in the play (double dummy).": "Tarafın oyunda {0} leve kaybetti (double dummy).",
     "Privacy": "Gizlilik", "Delete my account": "Hesabımı sil", "Delete your account and all your data? The administrator deletes them within 30 days.": "Hesabın ve bütün verilerin silinsin mi? Yönetici 30 gün içinde siler.", "Please delete my account and all my data.": "Lütfen hesabımı ve bütün verilerimi silin.", "Request sent: the administrator deletes your account within 30 days.": "İstek gönderildi: yönetici hesabını 30 gün içinde siler.",
     "Errors on devices": "Cihazlardaki hatalar", "Last 30 days": "Son 30 gün", "No errors reported. 🎉": "Bildirilen hata yok. 🎉", "first": "ilk",
     "Choose a convention to practise (or Off), then ▶ Start": "Çalışacağın konvansiyonu seç (ya da Kapalı), sonra ▶ Başla",
@@ -6036,6 +6041,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "The right card in the suit: {0}, not {1}.": "Riktig kort i fargen: {0}, ikke {1}.", "A trump lead was better: it cuts down the ruffs.": "Trumfutspill var bedre: det reduserer stjelingene.", "A short-suit lead was better: it can give your side a ruff.": "Utspill i kortfarge var bedre: det kan gi dere en stjeling.", "Your long suit was the better lead: set up its long cards.": "Langfargen din var bedre utspill: spill fram lengdene.", "Your long suit was the better lead here.": "Langfargen din var bedre utspill her.", "A trump lead was not right here: it helped the other side.": "Trumfutspill var ikke riktig her: det hjalp motparten.", "Another suit was the better lead: {0}.": "En annen farge var bedre utspill: {0}.", "Ruffing was better here.": "Å stjele var bedre her.", "Not ruffing was better here (keep your trumps).": "Å ikke stjele var bedre her (behold trumfene).", "Keep your honour: discard a low card.": "Behold honnøren: kast et lavt kort.", "Discard from another suit: keep the cards that matter.": "Kast fra en annen farge: behold kortene som teller.", "Second hand low: keeping your high card was better.": "Lavt i annen hånd: å beholde det høye kortet var bedre.", "Third hand high: winning the trick (or forcing a high card) was better.": "Høyt i tredje hånd: å vinne stikket (eller tvinge fram et høyt kort) var bedre.", "Winning this trick was better.": "Å vinne dette stikket var bedre.", "Ducking (letting this trick go) was better.": "Å dukke (la stikket gå) var bedre.", "{0} was better.": "{0} var bedre.", "Your side lost {0} tricks in the play (double dummy).": "Dere tapte {0} stikk i spillet (double dummy).",
     "Privacy": "Personvern", "Delete my account": "Slett kontoen min", "Delete your account and all your data? The administrator deletes them within 30 days.": "Slette kontoen din og alle dataene dine? Administratoren sletter dem innen 30 dager.", "Please delete my account and all my data.": "Vennligst slett kontoen min og alle dataene mine.", "Request sent: the administrator deletes your account within 30 days.": "Forespørsel sendt: administratoren sletter kontoen din innen 30 dager.",
     "Errors on devices": "Feil på enheter", "Last 30 days": "Siste 30 dager", "No errors reported. 🎉": "Ingen feil meldt. 🎉", "first": "først",
     "Choose a convention to practise (or Off), then ▶ Start": "Velg en konvensjon å øve på (eller Av), så ▶ Start",
@@ -11058,14 +11064,37 @@ const Ana = {
     else if (ui.overlay === 'rev' && ui.revId === e.id) showReview(e.id);
   },
 };
+// the coach's tip for a mistake: what kind of card was better in that position (from the two cards' kinds)
+function coachTip(x) {
+  const k = x.k || '', b = x.kb || '', place = +String(x.ctx || '').slice(2), def = String(x.ctx || '')[0] === 'F', nt = String(x.ctx || '')[1] === 'N';
+  if (!k || !b) return '';
+  if (S(x.c) === S(x.b) && k === b) return T('The right card in the suit: {0}, not {1}.', cardH(x.b), cardH(x.c));
+  if (place === 0) {
+    if (b === 'T') return T('A trump lead was better: it cuts down the ruffs.');
+    if (def && b[0] === 'S' && !nt) return T('A short-suit lead was better: it can give your side a ruff.');
+    if (b[0] === 'L') return T(nt ? 'Your long suit was the better lead: set up its long cards.' : 'Your long suit was the better lead here.');
+    if (k === 'T') return T('A trump lead was not right here: it helped the other side.');
+    return T('Another suit was the better lead: {0}.', cardH(x.b));
+  }
+  if (b === 'R') return T('Ruffing was better here.');
+  if (k === 'R') return T('Not ruffing was better here (keep your trumps).');
+  if (k === 'dh' && b === 'dx') return T('Keep your honour: discard a low card.');
+  if (k[0] === 'd' && b[0] === 'd') return T('Discard from another suit: keep the cards that matter.');
+  if (place === 1 && k === 'W' && b !== 'W') return T('Second hand low: keeping your high card was better.');
+  if (place === 2 && b === 'W') return T('Third hand high: winning the trick (or forcing a high card) was better.');
+  if (b === 'W') return T('Winning this trick was better.');
+  if (k === 'W') return T('Ducking (letting this trick go) was better.');
+  return T('{0} was better.', cardH(x.b));
+}
 function anaHtml(e) {
   if (!e || !e.pl || !e.pl.length || !e.c || !e.deal) return '';
   const a = e.ana;
+  if (a === undefined && !e.anaAuto) { e.anaAuto = 1; setTimeout(() => Ana.run(e), 400); }   // the coach starts by itself
   const body = a === undefined ? `<button class="btn" data-ana="${e.id}">🔍 ${T('Check my card play')}</button><div class="muted">${T('Every card your side played is compared double dummy with the other cards it could have played.')}</div>`
     : a === 'run' ? `<div class="muted">⏳ ${T('Checking the play…')}</div>`
     : a === null ? `<div class="muted">${T('The check could not be finished on this device.')}</div>`
     : !a.length ? `<div class="okmsg">👍 ${T('No double-dummy mistakes in the card play.')}</div>`
-    : a.map(x => `<div class="anarow">${T('Trick {0}', x.t)} · ${SEAT[x.s]}: ${cardH(x.c)} → ${cardH(x.b)} <b class="pos">+${x.lost}</b></div>`).join('') + `<div class="muted">${T('→ the better card, and how many more tricks it would have taken (double dummy).')}</div>`;
+    : `<div class="coachsum">${T('Your side lost {0} tricks in the play (double dummy).', a.reduce((n, x) => n + x.lost, 0))}</div>` + a.map(x => `<div class="anarow">${T('Trick {0}', x.t)} · ${SEAT[x.s]}: ${cardH(x.c)} → ${cardH(x.b)} <b class="pos">+${x.lost}</b>${(t => t ? `<div class="coachtip">💡 ${t}</div>` : '')(coachTip(x))}</div>`).join('') + `<div class="muted">${T('→ the better card, and how many more tricks it would have taken (double dummy).')}</div>`;
   return `<div class="grp"><span>🔍 ${T('Card play check')}</span>${body}</div>`;
 }
 

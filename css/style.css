@@ -2345,3 +2345,7 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 /* your card: the privacy page and "delete my account" */
 .pprivacy{margin-top:8px}
 .pprivacy .btn{font-size:13px;text-decoration:none;text-align:center}
+
+/* the coach: a summary of the play, and a tip under each mistake */
+.coachsum{font-weight:700;margin:2px 0 6px}
+.coachtip{font-size:13px;opacity:.85;margin:1px 0 4px 10px}

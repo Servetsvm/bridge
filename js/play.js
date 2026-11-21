@@ -1079,7 +1079,7 @@ function analysePlay(deal, c, pl, seats, limit) {
               try { if (ddAtLeast(hands, trick, s, x, lim, v[card] + 1)) v[x] = ddEval(hands, trick, s, x, lim, v[card] + 1); } catch (e) { if (e !== DDX) throw e; }
             }
             let best = card; for (const x of cand) if (v[x] != null && v[x] > v[best]) best = x;
-            if (v[best] > v[card]) out.push({ t: ti + 1, s, c: card, b: best, lost: v[best] - v[card] });
+            if (v[best] > v[card]) { const gg = { hands, trick, trump, contract: c }; out.push({ t: ti + 1, s, c: card, b: best, lost: v[best] - v[card], ctx: cardCtx(gg, s), k: cardKind(gg, s, card), kb: cardKind(gg, s, best) }); }
           }
         }
       }
