@@ -2317,3 +2317,14 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 
 /* the lobby's robot in the lobby chat */
 .cm.bot{background:rgba(217,178,92,.16);border-radius:8px;padding:2px 6px}
+
+/* phones: the chat button stands out (bigger, its own colour), its count of new messages is not cut off, and it
+   pulses while a message is unread */
+@media (max-width:1099px){
+  #bar .tools>#bChat{overflow:visible;font-size:19px;line-height:1;padding:6px 12px;background:#2f6fb0;color:#fff;border-color:#24578c;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+  #bar .tools>#bChat.gold{background:var(--brass);color:var(--brass-ink);animation:chatPulse 1.4s ease-in-out infinite}
+  #bChat .cbn{top:-8px;right:-8px;min-width:20px;height:20px;line-height:20px;font-size:12px;box-shadow:0 0 0 2px #fff}
+  #bar .menuwrap>#bMenu{overflow:visible;position:relative}
+}
+@keyframes chatPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,213,74,.9)}50%{box-shadow:0 0 0 6px rgba(255,213,74,0)}}
+@media (prefers-reduced-motion:reduce){#bar .tools>#bChat.gold{animation:none}}
