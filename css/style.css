@@ -2341,3 +2341,7 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .errrow summary{cursor:pointer;display:flex;flex-direction:column;gap:2px}
 .errrow summary small,.errrow>small{opacity:.7;font-size:12px;word-break:break-all}
 .errrow pre{white-space:pre-wrap;font-size:11px;max-height:200px;overflow:auto;margin:6px 0}
+
+/* your card: the privacy page and "delete my account" */
+.pprivacy{margin-top:8px}
+.pprivacy .btn{font-size:13px;text-decoration:none;text-align:center}

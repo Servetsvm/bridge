@@ -1081,6 +1081,15 @@ function askText(a) {
   return T('{0} wants to take back their last {1}', a.who, T(a.what || 'move'));
 }
 // a yes/no question inside the page (instead of the browser's own pop-up with the site's address)
+// the privacy page (in the app's language when it has it)
+const privacyUrl = () => (/^https?:$/.test(location.protocol) && !/claude/.test(location.hostname) ? '' : 'https://servetsvm.github.io/bridge/') + 'privacy.html?lang=' + (['tr', 'no'].includes(SET.lang) ? SET.lang : 'en');
+// "delete my account": a request to the administrator, who deletes the name and its data (Admin → All players)
+function delMeAsk() {
+  askYes(T('Delete your account and all your data? The administrator deletes them within 30 days.'), async () => {
+    try { await Net.supSend('🗑 ' + T('Please delete my account and all my data.') + ' (' + myNm() + ')', 'del'); flash('✓ ' + T('Request sent: the administrator deletes your account within 30 days.'), 4000); }
+    catch (e) { flash(e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.'), 3000); }
+  });
+}
 function askYes(text, yes) {
   ui.yesFn = yes;
   openOv('yes', `<div class="big">${esc(text)}</div><div class="row2"><button class="btn new" id="yesOk">${T('Yes')}</button><button class="btn" id="oClose">${T('No')}</button></div>`);
@@ -2278,7 +2287,8 @@ function showPlayer(name) {
       <label><span>${T('Country')}</span><select id="pCtry" class="sel"><option value="">${T('Not set')}</option>${COUNTRIES.map(c => [c, ctryName(c)]).sort((x, y) => x[1].localeCompare(y[1])).map(([c, n]) => `<option value="${c}" ${SET.ctry === c ? 'selected' : ''}>${flagOf(c)} ${esc(n)}</option>`).join('')}</select></label>
       <label><span>${T('Club')}</span><input id="pClub" class="tok" maxlength="24" value="${esc(SET.club || '')}" placeholder="${T('Your bridge club (optional)')}"></label>
       <div class="pavpick"><span>${T("Picture")}</span><div>${["", ...Net.AVATARS].map(a => `<button class="${(SET.av || "") === a ? "on" : ""}" data-av="${a}">${a || "Aa"}</button>`).join("")}</div></div>
-      <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button></div>` : '';
+      <button class="btn pconvb" data-hsec="conv">📋 ${T('Convention card')}</button>
+      <div class="row2 pprivacy"><a class="btn" href="${privacyUrl()}" target="_blank" rel="noopener">🔒 ${T('Privacy')}</a><button class="btn" id="pDelMe">🗑 ${T('Delete my account')}</button></div></div>` : '';
   openOv('player', `<div class="pcard">
     <div class="phead"><div class="pav${p && p.av ? " emo" : ""}">${p && p.av ? p.av : esc((shown.trim()[0] || "?").toUpperCase())}</div>
       <div class="pmain"><div class="pnm${champMark(shown) ? ' champgold' : ''}">${esc(shown)}${champMark(shown)} ${rankOf(p, shown)}${ctry ? ` <span class="pctry">${flagOf(ctry)} ${esc(ctryName(ctry))}</span>` : ''}${!me && isFriend(name) ? ' <span class="pstar">★</span>' : ''}</div>
@@ -3107,6 +3117,7 @@ function showHelp() {
   openOv("help", `<h2>${T('User guide')}</h2>
    <div class="muted">${T('Explains every button and every option in Settings, the convention card, reading a deal from a photo, and syncing your phone and PC. Download it to keep it on your device and read it offline.')}</div>
    ${[["en", "guide-en.html", "English", "🇬🇧"], ["tr", "guide.html", "Türkçe", "🇹🇷"], ["no", "guide-no.html", "Norsk", "🇳🇴"], ["es", "guide-es.html", "Español", "🇪🇸"], ["fr", "guide-fr.html", "Français", "🇫🇷"], ["it", "guide-it.html", "Italiano", "🇮🇹"], ["de", "guide-de.html", "Deutsch", "🇩🇪"], ["ru", "guide-ru.html", "Русский", "🇷🇺"], ["pl", "guide-pl.html", "Polski", "🇵🇱"], ["zh", "guide-zh.html", "中文", "🇨🇳"]].sort((a, b) => (b[0] === SET.lang) - (a[0] === SET.lang)).map(([, f, n, fl]) => row(f, n, fl)).join("")}
+   <div class="helprow"><span>🔒 <b>${T('Privacy')}</b></span><a class="btn" href="${privacyUrl()}" target="_blank" rel="noopener">${T('Open')}</a></div>
    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 /* ---- entering a deal (hand record, PBN, or the code Claude reads from a photo) ---- */
@@ -3757,6 +3768,7 @@ document.addEventListener('click', ev_ => {
       location.reload();   // the lobby, friends and messages are read again for nobody
     }); break;
     case "pRename": showGate(true); break;
+    case "pDelMe": delMeAsk(); break;
     case "oShared": { const d = ui.sharedDeal; ui.sharedDeal = null; closeOv(); if (d) { ui.saved = null; newBoard(d.hands, d.b); } break; }
     case "oShare": if (G && G.deal) shareDeal(G.deal, G.board); break;
     // a board from Results dealt again (same cards and number); its old result stays in the list. A board being played is left only after a yes
