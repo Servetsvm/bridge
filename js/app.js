@@ -1923,11 +1923,11 @@ function homeShell2() {
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="sbOpen" type="button"', '🃏', T('Social Bridge'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
         ${tile('id="hBidPrac" type="button"', '🎯', T('Bidding practice'), T('Bid both hands, then see the best contract and the robots\' auction.'))}
-        ${tile('data-hsec="tours" type="button"', '🏆', T('Tournaments and lessons'), T('Make a tournament, or a lesson with your own deals (PBN/LIN).'))}
+        ${tile('id="hRtTile" type="button"', '🤖', T('System table'), T('The robots play each bidding system: watch, or sit down.'))}
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
-      <div class="hcard rtcard" id="hRobot"></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
+      <div class="hcard rtcard" id="hRobot" hidden></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
       <div id="hSec"></div>
     </div></section>
@@ -3045,7 +3045,7 @@ function rtBody() {
 function rtDraw() { const el = $('rtBody'); if (!el) return; const h = rtBody(); if (el.innerHTML !== h) el.innerHTML = h; }
 function rtOpen(k) {
   RT.tab = 'live'; rtPick(k || RT.cur);
-  openOv('rt', `<h2>🤖 ${T('System table — live')}</h2><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  openOv('rt', `<h2>🤖 ${T('System table')}</h2><div id="rtBody">${rtBody()}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
   rtLoad().then(() => { rtPick(RT.cur); rtDraw(); });
   if (RT.timer) clearInterval(RT.timer);
   RT.timer = setInterval(() => {
@@ -3150,7 +3150,7 @@ function claudeOv() {
 const RT_SHORT = { sayc: 'SAYC', twoone: '2/1', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' };
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🔴 🤖 ${T('System table — live')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
+  return `<div class="rtgo"><b>🔴 🤖 ${T('System table')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
@@ -3709,6 +3709,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bRtAgain') { rtAgain(); return; }
   if (t.id === 'bRtNext') { rtNext(); return; }
   if (t.id === 'bRtSit') { rtSitPick(); return; }
+  if (t.id === 'hRtTile') { rtOpen(RT.cur); return; }
   if (t.id === 'tFileOff') { const tr = Net.st.tours[ui.tsetId]; if (tr) { tr.deals = []; showTourSetup(tr.id); } return; }
   if (t.id === 'hBidPrac' && typeof bpNew === 'function') { bpNew(); return; }
   if (t.id === 'bTblScore') { Net.panel(); return; }
@@ -4391,7 +4392,7 @@ async function rtErrs() {
     // the hidden list keeps only the records still in the files (it was cut at 2,000, so with 2,100 records every one
     // removed brought the oldest hidden one back)
     if (L.length) { const here = new Set(L.map(x => 'rt:' + x.sys + ':' + x.n)), keep = [...h].filter(p => here.has(p)); if (keep.length < h.size) try { localStorage.setItem(RT_HIDE, JSON.stringify(keep)); } catch (e) {} }
-    return L.map(x => ({ ...x, er: (x.er || []).map(e => Array.isArray(e) ? e : [e.t, e.s, e.c, e.b, e.lost]), path: 'rt:' + x.sys + ':' + x.n, kim: '🤖 ' + T('System table — live') + ' · ' + (RT_SYS[x.sys] || x.sys) + (x.conv ? ' · ' + pracName(x.conv) : '') })).filter(x => !h.has(x.path));
+    return L.map(x => ({ ...x, er: (x.er || []).map(e => Array.isArray(e) ? e : [e.t, e.s, e.c, e.b, e.lost]), path: 'rt:' + x.sys + ':' + x.n, kim: '🤖 ' + T('System table') + ' · ' + (RT_SYS[x.sys] || x.sys) + (x.conv ? ' · ' + pracName(x.conv) : '') })).filter(x => !h.has(x.path));
   } catch (e) { return []; }
 }
 const rbDone = path => String(path).startsWith('rt:') ? rtHide(path) : Net.roboErrDone(path);

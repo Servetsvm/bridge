@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "System table": "Sistem masası", "The robots play each bidding system: watch, or sit down.": "Robotlar her teklif sistemini oynar: izle ya da otur.",
     "Tournaments and lessons": "Turnuvalar ve dersler", "Make a tournament, or a lesson with your own deals (PBN/LIN).": "Turnuva kur ya da kendi ellerinle (PBN/LIN) ders yap.",
     "From here the auction left your system: no more suggestions.": "Buradan sonra açık artırma sisteminden ayrıldı: öneri gösterilmiyor.",
     "{0} deals from your file": "Dosyandan {0} el", "Random deals": "Rastgele eller", "A lesson: use the deals of a PBN or LIN file": "Ders: PBN ya da LIN dosyasındaki elleri kullan", "Everyone plays your deals; in the results you see how each player played each one.": "Herkes senin ellerini oynar; sonuçlarda her oyuncunun her eli nasıl oynadığını görürsün.", "No deals found in the file": "Dosyada el bulunamadı", "Lesson": "Ders",
@@ -463,6 +464,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "System table": "Systembordet", "The robots play each bidding system: watch, or sit down.": "Robotene spiller hvert meldesystem: se på, eller sett deg.",
     "Tournaments and lessons": "Turneringer og leksjoner", "Make a tournament, or a lesson with your own deals (PBN/LIN).": "Lag en turnering, eller en leksjon med dine egne giv (PBN/LIN).",
     "From here the auction left your system: no more suggestions.": "Herfra forlot meldingene systemet ditt: ingen flere forslag.",
     "{0} deals from your file": "{0} giv fra filen din", "Random deals": "Tilfeldige giv", "A lesson: use the deals of a PBN or LIN file": "En leksjon: bruk givene i en PBN- eller LIN-fil", "Everyone plays your deals; in the results you see how each player played each one.": "Alle spiller givene dine; i resultatene ser du hvordan hver spiller spilte hvert spill.", "No deals found in the file": "Fant ingen giv i filen", "Lesson": "Leksjon",
