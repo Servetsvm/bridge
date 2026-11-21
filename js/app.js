@@ -1927,7 +1927,7 @@ function homeShell2() {
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
-      <div class="hcard rtcard" id="hRobot" hidden></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
+      <div class="hcard rtcard" id="hRobot"></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
       <div id="hSec"></div>
     </div></section>
@@ -3150,7 +3150,7 @@ function claudeOv() {
 const RT_SHORT = { sayc: 'SAYC', twoone: '2/1', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' };
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🔴 🤖 ${T('System table')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
+  return `<div class="rtgo"><b>🤖 ${T('System table')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);

@@ -2450,6 +2450,14 @@ body.homev2 .h2tile.h2sys .rtchip{padding:6px 4px;font-size:13px;font-weight:700
 body.homev2 .h2tile.h2sys .rtchip{background:linear-gradient(180deg,#ecc874,var(--h2-brass,#c9a227) 55%,var(--h2-brass-2,#a8841c));color:var(--h2-brass-ink,#2a1f05);border:1px solid #8a6a1c;border-radius:10px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 2px 0 rgba(0,0,0,.18)}
 body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 
+/* the systems on the home page: on a wide screen the card in the right column (and the four tiles on one row on the
+   left), on a narrow one the buttons beside the tiles */
+@media (min-width:900px){
+  body.homev2 .h2tile.h2sys{display:none}
+  body.homev2 .h2tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (max-width:899px){ body.homev2 #hRobot{display:none} }
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -12487,7 +12495,7 @@ function homeShell2() {
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
-      <div class="hcard rtcard" id="hRobot" hidden></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
+      <div class="hcard rtcard" id="hRobot"></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
       <div id="hSec"></div>
     </div></section>
@@ -13710,7 +13718,7 @@ function claudeOv() {
 const RT_SHORT = { sayc: 'SAYC', twoone: '2/1', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' };
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🔴 🤖 ${T('System table')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
+  return `<div class="rtgo"><b>🤖 ${T('System table')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
