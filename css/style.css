@@ -2390,3 +2390,7 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 .usebar i{display:block;height:100%;background:var(--pos)}
 .usebar.warn i{background:#e0a040}
 .usebar.bad i{background:var(--neg)}
+
+/* the home page: the systems the robots play, as buttons beside the tiles (two tiles wide) */
+body.homev2 .h2tile.h2sys{grid-column:span 2;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px;cursor:default;align-items:stretch}
+body.homev2 .h2tile.h2sys .rtchip{padding:6px 4px;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
