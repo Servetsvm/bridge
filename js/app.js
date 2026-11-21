@@ -3324,6 +3324,59 @@ function startEnteredDeal(watch) {
 const kindOf = e => e.kind || (e.tour || e.tprac ? 't' : e.online ? 'o' : 'r');
 const KIND_TIP = { t: 'Played in a tournament', o: 'Played at an online table', r: 'Played offline, with robots' };
 const kindMark = e => { const k = kindOf(e), tip = T(KIND_TIP[k]) + (k === 't' && e.tn ? ': ' + e.tn : ''); return `<span class="kmark" title="${esc(tip)}">${k === 't' ? '🏆' : k === 'o' ? '🌐' : '🤖'}</span>`; };
+/* the weekly report: this week against the week before, from the boards on this device — the score, the tricks the
+   coach found lost in the play (declarer and defence), how often the auction reached the field's contract, the most
+   frequent kinds of mistake, and one piece of advice */
+const COACH_CAT = { lead: 'Opening and other leads', ruff: 'Ruffing', noruff: 'Ruffing too soon', honour: 'Keeping honours', discard: 'Discards', second: 'Second hand low', third: 'Third hand high', win: 'Taking a trick', duck: 'Ducking', card: 'Choice of card in a suit' };
+function coachCat(x) {
+  const k = x.k || '', b = x.kb || '', place = +String(x.ctx || '').slice(2);
+  if (S(x.c) === S(x.b) && k === b) return 'card';
+  if (place === 0) return 'lead';
+  if (b === 'R') return 'ruff';
+  if (k === 'R') return 'noruff';
+  if (k === 'dh' && b === 'dx') return 'honour';
+  if (k[0] === 'd' && b[0] === 'd') return 'discard';
+  if (place === 1 && k === 'W' && b !== 'W') return 'second';
+  if (place === 2 && b === 'W') return 'third';
+  if (b === 'W') return 'win';
+  if (k === 'W') return 'duck';
+  return 'card';
+}
+function weekStats(L) {
+  const sc = L.filter(e => e.imp != null), ana = L.filter(e => Array.isArray(e.ana) && e.c);
+  const mine = e => sideOf(e.c.decl) === sideOf(e.seat), lost = e => e.ana.reduce((n, x) => n + x.lost, 0);
+  const dA = ana.filter(mine), fA = ana.filter(e => !mine(e)), cmp = L.filter(e => e.norm && e.c != null);
+  const cats = {}; for (const e of ana) for (const x of e.ana) { const c = coachCat(x); cats[c] = (cats[c] || 0) + x.lost; }
+  const avg = (A, f) => A.length ? A.reduce((n, e) => n + f(e), 0) / A.length : null;
+  return { n: L.length, imp: avg(sc, e => e.imp), mp: avg(sc.filter(e => e.mp != null), e => e.mp), decl: avg(dA, lost), dn: dA.length, def: avg(fA, lost), fn: fA.length,
+    same: cmp.length ? 100 * cmp.filter(e => e.norm === conKey(e.c)).length / cmp.length : null, cats };
+}
+function weekHtml() {
+  const now = Date.now(), D = 7 * 864e5, L = HIST.filter(e => !e.passed || e.c);
+  const a = weekStats(L.filter(e => (e.ts || 0) > now - D)), b = weekStats(L.filter(e => (e.ts || 0) > now - 2 * D && (e.ts || 0) <= now - D));
+  if (!a.n) return `<div class="muted">${T('No boards this week yet: play a few and your report appears here.')}</div>`;
+  const f1 = v => v == null ? '—' : (Math.round(v * 10) / 10).toFixed(1), fs = v => v == null ? '—' : fmtSigned(Math.round(v * 100) / 100), fp = v => v == null ? '—' : Math.round(v) + '%';
+  // better or worse than last week (for the tricks lost, fewer is better)
+  const arrow = (x, y, lowGood) => x == null || y == null || Math.abs(x - y) < 1e-9 ? '' : ((x > y) !== !!lowGood ? ' <b class="pos">▲</b>' : ' <b class="neg">▼</b>');
+  const row = (name, x, y, f, low) => `<tr><td>${name}</td><td class="n">${f(x)}${arrow(x, y, low)}</td><td class="n">${f(y)}</td></tr>`;
+  const top = Object.entries(a.cats).sort((p, q) => q[1] - p[1]).slice(0, 3);
+  // the advice: the weakest part this week
+  let tip = '';
+  if (a.decl != null && a.def != null) tip = a.decl > a.def + 0.3 ? T('Most tricks went in your declarer play: plan the whole hand before the first card (count your winners and losers).') : a.def > a.decl + 0.3 ? T('Most tricks went in defence: think about the opening lead and watch your partner\'s signals.') : '';
+  if (!tip && top.length) tip = T('Your most frequent mistake: {0}. The coach\'s tips after each board show the right card.', T(COACH_CAT[top[0][0]]));
+  if (!tip && a.same != null && a.same < 50) tip = T('Your auctions often end in another contract than the field\'s: practise your system\'s bidding.');
+  return `<div class="resscroll"><table class="res"><thead><tr><th></th><th class="n">${T('This week')}</th><th class="n">${T('Last week')}</th></tr></thead><tbody>
+    ${row(T('Boards'), a.n, b.n, v => v == null ? '—' : String(v))}
+    ${row('IMP / ' + T('Bd'), a.imp, b.imp, fs)}
+    ${row('MP %', a.mp, b.mp, fp)}
+    ${row(T('Tricks lost as declarer'), a.decl, b.decl, f1, true)}
+    ${row(T('Tricks lost in defence'), a.def, b.def, f1, true)}
+    ${row(T('Same contract as the field'), a.same, b.same, fp)}
+    </tbody></table></div>
+    <div class="muted">${T('Tricks lost: per board the coach checked (double dummy), {0} as declarer and {1} in defence this week.', a.dn, a.fn)}</div>
+    ${top.length ? `<div class="grp"><span>${T('Most frequent mistakes this week')}</span>${top.map(([k, v]) => `<div class="anarow">${T(COACH_CAT[k])} <b class="neg">−${v}</b></div>`).join('')}</div>` : ''}
+    ${tip ? `<div class="okmsg">💡 ${tip}</div>` : ''}`;
+}
 function showResults() {
   const adm = typeof Net !== 'undefined' && Net.isAdmin();
   const per = Store.periods(HIST), isImp = SET.mode === 'IMP', tab = ui.resTab === 'robot' && !adm ? 'list' : ui.resTab;   // the robots' tab: the administrator only
@@ -3336,6 +3389,8 @@ function showResults() {
     body = `<div class="okmsg">🤖 ${T('Robot rating')}: <b>${rr.n ? rr.rt : '—'}</b> · ${T('{0} boards', rr.n)}${rr.n ? ' · ' + fmtSigned(Math.round(rr.avg * 100) / 100) + ' IMP / ' + T('Bd') : ''}</div>
       <div class="muted">${T('The deals you let the robots play (they play them with every hand open, double dummy): not in your Results or your rating. The rating: the same deal is also played at four expert robot tables the normal way; their declarer\'s tricks against double dummy, in IMPs.')}</div>
       <div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th class="n">${T('Tr')}</th><th class="n">DD</th><th class="n">IMP</th></tr></thead><tbody>${rows || `<tr><td colspan="6">${T('No deals given to the robots yet. Enter a deal, then Let the robots play it.')}</td></tr>`}</tbody></table></div>`;
+  } else if (tab === 'week') {
+    body = weekHtml();
   } else if (tab === 'stats') {
     body = `<div class="resscroll"><table class="res"><thead><tr><th>${T('Period')}</th><th class="n">${T('Boards')}</th><th class="n">IMP</th><th class="n">IMP/${T('Bd')}</th><th class="n">MP %</th><th class="n">${T('Points')}</th></tr></thead><tbody>${per.map(p => `<tr><td>${T(p.name)}</td><td class="n">${p.n}</td><td class="n">${p.scored ? fmtSigned(p.impSum) : "—"}</td><td class="n">${p.impAvg != null ? fmtSigned(p.impAvg) : "—"}</td><td class="n">${p.mpAvg != null ? p.mpAvg : "—"}</td><td class="n">${fmtSigned(p.pts)}</td></tr>`).join("")}</tbody></table></div>
      <div class="muted">${T('Every board is also played at 4 expert robot tables. IMP: your result against each table, averaged (cross-IMPs). MP: the percentage of the field you beat.')}</div>`;
@@ -3343,7 +3398,7 @@ function showResults() {
     const rows = HIST.slice(-100).reverse().map(e => `<tr class="rev" data-rev="${e.id}"><td>${kindMark(e)} ${new Date(e.ts || 0).toLocaleDateString()}${e.tn ? `<small class="rtn">${esc(e.tn)}</small>` : ''}</td><td>${e.board}</td><td>${e.passed ? T('Pass') : conKey(e.c)}</td><td>${e.passed ? '' : e.tricks}</td><td class="n">${fmtSigned(e.us || 0)}</td><td class="n">${e.imp == null ? "—" : fmtSigned(e.imp)}</td><td class="n">${e.mp == null ? "—" : e.mp + "%"}</td></tr>`).join('');
     body = `<div class="muted">${T('Tap a board to see the auction and how it was played.')}</div><div class="muted kkey">🏆 ${T('tournament')} · 🌐 ${T('online table')} · 🤖 ${T('offline')}</div><div class="resscroll"><table class="res"><thead><tr><th>${T('Date')}</th><th>${T('Bd')}</th><th>${T('Contract')}</th><th>${T('Tr')}</th><th class="n">${T('Score')}</th><th class="n">IMP</th><th class="n">MP</th></tr></thead><tbody>${rows || `<tr><td colspan="7">${T('No boards played yet.')}</td></tr>`}</tbody></table></div>`;
   }
-  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Board list')}</button><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button>${adm ? `<button data-v="robot" class="${tab === 'robot' ? 'on' : ''}">🤖 ${T('Robots')}</button>` : ''}</div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+  openOv('res', `<h2>${T('Results')}</h2><div class="seg" data-seg="restab"><button data-v="list" class="${tab === 'list' ? 'on' : ''}">${T('Board list')}</button><button data-v="stats" class="${tab === 'stats' ? 'on' : ''}">${T('Statistics')}</button><button data-v="week" class="${tab === 'week' ? 'on' : ''}">📈 ${T('My week')}</button>${adm ? `<button data-v="robot" class="${tab === 'robot' ? 'on' : ''}">🤖 ${T('Robots')}</button>` : ''}</div>${body}<div class="row2"><button class="btn" id="rPbn">💾 ${T('Save as PBN file')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }
 
 /* replay of a finished board, one card at a time: ui.revStep cards have been played.
