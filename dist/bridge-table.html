@@ -15697,7 +15697,7 @@ const Net = (() => {
     const me = myName() || "Player", L = (st.lchat || []).map(m => ({ ...m, pub: true }));
     for (const c of Object.values(st.dms || {})) for (const m of c.list) L.push({ from: m.from, to: m.me ? c.name : me, text: m.text, ts: m.ts, me: m.me, ok: m.ok, id: m.id });
     L.sort((a, b) => a.ts - b.ts);
-    return L.length ? L.slice(-80).map(m => m.pub && m.bot ? `<div class="cm bot"><b>🤖 ${esc(m.from)}</b> ${esc(m.text)}</div>` : m.pub
+    return L.length ? L.slice(-80).map(m => m.pub && m.bot ? `<div class="cm bot"><b>${esc(m.from)}</b> ${esc(m.text)}</div>` : m.pub
       ? `<div class="cm${m.from === me ? " me" : ""}"><b class="pname" data-who="${esc(m.from)}">${esc(m.from)}</b> ${esc(m.text)}</div>`
       : `<div class="cm pm${m.me ? " me" : ""}" data-pm="${esc(m.me ? m.to : m.from)}" title="${T("Reply privately")}">🔒 <b>${esc(m.me ? T("to {0}", m.to) : m.from)}</b> ${esc(m.text)}${m.me && m.id ? (m.ok ? " ✓" : " ⏳") : ""}</div>`).join("")
       : `<div class="muted">${T("No messages yet — say hello!")}</div>`;
