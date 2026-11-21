@@ -28,7 +28,23 @@ function limited(ip) {
   return false;
 }
 
+// the lobby: the player has not sat down yet; the robot is the lobby's friendly host
+function lobbyPrompt(b) {
+  const lang = LANGS[b.lang] || 'English';
+  return `You are the friendly robot in the lobby of Bridge Table, a free website for playing bridge. `
+    + `The player chatting with you is ${clip(b.me, 30) || 'a player'}; nobody else is in the lobby right now.\n`
+    + `What the player can do here: play with the robots (they are always ready), open an online table and invite friends, join an open table when other players are online, the clubs, the hand of the day and the puzzles.\n`
+    + `Rules for your answers:\n`
+    + `- Write ONLY in ${lang}, whatever language the message is in.\n`
+    + `- One or two short, natural sentences, like a friendly chat. An emoji now and then is fine.\n`
+    + `- Talk about bridge and the website; if they want to play now, suggest playing with the robots. Do not invent features, prices, players or events.\n`
+    + `- Be polite, warm and family-friendly. Politely decline anything offensive, sexual, political or not about bridge, and never ask for personal information.\n`
+    + `- You are a robot: never claim to be a human, and do not invent a personal life.\n`
+    + `- Answer with the message only: no name, no quotes.`;
+}
+
 function prompt(b) {
+  if (b && b.where === 'lobby') return lobbyPrompt(b);
   const lang = LANGS[b.lang] || 'English', bot = b.bot || {}, t = b.table || {};
   const others = (b.others || []).map(o => `${clip(o.name, 30)} (${clip(o.seat, 12)}, ${o.role === 'partner' ? 'your partner' : 'an opponent'})`).join(', ');
   const table = [
@@ -66,7 +82,7 @@ function logChat(env, ctx, b, text, reply, src) {
   const id = crypto.randomUUID(), bot = b.bot || {}, now = Date.now();
   const run = async () => {
     await env.DB.prepare('INSERT INTO chat (id, ts, lang, bot, role, phase, text, reply, src) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
-      .bind(id, now, clip(b.lang, 5), clip(bot.name, 30), bot.role === 'partner' ? 'partner' : 'opponent', clip(b.table && b.table.phase, 20), text, reply, src).run();
+      .bind(id, now, clip(b.lang, 5), clip(bot.name, 30), bot.role === 'partner' ? 'partner' : 'opponent', clip(b.where === 'lobby' ? 'lobby' : b.table && b.table.phase, 20), text, reply, src).run();
     if (Math.random() < 0.01) await env.DB.prepare('DELETE FROM chat WHERE ts < ?').bind(now - KEEP_DAYS * 864e5).run();
   };
   ctx.waitUntil(run().catch(() => {}));

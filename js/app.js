@@ -3886,10 +3886,23 @@ function pmTo(name) {
   render();
   setTimeout(() => { const i = ['dMsg', 'lMsg2', 'lMsg'].map($).find(x => x && x.offsetParent); if (i) i.focus(); }, 50);
 }
+// the lobby's robot (the same AI as at the robots' table, told it is the lobby): it answers only you, when nobody
+// else is in the lobby; no answer when the AI cannot be reached
+async function lobbyBot(text) {
+  if (!BOT_AI || !Net.lbot) return;
+  const me = myNm() || '', L = (Net.st.lchat || []).filter(m => m.bot || m.from === me).slice(-9, -1);
+  const body = { lang: SET.lang || 'en', text, me, where: 'lobby', bot: { name: T('Robot') }, history: L.map(m => ({ mine: !m.bot, from: m.from, text: m.text })) };
+  const ctl = new AbortController(), tm = setTimeout(() => ctl.abort(), 12000);
+  try {
+    const r = await fetch(BOT_AI, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: ctl.signal });
+    const j = await r.json(); if (!r.ok || !j.reply) return;
+    setTimeout(() => { Net.lbot(String(j.reply).slice(0, 200)); render(); renderDock(); }, 400 + Math.random() * 600);
+  } catch (e) {} finally { clearTimeout(tm); }
+}
 function lobbySend(text) {
   text = String(text || '').trim(); if (!text) return;
   if (champLive()) { flash(T('The lobby chat is closed while you play in the championship.'), 2600); return; }
-  if (ui.pmTo) Net.dmSend(ui.pmTo, text); else Net.lsend(text);
+  if (ui.pmTo) Net.dmSend(ui.pmTo, text); else { Net.lsend(text); if (Net.lobbyOthers && !Net.lobbyOthers()) lobbyBot(text); }
   // the new home page: the lobby panel closes once the message is sent (a reply lights the Lobby button)
   if (ui.hsec === 'chat' && document.body.classList.contains('homev2')) { ui.hsec = null; flash('✓ ' + T('Message sent'), 1500); }
   render(); renderDock();

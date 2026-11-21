@@ -2314,3 +2314,6 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 
 /* a club's logo as a picture (uploaded by its admin) */
 .clogo.clogo-img{object-fit:contain;background:#fff;padding:1px;width:1.85em}
+
+/* the lobby's robot in the lobby chat */
+.cm.bot{background:rgba(217,178,92,.16);border-radius:8px;padding:2px 6px}

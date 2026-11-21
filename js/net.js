@@ -571,8 +571,8 @@ const Net = (() => {
     const L = st.lchat || (st.lchat = []);
     if ((+m.ts || 0) <= lclearTs()) return;   // cleared on this device: older messages do not come back from the others
     if (L.some(x => x.id === m.id)) return;
-    L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: cleanProf(m.p) });
-    noteRating(m.from, L[L.length - 1].p); noteSeen(m.from, L[L.length - 1].p);
+    L.push({ id: String(m.id).slice(0, 40), from: String(m.from || 'Player').slice(0, 20), text: String(m.text).slice(0, 200), ts: +m.ts || Date.now(), p: cleanProf(m.p), ...(m.bot ? { bot: 1 } : {}) });
+    if (!m.bot) { noteRating(m.from, L[L.length - 1].p); noteSeen(m.from, L[L.length - 1].p); }
     L.sort((a, b) => a.ts - b.ts); if (L.length > 100) L.splice(0, L.length - 100);
     try { localStorage.setItem('bridge-lobby-chat', JSON.stringify(L.slice(-50))); } catch (e) {}
     if (!quiet) { if (m.from !== (myName() || 'Player') && ui.overlay !== 'lchat') st.lunread = (st.lunread || 0) + 1; renderL(); }
@@ -584,12 +584,20 @@ const Net = (() => {
     addL(m);
     for (const c of (st.mesh || new Map()).values()) if (c.open) { try { c.send({ t: 'lchat', m }); } catch (e) {} }
   }
+  // the lobby's robot answers you when nobody else is here: its line stays on this device (the others never see it)
+  function lbot(text) { addL({ id: 'bot' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), from: T('Robot'), text: String(text || '').slice(0, 200), ts: Date.now(), bot: 1 }); }
+  // the other players in the lobby now (their app answered lately on an open lobby line)
+  function lobbyOthers() {
+    const me = nameKey(myName() || ''), lines = st.mesh || new Map(); let n = 0;
+    for (const k in (st.present || {})) { const p = st.present[k], c = lines.get(ROOM(p.k)); if (k !== me && Date.now() - p.ts < 3 * 60e3 && (!c || c.open)) n++; }
+    return n;
+  }
   // the lobby chat with your private messages in it (another colour, only you and the other player see them)
   function lchatHtml() {
     const me = myName() || "Player", L = (st.lchat || []).map(m => ({ ...m, pub: true }));
     for (const c of Object.values(st.dms || {})) for (const m of c.list) L.push({ from: m.from, to: m.me ? c.name : me, text: m.text, ts: m.ts, me: m.me, ok: m.ok, id: m.id });
     L.sort((a, b) => a.ts - b.ts);
-    return L.length ? L.slice(-80).map(m => m.pub
+    return L.length ? L.slice(-80).map(m => m.pub && m.bot ? `<div class="cm bot"><b>🤖 ${esc(m.from)}</b> ${esc(m.text)}</div>` : m.pub
       ? `<div class="cm${m.from === me ? " me" : ""}"><b class="pname" data-who="${esc(m.from)}">${esc(m.from)}</b> ${esc(m.text)}</div>`
       : `<div class="cm pm${m.me ? " me" : ""}" data-pm="${esc(m.me ? m.to : m.from)}" title="${T("Reply privately")}">🔒 <b>${esc(m.me ? T("to {0}", m.to) : m.from)}</b> ${esc(m.text)}${m.me && m.id ? (m.ok ? " ✓" : " ⏳") : ""}</div>`).join("")
       : `<div class="muted">${T("No messages yet — say hello!")}</div>`;
@@ -1950,5 +1958,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lbot, lobbyOthers, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
