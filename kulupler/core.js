@@ -9,7 +9,7 @@ window.toggleTheme=function(){const h=document.documentElement;const n=h.getAttr
 //  DATA LAYER
 // ══════════════════════════════════════════════════════
 // ── Firebase REST DB ──
-// the club tournaments live in Bridge Table's database (gate/…), see bridge-auth.js
+// the club tournaments live in BridgePlay's database (gate/…), see bridge-auth.js
 const FB_BASE=window.GATE_BASE;
 let CLUB_ID=null;   // resolved by initClubGate() before login is usable
 let CLUB_NAME=null; // human-readable club name, set once club info is loaded
@@ -509,7 +509,7 @@ function generateSwissRoundMovements(roundNum, boardsPerRound){
 let _swissGenerating=false;
 async function maybeAdvanceSwissRound(){
   const s=getState();
-  if(s.movement!=='swiss'||s.status!=='running'||s.online||_swissGenerating)return;   // online: Bridge Table makes the Swiss rounds
+  if(s.movement!=='swiss'||s.status!=='running'||s.online||_swissGenerating)return;   // online: BridgePlay makes the Swiss rounds
   const boards=getBoards();const movements=getMovements();
   let total=0,done=0;
   for(let t=1;t<=s.tableCount;t++){

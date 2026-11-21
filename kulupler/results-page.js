@@ -106,7 +106,7 @@ const CSS=`.ccr{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif
 .ccr .bd h3{display:none}.ccr .bnote{text-align:center;font-weight:700;color:#1d5534;background:#f3f6f4;border-radius:999px;padding:4px 12px;margin:0 auto 8px;width:fit-content;font-size:.9rem}.ccr .bd h4{color:#1d5534}
 .ccr .dg .h div{font-size:1.1rem;letter-spacing:.5px}.ccr .dg .sy{display:inline-block;width:20px}
 @media (max-width:640px){.ccr .rt{font-size:1.9rem}.ccr .tt{font-size:1.3rem}.ccr .meta{font-size:.95rem}.ccr .rank{font-size:.9rem}.ccr .rank td{padding:7px 4px}.ccr .dg .h div{font-size:1rem}.ccr .bhead{justify-content:center}}
-/* Bridge Table's own look */
+/* BridgePlay's own look */
 .ccr .rhead{background:linear-gradient(135deg,#1d5534,#2f7a4a);border-radius:14px;padding:16px 18px;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18)}
 .ccr .rt{color:#f3d36b;font-family:Georgia,"Times New Roman",serif;letter-spacing:.5px}
 .ccr .back{background:rgba(255,255,255,.14);color:#fff;border-radius:999px;padding:4px 14px;font-size:1rem;margin-top:10px}.ccr .back::before{content:"← "}
@@ -303,7 +303,7 @@ function clubRating(){
   }
   return R;
 }
-// the player's card (from their Bridge Table card, e.g. ♦10), when Bridge Table knows them
+// the player's card (from their BridgePlay card, e.g. ♦10), when BridgePlay knows them
 function rtCard(n){
   try{ const P=window.parent; if(!P||P===window||!P.eval) return '';
     const i=P.eval('(n=>{ try{ const p=Net.profOf(n); const r=p&&cardRank(p,n); return r?r.i:null; }catch(e){ return null; } })')(n);

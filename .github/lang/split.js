@@ -11,7 +11,7 @@ const J = v => JSON.stringify(v);
 fs.mkdirSync(root + 'js/lang', { recursive: true });
 let total = 0;
 for (const [L] of LANGS) {
-  const out = `/* Bridge Table — the texts in one language (${L}), made from js/lang.js by .github/lang/split.js: do not edit here. */
+  const out = `/* BridgePlay — the texts in one language (${L}), made from js/lang.js by .github/lang/split.js: do not edit here. */
 var I18N = window.I18N || {};${L === 'en' ? '' : ` I18N[${J(L)}] = ${J(I18N[L] || {})};`}
 var CONV_T = window.CONV_T || {};${L === 'en' ? '' : ` CONV_T[${J(L)}] = ${J(CONV_T[L] || {})};`}
 var SYS_T = window.SYS_T || {};${L === 'en' ? '' : ` SYS_T[${J(L)}] = ${J(SYS_T[L] || {})};`}

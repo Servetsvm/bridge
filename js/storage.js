@@ -1,4 +1,4 @@
-/* Bridge Table — storage: browser storage, optional account storage when opened on claude.ai, period statistics. */
+/* BridgePlay — storage: browser storage, optional account storage when opened on claude.ai, period statistics. */
 const Store = (() => {
   'use strict';
   const KEY = 'bric-masasi-v2';

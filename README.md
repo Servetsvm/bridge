@@ -1,4 +1,4 @@
-# Bridge Table
+# BridgePlay
 
 Play bridge against three robots from any seat, with a full convention card, bid explanations and IMP/MP scoring against a virtual field of robot tables.
 

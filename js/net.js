@@ -1,4 +1,4 @@
-/* Bridge Table — play online with friends.
+/* BridgePlay — play online with friends.
    One device hosts the table: the rules, the robots and the scoring run there. Friends join through a link
    (…/bridge/#join-CODE) and sit as partner or opponents; empty seats are robots.
    Devices talk directly (WebRTC), found through the free PeerJS service. Each player is sent only the cards

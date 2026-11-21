@@ -1,4 +1,4 @@
-/* Bridge Table — card play: play state, robot play (rules + double-dummy sampling), double-dummy solver. */
+/* BridgePlay — card play: play state, robot play (rules + double-dummy sampling), double-dummy solver. */
 (window.BRIDGE = window.BRIDGE || []).push(function play(E) {
 'use strict';
 const { S, R, pd, sideOf, isNum, ST, rnd, shuffle, popc } = E;

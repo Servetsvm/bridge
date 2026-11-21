@@ -1,4 +1,4 @@
-/* Bridge Table — virtual field: the same deal is played at robot tables (for IMP/MP comparison). */
+/* BridgePlay — virtual field: the same deal is played at robot tables (for IMP/MP comparison). */
 (window.BRIDGE = window.BRIDGE || []).push(function field(E) {
 'use strict';
 const { dealerOf, auctionOver, contractOf, sideOf, vulOf, scoreOf } = E;

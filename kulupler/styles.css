@@ -340,7 +340,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .bm3-actions{display:grid;grid-template-columns:1fr 2fr;gap:8px;padding:14px 12px 14px}
 .bm3-ok,.bm3-cancel{min-height:54px;border:0;border-radius:10px;font-size:1.1rem;font-weight:800;cursor:pointer}
 .bm3-ok{background:#2a7de1;color:#fff}.bm3-cancel{background:#eef1f4;color:#3c4650;border:1px solid #d9dee3}
-/* ── Bridge Table's colours: the green felt background, cream text and brass (the dark theme) ── */
+/* ── BridgePlay's colours: the green felt background, cream text and brass (the dark theme) ── */
 :root:not([data-theme="light"]){
   --bg:#0c1a14;--surface:#123423;--surface2:#17402b;--surface3:#1e5c3b;
   --border:#24533a;--border2:#2f6a4b;
@@ -350,7 +350,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 :root:not([data-theme="light"]) body{background:radial-gradient(ellipse at 50% -10%,#1e5c3b 0%,#154629 45%,#0c1a14 100%) fixed;}
 :root:not([data-theme="light"]) #loginScreen{background:transparent;}
 .topbar{flex-wrap:wrap;gap:6px}.topbar-right{flex-wrap:wrap;justify-content:flex-end}
-/* ── the day theme in Bridge Table's colours: cream cards on a light green-grey, felt green for what stands out ── */
+/* ── the day theme in BridgePlay's colours: cream cards on a light green-grey, felt green for what stands out ── */
 [data-theme="light"]{
   --bg:#e8eee6;--surface:#fffdf6;--surface2:#f1ebdb;--surface3:#e6dfcb;
   --border:#d6d0bd;--border2:#c5bea6;
@@ -371,7 +371,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .language-menu button{display:flex;gap:8px;align-items:center;padding:8px 10px;background:none;border:1px solid transparent;border-radius:8px;color:var(--text);font-family:inherit;font-size:0.8rem;cursor:pointer;text-align:left;white-space:nowrap;}
 .language-menu button b{color:var(--gold);font-size:0.7rem;min-width:22px;}
 .language-menu button:hover,.language-menu button.on{border-color:var(--gold);background:var(--golddim);}
-/* a player's phone from Bridge Table's "Table No": the four players, then the table number */
+/* a player's phone from BridgePlay's "Table No": the four players, then the table number */
 #playerEntry .bm3-key{background:var(--surface2);color:var(--text);border-color:var(--border);}
 /* the players' seats drawn as the table: North at the top, South at the bottom, West left, East right */
 .pe-table{display:grid;grid-template-columns:1fr 1.1fr 1fr;grid-template-areas:'. n .' 'w m e' '. s .';gap:8px;align-items:center;}
@@ -463,7 +463,7 @@ body.bg-device .btn-primary{background:#2a7de1;color:#fff}
 .bm3t .sbb.pend{background:#fff3d6;border-color:#f0c96a}
 .bm3t .sbb:disabled{cursor:default}
 
-/* inside Bridge Table (Clubs): its bar has the name and Home */
+/* inside BridgePlay (Clubs): its bar has the name and Home */
 html.embed .login-logo,html.embed .topbar-logo,html.embed .login-box a[href="../"]{display:none!important}
 
 /* the running tournaments: a club's name, its tables when it is tapped */

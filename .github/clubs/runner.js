@@ -1,4 +1,4 @@
-// Online club tournaments (Bridge Table → Clubs → Online): a table everyone has left goes on with its robots.
+// Online club tournaments (BridgePlay → Clubs → Online): a table everyone has left goes on with its robots.
 // There is no server: every few minutes .github/workflows/clubs.yml starts this script; while an evening is being
 // played it stays (up to almost six hours) and, at each table of the round where none of the players' apps has been
 // seen for 90 seconds, adds the robots' next call or card to the table's list (the same list the apps read), and the

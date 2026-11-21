@@ -1,6 +1,6 @@
 /* BridgeGate — double-dummy analysis of the boards: how many tricks each player can take as declarer in each
    strain with all four hands open and best play on both sides, and the par result of the board.
-   The solver (partition search with a transposition table) comes from Bridge Table
+   The solver (partition search with a transposition table) comes from BridgePlay
    (https://servetsvm.github.io/bridge). This file runs both in the page (BGDD.*) and as a background worker. */
 (function (G) {
 'use strict';

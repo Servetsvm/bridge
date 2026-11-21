@@ -1,5 +1,5 @@
 /* BridgeGate — boards made automatically (a background worker): random deals, or deals on which the chosen conventions
-   come up in the robots' auction (Bridge Table's bidding engine, js/core.js and js/bidding.js). Every deal is shuffled
+   come up in the robots' auction (BridgePlay's bidding engine, js/core.js and js/bidding.js). Every deal is shuffled
    with the device's secure random numbers.
    In:  { meta: true }                                   → { meta: { systems: [{k,n}], convs: [{k,n}] } }
         { n, from, sys, convs: [keys], ms }              → { progress: i } …, then { done: [{ board, cards: [N,E,S,W] }], hit }

@@ -1,4 +1,4 @@
-# Bridge Table — the robots' tables and lesson book
+# BridgePlay — the robots' tables and lesson book
 
 Written every two hours by `.github/workflows/robots.yml` (`.github/robots/robots.js`, `.github/robots/learn.js` on the
 `main` branch). Cards are numbers 0–51: suit = ⌊c / 13⌋ (0 ♣, 1 ♦, 2 ♥, 3 ♠), rank = c mod 13 (0 = 2 … 12 = A).
@@ -16,7 +16,7 @@ without the candidate lessons).
 
 ## errors-&lt;system&gt;.json
 
-The robots' mistakes with the hands closed (as in Bridge Table's games), the last 300 boards of each table: the deal,
+The robots' mistakes with the hands closed (as in BridgePlay's games), the last 300 boards of each table: the deal,
 auction, contract, the play `p` (tricks of `[seat, card]`), `arm` (`L` with the candidate lessons, `B` without) and
 `er`: `[trick, seat, card played, better card, tricks lost, context, kind played, kind better]`, double dummy.
 

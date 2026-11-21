@@ -1,4 +1,4 @@
-/* Bridge Table — read a deal from a picture, on the device, without any online service.
+/* BridgePlay — read a deal from a picture, on the device, without any online service.
    Two kinds of pictures are understood:
    1. the end-of-board screen of a club bridge app: four open hands drawn as white card tiles
       (rank on top, suit below); North across the top, South across the bottom, West/East in the middle;

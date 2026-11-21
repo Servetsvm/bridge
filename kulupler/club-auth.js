@@ -1,7 +1,7 @@
 // ══════════════════════════════════════════════════════
-//  CLUB TOURNAMENTS IN BRIDGE TABLE — sign-in
+//  CLUB TOURNAMENTS IN BRIDGEPLAY — sign-in
 // ══════════════════════════════════════════════════════
-// The player signs in with their Bridge Table name and PIN (bridge-auth.js). Servet is the super admin: only he opens
+// The player signs in with their BridgePlay name and PIN (bridge-auth.js). Servet is the super admin: only he opens
 // clubs and keeps their passwords; a club's admin signs in with the club's password (a club opened by a player before
 // keeps that player as its admin, with their PIN); a table signs in with its 4-digit code: the club's 2-digit table prefix and
 // the table number (prefix 00: table 1 = 0001, table 2 = 0002 …). The database rules check all of it.
@@ -25,8 +25,8 @@ let CLUB_INFO=null;   // the resolved club's info (name, owner)
 // so the page stays a single shareable link (?club=CLUBID).
 // the super admin's test mode (this tab only): the tournament lives under bm/test, the club's real one is not touched
 const bgTestKey=id=>'bgTest:'+id;
-// (opened from Bridge Table's Clubs, the super admin's Test column: the address says test=1)
-// the super admin's test tournament (opened from Bridge Table's Clubs → 🧪 Test): its own place in the database (bm/test),
+// (opened from BridgePlay's Clubs, the super admin's Test column: the address says test=1)
+// the super admin's test tournament (opened from BridgePlay's Clubs → 🧪 Test): its own place in the database (bm/test),
 // this tab only; the club's real tournament is not touched
 function bgTestOn(id){ try{ return !!(id||CLUB_ID)&&new URLSearchParams(location.search).get('test')==='1'; }catch(e){ return false; } }
 function setClub(id){
@@ -40,7 +40,7 @@ function setClub(id){
   }catch(e){}
 }
 
-// the signed-in Bridge Table player, and whether they may run this club
+// the signed-in BridgePlay player, and whether they may run this club
 const me=()=>window.bridgeUser&&window.bridgeUser();
 const isSuper=()=>{ const u=me(); return !!u&&u.key==='servet'; };
 const isClubAdmin=()=>{ const u=me(); return !!u&&(isSuper()||(CLUB_INFO&&CLUB_INFO.owner===u.key)); };
@@ -55,7 +55,7 @@ window.bmSeatSave=t=>{ try{ if(role!=='table'||!CLUB_ID||!window._bgCode) return
 window.bmSeatForget=()=>{ try{ localStorage.removeItem('bg_seat:'+CLUB_ID); }catch(e){} };
 // the TD's screen hears the tables' calls (once)
 window.tdCallsWatch=()=>{ if(window._tdWatch) return; window._tdWatch=true; DB.subscribe('tdcalls',v=>{ if(typeof tdCallsShow==='function') tdCallsShow(v); }); };
-// the club's picture on the BridgeScore: Bridge Table's Clubs page with this club open (its Table No, TD, results)
+// the club's picture on the BridgeScore: BridgePlay's Clubs page with this club open (its Table No, TD, results)
 window.bgToClubs=function(){
   try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ const id=CLUB_ID; P.setTimeout(()=>{ if(typeof P.openClubCard==='function') P.openClubCard(id); else { P.closeClubs(); if(typeof P.showClubs==='function') P.showClubs(); } },0); return; } }catch(e){}
   location.href='../';
@@ -97,7 +97,7 @@ const newClubPw=()=>{ let s=''; const r=crypto.getRandomValues(new Uint32Array(6
 // inPanel: from the super admin's panel (its own fields; he stays there)
 window.createMyClub=async function(inPanel){
   const err=document.getElementById(inPanel?'saClubErr':'clubErr');err.textContent='';
-  const u=me(); if(!u){ err.textContent='❌ Sign in to Bridge Table first'; return; }
+  const u=me(); if(!u){ err.textContent='❌ Sign in to BridgePlay first'; return; }
   if(!isSuper()){ err.textContent='❌ Only the super admin opens clubs'; return; }
   const name=(document.getElementById(inPanel?'saNewClubName':'newClubName').value||'').trim().slice(0,40);
   if(!name){ err.textContent='❌ Enter the club name'; return; }
@@ -125,7 +125,7 @@ async function initClubGate(){
   // a table (or the entry screen of a running tournament) is shown as a BridgeScore from the first moment
   if(roleParam!=='screen') document.body.classList.add('bg-device');   // every sign-in screen as a BridgeScore
   const fromLink=!!id;
-  // the super admin's button in Bridge Table's Clubs: straight to his sign-in
+  // the super admin's button in BridgePlay's Clubs: straight to his sign-in
   if(params.get('sa')==='1'){ if(me()) await window.bridgeSession(); if(isSuper()){ document.getElementById('clubGate').style.display='none'; enterSuperAdminLogin(); setTimeout(()=>document.getElementById('pwInput')?.focus(),100); return; } }
   if(id&&(params.get('results')==='1'||params.get('movement')==='1')&&me()){
     await window.bridgeSession(); const info=await checkClubExists(id); if(info){ CLUB_INFO=info; setClub(id); CLUB_NAME=info.name||CLUB_NAME; window._ccResultsOnly=true; document.getElementById('loginScreen').style.display='none'; if(params.get('movement')==='1') await ccMovementPage(); else await ccResultsIndex(); return; }
@@ -165,7 +165,7 @@ async function initClubGate(){
         if(params.get('resume')&&document.getElementById('app').style.display!=='flex'){ bmSeatForget(); location.replace(location.pathname+'?club='+encodeURIComponent(id)); } },50); }
       // a screen's link (from the admin panel) opens the results screen at once
       if(roleParam==='screen') setTimeout(()=>doLogin(),50);
-      // a player from Bridge Table's "Table No" (the club's table code prefix in the link): the players' names, then the table
+      // a player from BridgePlay's "Table No" (the club's table code prefix in the link): the players' names, then the table
       // a table number already chosen on the entry screen (&tn=3): straight to the players
       const pp=params.get('p'), tn=+params.get('tn')||0; if(roleParam==='table'&&!tc&&/^\d{2}$/.test(pp||'')){ if(tn) bgPlayerNames(pp,tn); else bgPlayerEntry(pp); }
       if(roleParam==='table'&&tn&&bgTestOn()&&isSuper()){ window._bgTestTable=tn; setTimeout(()=>doLogin(),50); }
@@ -206,7 +206,7 @@ async function renderEntry(live){
     <div class="bg-entry-body"><div class="bg-entry-lbl">Table No</div>
     <div class="bm3-keys k4" style="padding:0;">${Array.from({length:t.tb||0},(_,i)=>i+1).filter(n=>!taken[k].has(n)).map(n=>`<button class="bm3-key" onclick="location.replace('${go(t,'&role=table&p='+t.p+'&tn='+n)}')">${n}</button>`).join('')}</div>
     ${own[k]?`<button class="btn-primary" style="margin-top:10px;" onclick="location.replace('${go(t,'&role=admin')}')">🧑‍⚖️ TD</button>`:''}</div></div>`).join('');
-  // the entry screen: only the club, its free tables and TD (the club ID box, My clubs and the super admin's link are gone: Bridge Table's Clubs page has them)
+  // the entry screen: only the club, its free tables and TD (the club ID box, My clubs and the super admin's link are gone: BridgePlay's Clubs page has them)
   document.querySelectorAll('.superLink').forEach(a=>a.style.display='none');
 }
 // the club tournaments running now (gate/live: name, club, tables, table code prefix)
@@ -221,7 +221,7 @@ async function renderClubGate(live){
   const u=me(), box=document.getElementById('myClubsBox');
   document.querySelectorAll('.superLink').forEach(a=>a.style.display=isSuper()?'':'none');
   if(!box) return;
-  if(!u){ box.innerHTML=`<div class="login-err" style="color:var(--text2);">Sign in to Bridge Table first (name and PIN), then come back here.</div>${clubAdminBox()}`; return; }
+  if(!u){ box.innerHTML=`<div class="login-err" style="color:var(--text2);">Sign in to BridgePlay first (name and PIN), then come back here.</div>${clubAdminBox()}`; return; }
   const mine=await myClubs(), ids=Object.keys(mine);
   // the tournaments running now: a player chooses one and gives the table number
   const lv=(live||[]).map(t=>`<button class="btn-primary" style="margin-bottom:6px;" onclick="location.replace(location.pathname+'?club=${encodeURIComponent(t.club)}&role=table&p=${t.p}')">🃏 ${cleanData(t.c||'')}${t.n?' — '+cleanData(t.n):''}</button>`).join('');
@@ -246,14 +246,14 @@ async function setSuperPw(pw){
 // ══════════════════════════════════════════════════════
 //  SESSIONS
 // ══════════════════════════════════════════════════════
-// Admin and super admin: the Bridge Table session (name + PIN) is enough, the rules know the club's admin.
+// Admin and super admin: the BridgePlay session (name + PIN) is enough, the rules know the club's admin.
 // A table: /tsess/{this device's hidden account} = {club, code}; the rules accept it only with a right code.
 async function startSession(r, club, code){
   const token=await authToken(); const uid=window._authUid;
   if(!token||!uid) throw new Error('No connection to the database');
-  // the admin types their own Bridge Table PIN: the database accepts the session only with the right one
+  // the admin types their own BridgePlay PIN: the database accepts the session only with the right one
   if(r==='superadmin'){
-    // his Bridge Table name (the PIN saved on this device) and the super admin password; the first time it is made
+    // his BridgePlay name (the PIN saved on this device) and the super admin password; the first time it is made
     const pw=String(code||'');
     if(!isSuper()||pw.length<6||!(await window.bridgeSession())) return false;
     const h=await superHash(pw);
@@ -358,12 +358,12 @@ window.selRole=function(r){
   role=r;
   document.getElementById('loginErr').textContent='';
   const inp=document.getElementById('pwInput'); inp.value='';
-  // a table types its 4-digit code; the admin and the super admin their own Bridge Table PIN; the screen nothing
+  // a table types its 4-digit code; the admin and the super admin their own BridgePlay PIN; the screen nothing
   document.getElementById('pwWrap').style.display=r==='screen'?'none':'block';
   const pin=false;   // the TD (the club's owner too): the club's password, once on this device
   inp.type=r==='table'?'text':'password';
-  inp.placeholder=r==='table'?(window._bgWantTable?'Your table\'s code (4 digits)':'Table code (4 digits)'):r==='superadmin'?'Super admin password (at least 6)':pin?'Your Bridge Table PIN':'Club password'; inp.inputMode=r==='superadmin'?'text':'numeric'; inp.maxLength=r==='table'||pin?4:40;
-  const sw=document.getElementById('roleSwitch'); if(sw){ sw.style.display=r==='table'?'':'none'; sw.textContent=r==='admin'?'🃏 Table':'🧑‍⚖️ TD'; }   // the admin's sign-in has no Table switch (the tables open from Bridge Table)
+  inp.placeholder=r==='table'?(window._bgWantTable?'Your table\'s code (4 digits)':'Table code (4 digits)'):r==='superadmin'?'Super admin password (at least 6)':pin?'Your BridgePlay PIN':'Club password'; inp.inputMode=r==='superadmin'?'text':'numeric'; inp.maxLength=r==='table'||pin?4:40;
+  const sw=document.getElementById('roleSwitch'); if(sw){ sw.style.display=r==='table'?'':'none'; sw.textContent=r==='admin'?'🃏 Table':'🧑‍⚖️ TD'; }   // the admin's sign-in has no Table switch (the tables open from BridgePlay)
 };
 window.switchAdminRole=()=>selRole(role==='admin'?'table':'admin');
 selRole('table');
@@ -592,7 +592,7 @@ window.performLogout=async function(){
   finishLogoutUI();
 };
 function finishLogoutUI(){
-  // inside Bridge Table: back to its Clubs window (the club is chosen there; no sign-in form is left behind)
+  // inside BridgePlay: back to its Clubs window (the club is chosen there; no sign-in form is left behind)
   try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ document.getElementById('app').style.display='none'; setTimeout(()=>{ Promise.resolve(endSession()).finally(()=>{ try{ P.setTimeout(()=>{ P.closeClubs(); if(typeof P.showClubs==='function') P.showClubs(); },0); }catch(e){} }); },800); return; } }catch(e){}
   setTimeout(endSession, 1500);   // this device may no longer change anything (after the last writes have gone out)
   document.getElementById('app').style.display='none';

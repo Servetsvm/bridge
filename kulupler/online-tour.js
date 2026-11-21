@@ -1,7 +1,7 @@
-/* BridgeGate — online club tournaments, played in Bridge Table (pairs against each other, each at home).
+/* BridgeGate — online club tournaments, played in BridgePlay (pairs against each other, each at home).
    The club's director sets one up here: its name, the day and the start time, the number of boards and the boards in
    each round, MP or IMP, the base system and the conventions everyone (robots too) bids with, and whether it comes
-   back every week. Players register as pairs in Bridge Table; a player without a partner goes on the "looking for a
+   back every week. Players register as pairs in BridgePlay; a player without a partner goes on the "looking for a
    partner" list, and the director can pair two of them here.
    Kept in the database at ot/<club>/<id>: info, pairs/<pair> { a, b, ka, kb, d }, seek/<player key> { n, d }.
    d = the start of the occurrence registered for (a weekly tournament has a new one each week). */
@@ -50,7 +50,7 @@ function otFormHtml(M, ed) {
       <div class="field"><label>Number of Rounds</label><input type="number" id="otRounds" value="6" min="1" max="20" oninput="otPreview()"><div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="otCalc"></div></div>
       <div class="field"><label>Movement</label><select id="otMov" onchange="otPreview()">${Object.entries(OT_MOV).map(([k, n]) => `<option value="${k}" ${k === 'howell' ? 'selected' : ''}>${n}</option>`).join('')}</select>
         <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">Mitchell: NS fixed, EW moves; the boards go round the tables, so each table plays its own boards. Howell: everyone moves; the boards go round the tables too. Barometer: like Howell, but every round all the tables play the same boards at the same time (one copy of the boards per table). Swiss: the pairing is made again from the standings after every round; all the tables play the same boards. In Mitchell, Howell and Barometer the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).</div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">The pairs register in Bridge Table; an odd number of pairs gets a robot pair, a pair can also play with a robot partner.</div></div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">The pairs register in BridgePlay; an odd number of pairs gets a robot pair, a pair can also play with a robot partner.</div></div>
       <div class="field"><label>Scoring</label><select id="otSc" onchange="otPreview()"><option value="both">IMP - MP</option></select></div>
       <div class="field"><label>Hand file (optional)</label><input type="file" id="otDeals" accept=".bri,.dup,.dlm,.dge,.pbn,.lin,.txt" onchange="otDealsFile(this)"><div id="otDealsInfo" style="font-size:0.72rem;color:var(--text3);margin-top:3px;">${ed && ed.deals ? '✅ ' + ed.deals.length + ' <span>boards from the hand file</span>' : '<span>The boards of a dealing machine (Duplimate BRI / DUP, Dealer4 DLM, DGE) or a PBN / LIN file: the evening is played with them. Without a file the boards are dealt at random.</span>'}</div></div>
       <div style="margin:12px 0 4px;padding-top:10px;border-top:1px solid var(--border);font-size:0.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:1px;">🌐 <span>Online (from home)</span></div>
@@ -106,7 +106,7 @@ function otSetupCard() {
   }, 0);
   return `<div class="card"><div class="card-title" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span>⚙️</span> Tournament Setup
       <span style="margin-left:auto;display:flex;gap:6px;"><button class="btn btn-sm" onclick="setSetupOnline(false)">🏛 <span>At the club</span></button><button class="btn btn-sm btn-gold" disabled>🌐 <span>Online (from home)</span></button></span></div>
-    <div style="font-size:0.78rem;color:var(--text2);margin-bottom:8px;">Played in Bridge Table: pairs against each other, each at home. Players register as pairs in Bridge Table and see the tournament there and here before it starts.</div></div>
+    <div style="font-size:0.78rem;color:var(--text2);margin-bottom:8px;">Played in BridgePlay: pairs against each other, each at home. Players register as pairs in BridgePlay and see the tournament there and here before it starts.</div></div>
     <div id="otSetupBox">⏳</div>`;
 }
 // the state of an evening: each round's tables with the boards finished there
@@ -201,13 +201,13 @@ window.otDelete = async function (id) {
   if (!await otAsk(otL('Delete this online tournament with its registrations?'))) return;
   try { await otPut('/' + id, undefined, 'DELETE'); await otClearMirror([id]); toast('🗑'); OT.edit = null; await otLoad(); renderAdminTab(); } catch (e) { toast('❌ Could not delete'); }
 };
-// a player's key as Bridge Table keeps it (a robot partner has none)
+// a player's key as BridgePlay keeps it (a robot partner has none)
 const otKey = n => /^robot$/i.test(String(n).trim()) ? '' : (otP() && otP().Net && otP().Net.ruleKey ? otP().Net.ruleKey(n) : String(n).trim().toLowerCase());
 // a pair: its two players (to add one, or to change a player — once started, the new player takes the seats)
 window.otPairForm = function (id, pid) {
   const t = (OT.list || {})[id], p = pid && t.pairs[pid], box = document.getElementById('otpf-' + id); if (!box) return;
   box.innerHTML = `<div class="field-row" style="margin-top:6px;"><div class="field"><label>1</label><input id="otpa-${id}" maxlength="20" value="${p ? cleanData(p.a) : ''}"></div><div class="field"><label>2</label><input id="otpb-${id}" maxlength="20" value="${p ? cleanData(p.b) : ''}" placeholder="Robot"></div></div>
-    <div style="font-size:0.72rem;color:var(--text3);">The players' names in Bridge Table (Robot for a robot partner).</div>
+    <div style="font-size:0.72rem;color:var(--text3);">The players' names in BridgePlay (Robot for a robot partner).</div>
     <button class="btn btn-sm btn-gold" onclick="otPairSave('${id}','${pid || ''}')">💾 <span>Save</span></button> <button class="btn btn-sm" onclick="document.getElementById('otpf-${id}').innerHTML=''">✖</button>`;
 };
 window.otPairSave = async function (id, pid) {
@@ -255,10 +255,10 @@ async function otUpcomingHtml() {
   }
   if (!L.length) return '';
   L.sort((a, b) => a.d - b.d);
-  return `<div style="font-size:0.72rem;color:var(--text3);margin:8px 0 4px;">🌐 Online club tournaments</div>` + L.map(x => `<div class="bg-entry" style="padding:8px 10px;"><b>🏛 ${cleanData(x.i.cn || x.club)} — ${cleanData(x.i.n)}</b><div style="font-size:0.78rem;">${otWhen(x.d)} · ${x.n} <span>pairs registered</span>${x.i.rep ? ' · 🔁' : ''}</div><div style="font-size:0.72rem;color:var(--text3);">Register as a pair on Bridge Table's home page.</div></div>`).join('');
+  return `<div style="font-size:0.72rem;color:var(--text3);margin:8px 0 4px;">🌐 Online club tournaments</div>` + L.map(x => `<div class="bg-entry" style="padding:8px 10px;"><b>🏛 ${cleanData(x.i.cn || x.club)} — ${cleanData(x.i.n)}</b><div style="font-size:0.78rem;">${otWhen(x.d)} · ${x.n} <span>pairs registered</span>${x.i.rep ? ' · 🔁' : ''}</div><div style="font-size:0.72rem;color:var(--text3);">Register as a pair on BridgePlay's home page.</div></div>`).join('');
 }
 
-// the results, double dummy, rating and watching are worked out by Bridge Table (the page the clubs program runs in)
+// the results, double dummy, rating and watching are worked out by BridgePlay (the page the clubs program runs in)
 window.otResults = function (id) {
   const P = window.parent; if (!P || P === window || typeof P.ctShowResults !== 'function') { toast('❌'); return; }
   P.CT.adminView = true;   // the director may always watch
@@ -267,7 +267,7 @@ window.otResults = function (id) {
 
 
 /* ---- the other admin tabs for the online tournaments (Movement, Tables, Boards, History, Log) ----
-   The plan, the scores and the double dummy are Bridge Table's own (the page the clubs program runs in). */
+   The plan, the scores and the double dummy are BridgePlay's own (the page the clubs program runs in). */
 const otP = () => (window.parent && window.parent !== window && typeof window.parent.ctScore === 'function') ? window.parent : null;
 // the evenings of this club: started ones (with their plan) newest first, and the next one coming up
 function otEvenings() {
@@ -284,7 +284,7 @@ function otComing() {
 }
 const otPn = p => p.robot ? '🤖 Robot' : cleanData(p.a) + ' – ' + cleanData(p.b);
 let otCss = false;
-function otStyle() {   // the hands and the double dummy table as Bridge Table draws them
+function otStyle() {   // the hands and the double dummy table as BridgePlay draws them
   if (otCss) return; otCss = true;
   const st = document.createElement('style');
   st.textContent = '.otbox table{border-collapse:collapse;margin:4px 0}.otbox td,.otbox th{border:1px solid var(--border);padding:2px 6px;font-size:.8rem;text-align:center}.otbox .deal{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:.78rem;margin:6px 0}.otbox .deal .h.n{grid-column:2}.otbox .deal .h.w{grid-column:1;grid-row:2}.otbox .deal .h.e{grid-column:3;grid-row:2}.otbox .deal .h.s{grid-column:2;grid-row:3}.otbox .red,.otbox .rd{color:#c4122f}.otbox .gm{font-weight:700}';
@@ -302,7 +302,7 @@ function otTabHtml(tab) {
   if (tab === 'tables') return `<div class="card">${head(cur)}${otPresenceHtml(cur)}${P ? `<div style="margin-top:6px;"><button class="btn btn-sm" onclick="otOpenRes('${cur.id}',${cur.d},'live')">👁 <span>Watch</span></button></div>` : ''}</div>`;
   return '';
 }
-// the full results (ranking, boards, rating, watching) in Bridge Table
+// the full results (ranking, boards, rating, watching) in BridgePlay
 window.otOpenRes = function (id, d, tab) {
   const P = otP(); if (!P) return;
   P.CT.adminView = true;
@@ -368,10 +368,10 @@ async function otRobots() {
 }
 setInterval(otRobots, 1500);
 
-/* Servet's online test, on the test page (Bridge Table → Clubs → Test → Beykoz → Admin): an online evening played with
+/* Servet's online test, on the test page (BridgePlay → Clubs → Test → Beykoz → Admin): an online evening played with
    robots, its system and conventions chosen here. Start asks which table he sits at first; only then is the evening
    made: he is North-South at that table in round 1 (a robot partner), robots sit everywhere else, nothing is played
-   until he has sat down, and Bridge Table seats him there at once */
+   until he has sat down, and BridgePlay seats him there at once */
 function otTestCard() {
   setTimeout(async () => {
     await Promise.all([otLoad(), otMeta()]);
@@ -419,7 +419,7 @@ window.otTestStart = function () {
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">${[...Array(tables).keys()].map(t => `<button class="btn btn-gold" style="min-height:52px;font-size:1.2rem;" onclick="otTestSit(${t})">${t + 1}</button>`).join('')}</div>`,
     '<button class="btn" onclick="closeModal()">' + otL('Cancel') + '</button>');
 };
-// the table chosen: the evening made with him North-South there in round 1, then Bridge Table seats him
+// the table chosen: the evening made with him North-South there in round 1, then BridgePlay seats him
 window.otTestSit = async function (ti) {
   const P = otP(), x = OT.testNew; if (!P || !x) return; closeModal(); OT.testNew = null;
   const { f, np, my, bm } = x, id = Date.now().toString(36), at = Date.now() - 1000;
@@ -435,11 +435,11 @@ window.otTestSit = async function (ti) {
     await otPut('/' + id + '/run/' + at, plan, 'PATCH');
     toast('🧪 ' + info.n + ' · ' + otL('Table') + ' ' + (ti + 1));
     await otLoad();
-    // Bridge Table: to the table now
+    // BridgePlay: to the table now
     otTestGoSit(id);
   } catch (e) { toast('❌ Could not start'); }
 };
-// to the table in Bridge Table: its own function does it (this page goes away when the clubs window closes)
+// to the table in BridgePlay: its own function does it (this page goes away when the clubs window closes)
 window.otTestGoSit = function (id) {
   const P = otP(); if (!P) return;
   try { P.eval('(k => ctLoad(true).then(() => { if (typeof closeClubs === "function") closeClubs(); ctSit(k); }))')(CLUB_ID + '|' + id); } catch (e) { toast('❌'); }
@@ -457,7 +457,7 @@ function otAsk(msg) {
 /* the online evening is the club's tournament: its pairs, tables, finished boards and hands written into the club's own
    data every few seconds while the director's page is open (the GitHub run does the same when it is closed), so
    Players, Movement, Tables, Boards, History, Log, the screen and PBN show it as a tournament at the club; a score the
-   director corrects in Boards goes back to the evening (its ranking in Bridge Table); at its end it is archived */
+   director corrects in Boards goes back to the evening (its ranking in BridgePlay); at its end it is archived */
 OT.mirBusy = false;
 async function otMirror() {
   const P = otP(); if (OT.mirBusy || !P || !P.ctMirror || typeof role === 'undefined' || role !== 'admin' || !CLUB_ID) return;

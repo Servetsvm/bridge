@@ -1,4 +1,4 @@
-/* Bridge Table — the double-dummy solver DDS (Bo Haglund and Soren Hein, Apache License 2.0, github.com/dds-bridge/dds),
+/* BridgePlay — the double-dummy solver DDS (Bo Haglund and Soren Hein, Apache License 2.0, github.com/dds-bridge/dds),
    compiled to WebAssembly by the bridge-dds package (Chris Book, Apache License 2.0, github.com/bookchris/bridge-dds-js),
    version 1.4.0. Unchanged except that it is a plain script: ddsFactory() starts one solver and returns a promise of it.
    The robots' workers use it to look at many more possible deals in the same time; without it they use the solver in

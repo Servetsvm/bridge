@@ -4,7 +4,7 @@
 // any .js/.css file). Otherwise returning users may keep loading a stale
 // cached version instead of your update. Suggested pattern:
 // 'bridgegate-v' + YYYYMMDD, e.g. 'bridgegate-v20260709'.
-const CACHE_NAME = 'kulup-v159';
+const CACHE_NAME = 'kulup-v160';
 
 const APP_SHELL = [
   './',
@@ -48,7 +48,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     soon(caches.keys().then((names) =>
-      // only this program's old caches: Bridge Table and other apps on this address keep theirs
+      // only this program's old caches: BridgePlay and other apps on this address keep theirs
       Promise.all(names.filter((n) => n !== CACHE_NAME && n.startsWith('kulup-')).map((n) => caches.delete(n)))
     ), 5000)
   );

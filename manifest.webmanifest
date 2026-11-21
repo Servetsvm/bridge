@@ -1,6 +1,6 @@
 {
-  "name": "Bridge Table",
-  "short_name": "Bridge",
+  "name": "BridgePlay",
+  "short_name": "BridgePlay",
   "description": "Play bridge against robots: any seat, full convention card, IMP/MP scoring against a virtual field.",
   "start_url": "./index.html",
   "scope": "./",

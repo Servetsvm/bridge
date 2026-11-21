@@ -1,4 +1,4 @@
-/* Swiss for the online club tournaments (Bridge Table → Clubs → Online, movement "Swiss"). The first round is made
+/* Swiss for the online club tournaments (BridgePlay → Clubs → Online, movement "Swiss"). The first round is made
    with the plan; each later round is made when every table has finished the round before: the pairs ranked by the
    result so far (MP %, or IMP when the tournament is scored in IMP), then paired down the list — first with second,
    third with fourth — leaving out a pair already met where it can. Nothing is written: every app (and the GitHub run,

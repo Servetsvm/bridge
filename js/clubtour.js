@@ -1,4 +1,4 @@
-/* Bridge Table — online club tournaments (set up by a club's director in the Clubs program, played here by pairs
+/* BridgePlay — online club tournaments (set up by a club's director in the Clubs program, played here by pairs
    against each other). This part: the tournaments coming up on the home page with a countdown, registering as a pair
    (with a partner who has a name here), the "looking for a partner" list, cancelling, and a reminder 15 minutes before
    the start. Kept in the database at ot/<club>/<id>: info, pairs/<pair> { a, b, ka, kb, d }, seek/<player key> { n, d }
@@ -191,7 +191,7 @@ function ctShow(key, err) {
     ${err ? `<div class="err">${esc(err)}</div>` : ''}
     ${x.d <= Date.now() && !mine ? `<div class="row2">` : mine ? `<div class="okmsg">✅ ${T('You are registered with {0}', esc(nameKeyEq(mine.a) ? mine.b : mine.a))}</div><div class="row2">${x.d > Date.now() ? `<button class="btn" data-ctcancel="${esc(key)}">${T('Cancel the registration')}</button>` : ''}`
       : `<div class="grp"><span>✍️ ${T('Register as a pair')}</span><input id="ctPartner" class="tok wide" list="ctNames" maxlength="20" placeholder="${T('Your partner\'s name')}"><datalist id="ctNames">${names.map(n => `<option value="${esc(n)}">`).join('')}</datalist>
-        <div class="muted">${T('Your partner needs a name in Bridge Table (the same name they sign in with).')}</div></div>
+        <div class="muted">${T('Your partner needs a name in BridgePlay (the same name they sign in with).')}</div></div>
         <div class="row2"><button class="btn new" data-ctreg="${esc(key)}">✍️ ${T('Register')}</button><button class="btn" data-ctrobot="${esc(key)}">🤖 ${T('Register with a robot partner')}</button><button class="btn" data-ctseek="${esc(key)}">${seeking ? '✖ ' + T('I no longer look for a partner') : '🔎 ' + T('I am looking for a partner')}</button>`}
       <button class="btn" data-ctadmin="${esc(key)}">⚙️ ${T('Admin')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
@@ -206,7 +206,7 @@ async function ctRegister(key, robot) {
   if (!robot && x.pairs.some(p => p.ka === Net.ruleKey(b) || p.kb === Net.ruleKey(b))) { ctShow(key, T('{0} is already registered with another partner', b)); return; }
   CT.busy = true;
   try {
-    if (!robot && !(await Net.Cloud.exists(b))) { ctShow(key, T('There is no player called {0} in Bridge Table', b)); return; }
+    if (!robot && !(await Net.Cloud.exists(b))) { ctShow(key, T('There is no player called {0} in BridgePlay', b)); return; }
     await ctSession();
     const pid = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
     await Net.Cloud.put(ctPath(x, '/pairs/' + pid), { a: myNm(), b, ka: ctMe(), kb: robot ? '' : Net.ruleKey(b), d: x.d, ts: Date.now() });

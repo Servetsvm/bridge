@@ -1,4 +1,4 @@
-// The robots' tables (Bridge Table's home page: 🤖 Robot table — live): six tables, one per system (SAYC, 2/1, Acol,
+// The robots' tables (BridgePlay's home page: 🤖 Robot table — live): six tables, one per system (SAYC, 2/1, Acol,
 // French Standard, Precision, Polish Club), where four robots with made-up names play each other all day: the system
 // on its own, then each of its conventions, ten boards each, on deals where the convention comes up. There is no
 // server: this script plays the boards ahead of time and gives each one its start time; the page shows every call and

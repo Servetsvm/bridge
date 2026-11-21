@@ -7,7 +7,7 @@ let adminTab='setup';
 function renderAdminPanel(){
   const otq=new URLSearchParams(location.search).get('ot');
   if(otq&&!window._otOpened&&typeof OT!=='undefined'){ window._otOpened=1; adminTab='setup'; setupOnline=true; OT.edit=otq; }
-  // the test page (Clubs → Test → Beykoz → Admin): only the online test with robots (cards played in Bridge Table)
+  // the test page (Clubs → Test → Beykoz → Admin): only the online test with robots (cards played in BridgePlay)
   if(bgTestOn()){ document.getElementById('panelContent').innerHTML=`<div class="admin-wrap"><div id="adminContent">${typeof otTestCard==='function'?otTestCard():''}</div></div>`; return; }
   document.getElementById('panelContent').innerHTML=`
     <div class="admin-wrap">
@@ -48,7 +48,7 @@ function renderAdminTab(){
   if(adminTab==='setup') setTimeout(adminUpdateCalc, 0);
 }
 
-// ── the super admin's test tournament (opened as such from Bridge Table): the robots play it by themselves ──
+// ── the super admin's test tournament (opened as such from BridgePlay): the robots play it by themselves ──
 function testBarHtml(){
   const L=v=>window.i18nText?i18nText(v):v;
   if(!bgTestOn()) return '';
@@ -305,7 +305,7 @@ function renderSetup(){
     })()}
     <div class="round-card"><div class="rc-head"><span class="rc-num">Round ${s.currentRound||0} / ${s.roundCount||0}</span><span class="rc-stat">${s.status==='running'?'🟢 Running':s.status==='setup'?'⏳ Setup':'🏁 Finished'} &nbsp;|&nbsp; ${scoringName(s)}</span></div><div class="round-progress"><div class="round-bar" style="width:${s.roundCount?(s.currentRound/s.roundCount*100):0}%"></div></div></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">
-      ${s.online&&s.status==='running'?`<div style="font-size:0.78rem;color:var(--text2);">🌐 <span>Online evening: the rounds go on by themselves in Bridge Table.</span></div>`:''}
+      ${s.online&&s.status==='running'?`<div style="font-size:0.78rem;color:var(--text2);">🌐 <span>Online evening: the rounds go on by themselves in BridgePlay.</span></div>`:''}
       ${!s.online&&s.status==='setup'&&s.roundCount>0?`<button class="btn btn-green btn-full" onclick="adminStart()">▶ Start Round 1</button>`:''}
       ${!s.online&&s.status==='running'&&s.currentRound<s.roundCount?`<button class="btn btn-gold" onclick="adminNextRound()">⏭ Next Round (${s.currentRound+1})</button>`:''}
       ${!s.online&&s.status==='running'&&s.currentRound>=s.roundCount?`<button class="btn btn-blue" onclick="adminFinish()">🏁 Finish Tournament</button>`:''}
@@ -430,9 +430,9 @@ window.saveStallMinutes=function(){
   const s=getState();s.stallAlertMinutes=v;setState(s);
   toast('✅ Alert threshold set to '+v+' min');
 };
-/* after the start: the players get Bridge Table's link (with this club and its table code prefix); there they tap
+/* after the start: the players get BridgePlay's link (with this club and its table code prefix); there they tap
    Table No, type their member numbers or names and choose their table */
-// the players get only Bridge Table's address: Table No there finds this tournament in the list of running ones
+// the players get only BridgePlay's address: Table No there finds this tournament in the list of running ones
 const playersLink=async()=>location.origin+location.pathname.replace(/(bridgegate|kulupler)\/[^/]*$/,'');
 // the running tournament in that list (gate/live/<club>): its name, the club, the tables and the table code prefix
 async function setLive(on){
@@ -445,13 +445,13 @@ async function setLive(on){
     else await fetch(url,{method:'DELETE'});
   }catch(e){}
 }
-// this tournament's link for the players: Bridge Table opens this club's running tournament, its free tables only
+// this tournament's link for the players: BridgePlay opens this club's running tournament, its free tables only
 // (the players can also find it under Clubs)
 window.bgShowPlayersLink=async function(){
   const L=window.i18nText?i18nText:x=>x, p=await getTablePrefix();
   const link=location.origin+location.pathname.replace(/kulupler\/[^/]*$/,'')+'?kulup='+encodeURIComponent('?club='+CLUB_ID+'&role=table&p='+p);
   const msg=encodeURIComponent('🃏 '+(CLUB_NAME||'')+(getState().name?' — '+getState().name:'')+'\n'+link);
-  openModal('🔗 '+L('The players’ link'),`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${L('It opens this tournament’s tables only: each player taps their table. They can also find it in Bridge Table under Clubs.')}</div>
+  openModal('🔗 '+L('The players’ link'),`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${L('It opens this tournament’s tables only: each player taps their table. They can also find it in BridgePlay under Clubs.')}</div>
     <input readonly value="${link}" onclick="this.select()" style="width:100%;font-size:0.76rem;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);box-sizing:border-box;">
     <div style="display:flex;gap:8px;margin-top:10px;"><a class="btn btn-full" style="background:#25d366;color:#fff;text-decoration:none;text-align:center;" href="https://wa.me/?text=${msg}" target="_blank" rel="noopener">WhatsApp</a><a class="btn btn-full btn-ghost" style="text-decoration:none;text-align:center;" href="sms:?&body=${msg}">SMS</a><button class="btn btn-full btn-ghost" onclick="navigator.clipboard&&navigator.clipboard.writeText('${link}').then(()=>toast('📋'))">📋 ${L('Copy')}</button></div>`,
     `<button class="btn btn-ghost" onclick="closeModal()">${L('Close')}</button>`);
@@ -602,7 +602,7 @@ function adminSetupAutoRefresh(){
 let _lastRoundCompleteNotified = -1;
 function checkRoundComplete(){
   const s = getState();
-  if(s.status !== 'running' || s.online) return;   // an online evening: Bridge Table moves the rounds
+  if(s.status !== 'running' || s.online) return;   // an online evening: BridgePlay moves the rounds
   checkStalledTables();
   const boards = getBoards();
   const movements = getMovements();
@@ -876,7 +876,7 @@ function renderPlayersAdmin(){
 }
 
 
-/* The club's logo: a playing card the club's admin picks (rank + suit, e.g. "AS", "TH"); Bridge Table's Clubs page shows
+/* The club's logo: a playing card the club's admin picks (rank + suit, e.g. "AS", "TH"); BridgePlay's Clubs page shows
    it before the club's name. Kept in the club's own data (gate/clubs/<id>/bm/logo), which the club's admin may write. */
 const LOGO_SU={S:'♠',H:'♥',D:'♦',C:'♣'}, LOGO_RK='AKQJT98765432';
 const LOGO_IMG=/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/;
@@ -891,7 +891,7 @@ window.clubLogoPick=async function(){
   let cur=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/logo.json'),{cache:'no-store'}); cur=r.ok?await r.json():null; }catch(e){}
   const t=s=>window.i18nText?i18nText(s):s;
   const grid=['S','H','D','C'].map(su=>`<div class="clogo-row">${[...LOGO_RK].map(rk=>`<button class="clogo-btn${cur===rk+su?' on':''}" onclick="clubLogoSave('${rk+su}')">${clubLogoHtml(rk+su)}</button>`).join('')}</div>`).join('');
-  openModal(t('Club logo'), `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${t("Choose a card: it is shown before your club's name in Bridge Table's Clubs.")}</div><div class="clogo-up">${LOGO_IMG.test(cur||'')?`<span class="clogo-cur">${clubLogoHtml(cur)}</span>`:''}<label class="btn">📷 ${t('Upload a picture')}<input type="file" accept="image/*" style="display:none" onchange="clubLogoFile(this)"></label><span>${t('or choose a card:')}</span></div><div class="clogo-grid">${grid}</div>`,
+  openModal(t('Club logo'), `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${t("Choose a card: it is shown before your club's name in BridgePlay's Clubs.")}</div><div class="clogo-up">${LOGO_IMG.test(cur||'')?`<span class="clogo-cur">${clubLogoHtml(cur)}</span>`:''}<label class="btn">📷 ${t('Upload a picture')}<input type="file" accept="image/*" style="display:none" onchange="clubLogoFile(this)"></label><span>${t('or choose a card:')}</span></div><div class="clogo-grid">${grid}</div>`,
     `<button class="btn" onclick="clubLogoSave(null)">${t('Default')}</button><button class="btn btn-gold" onclick="closeModal()">${t('Close')}</button>`);
 };
 // a picture from the device: made square (128 px, the whole picture in it) and kept small, in the club's data

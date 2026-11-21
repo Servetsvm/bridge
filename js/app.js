@@ -1,4 +1,4 @@
-/* Bridge Table — screen, game flow, field comparison and settings. */
+/* BridgePlay — screen, game flow, field comparison and settings. */
 'use strict';
 /* errors on a player's device are reported to the robots' Worker (/err): what went wrong, where, the version and the
    browser, never a name; at most a few a visit, and none from a test server on this computer */
@@ -1498,7 +1498,7 @@ function resume() {
 }
 function idleHtml() {
   const cont = ui.saved && ui.saved.phase !== "done";
-  return `<div class="lobby"><h3>Bridge Table</h3><div class="muted">Nothing is dealt yet. ${cont ? "Your last board is waiting." : ""}</div>
+  return `<div class="lobby"><h3>BridgePlay</h3><div class="muted">Nothing is dealt yet. ${cont ? "Your last board is waiting." : ""}</div>
     <div class="row2"><button class="btn new" id="bGo">${cont ? "Continue" : "Start"}</button><button class="btn" id="bNet">Online</button></div>
     ${typeof Net !== "undefined" ? Net.pendHtml() + `<h3>Open tables</h3>` + Net.tablesHtml() : ""}</div>`;
 }
@@ -1907,7 +1907,7 @@ function homeShell2() {
   const fan = [['A', '♠', ''], ['K', '♥', ' rd'], ['Q', '♦', ' rd'], ['J', '♣', '']].map(([r, su, c], i) => `<span class="h2c${c}" style="--i:${i}"><b>${r}</b><i>${su}</i></span>`).join('');
   const tile = (attrs, ico, title, sub) => `<${attrs.startsWith('href') ? 'a' : 'button'} class="h2tile" ${attrs}><span class="h2ti" aria-hidden="true">${ico}</span><b>${title}</b><small>${sub}</small></${attrs.startsWith('href') ? 'a' : 'button'}>`;
   return `<div class="home v2">
-  <header class="h2head"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('Bridge Table')}</div><button class="h2lobby" data-hsec="chat" title="${T('Lobby chat')}">💬 ${T('Lobby')} <b class="h2unr" id="hChatN"></b></button>
+  <header class="h2head"><div class="brand"><span class="suits">♠<i>♥</i><i>♦</i>♣</span>${T('BridgePlay')}</div><button class="h2lobby" data-hsec="chat" title="${T('Lobby chat')}">💬 ${T('Lobby')} <b class="h2unr" id="hChatN"></b></button>
     <div class="h2tools"><label class="hlang" title="${T('Language')}"><span aria-hidden="true">🌐</span><select id="hLang" class="sel" aria-label="${T('Language')}">${LANGS.map(([v, l]) => `<option value="${v}" ${SET.lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico hwa" id="bShareApp" title="${T('Send the app')}" aria-label="${T('Send the app')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
   <div class="hgrid">
@@ -3214,7 +3214,7 @@ function pbnOf(e) {
   const d = new Date(e.ts || Date.now()), q = v => `"${String(v).replace(/"/g, "'")}"`;
   const who = s => s === e.seat ? (myNm() || 'You') : 'Robot';
   const tag = (k, v) => `[${k} ${q(v)}]\n`;
-  let o = tag('Event', 'Bridge Table') + tag('Site', location.host || 'Bridge Table') + tag('Date', `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`)
+  let o = tag('Event', 'BridgePlay') + tag('Site', location.host || 'BridgePlay') + tag('Date', `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`)
     + tag('Board', e.board) + tag('West', who(3)) + tag('North', who(0)) + tag('East', who(1)) + tag('South', who(2))
     + tag('Dealer', 'NESW'[e.dealer ?? dealerOf(e.board)]) + tag('Vulnerable', vulTag(e.board))
     + tag('Deal', 'N:' + [0, 1, 2, 3].map(s => handStr(e.deal[s])).join(' ')) + tag('Scoring', SET.mode === 'MP' ? 'MP' : 'IMP');
@@ -3850,7 +3850,7 @@ document.addEventListener('click', ev_ => {
     // the turn sound on and off from the top bar
     case "bBell": { const on = (SET.alert || "online") !== "off"; if (on) { SET.alertOn = SET.alert || "online"; SET.alert = "off"; SET.sfxOn = SET.sfx; SET.sfx = false; } else { SET.alert = SET.alertOn || "online"; SET.sfx = SET.sfxOn !== false; beep(); } Store.saveSettings(SET); save(); render(); flash(on ? "🔕 " + T("Turn sound off") : "🔔 " + T("Turn sound on"), 1400); break; }
     case "bSet": showSettings(); break;
-    case 'bShareApp': openOv('share', `<h2>📲 ${T('Send the app')}</h2><div class="muted">${T('Whoever opens the link can install Bridge Table as an app.')}</div>
+    case 'bShareApp': openOv('share', `<h2>📲 ${T('Send the app')}</h2><div class="muted">${T('Whoever opens the link can install BridgePlay as an app.')}</div>
       <div class="row2"><button class="btn wa" id="shareWa">${ICON_WA} WhatsApp</button><button class="btn sms" id="shareSms">${ICON_SMS} SMS</button></div>
       <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`); break;
     case 'shareWa': closeOv(); window.open('https://wa.me/?text=' + encodeURIComponent(appInvite()), '_blank', 'noopener'); break;
@@ -3913,7 +3913,7 @@ function boardText(e) {
   const cd = c => SL[S(c)] + RK[R(c)];
   const hand = h => [3, 2, 1, 0].map(s => SL[s] + ':' + h.filter(c => S(c) === s).sort((a, b) => b - a).map(c => RK[R(c)]).join('')).join(' ');
   const dealer = e.dealer != null ? e.dealer : dealerOf(e.board), v = [vulOf(e.board, 0), vulOf(e.board, 1)];
-  const out = [`Bridge Table v${APP_V} · Board ${e.board} · Dealer ${N[dealer]} · Vul ${v[0] && v[1] ? 'All' : v[0] ? 'NS' : v[1] ? 'EW' : 'None'} · Me: ${N[e.seat]}`];
+  const out = [`BridgePlay v${APP_V} · Board ${e.board} · Dealer ${N[dealer]} · Vul ${v[0] && v[1] ? 'All' : v[0] ? 'NS' : v[1] ? 'EW' : 'None'} · Me: ${N[e.seat]}`];
   if (e.c) { const won = e.tricks != null ? e.tricks : e.pl ? e.pl.filter(t => t.length === 4).filter(t => sideOf(E.trickWinner(t.map(([s, c]) => ({ s, c })), e.c.strain < 4 ? e.c.strain : -1)) === sideOf(e.c.decl)).length : null;
     out.push(`Contract ${e.c.level}${'CDHSN'[e.c.strain]}${e.c.dbl === 1 ? 'X' : e.c.dbl === 2 ? 'XX' : ''} by ${N[e.c.decl]}` + (won != null ? ` · ${won} tricks` : '') + (e.dd && e.dd.you != null ? ` · double dummy ${e.dd.you}` : '')); }
   if (e.deal) e.deal.forEach((h, s) => out.push(`${N[s]}  ${hand(h)}`));
@@ -3936,7 +3936,7 @@ function dealFromCode(code) {
 // send a deal to a friend: the phone's share sheet, or the link is copied
 function shareDeal(deal, board) {
   const url = 'https://servetsvm.github.io/bridge/#d=' + dealCode(deal) + '&b=' + board, text = T('How would you play this deal?');
-  if (navigator.share) { navigator.share({ title: T('Bridge Table'), text, url }).catch(() => {}); return; }
+  if (navigator.share) { navigator.share({ title: T('BridgePlay'), text, url }).catch(() => {}); return; }
   (navigator.clipboard ? navigator.clipboard.writeText(text + ' ' + url) : Promise.reject()).then(() => flash(T('Link copied'), 1500)).catch(() => prompt(T('Copy link'), url));
 }
 // the app was opened from a shared deal: offer to play it (the link is taken out of the address)
@@ -3944,7 +3944,7 @@ function shareDeal(deal, board) {
 function welcome() {
   if (SET.welNo || (SET.welN || 0) >= 1 || ui.welDone || ui.overlay || (G && G.phase !== 'idle')) return;
   ui.welDone = 1; SET.welN = (SET.welN || 0) + 1; Store.saveSettings(SET);
-  openOv('welcome', `<h2 class="welh">♠<i>♥</i><i>♦</i>♣ ${T('Welcome to Bridge Table')}</h2>
+  openOv('welcome', `<h2 class="welh">♠<i>♥</i><i>♦</i>♣ ${T('Welcome to BridgePlay')}</h2>
     <div class="welmain"><span>📚</span><div><b>${T('Practise conventions')}</b><small>${T('Pick the conventions you want to learn: the robots deal hands where they come up, and after each board you see which of your calls were right.')}</small></div></div>
     <div class="row2"><button class="btn new" id="welGo">📚 ${T('Choose conventions')}</button><button class="btn" id="welClose">${T('Close')}</button></div>`);
 }
@@ -3956,7 +3956,7 @@ function welcomeClose(go) {
 // the WhatsApp logo and an SMS speech bubble for the buttons that send a message
 const ICON_WA = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.88 9.88zm8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41z"/></svg>';
 const ICON_SMS = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 2.8h16A2.2 2.2 0 0 1 22.2 5v10.2a2.2 2.2 0 0 1-2.2 2.2H9.6L5 21.2v-3.8H4a2.2 2.2 0 0 1-2.2-2.2V5A2.2 2.2 0 0 1 4 2.8z"/><text x="12" y="12.9" font-size="7.4" font-weight="900" text-anchor="middle" fill="currentColor" font-family="Arial,Helvetica,sans-serif">SMS</text></svg>';
-// a link tapped while Bridge Table is already open only changes the address's # part (no reload): read it then too
+// a link tapped while BridgePlay is already open only changes the address's # part (no reload): read it then too
 window.addEventListener('hashchange', () => { if (/[#&](bg|sb|d)=/.test(location.hash)) checkSharedDeal(); });
 function checkSharedDeal() {
   // an organiser's link from before (a club tournament #bg=club.prefix, or a Social bridge game #sb=CODE)
@@ -4024,8 +4024,8 @@ function notify(text) {
   if (SET.notify === false || !document.hidden || !text || !('Notification' in window) || Notification.permission !== 'granted') return;
   const o = { body: text, icon: 'icons/icon-192.png', tag: 'bridge-table', renotify: true };
   try {
-    if (navigator.serviceWorker) navigator.serviceWorker.getRegistration().then(r => r ? r.showNotification(T('Bridge Table'), o) : new Notification(T('Bridge Table'), o)).catch(() => {});
-    else new Notification(T('Bridge Table'), o);
+    if (navigator.serviceWorker) navigator.serviceWorker.getRegistration().then(r => r ? r.showNotification(T('BridgePlay'), o) : new Notification(T('BridgePlay'), o)).catch(() => {});
+    else new Notification(T('BridgePlay'), o);
   } catch (e) {}
 }
 function setNotify(on) {
@@ -4239,7 +4239,7 @@ function supMsgsHtml(m, mine) {
   if (!m.length) return `<div class="muted">${T('No messages yet.')}</div>`;
   return `<div class="supmsgs" id="supMsgs">${m.map(x => {
     const own = mine ? x.by === 'p' : x.by === 'a', who = x.by === 'p' ? '' : x.by === 'auto' ? '🤖 ' : '👑 ';
-    const txt = x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' && x.t === 'claude' ? T('Thank you for writing about the Claude system — your message has reached us, and every one is read. A deal where the Claude Double went wrong is the most useful thing you can send. And if you think your own system bids better: ⚔️ Challenge Claude on the home page. — Claude and Bridge Table') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
+    const txt = x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' && x.t === 'claude' ? T('Thank you for writing about the Claude system — your message has reached us, and every one is read. A deal where the Claude Double went wrong is the most useful thing you can send. And if you think your own system bids better: ⚔️ Challenge Claude on the home page. — Claude and BridgePlay') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
     return `<div class="supm ${own ? 'own' : ''} ${x.by}"><div>${who}${txt.replace(/\n/g, '<br>')}</div><small>${new Date(x.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></div>`;
   }).join('')}</div>`;
 }
@@ -4522,7 +4522,7 @@ function openClubs(q) {
     // the Clubs list again (the clubs program closes)
     v.querySelector('#cvClubs').addEventListener('click', () => { if (history.state && history.state.clubs) history.back(); else closeClubs(); setTimeout(() => { ui.overlay = null; showClubs(); }, 60); });
   }
-  const p = new URLSearchParams(String(q || '').replace(/^\?/, '')); p.set('embed', '1'); p.set('lang', SET.lang || 'en');   // the clubs program in Bridge Table's language
+  const p = new URLSearchParams(String(q || '').replace(/^\?/, '')); p.set('embed', '1'); p.set('lang', SET.lang || 'en');   // the clubs program in BridgePlay's language
   const fr = document.createElement('iframe'); fr.id = 'cvFrame'; fr.title = T('Clubs'); fr.src = 'kulupler/index.html?' + p.toString();   // a new frame: its first page adds no step to Back
   $('cvFrame').replaceWith(fr);
   v.hidden = false; document.body.classList.add('clubsopen');
@@ -4766,7 +4766,7 @@ function isIOS() { return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navi
 // a small button in the top bar (beside the language and settings): always in view, takes no room on the page
 function instHtml() {
   if (SET.instNo || isStandalone() || (!INST && !isIOS())) return '';
-  return `<button class="hinstb" id="instGo" title="${T('Install Bridge Table as an app')}">📲 ${T('Install')}</button>`;
+  return `<button class="hinstb" id="instGo" title="${T('Install BridgePlay as an app')}">📲 ${T('Install')}</button>`;
 }
 /* the app sent to someone (the WhatsApp button): their link carries ?install=1, and the app asks at once whether to
    install it (after the name and PIN for a new player). The phone itself confirms the install: no page can install on
@@ -4775,7 +4775,7 @@ var INST_ASKED = false;
 function installAsk() {
   if (INST_ASKED || !/[?&]install=1/.test(location.search) || isStandalone() || needGate()) return;
   INST_ASKED = true;
-  openOv('instask', `<h2>📲 Bridge Table</h2><div class="big">${T('Install Bridge Table on your phone as an app?')}</div>
+  openOv('instask', `<h2>📲 BridgePlay</h2><div class="big">${T('Install BridgePlay on your phone as an app?')}</div>
     <div class="muted">${T('Then it opens like any app, from your home screen.')}</div>
     <div class="row2"><button class="btn new" id="instGo">📲 ${T('Install')}</button><button class="btn" id="oClose">${T('Not now')}</button></div>`);
 }
@@ -4793,13 +4793,13 @@ setTimeout(cardReset, 20000);   // normally right after the database was asked (
 async function instGo() {
   if (!INST && !isIOS()) {
     // Chrome has not offered its install window (yet): the browser menu does it
-    openOv('inst', `<h2>📲 ${T('Install Bridge Table as an app')}</h2><div class="big">${T('Open the browser menu {0} and choose {1}.', '<b>⋮</b>', `<b>${T('Install app')}</b> / <b>${T('Add to Home Screen')}</b>`)}</div>
+    openOv('inst', `<h2>📲 ${T('Install BridgePlay as an app')}</h2><div class="big">${T('Open the browser menu {0} and choose {1}.', '<b>⋮</b>', `<b>${T('Install app')}</b> / <b>${T('Add to Home Screen')}</b>`)}</div>
       <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
     return;
   }
   if (INST) { const p = INST; INST = null; p.prompt(); try { const r = await p.userChoice; if (r && r.outcome === 'accepted') { SET.instNo = 1; Store.saveSettings(SET); } } catch (e) {} render(); return; }
-  openOv('inst', `<h2>📲 ${T('Install Bridge Table as an app')}</h2>
-    <ol class="inststeps"><li>${T('Tap the Share button {0} at the bottom (on iPad at the top) of Safari.', '<b>⬆︎</b>')}</li><li>${T('Choose {0}.', `<b>${T('Add to Home Screen')}</b>`)}</li><li>${T('Tap {0}: Bridge Table appears on your home screen.', `<b>${T('Add')}</b>`)}</li></ol>
+  openOv('inst', `<h2>📲 ${T('Install BridgePlay as an app')}</h2>
+    <ol class="inststeps"><li>${T('Tap the Share button {0} at the bottom (on iPad at the top) of Safari.', '<b>⬆︎</b>')}</li><li>${T('Choose {0}.', `<b>${T('Add to Home Screen')}</b>`)}</li><li>${T('Tap {0}: BridgePlay appears on your home screen.', `<b>${T('Add')}</b>`)}</li></ol>
     <div class="muted">${T('In another browser on iPhone, open this page in Safari first.')}</div>
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
 }

@@ -1,4 +1,4 @@
-/* Bridge Table — the texts in one language (en), made from js/lang.js by .github/lang/split.js: do not edit here. */
+/* BridgePlay — the texts in one language (en), made from js/lang.js by .github/lang/split.js: do not edit here. */
 var I18N = window.I18N || {};
 var CONV_T = window.CONV_T || {};
 var SYS_T = window.SYS_T || {};

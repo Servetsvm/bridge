@@ -1,24 +1,24 @@
-/* Club tournaments (BridgeGate inside Bridge Table): the sign-in is Bridge Table's own. The same hidden database
+/* Club tournaments (BridgeGate inside BridgePlay): the sign-in is BridgePlay's own. The same hidden database
    account as the app on this device (its refresh token is shared through this address's storage), and the player's
    Bridge name and PIN: the database session sess/<account> = { k: name, pin } is what the rules check.
    Servet is the super admin; the player who opens a club is its admin; a table signs in with its 4-digit code. */
 (function () {
   'use strict';
-  // the club tournaments live inside Bridge Table (its Clubs): this page opened on its own goes there, with its address
+  // the club tournaments live inside BridgePlay (its Clubs): this page opened on its own goes there, with its address
   const EMBED = window.top !== window;
   if (!EMBED) { location.replace('../?kulup=' + encodeURIComponent(location.search)); return; }
   document.documentElement.classList.add('embed');
   const NS = (location.search.match(/[?&]ns=([a-z0-9]{1,12})/i) || [])[1] || (/^(localhost|127.0.0.1)$/.test(location.hostname) ? 'dev' : undefined);
   const ROOT = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app' + (NS ? '/test/' + NS.toLowerCase() : '');
   const API_KEY = 'AIzaSyDNugZ1tf4rXu7lDYzyZg9v1V3is7xz_Mc';
-  // the language: Bridge Table's, whenever it changed there (bricskor_bridge_lang is the one last seen); a language chosen
-  // here stays until Bridge Table's changes. A table's phone that never opened Bridge Table: its last choice, or the phone's.
+  // the language: BridgePlay's, whenever it changed there (bricskor_bridge_lang is the one last seen); a language chosen
+  // here stays until BridgePlay's changes. A table's phone that never opened BridgePlay: its last choice, or the phone's.
   try {
     const ok = ['en', 'tr', 'no', 'es', 'fr', 'it', 'de', 'ru', 'pl', 'zh'], st = JSON.parse(localStorage.getItem('bric-masasi-v2') || 'null'), L = st && st.SET && st.SET.lang;
     if (ok.includes(L) && localStorage.getItem('bricskor_bridge_lang') !== L) { localStorage.setItem('bricskor_language', L); localStorage.setItem('bricskor_bridge_lang', L); }
     if (!localStorage.getItem('bricskor_language')) { const nav = String(navigator.language || '').slice(0, 2).toLowerCase().replace(/^n[bn]$/, 'no'); localStorage.setItem('bricskor_language', ok.includes(nav) ? nav : 'en'); }
   } catch (e) {}
-  window.GATE_ROOT = ROOT;                 // the Bridge Table database (its test part on a test server)
+  window.GATE_ROOT = ROOT;                 // the BridgePlay database (its test part on a test server)
   window.GATE_BASE = ROOT + '/gate';       // where the club tournaments live
   let tok = null, exp = 0, uid = null, p = null;
   async function fresh() {
@@ -38,7 +38,7 @@
     if (tok && Date.now() < exp - 60e3) return tok;
     try { return await (p || (p = fresh().finally(() => { p = null; }))); } catch (e) { return null; }
   };
-  // the player signed in on Bridge Table on this device: name, the name as the rules know it, and the PIN's code
+  // the player signed in on BridgePlay on this device: name, the name as the rules know it, and the PIN's code
   const nameKey = n => String(n || '').trim().toLocaleLowerCase('tr').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').replace(/\s+/g, '');
   window.bridgeUser = function () {
     let name = '', pin = null;
@@ -46,8 +46,8 @@
     if (!name || !pin) return null;
     return { name, key: encodeURIComponent(nameKey(name)).replace(/\./g, '%2E'), pin };
   };
-  // the database session for that player (as Bridge Table makes it): true when the PIN is right
-  // the PIN's code exactly as Bridge Table makes it (the database keeps only this)
+  // the database session for that player (as BridgePlay makes it): true when the PIN is right
+  // the PIN's code exactly as BridgePlay makes it (the database keeps only this)
   window.bridgePinHash = async function (name, pin) {
     const b = new TextEncoder().encode('bridge-table:' + nameKey(name) + ':' + pin);
     const h = await crypto.subtle.digest('SHA-256', b);

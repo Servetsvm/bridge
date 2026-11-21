@@ -1,4 +1,4 @@
-/* Bridge Table — bidding system.
+/* BridgePlay — bidding system.
    Each side bids with its own convention card (cards[0] = North-South, cards[1] = East-West).
    cands() lists candidate calls for the situation in priority order; the robot picks the first one its hand fits.
    The same list explains a human's calls and tells the robots what partner holds.

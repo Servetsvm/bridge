@@ -1,4 +1,4 @@
-// BridgeGate interface in Bridge Table's languages: English (the source), Turkish (below), and the others from lang/<code>.js
+// BridgeGate interface in BridgePlay's languages: English (the source), Turkish (below), and the others from lang/<code>.js
 // Keeps the original English UI as the source of truth and translates only
 // visible interface text. Tournament data, player names and bridge codes remain
 // untouched.
@@ -6,7 +6,7 @@
   'use strict';
 
   const STORAGE_KEY='bricskor_language';   // its own (the separate BridgeGate site on this address keeps bg_language)
-  const LANGS=[['en','English'],['tr','Türkçe'],['no','Norsk'],['es','Español'],['fr','Français'],['it','Italiano'],['de','Deutsch'],['ru','Русский'],['pl','Polski'],['zh','中文']];   // as in Bridge Table
+  const LANGS=[['en','English'],['tr','Türkçe'],['no','Norsk'],['es','Español'],['fr','Français'],['it','Italiano'],['de','Deutsch'],['ru','Русский'],['pl','Polski'],['zh','中文']];   // as in BridgePlay
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
@@ -26,10 +26,10 @@
     "Systems contest":"Sistemler yarışması",
     "Start a systems contest now? Six robot pairs, each playing its own system, every pair against every other.":"Sistemler yarışması şimdi başlatılsın mı? Altı robot çift, her biri kendi sistemiyle, herkes herkese karşı.",
     "Start the server robots":"Sunucu robotlarını başlat",
-    "Online evening: the rounds go on by themselves in Bridge Table.":"Online akşam: turlar Bridge Table’da kendiliğinden ilerler.",
+    "Online evening: the rounds go on by themselves in BridgePlay.":"Online akşam: turlar BridgePlay’de kendiliğinden ilerler.",
     "An online evening is being played. Set up a tournament at the club anyway?":"Şu an online bir akşam oynanıyor. Yine de kulüpte turnuva kurulsun mu?",
     "Number of Rounds":"Tur sayısı",
-    "The pairs register in Bridge Table; an odd number of pairs gets a robot pair, a pair can also play with a robot partner.":"Çiftler Bridge Table’dan kaydolur; çift sayısı tekse robot çift eklenir, bir çift robot ortakla da oynayabilir.",
+    "The pairs register in BridgePlay; an odd number of pairs gets a robot pair, a pair can also play with a robot partner.":"Çiftler BridgePlay’den kaydolur; çift sayısı tekse robot çift eklenir, bir çift robot ortakla da oynayabilir.",
     "Boards: 1-99":"Board: 1-99",
     "Social Bridge: a number of players divisible by 4 (at least 8)":"Sosyal Briç: oyuncu sayısı 4’e bölünebilmeli (en az 8)",
     "Not available on this device":"Bu cihazda kullanılamıyor",
@@ -176,7 +176,7 @@
     "Change":"Değiştir",
     "Save the changes":"Değişiklikleri kaydet",
     "Save":"Kaydet",
-    "The players' names in Bridge Table (Robot for a robot partner).":"Oyuncuların Bridge Table’daki adları (robot ortak için Robot).",
+    "The players' names in BridgePlay (Robot for a robot partner).":"Oyuncuların BridgePlay’deki adları (robot ortak için Robot).",
     "Preview with the pairs registered so far: the movement is made at the start.":"Şimdiye kadar kayıtlı çiftlerle önizleme: hareket başlangıçta kurulur.",
     "No pairs registered yet.":"Henüz kayıtlı çift yok.",
     "Board":"Board",
@@ -199,7 +199,7 @@
     "An odd number of pairs gets a robot pair; a pair can also play with a robot partner.":"Tek sayıda çifte robot çift eklenir; bir oyuncu robot ortakla da oynayabilir.",
     "Empty: the system and the conventions":"Boş: sistem ve konvansiyonlar",
     "Online club tournaments":"Online kulüp turnuvaları",
-    "Played in Bridge Table: pairs against each other, each at home. Players register as pairs in Bridge Table and see the tournament there and here before it starts.":"Bridge Table’da oynanır: çiftler birbirine karşı, herkes evinden. Oyuncular Bridge Table’da çift olarak kaydolur; turnuvayı başlamadan önce orada ve burada görür.",
+    "Played in BridgePlay: pairs against each other, each at home. Players register as pairs in BridgePlay and see the tournament there and here before it starts.":"BridgePlay’de oynanır: çiftler birbirine karşı, herkes evinden. Oyuncular BridgePlay’de çift olarak kaydolur; turnuvayı başlamadan önce orada ve burada görür.",
     "every week":"her hafta",
     "boards":"board",
     "boards a round":"board/tur",
@@ -217,7 +217,7 @@
     "Scoring":"Puanlama",
     "Conventions everyone plays (the robots too):":"Herkesin (robotların da) oynayacağı konvansiyonlar:",
     "Save the tournament":"Turnuvayı kaydet",
-    "Register as a pair on Bridge Table's home page.":"Bridge Table ana sayfasından çift olarak kaydolun.",
+    "Register as a pair on BridgePlay's home page.":"BridgePlay ana sayfasından çift olarak kaydolun.",
     "Social Bridge — pairs stay at their table, each table plays any free board":"Sosyal Briç — çiftler masasında kalır, her masa boştaki board’u oynar",
     "Number of boards":"Board sayısı",
     "Every pair stays at the same table in the same direction all evening. A table takes any board it has not played that no other table is playing, and plays it.":"Her çift bütün akşam aynı masada, aynı yönde kalır. Masa, oynamadığı ve başka masada oynanmayan herhangi bir board’u alıp oynar.",
@@ -257,8 +257,8 @@
     'Code':'Kod',
     'under a table: its link and its code in one message.':'bir masanın altında: o masanın linki ve kodu tek mesajda.',
     'Enter ↵':'Gir ↵',
-    'Sign in to Bridge Table first (name and PIN), then come back here.':'Önce Bridge Table’a isim ve PIN ile giriş yap, sonra buraya dön.',
-    'Bridge Table':'Bridge Table',
+    'Sign in to BridgePlay first (name and PIN), then come back here.':'Önce BridgePlay’e isim ve PIN ile giriş yap, sonra buraya dön.',
+    'BridgePlay':'BridgePlay',
     'My clubs':'Kulüplerim',
     'Open another club':'Başka bir kulüp aç',
     'Open your club':'Kulübünü aç',
@@ -280,7 +280,7 @@
     'Type each table\'s code (4 digits, all different) and save: the players choose their table and type it.':'Her masanın kodunu yazın (4 hane, hepsi farklı) ve kaydedin: oyuncular masalarını seçip bu kodu yazar.',
     'Set up the tournament first':'Önce turnuvayı kurun',
     'The players’ link':'Oyuncuların linki',
-    'It opens this tournament’s tables only: each player taps their table. They can also find it in Bridge Table under Clubs.':'Sadece bu turnuvanın masalarını açar: her oyuncu kendi masasına basar. Bridge Table’da Kulüpler altında da bulabilirler.',
+    'It opens this tournament’s tables only: each player taps their table. They can also find it in BridgePlay under Clubs.':'Sadece bu turnuvanın masalarını açar: her oyuncu kendi masasına basar. BridgePlay’de Kulüpler altında da bulabilirler.',
     'Take off the table':'Masadan çıkar',
     'Take the player off this table? The table becomes free again.':'Oyuncu bu masadan çıkarılsın mı? Masa yeniden boşalır.',
     'The director took you off the table.':'Yönetici seni masadan çıkardı.',
@@ -358,10 +358,10 @@
     'Join a club\'s tournament (table or screen)':'Bir kulübün turnuvasına katıl (masa ya da ekran)',
     'Club created':'Kulüp oluşturuldu',
     'Enter the club name':'Kulüp adını yaz',
-    'Sign in to Bridge Table first':'Önce Bridge Table’a giriş yap',
+    'Sign in to BridgePlay first':'Önce BridgePlay’e giriş yap',
     'This club is switched off':'Bu kulüp kapatılmış',
     'Table code (4 digits)':'Masa kodu (4 hane)',
-    'Your Bridge Table PIN':'Bridge Table PIN’in',
+    'Your BridgePlay PIN':'BridgePlay PIN’in',
     'Wrong table code':'Hatalı masa kodu',
     'Wrong PIN':'Hatalı PIN',
     'You are not this club\'s admin':'Bu kulübün yöneticisi değilsin',
@@ -466,7 +466,7 @@
     "Club password changed":"Kulüp şifresi değiştirildi",
     'Logo':'Logo',
     'Club logo':'Kulüp logosu',
-    "Choose a card: it is shown before your club's name in Bridge Table's Clubs.":'Bir kart seç: Bridge Table’ın Kulüpler sayfasında kulübünün adının önünde görünür.',
+    "Choose a card: it is shown before your club's name in BridgePlay's Clubs.":'Bir kart seç: BridgePlay’in Kulüpler sayfasında kulübünün adının önünde görünür.',
     'Default':'Varsayılan',
     'Saved':'Kaydedildi',
     'Not saved — please log in again':'Kaydedilmedi — lütfen tekrar giriş yap',
@@ -842,7 +842,7 @@
     'Load member list (.mcd)':'Üye listesini yükle (.mcd)',
     'No member list yet':'Henüz üye listesi yok',
     'Send the players the link':'Oyunculara linki gönder',
-    'The players open Bridge Table with this link, tap Table No, type their member numbers (or names) and choose their table.':'Oyuncular Bridge Table’ı bu linkle açar, Masa No’ya basar, üye numaralarını (ya da isimlerini) yazar ve masalarını seçer.',
+    'The players open BridgePlay with this link, tap Table No, type their member numbers (or names) and choose their table.':'Oyuncular BridgePlay’i bu linkle açar, Masa No’ya basar, üye numaralarını (ya da isimlerini) yazar ve masalarını seçer.',
     'The names come from the tables: the players enter them when they sit down.':'İsimler masalardan gelir: oyuncular oturunca kendileri girer.',
     'Change table':'Masa değiştir',
     'Table No':'Masa No',
@@ -994,7 +994,7 @@
     [/^(\d+) members loaded$/,(_,g1)=>`${g1} üye yüklendi`]
   ];
 
-  // opened from Bridge Table: its language first (and kept), so the two never differ
+  // opened from BridgePlay: its language first (and kept), so the two never differ
   let currentLanguage=(()=>{ try{ const q=new URLSearchParams(location.search).get('lang'); if(SUPPORTED.includes(q)){ localStorage.setItem(STORAGE_KEY,q); return q; } }catch(e){} return null; })()||readSavedLanguage()||'en';
   let languageSwitching=false;
   const originalText=new WeakMap();
@@ -1192,7 +1192,7 @@
   };
 
   function init(){
-    document.getElementById('languageGate')?.remove();   // the old first-visit language screen of a page still in the cache: the language now comes from Bridge Table
+    document.getElementById('languageGate')?.remove();   // the old first-visit language screen of a page still in the cache: the language now comes from BridgePlay
     setLanguage(readSavedLanguage()||'en',{remember:false});
 
     const observer=new MutationObserver(mutations=>{

@@ -1,4 +1,4 @@
-/* Bridge Table — the robots' chat (a Cloudflare Worker with Workers AI).
+/* BridgePlay — the robots' chat (a Cloudflare Worker with Workers AI).
    The site sends what the player wrote to a robot, with what everybody at the table can see (the contract, the auction,
    the tricks) and never a hand; the robot answers in one or two short sentences, in the player's language.
    The bidding explanations do not come from here: the site gives them from the robots' own system.
@@ -69,7 +69,7 @@ async function weather(text, lang) {
 
 function lobbyPrompt(b) {
   const lang = LANGS[b.lang] || 'English';
-  return `You are ${clip(b.bot && b.bot.name, 30) || 'the robot'}, the friendly robot in the lobby of Bridge Table, a free website for playing bridge. `
+  return `You are ${clip(b.bot && b.bot.name, 30) || 'the robot'}, the friendly robot in the lobby of BridgePlay, a free website for playing bridge. `
     + `The player chatting with you is ${clip(b.me, 30) || 'a player'}; nobody else is in the lobby right now.\n`
     + `What the player can do here: play with the robots (they are always ready), open an online table and invite friends, join an open table when other players are online, the clubs, the hand of the day and the puzzles.\n`
     + `Rules for your answers:\n`
@@ -95,7 +95,7 @@ function prompt(b) {
     t.tricks && `Tricks: ${clip(t.tricks, 80)}.`,
     t.result && `Result of the board: ${clip(t.result, 80)}.`,
   ].filter(Boolean).join(' ');
-  return `You are ${clip(bot.name, 30)}, a friendly player at a bridge club table on the website Bridge Table. You sit ${clip(bot.seat, 12)}. `
+  return `You are ${clip(bot.name, 30)}, a friendly player at a bridge club table on the website BridgePlay. You sit ${clip(bot.seat, 12)}. `
     + `The player chatting with you is ${clip(b.me, 30) || 'the player'} (${clip(b.meSeat, 12)}); you are their ${bot.role === 'partner' ? 'partner' : 'opponent'}. Also at the table: ${others || 'two more players'}. `
     + `What everyone at the table can see: ${table || 'the board has just started.'}\n`
     + `Rules for your answers:\n`

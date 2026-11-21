@@ -1,4 +1,4 @@
-/* Bridge Table — bidding practice with both hands: you see your hand and your partner's and make the calls for both
+/* BridgePlay — bidding practice with both hands: you see your hand and your partner's and make the calls for both
    (the opponents pass), then the contract is compared double dummy with the best contract for your side, and the
    robots bid the same two hands with your convention card. Loaded after app.js (uses its helpers). */
 'use strict';

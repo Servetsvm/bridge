@@ -78,7 +78,7 @@ function renderTablePanel(){
   setTimeout(()=>document.getElementById('tableInput')?.focus(),80);
 }
 
-/* A player's phone, from Bridge Table's "Table No" (the organiser's link brings the club and the table code prefix):
+/* A player's phone, from BridgePlay's "Table No" (the organiser's link brings the club and the table code prefix):
    first the four players (member number or name), then the table number; the table signs in with prefix + number
    and its names go to the pairs sitting there, so the admin's Players list fills itself. */
 const BG_PENDING='bg-pending-names';
@@ -507,13 +507,13 @@ function bgStandingsHtml(){
   if(!rows.length) return '';
   return `<div class="ro-move-card" style="margin-bottom:14px;text-align:left;"><div class="ro-move-label">🏆 ${L('Standings')}</div><table style="width:100%;font-size:0.8rem;border-collapse:collapse;">${rows.map((r,i)=>`<tr style="border-top:1px solid var(--border);"><td style="padding:3px 4px;">${i+1}</td><td style="padding:3px 4px;">${cleanData(r.name)}</td><td style="padding:3px 4px;text-align:right;">${r.pct}%</td><td style="padding:3px 4px;text-align:right;">${fmtImp(r.imp)}</td></tr>`).join('')}</table></div>`;
 }
-// the names of a table not sat at yet: back to Bridge Table's Clubs (or this program's table numbers) to choose again
+// the names of a table not sat at yet: back to BridgePlay's Clubs (or this program's table numbers) to choose again
 window.bgLeaveEntry=function(prefix){
   window._bgEntry=null;
   try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ const U=P.eval('ui'), id=CLUB_ID; P.closeClubs(); if(typeof P.showClubs==='function'){ U.clubOpen=id; U.clubLive=null; P.showClubs(); if(P.clubTaken) P.clubTaken(id).then(x=>{ (U.clubTaken=U.clubTaken||{})[id]=x.taken; P.showClubs(); }); } return; } }catch(e){}
   bgPlayerEntry(prefix);
 };
-// the director took this device off its table: back to Bridge Table's Clubs (no question asked)
+// the director took this device off its table: back to BridgePlay's Clubs (no question asked)
 window.bgKicked=async function(){
   if(bmPollInterval){clearInterval(bmPollInterval);bmPollInterval=null;}
   bmTableNo=null; window.bmCodeTable=null; window._bgSatAt=null;
@@ -521,7 +521,7 @@ window.bgKicked=async function(){
   try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ P.closeClubs(); if(typeof P.flash==='function') P.flash('🚪 '+(window.i18nText?i18nText('The director took you off the table.'):'The director took you off the table.'),3500); return; } }catch(e){}
   location.reload();
 };
-// the wrong table chosen: it is free again, and the player chooses again in Bridge Table's Clubs
+// the wrong table chosen: it is free again, and the player chooses again in BridgePlay's Clubs
 window.bgLeaveTable=async function(){
   const L=window.i18nText?i18nText:x=>x;
   if(!await confirmDialog(L('Leave this table? It becomes free again and you choose your table again.'),{title:'🚪',confirmLabel:L('Leave the table'),danger:false})) return;
@@ -530,7 +530,7 @@ window.bgLeaveTable=async function(){
   try{ if(typeof bgTestOn==='function'&&bgTestOn()) sessionStorage.removeItem('bgTestMine:'+CLUB_ID); }catch(e){}
   bmTableNo=null; window.bmCodeTable=null;
   try{ await endSession(); }catch(e){}
-  // inside Bridge Table: back to its Clubs, with the tables as they are now
+  // inside BridgePlay: back to its Clubs, with the tables as they are now
   try{ const P=window.parent; if(P&&P!==window&&typeof P.closeClubs==='function'){ const U=P.eval('ui'), id=CLUB_ID; P.closeClubs(); if(typeof P.showClubs==='function'){ U.clubOpen=id; U.clubLive=null; P.showClubs(); if(P.clubTaken) P.clubTaken(id).then(x=>{ (U.clubTaken=U.clubTaken||{})[id]=x.taken; P.showClubs(); }); } return; } }catch(e){}
   location.reload();
 };

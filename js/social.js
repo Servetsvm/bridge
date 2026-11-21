@@ -1,4 +1,4 @@
-/* Bridge Table — the team match: teams meet two by two, each match at two tables with real cards (table 1 the Open
+/* BridgePlay — the team match: teams meet two by two, each match at two tables with real cards (table 1 the Open
    room, the first team North-South; table 2 the Closed room, the second team North-South; tables 3-4 the next match…);
    the app only keeps the scores: each board room against room in IMPs, the match in IMPs and VPs. (Games from before
    it, pairs at tables, still open with their matchpoints.) Anyone at a table enters the result of a board that table played (contract, declarer, tricks); the boards
@@ -578,7 +578,7 @@ const SB = (() => {
     const rows = L.map((r, i) => `${i + 1}. ${r.name}${isHow() ? '' : ` (${T('Table {0}', r.t)}${dir(r)})`} — ${r.pct != null ? r.pct + '%' : '—'} · ${r.imp > 0 ? '+' : ''}${r.imp} IMP · ${T('{0} boards', r.n)}`);
     return [head, ...rows].join('\n');
   }
-  // the players get only Bridge Table's address: the game is under Open tables, and Table No opens it (no code needed)
+  // the players get only BridgePlay's address: the game is under Open tables, and Table No opens it (no code needed)
   const appLink = () => location.origin + location.pathname.replace(/index\.html$/, '');
   const gameLink = () => appLink() + '#sb=' + sb.id;
   const linkText = () => `🃏 ${sb.g.m.n}\n${gameLink()}`;
