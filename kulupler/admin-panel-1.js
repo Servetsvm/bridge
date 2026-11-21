@@ -20,6 +20,7 @@ function renderAdminPanel(){
         <button class="admin-tab" onclick="setAdminTab('boards',this)">📊 Boards</button>
         <button class="admin-tab" onclick="setAdminTab('history',this)">📜 History</button>
         <button class="admin-tab" onclick="setAdminTab('log',this)">📋 Log</button>
+        <button class="admin-tab" onclick="clubLogoPick()">🎴 Logo</button>
       </div>
       <div id="adminContent"></div>
     </div>`;
@@ -874,3 +875,28 @@ function renderPlayersAdmin(){
     </div>`;
 }
 
+
+/* The club's logo: a playing card the club's admin picks (rank + suit, e.g. "AS", "TH"); Bridge Table's Clubs page shows
+   it before the club's name. Kept in the club's own data (gate/clubs/<id>/bm/logo), which the club's admin may write. */
+const LOGO_SU={S:'♠',H:'♥',D:'♦',C:'♣'}, LOGO_RK='AKQJT98765432';
+function clubLogoHtml(code){
+  if(!/^[AKQJT2-9][SHDC]$/.test(code||'')) return '';
+  const r=code[0]==='T'?'10':code[0], red=code[1]==='H'||code[1]==='D';
+  return `<span class="clogo${red?' r':''}"><span class="cr">${r}</span><span class="cs">${LOGO_SU[code[1]]}</span></span>`;
+}
+window.clubLogoPick=async function(){
+  if(!CLUB_ID) return;
+  let cur=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/logo.json'),{cache:'no-store'}); cur=r.ok?await r.json():null; }catch(e){}
+  const t=s=>window.i18nText?i18nText(s):s;
+  const grid=['S','H','D','C'].map(su=>`<div class="clogo-row">${[...LOGO_RK].map(rk=>`<button class="clogo-btn${cur===rk+su?' on':''}" onclick="clubLogoSave('${rk+su}')">${clubLogoHtml(rk+su)}</button>`).join('')}</div>`).join('');
+  openModal(t('Club logo'), `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${t("Choose a card: it is shown before your club's name in Bridge Table's Clubs.")}</div><div class="clogo-grid">${grid}</div>`,
+    `<button class="btn" onclick="clubLogoSave(null)">${t('Default')}</button><button class="btn btn-gold" onclick="closeModal()">${t('Close')}</button>`);
+};
+window.clubLogoSave=async function(code){
+  const t=s=>window.i18nText?i18nText(s):s;
+  try{
+    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/logo.json'),code?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(code)}:{method:'DELETE'});
+    if(!r.ok) throw new Error(String(r.status));
+  }catch(e){ toast('❌ '+t('Not saved — please log in again')); return; }
+  toast('✅ '+t('Saved')); clubLogoPick();
+};

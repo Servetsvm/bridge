@@ -2305,3 +2305,9 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 /* a compact bidding area: the auction pad and the bidding box no wider than they need (narrow screens: full width) */
 #table.bidding .auction,#table.bidding .expl{width:min(100%,430px)}
 #bidbox{max-width:480px}
+
+/* a club's logo in Clubs: a small playing card before its name */
+.clogo{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:1.4em;height:1.85em;border-radius:.16em;background:#fffdf6;color:#1b1b1b;border:1px solid rgba(0,0,0,.25);box-shadow:0 2px 4px rgba(0,0,0,.25);font-family:var(--f-card);line-height:.95;vertical-align:middle;margin-right:.25em}
+.clogo .cr{font-size:.66em;font-weight:800}
+.clogo .cs{font-size:.72em}
+.clogo.r{color:#c4122f}

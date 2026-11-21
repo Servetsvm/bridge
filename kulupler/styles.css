@@ -751,3 +751,14 @@ body.bg-device #panelContent > .bm3.tdc .bm3-bar{display:grid}
 
 .bm-devbar .bg-toclub{border:0;color:#fff;font:inherit;cursor:pointer}
 .bm-devbar .bg-toclub:hover{filter:brightness(1.15)}
+
+/* the club logo: a small playing card */
+.clogo{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:1.9em;height:2.6em;border-radius:.3em;background:#fffdf6;color:#1b1b1b;border:1px solid #c9c2ad;box-shadow:0 1px 2px rgba(0,0,0,.25);font-family:Georgia,serif;line-height:1;vertical-align:middle}
+.clogo .cr{font-size:.95em}
+.clogo .cs{font-size:1.05em}
+.clogo.r{color:#c4122f}
+.clogo-grid{display:flex;flex-direction:column;gap:6px}
+.clogo-row{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:2px}
+.clogo-btn{background:none;border:2px solid transparent;border-radius:5px;padding:1px 0;cursor:pointer;font-size:12px;display:flex;justify-content:center}
+.clogo-btn .clogo{width:min(1.9em,100%)}
+.clogo-btn.on{border-color:#d9b25c;background:rgba(217,178,92,.25)}

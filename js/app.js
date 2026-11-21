@@ -4271,8 +4271,13 @@ async function showClubs() {
     const otRows = c => otOf(c).map(otCard).join('');
     const otLive = c => otOf(c).find(x => x.plan);   // an online evening being played: the club's tournament now
     const shown = ui.clubOpen ? L.filter(t => t.club === ui.clubOpen) : L;   // a club tapped: only that club, full screen
+    // the club's logo: the card its admin picked, else one given here (the honours in turn, by the clubs' order)
+    const DEF = ['AS', 'KH', 'QD', 'JC', 'AH', 'KS', 'QC', 'JD'], SU = { S: '♠', H: '♥', D: '♦', C: '♣' };
+    const ids = (ui.clubLive || []).map(t => t.club).sort();
+    const logo = id => { let c = (ui.clubLogos || {})[id]; if (!/^[AKQJT2-9][SHDC]$/.test(c || '')) c = DEF[Math.max(0, ids.indexOf(id)) % DEF.length];
+      return `<span class="clogo${c[1] === 'H' || c[1] === 'D' ? ' r' : ''}"><span class="cr">${c[0] === 'T' ? '10' : c[0]}</span><span class="cs">${SU[c[1]]}</span></span>`; };
     const clubCol = id => { let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h % 6; };   // each club its own colour (always the same)
-    const rows = shown.map(t => `<div class="clubrow cc${clubCol(t.club)}${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>🏛 ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
+    const rows = shown.map(t => `<div class="clubrow cc${clubCol(t.club)}${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>${logo(t.club)} ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
       (ui.clubOpen !== t.club ? '' : (t.tb ? `<div class="row2"><button class="btn gold" data-clubplay="${esc(t.club)}">🪑 ${T('Table No')}</button></div>` : otLive(t.club) ? '' : `<div class="muted">${T('No tournament at this club now.')}</div>`) +
         (x => `<div class="row4 clubtools ct4"><button class="btn" data-clubadmin="${esc(t.club)}">🧑‍⚖️ ${T('TD')}</button>` + (x ? `<button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button>` : `<button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button>`) + `<button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button><button class="btn" data-clubres="${esc(t.club)}">📄 ${T('Results')}</button></div>`)(otLive(t.club))) + `</div>`).join('');
     openOv('clubs', `<div class="clubsfs ${ui.clubOpen ? 'one' : 'list'}" style="--n:${Math.max(1, shown.length)}"><h2>🏛 ${T('Clubs')}</h2>
@@ -4293,6 +4298,10 @@ async function showClubs() {
     // the running tournaments first, then every other club (switched off ones are left out)
     const rest = Object.entries(cl || {}).filter(([id, c]) => c && c.a !== false && !live.some(t => t.club === id)).map(([club, c]) => ({ club, c: c.n })).sort((a, b) => String(a.c).localeCompare(String(b.c)));
     ui.clubLive = [...live, ...rest];
+    if (ui.overlay === 'clubs') draw();
+    // each club's logo (a card its admin picked), drawn again when they are in
+    const lg = await Promise.all(ui.clubLive.map(t => Net.Cloud.get('gate/clubs/' + t.club + '/bm/logo').catch(() => null)));
+    ui.clubLogos = {}; ui.clubLive.forEach((t, i) => { if (lg[i]) ui.clubLogos[t.club] = lg[i]; });
     if (ui.overlay === 'clubs') draw();
   }
 }
