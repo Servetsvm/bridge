@@ -2434,6 +2434,15 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 /* a window opened from the chat (the leaderboard, a player's card …) comes above the chat panel */
 .ov{z-index:50}
 
+/* the administrator's usage page */
+.userow{margin:6px 0}
+.userow>div:first-child{display:flex;justify-content:space-between;gap:8px}
+.userow small{opacity:.7;font-size:12px}
+.usebar{height:8px;border-radius:5px;background:rgba(0,0,0,.08);overflow:hidden;margin-top:3px}
+.usebar i{display:block;height:100%;background:var(--pos)}
+.usebar.warn i{background:#e0a040}
+.usebar.bad i{background:var(--neg)}
+
 </style>
 
 <noscript><h1>Bridge Table — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -5632,6 +5641,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Usage and limits": "Kullanım ve sınırlar", "Gemini is near its free daily limit: Llama answers when it is used up.": "Gemini ücretsiz günlük sınırına yakın: bitince Llama cevap verir.", "Workers AI is near its free daily limit: then the robots answer with short ready lines.": "Workers AI ücretsiz günlük sınırına yakın: bitince robotlar kısa hazır cümlelerle cevap verir.", "Many players online at once: the free database allows 100 connections.": "Aynı anda çok oyuncu çevrimiçi: ücretsiz veritabanı 100 bağlantıya izin verir.", "Everything is well within the free limits.": "Her şey ücretsiz sınırların rahatça altında.", "Robots' chat today": "Bugün robot sohbeti", "about {0} answers a day on the free plan": "ücretsiz planda günde yaklaşık {0} cevap", "the free plan has 10,000 Neurons a day": "ücretsiz planda günde 10.000 Neuron", "Last 24 hours": "Son 24 saat", "{0} kinds": "{0} çeşit", "Online database": "Online veritabanı", "Players online now": "Şu an çevrimiçi oyuncular", "the free plan allows 100 connections at once": "ücretsiz plan aynı anda 100 bağlantıya izin verir", "Players": "Oyuncular",
     "Your calls and your system": "Tekliflerin ve sistemin", "your system": "sistemin", "Practising": "Çalışılan",
     "A PBN or LIN file, a hand record or a photo. A deal you enter is practice, not scored.": "PBN ya da LIN dosyası, el kaydı ya da fotoğraf. Girdiğin el alıştırmadır, puana sayılmaz.",
     "No taking back in a tournament": "Turnuvada geri alma yok", "Taken back: this board is now practice, not scored": "Geri alındı: bu el artık alıştırma, puana sayılmaz", "Taken back: practice, not scored": "Geri alındı: alıştırma, puana sayılmaz", "Nothing to take back": "Geri alınacak bir şey yok",
@@ -11860,6 +11870,32 @@ async function botAI(seat, text) {
 }
 /* the administrator's review of the robots' chats (the Worker's log, read with the review key kept on this device):
    the 👎 answers first, then all, the 👍 ones and the answers that were held back (the model said it was a person) */
+/* the administrator: how much of the free services is used — the robots' chat (Gemini and Workers AI, a day), the
+   errors, and the online database (players online at once against its limit, players, logins today); a bar turns
+   orange from 70% and red from 90% of a limit. The limits are the free plans' (Nov 2026): check the providers' pages */
+const USE_LIMITS = { gemini: 1000, ai: 2000, online: 100 };
+async function showUsage() {
+  let key = ''; try { key = localStorage.getItem('bridge-bot-review') || ''; } catch (e) {}
+  const shell = body => openOv('use', `<h2>📈 ${T('Usage and limits')}</h2>${body}<div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  if (!key) { showBotReview('bad'); return; }
+  shell(`<div class="muted">${T('Loading…')}</div>`);
+  let d = null; try { const r = await fetch(BOT_AI.replace(/\/$/, '') + '/usage', { headers: { Authorization: 'Bearer ' + key } }); d = await r.json(); if (!r.ok) throw new Error(d.error || r.status); } catch (e) { d = { err: String(e.message || e) }; }
+  if (ui.overlay !== 'use') return;
+  const bar = (label, n, lim, note) => { const p = lim ? Math.min(100, Math.round(100 * n / lim)) : 0, c = p >= 90 ? 'bad' : p >= 70 ? 'warn' : 'ok';
+    return `<div class="userow"><div><b>${label}</b> <span>${n}${lim ? ' / ' + lim : ''}</span></div>${lim ? `<div class="usebar ${c}"><i style="width:${p}%"></i></div>` : ''}${note ? `<small>${note}</small>` : ''}</div>`; };
+  const today = new Date().toISOString().slice(0, 10), days = (d && d.days) || [];
+  const on = (n, src) => days.filter(x => x.d === n && x.src === src).reduce((a, x) => a + x.n, 0);
+  const gemT = on(today, 'gemini'), aiT = on(today, 'ai');
+  const dayList = [...new Set(days.map(x => x.d))].sort().reverse().map(n => `<tr><td>${n}</td><td class="n">${on(n, 'gemini')}</td><td class="n">${on(n, 'ai')}</td><td class="n">${days.filter(x => x.d === n).reduce((a, x) => a + x.n, 0)}</td></tr>`).join('');
+  const c = Net.st.cloud || {}, onl = (c.on || []).length;
+  const warn = [gemT >= USE_LIMITS.gemini * 0.9 && T('Gemini is near its free daily limit: Llama answers when it is used up.'), aiT >= USE_LIMITS.ai * 0.9 && T('Workers AI is near its free daily limit: then the robots answer with short ready lines.'), onl >= USE_LIMITS.online * 0.7 && T('Many players online at once: the free database allows 100 connections.')].filter(Boolean);
+  shell(`${warn.length ? warn.map(w => `<div class="err">⚠ ${w}</div>`).join('') : `<div class="okmsg">✅ ${T('Everything is well within the free limits.')}</div>`}
+    <div class="grp"><span>💬 ${T("Robots' chat today")}</span>
+      ${d && d.err ? `<div class="muted">⚠ ${esc(d.err)}</div>` : bar('Gemini' + (d.model ? ' (' + esc(d.model) + ')' : ''), gemT, USE_LIMITS.gemini, T('about {0} answers a day on the free plan', USE_LIMITS.gemini)) + bar('Workers AI (Llama)', aiT, USE_LIMITS.ai, T('the free plan has 10,000 Neurons a day'))}
+      ${dayList ? `<table class="res"><thead><tr><th>${T('Date')}</th><th class="n">Gemini</th><th class="n">Llama</th><th class="n">${T('Total')}</th></tr></thead><tbody>${dayList}</tbody></table>` : ''}</div>
+    <div class="grp"><span>🐞 ${T('Errors on devices')}</span>${bar(T('Last 24 hours'), (d && d.errors && d.errors.n) || 0, 0, T('{0} kinds', (d && d.errors && d.errors.kinds) || 0))}</div>
+    <div class="grp"><span>🗄 ${T('Online database')}</span>${bar(T('Players online now'), onl, USE_LIMITS.online, T('the free plan allows 100 connections at once'))}${bar(T('Players'), c.users == null ? '—' : c.users, 0)}${bar(T('Logins today'), c.logins == null ? '—' : c.logins, 0)}</div>`);
+}
 /* the administrator: the errors the players' devices reported (the Worker's list, read with the same review key) */
 async function showErrs() {
   let key = ''; try { key = localStorage.getItem('bridge-bot-review') || ''; } catch (e) {}
@@ -14171,7 +14207,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
   if (t.dataset.pldet) { ev_.preventDefault(); ui.plOpen = ui.plOpen === t.dataset.pldet ? null : t.dataset.pldet; showPlayers(); return; }
-  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="admBotChat">💬 ${T('Robots\' chats')}</button><button class="btn" id="admErrs">🐞 ${T('Errors on devices')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="admBotChat">💬 ${T('Robots\' chats')}</button><button class="btn" id="admErrs">🐞 ${T('Errors on devices')}</button><button class="btn" id="admUse">📈 ${T('Usage and limits')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
@@ -14259,6 +14295,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.brate) { const [id, v] = t.dataset.brate.split(':'), m = BOT.chat.find(x => x.aiId === id); if (m && !m.rate) { m.rate = +v; renderDock(); fetch(BOT_AI.replace(/\/$/, '') + '/rate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, v: +v }) }).catch(() => {}); } return; }
   if (t.id === 'admBotChat') { showBotReview('bad'); return; }
   if (t.id === 'admErrs') { showErrs(); return; }
+  if (t.id === 'admUse') { showUsage(); return; }
   if (t.dataset.brf) { showBotReview(t.dataset.brf); return; }
   if (t.id === 'brKeySave') { const i = $('brKey'); try { localStorage.setItem('bridge-bot-review', (i && i.value || '').trim()); } catch (e) {} showBotReview('bad'); return; }
   if (t.id === 'brKeyForget') { try { localStorage.removeItem('bridge-bot-review'); } catch (e) {} showBotReview('bad'); return; }

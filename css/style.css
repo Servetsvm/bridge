@@ -2381,3 +2381,12 @@ body.four .bmsy.s0{color:#1a8a3a}body.four .bmsy.s1{color:#e07000}
 
 /* a window opened from the chat (the leaderboard, a player's card …) comes above the chat panel */
 .ov{z-index:50}
+
+/* the administrator's usage page */
+.userow{margin:6px 0}
+.userow>div:first-child{display:flex;justify-content:space-between;gap:8px}
+.userow small{opacity:.7;font-size:12px}
+.usebar{height:8px;border-radius:5px;background:rgba(0,0,0,.08);overflow:hidden;margin-top:3px}
+.usebar i{display:block;height:100%;background:var(--pos)}
+.usebar.warn i{background:#e0a040}
+.usebar.bad i{background:var(--neg)}

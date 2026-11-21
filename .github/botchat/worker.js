@@ -155,6 +155,16 @@ async function errors(req, env, json) {
   return json({ rows: rows.results || [] });
 }
 
+async function usage(req, env, json) {
+  const key = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!env.REVIEW_KEY || !sameKey(key, env.REVIEW_KEY)) return json({ error: 'forbidden' }, 403);
+  if (!env.DB) return json({ error: 'no log' }, 500);
+  const since = Date.now() - 7 * 864e5;
+  const days = await env.DB.prepare("SELECT date(ts / 1000, 'unixepoch') AS d, src, COUNT(*) AS n FROM chat WHERE ts > ? GROUP BY d, src ORDER BY d").bind(since).all();
+  const er = await env.DB.prepare('SELECT COUNT(*) AS kinds, SUM(n) AS n FROM errs WHERE last > ?').bind(Date.now() - 864e5).first();
+  return json({ days: days.results || [], errors: er || {}, gemini: !!env.GEMINI_KEY, model: env.GEMINI_MODEL || '', ai: env.MODEL || '' });
+}
+
 async function review(req, env, json) {
   const key = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
   if (!env.REVIEW_KEY || !sameKey(key, env.REVIEW_KEY)) return json({ error: 'forbidden' }, 403);
@@ -213,6 +223,7 @@ export default {
     const path = new URL(req.url).pathname.replace(/\/+$/, '');
     if (path === '/review' && req.method === 'GET') return review(req, env, json);
     if (path === '/errors' && req.method === 'GET') return errors(req, env, json);
+    if (path === '/usage' && req.method === 'GET') return usage(req, env, json);
     if (req.method !== 'POST' || !ok) return json({ error: 'forbidden' }, 403);
     if (limited(req.headers.get('CF-Connecting-IP') || 'x')) return json({ error: 'slow down' }, 429);
     let b; try { b = await req.json(); } catch (e) { return json({ error: 'bad request' }, 400); }
