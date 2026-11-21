@@ -34,7 +34,7 @@ const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All
 function frame(title,body,actions,sub){
   const s=getState(), td=typeof tdName==='function'?tdName():'';
   document.getElementById('panelContent').innerHTML=`<div class="bm3 bm3w tdc"><div class="bm3-screen">
-    <div class="bm3-bar"><span class="td">🧑‍⚖️ TD</span><div class="ev"><b>${cleanData(CLUB_NAME||'')}${td?' · '+cleanData(td):''}</b>${cleanData(title||'')}</div><span class="td" style="visibility:hidden" aria-hidden="true">🧑‍⚖️ TD</span></div>
+    <div class="bm3-bar"><button class="td tdbtn" onclick="tdcClub()" title="${L('Club settings')}">🧑‍⚖️ TD ⚙️</button><div class="ev"><b>${cleanData(CLUB_NAME||'')}${td?' · '+cleanData(td):''}</b>${cleanData(title||'')}</div><span class="td" style="visibility:hidden" aria-hidden="true">🧑‍⚖️ TD ⚙️</span></div>
     ${sub||''}
     <div class="bm3-body">${body}</div>
     <div class="bm3-actions">${actions||''}</div></div></div>`;
@@ -167,6 +167,33 @@ function drawRun(){ TDC.arc=null;
   frame(cleanData(s.name||'')+' · '+L((MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||''),body,`<button class="bm3-cancel" onclick="tdcReload()">↻</button>`+next,sub);
 }
 window.tdcReload=async()=>{ try{ await Promise.all(['state','boards','approvals','movements','pairs','tdcalls'].map(k=>DB.get(k))); }catch(e){} tdcDraw(); };
+// the TD button: the club's settings (its logo, its password, the tables' codes, the slow-table alarm, the links)
+window.tdcClub=function(){
+  const b=(ic,t,fn)=>`<button class="btn tdc-set" onclick="closeModal();${fn}">${ic} ${L(t)}</button>`;
+  openModal('⚙️ '+L('Club settings'),`<div class="tdc-setlist">${[
+    b('🎴','Club logo','clubLogoPick()'),
+    b('🔑','Club password','tdcPw()'),
+    b('🔢','Table codes','showTableCodes()'),
+    b('⚠️','Slow table','tdcStall()'),
+    b('🔗','Players\' link','bgShowPlayersLink()'),
+    b('📺','Screen','tdcScreen()')].join('')}</div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Close')}</button>`);
+};
+// the club's password (the one the club's admins sign in with): the TD changes it; whoever signed in with the old one goes on
+window.tdcPw=function(){
+  openModal('🔑 '+L('Club password'),`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${L('The club\'s admins sign in with it. Give the new password to the other admins.')}</div><div class="field"><label>${L('New password (4 – 40)')}</label><input id="tdcNewPw" maxlength="40" autocomplete="off"></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-blue" onclick="document.getElementById('tdcNewPw').value=newClubPw()">🎲 ${L('New')}</button><button class="btn btn-gold" onclick="tdcPwSave()">${L('Save')}</button>`);
+};
+window.tdcPwSave=async function(){
+  const pw=(document.getElementById('tdcNewPw').value||'').trim();
+  if(pw.length<4||pw.length>40){ toast('❌ '+L('New password (4 – 40)')); return; }
+  try{
+    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/secret/pw.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(pw)});
+    if(!r.ok) throw new Error(String(r.status));
+    // signed in with the club's password: this device's sign-in takes the new one
+    try{ const token=await authToken(), uid=window._authUid; if(token&&uid) await fetch(FB_BASE+'/csess/'+uid+'.json?auth='+token,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({club:String(CLUB_ID),pw})}); }catch(e){}
+  }catch(e){ toast('❌ '+L('Not saved — please log in again')); return; }
+  closeModal(); toast('✅ '+L('Club password changed'));
+};
 window.tdcScreen=()=>{ window.open(location.origin+location.pathname+'?club='+encodeURIComponent(CLUB_ID)+'&role=screen','_blank'); };
 const allDone=()=>{ const s=getState(), B=getBoards(); for(let t=1;t<=s.tableCount;t++){ const m=getMovements()[s.currentRound+'_'+t]||{}; for(let b=m.boardStart||1;b<=(m.boardEnd||0);b++) if(!(B[t+'_'+s.currentRound+'_'+b]||{}).status) return false; } return true; };
 window.tdcNext=async function(){

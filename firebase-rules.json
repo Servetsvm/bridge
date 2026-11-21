@@ -224,6 +224,7 @@
                   ".validate": "newData.isString() && newData.val().matches(/^[0-9][0-9]$/)"
                 },
                 "pw": {
+                  ".write": "(auth != null && root.child('test').child($ns).child('sess').child(auth.uid).child('k').val() === 'servet' && root.child('test').child($ns).child('gate').child('superpw').child('h').exists() && root.child('test').child($ns).child('gate').child('ssess').child(auth.uid).child('h').val() === root.child('test').child($ns).child('gate').child('superpw').child('h').val()) || (auth != null && root.child('test').child($ns).child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('test').child($ns).child('sess').child(auth.uid).child('k').val()) || (auth != null && root.child('test').child($ns).child('gate').child('csess').child(auth.uid).child('club').val() === $club && root.child('test').child($ns).child('gate').child('csess').child(auth.uid).child('pw').val() === root.child('test').child($ns).child('gate').child('clubs').child($club).child('secret').child('pw').val())",
                   ".validate": "newData.isString() && newData.val().length >= 4 && newData.val().length <= 40"
                 },
                 "$other": {
@@ -376,6 +377,7 @@
               ".validate": "newData.isString() && newData.val().matches(/^[0-9][0-9]$/)"
             },
             "pw": {
+              ".write": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' && root.child('gate').child('superpw').child('h').exists() && root.child('gate').child('ssess').child(auth.uid).child('h').val() === root.child('gate').child('superpw').child('h').val()) || (auth != null && root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val()) || (auth != null && root.child('gate').child('csess').child(auth.uid).child('club').val() === $club && root.child('gate').child('csess').child(auth.uid).child('pw').val() === root.child('gate').child('clubs').child($club).child('secret').child('pw').val())",
               ".validate": "newData.isString() && newData.val().length >= 4 && newData.val().length <= 40"
             },
             "$other": {

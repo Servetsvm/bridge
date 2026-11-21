@@ -762,3 +762,9 @@ body.bg-device #panelContent > .bm3.tdc .bm3-bar{display:grid}
 .clogo-btn{background:none;border:2px solid transparent;border-radius:5px;padding:1px 0;cursor:pointer;font-size:12px;display:flex;justify-content:center}
 .clogo-btn .clogo{width:min(1.9em,100%)}
 .clogo-btn.on{border-color:#d9b25c;background:rgba(217,178,92,.25)}
+
+/* the TD button (the club's settings) and its list */
+.bm3-bar button.tdbtn{border:0;color:inherit;font-family:inherit;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.bm3-bar button.tdbtn:hover{filter:brightness(1.15)}
+.tdc-setlist{display:grid;grid-template-columns:1fr;gap:8px}
+.tdc-set{width:100%;text-align:left;justify-content:flex-start;padding:12px 14px;font-size:1rem}
