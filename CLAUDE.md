@@ -27,6 +27,8 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 | `firebase-rules.json` | veritabanı kuralları |
 
 ## Kurallar / alışkanlıklar
+- **Her zaman `main`'e gönder** (kullanıcının kalıcı izni, 2026-11-22): site GitHub Pages'te `main`'den yayınlanır.
+  Oturum dalında çalışılıyorsa iş bitince `main`'e birleştir ve push et.
 - Siteye ait bir dosya değişince **`sw.js` içindeki `VERSION`'u bir arttır** (`bridge-vNNN`).
 - Ardından `dist/bridge-table.html`'i yeniden üret (`build.ps1`; Linux'ta pwsh yoksa aynı adımları node ile yap:
   split.js → index.html'e css/js/lang gömülür, ikon base64). Her site commit'i dist'i de içerir.
