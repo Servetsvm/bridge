@@ -109,8 +109,8 @@ function bpShow() {
       <div>${T('Best contract')}: <b>${bpCon(d.best.c)}</b> · <b>${fmtSigned(d.best.sc)}</b></div>
       <div>${T('Robots')}: <b>${bpCon(d.rob)}</b>${d.rob ? ` · <b>${fmtSigned(d.ro.sc)}</b>` : ''}</div>
       <div class="bpimp ${d.imp >= 0 ? 'pos' : 'neg'}">${d.imp === 0 ? '✅ ' + T('The best contract!') : fmtSigned(d.imp) + ' IMP'}</div></div>
+      <div class="grp"><span>${T('The robots\' auction')}</span>${bpAuc(d.ra)}</div>
       <div class="grp"><span>${T('Your calls and your system')}</span>${d.chk.map(x => x.off ? `<div class="muted bpoff">↪ ${T('From here the auction left your system: no more suggestions.')}</div>` : x.sys === undefined ? `<div class="bpchk"><b>${T(['North', 'East', 'South', 'West'][x.seat])}</b> ${x.call === 'P' ? T('Pass') : callHtml(x.call)}${x.mt ? `<small>${symText(bidTxt(x.mt))}</small>` : ''}</div>` : `<div class="bpchk${x.sys === x.call ? ' ok' : ''}"><b>${T(['North', 'East', 'South', 'West'][x.seat])}</b> ${x.call === 'P' ? T('Pass') : callHtml(x.call)}${x.sys === x.call ? ' ✅' : ` → ${T('your system')}: <b>${x.sys == null ? '?' : x.sys === 'P' ? T('Pass') : callHtml(x.sys)}</b>`}${(x.sys === x.call ? x.mt : x.st) ? `<small>${symText(bidTxt(x.sys === x.call ? x.mt : x.st))}</small>` : ''}</div>`).join('')}</div>
-      <details><summary>${T('The robots\' auction')}</summary>${bpAuc(d.ra)}</details>
       <details><summary>${T('Tricks double dummy')}</summary><table class="bpauc"><tr><th></th>${st.map(x => `<th>${x}</th>`).join('')}</tr>${[0, 1].map(i => `<tr><th>${T(i ? 'South' : 'North')}</th>${d.tab.map(r => `<td>${r[i]}</td>`).join('')}</tr>`).join('')}</table></details>
       <div class="muted">${T('This session: {0} deals, {1} IMP', BP.n, fmtSigned(BP.imp))}</div>`;
   }
