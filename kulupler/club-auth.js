@@ -339,6 +339,17 @@ async function saSetClubActive(id, active){
   try{ await fetch(FB_BASE+'/clubList/'+id+'/a.json'+q,{method:'PUT',body:JSON.stringify(active)}); }catch(e){}
 }
 
+async function saRenameClub(id, name, ownerKey){
+  const token = await fbAuthToken();
+  const q = token?'?auth='+token:'';
+  const r = await fetch(FB_BASE+'/clubs/'+id+'/info/name.json'+q,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(name)});
+  if(!r.ok) throw new Error('Firebase write failed: '+r.status);
+  try{ await fetch(FB_BASE+'/clubList/'+id+'/n.json'+q,{method:'PUT',body:JSON.stringify(name)}); }catch(e){}
+  if(ownerKey) try{ await fetch(FB_BASE+'/owners/'+encodeURIComponent(ownerKey)+'/'+id+'.json'+q,{method:'PUT',body:JSON.stringify(name)}); }catch(e){}
+  // a tournament running now: the players' list of running tournaments shows the club's new name
+  try{ const lr=await fetch(FB_BASE+'/live/'+id+'/c.json'+q,{cache:'no-store'}); if(lr.ok&&(await lr.json())!==null) await fetch(FB_BASE+'/live/'+id+'/c.json'+q,{method:'PUT',body:JSON.stringify(name)}); }catch(e){}
+}
+
 async function saDeleteClub(id, ownerKey){
   const token = await fbAuthToken();
   const q = token?'?auth='+token:'';

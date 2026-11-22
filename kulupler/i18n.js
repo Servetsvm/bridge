@@ -349,6 +349,8 @@
     'New password (at least 4)':'Yeni şifre (en az 4)',
     'At least 4 characters':'En az 4 karakter',
     'Password saved':'Şifre kaydedildi',
+    'Name':'Ad',
+    'Name saved':'Ad kaydedildi',
     'New club':'Yeni kulüp',
     'Only you open clubs. The club gets a password: give it with the club ID to the club\'s admin.':'Kulüpleri sadece siz açarsınız. Kulübe bir şifre verilir: kulüp kimliğiyle birlikte kulüp yöneticisine verin.',
     'Enter the club ID':'Kulüp kimliğini yazın',

@@ -30,6 +30,7 @@ async function renderSuperAdminPanel(){
             <div style="font-size:0.72rem;color:var(--text3);margin-top:2px;">${cl.fed==='tbf'?'🇹🇷 TBF':'🇳🇴 NBF'} · 👤 ${cl.owner||'—'} · ID: ${cl.id}${cl.created?' · Created: '+new Date(cl.created).toLocaleDateString():''}</div>
           </div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="saNamePrompt(${i})">✏️ Name</button>
             <button class="btn btn-gold btn-sm" onclick="saPwPrompt(${i})">🔑 Password</button>
             <a class="btn btn-ghost btn-sm" href="?club=${encodeURIComponent(cl.id)}" target="_blank" rel="noopener">Open</a>
             <button class="btn ${cl.active?'btn-ghost':'btn-green'} btn-sm" onclick="saToggleActive(${i})">${cl.active?'Deactivate':'Activate'}</button>
@@ -125,6 +126,26 @@ window.saPwSave=async function(i){
   if(!/^\d{4,12}$/.test(pw)){ toast('❌ 4–12 digits'); return; }
   try{ const r=await fetch(await fbRootUrl('/clubs/'+cl.id+'/secret/pw.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(pw)}); if(!r.ok) throw new Error('HTTP '+r.status); closeModal(); toast('🔑 Password saved'); }
   catch(e){ toast('❌ Failed: '+e.message); }
+};
+// a club's name: changed everywhere it is kept (the club's info, the players' Clubs list, its owner's list and a running
+// tournament's entry); the club's ID and its link stay the same
+window.saNamePrompt=function(i){
+  const cl=SA_CLUBS[i]; if(!cl) return;
+  openModal('Club name', `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:6px;">ID: <b>${cl.id}</b></div>
+    <div class="pw-wrap"><input type="text" id="saNewName" maxlength="40" placeholder="Club name" autocomplete="off" onkeydown="if(event.key==='Enter')saNameSave(${i})"></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-gold" onclick="saNameSave(${i})">Save</button>`);
+  const inp=document.getElementById('saNewName'); if(inp){ inp.value=cl.name; setTimeout(()=>{ inp.focus(); inp.select(); },50); }
+};
+window.saNameSave=async function(i){
+  const cl=SA_CLUBS[i]; if(!cl) return;
+  const name=(document.getElementById('saNewName')?.value||'').trim().slice(0,40);
+  if(!name){ toast('❌ Enter the club name'); return; }
+  if(name===cl.name){ closeModal(); return; }
+  try{
+    await saRenameClub(cl.id, name, cl.ownerKey);
+    closeModal(); toast('✏️ Name saved');
+    renderSuperAdminPanel();
+  }catch(e){ toast('❌ Failed: '+e.message); }
 };
 window.saToggleActive=async function(i){
   const cl=SA_CLUBS[i]; if(!cl) return;
