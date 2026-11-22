@@ -2409,3 +2409,6 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 /* Admin: what the robots learned, a scrolling list */
 .learnlist{max-height:65vh;overflow:auto;display:flex;flex-direction:column;gap:8px}
 .learnlist small{opacity:.6;font-size:11px}
+
+/* Admin: the country a player logged in from */
+.plctry{font-weight:600;font-size:.85em;opacity:.8;margin-left:4px}

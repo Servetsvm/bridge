@@ -895,7 +895,7 @@ const Net = (() => {
     if (!Cloud.on || !isAdmin()) return [];
     const [users, logins] = await Promise.all([Cloud.get('users'), Cloud.get('logins').catch(() => null)]);
     const last = {}, days = {}, hist = {};
-    for (const [day, L] of Object.entries(logins || {})) for (const [k, x] of Object.entries(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; (hist[k] = hist[k] || []).push({ day, in: x && x.ts || 0, out: x && x.le || 0, a: x && x.a || null, pr: x && x.pr || '' }); }
+    for (const [day, L] of Object.entries(logins || {})) for (const [k, x] of Object.entries(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; (hist[k] = hist[k] || []).push({ day, in: x && x.ts || 0, out: x && x.le || 0, a: x && x.a || null, pr: x && x.pr || '', c: x && /^[A-Z]{2}$/.test(x.c || '') ? x.c : '' }); }
     for (const k in hist) hist[k].sort((a, b) => b.day.localeCompare(a.day));
     return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, hist: hist[k] || [], me: k === ruleKey(myName()) }))
       .sort((a, b) => (b.last || '').localeCompare(a.last || '') || b.ts - a.ts);

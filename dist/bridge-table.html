@@ -2462,6 +2462,9 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .learnlist{max-height:65vh;overflow:auto;display:flex;flex-direction:column;gap:8px}
 .learnlist small{opacity:.6;font-size:11px}
 
+/* Admin: the country a player logged in from */
+.plctry{font-weight:600;font-size:.85em;opacity:.8;margin-left:4px}
+
 </style>
 
 <noscript><h1>BridgePlay — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -15144,10 +15147,10 @@ async function showPlayers() {
   // a name opened: its days, newest first (30): in and out, and what was played that day
   const plDays = x => `<div class="pldays">${(x.hist || []).slice(0, 30).map(h => { const a = h.a || {}, cv = Object.keys(a.cv || {}).concat(String(h.pr || '').split(',')).filter((k, i, A) => k && A.indexOf(k) === i && E.convInfo(k));
     const did = [a.r ? '🤖 ' + T('With robots') + ' ' + a.r : '', a.o ? '🌐 ' + T('At a table') + ' ' + a.o : '', a.t ? '🏆 ' + T('Tournaments') + ' ' + a.t : '', a.p ? '📚 ' + T('Practise conventions') + ' ' + a.p : ''].filter(Boolean).join(' · ');
-    return `<div class="plday"><b>${new Date(h.day).toLocaleDateString()}</b><span>${T('Logged in')} ${hm(h.in)} · ${T('Last seen')} ${hm(h.out)}</span><span>${did || '—'}${a.b ? ' · ' + T('Boards') + ' ' + a.b : ''}</span>${cv.length ? `<small>${cv.map(k => esc(pracName(k))).join(', ')}</small>` : ''}</div>`; }).join('') || `<div class="muted">—</div>`}${x.me ? '' : `<button class="btn mini-btn plpin" data-plpin="${esc(x.k)}">🔑 ${T('New PIN')}</button><button class="btn mini-btn plpin" data-plmsg="${esc(x.name)}">✉️ ${T('Write a message…')}</button>`}</div>`;
+    return `<div class="plday"><b>${new Date(h.day).toLocaleDateString()}${h.c ? ' ' + flagOf(h.c) + ' ' + h.c : ''}</b><span>${T('Logged in')} ${hm(h.in)} · ${T('Last seen')} ${hm(h.out)}</span><span>${did || '—'}${a.b ? ' · ' + T('Boards') + ' ' + a.b : ''}</span>${cv.length ? `<small>${cv.map(k => esc(pracName(k))).join(', ')}</small>` : ''}</div>`; }).join('') || `<div class="muted">—</div>`}${x.me ? '' : `<button class="btn mini-btn plpin" data-plpin="${esc(x.k)}">🔑 ${T('New PIN')}</button><button class="btn mini-btn plpin" data-plmsg="${esc(x.name)}">✉️ ${T('Write a message…')}</button>`}</div>`;
   const rows = L.filter(x => !q || x.name.toLowerCase().includes(q)).map(x => `<label class="plrow${sel.has(x.k) ? ' on' : ''}">
       <input type="checkbox" data-plk="${esc(x.k)}" ${sel.has(x.k) ? 'checked' : ''} ${x.me ? 'disabled' : ''}>
-      <b>${esc(x.name)}</b><small>${T('Made')}: ${when(x.ts)} · ${T('Last seen')}: ${x.hist && x.hist[0] ? when(x.hist[0].out || x.hist[0].in) : '–'} · ${T('{0} days', x.days)}</small><button class="pldet" data-pldet="${esc(x.k)}">${ui.plOpen === x.k ? '▾' : '▸'}</button></label>${ui.plOpen === x.k ? plDays(x) : ''}`).join('');
+      <b>${esc(x.name)}${(c => c ? ` <span class="plctry" title="${c}">${flagOf(c)} ${c}</span>` : '')(((x.hist || []).find(h => h.c) || {}).c)}</b><small>${T('Made')}: ${when(x.ts)} · ${T('Last seen')}: ${x.hist && x.hist[0] ? when(x.hist[0].out || x.hist[0].in) : '–'} · ${T('{0} days', x.days)}</small><button class="pldet" data-pldet="${esc(x.k)}">${ui.plOpen === x.k ? '▾' : '▸'}</button></label>${ui.plOpen === x.k ? plDays(x) : ''}`).join('');
   openOv('players', `<h2>👥 ${T('All players')} <small>(${L.length})</small></h2>
     <input id="plQ" class="tok wide" placeholder="🔍 ${T('Search a name…')}" value="${esc(ui.plQ || '')}">
     <div class="pllist">${rows || `<div class="muted">${T('Nobody yet.')}</div>`}</div>
@@ -16303,7 +16306,7 @@ const Net = (() => {
     if (!Cloud.on || !isAdmin()) return [];
     const [users, logins] = await Promise.all([Cloud.get('users'), Cloud.get('logins').catch(() => null)]);
     const last = {}, days = {}, hist = {};
-    for (const [day, L] of Object.entries(logins || {})) for (const [k, x] of Object.entries(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; (hist[k] = hist[k] || []).push({ day, in: x && x.ts || 0, out: x && x.le || 0, a: x && x.a || null, pr: x && x.pr || '' }); }
+    for (const [day, L] of Object.entries(logins || {})) for (const [k, x] of Object.entries(L || {})) { days[k] = (days[k] || 0) + 1; if (!last[k] || day > last[k]) last[k] = day; (hist[k] = hist[k] || []).push({ day, in: x && x.ts || 0, out: x && x.le || 0, a: x && x.a || null, pr: x && x.pr || '', c: x && /^[A-Z]{2}$/.test(x.c || '') ? x.c : '' }); }
     for (const k in hist) hist[k].sort((a, b) => b.day.localeCompare(a.day));
     return Object.entries(users || {}).filter(([, u]) => u && u.name).map(([k, u]) => ({ k, name: u.name, ts: u.ts || 0, last: last[k] || '', days: days[k] || 0, hist: hist[k] || [], me: k === ruleKey(myName()) }))
       .sort((a, b) => (b.last || '').localeCompare(a.last || '') || b.ts - a.ts);
