@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "What the robots learned": "Robotun öğrendikleri",
     "System table": "Sistem masası", "The robots play each bidding system: watch, or sit down.": "Robotlar her teklif sistemini oynar: izle ya da otur.",
     "Tournaments and lessons": "Turnuvalar ve dersler", "Make a tournament, or a lesson with your own deals (PBN/LIN).": "Turnuva kur ya da kendi ellerinle (PBN/LIN) ders yap.",
     "From here the auction left your system: no more suggestions.": "Buradan sonra açık artırma sisteminden ayrıldı: öneri gösterilmiyor.",
@@ -464,6 +465,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "What the robots learned": "Hva robotene har lært",
     "System table": "Systembordet", "The robots play each bidding system: watch, or sit down.": "Robotene spiller hvert meldesystem: se på, eller sett deg.",
     "Tournaments and lessons": "Turneringer og leksjoner", "Make a tournament, or a lesson with your own deals (PBN/LIN).": "Lag en turnering, eller en leksjon med dine egne giv (PBN/LIN).",
     "From here the auction left your system: no more suggestions.": "Herfra forlot meldingene systemet ditt: ingen flere forslag.",

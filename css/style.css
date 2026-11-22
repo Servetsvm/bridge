@@ -2405,3 +2405,7 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
   body.homev2 .h2tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media (max-width:899px){ body.homev2 #hRobot{display:none} }
+
+/* Admin: what the robots learned, a scrolling list */
+.learnlist{max-height:65vh;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.learnlist small{opacity:.6;font-size:11px}

@@ -2871,7 +2871,11 @@ function learnedMsg() {
   SET.learnedSeen = Math.max(...ROBOT_LEARNED.map(x => x.v)); if (LESSONS) SET.lessonSeen = LESSONS.v; Store.saveSettings(SET); save();
   openOv('learned', `<h2>🤖 Robot yeni öğrendi</h2>${L.map(x => `<div class="cvreq"><div class="cvb">${esc(x.tr)}</div></div>`).join('')}<div class="row2"><button class="btn gold" id="oClose">Kapat</button></div>`);
 }
-setTimeout(learnedMsg, 6000); setInterval(learnedMsg, 30000);   // shown when no other window is open
+// the notes no longer pop up (Servet's wish): Admin → What the robots learned lists them all, newest first
+function showLearned() {
+  const L = ROBOT_LEARNED.slice().sort((a, b) => b.v - a.v);
+  openOv('learned', `<h2>🤖 ${T('What the robots learned')}</h2><div class="learnlist">${L.map(x => `<div class="cvreq"><small>v${x.v}</small><div class="cvb">${esc(SET.lang === 'tr' || !x.en ? x.tr : x.en)}</div></div>`).join('')}</div><div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
+}
 /* opponent robots by level (only when you play alone with robots): a beginner looks less far ahead and sometimes plays a careless card */
 function robotCard(g, t) {
   const lv = SET.robotLvl || 'expert';
@@ -3676,7 +3680,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'instGo') { instGo(); return; }
   if (t.id === 'welGo' || t.id === 'welClose') { welcomeClose(t.id === 'welGo'); return; }
   if (t.dataset.pldet) { ev_.preventDefault(); ui.plOpen = ui.plOpen === t.dataset.pldet ? null : t.dataset.pldet; showPlayers(); return; }
-  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="admBotChat">💬 ${T('Robots\' chats')}</button><button class="btn" id="admErrs">🐞 ${T('Errors on devices')}</button><button class="btn" id="admUse">📈 ${T('Usage and limits')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="admBotChat">💬 ${T('Robots\' chats')}</button><button class="btn" id="admErrs">🐞 ${T('Errors on devices')}</button><button class="btn" id="admUse">📈 ${T('Usage and limits')}</button><button class="btn" id="admLearned">🤖 ${T('What the robots learned')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
@@ -3766,6 +3770,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'admBotChat') { showBotReview('bad'); return; }
   if (t.id === 'admErrs') { showErrs(); return; }
   if (t.id === 'admUse') { showUsage(); return; }
+  if (t.id === 'admLearned') { showLearned(); return; }
   if (t.dataset.brf) { showBotReview(t.dataset.brf); return; }
   if (t.id === 'brKeySave') { const i = $('brKey'); try { localStorage.setItem('bridge-bot-review', (i && i.value || '').trim()); } catch (e) {} showBotReview('bad'); return; }
   if (t.id === 'brKeyForget') { try { localStorage.removeItem('bridge-bot-review'); } catch (e) {} showBotReview('bad'); return; }
