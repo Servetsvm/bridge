@@ -3743,7 +3743,12 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
   // the club's info in a window of its own; Back returns to the club
-  if (t.dataset.clubinfo) { openOv('clubinfo', `<h2>ℹ️ ${esc(t.dataset.clubname || '')}</h2>${clubInfoHtml((ui.clubInfo || {})[t.dataset.clubinfo])}<div class="row2"><button class="btn" data-clubback="1">‹ ${T('Back')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.dataset.clubinfo) {   // full screen, in the club's own colour, with its logo
+    const row = t.closest('.clubrow'), lg = row && row.querySelector('.clogo'), cc = row ? [...row.classList].find(c => /^cc\d$/.test(c)) || '' : '';
+    openOv('clubinfo', `<div class="clubsfs one ciPage"><div class="row2 clubstop"><button class="btn" data-clubback="1">‹ ${esc(t.dataset.clubname || T('Back'))}</button><button class="btn" id="oClose">${T('Close')}</button></div>
+      <div class="clubrow ${cc} open"><div class="cihead">${lg ? lg.outerHTML : '🏛'}<b>${esc(t.dataset.clubname || '')}</b></div><div class="cisub">ℹ️ ${T('Club info')}</div>${clubInfoHtml((ui.clubInfo || {})[t.dataset.clubinfo])}</div></div>`);
+    return;
+  }
   if (t.dataset.clubback) { showClubs(); return; }
   if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
   if (t.dataset.clubmov) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubmov) + '&movement=1'); return; }

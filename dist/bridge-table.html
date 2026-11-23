@@ -2484,6 +2484,27 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .clubinfo .cibtns{display:flex;gap:6px;flex-wrap:wrap}
 .clubinfo .cibtns .btn{text-decoration:none}
 .clubrow .btn.clubinfob{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:66px;margin-top:10px;font-size:20px;font-weight:700;border-radius:12px}
+/* a club's info: full screen like Clubs, in the club's colour, bigger text */
+#ov:has(.sheet[data-ov="clubinfo"]){padding:0}
+.sheet[data-ov="clubinfo"]{width:100%;max-width:none;height:100%;max-height:none;border-radius:0;box-sizing:border-box;padding:16px max(16px,calc((100% - 760px)/2)) 24px;overflow:auto;display:flex;flex-direction:column}
+.sheet[data-ov="clubinfo"] .fbar{display:none}
+.ciPage .clubrow{flex:1;display:flex;flex-direction:column;gap:14px;padding:16px}
+.ciPage .cihead{display:flex;align-items:center;gap:14px}
+.ciPage .cihead b{font-size:clamp(24px,7vw,40px);line-height:1.1}
+.ciPage .cisub{font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.7}
+.ciPage .clubinfo{gap:12px;margin:0}
+.ciPage .clubinfo .cirow{font-size:20px;padding:16px 14px;gap:14px;flex-wrap:wrap}
+.ciPage .clubinfo .cirow>span:first-child{font-size:28px}
+.ciPage .clubinfo small{font-size:13px}
+.ciPage .clubinfo em{font-size:17px;padding:10px 16px;border-radius:10px}
+.ciPage .clubinfo .cibtns .btn{font-size:18px;padding:12px 18px}
+.ciPage .cihead .clogo{font-size:clamp(34px,9vw,52px)}
+.ciPage .clubinfo .cirow>span:nth-child(2){flex:1 1 60%}
+.ciPage .clubinfo .cirow em,.ciPage .clubinfo .cibtns{flex:1 1 100%;margin-left:42px}
+.ciPage .clubinfo .cirow em{text-align:center;padding:14px}
+.ciPage .clubinfo .cibtns{display:flex;gap:10px}
+.ciPage .clubinfo .cibtns .btn{flex:1;text-align:center;padding:14px}
+.clubsfs > .row2 .btn[data-clubback]{background:#1f5d36!important;color:#fff!important;border:2px solid #174a2b!important}
 
 </style>
 
@@ -14385,7 +14406,12 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
   // the club's info in a window of its own; Back returns to the club
-  if (t.dataset.clubinfo) { openOv('clubinfo', `<h2>ℹ️ ${esc(t.dataset.clubname || '')}</h2>${clubInfoHtml((ui.clubInfo || {})[t.dataset.clubinfo])}<div class="row2"><button class="btn" data-clubback="1">‹ ${T('Back')}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.dataset.clubinfo) {   // full screen, in the club's own colour, with its logo
+    const row = t.closest('.clubrow'), lg = row && row.querySelector('.clogo'), cc = row ? [...row.classList].find(c => /^cc\d$/.test(c)) || '' : '';
+    openOv('clubinfo', `<div class="clubsfs one ciPage"><div class="row2 clubstop"><button class="btn" data-clubback="1">‹ ${esc(t.dataset.clubname || T('Back'))}</button><button class="btn" id="oClose">${T('Close')}</button></div>
+      <div class="clubrow ${cc} open"><div class="cihead">${lg ? lg.outerHTML : '🏛'}<b>${esc(t.dataset.clubname || '')}</b></div><div class="cisub">ℹ️ ${T('Club info')}</div>${clubInfoHtml((ui.clubInfo || {})[t.dataset.clubinfo])}</div></div>`);
+    return;
+  }
   if (t.dataset.clubback) { showClubs(); return; }
   if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
   if (t.dataset.clubmov) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubmov) + '&movement=1'); return; }

@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v638`, kulüpler `kulup-v165`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v640`, kulüpler `kulup-v165`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -55,7 +55,7 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v638`, kulü
 ### 2026-11-23
 - Kulüp bilgisi: kulüp yöneticisi BridgeScore'da TD → Kulüp ayarları → ℹ️ Kulüp bilgisi (adres, irtibat kişisi, telefon) →
   `gate/clubs/<id>/bm/info {adr,kp,tel}`. BridgePlay Kulüpler'de kulübe basınca Sonuçlar'ın altında "ℹ️ Kulüp bilgisi" düğmesi
-  (bilgi varsa), basınca ayrı pencere (`openOv('clubinfo')`, ‹ Geri kulübe döner; `clubInfoHtml`): adres → Google Maps yol
+  (bilgi varsa), basınca tam ekran sayfa (`openOv('clubinfo')`, `.ciPage`, kulübün rengi ve logosu, ‹ Geri kulübe döner; `clubInfoHtml`): adres → Google Maps yol
   tarifi, telefon → `tel:` Ara / `sms:` SMS.
 - **Açılış hızı:** sw.js artık FILES listesindeki dosyaları önce önbellekten verir (eskiden her açılışta her dosya internetten
   istenirdi: kötü bağlantıda ~4,7 s → 0,1 s). Güncelleme: yeni VERSION → arka planda iner, bir sonraki açılışta yeni sürüm.
