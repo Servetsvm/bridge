@@ -894,7 +894,9 @@ const Net = (() => {
     const all = await Cloud.get('destek') || {};
     return Object.entries(all).map(([k, th]) => {
       const m = Object.values(th.m || {}).filter(x => x && x.ts).sort((a, b) => a.ts - b.ts), last = m[m.length - 1];
-      return { k, n: th.n || decodeURIComponent(k), last, unread: m.some(x => x.by === 'p' && x.ts > (th.ar || 0)) };
+      // a club request not answered yet (no message from the administrator after it)
+      const ask = [...m].reverse().find(x => x.by === 'p' && x.kl && typeof x.kl === 'object'), kl = ask && !m.some(x => x.ts > ask.ts && x.by === 'a') ? { ...ask.kl, ts: ask.ts } : null;
+      return { k, n: th.n || decodeURIComponent(k), last, kl, unread: m.some(x => x.by === 'p' && x.ts > (th.ar || 0)) };
     }).filter(x => x.last).sort((a, b) => b.last.ts - a.last.ts);
   }
   /* new messages (looked at on arrival and every two minutes): for the administrator the threads with a player's
@@ -904,7 +906,18 @@ const Net = (() => {
     st.supChk = Date.now();
     try {
       let n = 0;
-      if (isAdmin()) n = (await supInbox()).filter(x => x.unread).length;
+      if (isAdmin()) {
+        const box = await supInbox(); n = box.filter(x => x.unread).length;
+        // club requests waiting for the administrator: a notice (and a phone notification with the app in the background) for each new one
+        const kr = box.filter(x => x.kl).map(x => ({ k: x.k, n: x.n, kl: x.kl })).sort((a, b) => b.kl.ts - a.kl.ts);
+        const seen = +SET.klSeen || 0, fresh = kr.filter(x => x.kl.ts > seen);
+        if (fresh.length) {
+          const txt = '🏛️ ' + T('New club request') + ': ' + fresh.map(x => x.kl.n + ' (' + x.n + ')').join(', ');
+          if (typeof flash === 'function') flash(txt, 6000);
+          SET.klSeen = Math.max(...fresh.map(x => x.kl.ts)); try { Store.saveSettings(SET); } catch (e) {}
+        }
+        if (JSON.stringify(kr) !== JSON.stringify(st.klReq || [])) { st.klReq = kr; if (typeof render === 'function') render(); }
+      }
       else { const th = await supThread(); n = th.m.filter(x => x.by === 'a' && x.ts > th.pr).length; }
       if (n > (st.supNew || 0) && typeof flash === 'function') flash('✉️ ' + (isAdmin() ? T('{0} new messages from players', n) : T('The administrator answered you')), 5000);   // seen on any screen, not only the home page
       if (n !== (st.supNew || 0)) { st.supNew = n; if (typeof render === 'function') render(); }
@@ -1984,5 +1997,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lbot, lobbyOthers, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, clubAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lbot, lobbyOthers, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get klReq() { return st.klReq || []; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, clubAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

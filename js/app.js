@@ -2003,11 +2003,13 @@ function renderHome() {
     const sup = N.supNew ? (N.isAdmin() ? `<button class="hcard supnew" id="hSupIn">✉️ ${T('{0} new messages from players', N.supNew)}</button>` : `<button class="hcard supnew" id="hSup">✉️ ${T('The administrator answered you')}</button>`) : '';
     // the database cannot be reached: results, progress and messages are not saved; say why and what to do
     const bad = N.cloudBad && myNm() ? `<div class="hcard cloudbad"><b>⚠ ${T('Cannot reach the server: your results, progress and messages are not saved.')}</b><small>${T('Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.')}</small></div>` : '';
+    // club requests waiting: each with Open the club (the super admin's panel, filled in)
+    const kln = N.isAdmin() ? N.klReq.map(x => `<div class="hcard supnew klreq"><span>🏛️ ${T('Club request')}: <b>${esc(x.kl.n)}</b> · ${esc(x.n)}${x.kl.c ? ' · ' + esc(x.kl.c) : ''}</span><button class="btn gold mini-btn" data-klopen="${esc(JSON.stringify({ n: x.kl.n, f: x.kl.f, k: x.k, pn: x.n }))}">🏛️ ${T('Open the club')}</button></div>`).join('') : '';
     const cvn = N.isAdmin() && N.cvNew ? `<button class="hcard supnew" id="hConvReq">📥 ${T('{0} new convention requests', N.cvNew)}</button>` : '';
     // the administrator's card: always on the home page (players, messages, requests, robots)
     const admN = (N.supNew || 0) + (N.cvNew || 0) + (ui.learnNew || 0);
     set('hAdm', N.isAdmin() ? `<button class="hadmb" id="admTog" title="${T('Admin')}">👑${admN ? `<b class="supc">${admN}</b>` : ''}</button>` : '');
-    set('hPend', bad + sup + cvn + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
+    set('hPend', bad + sup + kln + cvn + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
     set('hTables', (typeof ctCardHtml === 'function' ? ctCardHtml() : '') + N.tablesHtml());
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
@@ -3697,7 +3699,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'clubAskSend') { sendClubAsk(); return; }
   if (t.dataset.klopen) {   // the super admin: the clubs program with the new club's name and federation filled in; its ID and password go back to the player
     let r = {}; try { r = JSON.parse(t.dataset.klopen); } catch (e) {}
-    closeOv(); openClubs('?sa=1&nc=' + encodeURIComponent(r.n || '') + '&nf=' + (r.f === 'tbf' ? 'tbf' : 'nbf') + '&for=' + encodeURIComponent(ui.supK || '') + '&forn=' + encodeURIComponent(ui.supThN || ''));
+    closeOv(); openClubs('?sa=1&nc=' + encodeURIComponent(r.n || '') + '&nf=' + (r.f === 'tbf' ? 'tbf' : 'nbf') + '&for=' + encodeURIComponent(r.k || ui.supK || '') + '&forn=' + encodeURIComponent(r.pn || ui.supThN || ''));
     return;
   }
   if (t.id === 'supReply') { sendSupReply(); return; }

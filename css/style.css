@@ -2420,3 +2420,5 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .hclubask:hover{border-color:var(--brass,#c9a43a)}
 #ov label.fld{display:flex;flex-direction:column;gap:3px;margin:8px 0;font-size:13px;font-weight:600}
 #ov label.fld .tok{font-weight:400;font-size:15px;font-family:inherit;letter-spacing:normal;box-sizing:border-box;width:100%}
+.hcard.klreq{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.hcard.klreq span{flex:1 1 180px}
