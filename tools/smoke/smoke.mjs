@@ -28,7 +28,7 @@ const chrome = process.env.CHROME || ['C:/Program Files/Google/Chrome/Applicatio
 if (!chrome) { console.error('smoke: no Chrome found (set CHROME)'); process.exit(1); }
 
 const problems = [];
-const browser = await puppeteer.launch({ executablePath: chrome, headless: true, protocolTimeout: 600000, args: ['--no-sandbox', '--disable-gpu', '--window-size=1280,900'] });
+const browser = await puppeteer.launch({ executablePath: chrome, headless: true, protocolTimeout: 600000, args: ['--no-sandbox', '--disable-gpu', '--window-size=1280,900', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1'] });
 let ok = false;
 try {
   const page = await browser.newPage();
@@ -68,12 +68,33 @@ try {
   // the screen after the boards: the results window opens
   const shot = await page.evaluate(() => { try { closeOv(); showResults(); } catch (e) { return String(e); } return ui.overlay; });
   if (shot !== 'res') problems.push('the results window did not open (' + shot + ')');
+
+  /* without internet (on a plane): a fresh page fills the offline copy, then this server stops and the app must still
+     open from the phone's copy and deal a board. (Request interception is off on this page: Chrome skips the service
+     worker with it on; other sites are refused by the browser's host rules instead.) */
+  const off = await browser.newPage();
+  await off.setViewport({ width: 412, height: 900 });
+  off.on('pageerror', e => problems.push('offline page error: ' + (e.message || e)));
+  await off.goto(base, { waitUntil: 'load', timeout: 60000 });
+  await off.waitForFunction(async () => { if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return false;
+    for (const f of ['./', 'css/style.css', 'js/app.js', 'js/net.js', 'js/dds.js', 'js/lang/en.js']) if (!(await caches.match(f, { ignoreSearch: true }))) return false; return true; }, { timeout: 90000, polling: 1000 });
+  server.closeAllConnections?.(); await new Promise(r => server.close(r));
+  await off.setOfflineMode(true);
+  await off.reload({ waitUntil: 'load', timeout: 60000 });
+  const offRes = await off.evaluate(async () => {
+    for (let i = 0; i < 100 && !(typeof G !== 'undefined' && typeof newBoard === 'function' && typeof T === 'function'); i++) await new Promise(r => setTimeout(r, 100));
+    if (typeof newBoard !== 'function') return { ok: false, why: 'the app did not load' };
+    try { closeOv(); } catch (e) {} ui.overlay = null; newBoard();
+    return { ok: G && G.phase === 'bid' && G.deal && G.deal[0].length === 13, why: 'phase ' + (G && G.phase) };
+  });
+  if (!offRes.ok) problems.push('without internet the app did not start a board (' + offRes.why + ')');
+  else console.log('smoke: opens and deals without internet');
   ok = !problems.length;
 } catch (e) {
   problems.push(String(e.message || e));
 } finally {
   await browser.close();
-  server.close();
+  if (server.listening) server.close();
 }
 for (const p of problems) console.error('smoke: ' + p);
 console.log(ok ? 'smoke: OK' : 'smoke: FAILED');
