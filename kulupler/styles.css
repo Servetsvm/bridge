@@ -774,3 +774,6 @@ body.bg-device #panelContent > .bm3.tdc .bm3-bar{display:grid}
 .clogo-up{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;font-size:.85rem;color:var(--text2)}
 .clogo-up .btn{cursor:pointer}
 .clogo-cur .clogo{font-size:20px;border:2px solid #d9b25c}
+/* the entry screen's table numbers: bigger keys and numbers (tapped by players standing at the table) */
+.bg-entry .bm3-keys{gap:10px}
+.bg-entry .bm3-key{min-height:80px;font-size:2.1rem;border-radius:12px}
