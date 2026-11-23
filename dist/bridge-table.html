@@ -2505,6 +2505,11 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .ciPage .clubinfo .cibtns{display:flex;gap:10px}
 .ciPage .clubinfo .cibtns .btn{flex:1;text-align:center;padding:14px}
 .clubsfs > .row2 .btn[data-clubback]{background:#1f5d36!important;color:#fff!important;border:2px solid #174a2b!important}
+/* the list of clubs: the club's name on one line, the running tournament (its date) and an online evening under it */
+.clubsfs.list .clubname{display:grid;grid-template-columns:1fr auto;align-content:center;column-gap:8px;row-gap:4px}
+.clubsfs.list .clubname b{grid-column:1;display:flex;align-items:center;gap:10px;min-width:0}
+.clubsfs.list .clubname small{grid-column:1}
+.clubsfs.list .clubname .clubarr{grid-column:2;grid-row:1 / span 3;align-self:center}
 
 </style>
 
