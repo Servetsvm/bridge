@@ -2510,6 +2510,10 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .clubsfs.list .clubname b{grid-column:1;display:flex;align-items:center;gap:10px;min-width:0}
 .clubsfs.list .clubname small{grid-column:1}
 .clubsfs.list .clubname .clubarr{grid-column:2;grid-row:1 / span 3;align-self:center}
+/* the club's info page on the table's green felt (the club's own colour on the card) */
+.sheet[data-ov="clubinfo"]{background:radial-gradient(ellipse at 50% 40%,var(--felt) 0%,var(--felt-deep) 100%)!important}
+.sheet[data-ov="clubinfo"] .clubsfs > .row2 #oClose{border-color:#fff!important}
+.sheet[data-ov="clubinfo"] .clubsfs > .row2 .btn[data-clubback]{border:2px solid rgba(255,255,255,.75)!important;background:#174a2b!important}
 
 </style>
 
