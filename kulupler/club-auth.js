@@ -127,7 +127,7 @@ async function initClubGate(){
   if(roleParam!=='screen') document.body.classList.add('bg-device');   // every sign-in screen as a BridgeScore
   const fromLink=!!id;
   // the super admin's button in BridgePlay's Clubs: straight to his sign-in
-  if(params.get('sa')==='1'){ if(me()) await window.bridgeSession(); if(isSuper()){ document.getElementById('clubGate').style.display='none'; enterSuperAdminLogin(); setTimeout(()=>document.getElementById('pwInput')?.focus(),100); return; } }
+  if(params.get('sa')==='1'){ if(me()) await window.bridgeSession(); if(isSuper()){ if(await superSessionOk()){ showSuperPanel(); return; } document.getElementById('clubGate').style.display='none'; enterSuperAdminLogin(); setTimeout(()=>document.getElementById('pwInput')?.focus(),100); return; } }
   if(id&&(params.get('results')==='1'||params.get('movement')==='1')&&me()){
     await window.bridgeSession(); const info=await checkClubExists(id); if(info){ CLUB_INFO=info; setClub(id); CLUB_NAME=info.name||CLUB_NAME; window._ccResultsOnly=true; document.getElementById('loginScreen').style.display='none'; if(params.get('movement')==='1') await ccMovementPage(); else await ccResultsIndex(); return; }
   }
@@ -407,6 +407,22 @@ window.changeClub=function(){
   const err=document.getElementById('clubErr'); if(err) err.textContent='';
 };
 
+// the super admin's panel (after his password, or straight away while this device's super admin session still holds)
+function showSuperPanel(){
+  document.getElementById('clubGate').style.display='none';
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('topbarRole').textContent='Super Admin';
+  const clubBadge=document.getElementById('topbarClub'); if(clubBadge) clubBadge.style.display='none';
+  document.getElementById('topbarRound').style.display='none';
+  role='superadmin';
+  renderSuperAdminPanel();
+}
+// does this device's super admin session (gate/ssess, made with his password) still open the clubs? Only then can the
+// list of every club be read
+async function superSessionOk(){
+  try{ const token=await authToken(); if(!token) return false; const r=await fetch(FB_BASE+'/clubs.json?shallow=true&auth='+token,{cache:'no-store'}); return r.ok; }catch(e){ return false; }
+}
 window.doLogin=async function(){
   const err=document.getElementById('loginErr');err.textContent='';
   const pw=document.getElementById('pwInput').value;
@@ -420,12 +436,7 @@ window.doLogin=async function(){
     catch(e){ if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';} err.textContent='❌ '+e.message; return; }
     if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
     if(!ok){ err.textContent=!isSuper()?'❌ Only the super admin can sign in here':String(pw).length<6?'❌ At least 6 characters':'❌ Wrong password'; return; }
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('app').style.display='flex';
-    document.getElementById('topbarRole').textContent='Super Admin';
-    const clubBadge=document.getElementById('topbarClub'); if(clubBadge) clubBadge.style.display='none';
-    document.getElementById('topbarRound').style.display='none';
-    renderSuperAdminPanel();
+    showSuperPanel();
     return;
   }
 
