@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Add to calendar": "Takvime ekle", "Calendar": "Takvim", "Phone calendar (.ics file)": "Telefonun takvimi (.ics dosyası)",
     "Tomorrow": "Yarın",
     "Ready to play without internet (on a plane too)": "Uçakta da internetsiz oynamaya hazır", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Henüz internetsiz oynamaya hazır değil: uygulamayı internetteyken bir dakika açık tut.",
     "A new version is ready": "Yeni sürüm hazır", "Reload": "Yenile",
@@ -475,6 +476,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Add to calendar": "Legg til i kalenderen", "Calendar": "Kalender", "Phone calendar (.ics file)": "Telefonens kalender (.ics-fil)",
     "Tomorrow": "I morgen",
     "Ready to play without internet (on a plane too)": "Klar til å spille uten internett (også på fly)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Ikke klar til å spille uten internett ennå: hold appen åpen med internett i et minutt.",
     "A new version is ready": "En ny versjon er klar", "Reload": "Last inn på nytt",
@@ -944,6 +946,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Add to calendar": "Añadir al calendario", "Calendar": "Calendar", "Phone calendar (.ics file)": "Calendario del teléfono (archivo .ics)",
     "Tomorrow": "Mañana",
     "Ready to play without internet (on a plane too)": "Listo para jugar sin internet (también en el avión)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Aún no está listo para jugar sin internet: deja la app abierta con internet un minuto.",
     "A new version is ready": "Hay una nueva versión", "Reload": "Recargar",
@@ -1428,6 +1431,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Add to calendar": "Ajouter au calendrier", "Calendar": "Agenda", "Phone calendar (.ics file)": "Calendrier du téléphone (fichier .ics)",
     "Tomorrow": "Demain",
     "Ready to play without internet (on a plane too)": "Prêt à jouer sans internet (en avion aussi)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Pas encore prêt à jouer sans internet : laissez l’app ouverte avec internet une minute.",
     "A new version is ready": "Une nouvelle version est prête", "Reload": "Recharger",
@@ -1912,6 +1916,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Add to calendar": "Aggiungi al calendario", "Calendar": "Calendar", "Phone calendar (.ics file)": "Calendario del telefono (file .ics)",
     "Tomorrow": "Domani",
     "Ready to play without internet (on a plane too)": "Pronto per giocare senza internet (anche in aereo)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Non ancora pronto per giocare senza internet: tieni l’app aperta con internet per un minuto.",
     "A new version is ready": "È pronta una nuova versione", "Reload": "Ricarica",
@@ -2396,6 +2401,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Add to calendar": "Zum Kalender hinzufügen", "Calendar": "Kalender", "Phone calendar (.ics file)": "Kalender des Telefons (.ics-Datei)",
     "Tomorrow": "Morgen",
     "Ready to play without internet (on a plane too)": "Bereit zum Spielen ohne Internet (auch im Flugzeug)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Noch nicht bereit ohne Internet: lass die App eine Minute mit Internet geöffnet.",
     "A new version is ready": "Eine neue Version ist bereit", "Reload": "Neu laden",
@@ -2880,6 +2886,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Add to calendar": "Добавить в календарь", "Calendar": "Календарь", "Phone calendar (.ics file)": "Календарь телефона (файл .ics)",
     "Tomorrow": "Завтра",
     "Ready to play without internet (on a plane too)": "Готово к игре без интернета (и в самолёте)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Пока не готово к игре без интернета: подержите приложение открытым с интернетом минуту.",
     "A new version is ready": "Готова новая версия", "Reload": "Обновить",
@@ -3364,6 +3371,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Add to calendar": "Dodaj do kalendarza", "Calendar": "Kalendarz", "Phone calendar (.ics file)": "Kalendarz telefonu (plik .ics)",
     "Tomorrow": "Jutro",
     "Ready to play without internet (on a plane too)": "Gotowe do gry bez internetu (także w samolocie)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Jeszcze nie gotowe do gry bez internetu: zostaw aplikację otwartą z internetem na minutę.",
     "A new version is ready": "Nowa wersja jest gotowa", "Reload": "Odśwież",
@@ -3848,6 +3856,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Add to calendar": "添加到日历", "Calendar": "日历", "Phone calendar (.ics file)": "手机日历（.ics 文件）",
     "Tomorrow": "明天",
     "Ready to play without internet (on a plane too)": "可离线游戏（飞机上也可以）", "Not ready to play without internet yet: keep the app open with internet for a minute.": "尚不能离线游戏：请在联网状态下让应用打开一分钟。",
     "A new version is ready": "新版本已就绪", "Reload": "重新加载",

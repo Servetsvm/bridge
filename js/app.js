@@ -3766,10 +3766,13 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.clubinfo) {   // full screen on the green felt, with the club's logo
     const row = t.closest('.clubrow'), lg = row && row.querySelector('.clogo');
     openOv('clubinfo', `<div class="clubsfs one ciPage"><div class="row2 clubstop"><button class="btn" data-clubback="1">‹ ${esc(t.dataset.clubname || T('Back'))}</button><button class="btn" id="oClose">${T('Close')}</button></div>
-      <div class="clubrow cigreen open"><div class="cihead">${lg ? lg.outerHTML : '🏛'}<b>${esc(t.dataset.clubname || '')}</b></div><div class="cisub">ℹ️ ${T('Club info')}</div>${clubInfoHtml((ui.clubInfo || {})[t.dataset.clubinfo])}</div></div>`);
+      <div class="clubrow cigreen open"><div class="cihead">${lg ? lg.outerHTML : '🏛'}<b>${esc(t.dataset.clubname || '')}</b></div><div class="cisub">ℹ️ ${T('Club info')}</div>${clubInfoHtml((ui.clubInfo || {})[t.dataset.clubinfo], { name: t.dataset.clubname || '' })}</div></div>`);
+    ui.clubInfoId = t.dataset.clubinfo; ui.clubInfoName = t.dataset.clubname || '';
     return;
   }
   if (t.dataset.clubback) { showClubs(); return; }
+  if (t.dataset.clubcal) { const bx = t.parentNode.querySelector('.cicalbox'); if (bx) bx.hidden = !bx.hidden; return; }
+  if (t.dataset.clubics) { const x = (ui.clubInfo || {})[ui.clubInfoId]; if (x) clubIcs(x, ui.clubInfoName); return; }
   if (t.dataset.clubopen != null) { ui.clubOpen = ui.clubOpen === t.dataset.clubopen ? null : t.dataset.clubopen; showClubs(); return; }
   if (t.dataset.clubmov) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubmov) + '&movement=1'); return; }
   if (t.dataset.clubscr) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubscr) + '&role=screen'); return; }
@@ -4556,6 +4559,35 @@ async function clubTaken(club, test) {
 }
 /* a club's info card (its admin sets it in BridgeScore: TD → Club info): the address opens the phone's maps for the way
    there, the phone number calls or sends an SMS */
+/* a tournament day into a calendar: the first time from today, repeated (every day, weekdays, the weekend or weekly),
+   three hours long; floating local time (the phone's own clock) */
+const ICS_DAY = ['', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+function clubCalRule(r) { return r.d === 0 ? 'FREQ=DAILY' : r.d === 8 ? 'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR' : r.d === 9 ? 'FREQ=WEEKLY;BYDAY=SA,SU' : 'FREQ=WEEKLY;BYDAY=' + ICS_DAY[r.d]; }
+function clubCalStart(r) {
+  const now = new Date(), [h, m] = r.t.split(':').map(Number);
+  for (let a = 0; a < 8; a++) { const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + a, h, m), iso = d.getDay() || 7;
+    if (r.d === 0 || (r.d === 8 && iso <= 5) || (r.d === 9 && iso >= 6) || r.d === iso) return d; }
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+}
+const icsTime = d => d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + '00';
+const clubCalTitle = (r, name) => name + (CLUB_KIND[r.k] ? ' — ' + T(CLUB_KIND[r.k]) : '') + ' (Bridge)';
+const clubCalNote = (r, kp, tel) => [r.n, kp && T('Contact person') + ': ' + kp, tel && T('Phone') + ': ' + tel].filter(Boolean).join('\n');
+function clubCalGoogle(r, name, adr, kp, tel) {
+  const a = clubCalStart(r), b = new Date(a.getTime() + 3 * 3600e3);
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent(clubCalTitle(r, name)) + '&dates=' + icsTime(a) + '/' + icsTime(b)
+    + '&recur=' + encodeURIComponent('RRULE:' + clubCalRule(r)) + (adr ? '&location=' + encodeURIComponent(adr.replace(/\n/g, ', ')) : '') + '&details=' + encodeURIComponent(clubCalNote(r, kp, tel));
+}
+// every tournament day in one .ics file (the phone's calendar app opens it)
+function clubIcs(x, name) {
+  const esc2 = v => String(v || '').replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/([,;])/g, '\\$1');
+  const adr = String(x.adr || '').trim().replace(/\n/g, ', '), stamp = icsTime(new Date());
+  const ev = (x.sch || []).filter(r => r && r.d >= 0 && r.d <= 9 && /^\d\d:\d\d$/.test(r.t || '')).map((r, i) => { const a = clubCalStart(r);
+    return ['BEGIN:VEVENT', 'UID:' + stamp + '-' + i + '@bridgeplay', 'DTSTAMP:' + stamp, 'DTSTART:' + icsTime(a), 'DURATION:PT3H', 'RRULE:' + clubCalRule(r),
+      'SUMMARY:' + esc2(clubCalTitle(r, name)), adr ? 'LOCATION:' + esc2(adr) : '', 'DESCRIPTION:' + esc2(clubCalNote(r, x.kp, x.tel)), 'END:VEVENT'].filter(Boolean).join('\r\n'); });
+  const txt = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//BridgePlay//Clubs//EN', ...ev, 'END:VCALENDAR'].join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/calendar' }));
+  a.download = (name || 'club').replace(/[^\p{L}\p{N}]+/gu, '-') + '.ics'; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
 /* a club's tournament days (bm/info sch: d 0 every day, 8 weekdays, 9 the weekend, 1 Monday … 7 Sunday; t "19:00";
    k the kind): the next one from now, as "Today 19:00", "Tomorrow 18:30" or "Thursday 18:30", with its kind */
 const CLUB_KIND = { pairs: 'Pairs', teams: 'Teams', indiv: 'Individual', begin: 'Beginners', online: 'Online' };
@@ -4576,7 +4608,7 @@ function clubNext(x) {
   const when = best.a === 0 ? T('Today') : best.a === 1 ? T('Tomorrow') : cap(best.at.toLocaleDateString(SET.lang || undefined, { weekday: 'long' }));
   return `${when} ${best.r.t}${CLUB_KIND[best.r.k] ? ' · ' + T(CLUB_KIND[best.r.k]) : ''}`;
 }
-function clubInfoHtml(x) {
+function clubInfoHtml(x, opts) {
   if (!x) return '';
   const adr = String(x.adr || '').trim(), kp = String(x.kp || '').trim(), tel = String(x.tel || '').trim(), num = tel.replace(/[^\d+]/g, '');
   // the tournament days: the weekday in the reader's language, the time and a note
@@ -4587,7 +4619,7 @@ function clubInfoHtml(x) {
   if (!adr && !kp && !num && !sch.length) return '';
   const map = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(adr);
   return `<div class="clubinfo">${adr ? `<a class="cirow" href="${esc(map)}" target="_blank" rel="noopener"><span>📍</span><span><small>${T('Address')}</small>${esc(adr).replace(/\n/g, '<br>')}</span><em>🧭 ${T('Directions')}</em></a>` : ''}`
-    + (sch.length ? `<div class="cirow cisch"><span>📅</span><span><small>${T('Tournament days')}</small>${sch.map(r => `<div class="cischr"><b>${esc((w => w.charAt(0).toLocaleUpperCase() + w.slice(1))(day(r.d)))}</b> <span>${esc(r.t)}</span>${KIND[r.k] ? ` <i>· ${T(KIND[r.k])}</i>` : ''}${r.n ? ` <i>· ${esc(r.n)}</i>` : ''}</div>`).join('')}</span></div>` : '')
+    + (sch.length ? `<div class="cirow cisch"><span>📅</span><span><small>${T('Tournament days')}</small>${sch.map(r => `<div class="cischr"><b>${esc((w => w.charAt(0).toLocaleUpperCase() + w.slice(1))(day(r.d)))}</b> <span>${esc(r.t)}</span>${KIND[r.k] ? ` <i>· ${T(KIND[r.k])}</i>` : ''}${r.n ? ` <i>· ${esc(r.n)}</i>` : ''}</div>`).join('')}</span>${opts && opts.name ? `<button class="btn cical" type="button" data-clubcal="1">📅 ${T('Add to calendar')}</button><div class="cicalbox" hidden>${sch.map((r, i) => `<a class="btn" href="${esc(clubCalGoogle(r, opts.name, adr, kp, tel))}" target="_blank" rel="noopener">Google ${T('Calendar')}: ${esc((w => w.charAt(0).toLocaleUpperCase() + w.slice(1))(day(r.d)))} ${esc(r.t)}</a>`).join('')}<button class="btn" type="button" data-clubics="1">📱 ${T('Phone calendar (.ics file)')}</button></div>` : ''}</div>` : '')
     + (kp ? `<div class="cirow"><span>👤</span><span><small>${T('Contact person')}</small>${esc(kp)}</span></div>` : '')
     + (num ? `<div class="cirow"><span>📞</span><span><small>${T('Phone')}</small>${esc(tel)}</span><span class="cibtns"><a class="btn gold mini-btn cicall" href="tel:${esc(num)}">📞 ${T('Call')}</a><a class="btn mini-btn cisms" href="sms:${esc(num)}">💬 SMS</a></span></div>` : '')
     + `</div>`;
