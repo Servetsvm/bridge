@@ -3170,11 +3170,22 @@ function rtCardHtml() {
 }
 setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
 setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
+/* Settings: can the app open without internet (on a plane)? Every file it needs to start is in the phone's offline copy */
+async function offReadyCheck() {
+  const el = $('offReady'); if (!el) return;
+  if (!('caches' in window) || !navigator.serviceWorker || !navigator.serviceWorker.controller) { el.textContent = location.protocol === 'file:' ? '' : '⏳ ' + T('Not ready to play without internet yet: keep the app open with internet for a minute.'); return; }
+  const need = ['./', 'css/style.css', 'js/core.js', 'js/bidding.js', 'js/play.js', 'js/app.js', 'js/net.js', 'js/dds.js', 'js/lang/' + (SET.lang || 'en') + '.js'];
+  let ok = true; try { for (const f of need) if (!(await caches.match(f, { ignoreSearch: true }))) { ok = false; break; } } catch (e) { ok = false; }
+  el.className = 'offready ' + (ok ? 'ok' : 'muted');
+  el.textContent = ok ? '✈️ ' + T('Ready to play without internet (on a plane too)') + ' ✓' : '⏳ ' + T('Not ready to play without internet yet: keep the app open with internet for a minute.');
+}
 function showSettings() {
+  setTimeout(offReadyCheck, 0);
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
   openOv('set', `<h2>${T('Settings')}</h2>
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
+   <div id="offReady" class="offready muted"></div>
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
    <div class="grp"><span>🃏 ${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button><div class="muted">${T('A PBN or LIN file, a hand record or a photo. A deal you enter is practice, not scored.')}</div></div>
    <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
