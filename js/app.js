@@ -3743,10 +3743,10 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'chGo') { startChamp(); return; }
   if (t.id === 'hClubs') { ui.clubOpen = null; showClubs(); return; }
   // the club's info in a window of its own; Back returns to the club
-  if (t.dataset.clubinfo) {   // full screen, in the club's own colour, with its logo
-    const row = t.closest('.clubrow'), lg = row && row.querySelector('.clogo'), cc = row ? [...row.classList].find(c => /^cc\d$/.test(c)) || '' : '';
+  if (t.dataset.clubinfo) {   // full screen on the green felt, with the club's logo
+    const row = t.closest('.clubrow'), lg = row && row.querySelector('.clogo');
     openOv('clubinfo', `<div class="clubsfs one ciPage"><div class="row2 clubstop"><button class="btn" data-clubback="1">‹ ${esc(t.dataset.clubname || T('Back'))}</button><button class="btn" id="oClose">${T('Close')}</button></div>
-      <div class="clubrow ${cc} open"><div class="cihead">${lg ? lg.outerHTML : '🏛'}<b>${esc(t.dataset.clubname || '')}</b></div><div class="cisub">ℹ️ ${T('Club info')}</div>${clubInfoHtml((ui.clubInfo || {})[t.dataset.clubinfo])}</div></div>`);
+      <div class="clubrow cigreen open"><div class="cihead">${lg ? lg.outerHTML : '🏛'}<b>${esc(t.dataset.clubname || '')}</b></div><div class="cisub">ℹ️ ${T('Club info')}</div>${clubInfoHtml((ui.clubInfo || {})[t.dataset.clubinfo])}</div></div>`);
     return;
   }
   if (t.dataset.clubback) { showClubs(); return; }
@@ -4538,7 +4538,7 @@ function clubInfoHtml(x) {
   const map = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(adr);
   return `<div class="clubinfo">${adr ? `<a class="cirow" href="${esc(map)}" target="_blank" rel="noopener"><span>📍</span><span><small>${T('Address')}</small>${esc(adr).replace(/\n/g, '<br>')}</span><em>🧭 ${T('Directions')}</em></a>` : ''}`
     + (kp ? `<div class="cirow"><span>👤</span><span><small>${T('Contact person')}</small>${esc(kp)}</span></div>` : '')
-    + (num ? `<div class="cirow"><span>📞</span><span><small>${T('Phone')}</small>${esc(tel)}</span><span class="cibtns"><a class="btn gold mini-btn" href="tel:${esc(num)}">📞 ${T('Call')}</a><a class="btn mini-btn" href="sms:${esc(num)}">💬 SMS</a></span></div>` : '')
+    + (num ? `<div class="cirow"><span>📞</span><span><small>${T('Phone')}</small>${esc(tel)}</span><span class="cibtns"><a class="btn gold mini-btn cicall" href="tel:${esc(num)}">📞 ${T('Call')}</a><a class="btn mini-btn cisms" href="sms:${esc(num)}">💬 SMS</a></span></div>` : '')
     + `</div>`;
 }
 async function showClubs() {

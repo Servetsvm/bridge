@@ -2462,3 +2462,13 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .sheet[data-ov="clubinfo"]{background:radial-gradient(ellipse at 50% 40%,var(--felt) 0%,var(--felt-deep) 100%)!important}
 .sheet[data-ov="clubinfo"] .clubsfs > .row2 #oClose{border-color:#fff!important}
 .sheet[data-ov="clubinfo"] .clubsfs > .row2 .btn[data-clubback]{border:2px solid rgba(255,255,255,.75)!important;background:#174a2b!important}
+/* the club's info page: a green card on the felt, white tiles, each button in its own colour */
+.ciPage .clubrow.cigreen{background:linear-gradient(180deg,#2a7a4e,#1d5f3a);border:1px solid rgba(255,255,255,.18);color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.25);border-radius:18px}
+.ciPage .cigreen .cihead b{color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.ciPage .cigreen .cisub{color:#f3dc9a;opacity:1}
+.ciPage .cigreen .clubinfo .cirow{background:#fffdf6;color:#1b2a20;border-radius:14px;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.ciPage .cigreen .clubinfo small{color:#5b6b60;opacity:1}
+.ciPage .cigreen .clubinfo em{background:var(--brass);color:var(--brass-ink);box-shadow:0 2px 0 #a8862f}
+.ciPage .cigreen .clubinfo .cibtns .btn.cicall{background:#1f8a4c!important;color:#fff!important;border-color:#176b3a!important;box-shadow:0 2px 0 #145c32}
+.ciPage .cigreen .clubinfo .cibtns .btn.cisms{background:#1e88e5!important;color:#fff!important;border-color:#1769b3!important;box-shadow:0 2px 0 #145ea0}
+.ciPage .clubrow.cigreen{flex:0 0 auto}
