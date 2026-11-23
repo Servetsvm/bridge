@@ -192,22 +192,28 @@ window.tdcInfo=async function(){
     `<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcInfoSave()">${L('Save')}</button>`);
   (Array.isArray(x.sch)?x.sch:[]).forEach(r=>tdcSchAdd(r));
 };
-// one tournament day: the weekday (1 Monday … 7 Sunday, its name in the page's language), the time and a short note
-const tdcDay=d=>{ try{ return new Date(2024,0,d).toLocaleDateString(window.getLanguage?.()||undefined,{weekday:'long'}); }catch(e){ return String(d); } };
+/* one tournament day: when (0 every day, 8 weekdays, 9 the weekend, 1 Monday … 7 Sunday), the time, the kind of tournament
+   (chosen from a list, so every player reads it in their own language) and a short free note (shown as typed) */
+const TDC_DAYS=[0,8,9,1,2,3,4,5,6,7], TDC_KINDS=['','pairs','teams','indiv','begin','online'];
+const TDC_KIND_TXT={pairs:'Pairs',teams:'Teams',indiv:'Individual',begin:'Beginners',online:'Online'};
+const tdcDay=d=>d===0?L('Every day'):d===8?L('Weekdays'):d===9?L('Weekend'):(()=>{ try{ return new Date(2024,0,d).toLocaleDateString(window.getLanguage?.()||undefined,{weekday:'long'}); }catch(e){ return String(d); } })();
 window.tdcSchAdd=function(r){
   const box=document.getElementById('tdcSch'); if(!box||box.children.length>=7) return; r=r||{};
   const row=document.createElement('div'); row.className='tdc-sch'; row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;';
-  row.innerHTML=`<select class="tdc-d" style="flex:1 1 110px;padding:8px;border-radius:8px;">${[1,2,3,4,5,6,7].map(d=>`<option value="${d}"${+r.d===d?' selected':''}>${tdcDay(d)}</option>`).join('')}</select>
+  row.innerHTML=`<select class="tdc-d" style="flex:1 1 110px;padding:8px;border-radius:8px;">${TDC_DAYS.map(d=>`<option value="${d}"${(r.d==null?0:+r.d)===d?' selected':''}>${tdcDay(d)}</option>`).join('')}</select>
     <input class="tdc-t" type="time" value="${/^\d\d:\d\d$/.test(r.t||'')?r.t:'19:00'}" style="flex:0 0 100px;padding:8px;border-radius:8px;">
-    <input class="tdc-n" maxlength="40" placeholder="${L('Note (e.g. pairs)')}" value="${String(r.n||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" style="flex:2 1 140px;padding:8px;border-radius:8px;">
+    <select class="tdc-k" style="flex:1 1 110px;padding:8px;border-radius:8px;">${TDC_KINDS.map(k=>`<option value="${k}"${(r.k||'')===k?' selected':''}>${k?L(TDC_KIND_TXT[k]):'— '+L('Kind')+' —'}</option>`).join('')}</select>
+    <input class="tdc-n" maxlength="40" placeholder="${L('Other note (shown as written)')}" value="${String(r.n||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" style="flex:2 1 140px;padding:8px;border-radius:8px;">
     <button type="button" class="btn btn-ghost btn-sm" onclick="this.parentNode.remove()" title="${L('Delete')}">✕</button>`;
   box.appendChild(row);
 };
 window.tdcInfoSave=async function(){
   const g=id=>(document.getElementById(id)?.value||'').trim();
   const x={adr:g('tdcAdr').slice(0,150),kp:g('tdcKp').slice(0,60),tel:g('tdcTel').slice(0,25)};
-  const sch=[...document.querySelectorAll('#tdcSch .tdc-sch')].map(r=>({d:+r.querySelector('.tdc-d').value,t:r.querySelector('.tdc-t').value||'',n:r.querySelector('.tdc-n').value.trim().slice(0,40)}))
-    .filter(r=>r.d>=1&&r.d<=7&&/^\d\d:\d\d$/.test(r.t)).sort((a,b)=>a.d-b.d||a.t.localeCompare(b.t)).slice(0,7);
+  const ord=d=>TDC_DAYS.indexOf(d);
+  const sch=[...document.querySelectorAll('#tdcSch .tdc-sch')].map(r=>({d:+r.querySelector('.tdc-d').value,t:r.querySelector('.tdc-t').value||'',k:r.querySelector('.tdc-k').value||'',n:r.querySelector('.tdc-n').value.trim().slice(0,40)}))
+    .filter(r=>TDC_DAYS.includes(r.d)&&/^\d\d:\d\d$/.test(r.t)).map(r=>{ const o={d:r.d,t:r.t}; if(TDC_KINDS.includes(r.k)&&r.k) o.k=r.k; if(r.n) o.n=r.n; return o; })
+    .sort((a,b)=>ord(a.d)-ord(b.d)||a.t.localeCompare(b.t)).slice(0,7);
   if(sch.length) x.sch=sch;
   if(x.tel&&!/^[+\d][\d\s\-()]{4,}$/.test(x.tel)){ toast('❌ '+L('Phone number')+'?'); return; }
   try{

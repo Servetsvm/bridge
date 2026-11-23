@@ -4544,12 +4544,14 @@ function clubInfoHtml(x) {
   if (!x) return '';
   const adr = String(x.adr || '').trim(), kp = String(x.kp || '').trim(), tel = String(x.tel || '').trim(), num = tel.replace(/[^\d+]/g, '');
   // the tournament days: the weekday in the reader's language, the time and a note
-  const day = d => { try { return new Date(2024, 0, d).toLocaleDateString(SET.lang || undefined, { weekday: 'long' }); } catch (e) { return ''; } };
-  const sch = (Array.isArray(x.sch) ? x.sch : []).filter(r => r && r.d >= 1 && r.d <= 7 && /^\d\d:\d\d$/.test(r.t || ''));
+  // (0 every day, 8 weekdays, 9 the weekend, 1 Monday … 7 Sunday; the kind from a list, so it is in the reader's language too)
+  const day = d => d === 0 ? T('Every day') : d === 8 ? T('Weekdays') : d === 9 ? T('Weekend') : (() => { try { return new Date(2024, 0, d).toLocaleDateString(SET.lang || undefined, { weekday: 'long' }); } catch (e) { return ''; } })();
+  const KIND = { pairs: 'Pairs', teams: 'Teams', indiv: 'Individual', begin: 'Beginners', online: 'Online' };
+  const sch = (Array.isArray(x.sch) ? x.sch : []).filter(r => r && r.d >= 0 && r.d <= 9 && /^\d\d:\d\d$/.test(r.t || ''));
   if (!adr && !kp && !num && !sch.length) return '';
   const map = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(adr);
   return `<div class="clubinfo">${adr ? `<a class="cirow" href="${esc(map)}" target="_blank" rel="noopener"><span>📍</span><span><small>${T('Address')}</small>${esc(adr).replace(/\n/g, '<br>')}</span><em>🧭 ${T('Directions')}</em></a>` : ''}`
-    + (sch.length ? `<div class="cirow cisch"><span>📅</span><span><small>${T('Tournament days')}</small>${sch.map(r => `<div class="cischr"><b>${esc(day(r.d))}</b> <span>${esc(r.t)}</span>${r.n ? ` <i>· ${esc(r.n)}</i>` : ''}</div>`).join('')}</span></div>` : '')
+    + (sch.length ? `<div class="cirow cisch"><span>📅</span><span><small>${T('Tournament days')}</small>${sch.map(r => `<div class="cischr"><b>${esc((w => w.charAt(0).toLocaleUpperCase() + w.slice(1))(day(r.d)))}</b> <span>${esc(r.t)}</span>${KIND[r.k] ? ` <i>· ${T(KIND[r.k])}</i>` : ''}${r.n ? ` <i>· ${esc(r.n)}</i>` : ''}</div>`).join('')}</span></div>` : '')
     + (kp ? `<div class="cirow"><span>👤</span><span><small>${T('Contact person')}</small>${esc(kp)}</span></div>` : '')
     + (num ? `<div class="cirow"><span>📞</span><span><small>${T('Phone')}</small>${esc(tel)}</span><span class="cibtns"><a class="btn gold mini-btn cicall" href="tel:${esc(num)}">📞 ${T('Call')}</a><a class="btn mini-btn cisms" href="sms:${esc(num)}">💬 SMS</a></span></div>` : '')
     + `</div>`;

@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v645`, kulüpler `kulup-v167`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v646`, kulüpler `kulup-v168`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -56,7 +56,8 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v645`, kulü
 - Claim savunmada da çalışır: `claimSeat()` (löve senin elinde değilse kendi koltuğun), claim her zaman senin tarafına sayılır;
   online masada misafirin claim'i de kendi koltuğu için (net.js `d.t === "claim"`).
 - Kulüp bilgisi: kulüp yöneticisi BridgeScore'da TD → Kulüp ayarları → ℹ️ Kulüp bilgisi (adres, irtibat kişisi, telefon) →
-  `gate/clubs/<id>/bm/info {adr,kp,tel,sch:[{d:1-7,t:'19:00',n}]}` (sch = turnuva günleri, en çok 7). BridgePlay Kulüpler'de kulübe basınca Sonuçlar'ın altında "ℹ️ Kulüp bilgisi" düğmesi
+  `gate/clubs/<id>/bm/info {adr,kp,tel,sch:[{d,t:'19:00',k,n}]}` (sch = turnuva günleri, en çok 7;
+  d: 0 her gün, 8 hafta içi, 9 hafta sonu, 1–7 Pzt–Paz; k: pairs/teams/indiv/begin/online — okuyanın dilinde; n serbest not, çevrilmez). BridgePlay Kulüpler'de kulübe basınca Sonuçlar'ın altında "ℹ️ Kulüp bilgisi" düğmesi
   (bilgi varsa), basınca tam ekran sayfa (`openOv('clubinfo')`, `.ciPage`, kulübün rengi ve logosu, ‹ Geri kulübe döner; `clubInfoHtml`): adres → Google Maps yol
   tarifi, telefon → `tel:` Ara / `sms:` SMS.
 - **Açılış hızı:** sw.js artık FILES listesindeki dosyaları önce önbellekten verir (eskiden her açılışta her dosya internetten
