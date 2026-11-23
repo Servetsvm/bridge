@@ -213,6 +213,58 @@ async function gemini(env, messages) {
   } catch (e) { console.log('gemini threw', String(e), Date.now() - t0); return null; }
 }
 
+/* ---- notifications to a closed app (Web Push) ----
+   A phone subscribes (POST /push/sub: the player's name key and the browser's push subscription; the administrator's
+   device also sends the review key). When something happens (a player writes to the administrator, asks for a club;
+   the administrator answers) the site asks the Worker (POST /push/send) to wake the phones of whom it concerns. The
+   push carries nothing: the phone's service worker then asks GET /push/last for what it was (the kind and a short name)
+   and shows the notification in the phone's own language. So no message text ever goes through the push services.
+   The key pair is the Worker secret VAPID_JWK (made once with vapid.mjs); the public half is GET /push/key. */
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const unb64u = s => Uint8Array.from(atob(String(s).replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((String(s).length + 3) % 4)), c => c.charCodeAt(0));
+function vapidJwk(env) { try { const j = JSON.parse(env.VAPID_JWK || ''); return j && j.d && j.x && j.y ? j : null; } catch (e) { return null; } }
+// the public key as the browser wants it: 0x04 || x || y
+function vapidPublic(j) { const x = unb64u(j.x), y = unb64u(j.y), k = new Uint8Array(65); k[0] = 4; k.set(x, 1); k.set(y, 33); return b64u(k); }
+async function vapidAuth(env, endpoint) {
+  const j = vapidJwk(env), aud = new URL(endpoint).origin;
+  const key = await crypto.subtle.importKey('jwk', { kty: 'EC', crv: 'P-256', x: j.x, y: j.y, d: j.d, ext: true }, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']);
+  const enc = o => b64u(new TextEncoder().encode(JSON.stringify(o)));
+  const head = enc({ typ: 'JWT', alg: 'ES256' }) + '.' + enc({ aud, exp: Math.floor(Date.now() / 1000) + 12 * 3600, sub: env.VAPID_SUB || 'https://servetsvm.github.io/bridge/' });
+  const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, key, new TextEncoder().encode(head));
+  return 'vapid t=' + head + '.' + b64u(sig) + ', k=' + vapidPublic(j);
+}
+const PUSH_KINDS = ['msg', 'club', 'reply', 'clubopen'];
+async function pushRoute(path, req, b, env, ctx, json) {
+  if (!env.DB || !vapidJwk(env)) return json({ error: 'push not set up' }, 501);
+  const key = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, ''), admin = !!(env.REVIEW_KEY && sameKey(key, env.REVIEW_KEY));
+  if (path === '/push/sub') {
+    const name = clip(b && b.name, 40).toLowerCase(), sub = b && b.sub, ep = sub && clip(sub.endpoint, 600);
+    if (!name || !ep || !/^https:\/\//.test(ep)) return json({ error: 'bad request' }, 400);
+    await env.DB.prepare('INSERT INTO push (ep, name, admin, sub, ts) VALUES (?, ?, ?, ?, ?) ON CONFLICT(ep) DO UPDATE SET name = excluded.name, admin = excluded.admin, sub = excluded.sub, ts = excluded.ts')
+      .bind(ep, name, admin ? 1 : 0, JSON.stringify({ endpoint: ep }), Date.now()).run();
+    return json({ ok: true, admin });
+  }
+  if (path === '/push/unsub') { const ep = clip(b && b.ep, 600); if (ep) await env.DB.prepare('DELETE FROM push WHERE ep = ?').bind(ep).run(); return json({ ok: true }); }
+  if (path === '/push/send') {
+    const kind = PUSH_KINDS.includes(b && b.kind) ? b.kind : null, n = clip(b && b.n, 40), to = clip(b && b.to, 40).toLowerCase();
+    if (!kind || !to) return json({ error: 'bad request' }, 400);
+    // to the administrator: anyone (a player's message or club request); to a player: only the administrator
+    if (to !== 'admin' && !admin) return json({ error: 'forbidden' }, 403);
+    const rows = (await (to === 'admin' ? env.DB.prepare('SELECT ep FROM push WHERE admin = 1') : env.DB.prepare('SELECT ep FROM push WHERE name = ? AND admin = 0').bind(to)).all()).results || [];
+    const now = Date.now();
+    ctx.waitUntil(Promise.all(rows.map(async r => {
+      try {
+        await env.DB.prepare('UPDATE push SET lk = ?, ln = ?, lt = ? WHERE ep = ?').bind(kind, n, now, r.ep).run();
+        const res = await fetch(r.ep, { method: 'POST', headers: { Authorization: await vapidAuth(env, r.ep), TTL: '86400', Urgency: 'high', 'Content-Length': '0' } });
+        if (res.status === 404 || res.status === 410) await env.DB.prepare('DELETE FROM push WHERE ep = ?').bind(r.ep).run();   // the phone unsubscribed
+        else if (!res.ok) console.log('push', res.status, (await res.text()).slice(0, 200));
+      } catch (e) { console.log('push threw', String(e)); }
+    })));
+    return json({ ok: true, n: rows.length });
+  }
+  return json({ error: 'not found' }, 404);
+}
+
 export default {
   async fetch(req, env, ctx) {
     const origin = req.headers.get('Origin') || '';
@@ -224,10 +276,18 @@ export default {
     if (path === '/review' && req.method === 'GET') return review(req, env, json);
     if (path === '/errors' && req.method === 'GET') return errors(req, env, json);
     if (path === '/usage' && req.method === 'GET') return usage(req, env, json);
+    // push: the public key, and (for a phone's service worker) what its last push was about
+    if (path === '/push/key' && req.method === 'GET') { const j = vapidJwk(env); return j ? json({ key: vapidPublic(j) }) : json({ error: 'push not set up' }, 501); }
+    if (path === '/push/last' && req.method === 'GET') {
+      const ep = new URL(req.url).searchParams.get('ep') || ''; if (!env.DB || !ep) return json({});
+      const r = await env.DB.prepare('SELECT lk, ln, lt FROM push WHERE ep = ?').bind(ep.slice(0, 600)).first().catch(() => null);
+      return json(r && r.lk && Date.now() - r.lt < 864e5 ? { kind: r.lk, n: r.ln || '' } : {});
+    }
     if (req.method !== 'POST' || !ok) return json({ error: 'forbidden' }, 403);
     if (limited(req.headers.get('CF-Connecting-IP') || 'x')) return json({ error: 'slow down' }, 429);
     let b; try { b = await req.json(); } catch (e) { return json({ error: 'bad request' }, 400); }
     if (path === '/err') return takeError(b, env, ctx, json);
+    if (path.startsWith('/push/')) return pushRoute(path, req, b, env, ctx, json);
     // the player's 👍 (1) or 👎 (-1) on an answer of the last day
     if (path === '/rate') {
       const id = String(b && b.id || ''), v = b && b.v === 1 ? 1 : b && b.v === -1 ? -1 : 0;

@@ -83,3 +83,20 @@ address.
 
 - From the command line: `npx wrangler d1 execute bridge-botchat --remote --command "SELECT * FROM chat WHERE rate < 0 ORDER BY ts DESC LIMIT 50"`.
 - A new table on a new database: `npx wrangler d1 execute bridge-botchat --remote --file=schema.sql`.
+
+## Notifications while the app is closed (Web Push)
+
+The same Worker wakes the players' phones when something happens (a message or a club request to the administrator,
+the administrator's answer, a club opened). The push itself carries nothing; the phone asks the Worker what it was about
+(`/push/last`) and shows it in its own language. Set up once, in this folder:
+
+```bash
+npx wrangler d1 execute bridge-botchat --remote --file=schema.sql   # the new "push" table (the old tables stay as they are)
+node vapid.mjs | npx wrangler secret put VAPID_JWK                  # the key pair, straight into a Worker secret
+npx wrangler deploy
+```
+
+Phones subscribe by themselves once notifications are on and allowed (Settings → Notifications when the app is in the
+background). The administrator's phone is marked as the administrator's with the review key kept on it (the same key as
+for the robots' chat review); a push to a player is only sent with that key. Until VAPID_JWK is set nothing changes:
+the site goes on without these notifications.

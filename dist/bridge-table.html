@@ -14831,6 +14831,7 @@ window.claude?.hot?.snapshot?.(() => ({ SET, G, HIST, BOARD }));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
 // with nobody else in the lobby there is no tournament sync to wait for: check the running tournaments a little after opening
 setTimeout(() => { if (typeof Net !== 'undefined' && !Net.st.tourResumed) { Net.st.tourResumed = true; tourResume(); } }, 9000);
+setTimeout(() => { if (typeof Net !== 'undefined') pushSetup(); }, 6000);   // this phone's subscription for notifications while the app is closed
 /* a phone or PC notification while the app is in the background (Settings → Notifications): join requests,
    messages, invitations and your turn at an online table. It needs the app open somewhere: a closed app gets nothing */
 function notify(text) {
@@ -14841,11 +14842,42 @@ function notify(text) {
     else new Notification(T('BridgePlay'), o);
   } catch (e) {}
 }
+/* notifications to a closed app (Web Push through the robots' Worker): with notifications on and allowed, this phone
+   subscribes under the player's name (the administrator's phone with the review key kept on it); off unsubscribes it.
+   The push carries nothing: sw.js asks the Worker what it was about and shows it in the phone's language. */
+const pushBase = () => BOT_AI.replace(/\/$/, '');
+async function pushSetup(force) {
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window) || Notification.permission !== 'granted' || SET.notify === false || !myNm()) return;
+    const day = new Date().toISOString().slice(0, 10), who = Net.fbKey(myNm()) + (Net.isAdmin() ? ':a' : '');
+    if (!force && SET.pushDay === day && SET.pushWho === who) return;   // once a day is enough (the subscription can change)
+    const reg = await navigator.serviceWorker.ready; if (!reg.pushManager) return;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      const k = await (await fetch(pushBase() + '/push/key')).json(); if (!k.key) return;
+      const raw = Uint8Array.from(atob(k.key.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((k.key.length + 3) % 4)), c => c.charCodeAt(0));
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
+    }
+    let rk = ''; try { rk = Net.isAdmin() ? localStorage.getItem('bridge-bot-review') || '' : ''; } catch (e) {}
+    const r = await fetch(pushBase() + '/push/sub', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(rk ? { Authorization: 'Bearer ' + rk } : {}) }, body: JSON.stringify({ name: Net.fbKey(myNm()), sub: sub.toJSON() }) });
+    if (r.ok) { SET.pushDay = day; SET.pushWho = who; Store.saveSettings(SET); save(); }
+  } catch (e) {}
+}
+async function pushOff() {
+  try { const reg = await navigator.serviceWorker.getRegistration(), sub = reg && reg.pushManager && await reg.pushManager.getSubscription();
+    if (sub) { fetch(pushBase() + '/push/unsub', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ep: sub.endpoint }) }).catch(() => {}); await sub.unsubscribe(); }
+    SET.pushDay = ''; Store.saveSettings(SET); save(); } catch (e) {}
+}
+// wake the phones of whom it concerns ('admin', or a player's name key); to a player only with the review key
+function pushSend(to, kind, n) {
+  try { let rk = ''; if (to !== 'admin') { try { rk = localStorage.getItem('bridge-bot-review') || ''; } catch (e) {} if (!rk) return; }
+    fetch(pushBase() + '/push/send', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(rk ? { Authorization: 'Bearer ' + rk } : {}) }, body: JSON.stringify({ to, kind, n: String(n || '').slice(0, 40) }) }).catch(() => {}); } catch (e) {}
+}
 function setNotify(on) {
-  if (!on) { SET.notify = false; Store.saveSettings(SET); save(); showSettings(); return; }
+  if (!on) { SET.notify = false; Store.saveSettings(SET); save(); pushOff(); showSettings(); return; }
   if (!('Notification' in window)) { flash(T('This browser cannot show notifications'), 2500); return; }
   Notification.requestPermission().then(p => {
-    SET.notify = p === 'granted'; Store.saveSettings(SET); save(); showSettings();
+    SET.notify = p === 'granted'; Store.saveSettings(SET); save(); showSettings(); if (p === 'granted') pushSetup(true);
     if (p !== 'granted') flash(T('Notifications are blocked — allow them in the browser settings'), 3500);
   }).catch(() => {});
 }
@@ -14854,7 +14886,7 @@ document.addEventListener('pointerdown', function askNotify() {
   if (!myNm() || SET.notify === false || SET.notifyAsked || !('Notification' in window)) return;
   document.removeEventListener('pointerdown', askNotify);
   SET.notifyAsked = 1; Store.saveSettings(SET); save();
-  if (Notification.permission === 'default') Notification.requestPermission().then(p => { if (p === 'denied') { SET.notify = false; Store.saveSettings(SET); save(); } }).catch(() => {});
+  if (Notification.permission === 'default') Notification.requestPermission().then(p => { if (p === 'denied') { SET.notify = false; Store.saveSettings(SET); save(); } else if (p === 'granted') pushSetup(true); }).catch(() => {});
 });
 /* private messages in the lobby chat: tap a player's name, the next message goes only to them (✕ ends it) */
 function pmTo(name) {
@@ -16501,6 +16533,7 @@ const Net = (() => {
     await Cloud.put('destek/' + k + '/n', String(name).slice(0, 20));
     await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'p', t, kl, ts: now });
     await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', kl: 1, t: kl.n, ts: now + 1 });
+    if (typeof pushSend === 'function') pushSend('admin', 'club', kl.n);
     await Cloud.put('destek/' + k + '/pr', now + 2);
     st.supNew = 0;
   }
@@ -16603,6 +16636,7 @@ const Net = (() => {
     // the automatic thank-you, once for each new question (not after every line of a message sent in parts)
     // (a message about the Claude system, from its article: the thank-you says so, in the reader's own language)
     if (!last || last.by !== 'p' || kind === 'claude') await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', t: kind === 'claude' ? 'claude' : '', ts: now + 1 });
+    if (typeof pushSend === 'function') pushSend('admin', 'msg', name);   // the administrator's phone, even with the app closed
     await Cloud.put('destek/' + k + '/pr', now + 1);
     st.supNew = 0;
   }
@@ -16625,6 +16659,7 @@ const Net = (() => {
     if (n) try { await Cloud.put('destek/' + k + '/n', String(n).slice(0, 20)); } catch (e) {}   // a conversation the administrator starts: the player's name on it
     await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'a', t: String(txt).slice(0, 1000), ts: Date.now() });
     await Cloud.put('destek/' + k + '/ar', Date.now());
+    if (typeof pushSend === 'function') pushSend(k, 'reply');   // the player's phone, even with the app closed
   }
   /* the administrator deletes a club request (a test, or one not wanted): the request and its automatic thank-you go;
      a thread with nothing else in it goes too */

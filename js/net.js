@@ -756,6 +756,7 @@ const Net = (() => {
     await Cloud.put('destek/' + k + '/n', String(name).slice(0, 20));
     await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'p', t, kl, ts: now });
     await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', kl: 1, t: kl.n, ts: now + 1 });
+    if (typeof pushSend === 'function') pushSend('admin', 'club', kl.n);
     await Cloud.put('destek/' + k + '/pr', now + 2);
     st.supNew = 0;
   }
@@ -858,6 +859,7 @@ const Net = (() => {
     // the automatic thank-you, once for each new question (not after every line of a message sent in parts)
     // (a message about the Claude system, from its article: the thank-you says so, in the reader's own language)
     if (!last || last.by !== 'p' || kind === 'claude') await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', t: kind === 'claude' ? 'claude' : '', ts: now + 1 });
+    if (typeof pushSend === 'function') pushSend('admin', 'msg', name);   // the administrator's phone, even with the app closed
     await Cloud.put('destek/' + k + '/pr', now + 1);
     st.supNew = 0;
   }
@@ -880,6 +882,7 @@ const Net = (() => {
     if (n) try { await Cloud.put('destek/' + k + '/n', String(n).slice(0, 20)); } catch (e) {}   // a conversation the administrator starts: the player's name on it
     await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'a', t: String(txt).slice(0, 1000), ts: Date.now() });
     await Cloud.put('destek/' + k + '/ar', Date.now());
+    if (typeof pushSend === 'function') pushSend(k, 'reply');   // the player's phone, even with the app closed
   }
   /* the administrator deletes a club request (a test, or one not wanted): the request and its automatic thank-you go;
      a thread with nothing else in it goes too */

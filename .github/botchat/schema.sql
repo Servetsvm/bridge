@@ -30,3 +30,17 @@ CREATE TABLE IF NOT EXISTS errs (
   page TEXT
 );
 CREATE INDEX IF NOT EXISTS errs_last ON errs (last);
+
+-- phones subscribed to notifications while the app is closed (Web Push): the push address, the player's name key
+-- (admin = 1: the administrator's devices), and what the last push was about (the phone asks for it when woken)
+CREATE TABLE IF NOT EXISTS push (
+  ep TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  admin INTEGER NOT NULL DEFAULT 0,
+  sub TEXT,
+  ts INTEGER NOT NULL,
+  lk TEXT,
+  ln TEXT,
+  lt INTEGER
+);
+CREATE INDEX IF NOT EXISTS push_name ON push (name);

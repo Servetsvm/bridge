@@ -1,5 +1,5 @@
 /* BridgePlay — offline cache. Bump VERSION after changing any file so phones pick up the new version. */
-const VERSION = 'bridge-v650';
+const VERSION = 'bridge-v651';
 const FILES = ['./', './index.html', './css/style.css', './js/dds.js', './js/core.js', './js/bidding.js', './js/play.js', './js/field.js', './js/storage.js', './js/photo.js', './js/app.js', './js/net.js', './js/clubswiss.js', './js/clubmirror.js', './js/clubtour.js', './js/social.js', './js/bidprac.js', './js/puzzles.json', './js/puzzles-play.json', './guide.html', './guide-en.html', './guide-no.html', './guide-es.html', './guide-fr.html', './guide-it.html', './guide-de.html', './guide-ru.html', './guide-pl.html', './guide-zh.html', './privacy.html', './manifest.webmanifest',
   // the texts of each language (index.html loads the visitor's one): without it the page stays empty offline
   ...['en', 'tr', 'no', 'es', 'fr', 'it', 'de', 'ru', 'pl', 'zh'].map(l => './js/lang/' + l + '.js'), './icons/icon-192.png', './icons/icon-512.png'];
@@ -34,6 +34,27 @@ function fromNet(e) {
     return make();
   }).catch(() => soon(caches.match(e.request, { ignoreSearch: true }), 3000).then(m => m || Response.error()));
 }
+/* a push from the robots' Worker (the app may be closed): the push itself carries nothing, so ask the Worker what it was
+   about and show it in the phone's language. Opening it brings the app (its messages) to the front. */
+const PUSH_BASE = 'https://bridge-bots.bridgetable.workers.dev';
+const PUSH_TXT = {
+  en: { msg: 'New message from {0}', club: 'New club request: {0}', reply: 'The administrator answered you', clubopen: 'Your club is open: {0}', any: 'Something new for you' },
+  tr: { msg: '{0} sana yazdı', club: 'Yeni kulüp talebi: {0}', reply: 'Yönetici sana cevap verdi', clubopen: 'Kulübün açıldı: {0}', any: 'Senin için yeni bir şey var' },
+  no: { msg: 'Ny melding fra {0}', club: 'Ny klubbforespørsel: {0}', reply: 'Administratoren har svart deg', clubopen: 'Klubben din er åpnet: {0}', any: 'Noe nytt til deg' },
+  de: { msg: 'Neue Nachricht von {0}', club: 'Neue Club-Anfrage: {0}', reply: 'Der Administrator hat dir geantwortet', clubopen: 'Dein Club ist eröffnet: {0}', any: 'Etwas Neues für dich' },
+  es: { msg: 'Nuevo mensaje de {0}', club: 'Nueva solicitud de club: {0}', reply: 'El administrador te ha respondido', clubopen: 'Tu club está abierto: {0}', any: 'Hay algo nuevo para ti' },
+  fr: { msg: 'Nouveau message de {0}', club: 'Nouvelle demande de club : {0}', reply: 'L’administrateur vous a répondu', clubopen: 'Votre club est ouvert : {0}', any: 'Du nouveau pour vous' },
+};
+self.addEventListener('push', e => {
+  e.waitUntil((async () => {
+    let kind = 'any', n = '';
+    try { const sub = await self.registration.pushManager.getSubscription();
+      if (sub) { const r = await soon(fetch(PUSH_BASE + '/push/last?ep=' + encodeURIComponent(sub.endpoint)).then(r => r.json()), 6000); if (r && r.kind) { kind = r.kind; n = r.n || ''; } } } catch (x) {}
+    const lang = String((self.navigator && self.navigator.language) || 'en').toLowerCase(), L = PUSH_TXT[/^(nb|nn|no)/.test(lang) ? 'no' : lang.slice(0, 2)] || PUSH_TXT.en;
+    const body = (L[kind] || L.any).replace('{0}', n).replace(/\s*:\s*$/, '');
+    return self.registration.showNotification('BridgePlay', { body, icon: 'icons/icon-192.png', badge: 'icons/icon-192.png', tag: 'bridge-' + kind, renotify: true, data: { kind } });
+  })());
+});
 // tapping a notification brings the app to the front
 self.addEventListener('notificationclick', e => {
   e.notification.close();
