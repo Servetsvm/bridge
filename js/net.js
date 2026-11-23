@@ -1497,7 +1497,9 @@ const Net = (() => {
     if (d.t === 'leave') { delete st.seats[seat]; delete st.names[seat]; if (st.toks) delete st.toks[seat]; if (st.away && st.away[seat]) { clearTimeout(st.away[seat].t); delete st.away[seat]; } st.conns.delete(conn.peer); addChat(null, who + ' left the table — a robot plays ' + SEAT[seat]); broadcast(); panelRefresh(); render(); tick(); return; }
     if (d.t === "chat") { addChat(who, d.text); return; }
     if (d.t === "undo") { requestUndo(conn.peer, who, seat); return; }   // the other side may say no
-    if (d.t === "claim") { if (G.phase === "play" && !G.play.trick.length && owner(G.play.turn) === conn.peer) { const left = G.play.hands[G.play.turn].length, n = Number.isFinite(+d.n) ? Math.max(0, Math.min(+d.n, left)) : left; requestClaim(G.play.turn, n, who); } return; }
+    if (d.t === "claim") {   // a guest's claim, for their side (the seat on lead if it is theirs, else their own seat: defenders claim too)
+      const cs = owner(G.play.turn) === conn.peer ? G.play.turn : [0, 1, 2, 3].find(s => owner(s) === conn.peer);
+      if (G.phase === "play" && !G.play.trick.length && cs != null) { const left = G.play.hands[G.play.turn].length, n = Number.isFinite(+d.n) ? Math.max(0, Math.min(+d.n, left)) : left; requestClaim(cs, n, who); } return; }
     if (d.t === "askreply") { const f = askP[d.id]; if (f && f.who.includes(conn.peer)) f.fin(!!d.ok); return; }
     if (d.t === "replay") { if (G.phase === "done") { addChat(null, who + " asked to replay this deal"); replayDeal(); } return; }
     if (d.t === "hint") { if (G.phase === "play" && owner(G.play.turn) === conn.peer && G.play.trick.length < 4) conn.send({ t: "hint", c: E.aiPlay(G.play, G.play.turn), id: G.id }); return; }

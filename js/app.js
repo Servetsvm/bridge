@@ -1035,6 +1035,14 @@ function tick() {
 /* ---- claims: the claimer says how many of the remaining tricks they take; the other side accepts or not.
    Robots on the other side check the claim double dummy (they accept only what can really be made). ---- */
 const tricksLeft = () => G.play.hands[G.play.leader].length;
+/* the seat a claim is made for: the one on lead if it is yours, else your own seat. So a defender can claim too, while
+   the declarer (a robot) or partner is on lead; the claim counts for your side */
+function claimSeat() {
+  const g = G && G.play; if (!g) return null;
+  if (userControls(g.turn)) return g.turn;
+  const u = U(); if (u != null && userControls(u)) return u;
+  return [0, 1, 2, 3].find(s => userControls(s)) ?? null;
+}
 // the claimer picks the number of tricks (all of them first)
 function claim(seat) {
   if (G && G.ct) return;
@@ -1047,7 +1055,8 @@ function claim(seat) {
 function claimChosen(n) {
   closeOv();
   if (guest()) { Net.send({ t: "claim", n }); flash(T('Claim sent — waiting for the other side'), 2000); return; }
-  requestClaim(G.play.turn, n);
+  const s = claimSeat(); if (s == null) return;
+  requestClaim(s, n);
 }
 // humans on the side that has to agree (online: their ids; "host" is this device)
 function agreeOwners(side) {
@@ -1426,7 +1435,7 @@ function renderBar() {
      ${typeof Net !== 'undefined' ? (n => `<button class="btn hbtn narrowonly${n ? ' gold' : ''}" id="bChat" title="${T('Chat')}"><b aria-hidden="true">💬</b><small>${T('Chat')}</small>${n ? `<span class="cbn">${n}</span>` : ''}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ''}<button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
     return; }
   const g = G.play;
-  const canClaim = !G.ct && G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
+  const canClaim = !G.ct && G.phase === "play" && !g.trick.length && claimSeat() != null && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
   const last = HIST.length ? HIST[HIST.length - 1] : null;
   const lastTxt = last ? (last.imp != null ? (fmtSigned(last.imp) + ' IMP · ' + last.mp + '%') : fmtSigned(last.us || 0)) : '&nbsp;';
   const per = Store.periods(HIST)[0];

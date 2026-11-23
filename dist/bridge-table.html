@@ -11717,6 +11717,14 @@ function tick() {
 /* ---- claims: the claimer says how many of the remaining tricks they take; the other side accepts or not.
    Robots on the other side check the claim double dummy (they accept only what can really be made). ---- */
 const tricksLeft = () => G.play.hands[G.play.leader].length;
+/* the seat a claim is made for: the one on lead if it is yours, else your own seat. So a defender can claim too, while
+   the declarer (a robot) or partner is on lead; the claim counts for your side */
+function claimSeat() {
+  const g = G && G.play; if (!g) return null;
+  if (userControls(g.turn)) return g.turn;
+  const u = U(); if (u != null && userControls(u)) return u;
+  return [0, 1, 2, 3].find(s => userControls(s)) ?? null;
+}
 // the claimer picks the number of tricks (all of them first)
 function claim(seat) {
   if (G && G.ct) return;
@@ -11729,7 +11737,8 @@ function claim(seat) {
 function claimChosen(n) {
   closeOv();
   if (guest()) { Net.send({ t: "claim", n }); flash(T('Claim sent — waiting for the other side'), 2000); return; }
-  requestClaim(G.play.turn, n);
+  const s = claimSeat(); if (s == null) return;
+  requestClaim(s, n);
 }
 // humans on the side that has to agree (online: their ids; "host" is this device)
 function agreeOwners(side) {
@@ -12108,7 +12117,7 @@ function renderBar() {
      ${typeof Net !== 'undefined' ? (n => `<button class="btn hbtn narrowonly${n ? ' gold' : ''}" id="bChat" title="${T('Chat')}"><b aria-hidden="true">💬</b><small>${T('Chat')}</small>${n ? `<span class="cbn">${n}</span>` : ''}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ''}<button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
     return; }
   const g = G.play;
-  const canClaim = !G.ct && G.phase === "play" && !g.trick.length && userControls(g.turn) && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
+  const canClaim = !G.ct && G.phase === "play" && !g.trick.length && claimSeat() != null && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
   const last = HIST.length ? HIST[HIST.length - 1] : null;
   const lastTxt = last ? (last.imp != null ? (fmtSigned(last.imp) + ' IMP · ' + last.mp + '%') : fmtSigned(last.us || 0)) : '&nbsp;';
   const per = Store.periods(HIST)[0];
@@ -17087,7 +17096,9 @@ const Net = (() => {
     if (d.t === 'leave') { delete st.seats[seat]; delete st.names[seat]; if (st.toks) delete st.toks[seat]; if (st.away && st.away[seat]) { clearTimeout(st.away[seat].t); delete st.away[seat]; } st.conns.delete(conn.peer); addChat(null, who + ' left the table — a robot plays ' + SEAT[seat]); broadcast(); panelRefresh(); render(); tick(); return; }
     if (d.t === "chat") { addChat(who, d.text); return; }
     if (d.t === "undo") { requestUndo(conn.peer, who, seat); return; }   // the other side may say no
-    if (d.t === "claim") { if (G.phase === "play" && !G.play.trick.length && owner(G.play.turn) === conn.peer) { const left = G.play.hands[G.play.turn].length, n = Number.isFinite(+d.n) ? Math.max(0, Math.min(+d.n, left)) : left; requestClaim(G.play.turn, n, who); } return; }
+    if (d.t === "claim") {   // a guest's claim, for their side (the seat on lead if it is theirs, else their own seat: defenders claim too)
+      const cs = owner(G.play.turn) === conn.peer ? G.play.turn : [0, 1, 2, 3].find(s => owner(s) === conn.peer);
+      if (G.phase === "play" && !G.play.trick.length && cs != null) { const left = G.play.hands[G.play.turn].length, n = Number.isFinite(+d.n) ? Math.max(0, Math.min(+d.n, left)) : left; requestClaim(cs, n, who); } return; }
     if (d.t === "askreply") { const f = askP[d.id]; if (f && f.who.includes(conn.peer)) f.fin(!!d.ok); return; }
     if (d.t === "replay") { if (G.phase === "done") { addChat(null, who + " asked to replay this deal"); replayDeal(); } return; }
     if (d.t === "hint") { if (G.phase === "play" && owner(G.play.turn) === conn.peer && G.play.trick.length < 4) conn.send({ t: "hint", c: E.aiPlay(G.play, G.play.turn), id: G.id }); return; }
