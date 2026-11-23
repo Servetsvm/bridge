@@ -2432,4 +2432,3 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .clubinfo .cibtns{display:flex;gap:6px;flex-wrap:wrap}
 .clubinfo .cibtns .btn{text-decoration:none}
 .clubrow .btn.clubinfob{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:66px;margin-top:10px;font-size:20px;font-weight:700;border-radius:12px}
-.clubsfs .clubrow .btn.clubinfob.on{background:var(--brass)!important;color:var(--brass-ink)!important;border-color:var(--brass)!important}
