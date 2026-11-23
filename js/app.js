@@ -2004,7 +2004,7 @@ function renderHome() {
     // the database cannot be reached: results, progress and messages are not saved; say why and what to do
     const bad = N.cloudBad && myNm() ? `<div class="hcard cloudbad"><b>⚠ ${T('Cannot reach the server: your results, progress and messages are not saved.')}</b><small>${T('Turn off an ad or privacy blocker for this site, check the internet connection, then reload the page.')}</small></div>` : '';
     // club requests waiting: each with Open the club (the super admin's panel, filled in)
-    const kln = N.isAdmin() ? N.klReq.map(x => `<div class="hcard supnew klreq"><span>🏛️ ${T('Club request')}: <b>${esc(x.kl.n)}</b> · ${esc(x.n)}${x.kl.c ? ' · ' + esc(x.kl.c) : ''}</span><button class="btn gold mini-btn" data-klopen="${esc(JSON.stringify({ n: x.kl.n, f: x.kl.f, k: x.k, pn: x.n }))}">🏛️ ${T('Open the club')}</button></div>`).join('') : '';
+    const kln = N.isAdmin() ? N.klReq.map(x => `<div class="hcard supnew klreq"><span>🏛️ ${T('Club request')}: <b>${esc(x.kl.n)}</b> · ${esc(x.n)}${x.kl.c ? ' · ' + esc(x.kl.c) : ''}</span><button class="btn gold mini-btn" data-klopen="${esc(JSON.stringify({ n: x.kl.n, f: x.kl.f, k: x.k, pn: x.n }))}">🏛️ ${T('Open the club')}</button><button class="btn mini-btn" data-kldel="${esc(x.k + '|' + x.kl.id)}" title="${T('Delete the request')}">🗑</button></div>`).join('') : '';
     const cvn = N.isAdmin() && N.cvNew ? `<button class="hcard supnew" id="hConvReq">📥 ${T('{0} new convention requests', N.cvNew)}</button>` : '';
     // the administrator's card: always on the home page (players, messages, requests, robots)
     const admN = (N.supNew || 0) + (N.cvNew || 0) + (ui.learnNew || 0);
@@ -3697,6 +3697,14 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'supSend') { sendSup(); return; }
   if (t.id === 'hClubAsk' || t.closest && t.closest('#hClubAsk')) { showClubAsk(); return; }
   if (t.id === 'clubAskSend') { sendClubAsk(); return; }
+  if (t.dataset.kldel) {   // the administrator deletes a club request (with its automatic thank-you)
+    const [k, id] = t.dataset.kldel.split('|');
+    askYes(T('Delete this club request?'), async () => {
+      try { await Net.clubAskDelete(k, id); flash('🗑', 1200); } catch (e) { flash(T('The online database could not be reached.'), 2500); }
+      if (ui.overlay === 'supth') showSupThread(k); else render();
+    });
+    return;
+  }
   if (t.dataset.klopen) {   // the super admin: the clubs program with the new club's name and federation filled in; its ID and password go back to the player
     let r = {}; try { r = JSON.parse(t.dataset.klopen); } catch (e) {}
     closeOv(); openClubs('?sa=1&nc=' + encodeURIComponent(r.n || '') + '&nf=' + (r.f === 'tbf' ? 'tbf' : 'nbf') + '&for=' + encodeURIComponent(r.k || ui.supK || '') + '&forn=' + encodeURIComponent(r.pn || ui.supThN || ''));
@@ -4282,7 +4290,7 @@ function supMsgsHtml(m, mine) {
     const own = mine ? x.by === 'p' : x.by === 'a', who = x.by === 'p' ? '' : x.by === 'auto' ? '🤖 ' : '👑 ';
     const txt = x.by === 'auto' && x.kl ? T('Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.', '<b>' + esc(x.t) + '</b>')
       : x.by === 'a' && x.kd ? T('Your club is open: {0}.', '<b>' + esc(x.kd.n) + '</b>') + '\n' + T('Club ID') + ': <b>' + esc(x.kd.id) + '</b>\n' + T('Club password') + ': <b>' + esc(x.kd.pw) + '</b>\n' + T('Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.')
-      : x.by === 'p' && x.kl && typeof x.kl === 'object' ? '🏛️ <b>' + T('Club request') + ':</b> ' + esc(x.t).replace(/^🏛️ /, '') + (!mine ? `<br><button class="btn gold mini-btn" data-klopen="${esc(JSON.stringify({ n: x.kl.n, f: x.kl.f }))}">🏛️ ${T('Open the club')}</button>` : '')
+      : x.by === 'p' && x.kl && typeof x.kl === 'object' ? '🏛️ <b>' + T('Club request') + ':</b> ' + esc(x.t).replace(/^🏛️ /, '') + (!mine ? `<br><button class="btn gold mini-btn" data-klopen="${esc(JSON.stringify({ n: x.kl.n, f: x.kl.f }))}">🏛️ ${T('Open the club')}</button> <button class="btn mini-btn" data-kldel="${esc((ui.supK || '') + '|' + x.id)}">🗑 ${T('Delete the request')}</button>` : '')
       : x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' && x.t === 'claude' ? T('Thank you for writing about the Claude system — your message has reached us, and every one is read. A deal where the Claude Double went wrong is the most useful thing you can send. And if you think your own system bids better: ⚔️ Challenge Claude on the home page. — Claude and BridgePlay') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
     return `<div class="supm ${own ? 'own' : ''} ${x.by}"><div>${who}${txt.replace(/\n/g, '<br>')}</div><small>${new Date(x.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></div>`;
   }).join('')}</div>`;

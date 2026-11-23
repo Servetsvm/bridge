@@ -72,12 +72,16 @@ const SA_REQ=(()=>{ const q=new URLSearchParams(location.search), n=(q.get('nc')
 function saFillRequest(){
   if(!SA_REQ||SA_REQ.done) return;
   const n=document.getElementById('saNewClubName'), f=document.getElementById('saNewClubFed'); if(!n) return;
-  n.value=SA_REQ.n; if(f) f.value=SA_REQ.f;
   const card=n.closest('.card');
   if(card&&!card.querySelector('.sa-req')){ const d=document.createElement('div'); d.className='sa-req'; d.style.cssText='font-size:0.85rem;background:var(--surface2);border:1px solid var(--gold);border-radius:8px;padding:8px;margin-bottom:8px;';
-    d.innerHTML=`🏛️ <b>${cleanData(SA_REQ.pn||SA_REQ.k)}</b> — ${saL('Club request')}: <b>${cleanData(SA_REQ.n)}</b><br><span style="color:var(--text2)">${saL('The club\'s ID and password go to the player\'s messages when you create it.')}</span>`;
+    d.innerHTML=`🏛️ <b>${cleanData(SA_REQ.pn||SA_REQ.k)}</b> — ${saL('Club request')}: <b>${cleanData(SA_REQ.n)}</b><br><span style="color:var(--text2)">${saL('Fill in the new club from it, then create the club: its ID and password go to the player\'s messages.')}</span><br><button class="btn btn-gold btn-sm" style="margin-top:6px;" onclick="saUseRequest()">✏️ ${saL('Fill in from the request')}</button>`;
     card.insertBefore(d,card.querySelector('.pw-wrap')); card.scrollIntoView({block:'center'}); }
 }
+// the request into the new club's fields (only on the super admin's tap): then the club created goes to that player
+window.saUseRequest=function(){
+  if(!SA_REQ) return; const n=document.getElementById('saNewClubName'), f=document.getElementById('saNewClubFed');
+  if(n) n.value=SA_REQ.n; if(f) f.value=SA_REQ.f; SA_REQ.used=true; n?.focus();
+};
 // the new club's ID and password, to the player who asked for it (a message from the administrator in BridgePlay)
 async function saSendClubToPlayer(c){
   if(!SA_REQ||!SA_REQ.k||!c) return false;
@@ -140,7 +144,7 @@ window.saSuperPwSave=async function(){
 window.saNewClub=async function(){
   const c=await createMyClub(true); if(document.getElementById('saClubErr')?.textContent) return;
   // a player's request: the ID and password to their messages (the "Club created" window stays open over the panel)
-  if(c&&SA_REQ&&!SA_REQ.done){ try{ await saSendClubToPlayer(c); toast('📨 '+saL('Sent to the player')); }catch(e){ toast('❌ '+saL('Not sent to the player')+': '+e.message); } }
+  if(c&&SA_REQ&&SA_REQ.used&&!SA_REQ.done){ try{ await saSendClubToPlayer(c); toast('📨 '+saL('Sent to the player')); }catch(e){ toast('❌ '+saL('Not sent to the player')+': '+e.message); } }
   renderSuperAdminPanel();
 };
 // a club's password: shown, and changed (a new one, or one typed)

@@ -349,6 +349,8 @@
     'New password (at least 4)':'Yeni şifre (en az 4)',
     'At least 4 characters':'En az 4 karakter',
     'Password saved':'Şifre kaydedildi',
+    "Fill in the new club from it, then create the club: its ID and password go to the player's messages.":"Yeni kulübü bu talepten doldur, sonra kulübü oluştur: ID'si ve şifresi oyuncunun mesajlarına gider.",
+    "Fill in from the request":"Bu talepten doldur",
     "Club request":"Kulüp talebi",
     "The club's ID and password go to the player's messages when you create it.":"Kulübü oluşturunca ID'si ve şifresi oyuncunun mesajlarına gider.",
     "Sent to the player":"Oyuncuya gönderildi",

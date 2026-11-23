@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v631`, kulüpler `kulup-v163`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v632`, kulüpler `kulup-v164`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -58,7 +58,9 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v631`, kulü
   Bir oyuncu 14 gün içinde cevapsız ikinci talep gönderemez; aynı adda kulüp varsa uyarı. 10 dil.
 - Yeni kulüp talebi yöneticiye: ekranda uyarı + arka planda telefon bildirimi (`supCheck`, `SET.klSeen`); ana sayfada
   cevapsız her talep için kart + "Kulübü aç" (`Net.klReq`). Yönetici o oyuncuya herhangi bir mesaj yazınca talep listeden düşer.
-- `?sa=1`: cihazdaki süper yönetici oturumu (gate/ssess) geçerliyse şifre sorulmadan doğrudan panel (`superSessionOk`, `showSuperPanel`).
+- "Kulübü aç" her zaman süper yönetici şifresini sorar (şifresiz geçiş geri alındı). Panelde talep ayrı kutuda; form boş kalır,
+  "Bu talepten doldur" ile dolar — ID/şifre oyuncuya yalnızca o zaman gider. Talep 🗑 ile silinir (`Net.clubAskDelete`:
+  talep + otomatik teşekkür; başka mesaj yoksa tüm konuşma).
 
 ### 2026-11-22
 - Deklarasyon pratiği: robotların deklarasyonu sonucun hemen altında, açık (kapalı "details" değil). `tools/build.mjs` eklendi.

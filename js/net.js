@@ -865,7 +865,7 @@ const Net = (() => {
   async function supThread(k) {
     if (k && !isAdmin()) return null;
     const key = k || await supMine(), th = await Cloud.get('destek/' + key) || {};
-    return { k: key, n: th.n || '', pr: th.pr || 0, ar: th.ar || 0, m: Object.values(th.m || {}).filter(x => x && x.ts).sort((a, b) => a.ts - b.ts) };
+    return { k: key, n: th.n || '', pr: th.pr || 0, ar: th.ar || 0, m: Object.entries(th.m || {}).filter(([, x]) => x && x.ts).map(([id, x]) => ({ ...x, id })).sort((a, b) => a.ts - b.ts) };
   }
   // marks the thread read: the player's own, or (the administrator) a player's
   async function supRead(k) {
@@ -881,6 +881,17 @@ const Net = (() => {
     await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'a', t: String(txt).slice(0, 1000), ts: Date.now() });
     await Cloud.put('destek/' + k + '/ar', Date.now());
   }
+  /* the administrator deletes a club request (a test, or one not wanted): the request and its automatic thank-you go;
+     a thread with nothing else in it goes too */
+  async function clubAskDelete(k, id) {
+    if (!isAdmin() || !k || !id) return false;
+    const th = await Cloud.get('destek/' + k) || {}, m = th.m || {}, ask = m[id];
+    const del = [id, ...Object.entries(m).filter(([, x]) => x && x.by === 'auto' && x.kl === 1 && ask && x.ts > ask.ts && x.ts - ask.ts < 5000).map(([i]) => i)];
+    if (Object.keys(m).every(i => del.includes(i))) await Cloud.put('destek/' + k, null);
+    else for (const i of del) await Cloud.put('destek/' + k + '/m/' + i, null);
+    st.supChk = 0; supCheck();
+    return true;
+  }
   // the administrator deletes a conversation (the player's thread with every message)
   async function supDelete(k) {
     if (!isAdmin() || !k) return false;
@@ -893,9 +904,9 @@ const Net = (() => {
     if (!Cloud.on || !isAdmin()) return [];
     const all = await Cloud.get('destek') || {};
     return Object.entries(all).map(([k, th]) => {
-      const m = Object.values(th.m || {}).filter(x => x && x.ts).sort((a, b) => a.ts - b.ts), last = m[m.length - 1];
+      const m = Object.entries(th.m || {}).filter(([, x]) => x && x.ts).map(([id, x]) => ({ ...x, id })).sort((a, b) => a.ts - b.ts), last = m[m.length - 1];
       // a club request not answered yet (no message from the administrator after it)
-      const ask = [...m].reverse().find(x => x.by === 'p' && x.kl && typeof x.kl === 'object'), kl = ask && !m.some(x => x.ts > ask.ts && x.by === 'a') ? { ...ask.kl, ts: ask.ts } : null;
+      const ask = [...m].reverse().find(x => x.by === 'p' && x.kl && typeof x.kl === 'object'), kl = ask && !m.some(x => x.ts > ask.ts && x.by === 'a') ? { ...ask.kl, ts: ask.ts, id: ask.id } : null;
       return { k, n: th.n || decodeURIComponent(k), last, kl, unread: m.some(x => x.by === 'p' && x.ts > (th.ar || 0)) };
     }).filter(x => x.last).sort((a, b) => b.last.ts - a.last.ts);
   }
@@ -1997,5 +2008,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lbot, lobbyOthers, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get klReq() { return st.klReq || []; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, clubAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lbot, lobbyOthers, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get klReq() { return st.klReq || []; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, clubAsk, clubAskDelete, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
