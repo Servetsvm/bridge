@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "A new version is ready": "Yeni sürüm hazır", "Reload": "Yenile",
     "Every day": "Her gün", "Weekdays": "Hafta içi", "Weekend": "Hafta sonu", "Individual": "Bireysel", "Beginners": "Yeni başlayanlar",
     "Tournament days": "Turnuva günleri",
     "Club info": "Kulüp bilgisi",
@@ -472,6 +473,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "A new version is ready": "En ny versjon er klar", "Reload": "Last inn på nytt",
     "Every day": "Hver dag", "Weekdays": "Ukedager", "Weekend": "Helg", "Individual": "Individuell", "Beginners": "Nybegynnere",
     "Tournament days": "Turneringsdager",
     "Club info": "Klubbinfo",
@@ -938,6 +940,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "A new version is ready": "Hay una nueva versión", "Reload": "Recargar",
     "Every day": "Todos los días", "Weekdays": "Entre semana", "Weekend": "Fin de semana", "Individual": "Individual", "Beginners": "Principiantes",
     "Tournament days": "Días de torneo",
     "Club info": "Información del club",
@@ -1419,6 +1422,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "A new version is ready": "Une nouvelle version est prête", "Reload": "Recharger",
     "Every day": "Tous les jours", "Weekdays": "En semaine", "Weekend": "Le week-end", "Individual": "Individuel", "Beginners": "Débutants",
     "Tournament days": "Jours de tournoi",
     "Club info": "Infos du club",
@@ -1900,6 +1904,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "A new version is ready": "È pronta una nuova versione", "Reload": "Ricarica",
     "Every day": "Ogni giorno", "Weekdays": "Giorni feriali", "Weekend": "Fine settimana", "Individual": "Individuale", "Beginners": "Principianti",
     "Tournament days": "Giorni di torneo",
     "Club info": "Info del club",
@@ -2381,6 +2386,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "A new version is ready": "Eine neue Version ist bereit", "Reload": "Neu laden",
     "Every day": "Jeden Tag", "Weekdays": "Wochentags", "Weekend": "Am Wochenende", "Individual": "Einzel", "Beginners": "Anfänger",
     "Tournament days": "Turniertage",
     "Club info": "Club-Info",
@@ -2862,6 +2868,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "A new version is ready": "Готова новая версия", "Reload": "Обновить",
     "Every day": "Каждый день", "Weekdays": "По будням", "Weekend": "По выходным", "Individual": "Личный", "Beginners": "Для начинающих",
     "Tournament days": "Дни турниров",
     "Club info": "О клубе",
@@ -3343,6 +3350,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "A new version is ready": "Nowa wersja jest gotowa", "Reload": "Odśwież",
     "Every day": "Codziennie", "Weekdays": "W dni robocze", "Weekend": "W weekend", "Individual": "Indywidualny", "Beginners": "Dla początkujących",
     "Tournament days": "Dni turniejów",
     "Club info": "Informacje o klubie",
@@ -3824,6 +3832,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "A new version is ready": "新版本已就绪", "Reload": "重新加载",
     "Every day": "每天", "Weekdays": "工作日", "Weekend": "周末", "Individual": "个人赛", "Beginners": "初学者",
     "Tournament days": "比赛日",
     "Club info": "俱乐部信息",

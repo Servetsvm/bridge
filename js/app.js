@@ -4046,7 +4046,12 @@ function start(data) {
     const hadController = !!navigator.serviceWorker.controller; let reloaded = false, want = false;
     const quiet = () => !(typeof Net !== 'undefined' && Net.st && Net.st.on) && !ui.overlay && (!G || G.rtv || !['bid', 'play'].includes(G.phase));
     const go = () => { if (want && !reloaded && quiet()) { reloaded = true; save(); location.reload(); } };
-    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) { want = true; go(); } });
+    // a new version is in: a quiet moment switches by itself; otherwise a strip at the bottom offers it now
+    const offer = () => { if (reloaded || $('updBar')) return; const b = document.createElement('div'); b.id = 'updBar';
+      b.innerHTML = `<span>🔄 ${T('A new version is ready')}</span><button class="btn gold" type="button">${T('Reload')}</button><button class="btn updx" type="button" aria-label="${T('Close')}">✕</button>`;
+      b.querySelector('.gold').onclick = () => { reloaded = true; save(); location.reload(); }; b.querySelector('.updx').onclick = () => b.remove();
+      document.body.appendChild(b); };
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) { want = true; go(); if (!reloaded) offer(); } });
     setInterval(go, 15000);
     const look = () => navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
     navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});

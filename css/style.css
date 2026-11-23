@@ -2474,3 +2474,8 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .ciPage .clubrow.cigreen{flex:0 0 auto}
 .clubinfo .cischr{padding:2px 0}
 .clubinfo .cischr i{font-style:normal;opacity:.75}
+/* a new version is ready: a strip at the bottom with Reload */
+#updBar{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:10px;background:#173d28;color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:14px;padding:10px 12px 10px 16px;box-shadow:0 6px 20px rgba(0,0,0,.35);font-size:15px;max-width:calc(100% - 24px);box-sizing:border-box}
+#updBar span{flex:1;white-space:nowrap}
+#updBar .btn{padding:8px 14px}
+#updBar .updx{background:transparent;color:#fff;border:0;padding:6px 8px}
