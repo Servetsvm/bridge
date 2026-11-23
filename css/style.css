@@ -2482,3 +2482,4 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .offready{margin:8px 0 2px;font-size:14px;border-radius:10px;padding:8px 10px;background:rgba(0,0,0,.04)}
 .offready:empty{display:none}
 .offready.ok{background:#e3f4e8;color:#15572f;font-weight:700}
+.clubrow .clubname small.clubnext{opacity:.9;font-weight:600}

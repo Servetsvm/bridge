@@ -4556,6 +4556,26 @@ async function clubTaken(club, test) {
 }
 /* a club's info card (its admin sets it in BridgeScore: TD → Club info): the address opens the phone's maps for the way
    there, the phone number calls or sends an SMS */
+/* a club's tournament days (bm/info sch: d 0 every day, 8 weekdays, 9 the weekend, 1 Monday … 7 Sunday; t "19:00";
+   k the kind): the next one from now, as "Today 19:00", "Tomorrow 18:30" or "Thursday 18:30", with its kind */
+const CLUB_KIND = { pairs: 'Pairs', teams: 'Teams', indiv: 'Individual', begin: 'Beginners', online: 'Online' };
+function clubNext(x) {
+  const sch = x && Array.isArray(x.sch) ? x.sch.filter(r => r && r.d >= 0 && r.d <= 9 && /^\d\d:\d\d$/.test(r.t || '')) : [];
+  if (!sch.length) return '';
+  const now = new Date(); let best = null;
+  for (let a = 0; a < 8; a++) {
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() + a), iso = day.getDay() || 7;
+    for (const r of sch) {
+      if (!(r.d === 0 || (r.d === 8 && iso <= 5) || (r.d === 9 && iso >= 6) || r.d === iso)) continue;
+      const [h, m] = r.t.split(':').map(Number), at = new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
+      if (at > now && (!best || at < best.at)) best = { at, r, a };
+    }
+  }
+  if (!best) return '';
+  const cap = w => w.charAt(0).toLocaleUpperCase() + w.slice(1);
+  const when = best.a === 0 ? T('Today') : best.a === 1 ? T('Tomorrow') : cap(best.at.toLocaleDateString(SET.lang || undefined, { weekday: 'long' }));
+  return `${when} ${best.r.t}${CLUB_KIND[best.r.k] ? ' · ' + T(CLUB_KIND[best.r.k]) : ''}`;
+}
 function clubInfoHtml(x) {
   if (!x) return '';
   const adr = String(x.adr || '').trim(), kp = String(x.kp || '').trim(), tel = String(x.tel || '').trim(), num = tel.replace(/[^\d+]/g, '');
@@ -4586,7 +4606,7 @@ async function showClubs() {
     const logo = id => { let c = (ui.clubLogos || {})[id]; if (/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+\/=]+$/.test(c || '')) return `<img class="clogo clogo-img" src="${c}" alt="">`; if (!/^[AKQJT2-9][SHDC]$/.test(c || '')) c = DEF[Math.max(0, ids.indexOf(id)) % DEF.length];
       return `<span class="clogo${c[1] === 'H' || c[1] === 'D' ? ' r' : ''}"><span class="cr">${c[0] === 'T' ? '10' : c[0]}</span><span class="cs">${SU[c[1]]}</span></span>`; };
     const clubCol = id => { let h = 0; for (const ch of String(id)) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h % 6; };   // each club its own colour (always the same)
-    const rows = shown.map(t => `<div class="clubrow cc${clubCol(t.club)}${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>${logo(t.club)} ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
+    const rows = shown.map(t => `<div class="clubrow cc${clubCol(t.club)}${ui.clubOpen === t.club ? ' open' : ''}${t.tb ? ' live' : ''}"><button class="clubname" data-clubopen="${esc(t.club)}"><b>${logo(t.club)} ${esc(t.c || t.club)}</b>${t.tb ? `<small>🟢 ${esc(t.n || T('Running'))}</small>` : ''}${otOf(t.club).length ? `<small>🌐 ${esc(otOf(t.club)[0].i.n)} · ${esc(ctWhen(otOf(t.club)[0].d))}</small>` : ''}${!t.tb && clubNext((ui.clubInfo || {})[t.club]) ? `<small class="clubnext">⏰ ${esc(clubNext(ui.clubInfo[t.club]))}</small>` : ''}<span class="clubarr">${ui.clubOpen === t.club ? '▾' : '▸'}</span></button>` + (ui.clubOpen === t.club ? otRows(t.club) : '') +
       (ui.clubOpen !== t.club ? '' : (t.tb ? `<div class="row2"><button class="btn gold" data-clubplay="${esc(t.club)}">🪑 ${T('Table No')}</button></div>` : otLive(t.club) ? '' : `<div class="muted">${T('No tournament at this club now.')}</div>`) +
         (x => `<div class="row4 clubtools ct4"><button class="btn" data-clubadmin="${esc(t.club)}">🧑‍⚖️ ${T('TD')}</button>` + (x ? `<button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button>` : `<button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button>`) + `<button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button><button class="btn" data-clubres="${esc(t.club)}">📄 ${T('Results')}</button></div>`)(otLive(t.club))
         // the club's info (address, contact person, phone): a button under the tools, the card opens under it
@@ -4616,7 +4636,7 @@ async function showClubs() {
     // each club's info (address, contact person, phone), set by the club's admin
     const inf = await Promise.all(ui.clubLive.map(t => Net.Cloud.get('gate/clubs/' + t.club + '/bm/info').catch(() => null)));
     ui.clubInfo = {}; ui.clubLive.forEach((t, i) => { if (inf[i] && typeof inf[i] === 'object') ui.clubInfo[t.club] = inf[i]; });
-    if (ui.overlay === 'clubs' && ui.clubOpen) draw();
+    if (ui.overlay === 'clubs') draw();   // the next tournament under each club's name, and the info button
   }
 }
 /* Clubs: the club tournaments (in kulupler/, once BridgeGate) open here, full screen above the home page, under a bar with
