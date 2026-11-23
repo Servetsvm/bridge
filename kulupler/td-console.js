@@ -187,15 +187,31 @@ window.tdcInfo=async function(){
   openModal('ℹ️ '+L('Club info'),`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${L('Shown on BridgePlay\'s Clubs page: players open the address in their maps, and call or send an SMS to the number.')}</div>
     <div class="field"><label>${L('Address')}</label><textarea id="tdcAdr" rows="2" maxlength="150" style="width:100%;box-sizing:border-box;">${v(x.adr)}</textarea></div>
     <div class="field"><label>${L('Contact person')}</label><input id="tdcKp" maxlength="60" value="${v(x.kp)}"></div>
-    <div class="field"><label>${L('Phone number')}</label><input id="tdcTel" type="tel" maxlength="25" placeholder="+47 …" value="${v(x.tel)}"></div>`,
+    <div class="field"><label>${L('Phone number')}</label><input id="tdcTel" type="tel" maxlength="25" placeholder="+47 …" value="${v(x.tel)}"></div>
+    <div class="field"><label>📅 ${L('Tournament days')}</label><div id="tdcSch"></div><button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" onclick="tdcSchAdd()">➕ ${L('Add a day')}</button></div>`,
     `<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcInfoSave()">${L('Save')}</button>`);
+  (Array.isArray(x.sch)?x.sch:[]).forEach(r=>tdcSchAdd(r));
+};
+// one tournament day: the weekday (1 Monday … 7 Sunday, its name in the page's language), the time and a short note
+const tdcDay=d=>{ try{ return new Date(2024,0,d).toLocaleDateString(window.getLanguage?.()||undefined,{weekday:'long'}); }catch(e){ return String(d); } };
+window.tdcSchAdd=function(r){
+  const box=document.getElementById('tdcSch'); if(!box||box.children.length>=7) return; r=r||{};
+  const row=document.createElement('div'); row.className='tdc-sch'; row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;';
+  row.innerHTML=`<select class="tdc-d" style="flex:1 1 110px;padding:8px;border-radius:8px;">${[1,2,3,4,5,6,7].map(d=>`<option value="${d}"${+r.d===d?' selected':''}>${tdcDay(d)}</option>`).join('')}</select>
+    <input class="tdc-t" type="time" value="${/^\d\d:\d\d$/.test(r.t||'')?r.t:'19:00'}" style="flex:0 0 100px;padding:8px;border-radius:8px;">
+    <input class="tdc-n" maxlength="40" placeholder="${L('Note (e.g. pairs)')}" value="${String(r.n||'').replace(/"/g,'&quot;').replace(/</g,'&lt;')}" style="flex:2 1 140px;padding:8px;border-radius:8px;">
+    <button type="button" class="btn btn-ghost btn-sm" onclick="this.parentNode.remove()" title="${L('Delete')}">✕</button>`;
+  box.appendChild(row);
 };
 window.tdcInfoSave=async function(){
   const g=id=>(document.getElementById(id)?.value||'').trim();
   const x={adr:g('tdcAdr').slice(0,150),kp:g('tdcKp').slice(0,60),tel:g('tdcTel').slice(0,25)};
+  const sch=[...document.querySelectorAll('#tdcSch .tdc-sch')].map(r=>({d:+r.querySelector('.tdc-d').value,t:r.querySelector('.tdc-t').value||'',n:r.querySelector('.tdc-n').value.trim().slice(0,40)}))
+    .filter(r=>r.d>=1&&r.d<=7&&/^\d\d:\d\d$/.test(r.t)).sort((a,b)=>a.d-b.d||a.t.localeCompare(b.t)).slice(0,7);
+  if(sch.length) x.sch=sch;
   if(x.tel&&!/^[+\d][\d\s\-()]{4,}$/.test(x.tel)){ toast('❌ '+L('Phone number')+'?'); return; }
   try{
-    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),x.adr||x.kp||x.tel?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
+    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),x.adr||x.kp||x.tel||x.sch?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
     if(!r.ok) throw new Error(String(r.status));
   }catch(e){ toast('❌ '+L('Not saved — please log in again')); return; }
   closeModal(); toast('✅ '+L('Saved'));

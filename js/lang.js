@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Tournament days": "Turnuva günleri",
     "Club info": "Kulüp bilgisi",
     "Address": "Adres", "Directions": "Yol tarifi", "Contact person": "İrtibat kişisi", "Phone": "Telefon", "Call": "Ara",
     "Delete the request": "İsteği sil", "Delete this club request?": "Bu kulüp isteği silinsin mi?",
@@ -470,6 +471,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Tournament days": "Turneringsdager",
     "Club info": "Klubbinfo",
     "Address": "Adresse", "Directions": "Veibeskrivelse", "Contact person": "Kontaktperson", "Phone": "Telefon", "Call": "Ring",
     "Delete the request": "Slett forespørselen", "Delete this club request?": "Slette denne klubbforespørselen?",
@@ -934,6 +936,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Tournament days": "Días de torneo",
     "Club info": "Información del club",
     "Address": "Dirección", "Directions": "Cómo llegar", "Contact person": "Persona de contacto", "Phone": "Teléfono", "Call": "Llamar",
     "Delete the request": "Borrar la solicitud", "Delete this club request?": "¿Borrar esta solicitud de club?",
@@ -1413,6 +1416,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Tournament days": "Jours de tournoi",
     "Club info": "Infos du club",
     "Address": "Adresse", "Directions": "Itinéraire", "Contact person": "Personne à contacter", "Phone": "Téléphone", "Call": "Appeler",
     "Delete the request": "Supprimer la demande", "Delete this club request?": "Supprimer cette demande de club ?",
@@ -1892,6 +1896,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Tournament days": "Giorni di torneo",
     "Club info": "Info del club",
     "Address": "Indirizzo", "Directions": "Indicazioni", "Contact person": "Referente", "Phone": "Telefono", "Call": "Chiama",
     "Delete the request": "Elimina la richiesta", "Delete this club request?": "Eliminare questa richiesta di club?",
@@ -2371,6 +2376,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Tournament days": "Turniertage",
     "Club info": "Club-Info",
     "Address": "Adresse", "Directions": "Route", "Contact person": "Ansprechpartner", "Phone": "Telefon", "Call": "Anrufen",
     "Delete the request": "Anfrage löschen", "Delete this club request?": "Diese Club-Anfrage löschen?",
@@ -2850,6 +2856,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Tournament days": "Дни турниров",
     "Club info": "О клубе",
     "Address": "Адрес", "Directions": "Маршрут", "Contact person": "Контактное лицо", "Phone": "Телефон", "Call": "Позвонить",
     "Delete the request": "Удалить запрос", "Delete this club request?": "Удалить этот запрос клуба?",
@@ -3329,6 +3336,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Tournament days": "Dni turniejów",
     "Club info": "Informacje o klubie",
     "Address": "Adres", "Directions": "Dojazd", "Contact person": "Osoba kontaktowa", "Phone": "Telefon", "Call": "Zadzwoń",
     "Delete the request": "Usuń prośbę", "Delete this club request?": "Usunąć tę prośbę o klub?",
@@ -3808,6 +3816,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Tournament days": "比赛日",
     "Club info": "俱乐部信息",
     "Address": "地址", "Directions": "导航", "Contact person": "联系人", "Phone": "电话", "Call": "拨打",
     "Delete the request": "删除申请", "Delete this club request?": "删除这个俱乐部申请？",

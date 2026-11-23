@@ -4543,9 +4543,13 @@ async function clubTaken(club, test) {
 function clubInfoHtml(x) {
   if (!x) return '';
   const adr = String(x.adr || '').trim(), kp = String(x.kp || '').trim(), tel = String(x.tel || '').trim(), num = tel.replace(/[^\d+]/g, '');
-  if (!adr && !kp && !num) return '';
+  // the tournament days: the weekday in the reader's language, the time and a note
+  const day = d => { try { return new Date(2024, 0, d).toLocaleDateString(SET.lang || undefined, { weekday: 'long' }); } catch (e) { return ''; } };
+  const sch = (Array.isArray(x.sch) ? x.sch : []).filter(r => r && r.d >= 1 && r.d <= 7 && /^\d\d:\d\d$/.test(r.t || ''));
+  if (!adr && !kp && !num && !sch.length) return '';
   const map = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(adr);
   return `<div class="clubinfo">${adr ? `<a class="cirow" href="${esc(map)}" target="_blank" rel="noopener"><span>📍</span><span><small>${T('Address')}</small>${esc(adr).replace(/\n/g, '<br>')}</span><em>🧭 ${T('Directions')}</em></a>` : ''}`
+    + (sch.length ? `<div class="cirow cisch"><span>📅</span><span><small>${T('Tournament days')}</small>${sch.map(r => `<div class="cischr"><b>${esc(day(r.d))}</b> <span>${esc(r.t)}</span>${r.n ? ` <i>· ${esc(r.n)}</i>` : ''}</div>`).join('')}</span></div>` : '')
     + (kp ? `<div class="cirow"><span>👤</span><span><small>${T('Contact person')}</small>${esc(kp)}</span></div>` : '')
     + (num ? `<div class="cirow"><span>📞</span><span><small>${T('Phone')}</small>${esc(tel)}</span><span class="cibtns"><a class="btn gold mini-btn cicall" href="tel:${esc(num)}">📞 ${T('Call')}</a><a class="btn mini-btn cisms" href="sms:${esc(num)}">💬 SMS</a></span></div>` : '')
     + `</div>`;
