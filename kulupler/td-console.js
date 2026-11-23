@@ -172,11 +172,33 @@ window.tdcClub=function(){
   const b=(ic,t,fn)=>`<button class="btn tdc-set" onclick="closeModal();${fn}">${ic} ${L(t)}</button>`;
   openModal('⚙️ '+L('Club settings'),`<div class="tdc-setlist">${[
     b('🎴','Club logo','clubLogoPick()'),
+    b('ℹ️','Club info','tdcInfo()'),
     b('🔑','Club password','tdcPw()'),
     b('🔢','Table codes','showTableCodes()'),
     b('⚠️','Slow table','tdcStall()'),
     b('🔗','Players\' link','bgShowPlayersLink()'),
     b('📺','Screen','tdcScreen()')].join('')}</div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Close')}</button>`);
+};
+// the club's info for BridgePlay's Clubs page: address (players open it in their maps), contact person, phone (call / SMS).
+// Kept in the club's own data (gate/clubs/<id>/bm/info), like the logo
+window.tdcInfo=async function(){
+  let x={}; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),{cache:'no-store'}); x=(r.ok&&await r.json())||{}; }catch(e){}
+  const v=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  openModal('ℹ️ '+L('Club info'),`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${L('Shown on BridgePlay\'s Clubs page: players open the address in their maps, and call or send an SMS to the number.')}</div>
+    <div class="field"><label>${L('Address')}</label><textarea id="tdcAdr" rows="2" maxlength="150" style="width:100%;box-sizing:border-box;">${v(x.adr)}</textarea></div>
+    <div class="field"><label>${L('Contact person')}</label><input id="tdcKp" maxlength="60" value="${v(x.kp)}"></div>
+    <div class="field"><label>${L('Phone number')}</label><input id="tdcTel" type="tel" maxlength="25" placeholder="+47 …" value="${v(x.tel)}"></div>`,
+    `<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcInfoSave()">${L('Save')}</button>`);
+};
+window.tdcInfoSave=async function(){
+  const g=id=>(document.getElementById(id)?.value||'').trim();
+  const x={adr:g('tdcAdr').slice(0,150),kp:g('tdcKp').slice(0,60),tel:g('tdcTel').slice(0,25)};
+  if(x.tel&&!/^[+\d][\d\s\-()]{4,}$/.test(x.tel)){ toast('❌ '+L('Phone number')+'?'); return; }
+  try{
+    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),x.adr||x.kp||x.tel?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
+    if(!r.ok) throw new Error(String(r.status));
+  }catch(e){ toast('❌ '+L('Not saved — please log in again')); return; }
+  closeModal(); toast('✅ '+L('Saved'));
 };
 // the club's password (the one the club's admins sign in with): the TD changes it; whoever signed in with the old one goes on
 window.tdcPw=function(){

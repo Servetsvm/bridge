@@ -2422,3 +2422,12 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 #ov label.fld .tok{font-weight:400;font-size:15px;font-family:inherit;letter-spacing:normal;box-sizing:border-box;width:100%}
 .hcard.klreq{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .hcard.klreq span{flex:1 1 180px}
+/* a club's info: address (opens maps), contact person, phone (call / SMS) */
+.clubinfo{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.clubinfo .cirow{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.05);border-radius:10px;padding:8px 10px;color:inherit;text-decoration:none;font-size:15px;line-height:1.3}
+.clubinfo .cirow>span:first-child{font-size:20px}
+.clubinfo .cirow>span:nth-child(2){flex:1;min-width:0;overflow-wrap:anywhere}
+.clubinfo small{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;opacity:.6}
+.clubinfo em{font-style:normal;font-weight:700;font-size:13px;background:var(--brass);color:var(--brass-ink);border-radius:8px;padding:4px 10px;white-space:nowrap}
+.clubinfo .cibtns{display:flex;gap:6px;flex-wrap:wrap}
+.clubinfo .cibtns .btn{text-decoration:none}

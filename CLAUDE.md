@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v634`, kulüpler `kulup-v164`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v635`, kulüpler `kulup-v165`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -53,6 +53,9 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v634`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-23
+- Kulüp bilgisi: kulüp yöneticisi BridgeScore'da TD → Kulüp ayarları → ℹ️ Kulüp bilgisi (adres, irtibat kişisi, telefon) →
+  `gate/clubs/<id>/bm/info {adr,kp,tel}`. BridgePlay Kulüpler'de kulübe basınca kart (`clubInfoHtml`): adres → Google Maps yol
+  tarifi, telefon → `tel:` Ara / `sms:` SMS.
 - **Açılış hızı:** sw.js artık FILES listesindeki dosyaları önce önbellekten verir (eskiden her açılışta her dosya internetten
   istenirdi: kötü bağlantıda ~4,7 s → 0,1 s). Güncelleme: yeni VERSION → arka planda iner, bir sonraki açılışta yeni sürüm.
   Bu yüzden VERSION'u artırmayı UNUTMA — artırılmazsa telefonlar eski dosyada kalır.
