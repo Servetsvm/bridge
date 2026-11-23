@@ -2464,6 +2464,14 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 
 /* Admin: the country a player logged in from */
 .plctry{font-weight:600;font-size:.85em;opacity:.8;margin-left:4px}
+/* "Start your own club": a small card under the open tables, and its form */
+.hcard.hclubask{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;font:inherit;border:1px dashed rgba(0,0,0,.18);cursor:pointer;padding:10px 14px}
+.hclubask b{font-size:15px}
+.hclubask span{font-size:13px;opacity:.75;line-height:1.35}
+.hclubask em{font-style:normal;font-weight:700;font-size:13px;background:var(--brass);color:var(--brass-ink);border-radius:8px;padding:3px 10px;align-self:flex-end}
+.hclubask:hover{border-color:var(--brass,#c9a43a)}
+#ov label.fld{display:flex;flex-direction:column;gap:3px;margin:8px 0;font-size:13px;font-weight:600}
+#ov label.fld .tok{font-weight:400;font-size:15px;font-family:inherit;letter-spacing:normal;box-sizing:border-box;width:100%}
 
 </style>
 
@@ -5668,6 +5676,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Start your own club": "Kendi kulübünü kur", "Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.": "Kulübünüz kendi turnuvalarını BridgePlay'de oynasın: masalar, sonuçlar, IMP/MP. Ücretsiz.", "Ask for a club": "Kulüp iste", "Write your club's name: the administrator opens the club and sends you its ID and password in your messages (✉️).": "Kulübünün adını yaz: yönetici kulübü açar, ID'sini ve şifresini mesajlarına (✉️) gönderir.", "Club name": "Kulüp adı", "Federation": "Federasyon", "Other": "Diğer", "Town or country": "Şehir ya da ülke", "Note (how often you play, how many tables …)": "Not (ne sıklıkla oynuyorsunuz, kaç masa …)", "Write the club's name.": "Kulübün adını yaz.", "Choose the federation.": "Federasyonu seç.", "You have already asked for a club: the administrator will answer in your messages (✉️).": "Zaten bir kulüp istedin: yönetici mesajlarında (✉️) cevap verecek.", "A club with this name is already in Clubs.": "Bu adda bir kulüp Kulüpler'de zaten var.", "Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.": "Kulüp talebin için teşekkürler: {0}. Yönetici kulübü açar ve ID'sini ve şifresini buraya gönderir.", "Your club is open: {0}.": "Kulübün açıldı: {0}.", "Club password": "Kulüp şifresi", "Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.": "Ana sayfada 🏛 Kulüpler'i aç, kulübünü bul ve bu şifreyle yöneticisi olarak gir. Şifreyi kimseyle paylaşma.", "Club request": "Kulüp talebi", "Open the club": "Kulübü aç",
     "What the robots learned": "Robotun öğrendikleri",
     "System table": "Sistem masası", "The robots play each bidding system: watch, or sit down.": "Robotlar her teklif sistemini oynar: izle ya da otur.",
     "Tournaments and lessons": "Turnuvalar ve dersler", "Make a tournament, or a lesson with your own deals (PBN/LIN).": "Turnuva kur ya da kendi ellerinle (PBN/LIN) ders yap.",
@@ -6130,6 +6139,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Start your own club": "Start din egen klubb", "Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.": "Klubben din spiller sine egne turneringer i BridgePlay: bord, resultater, IMP/MP. Gratis.", "Ask for a club": "Be om en klubb", "Write your club's name: the administrator opens the club and sends you its ID and password in your messages (✉️).": "Skriv klubbens navn: administratoren åpner klubben og sender deg ID og passord i meldingene dine (✉️).", "Club name": "Klubbnavn", "Federation": "Forbund", "Other": "Annet", "Town or country": "By eller land", "Note (how often you play, how many tables …)": "Merknad (hvor ofte dere spiller, hvor mange bord …)", "Write the club's name.": "Skriv klubbens navn.", "Choose the federation.": "Velg forbund.", "You have already asked for a club: the administrator will answer in your messages (✉️).": "Du har allerede bedt om en klubb: administratoren svarer i meldingene dine (✉️).", "A club with this name is already in Clubs.": "En klubb med dette navnet finnes allerede i Klubber.", "Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.": "Takk for klubbforespørselen: {0}. Administratoren åpner klubben og sender deg ID og passord her.", "Your club is open: {0}.": "Klubben din er åpnet: {0}.", "Club password": "Klubbpassord", "Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.": "Åpne 🏛 Klubber på startsiden, finn klubben din og logg inn som administrator med dette passordet. Hold passordet for deg selv.", "Club request": "Klubbforespørsel", "Open the club": "Åpne klubben",
     "What the robots learned": "Hva robotene har lært",
     "System table": "Systembordet", "The robots play each bidding system: watch, or sit down.": "Robotene spiller hvert meldesystem: se på, eller sett deg.",
     "Tournaments and lessons": "Turneringer og leksjoner", "Make a tournament, or a lesson with your own deals (PBN/LIN).": "Lag en turnering, eller en leksjon med dine egne giv (PBN/LIN).",
@@ -6589,6 +6599,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
+    "Start your own club": "Crea tu propio club", "Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.": "Tu club juega sus propios torneos en BridgePlay: mesas, resultados, IMP/MP. Gratis.", "Ask for a club": "Pedir un club", "Write your club's name: the administrator opens the club and sends you its ID and password in your messages (✉️).": "Escribe el nombre de tu club: el administrador abre el club y te envía su ID y contraseña en tus mensajes (✉️).", "Club name": "Nombre del club", "Federation": "Federación", "Other": "Otra", "Town or country": "Ciudad o país", "Note (how often you play, how many tables …)": "Nota (con qué frecuencia jugáis, cuántas mesas …)", "Write the club's name.": "Escribe el nombre del club.", "Choose the federation.": "Elige la federación.", "You have already asked for a club: the administrator will answer in your messages (✉️).": "Ya pediste un club: el administrador responderá en tus mensajes (✉️).", "A club with this name is already in Clubs.": "Ya hay un club con este nombre en Clubes.", "Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.": "Gracias por tu solicitud de club: {0}. El administrador abre el club y te envía aquí su ID y contraseña.", "Your club is open: {0}.": "Tu club está abierto: {0}.", "Club password": "Contraseña del club", "Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.": "Abre 🏛 Clubes en la página de inicio, busca tu club y entra como su administrador con esta contraseña. No compartas la contraseña.", "Club request": "Solicitud de club", "Open the club": "Abrir el club",
     "Choose a convention to practise (or Off), then ▶ Start": "Elige una convención para practicar (o Desactivado) y luego ▶ Empezar",
     "My convention card": "Mi tarjeta de convenciones",
     "TD": "Director",
@@ -7063,6 +7074,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
+    "Start your own club": "Créez votre propre club", "Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.": "Votre club joue ses propres tournois dans BridgePlay : tables, résultats, IMP/MP. Gratuit.", "Ask for a club": "Demander un club", "Write your club's name: the administrator opens the club and sends you its ID and password in your messages (✉️).": "Écrivez le nom de votre club : l’administrateur ouvre le club et vous envoie son ID et son mot de passe dans vos messages (✉️).", "Club name": "Nom du club", "Federation": "Fédération", "Other": "Autre", "Town or country": "Ville ou pays", "Note (how often you play, how many tables …)": "Note (à quelle fréquence vous jouez, combien de tables …)", "Write the club's name.": "Écrivez le nom du club.", "Choose the federation.": "Choisissez la fédération.", "You have already asked for a club: the administrator will answer in your messages (✉️).": "Vous avez déjà demandé un club : l’administrateur répondra dans vos messages (✉️).", "A club with this name is already in Clubs.": "Un club de ce nom existe déjà dans Clubs.", "Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.": "Merci pour votre demande de club : {0}. L’administrateur ouvre le club et vous envoie ici son ID et son mot de passe.", "Your club is open: {0}.": "Votre club est ouvert : {0}.", "Club password": "Mot de passe du club", "Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.": "Ouvrez 🏛 Clubs sur la page d’accueil, trouvez votre club et connectez-vous comme administrateur avec ce mot de passe. Gardez le mot de passe pour vous.", "Club request": "Demande de club", "Open the club": "Ouvrir le club",
     "Choose a convention to practise (or Off), then ▶ Start": "Choisis une convention à travailler (ou Désactivé), puis ▶ Commencer",
     "My convention card": "Ma carte de conventions",
     "TD": "Arbitre",
@@ -7537,6 +7549,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
+    "Start your own club": "Crea il tuo club", "Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.": "Il tuo club gioca i propri tornei in BridgePlay: tavoli, risultati, IMP/MP. Gratis.", "Ask for a club": "Chiedi un club", "Write your club's name: the administrator opens the club and sends you its ID and password in your messages (✉️).": "Scrivi il nome del tuo club: l’amministratore apre il club e ti invia ID e password nei tuoi messaggi (✉️).", "Club name": "Nome del club", "Federation": "Federazione", "Other": "Altra", "Town or country": "Città o paese", "Note (how often you play, how many tables …)": "Nota (quanto spesso giocate, quanti tavoli …)", "Write the club's name.": "Scrivi il nome del club.", "Choose the federation.": "Scegli la federazione.", "You have already asked for a club: the administrator will answer in your messages (✉️).": "Hai già chiesto un club: l’amministratore risponderà nei tuoi messaggi (✉️).", "A club with this name is already in Clubs.": "Esiste già un club con questo nome in Club.", "Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.": "Grazie per la tua richiesta di club: {0}. L’amministratore apre il club e ti invia qui ID e password.", "Your club is open: {0}.": "Il tuo club è aperto: {0}.", "Club password": "Password del club", "Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.": "Apri 🏛 Club nella pagina iniziale, trova il tuo club ed entra come amministratore con questa password. Tieni la password per te.", "Club request": "Richiesta di club", "Open the club": "Apri il club",
     "Choose a convention to practise (or Off), then ▶ Start": "Scegli una convenzione da esercitare (o Spento), poi ▶ Inizia",
     "My convention card": "La mia carta delle convenzioni",
     "TD": "Arbitro",
@@ -8011,6 +8024,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
+    "Start your own club": "Gründe deinen eigenen Club", "Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.": "Dein Club spielt seine eigenen Turniere in BridgePlay: Tische, Ergebnisse, IMP/MP. Kostenlos.", "Ask for a club": "Club anfragen", "Write your club's name: the administrator opens the club and sends you its ID and password in your messages (✉️).": "Schreib den Namen deines Clubs: Der Administrator eröffnet den Club und schickt dir ID und Passwort in deine Nachrichten (✉️).", "Club name": "Clubname", "Federation": "Verband", "Other": "Anderer", "Town or country": "Stadt oder Land", "Note (how often you play, how many tables …)": "Notiz (wie oft ihr spielt, wie viele Tische …)", "Write the club's name.": "Schreib den Namen des Clubs.", "Choose the federation.": "Wähle den Verband.", "You have already asked for a club: the administrator will answer in your messages (✉️).": "Du hast schon einen Club angefragt: Der Administrator antwortet in deinen Nachrichten (✉️).", "A club with this name is already in Clubs.": "Ein Club mit diesem Namen ist schon in Clubs.", "Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.": "Danke für deine Club-Anfrage: {0}. Der Administrator eröffnet den Club und schickt dir hier ID und Passwort.", "Your club is open: {0}.": "Dein Club ist eröffnet: {0}.", "Club password": "Club-Passwort", "Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.": "Öffne 🏛 Clubs auf der Startseite, such deinen Club und melde dich mit diesem Passwort als Administrator an. Behalte das Passwort für dich.", "Club request": "Club-Anfrage", "Open the club": "Club eröffnen",
     "Choose a convention to practise (or Off), then ▶ Start": "Wähle eine Konvention zum Üben (oder Aus), dann ▶ Start",
     "My convention card": "Meine Konventionskarte",
     "TD": "TL",
@@ -8485,6 +8499,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
+    "Start your own club": "Создайте свой клуб", "Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.": "Ваш клуб проводит свои турниры в BridgePlay: столы, результаты, IMP/MP. Бесплатно.", "Ask for a club": "Запросить клуб", "Write your club's name: the administrator opens the club and sends you its ID and password in your messages (✉️).": "Напишите название клуба: администратор откроет клуб и пришлёт ID и пароль в ваши сообщения (✉️).", "Club name": "Название клуба", "Federation": "Федерация", "Other": "Другая", "Town or country": "Город или страна", "Note (how often you play, how many tables …)": "Заметка (как часто играете, сколько столов …)", "Write the club's name.": "Напишите название клуба.", "Choose the federation.": "Выберите федерацию.", "You have already asked for a club: the administrator will answer in your messages (✉️).": "Вы уже запросили клуб: администратор ответит в ваших сообщениях (✉️).", "A club with this name is already in Clubs.": "Клуб с таким названием уже есть в Клубах.", "Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.": "Спасибо за запрос клуба: {0}. Администратор откроет клуб и пришлёт сюда его ID и пароль.", "Your club is open: {0}.": "Ваш клуб открыт: {0}.", "Club password": "Пароль клуба", "Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.": "Откройте 🏛 Клубы на главной странице, найдите свой клуб и войдите как администратор с этим паролем. Никому не сообщайте пароль.", "Club request": "Запрос клуба", "Open the club": "Открыть клуб",
     "Choose a convention to practise (or Off), then ▶ Start": "Выбери конвенцию для тренировки (или Выкл.), затем ▶ Начать",
     "My convention card": "Моя конвенционная карта",
     "TD": "Судья",
@@ -8959,6 +8974,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
+    "Start your own club": "Załóż własny klub", "Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.": "Twój klub rozgrywa własne turnieje w BridgePlay: stoły, wyniki, IMP/MP. Za darmo.", "Ask for a club": "Poproś o klub", "Write your club's name: the administrator opens the club and sends you its ID and password in your messages (✉️).": "Wpisz nazwę klubu: administrator otworzy klub i wyśle ci jego ID i hasło w wiadomościach (✉️).", "Club name": "Nazwa klubu", "Federation": "Federacja", "Other": "Inna", "Town or country": "Miasto lub kraj", "Note (how often you play, how many tables …)": "Uwagi (jak często gracie, ile stołów …)", "Write the club's name.": "Wpisz nazwę klubu.", "Choose the federation.": "Wybierz federację.", "You have already asked for a club: the administrator will answer in your messages (✉️).": "Już poprosiłeś o klub: administrator odpowie w twoich wiadomościach (✉️).", "A club with this name is already in Clubs.": "Klub o tej nazwie jest już w Klubach.", "Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.": "Dziękujemy za prośbę o klub: {0}. Administrator otworzy klub i wyśle tu jego ID i hasło.", "Your club is open: {0}.": "Twój klub jest otwarty: {0}.", "Club password": "Hasło klubu", "Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.": "Otwórz 🏛 Kluby na stronie głównej, znajdź swój klub i zaloguj się jako administrator tym hasłem. Nie udostępniaj hasła.", "Club request": "Prośba o klub", "Open the club": "Otwórz klub",
     "Choose a convention to practise (or Off), then ▶ Start": "Wybierz konwencję do ćwiczenia (lub Wyłączone), potem ▶ Start",
     "My convention card": "Moja karta konwencji",
     "TD": "Sędzia",
@@ -9433,6 +9449,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
+    "Start your own club": "创建你自己的俱乐部", "Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.": "你的俱乐部在 BridgePlay 举办自己的比赛：牌桌、成绩、IMP/MP。免费。", "Ask for a club": "申请俱乐部", "Write your club's name: the administrator opens the club and sends you its ID and password in your messages (✉️).": "写下你的俱乐部名称：管理员开设俱乐部后，会把 ID 和密码发到你的消息（✉️）里。", "Club name": "俱乐部名称", "Federation": "协会", "Other": "其他", "Town or country": "城市或国家", "Note (how often you play, how many tables …)": "备注（多久打一次、几张牌桌 …）", "Write the club's name.": "请写俱乐部名称。", "Choose the federation.": "请选择协会。", "You have already asked for a club: the administrator will answer in your messages (✉️).": "你已经申请过俱乐部：管理员会在你的消息（✉️）里回复。", "A club with this name is already in Clubs.": "俱乐部里已经有同名的俱乐部。", "Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.": "感谢你的俱乐部申请：{0}。管理员开设俱乐部后，会在这里发给你 ID 和密码。", "Your club is open: {0}.": "你的俱乐部已开设：{0}。", "Club password": "俱乐部密码", "Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.": "在首页打开 🏛 俱乐部，找到你的俱乐部，用这个密码以管理员身份登录。请勿把密码告诉他人。", "Club request": "俱乐部申请", "Open the club": "开设俱乐部",
     "Choose a convention to practise (or Off), then ▶ Start": "选择要练习的约定（或关闭），然后点 ▶ 开始",
     "My convention card": "我的约定卡",
     "TD": "裁判",
@@ -12506,6 +12523,7 @@ function homeShell2() {
       <div class="hcard prac" id="hPrac"></div>
       <div class="hcard rtcard" id="hRobot"></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
+      <button class="hcard hclubask" id="hClubAsk" type="button"><b>🏛️ ${T('Start your own club')}</b><span>${T('Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.')}</span><em>${T('Ask for a club')} ›</em></button>
       <div id="hSec"></div>
     </div></section>
   </div><div id="hSheet"></div></div>`;
@@ -14269,6 +14287,13 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.dataset.supdel) { const k = t.dataset.supdel, x = (ui.supList || []).find(y => y.k === k); askYes(T('Delete the conversation with {0}?', esc(x ? x.n : decodeURIComponent(k))), async () => { try { await Net.supDelete(k); } catch (e) { flash(T('Could not remove'), 2000); } showSupInbox(); }); return; }
   if (t.id === 'supSend') { sendSup(); return; }
+  if (t.id === 'hClubAsk' || t.closest && t.closest('#hClubAsk')) { showClubAsk(); return; }
+  if (t.id === 'clubAskSend') { sendClubAsk(); return; }
+  if (t.dataset.klopen) {   // the super admin: the clubs program with the new club's name and federation filled in; its ID and password go back to the player
+    let r = {}; try { r = JSON.parse(t.dataset.klopen); } catch (e) {}
+    closeOv(); openClubs('?sa=1&nc=' + encodeURIComponent(r.n || '') + '&nf=' + (r.f === 'tbf' ? 'tbf' : 'nbf') + '&for=' + encodeURIComponent(ui.supK || '') + '&forn=' + encodeURIComponent(ui.supThN || ''));
+    return;
+  }
   if (t.id === 'supReply') { sendSupReply(); return; }
   if (t.dataset.supk) { showSupThread(t.dataset.supk); return; }
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
@@ -14816,12 +14841,41 @@ document.addEventListener('pointerdown', e => {
 /* ---- the administrator's visitor statistics: today, the last 7, 30 and 365 days, by country (once per internet address) ---- */
 /* "Add a convention": a player describes a convention the robots do not know; the request goes to the administrator,
    and it is then added to the robots' bidding (and to the list above) */
+/* ---- a club of one's own: the request goes to the administrator (in the player's messages), who opens the club ---- */
+function showClubAsk() {
+  openOv('clubask', `<h2>🏛️ ${T('Start your own club')}</h2>
+    <div class="muted">${T('Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.')} ${T('Write your club\'s name: the administrator opens the club and sends you its ID and password in your messages (✉️).')}</div>
+    <label class="fld">${T('Club name')} *<input id="kaN" class="tok wide" maxlength="40" autocomplete="off"></label>
+    <label class="fld">${T('Federation')} *<select id="kaF" class="tok wide"><option value="">—</option><option value="nbf">🇳🇴 NBF (Norge)</option><option value="tbf">🇹🇷 TBF (Türkiye)</option><option value="other">${T('Other')}</option></select></label>
+    <label class="fld">${T('Town or country')}<input id="kaC" class="tok wide" maxlength="40" autocomplete="off"></label>
+    <label class="fld">${T('Note (how often you play, how many tables …)')}<textarea id="kaO" class="tok wide" rows="2" maxlength="300"></textarea></label>
+    <div class="err" id="kaErr"></div>
+    <div class="row2"><button class="btn gold" id="clubAskSend">📨 ${T('Send')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  setTimeout(() => { const i = $('kaN'); if (i) i.focus(); }, 60);
+}
+async function sendClubAsk() {
+  const v = id => ($(id) && $(id).value || '').trim(), err = $('kaErr'), b = $('clubAskSend');
+  const r = { n: v('kaN'), f: v('kaF'), c: v('kaC'), o: v('kaO') };
+  if (!r.n) { err.textContent = T('Write the club\'s name.'); return; }
+  if (!r.f) { err.textContent = T('Choose the federation.'); return; }
+  if (b) b.disabled = true;
+  try { await Net.clubAsk(r); closeOv(); flash('✅ ' + T('Thank you! Your request was sent to the administrator.') + ' ' + T('The answer comes in your messages (✉️).'), 4000); }
+  catch (e) {
+    if (b) b.disabled = false;
+    err.textContent = e.message === 'pending' ? T('You have already asked for a club: the administrator will answer in your messages (✉️).')
+      : e.message === 'exists' ? T('A club with this name is already in Clubs.')
+      : e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.');
+  }
+}
 /* ---- writing to the administrator: the player's thread, and the administrator's inbox ---- */
 function supMsgsHtml(m, mine) {
   if (!m.length) return `<div class="muted">${T('No messages yet.')}</div>`;
   return `<div class="supmsgs" id="supMsgs">${m.map(x => {
     const own = mine ? x.by === 'p' : x.by === 'a', who = x.by === 'p' ? '' : x.by === 'auto' ? '🤖 ' : '👑 ';
-    const txt = x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' && x.t === 'claude' ? T('Thank you for writing about the Claude system — your message has reached us, and every one is read. A deal where the Claude Double went wrong is the most useful thing you can send. And if you think your own system bids better: ⚔️ Challenge Claude on the home page. — Claude and BridgePlay') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
+    const txt = x.by === 'auto' && x.kl ? T('Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.', '<b>' + esc(x.t) + '</b>')
+      : x.by === 'a' && x.kd ? T('Your club is open: {0}.', '<b>' + esc(x.kd.n) + '</b>') + '\n' + T('Club ID') + ': <b>' + esc(x.kd.id) + '</b>\n' + T('Club password') + ': <b>' + esc(x.kd.pw) + '</b>\n' + T('Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.')
+      : x.by === 'p' && x.kl && typeof x.kl === 'object' ? '🏛️ <b>' + T('Club request') + ':</b> ' + esc(x.t).replace(/^🏛️ /, '') + (!mine ? `<br><button class="btn gold mini-btn" data-klopen="${esc(JSON.stringify({ n: x.kl.n, f: x.kl.f }))}">🏛️ ${T('Open the club')}</button>` : '')
+      : x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' && x.t === 'claude' ? T('Thank you for writing about the Claude system — your message has reached us, and every one is read. A deal where the Claude Double went wrong is the most useful thing you can send. And if you think your own system bids better: ⚔️ Challenge Claude on the home page. — Claude and BridgePlay') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
     return `<div class="supm ${own ? 'own' : ''} ${x.by}"><div>${who}${txt.replace(/\n/g, '<br>')}</div><small>${new Date(x.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></div>`;
   }).join('')}</div>`;
 }
@@ -14857,7 +14911,7 @@ async function showSupInbox() {
   if (ui.overlay !== 'supin') return;
   ui.supList = L;
   const row = x => `<div class="suprow${x.unread ? '' : ' read'}"><button class="supth${x.unread ? ' new' : ''}" data-supk="${esc(x.k)}"><b>${x.unread ? '🔵 ' : ''}${esc(x.n)}</b>
-      <span>${x.last.by === 'auto' && x.last.cv ? '📥 ' : x.last.by === 'auto' ? '🤖 ' : x.last.by === 'a' ? '👑 ' : ''}${esc(x.last.by === 'auto' && !x.last.cv ? T('Thank you! Your message will be answered as soon as possible.') : x.last.t).slice(0, 90)}</span>
+      <span>${x.last.kl ? '🏛️ ' : x.last.by === 'auto' && x.last.cv ? '📥 ' : x.last.by === 'auto' ? '🤖 ' : x.last.by === 'a' ? '👑 ' : ''}${esc(x.last.by === 'auto' && !x.last.cv && !x.last.kl ? T('Thank you! Your message will be answered as soon as possible.') : x.last.t).slice(0, 90)}</span>
       <small>${new Date(x.last.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small><em class="supgo">💬 ${T('Reply')} ›</em></button><button class="btn mini-btn supdel" data-supdel="${esc(x.k)}" title="${T('Delete the conversation')}">🗑</button></div>`;
   const U = L.filter(x => x.unread), Rd = L.filter(x => !x.unread);
   openOv('supin', `<h2>📨 ${T('Messages')}</h2>
@@ -14871,6 +14925,7 @@ async function showSupThread(k) {
   let th = null; try { th = await Net.supThread(k); } catch (e) {}
   if (ui.overlay !== 'supth') return;
   if (th && !th.n && ui.supNm && Net.fbKey(ui.supNm) === k) th.n = ui.supNm;
+  ui.supThN = th && th.n || '';
   openOv('supth', `<h2>📨 ${esc(th && th.n || '')}</h2>
     ${th ? supMsgsHtml(th.m, false) : `<div class="err">${T('The online database could not be reached.')}</div>`}
     ${th ? supBox('supRe', T('Your answer…')) : ''}
@@ -16146,6 +16201,30 @@ const Net = (() => {
       await Cloud.put('destek/' + k + '/pr', now + 1);
     } catch (e) {}
   }
+  /* a player asks for a club of their own: the request is a message in their thread with the administrator
+     (destek/<player>/m, kl: { n name, f federation, c town, o note }), with an automatic thank-you (kl: 1). One open
+     request at a time: until the administrator answers it (his message with kd, the club opened) or 14 days pass.
+     The club is opened by the super admin in the clubs program, from the request. */
+  async function clubAsk(r) {
+    const k = await supMine(), name = myName(), now = Date.now();
+    const kl = { n: String(r.n || '').trim().slice(0, 40), f: ['nbf', 'tbf'].includes(r.f) ? r.f : 'other', c: String(r.c || '').trim().slice(0, 40), o: String(r.o || '').trim().slice(0, 300) };
+    if (!kl.n) throw new Error('name');
+    const th = await Cloud.get('destek/' + k).catch(() => null) || {};
+    const m = Object.values(th.m || {}).filter(x => x && x.ts).sort((a, b) => a.ts - b.ts);
+    const lastAsk = [...m].reverse().find(x => x.by === 'p' && x.kl && typeof x.kl === 'object');
+    if (lastAsk && now - lastAsk.ts < 14 * 864e5 && !m.some(x => x.ts > lastAsk.ts && x.by === 'a')) throw new Error('pending');
+    try {   // a club of that name already in Clubs
+      const list = await Cloud.get('gate/clubList') || {}, low = kl.n.toLocaleLowerCase();
+      if (Object.values(list).some(x => x && String(x.n || '').toLocaleLowerCase() === low)) throw new Error('exists');
+    } catch (e) { if (e.message === 'exists') throw e; }
+    const fed = { nbf: 'NBF', tbf: 'TBF', other: '—' }[kl.f];
+    const t = '🏛️ ' + kl.n + (kl.c ? ' · ' + kl.c : '') + ' · ' + fed + (kl.o ? '\n' + kl.o : '');
+    await Cloud.put('destek/' + k + '/n', String(name).slice(0, 20));
+    await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'p', t, kl, ts: now });
+    await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', kl: 1, t: kl.n, ts: now + 1 });
+    await Cloud.put('destek/' + k + '/pr', now + 2);
+    st.supNew = 0;
+  }
   async function convRequests() {
     if (!Cloud.on || !isAdmin()) return [];
     const all = await Cloud.get('istek') || {}, out = [];
@@ -17371,7 +17450,7 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lbot, lobbyOthers, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lbot, lobbyOthers, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, clubAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();
 
 </script>

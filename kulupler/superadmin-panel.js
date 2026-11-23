@@ -62,6 +62,32 @@ async function renderSuperAdminPanel(){
     <div class="card-title">🛡️ Super Admin — Clubs (${clubs.length})</div>
     ${rows}`;
   saShowMembersInfo('nbf'); saShowMembersInfo('tbf');
+  saFillRequest();
+}
+const saL=v=>window.i18nText?i18nText(v):v;
+// a player's club request (BridgePlay's messages → Open the club): the new club's name and federation filled in, and
+// whose request it is; once the club is opened its ID and password go to that player's messages
+const SA_REQ=(()=>{ const q=new URLSearchParams(location.search), n=(q.get('nc')||'').trim().slice(0,40);
+  return n?{n,f:q.get('nf')==='tbf'?'tbf':'nbf',k:(q.get('for')||'').replace(/[.#$\[\]\/]/g,''),pn:(q.get('forn')||'').slice(0,20),done:false}:null; })();
+function saFillRequest(){
+  if(!SA_REQ||SA_REQ.done) return;
+  const n=document.getElementById('saNewClubName'), f=document.getElementById('saNewClubFed'); if(!n) return;
+  n.value=SA_REQ.n; if(f) f.value=SA_REQ.f;
+  const card=n.closest('.card');
+  if(card&&!card.querySelector('.sa-req')){ const d=document.createElement('div'); d.className='sa-req'; d.style.cssText='font-size:0.85rem;background:var(--surface2);border:1px solid var(--gold);border-radius:8px;padding:8px;margin-bottom:8px;';
+    d.innerHTML=`🏛️ <b>${cleanData(SA_REQ.pn||SA_REQ.k)}</b> — ${saL('Club request')}: <b>${cleanData(SA_REQ.n)}</b><br><span style="color:var(--text2)">${saL('The club\'s ID and password go to the player\'s messages when you create it.')}</span>`;
+    card.insertBefore(d,card.querySelector('.pw-wrap')); card.scrollIntoView({block:'center'}); }
+}
+// the new club's ID and password, to the player who asked for it (a message from the administrator in BridgePlay)
+async function saSendClubToPlayer(c){
+  if(!SA_REQ||!SA_REQ.k||!c) return false;
+  const root=FB_BASE.replace(/\/gate$/,''), token=await authToken(), q=token?'?auth='+token:'', now=Date.now();
+  const id=now.toString(36)+Math.random().toString(36).slice(2,6);
+  const t=`Your club is open: ${c.name}.\nClub ID: ${c.id}\nClub password: ${c.pw}`;
+  const r=await fetch(root+'/destek/'+SA_REQ.k+'/m/'+id+'.json'+q,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({by:'a',t,kd:{n:c.name,id:c.id,pw:c.pw},ts:now})});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  try{ await fetch(root+'/destek/'+SA_REQ.k+'/ar.json'+q,{method:'PUT',body:JSON.stringify(now)}); }catch(e){}
+  SA_REQ.done=true; return true;
 }
 // how many members the list holds, and when it was loaded
 async function saShowMembersInfo(fed){
@@ -111,7 +137,12 @@ window.saSuperPwSave=async function(){
   try{ await setSuperPw(a); closeModal(); toast('🔑 Password saved'); }catch(e){ toast('❌ Failed: '+e.message); }
 };
 
-window.saNewClub=async function(){ await createMyClub(true); if(!document.getElementById('saClubErr')?.textContent) renderSuperAdminPanel(); };
+window.saNewClub=async function(){
+  const c=await createMyClub(true); if(document.getElementById('saClubErr')?.textContent) return;
+  // a player's request: the ID and password to their messages (the "Club created" window stays open over the panel)
+  if(c&&SA_REQ&&!SA_REQ.done){ try{ await saSendClubToPlayer(c); toast('📨 '+saL('Sent to the player')); }catch(e){ toast('❌ '+saL('Not sent to the player')+': '+e.message); } }
+  renderSuperAdminPanel();
+};
 // a club's password: shown, and changed (a new one, or one typed)
 window.saPwPrompt=async function(i){
   const cl=SA_CLUBS[i]; if(!cl) return;

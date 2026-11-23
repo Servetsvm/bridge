@@ -115,6 +115,7 @@ window.createMyClub=async function(inPanel){
   // the password, to give the club's admin (the super admin sees and changes it in his panel)
   openModal('Club created', `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:8px;">${cleanData(name)} · ID: <b>${id}</b></div><div style="font-size:0.85rem;color:var(--text2);">Club password (give it to the club's admin):</div><div style="font-size:1.4rem;font-weight:800;letter-spacing:2px;margin:8px 0;" data-i18n-ignore>${pw}</div>`, `<button class="btn btn-gold" onclick="closeModal()">OK</button>`);
   if(!inPanel) await openClub(id, err);
+  return {id,name,pw};
 };
 
 // The club gate: the player's own clubs, a new club, or a club ID (a table device gets the club's link)

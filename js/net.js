@@ -735,6 +735,30 @@ const Net = (() => {
       await Cloud.put('destek/' + k + '/pr', now + 1);
     } catch (e) {}
   }
+  /* a player asks for a club of their own: the request is a message in their thread with the administrator
+     (destek/<player>/m, kl: { n name, f federation, c town, o note }), with an automatic thank-you (kl: 1). One open
+     request at a time: until the administrator answers it (his message with kd, the club opened) or 14 days pass.
+     The club is opened by the super admin in the clubs program, from the request. */
+  async function clubAsk(r) {
+    const k = await supMine(), name = myName(), now = Date.now();
+    const kl = { n: String(r.n || '').trim().slice(0, 40), f: ['nbf', 'tbf'].includes(r.f) ? r.f : 'other', c: String(r.c || '').trim().slice(0, 40), o: String(r.o || '').trim().slice(0, 300) };
+    if (!kl.n) throw new Error('name');
+    const th = await Cloud.get('destek/' + k).catch(() => null) || {};
+    const m = Object.values(th.m || {}).filter(x => x && x.ts).sort((a, b) => a.ts - b.ts);
+    const lastAsk = [...m].reverse().find(x => x.by === 'p' && x.kl && typeof x.kl === 'object');
+    if (lastAsk && now - lastAsk.ts < 14 * 864e5 && !m.some(x => x.ts > lastAsk.ts && x.by === 'a')) throw new Error('pending');
+    try {   // a club of that name already in Clubs
+      const list = await Cloud.get('gate/clubList') || {}, low = kl.n.toLocaleLowerCase();
+      if (Object.values(list).some(x => x && String(x.n || '').toLocaleLowerCase() === low)) throw new Error('exists');
+    } catch (e) { if (e.message === 'exists') throw e; }
+    const fed = { nbf: 'NBF', tbf: 'TBF', other: '—' }[kl.f];
+    const t = '🏛️ ' + kl.n + (kl.c ? ' · ' + kl.c : '') + ' · ' + fed + (kl.o ? '\n' + kl.o : '');
+    await Cloud.put('destek/' + k + '/n', String(name).slice(0, 20));
+    await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'p', t, kl, ts: now });
+    await Cloud.put('destek/' + k + '/m/' + supId(), { by: 'auto', kl: 1, t: kl.n, ts: now + 1 });
+    await Cloud.put('destek/' + k + '/pr', now + 2);
+    st.supNew = 0;
+  }
   async function convRequests() {
     if (!Cloud.on || !isAdmin()) return [];
     const all = await Cloud.get('istek') || {}, out = [];
@@ -1960,5 +1984,5 @@ const Net = (() => {
   }
   // tell the lobby at once what is played here (e.g. a tournament board started)
   const shareInfo = () => { if (st.slot) meshSend(tableInfo()); };
-  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lbot, lobbyOthers, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
+  return { statusOf, adminKick, lobbyBack, get out() { return !!st.out; }, st, owner, whereIs, shareInfo, kick, nudge, playWith, quickWatch, broadcast, send, panel, sit, askOwners, profOf, sysShort, sendChat, tchatHtml, QUICK, openTable: priv => { if (!st.on) host(priv); else panel(); }, peopleHtml, joinInvite, inviteToTable, tourTableResult, myTourSeat, openTourTable, joinTourTable, dmSend, tablesHtml, findTables, pendHtml, lsend, lbot, lobbyOthers, lchatHtml, lobbyCount, quickJoin, boardDone, askNewDeal, scoreHtml, newTour, tourResult, devId, prof, profTxt, tourInvite, tourStart, tourCancel, dailyId, tourBy, ensureDaily, playersHtml, AVATARS, checkName, register, login, suggestNames, cloudSync, cloudSyncSoon, isAdmin, loginsToday, loginStats, visitStats, noteBoard, onlineNow, supSend, supThread, supRead, supReply, supDelete, supInbox, supCheck, adminUsers, adminDelete, adminSetPin, adminWipe, goOffline, pruneKnown, get supNew() { return st.supNew || 0; }, get cvNew() { return st.cvNew || 0; }, get cloudBad() { return (st.cloudFail || 0) >= 2; }, convAsk, clubAsk, convRequests, convDone, roboErr, roboNote, roboErrs, roboErrDone, roboErrFixed, roboBid, champGet, champPut, ipTag, fbKey, country, leaderHtml, Cloud, nameKey, ruleKey, adminCloseTour, tourAnswer, invitedTo, isMine, openTour, knownNames, lclear, note: t => addChat(null, t), get on() { return st.on; }, get host() { return st.host; }, get guest() { return st.guest; }, get me() { return st.me; } };
 })();

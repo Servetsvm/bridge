@@ -2412,3 +2412,11 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 
 /* Admin: the country a player logged in from */
 .plctry{font-weight:600;font-size:.85em;opacity:.8;margin-left:4px}
+/* "Start your own club": a small card under the open tables, and its form */
+.hcard.hclubask{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;font:inherit;border:1px dashed rgba(0,0,0,.18);cursor:pointer;padding:10px 14px}
+.hclubask b{font-size:15px}
+.hclubask span{font-size:13px;opacity:.75;line-height:1.35}
+.hclubask em{font-style:normal;font-weight:700;font-size:13px;background:var(--brass);color:var(--brass-ink);border-radius:8px;padding:3px 10px;align-self:flex-end}
+.hclubask:hover{border-color:var(--brass,#c9a43a)}
+#ov label.fld{display:flex;flex-direction:column;gap:3px;margin:8px 0;font-size:13px;font-weight:600}
+#ov label.fld .tok{font-weight:400;font-size:15px;font-family:inherit;letter-spacing:normal;box-sizing:border-box;width:100%}

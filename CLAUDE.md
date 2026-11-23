@@ -41,12 +41,21 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v629`, kulüpler `kulup-v161`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v630`, kulüpler `kulup-v162`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
+- Kulüp talebi akışı: ana sayfa kartı `#hClubAsk` → form → `Net.clubAsk` → `destek/<oyuncu>/m` (mesajda `kl`), otomatik teşekkür (`kl:1`).
+  Admin mesajda "Kulübü aç" → `kulupler/?sa=1&nc=&nf=&for=&forn=` → süper yönetici paneli dolu gelir; kulüp açılınca
+  oyuncuya `kd:{n,id,pw}` mesajı (`saSendClubToPlayer`). Firebase kuralı değişmedi.
+
 ## Oturum günlüğü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
+
+### 2026-11-23
+- Ana sayfa: Açık masaların altında "🏛️ Kendi kulübünü kur" kartı; form (ad + federasyon zorunlu, şehir/not isteğe bağlı),
+  talep yöneticinin mesajlarına; "Kulübü aç" ile süper yönetici paneli dolu açılır, ID + şifre oyuncuya otomatik gider.
+  Bir oyuncu 14 gün içinde cevapsız ikinci talep gönderemez; aynı adda kulüp varsa uyarı. 10 dil.
 
 ### 2026-11-22
 - Deklarasyon pratiği: robotların deklarasyonu sonucun hemen altında, açık (kapalı "details" değil). `tools/build.mjs` eklendi.

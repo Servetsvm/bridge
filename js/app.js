@@ -1929,6 +1929,7 @@ function homeShell2() {
       <div class="hcard prac" id="hPrac"></div>
       <div class="hcard rtcard" id="hRobot"></div>   <!-- the robots' live table, then the open tables (right column on a wide screen, under the ways to play on a phone) -->
       <div class="hcard htables"><h3>${T('Open tables')}</h3><div id="hTables"></div></div>
+      <button class="hcard hclubask" id="hClubAsk" type="button"><b>🏛️ ${T('Start your own club')}</b><span>${T('Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.')}</span><em>${T('Ask for a club')} ›</em></button>
       <div id="hSec"></div>
     </div></section>
   </div><div id="hSheet"></div></div>`;
@@ -3692,6 +3693,13 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.dataset.supdel) { const k = t.dataset.supdel, x = (ui.supList || []).find(y => y.k === k); askYes(T('Delete the conversation with {0}?', esc(x ? x.n : decodeURIComponent(k))), async () => { try { await Net.supDelete(k); } catch (e) { flash(T('Could not remove'), 2000); } showSupInbox(); }); return; }
   if (t.id === 'supSend') { sendSup(); return; }
+  if (t.id === 'hClubAsk' || t.closest && t.closest('#hClubAsk')) { showClubAsk(); return; }
+  if (t.id === 'clubAskSend') { sendClubAsk(); return; }
+  if (t.dataset.klopen) {   // the super admin: the clubs program with the new club's name and federation filled in; its ID and password go back to the player
+    let r = {}; try { r = JSON.parse(t.dataset.klopen); } catch (e) {}
+    closeOv(); openClubs('?sa=1&nc=' + encodeURIComponent(r.n || '') + '&nf=' + (r.f === 'tbf' ? 'tbf' : 'nbf') + '&for=' + encodeURIComponent(ui.supK || '') + '&forn=' + encodeURIComponent(ui.supThN || ''));
+    return;
+  }
   if (t.id === 'supReply') { sendSupReply(); return; }
   if (t.dataset.supk) { showSupThread(t.dataset.supk); return; }
   if (t.id === 'cvaSend') { sendConvAsk(); return; }
@@ -4239,12 +4247,41 @@ document.addEventListener('pointerdown', e => {
 /* ---- the administrator's visitor statistics: today, the last 7, 30 and 365 days, by country (once per internet address) ---- */
 /* "Add a convention": a player describes a convention the robots do not know; the request goes to the administrator,
    and it is then added to the robots' bidding (and to the list above) */
+/* ---- a club of one's own: the request goes to the administrator (in the player's messages), who opens the club ---- */
+function showClubAsk() {
+  openOv('clubask', `<h2>🏛️ ${T('Start your own club')}</h2>
+    <div class="muted">${T('Your club plays its own tournaments in BridgePlay: tables, results, IMP/MP. Free.')} ${T('Write your club\'s name: the administrator opens the club and sends you its ID and password in your messages (✉️).')}</div>
+    <label class="fld">${T('Club name')} *<input id="kaN" class="tok wide" maxlength="40" autocomplete="off"></label>
+    <label class="fld">${T('Federation')} *<select id="kaF" class="tok wide"><option value="">—</option><option value="nbf">🇳🇴 NBF (Norge)</option><option value="tbf">🇹🇷 TBF (Türkiye)</option><option value="other">${T('Other')}</option></select></label>
+    <label class="fld">${T('Town or country')}<input id="kaC" class="tok wide" maxlength="40" autocomplete="off"></label>
+    <label class="fld">${T('Note (how often you play, how many tables …)')}<textarea id="kaO" class="tok wide" rows="2" maxlength="300"></textarea></label>
+    <div class="err" id="kaErr"></div>
+    <div class="row2"><button class="btn gold" id="clubAskSend">📨 ${T('Send')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  setTimeout(() => { const i = $('kaN'); if (i) i.focus(); }, 60);
+}
+async function sendClubAsk() {
+  const v = id => ($(id) && $(id).value || '').trim(), err = $('kaErr'), b = $('clubAskSend');
+  const r = { n: v('kaN'), f: v('kaF'), c: v('kaC'), o: v('kaO') };
+  if (!r.n) { err.textContent = T('Write the club\'s name.'); return; }
+  if (!r.f) { err.textContent = T('Choose the federation.'); return; }
+  if (b) b.disabled = true;
+  try { await Net.clubAsk(r); closeOv(); flash('✅ ' + T('Thank you! Your request was sent to the administrator.') + ' ' + T('The answer comes in your messages (✉️).'), 4000); }
+  catch (e) {
+    if (b) b.disabled = false;
+    err.textContent = e.message === 'pending' ? T('You have already asked for a club: the administrator will answer in your messages (✉️).')
+      : e.message === 'exists' ? T('A club with this name is already in Clubs.')
+      : e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.');
+  }
+}
 /* ---- writing to the administrator: the player's thread, and the administrator's inbox ---- */
 function supMsgsHtml(m, mine) {
   if (!m.length) return `<div class="muted">${T('No messages yet.')}</div>`;
   return `<div class="supmsgs" id="supMsgs">${m.map(x => {
     const own = mine ? x.by === 'p' : x.by === 'a', who = x.by === 'p' ? '' : x.by === 'auto' ? '🤖 ' : '👑 ';
-    const txt = x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' && x.t === 'claude' ? T('Thank you for writing about the Claude system — your message has reached us, and every one is read. A deal where the Claude Double went wrong is the most useful thing you can send. And if you think your own system bids better: ⚔️ Challenge Claude on the home page. — Claude and BridgePlay') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
+    const txt = x.by === 'auto' && x.kl ? T('Thank you for your club request: {0}. The administrator opens the club and sends you its ID and password here.', '<b>' + esc(x.t) + '</b>')
+      : x.by === 'a' && x.kd ? T('Your club is open: {0}.', '<b>' + esc(x.kd.n) + '</b>') + '\n' + T('Club ID') + ': <b>' + esc(x.kd.id) + '</b>\n' + T('Club password') + ': <b>' + esc(x.kd.pw) + '</b>\n' + T('Open 🏛 Clubs on the home page, find your club and sign in as its admin with this password. Keep the password to yourself.')
+      : x.by === 'p' && x.kl && typeof x.kl === 'object' ? '🏛️ <b>' + T('Club request') + ':</b> ' + esc(x.t).replace(/^🏛️ /, '') + (!mine ? `<br><button class="btn gold mini-btn" data-klopen="${esc(JSON.stringify({ n: x.kl.n, f: x.kl.f }))}">🏛️ ${T('Open the club')}</button>` : '')
+      : x.by === 'auto' && x.cv ? T('Thank you for your convention request: {0}. It will be added to the robots soon, and you will get a message here when it is ready.', '<b>' + esc(x.t) + '</b>') : x.by === 'auto' && x.t === 'claude' ? T('Thank you for writing about the Claude system — your message has reached us, and every one is read. A deal where the Claude Double went wrong is the most useful thing you can send. And if you think your own system bids better: ⚔️ Challenge Claude on the home page. — Claude and BridgePlay') : x.by === 'auto' ? T('Thank you! Your message will be answered as soon as possible.') : esc(x.t);
     return `<div class="supm ${own ? 'own' : ''} ${x.by}"><div>${who}${txt.replace(/\n/g, '<br>')}</div><small>${new Date(x.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small></div>`;
   }).join('')}</div>`;
 }
@@ -4280,7 +4317,7 @@ async function showSupInbox() {
   if (ui.overlay !== 'supin') return;
   ui.supList = L;
   const row = x => `<div class="suprow${x.unread ? '' : ' read'}"><button class="supth${x.unread ? ' new' : ''}" data-supk="${esc(x.k)}"><b>${x.unread ? '🔵 ' : ''}${esc(x.n)}</b>
-      <span>${x.last.by === 'auto' && x.last.cv ? '📥 ' : x.last.by === 'auto' ? '🤖 ' : x.last.by === 'a' ? '👑 ' : ''}${esc(x.last.by === 'auto' && !x.last.cv ? T('Thank you! Your message will be answered as soon as possible.') : x.last.t).slice(0, 90)}</span>
+      <span>${x.last.kl ? '🏛️ ' : x.last.by === 'auto' && x.last.cv ? '📥 ' : x.last.by === 'auto' ? '🤖 ' : x.last.by === 'a' ? '👑 ' : ''}${esc(x.last.by === 'auto' && !x.last.cv && !x.last.kl ? T('Thank you! Your message will be answered as soon as possible.') : x.last.t).slice(0, 90)}</span>
       <small>${new Date(x.last.ts).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small><em class="supgo">💬 ${T('Reply')} ›</em></button><button class="btn mini-btn supdel" data-supdel="${esc(x.k)}" title="${T('Delete the conversation')}">🗑</button></div>`;
   const U = L.filter(x => x.unread), Rd = L.filter(x => !x.unread);
   openOv('supin', `<h2>📨 ${T('Messages')}</h2>
@@ -4294,6 +4331,7 @@ async function showSupThread(k) {
   let th = null; try { th = await Net.supThread(k); } catch (e) {}
   if (ui.overlay !== 'supth') return;
   if (th && !th.n && ui.supNm && Net.fbKey(ui.supNm) === k) th.n = ui.supNm;
+  ui.supThN = th && th.n || '';
   openOv('supth', `<h2>📨 ${esc(th && th.n || '')}</h2>
     ${th ? supMsgsHtml(th.m, false) : `<div class="err">${T('The online database could not be reached.')}</div>`}
     ${th ? supBox('supRe', T('Your answer…')) : ''}
