@@ -1,10 +1,14 @@
 /* BridgePlay — offline cache. Bump VERSION after changing any file so phones pick up the new version. */
-const VERSION = 'bridge-v632';
-const FILES = ['./', './index.html', './css/style.css', './js/dds.js', './js/core.js', './js/bidding.js', './js/play.js', './js/field.js', './js/storage.js', './js/photo.js', './js/app.js', './js/net.js', './js/clubswiss.js', './js/clubmirror.js', './js/clubtour.js', './js/social.js', './js/bidprac.js', './js/puzzles.json', './js/puzzles-play.json', './guide.html', './guide-en.html', './guide-no.html', './guide-es.html', './guide-fr.html', './guide-it.html', './guide-de.html', './guide-ru.html', './guide-pl.html', './guide-zh.html', './privacy.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
+const VERSION = 'bridge-v633';
+const FILES = ['./', './index.html', './css/style.css', './js/dds.js', './js/core.js', './js/bidding.js', './js/play.js', './js/field.js', './js/storage.js', './js/photo.js', './js/app.js', './js/net.js', './js/clubswiss.js', './js/clubmirror.js', './js/clubtour.js', './js/social.js', './js/bidprac.js', './js/puzzles.json', './js/puzzles-play.json', './guide.html', './guide-en.html', './guide-no.html', './guide-es.html', './guide-fr.html', './guide-it.html', './guide-de.html', './guide-ru.html', './guide-pl.html', './guide-zh.html', './privacy.html', './manifest.webmanifest',
+  // the texts of each language (index.html loads the visitor's one): without it the page stays empty offline
+  ...['en', 'tr', 'no', 'es', 'fr', 'it', 'de', 'ru', 'pl', 'zh'].map(l => './js/lang/' + l + '.js'), './icons/icon-192.png', './icons/icon-512.png'];
 // the cache may hang (seen in one Chrome: every file then stayed loading for ever), so nothing waits for it for long
 const soon = (p, ms) => Promise.race([p, new Promise(res => setTimeout(res, ms))]).catch(() => {});
-self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(soon(caches.open(VERSION).then(c => c.addAll(FILES)), 15000)); });
-self.addEventListener('activate', e => { e.waitUntil(soon(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION && /^bridge-v\d+$/.test(k)).map(k => caches.delete(k)))), 5000).then(() => self.clients.claim())); });
+// file by file: one file that fails does not leave the whole cache empty (addAll stores nothing when one fails)
+self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(soon(caches.open(VERSION).then(c => Promise.all(FILES.map(f => c.add(new Request(f, { cache: 'reload' })).catch(() => {})))), 20000)); });
+// the version before stays as a spare (a file the new one has not got yet is read from it offline); older ones go
+self.addEventListener('activate', e => { e.waitUntil(soon(caches.keys().then(ks => { const old = ks.filter(k => k !== VERSION && /^bridge-v\d+$/.test(k)).sort((a, b) => +b.slice(8) - +a.slice(8)); return Promise.all(old.slice(1).map(k => caches.delete(k))); }), 5000).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;   // other sites: the browser's own
   // network first so updates arrive; fall back to the cache when offline. The file is read whole first and the page gets

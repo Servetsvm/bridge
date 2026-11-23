@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v632`, kulüpler `kulup-v164`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v633`, kulüpler `kulup-v164`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -53,6 +53,9 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v632`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-23
+- **Çevrimdışı hata düzeltildi** (uçakta açılmadı): `js/lang/*.js` sw.js önbellek listesinde yoktu → internetsiz boş sayfa
+  ("LANGS is not defined"). Artık 10 dil dosyası önbellekte, önbellek dosya dosya dolar, bir önceki sürüm yedek kalır.
+  Test: Playwright ile çevrimiçi aç → `context.setOffline(true)` → yeniden aç → el başlat. Yeni dosya eklenince sw.js FILES'a ekle!
 - Ana sayfa: Açık masaların altında "🏛️ Kendi kulübünü kur" kartı; form (ad + federasyon zorunlu, şehir/not isteğe bağlı),
   talep yöneticinin mesajlarına; "Kulübü aç" ile süper yönetici paneli dolu açılır, ID + şifre oyuncuya otomatik gider.
   Bir oyuncu 14 gün içinde cevapsız ikinci talep gönderemez; aynı adda kulüp varsa uyarı. 10 dil.
