@@ -248,9 +248,10 @@ function renderSetup(){
   // the numbers brought from the online setup (BridgeScore test): put in the form once, before a test tournament is set up
   if(bgTestOn()&&!window._bgPrefilled&&!(getState().tableCount>0)){ const q=new URLSearchParams(location.search); if(q.get('tp')){ window._bgPrefilled=1; setTimeout(()=>{ const set=(id,v)=>{ const e=document.getElementById(id); if(e&&v!=null&&v!=='') e.value=v; }; set('aPlayers',q.get('tp')); set('aBPR',q.get('tb')); if(['mitchell','howell','barometer','swiss'].includes(q.get('tm'))) set('aMovement',q.get('tm')); try{ adminUpdateCalc(); }catch(e){} },60); } }
   if(typeof setupOnline!=='undefined'&&setupOnline&&typeof otSetupCard==='function') return otSetupCard();
-  const s=getState();
-  // opened from BridgePlay's Team match button (setup=team): the setup comes with Team match chosen (not over a tournament running)
-  if(!window._teamPre&&new URLSearchParams(location.search).get('setup')==='team'&&(!s.status||s.status==='setup'||s.status==='finished')){ window._teamPre=1; s.movement='team'; }
+  // opened from BridgePlay's Team match button (setup=team): the setup comes with Team match chosen (not over a tournament
+  // running), on every drawing — also after the tournament's data comes in — until the TD chooses another movement. Only
+  // the form shows it: the tournament's saved state is not changed
+  const s0=getState(), s=!window._teamPreDone&&new URLSearchParams(location.search).get('setup')==='team'&&s0.status!=='running'?{...s0,movement:'team'}:s0;
   const playerCount=parseInt(s._setupPlayers||0);
   const tableCount=playerCount>0?Math.floor(playerCount/4):0;
   const hasPhantom=playerCount>0&&playerCount%4!==0;
@@ -339,6 +340,7 @@ function renderSetup(){
 
 window.adminUpdateCalc=function(){
   const mov=document.getElementById('aMovement')?.value||'mitchell';
+  if(mov!=='team') window._teamPreDone=1;   // the TD chose another movement: Team match is no longer put back
   const bpr=parseInt(document.getElementById('aBPR')?.value||3);
   const swissField=document.getElementById('aSwissRoundsField');
   const teamField=document.getElementById('aTeamSettings');
