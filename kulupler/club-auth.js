@@ -160,6 +160,11 @@ async function initClubGate(){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
       if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
       if(roleParam==='admin') setTimeout(()=>document.getElementById('pwInput')?.focus(),100);
+      // a quick team match being played here (its tables need no code): a member not asking for the TD goes to its table numbers
+      if(u&&roleParam!=='admin'&&roleParam!=='screen'&&!params.get('t')&&!params.get('qt')&&!params.get('p')){
+        let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
+        if(st&&st.status==='running'&&st._quickTeam){ selRole('table'); bgPlayerEntry('00'); return; }
+      }
       // BridgePlay's Team match button (quick=team): any signed-in member needs no password — the match is set up at once
       // (the rules let a member write the tournament only while no other one is running)
       if(roleParam==='admin'&&params.get('quick')==='team'&&me()){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }

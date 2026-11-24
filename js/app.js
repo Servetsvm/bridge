@@ -3168,8 +3168,11 @@ function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
   return `<div class="rtgo"><b>🤖 ${T('System table')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
 }
-setTimeout(() => rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }), 3000);
-setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome')) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
+// the robots' tables (about 2 MB) are fetched only where their card is shown (a wide screen): a phone hides it,
+// and its system buttons fetch them when tapped
+const rtShown = () => { const el = $('hRobot'); return !!(el && el.offsetParent !== null); };
+setTimeout(() => { if (rtShown()) rtLoad().then(() => { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); }); }, 3000);
+setInterval(() => { const el = $('hRobot'); if (!el || !document.body.classList.contains('athome') || !rtShown()) return; rtLoad().then(() => { const h = rtCardHtml(); if (el.innerHTML !== h) el.innerHTML = h; }); }, 30000);
 /* Settings: can the app open without internet (on a plane)? Every file it needs to start is in the phone's offline copy */
 async function offReadyCheck() {
   const el = $('offReady'); if (!el) return;

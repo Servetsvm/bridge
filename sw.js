@@ -1,5 +1,5 @@
 /* BridgePlay — offline cache. Bump VERSION after changing any file so phones pick up the new version. */
-const VERSION = 'bridge-v665';
+const VERSION = 'bridge-v666';
 const FILES = ['./', './index.html', './css/style.css', './js/dds.js', './js/core.js', './js/bidding.js', './js/play.js', './js/field.js', './js/storage.js', './js/photo.js', './js/app.js', './js/net.js', './js/clubswiss.js', './js/clubmirror.js', './js/clubtour.js', './js/social.js', './js/bidprac.js', './js/puzzles.json', './js/puzzles-play.json', './guide.html', './guide-en.html', './guide-no.html', './guide-es.html', './guide-fr.html', './guide-it.html', './guide-de.html', './guide-ru.html', './guide-pl.html', './guide-zh.html', './privacy.html', './manifest.webmanifest',
   // the texts of each language (index.html loads the visitor's one): without it the page stays empty offline
   ...['en', 'tr', 'no', 'es', 'fr', 'it', 'de', 'ru', 'pl', 'zh'].map(l => './js/lang/' + l + '.js'), './icons/icon-192.png', './icons/icon-512.png'];
@@ -17,6 +17,11 @@ const OWN = new Set(FILES.map(f => new URL(f, self.location).pathname));
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   const url = new URL(e.request.url);
+  // the fonts (Google): kept after the first time, so a start never waits for them (nor fails offline)
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    e.respondWith(caches.open('fonts-v1').then(c => c.match(e.request).then(m => m || fetch(e.request).then(r => { if (r.ok || r.type === 'opaque') c.put(e.request, r.clone()).catch(() => {}); return r; }))));
+    return;
+  }
   if (url.origin !== location.origin) return;   // other sites: the browser's own
   if (OWN.has(url.pathname)) {
     e.respondWith(soon(caches.open(VERSION).then(c => c.match(e.request, { ignoreSearch: true })), 3000).then(m => m || fromNet(e)));
