@@ -281,16 +281,18 @@ async function pushRoute(path, req, b, env, ctx, json) {
     // to the administrator: anyone (a player's message or club request); to a player: only the administrator
     if (to !== 'admin' && !admin) return json({ error: 'forbidden' }, 403);
     const keys = await pushList(env, to === 'admin' ? 'sub:1:' : 'sub:0:' + encodeURIComponent(to) + ':');
-    ctx.waitUntil(Promise.all(keys.map(async k => {
+    // each push service's answer comes back (201 = taken; the service's message otherwise), to see why one did not arrive
+    const res = await Promise.all(keys.map(async k => {
       try {
-        const v = JSON.parse(await env.PUSH.get(k) || 'null'); if (!v || !v.ep) return;
+        const v = JSON.parse(await env.PUSH.get(k) || 'null'); if (!v || !v.ep) return 'gone';
         await env.PUSH.put('last:' + k.split(':').pop(), JSON.stringify({ kind, n, t: Date.now() }), { expirationTtl: 86400 * 2 });
-        const res = await fetch(v.ep, { method: 'POST', headers: { Authorization: await vapidAuth(env, v.ep), TTL: '86400', Urgency: 'high', 'Content-Length': '0' } });
-        if (res.status === 404 || res.status === 410) await pushDel(env, v.ep);   // the phone unsubscribed
-        else if (!res.ok) console.log('push', res.status, (await res.text()).slice(0, 200));
-      } catch (e) { console.log('push threw', String(e)); }
-    })));
-    return json({ ok: true, n: keys.length });
+        const r = await fetch(v.ep, { method: 'POST', headers: { Authorization: await vapidAuth(env, v.ep), TTL: '86400', Urgency: 'high', 'Content-Length': '0' } });
+        if (r.status === 404 || r.status === 410) await pushDel(env, v.ep);   // the phone unsubscribed
+        const host = new URL(v.ep).host;
+        return r.ok ? host + ' ' + r.status : host + ' ' + r.status + ' ' + (await r.text()).slice(0, 160);
+      } catch (e) { return 'threw ' + String(e).slice(0, 120); }
+    }));
+    return json({ ok: true, n: keys.length, res });
   }
   return json({ error: 'not found' }, 404);
 }
