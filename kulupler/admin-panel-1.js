@@ -293,7 +293,7 @@ function renderSetup(){
         <option value="barometer" ${s.movement==='barometer'?'selected':''}>Barometer — every table plays the same boards each round, then the pairs move</option>
         <option value="swiss" ${s.movement==='swiss'?'selected':''}>Swiss — pairings adapt to standings each round</option>
         <option value="social" ${s.movement==='social'?'selected':''}>Social Bridge — pairs stay at their table, each table plays any free board</option>
-        <option value="team" ${isTeam?'selected':''}>Team Match — two teams, the same boards at two tables, IMP</option>
+        ${isTeam?'<option value="team" selected>Team Match — two teams, the same boards at two tables, IMP</option>':''}
       </select>
       <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="movHint">${isTeam?'Team Match: 2 teams, 2 or more pairs per team, two-table mirrored boards and IMP scoring.':'Mitchell: NS fixed, EW moves; the boards go round the tables, so each table plays its own boards. Howell: everyone moves; the boards go round the tables too. Barometer: like Howell, but every round all the tables play the same boards at the same time (one copy of the boards per table). Swiss: the pairing is made again from the standings after every round; all the tables play the same boards. In Mitchell, Howell and Barometer the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).'}</div>
     </div>
@@ -805,20 +805,22 @@ function applyImport(data){
   if(data.boards)setBoards(data.boards);if(data.movements)setMovements(data.movements);
   addLog('ok','Data imported','');closeModal();toast('✅ Imported!');refreshTopbar();renderAdminTab();
 }
-window.adminReset=async function(){
-  if(!await confirmDialog('DELETE ALL DATA?\n\nThis will erase the current tournament.\nPlayer Registry will NOT be deleted.\n\nContinue?',{title:'Reset Tournament',confirmLabel:'Delete Everything'}))return;
+// one: the BridgeScore's Delete — one question, then the tournament is gone at once (no backup asked)
+window.adminReset=async function(one){
+  if(one){ if(!await confirmDialog(i18nText('Delete this tournament completely?'),{title:'🗑 '+i18nText('Delete'),confirmLabel:i18nText('Delete'),cancelLabel:i18nText('Cancel')})) return; }
+  else if(!await confirmDialog('DELETE ALL DATA?\n\nThis will erase the current tournament.\nPlayer Registry will NOT be deleted.\n\nContinue?',{title:'Reset Tournament',confirmLabel:'Delete Everything'}))return;
   // Offer player data backup before reset
   const players=PlayerDB.getAll();
-  if(players.length>0){
+  if(!one&&players.length>0){
     if(await confirmDialog(`Export ${players.length} players to backup file before reset?`,{title:'Backup Players?',confirmLabel:'Export',danger:false})){
       PlayerDB.export();
       await new Promise(r=>setTimeout(r,500));
     }
   }
-  await Promise.all(['state','pairs','boards','movements','logs','approvals','hands','dd'].map(k=>DB.del(k)));
+  await Promise.all(['state','pairs','boards','movements','logs','approvals','hands','dd','ready','kicks','tdcalls','tableLocks','boardLocks'].map(k=>DB.del(k)));
   setLive(false);
   Object.keys(_cache).filter(k=>k!=='playerdb').forEach(k=>delete _cache[k]);
-  toast('🗑 Reset complete — Player Registry preserved');refreshTopbar();renderAdminTab();
+  toast(one?'🗑 '+i18nText('Deleted'):'🗑 Reset complete — Player Registry preserved');refreshTopbar();renderAdminTab();
 };
 
 // ── Player Database (shared via Firebase — all devices see same name pool) ──

@@ -84,7 +84,7 @@ window.tdcPick=function(v){
   TDC.tab=v||null; tdcDraw(); tdcFill(true); };
 // Reset deletes the tournament: asked twice
 window.tdcReset=function(){ TDC.tab=null; tdcGo('reset'); };
-window.tdcResetNow=async function(){ await adminReset(); TDC.tab='log'; TDC.v='home'; tdcDraw(); };
+window.tdcResetNow=async function(){ await adminReset(true); TDC.tab='log'; TDC.v='home'; tdcDraw(); };
 window.tdcResetOld=async function(i){ const a0=getArchives()[i]; if(!a0) return; await adminDeleteArchive(i); tdcDraw(); };
 // the hands: before round 1 (on the ready screen) and from the menu
 const handsHtml=()=>{ const h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>`; };
@@ -94,7 +94,7 @@ window.tdcStart=async function(){ await adminStart(); TDC.v='run'; tdcDraw(); };
 
 // ── the setup on one screen: the movement, the players, the boards (and the Swiss rounds), then Create ──
 window.tdcInitW=function(){ const s=getState(), teamLink=new URLSearchParams(location.search).get('setup')==='team'&&s.status!=='running';   // from BridgePlay's Team match button
-  TDC.w={ta:s._teamAName||'Team A',tb:s._teamBName||'Team B',tpp:+s._teamPairs||2,mov:teamLink?'team':s.movement||'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
+  TDC.w={ta:s._teamAName||'Team A',tb:s._teamBName||'Team B',tpp:+s._teamPairs||2,mov:teamLink?'team':s.movement&&s.movement!=='team'?s.movement:'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
 window.tdcSetupStart=function(){ tdcInitW(); TDC.v='setup'; tdcDraw(); };
 function calc(w){
   if(w.mov==='team'){ const n=+w.tpp||2; return {tables:n,ph:false,pc:n*2,rounds:n,total:n*(+w.bpr||0)}; }   // two teams of n pairs: n tables (two a match), n rounds
@@ -128,7 +128,7 @@ function drawSetup(fin){
   const w=TDC.w, again=TDC.v==='setup', fs=getState().status==='finished';
   const body=`${fs&&!again?`<div class="tdc-finrow">🏁 ${L('Tournament finished')} <button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>`:''}
     <div class="bm3-step">${L('Movement')}</div>
-    <div class="tdc-pick"><select class="tdc-sel" onchange="tdcSet1('mov',this.value)">${MOVS.map(([k,n,d])=>`<option value="${k}"${w.mov===k?' selected':''}>${L(n)} — ${L(d)}</option>`).join('')}</select></div>
+    <div class="tdc-pick"><select class="tdc-sel" onchange="tdcSet1('mov',this.value)">${MOVS.filter(m=>m[0]!=='team'||w.mov==='team').map(([k,n,d])=>`<option value="${k}"${w.mov===k?' selected':''}>${L(n)} — ${L(d)}</option>`).join('')}</select></div>
     ${w.mov==='team'?`<div class="bm3-step">${L('Teams')}</div><div class="tdc-teams"><input class="tdc-in" maxlength="30" value="${cleanData(w.ta)}" oninput="TDC.w.ta=this.value;tdcSumNow()" placeholder="Team A"><input class="tdc-in" maxlength="30" value="${cleanData(w.tb)}" oninput="TDC.w.tb=this.value;tdcSumNow()" placeholder="Team B"></div>
       <div class="bm3-step">${L('Pairs per team')}</div><div class="bm3-keys k4">${[2,4,6,8].map(n=>`<button class="bm3-key${+w.tpp===n?' active':''}" onclick="tdcSet1('tpp',${n})">${n}</button>`).join('')}</div>`
     :`<div class="bm3-step">${L('Number of players')}</div>${stepper('players',[8,12,16,20,24,28,32])}`}
@@ -195,7 +195,8 @@ window.tdcInfo=async function(){
     <div class="field"><label>${L('Address')}</label><textarea id="tdcAdr" rows="2" maxlength="150" style="width:100%;box-sizing:border-box;">${v(x.adr)}</textarea></div>
     <div class="field"><label>${L('Contact person')}</label><input id="tdcKp" maxlength="60" value="${v(x.kp)}"></div>
     <div class="field"><label>${L('Phone number')}</label><input id="tdcTel" type="tel" maxlength="25" placeholder="+47 …" value="${v(x.tel)}"></div>
-    <div class="field"><label>📅 ${L('Tournament days')}</label><div id="tdcSch"></div><button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" onclick="tdcSchAdd()">➕ ${L('Add a day')}</button></div>`,
+    <div class="field"><label>📅 ${L('Tournament days')}</label><div id="tdcSch"></div><button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" onclick="tdcSchAdd()">➕ ${L('Add a day')}</button></div>
+    <label style="display:flex;gap:10px;align-items:center;font-size:0.95rem;margin-top:6px;cursor:pointer;"><input type="checkbox" id="tdcTm" ${x.tm?'checked':''} style="width:22px;height:22px;"> 🏆 ${L('Team match button on BridgePlay (members start a 2-table match)')}</label>`,
     `<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcInfoSave()">${L('Save')}</button>`);
   (Array.isArray(x.sch)?x.sch:[]).forEach(r=>tdcSchAdd(r));
 };
@@ -222,9 +223,10 @@ window.tdcInfoSave=async function(){
     .filter(r=>TDC_DAYS.includes(r.d)&&/^\d\d:\d\d$/.test(r.t)).map(r=>{ const o={d:r.d,t:r.t}; if(TDC_KINDS.includes(r.k)&&r.k) o.k=r.k; if(r.n) o.n=r.n; return o; })
     .sort((a,b)=>ord(a.d)-ord(b.d)||a.t.localeCompare(b.t)).slice(0,7);
   if(sch.length) x.sch=sch;
+  if(document.getElementById('tdcTm')?.checked) x.tm=1;   // the Team match button on BridgePlay's club page: only when the admin turns it on
   if(x.tel&&!/^[+\d][\d\s\-()]{4,}$/.test(x.tel)){ toast('❌ '+L('Phone number')+'?'); return; }
   try{
-    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),x.adr||x.kp||x.tel||x.sch?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
+    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),x.adr||x.kp||x.tel||x.sch||x.tm?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
     if(!r.ok) throw new Error(String(r.status));
   }catch(e){ toast('❌ '+L('Not saved — please log in again')); return; }
   closeModal(); toast('✅ '+L('Saved'));

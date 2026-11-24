@@ -138,9 +138,9 @@ async function initClubGate(){
   if(u&&!roleParam&&params.get('admin')!=='1'){
     // this phone's table in a tournament still running (it slept or was closed): straight back to it
     const sid=id||(()=>{ try{ return localStorage.getItem('bg_clubId'); }catch(e){ return null; } })(), seat=sid&&bmSeatOf(sid);
-    if(seat&&/^\d{4}$/.test(seat.c||'')&&Date.now()-seat.at<12*3600e3){
+    if(seat&&/^(\d{4}|Q\d{1,2})$/.test(seat.c||'')&&Date.now()-seat.at<12*3600e3){
       let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+sid+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
-      if(st&&st.status==='running'&&seat.sid&&st._startedAt===seat.sid){ location.replace(location.pathname+'?club='+encodeURIComponent(sid)+'&role=table&t='+seat.c+'&resume=1'); return; }
+      if(st&&st.status==='running'&&seat.sid&&st._startedAt===seat.sid){ location.replace(location.pathname+'?club='+encodeURIComponent(sid)+'&role=table&'+(seat.c[0]==='Q'?'qt='+seat.c.slice(1):'t='+seat.c)+'&resume=1'); return; }
     }
     let live=await liveTournaments();
     if(id&&fromLink) live=live.filter(t=>t.club===id);   // Players from a club's card: that club's tables only
@@ -162,11 +162,14 @@ async function initClubGate(){
       if(roleParam==='admin') setTimeout(()=>document.getElementById('pwInput')?.focus(),100);
       // BridgePlay's Team match button (quick=team): any signed-in member needs no password — the match is set up at once
       // (the rules let a member write the tournament only while no other one is running)
-      if(roleParam==='admin'&&params.get('quick')==='team'&&me()){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
+      if(roleParam==='admin'&&params.get('quick')==='team'&&me()&&(isClubAdmin()||await clubTeamOn(id))){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(async()=>{ await doLogin();
         // back at a table that is no longer this phone's (a new tournament, new codes): the table is chosen again, no code asked
         if(params.get('resume')&&document.getElementById('app').style.display!=='flex'){ bmSeatForget(); location.replace(location.pathname+'?club='+encodeURIComponent(id)); } },50); }
+      // back at a quick team match's table (this phone's seat, qt=table): no code, the BridgePlay session is enough
+      const qt=+params.get('qt')||0; if(roleParam==='table'&&qt&&me()){ window._quickSeat=qt; window._bgWantTable=qt; setTimeout(async()=>{ await doLogin();
+        if(document.getElementById('app').style.display!=='flex'){ bmSeatForget(); location.replace(location.pathname+'?club='+encodeURIComponent(id)); } },50); }
       // a screen's link (from the admin panel) opens the results screen at once
       if(roleParam==='screen') setTimeout(()=>doLogin(),50);
       // a player from BridgePlay's "Table No" (the club's table code prefix in the link): the players' names, then the table
@@ -214,6 +217,8 @@ async function renderEntry(live){
   document.querySelectorAll('.superLink').forEach(a=>a.style.display='none');
 }
 // the club tournaments running now (gate/live: name, club, tables, table code prefix)
+// the club's admin turned the Team match button on (Club info): members may start a quick team match
+async function clubTeamOn(id){ try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/info/tm.json'),{cache:'no-store'}); return r.ok&&!!(await r.json()); }catch(e){ return false; } }
 async function liveTournaments(){
   try{ const r=await fetch(await fbRootUrl('/live.json')); const v=r.ok?await r.json():null;
     return Object.entries(v||{}).map(([club,t])=>({club,...t})).filter(t=>t&&/^\d{2}$/.test(t.p||'')&&Date.now()-t.ts<24*3600e3).sort((a,b)=>b.ts-a.ts);
@@ -464,7 +469,7 @@ window.doLogin=async function(){
   if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()&&/^\d{4}$/.test(String(pw).trim())?'❌ Wrong PIN':'❌ Wrong password';return;}
   // the code says which table this is: prefix + table number (0003 = table 3)
   document.body.classList.toggle('bg-device',role==='table');   // a table: the BridgeScore look from here on
-  if(role==='table'&&window._quickSeat){ window.bmCodeTable=window._quickSeat; window._bgWantTable=null; window._quickSeat=null; }
+  if(role==='table'&&window._quickSeat){ window.bmCodeTable=window._quickSeat; window._bgCode='Q'+window._quickSeat; window.bmCodePrefix=window.bmCodePrefix||'00'; window._bgWantTable=null; window._quickSeat=null; }   // its seat is kept as Q<table>: the phone comes back to it
   else if(role==='table'&&testT){ window.bmCodeTable=testT; window._bgTestTable=null; try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(testT)); }catch(e){} }
   else if(role==='table'){
     const c=String(pw).trim(); window.bmCodePrefix=c.slice(0,2); window._bgCode=c;   // for Change table

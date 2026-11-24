@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v662`, kulüpler `kulup-v177`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v663`, kulüpler `kulup-v178`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,10 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v662`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-24
+- Takım maçı Hareket listelerinden kalktı (yalnız 🏆 düğmesiyle). 🏆 düğmesi BridgePlay'de yalnız kulüp yöneticisi açarsa
+  görünür: TD → Kulüp bilgisi → "Takım maçı düğmesi" (`bm/info/tm:1`; üye için `clubTeamOn`). Takım maçında telefon kapanınca
+  aynı masaya döner (koltuk `c:'Q<masa>'`, `?role=table&qt=<masa>`). BridgeScore'da turnuva Sil tek soru (`adminReset(true)`).
+  Ana sayfa sistem adları büyük/kalın. Konvansiyon çalışırken masadan kalkınca el saklanmaz → "Başla" (`goHome`, `pracList()`).
 - **Üye takım maçı:** BridgePlay'e giriş yapmış her üye (`me()`, `sess/<uid>/k` var) kulüpte başka turnuva yoksa 🏆 Takım maçını
   şifresiz başlatır; Firebase kuralı: bm/{state,movements,pairs,boards,approvals,tableLocks,boardLocks,ready,kicks,tdcalls,logs,hands,dd}
   üyeye yazılabilir yalnız `state.status !== 'running' || state._quickTeam`; `gate/live/<club>` aynı koşulla; `bm/teamArch/<id>` yalnız ekleme.
