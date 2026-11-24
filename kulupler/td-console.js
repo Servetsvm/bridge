@@ -47,7 +47,7 @@ window.tdcGo=(v,o)=>{ Object.assign(TDC,{v},o||{}); tdcDraw(); tdcFill(false); }
 function tdcDraw(){
   const s=getState();
   if(qtMember()){
-    if(s.status==='running'&&s.tableCount>0) return TDC.v==='table'&&TDC.t?drawTable():drawRun();
+    if(s.status==='running'&&s.tableCount>0) return drawRun();   // the tables' progress only: correcting a score is the club TD's
     return frame(L('Team match'),`<div class="bm3-note" style="padding:16px 12px;text-align:center;font-size:1.05rem;">🏁 ${L('Tournament finished')}</div>`,`<button class="btn" onclick="tdcPwLogin()">🔑 ${L('Club password')}</button><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button>`);
   }
   if(TDC.v==='setup') return drawSetup();
@@ -171,7 +171,7 @@ function drawRun(){ TDC.arc=null;
   let tot=0,dn=0; const tiles=[], legend=new Set();
   for(let t=1;t<=s.tableCount;t++){ const i=tableInfo(t,s,B,A,calls,thr); tot+=i.n; dn+=i.d;
     const st=i.call?'call':i.done?'done':i.slow?'slow':i.pend?'pend':''; if(st&&st!=='done') legend.add(st);
-    tiles.push(`<button class="tdc-tile ${st}" onclick="tdcGo('table',{t:${t},r:${s.currentRound}})"><b>${t}</b><small>${i.call?'📣 TD':i.done?'✓':i.slow?'⚠️ '+i.d+'/'+i.n:i.d+'/'+i.n}</small><i>${num(i.m.ns)}–${num(i.m.ew)}</i></button>`); }
+    tiles.push(`<button class="tdc-tile ${st}" ${qtMember()?'disabled style="opacity:1;cursor:default"':`onclick="tdcGo('table',{t:${t},r:${s.currentRound}})"`}><b>${t}</b><small>${i.call?'📣 TD':i.done?'✓':i.slow?'⚠️ '+i.d+'/'+i.n:i.d+'/'+i.n}</small><i>${num(i.m.ns)}–${num(i.m.ew)}</i></button>`); }
   const all=tot>0&&dn>=tot, last=s.currentRound>=s.roundCount, social=s.movement==='social';
   const sub=`<div class="tdc-round"><b>${L('Round')} ${s.currentRound} / ${s.roundCount} · ${L((MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||'')}</b><span>${dn}/${tot} ${L('boards')}</span><div class="tdc-bar"><i style="width:${tot?Math.round(dn/tot*100):0}%"></i></div></div>`;
   const body=`<div class="tdc-tiles">${tiles.join('')}</div>
