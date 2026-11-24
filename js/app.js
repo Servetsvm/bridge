@@ -4135,6 +4135,8 @@ function pushStateShow() {
 }
 async function pushTest() {
   const b = $('pushTest'); if (b) b.disabled = true;
+  // the phone never asked for the permission yet: ask now (the tap is what lets the browser show its question)
+  if ('Notification' in window && Notification.permission === 'default') { try { const p = await Notification.requestPermission(); if (p === 'granted') { SET.notify = true; Store.saveSettings(SET); save(); } } catch (e) {} }
   SET.pushSt = ''; pushStateShow();
   const st = await pushSetup(true);
   if (st === 'ok-admin') {
