@@ -349,6 +349,8 @@
     'New password (at least 4)':'Yeni şifre (en az 4)',
     'At least 4 characters':'En az 4 karakter',
     'Password saved':'Şifre kaydedildi',
+    "Team match":"Takım maçı",
+    "Two teams, the same boards at two tables, IMP":"İki takım, iki masada aynı eller, IMP",
     "Team Match: 2 teams, 2 or more pairs per team, two-table mirrored boards and IMP scoring.":"Takım maçı: 2 takım, takım başına 2 ya da daha çok çift, iki masada aynı eller ve IMP puanlama.",
     "Team Match: 2, 4, 6 … 12 pairs per team":"Takım maçı: takım başına 2, 4, 6 … 12 çift",
     "Team Match — two teams, the same boards at two tables, IMP":"Takım maçı — iki takım, iki masada aynı eller, IMP",

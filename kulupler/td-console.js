@@ -30,7 +30,7 @@ if(_tcs) window.tdCallsShow=function(v){ _tcs(v); tdcLive(); };
 function tdcLive(){ if(role!=='admin'||!tdcOn()||!document.querySelector('.tdc')) return; if(document.getElementById('modalBg')?.classList.contains('open')) return; { const ae=document.activeElement, t=document.querySelector('.tdc'); if(ae&&t&&t.contains(ae)&&/^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return; } if(['run','table','home','arc'].includes(TDC.v)) tdcDraw(); }
 
 const num=x=>(x||'').replace(/[^0-9]/g,'')||'?';
-const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board']];
+const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board'],['team','Team match','Two teams, the same boards at two tables, IMP']];
 function frame(title,body,actions,sub){
   const s=getState(), td=typeof tdName==='function'?tdName():'';
   document.getElementById('panelContent').innerHTML=`<div class="bm3 bm3w tdc"><div class="bm3-screen">
@@ -93,9 +93,11 @@ window.tdcStallOk=function(){ const v=parseInt(document.getElementById('tdcStall
 window.tdcStart=async function(){ await adminStart(); TDC.v='run'; tdcDraw(); };
 
 // ── the setup on one screen: the movement, the players, the boards (and the Swiss rounds), then Create ──
-window.tdcInitW=function(){ const s=getState(); TDC.w={mov:s.movement&&s.movement!=='team'?s.movement:'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
+window.tdcInitW=function(){ const s=getState(), teamLink=new URLSearchParams(location.search).get('setup')==='team'&&s.status!=='running';   // from BridgePlay's Team match button
+  TDC.w={ta:s._teamAName||'Team A',tb:s._teamBName||'Team B',tpp:+s._teamPairs||2,mov:teamLink?'team':s.movement||'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
 window.tdcSetupStart=function(){ tdcInitW(); TDC.v='setup'; tdcDraw(); };
 function calc(w){
+  if(w.mov==='team'){ const n=+w.tpp||2; return {tables:n,ph:false,pc:n*2,rounds:n,total:n*(+w.bpr||0)}; }   // two teams of n pairs: n tables (two a match), n rounds
   const p=+w.players||0, t0=Math.floor(p/4), ph=p%4!==0, pc=t0*2+(ph?1:0), mT=t0+(ph?1:0);
   // Mitchell: an odd number of pairs adds a table (the phantom); an even number of tables plays one round fewer (skip)
   const tables=w.mov==='mitchell'?mT:t0;
@@ -109,7 +111,9 @@ window.tdcInc=(k,dv)=>{ const [lo,hi]=LIM[k]; TDC.w[k]=Math.max(lo,Math.min(hi,(
 window.tdcTyped=(k,el)=>{ const v=parseInt(el.value,10); if(v>0){ TDC.w[k]=v; const x=document.getElementById('tdcSum'); if(x) x.outerHTML=sumHtml(); const b=document.getElementById('tdcCreateBtn'); if(b) b.disabled=!!setupErr(); } };
 const stepper=(k,quick)=>`<div class="tdc-stepper"><button class="bm3-key" onclick="tdcInc('${k}',-1)">−</button><input type="number" inputmode="numeric" value="${TDC.w[k]}" min="${LIM[k][0]}" max="${LIM[k][1]}" oninput="tdcTyped('${k}',this)" onchange="drawSetupNow()"><button class="bm3-key" onclick="tdcInc('${k}',1)">+</button></div>${quick?`<div class="tdc-quick">${quick.map(n=>`<button class="${+TDC.w[k]===n?'on':''}" onclick="tdcSet1('${k}',${n})">${n}</button>`).join('')}</div>`:''}`;
 window.drawSetupNow=()=>drawSetup();
+window.tdcSumNow=()=>{ const x=document.getElementById('tdcSum'); if(x) x.outerHTML=sumHtml(); const b=document.getElementById('tdcCreateBtn'); if(b) b.disabled=!!setupErr(); };
 function setupErr(){ const w=TDC.w, c=calc(w), p=+w.players||0;
+  if(w.mov==='team') return (+w.tpp>=2&&+w.tpp<=12&&!(+w.tpp%2))?(String(w.ta||'').trim()&&String(w.tb||'').trim()?'':L('Teams')+'?'):L('Team Match: 2, 4, 6 … 12 pairs per team');
   if(p%2) return L('An even number of players: each pair is two players');
   if(w.mov==='social'&&p%4) return L('Social Bridge: full tables only (a half table: choose Howell)');
   if(p<8) return L('At least 8 players');
@@ -118,14 +122,16 @@ function setupErr(){ const w=TDC.w, c=calc(w), p=+w.players||0;
   if(w.mov==='swiss'&&!((+w.swr)>=3&&(+w.swr)<=c.pc-1)) return L('Number of rounds')+': 3 – '+Math.max(3,c.pc-1);
   return ''; }
 function sumHtml(){ const w=TDC.w, c=calc(w), e=setupErr();
-  return `<div id="tdcSum" class="tdc-sumline${e?' bad':''}">${e?'⚠️ '+cleanData(e):`<b>${c.tables}</b> ${L('tables')}${c.ph?' + 👻':''} · <b>${c.rounds}</b> ${L('rounds')} · <b>${c.total}</b> ${L('boards')}`}</div>`; }
+  return `<div id="tdcSum" class="tdc-sumline${e?' bad':''}">${e?'⚠️ '+cleanData(e):`${w.mov==='team'?`<b>${cleanData(w.ta)}</b> – <b>${cleanData(w.tb)}</b> · `:''}<b>${c.tables}</b> ${L('tables')}${c.ph?' + 👻':''} · <b>${c.rounds}</b> ${L('rounds')} · <b>${c.total}</b> ${L('boards')}`}</div>`; }
 function drawSetup(fin){
   if(!TDC.w) tdcInitW();
   const w=TDC.w, again=TDC.v==='setup', fs=getState().status==='finished';
   const body=`${fs&&!again?`<div class="tdc-finrow">🏁 ${L('Tournament finished')} <button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>`:''}
     <div class="bm3-step">${L('Movement')}</div>
     <div class="tdc-pick"><select class="tdc-sel" onchange="tdcSet1('mov',this.value)">${MOVS.map(([k,n,d])=>`<option value="${k}"${w.mov===k?' selected':''}>${L(n)} — ${L(d)}</option>`).join('')}</select></div>
-    <div class="bm3-step">${L('Number of players')}</div>${stepper('players',[8,12,16,20,24,28,32])}
+    ${w.mov==='team'?`<div class="bm3-step">${L('Teams')}</div><div class="tdc-teams"><input class="tdc-in" maxlength="30" value="${cleanData(w.ta)}" oninput="TDC.w.ta=this.value;tdcSumNow()" placeholder="Team A"><input class="tdc-in" maxlength="30" value="${cleanData(w.tb)}" oninput="TDC.w.tb=this.value;tdcSumNow()" placeholder="Team B"></div>
+      <div class="bm3-step">${L('Pairs per team')}</div><div class="bm3-keys k4">${[2,4,6,8].map(n=>`<button class="bm3-key${+w.tpp===n?' active':''}" onclick="tdcSet1('tpp',${n})">${n}</button>`).join('')}</div>`
+    :`<div class="bm3-step">${L('Number of players')}</div>${stepper('players',[8,12,16,20,24,28,32])}`}
     ${w.mov==='social'?`<div class="bm3-step">${L('Number of boards')}</div>${stepper('soc',[12,16,20,24,28,32])}`
       :`<div class="bm3-step">${L('Boards per round')}</div><div class="bm3-keys k4">${[1,2,3,4,5,6,7,8].map(n=>`<button class="bm3-key${w.bpr===n?' active':''}" onclick="tdcSet1('bpr',${n})">${n}</button>`).join('')}</div>`}
     ${w.mov==='swiss'?`<div class="bm3-step">${L('Number of rounds')}</div>${stepper('swr',null)}`:''}
@@ -138,8 +144,9 @@ window.tdcCreate=async function(){
   const w=TDC.w; if(!w) return;
   if(TDC.tab){ TDC.tab=null; const c=document.getElementById('adminContent'); if(c) c.remove(); }
   const box=document.createElement('div'); box.style.display='none'; box.id='tdcForm';
-  box.innerHTML=`<input id="aName"><select id="aMovement"><option value="${w.mov}" selected>${w.mov}</option></select><input id="aBPR" value="${w.bpr}"><input id="aPlayers" value="${+w.players||0}"><input id="aSocBoards" value="${+w.soc||0}"><input id="aSwissRounds" value="${+w.swr||0}">`;
+  box.innerHTML=`<input id="aName"><select id="aMovement"><option value="${w.mov}" selected>${w.mov}</option></select><input id="aBPR" value="${w.bpr}"><input id="aPlayers" value="${+w.players||0}"><input id="aSocBoards" value="${+w.soc||0}"><input id="aSwissRounds" value="${+w.swr||0}"><input id="aTeamA"><input id="aTeamB"><input id="aTeamPairs" value="${+w.tpp||2}">`;
   document.body.appendChild(box);
+  box.querySelector('#aTeamA').value=String(w.ta||'Team A').trim().slice(0,30); box.querySelector('#aTeamB').value=String(w.tb||'Team B').trim().slice(0,30);
   try{ await adminSetup(); } finally{ box.remove(); }
   if(getState().status==='setup'&&getState().roundCount>0){ TDC.w=null; TDC.v='home'; }
   tdcDraw();
