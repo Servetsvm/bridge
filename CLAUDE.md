@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v676`, kulüpler `kulup-v190`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v677`, kulüpler `kulup-v191`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v676`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-24
+- TD → Menü → Kayıtlar: "🏆 Takım maçı" listesi, her sonuç 🗑 ile silinir (`tdcDelTeam`, yalnız kulüp yöneticisi; kural bm .write).
+  Konvansiyon çalışırken (`pracList()`) açılışta ve hesap değişince de yarım el saklanmaz → hep "Başla".
 - **Takım maçı kendiliğinden biter:** son board'u giren masa (`bgQuickFinish`, core.js; table-play allDone) iki masada 16 board
   bitince durumu finished yapar, `teamArch/q<_startedAt>`'a yazar (aynı id → iki telefon bir kez ekler), live'ı siler.
   Hiç board oynanmamış takım maçı arşivlenmez ve sonuçlarda gizlenir (`resArc`). Bitmeyen takım maçı live'da 5 saat sonra görünmez (`t.q`).

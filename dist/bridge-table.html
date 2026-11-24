@@ -12629,7 +12629,7 @@ function acctLoad(k) {
   let a = null; try { a = k && JSON.parse(localStorage.getItem(acctKey(k)) || 'null'); } catch (e) {}
   const dev = {}; for (const x of DEVICE_SET) if (SET[x] !== undefined) dev[x] = SET[x];
   SET = Object.assign({ style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } }, a ? a.set : {}, dev);
-  HIST = a ? a.hist || [] : []; BOARD = a ? a.board || 0 : 0; G = idleG(); ui.saved = a ? a.saved || null : null;
+  HIST = a ? a.hist || [] : []; BOARD = a ? a.board || 0 : 0; G = idleG(); ui.saved = a && !pracList().length ? a.saved || null : null;   // practising a convention: a new board (Start), never Continue
   seasonStart();   // a player put away before the season: their old boards are kept aside too
   for (const x of ACCT_LS) { try { if (a && a.ls && a.ls[x] != null) localStorage.setItem(x, a.ls[x]); else localStorage.removeItem(x); } catch (e) {} }
   SET.cloudSet = 0;
@@ -14828,7 +14828,7 @@ function start(data) {
   Field.init();
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
   // an unfinished board (bidding or play) waits for "Play with robots" to carry on
-  ui.saved = G && G.id !== 'idle' && (G.phase === 'bid' || G.phase === 'play') ? G : null;
+  ui.saved = G && G.id !== 'idle' && (G.phase === 'bid' || G.phase === 'play') && !pracList().length ? G : null;   // practising a convention: Start, not Continue
   G = idleG(); render();
   { const sq = new URLSearchParams(location.search), kq = sq.get('kulup'), ks = sq.get('sys'), kf = sq.get('feedback');
     if (ks && E.SYSTEMS.some(y => y.k === ks)) { setSys(ks); Store.saveSettings(SET); }   // a link that chooses the system (the Claude system's article: Try it)

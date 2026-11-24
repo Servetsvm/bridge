@@ -209,6 +209,7 @@ window.ccResultsPage=async function(i){
 // the list of the club's results: a tab for each year, the months newest first, each tournament's date and name
 let IDXY=null, IDXT='res';   // the results' tab: the tournaments (res), or the team matches (team)
 // a team match's score from its archive: each board's IMPs to the team that won it (team A NS at the first table of each match)
+window.teamScoreOf=a=>teamScoreOf(a);
 function teamScoreOf(a){
   const s=a&&a.state||{}, mv=a&&a.movements||{}, B=a&&a.boards||{}; let A=0,Bs=0;
   for(let r=1;r<=(s.roundCount||1);r++) for(let t=1;t<=(s.tableCount||0);t+=2){ const m1=mv[r+'_'+t]; if(!m1) continue;

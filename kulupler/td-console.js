@@ -312,14 +312,23 @@ window.tdcFree=async t=>{ await adminKickTable(t); tdcDraw(); };
 // ── Reset: the tournament now (its boards, pairs and movement) and the old tournaments, each deleted on its own ──
 // the tournament now and the old tournaments, each with its own delete (shown at the top of Log)
 function resetHtml(){
-  if(Date.now()-(TDC.resAt||0)>3000){ TDC.resAt=Date.now(); archivesFresh().then(()=>{ if(TDC.tab==='log') tdcFill(false); }); }
+  if(Date.now()-(TDC.resAt||0)>3000){ TDC.resAt=Date.now(); Promise.all([archivesFresh(),DB.get('teamArch')]).then(()=>{ if(TDC.tab==='log') tdcFill(false); }); }
   const s=getState(), A=getArchives()||[], now=s&&s.status&&s.status!=='none'&&(s.tableCount>0||s.name);
   return `<div class="bm3-step">${L('The tournament now')}</div>
     ${now?`<div class="tdc-hist"><div class="tdc-hrow tdc-resrow"><b>${cleanData(s.name||'')}</b><span>${s.status==='running'?'🟢 '+L('Running'):s.status==='finished'?'🏁 '+L('Finished'):'⏳ '+L('Ready to start')}</span><button class="btn tdc-red" onclick="tdcResetNow()">🗑 ${L('Delete')}</button></div></div>`:`<div class="bm3-note" style="padding:0 12px">${L('No tournament now')}</div>`}
     <div class="bm3-step">${L('Old tournaments')}</div>
     ${A.length?`<div class="tdc-hist">${A.map((a,i)=>`<div class="tdc-hrow tdc-resrow"><b>${cleanData((a.state&&a.state.name)||L('Tournament'))}</b><span>${dd(a.finished)} · ${(a.state&&a.state.tableCount)||0} ${L('tables')}</span><button class="btn tdc-red" onclick="tdcResetOld(${i})">🗑 ${L('Delete')}</button></div>`).join('')}</div>`:`<div class="bm3-note" style="padding:0 12px">${L('No archived tournaments')}</div>`}
+    ${(()=>{ const T=Object.entries(_cache['teamArch']||{}).filter(([,a])=>a&&a.state).sort((x,y)=>String(y[1].finished||'').localeCompare(String(x[1].finished||'')));
+      return T.length?`<div class="bm3-step">🏆 ${L('Team match')}</div><div class="tdc-hist">${T.map(([id,a])=>{ const sc=typeof window.teamScoreOf==='function'?window.teamScoreOf(a):null;
+        return `<div class="tdc-hrow tdc-resrow"><b>${sc?cleanData(sc.ta)+' '+sc.a+' – '+sc.b+' '+cleanData(sc.tb):cleanData(a.state.name||L('Team match'))}</b><span>${dd(a.finished)}</span><button class="btn tdc-red" onclick="tdcDelTeam('${String(id).replace(/[^A-Za-z0-9_-]/g,'')}')">🗑 ${L('Delete')}</button></div>`; }).join('')}</div>`:''; })()}
     <div class="bm3-step">${L('Log')}</div>`;
 }
+// a team match's result deleted (the club's TD: the rules let only the club's admins remove one)
+window.tdcDelTeam=async function(id){
+  if(!await confirmDialog(L('Delete the results of this tournament? Nobody can see them afterwards, and this cannot be undone.'),{title:'🗑',confirmLabel:L('Delete'),danger:true})) return;
+  try{ const r=await fetch(await fbUrl('/teamArch/'+id+'.json'),{method:'DELETE'}); if(!r.ok) throw new Error(String(r.status)); }catch(e){ toast('❌ '+L('Not deleted — please log in again')); return; }
+  const T={...(_cache['teamArch']||{})}; delete T[id]; _cache['teamArch']=T; toast('🗑 '+L('Deleted')); tdcFill(false);
+};
 // ── the old tournaments: each one opened, its boards and names corrected, its results, PBN, PDF, renamed, deleted ──
 const dd=x=>{ const d=new Date(x||0); return isNaN(d)?'':String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear(); };
 function drawHist(){
