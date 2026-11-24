@@ -1,0 +1,16 @@
+# A test notification to the administrator's phones (Actions → Test notification → Run workflow): the robots' Worker
+# wakes every phone subscribed as the administrator's, which shows "New message from Test" even with the app closed.
+# The run says how many phones it went to (0: no phone has subscribed yet — open BridgePlay with notifications allowed).
+name: Test notification
+on:
+  workflow_dispatch:
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Send
+        run: |
+          R=$(curl -s -X POST https://bridge-bots.bridgeplay.workers.dev/push/send -H 'Origin: https://servetsvm.github.io' -H 'Content-Type: application/json' -d '{"to":"admin","kind":"msg","n":"Test"}')
+          echo "$R"
+          echo "### Test notification: $R" >> "$GITHUB_STEP_SUMMARY"
