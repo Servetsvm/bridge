@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v671`, kulüpler `kulup-v185`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v672`, kulüpler `kulup-v186`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -69,7 +69,7 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v671`, kulü
 - Kulüpte süren takım maçı varken üye kulübe girince masa kodu ekranı yerine masa numaraları (`bgPlayerEntry('00')`).
 - Takım maçı Hareket listelerinden kalktı (yalnız 🏆 düğmesiyle). 🏆 düğmesi BridgePlay'de yalnız kulüp yöneticisi açarsa
   görünür: TD → Kulüp bilgisi → "Takım maçı düğmesi" (`bm/info/tm:1` yalnız düğmeyi gösterir; düğmeye basan her üye şifresiz başlatır; masa kodsuz oturma `state._quickTeam`'dan da anlaşılır). Takım maçında telefon kapanınca
-  aynı masaya döner (koltuk `c:'Q<masa>'`, `?role=table&qt=<masa>`). BridgeScore'da turnuva Sil tek soru (`adminReset(true)`).
+  aynı masaya döner — yalnız oturan kişi (`bg_seat` içinde `u`; aynı telefonda başka isim kendi masasını seçer) (koltuk `c:'Q<masa>'`, `?role=table&qt=<masa>`). BridgeScore'da turnuva Sil tek soru (`adminReset(true)`).
   Ana sayfa sistem adları büyük/kalın. Konvansiyon çalışırken masadan kalkınca el saklanmaz → "Başla" (`goHome`, `pracList()`).
 - **Üye takım maçı:** BridgePlay'e giriş yapmış her üye (`me()`, `sess/<uid>/k` var) kulüpte başka turnuva yoksa 🏆 Takım maçını
   şifresiz başlatır; Firebase kuralı: bm/{state,movements,pairs,boards,approvals,tableLocks,boardLocks,ready,kicks,tdcalls,logs,hands,dd}

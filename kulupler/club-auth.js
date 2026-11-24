@@ -50,8 +50,9 @@ const isClubAdmin=()=>{ const u=me(); return !!u&&(isSuper()||(CLUB_INFO&&CLUB_I
 try{ Object.keys(localStorage).filter(k=>k.startsWith('bg_td:')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
 const tdSaved=()=>null;
 // the table this phone sits at (its code, number, round): opened again it comes back there
-const bmSeatOf=club=>{ try{ return JSON.parse(localStorage.getItem('bg_seat:'+club)||'null'); }catch(e){ return null; } };
-window.bmSeatSave=t=>{ try{ if(role!=='table'||!CLUB_ID||!window._bgCode) return; localStorage.setItem('bg_seat:'+CLUB_ID,JSON.stringify({c:window._bgCode,p:window.bmCodePrefix||'',t,r:getState().currentRound,sid:getState()._startedAt||'',at:Date.now()})); }catch(e){} };
+// this phone's seat: only for the player who sat there (another player signed in on the same phone chooses their own table)
+const bmSeatOf=club=>{ try{ const v=JSON.parse(localStorage.getItem('bg_seat:'+club)||'null'), u=me(); if(v&&v.u&&(!u||v.u!==u.key)) return null; if(v&&!v.u&&/^Q/.test(v.c||'')) return null; return v; }catch(e){ return null; } };
+window.bmSeatSave=t=>{ try{ if(role!=='table'||!CLUB_ID||!window._bgCode) return; localStorage.setItem('bg_seat:'+CLUB_ID,JSON.stringify({u:(me()||{}).key||'',c:window._bgCode,p:window.bmCodePrefix||'',t,r:getState().currentRound,sid:getState()._startedAt||'',at:Date.now()})); }catch(e){} };
 window.bmSeatForget=()=>{ try{ localStorage.removeItem('bg_seat:'+CLUB_ID); }catch(e){} };
 // the TD's screen hears the tables' calls (once)
 window.tdCallsWatch=()=>{ if(window._tdWatch) return; window._tdWatch=true; DB.subscribe('tdcalls',v=>{ if(typeof tdCallsShow==='function') tdCallsShow(v); }); };
