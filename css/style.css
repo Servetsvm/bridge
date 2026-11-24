@@ -2493,3 +2493,4 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .pushst{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:14px}
 .pushst:empty{display:none}
 .pushst span{flex:1 1 200px}
+.clubrow .btn.clubteamb{background:var(--brass);color:var(--brass-ink);border-color:var(--brass)}

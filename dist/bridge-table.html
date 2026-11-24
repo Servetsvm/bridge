@@ -2545,6 +2545,7 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .pushst{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:14px}
 .pushst:empty{display:none}
 .pushst span{flex:1 1 200px}
+.clubrow .btn.clubteamb{background:var(--brass);color:var(--brass-ink);border-color:var(--brass)}
 
 </style>
 
@@ -14542,6 +14543,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'clubSuper') { closeOv(); openClubs('?sa=1'); return; }   // the super admin's sign-in (only he sees the button)
   if (t.dataset.clubplay) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubplay)); return; }
   if (t.dataset.clubres) { window.open(location.pathname + '?kulup=' + encodeURIComponent('?club=' + t.dataset.clubres + '&results=1'), '_blank'); return; }
+  if (t.dataset.clubteam) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubteam) + '&role=admin&setup=team'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
   // the online team match: a new tournament of the Team match type, set up at once
@@ -15480,6 +15482,8 @@ async function showClubs() {
       (ui.clubOpen !== t.club ? '' : (t.tb ? `<div class="row2"><button class="btn gold" data-clubplay="${esc(t.club)}">🪑 ${T('Table No')}</button></div>` : otLive(t.club) ? '' : `<div class="muted">${T('No tournament at this club now.')}</div>`) +
         (x => `<div class="row4 clubtools ct4"><button class="btn" data-clubadmin="${esc(t.club)}">🧑‍⚖️ ${T('TD')}</button>` + (x ? `<button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button>` : `<button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button>`) + `<button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button><button class="btn" data-clubres="${esc(t.club)}">📄 ${T('Results')}</button></div>`)(otLive(t.club))
         // the club's info (address, contact person, phone): a button under the tools, the card opens under it
+        // a team match: the TD's sign-in, then the setup with Team match chosen
+        + (t.tb ? '' : `<button class="btn clubinfob clubteamb" data-clubteam="${esc(t.club)}">🏆 ${T('Team match')}</button>`)
         + (clubInfoHtml((ui.clubInfo || {})[t.club]) ? `<button class="btn clubinfob" data-clubinfo="${esc(t.club)}" data-clubname="${esc(t.c || t.club)}">ℹ️ ${T('Club info')}</button>` : '')) + `</div>`).join('');
     openOv('clubs', `<div class="clubsfs ${ui.clubOpen ? 'one' : 'list'}" style="--n:${Math.max(1, shown.length)}"><div class="row2 clubstop">${ui.clubOpen ? `<button class="btn" data-clubopen="${esc(ui.clubOpen)}">‹ ${T('Clubs')}</button>` : ''}<button class="btn" id="oClose">${T('Close')}</button></div>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}${!ui.clubOpen && typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn clubsa" id="clubSuper">🛡️ ${T('Super admin')}</button>` : ''}</div>`);
