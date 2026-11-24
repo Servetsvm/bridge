@@ -4071,10 +4071,17 @@ function start(data) {
       b.innerHTML = `<span>🔄 ${T('A new version is ready')}</span><button class="btn gold" type="button">${T('Reload')}</button><button class="btn updx" type="button" aria-label="${T('Close')}">✕</button>`;
       b.querySelector('.gold').onclick = () => { reloaded = true; save(); location.reload(); }; b.querySelector('.updx').onclick = () => b.remove();
       document.body.appendChild(b); };
-    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) { want = true; go(); if (!reloaded) offer(); } });
+    // at the start (or back on a quiet screen) a new version found: a short "Updating…" screen, and the new version opens
+    // at once — a player who starts the app always plays the latest one (the strip below stays for a game in progress)
+    const T0 = Date.now(); let waitUpd = false;
+    const updWait = on => { let w = $('updWait'); if (!on) { if (w) w.remove(); waitUpd = false; return; } if (w) return; waitUpd = true;
+      w = document.createElement('div'); w.id = 'updWait'; w.innerHTML = `<div><div class="updspin">🔄</div><b>${T('Updating…')}</b></div>`; document.body.appendChild(w);
+      setTimeout(() => { if (!reloaded) updWait(false); }, 20000); };   // a slow download: the old version goes on, the strip offers the new one
+    const watchReg = r => r && r.addEventListener('updatefound', () => { if (hadController && (Date.now() - T0 < 20000 || quiet())) updWait(true); });
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) { want = true; if (waitUpd && !reloaded) { reloaded = true; save(); location.reload(); return; } go(); if (!reloaded) offer(); } });
     setInterval(go, 15000);
     const look = () => navigator.serviceWorker.getRegistration().then(r => r && r.update()).catch(() => {});
-    navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(r => { watchReg(r); return r.update(); }).catch(() => {});
     setInterval(look, 10 * 60e3);
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { look(); go(); } });
   }

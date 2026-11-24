@@ -2506,3 +2506,8 @@ body.homev2 .h2tiles .h2sys{grid-column:1/-1}
 .clubsfs.one .clubname{display:grid;grid-template-columns:1fr;align-content:center;row-gap:4px}
 .clubsfs.one .clubname b{display:flex;align-items:center;gap:12px;min-width:0}
 .clubsfs.one .clubname small{font-size:15px}
+
+/* a new version is being fetched at the start: a short wait, then it opens */
+#updWait{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(14,40,28,.92);color:#f4e6b8;font:600 20px/1.4 var(--f-ui,system-ui);text-align:center}
+#updWait .updspin{font-size:44px;animation:updspin 1.2s linear infinite;margin-bottom:8px}
+@keyframes updspin{to{transform:rotate(360deg)}}

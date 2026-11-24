@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v666`, kulüpler `kulup-v181`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v667`, kulüpler `kulup-v181`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,9 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v666`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-24
+- **Açılışta her zaman güncel sürüm:** app.js `updatefound` (açılıştan sonraki 20 sn içinde ya da sakin ekranda) → tam ekran
+  "Güncelleniyor…" (`#updWait`), yeni SW devralınca hemen yeniden yüklenir; 20 sn'de bitmezse eski sürüm sürer, şerit önerir.
+  Kulüp programı (kulupler/) zaten network-first.
 - **Hız:** telefonda gizli robot masası kartı (#hRobot) için her açılışta inen ~2 MB live-*.json artık yalnız kart görünürse
   (`rtShown`); Google Fonts sayfayı bekletmiyor (media=print onload) ve sw.js'de `fonts-v1` önbelleğinde. Web Push hafif (günde bir abonelik) → kaldı.
 - Kulüpte süren takım maçı varken üye kulübe girince masa kodu ekranı yerine masa numaraları (`bgPlayerEntry('00')`).
