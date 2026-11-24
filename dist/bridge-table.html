@@ -14866,8 +14866,14 @@ async function pushSetup(force) {
     const reg = await navigator.serviceWorker.ready; if (!reg.pushManager) return pushState('unsupported');
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
-      let k = {}; try { k = await (await fetch(pushBase() + '/push/key')).json(); } catch (e) { return pushState('err:server'); }
-      if (!k.key) return pushState('err:server');
+      // (tried twice: a new address can take a moment to be found by the phone's network)
+      let k = {}, why = '';
+      for (let i = 0; i < 2 && !k.key; i++) {
+        try { const r = await fetch(pushBase() + '/push/key', { cache: 'no-store' }); why = 'HTTP ' + r.status; k = await r.json().catch(() => ({})); if (!k.key && k.error) why += ' ' + k.error; }
+        catch (e) { why = (e && e.message || String(e)).slice(0, 40); }
+        if (!k.key && !i) await new Promise(r => setTimeout(r, 1500));
+      }
+      if (!k.key) return pushState('err:' + why + ' · ' + pushBase().replace(/^https:\/\//, ''));
       const raw = Uint8Array.from(atob(k.key.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((k.key.length + 3) % 4)), c => c.charCodeAt(0));
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
     }
