@@ -88,10 +88,9 @@ address.
 
 The same Worker wakes the players' phones when something happens (a message or a club request to the administrator,
 the administrator's answer, a club opened). The push itself carries nothing; the phone asks the Worker what it was about
-(`/push/last`) and shows it in its own language. Set up once, in this folder:
+(`/push/last`) and shows it in its own language. Set up once, in this folder (the Worker makes its "push" table by itself):
 
 ```bash
-npx wrangler d1 execute bridge-botchat --remote --file=schema.sql   # the new "push" table (the old tables stay as they are)
 node vapid.mjs | npx wrangler secret put VAPID_JWK                  # the key pair, straight into a Worker secret
 npx wrangler deploy
 ```

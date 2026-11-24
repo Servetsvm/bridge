@@ -234,8 +234,17 @@ async function vapidAuth(env, endpoint) {
   return 'vapid t=' + head + '.' + b64u(sig) + ', k=' + vapidPublic(j);
 }
 const PUSH_KINDS = ['msg', 'club', 'reply', 'clubopen'];
+// the push table is made by the Worker itself the first time (no separate database step); the same as in schema.sql
+let PUSH_TABLE = false;
+async function pushTable(env) {
+  if (PUSH_TABLE || !env.DB) return;
+  await env.DB.prepare('CREATE TABLE IF NOT EXISTS push (ep TEXT PRIMARY KEY, name TEXT NOT NULL, admin INTEGER NOT NULL DEFAULT 0, sub TEXT, ts INTEGER NOT NULL, lk TEXT, ln TEXT, lt INTEGER)').run();
+  await env.DB.prepare('CREATE INDEX IF NOT EXISTS push_name ON push (name)').run();
+  PUSH_TABLE = true;
+}
 async function pushRoute(path, req, b, env, ctx, json) {
   if (!env.DB || !vapidJwk(env)) return json({ error: 'push not set up' }, 501);
+  await pushTable(env);
   const key = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, ''), admin = !!(env.REVIEW_KEY && sameKey(key, env.REVIEW_KEY));
   if (path === '/push/sub') {
     const name = clip(b && b.name, 40).toLowerCase(), sub = b && b.sub, ep = sub && clip(sub.endpoint, 600);
@@ -280,6 +289,7 @@ export default {
     if (path === '/push/key' && req.method === 'GET') { const j = vapidJwk(env); return j ? json({ key: vapidPublic(j) }) : json({ error: 'push not set up' }, 501); }
     if (path === '/push/last' && req.method === 'GET') {
       const ep = new URL(req.url).searchParams.get('ep') || ''; if (!env.DB || !ep) return json({});
+      await pushTable(env).catch(() => {});
       const r = await env.DB.prepare('SELECT lk, ln, lt FROM push WHERE ep = ?').bind(ep.slice(0, 600)).first().catch(() => null);
       return json(r && r.lk && Date.now() - r.lt < 864e5 ? { kind: r.lk, n: r.ln || '' } : {});
     }
