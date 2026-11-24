@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v659`, kulüpler `kulup-v171`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v659`, kulüpler `kulup-v172`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -57,6 +57,14 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v659`, kulü
 
 ## Oturum günlüğü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
+
+### 2026-11-24
+- **Takım maçı** kulüplerde geri açıldı (BridgeScore → Kurulum → Hareket: Takım maçı; takım adları, takım başına 2/4/6… çift).
+  `generateTeamMatch` düzeltildi (eskiden aynı çift iki masaya oturuyordu): maç başına 1. masa A(KG)–B(DB), 2. masa B(KG)–A(DB),
+  aynı eller; N tur, her A çifti her B çiftiyle bir kez. Skor `calcTeamMatchIMP` (impA/impB brüt), `teamScoreHtml` sonuç sayfası
+  ve ekranda. Tek sayıda çift engelli.
+- Web Push yeni Cloudflare hesabında çalışıyor (abonelik KV, yönetici Firebase oturumuyla). Ayarlar'da durum + 🔔 Deneme.
+  Kullanıcının Xiaomi telefonunda FCM 201 dönüyor ama bildirim görünmedi → telefonun pil/otomatik başlatma ayarları (yarım).
 
 ### 2026-11-23
 - **Yeni sürüm şeridi** (`#updBar`, controllerchange'de sakin an değilse), **Ayarlar'da çevrimdışı hazır** (`offReadyCheck`),

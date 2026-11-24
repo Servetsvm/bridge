@@ -164,27 +164,29 @@ function teamMatchSettingsFromUI(){
     pairsPerTeam:teamMatchPairCount()
   };
 }
+/* A team match: N pairs a team (A: p1…pN, B: pN+1…p2N), played two tables at a time on the same boards (open and
+   closed room). In each match of a round two A pairs and two B pairs play: at the first table A NS against B EW, at the
+   second B NS against A EW — so team A holds every hand once, and the IMPs come from the two tables' scores of each board.
+   N rounds; round r turns the B pairs by r, so each A pair meets each B pair once. With an odd N one pair of each team
+   sits out each round (in turn). */
 function generateTeamMatch(pairCount, boardsPerRound, teamAName, teamBName){
-  const movements={}, pairs={};
-  for(let i=1;i<=pairCount;i++)pairs['p'+i]={id:'p'+i,name:'Pair '+i,dir:'',startTable:0,isPhantom:false,team:'A',teamName:teamAName,teamPair:i};
-  for(let i=1;i<=pairCount;i++){const id='p'+(pairCount+i);pairs[id]={id,name:'Pair '+(pairCount+i),dir:'',startTable:0,isPhantom:false,team:'B',teamName:teamBName,teamPair:i};}
-  const rounds=pairCount;
-  const activeCount=pairCount%2===0?pairCount:pairCount-1;
+  const movements={}, pairs={}, N=pairCount;
+  for(let i=1;i<=N;i++)pairs['p'+i]={id:'p'+i,name:'Pair '+i,dir:'',startTable:0,isPhantom:false,team:'A',teamName:teamAName,teamPair:i};
+  for(let i=1;i<=N;i++){const id='p'+(N+i);pairs[id]={id,name:'Pair '+(N+i),dir:'',startTable:0,isPhantom:false,team:'B',teamName:teamBName,teamPair:i};}
+  const active=N%2===0?N:N-1, rounds=N;
   for(let r=0;r<rounds;r++){
     const boardStart=r*boardsPerRound+1,boardEnd=boardStart+boardsPerRound-1;
-    const sitA=pairCount%2===1?((r%pairCount)+1):null;
-    const sitB=pairCount%2===1?(((r+1)%pairCount)+1):null;
-    const aList=Array.from({length:pairCount},(_,i)=>i+1).filter(i=>i!==sitA);
-    const bList=Array.from({length:pairCount},(_,i)=>i+1).filter(i=>i!==sitB);
-    for(let i=0;i<activeCount/2;i++){
-      const aIndex=aList[2*i];
-      const bIndex=bList[(2*i+r)%activeCount];
-      const a='p'+aIndex,b='p'+(pairCount+bIndex),t1=2*i+1,t2=2*i+2;
-      movements[(r+1)+'_'+t1]={ns:a,ew:b,boardStart,boardEnd,teamMatch:true,matchId:'M'+(i+1),teamA:a,teamB:b,mirrorTable:t2,sitoutA:sitA,sitoutB:sitB};
-      movements[(r+1)+'_'+t2]={ns:b,ew:a,boardStart,boardEnd,teamMatch:true,matchId:'M'+(i+1),teamA:a,teamB:b,mirrorTable:t1,sitoutA:sitA,sitoutB:sitB};
+    const sitA=N%2?(r%N)+1:null, sitB=N%2?((r+1)%N)+1:null;
+    const A=Array.from({length:N},(_,i)=>i+1).filter(i=>i!==sitA), B0=Array.from({length:N},(_,i)=>i+1).filter(i=>i!==sitB);
+    const B=B0.map((_,j)=>B0[(j+r)%active]);
+    for(let m=0;m<active/2;m++){
+      const a1='p'+A[2*m], a2='p'+A[2*m+1], b1='p'+(N+B[2*m]), b2='p'+(N+B[2*m+1]), t1=2*m+1, t2=2*m+2;
+      const common={boardStart,boardEnd,teamMatch:true,matchId:'M'+(m+1),sitoutA:sitA,sitoutB:sitB};
+      movements[(r+1)+'_'+t1]={...common,ns:a1,ew:b1,teamA:a1,teamB:b1,mirrorTable:t2};   // open room: A NS
+      movements[(r+1)+'_'+t2]={...common,ns:b2,ew:a2,teamA:a2,teamB:b2,mirrorTable:t1};   // closed room: A EW
     }
   }
-  return{movements,pairs,rounds,tableCount:activeCount};
+  return{movements,pairs,rounds,tableCount:active};
 }
 
 function calcTeamMatchIMP(){
@@ -192,7 +194,7 @@ function calcTeamMatchIMP(){
   if(s.movement!=='team')return null;
   const boards=getBoards(), mv=getMovements();
   const rows=[];
-  let totalA=0,totalB=0;
+  let totalA=0,totalB=0,impA=0,impB=0;
   for(let r=1;r<=s.roundCount;r++){
     for(let t=1;t<=s.tableCount;t+=2){
       const m1=mv[r+'_'+t], m2=mv[r+'_'+(t+1)];
@@ -204,13 +206,13 @@ function calcTeamMatchIMP(){
         // Team A is NS at table 1 and EW at table 2.
         const aScore=d1.nsScore-d2.nsScore;
         const imp=scoreToIMP(aScore);
-        roundIMP+=imp; done++;
+        roundIMP+=imp; done++; if(imp>0) impA+=imp; else impB-=imp;
       }
       totalA+=roundIMP; totalB-=roundIMP;
       rows.push({round:r,match:m1.matchId||'',a:m1.teamA,b:m1.teamB,imp:roundIMP,done});
     }
   }
-  return{rows,totalA,totalB};
+  return{rows,totalA,totalB,impA,impB};
 }
 function renderTeamMatchCard(){
   const s=getState();
@@ -222,17 +224,24 @@ function renderTeamMatchCard(){
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
       <div style="flex:1;min-width:140px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
         <div style="font-size:.72rem;color:var(--text3);">${s.teams.A.name}</div>
-        <div style="font-size:1.45rem;font-weight:800;color:var(--blue);">${tm?.totalA||0} IMP</div>
+        <div style="font-size:1.45rem;font-weight:800;color:var(--blue);">${tm?.impA||0} IMP</div>
       </div>
       <div style="flex:1;min-width:140px;padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
         <div style="font-size:.72rem;color:var(--text3);">${s.teams.B.name}</div>
-        <div style="font-size:1.45rem;font-weight:800;color:var(--gold);">${Math.abs(tm?.totalB||0)} IMP</div>
+        <div style="font-size:1.45rem;font-weight:800;color:var(--gold);">${tm?.impB||0} IMP</div>
       </div>
     </div>
     ${doneRows.length?`<div style="font-size:.76rem;color:var(--text2);">Completed match/round IMPs: ${doneRows.map(x=>`R${x.round} ${x.imp>=0?'+':''}${x.imp}`).join(' · ')}</div>`:'<div style="font-size:.76rem;color:var(--text3);">No complete two-table board comparison yet.</div>'}
   </div>`;
 }
 
+// the two teams' score for the results page and the screen: each team's IMPs, the team ahead lit
+function teamScoreHtml(){
+  const s=getState(); if(s.movement!=='team'||!s.teams) return '';
+  const tm=calcTeamMatchIMP()||{impA:0,impB:0}, a=tm.impA||0, b=tm.impB||0;
+  const box=(n,v,lead)=>`<div style="flex:1;min-width:130px;padding:12px 14px;border-radius:12px;background:${lead?'#1f5d36':'#f3f4f2'};color:${lead?'#fff':'#1b1b1b'};border:1px solid ${lead?'#174a2b':'#d9dee3'};text-align:center;"><div style="font-size:.85rem;font-weight:700;opacity:.85;">${cleanData(n)}</div><div style="font-size:1.8rem;font-weight:800;">${v} IMP</div></div>`;
+  return `<div class="team-score" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;">${box(s.teams.A.name,a,a>b)}${box(s.teams.B.name,b,b>a)}</div>`;
+}
 // ── Setup ──
 function renderSetup(){
   if(bgTestOn()&&typeof setupOnline!=='undefined') setupOnline=false;   // the test tournament is played at the club (the BridgeScore): no online one from here
@@ -269,8 +278,19 @@ function renderSetup(){
         <option value="barometer" ${s.movement==='barometer'?'selected':''}>Barometer — every table plays the same boards each round, then the pairs move</option>
         <option value="swiss" ${s.movement==='swiss'?'selected':''}>Swiss — pairings adapt to standings each round</option>
         <option value="social" ${s.movement==='social'?'selected':''}>Social Bridge — pairs stay at their table, each table plays any free board</option>
+        <option value="team" ${isTeam?'selected':''}>Team Match — two teams, the same boards at two tables, IMP</option>
       </select>
       <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;" id="movHint">${isTeam?'Team Match: 2 teams, 2 or more pairs per team, two-table mirrored boards and IMP scoring.':'Mitchell: NS fixed, EW moves; the boards go round the tables, so each table plays its own boards. Howell: everyone moves; the boards go round the tables too. Barometer: like Howell, but every round all the tables play the same boards at the same time (one copy of the boards per table). Swiss: the pairing is made again from the standings after every round; all the tables play the same boards. In Mitchell, Howell and Barometer the North-South pair of table 1 stays seated (e.g. for a player in a wheelchair).'}</div>
+    </div>
+    <div class="field" id="aTeamSettings" style="display:${isTeam?'block':'none'};">
+      <label>Teams</label>
+      <div class="field-row">
+        <div class="field"><input type="text" id="aTeamA" maxlength="30" value="${(s._teamAName||'Team A').replace(/"/g,'&quot;')}" placeholder="Team A"></div>
+        <div class="field"><input type="text" id="aTeamB" maxlength="30" value="${(s._teamBName||'Team B').replace(/"/g,'&quot;')}" placeholder="Team B"></div>
+      </div>
+      <label>Pairs per team</label>
+      <input type="number" id="aTeamPairs" value="${teamPairs}" min="2" max="12" step="2" oninput="adminUpdateCalc()">
+      <div style="font-size:0.72rem;color:var(--text3);margin-top:3px;">A classic match: 2 pairs per team (4 players each), open and closed room. Each pair meets each pair of the other team once; the result is in IMPs.</div>
     </div>
     <div class="field" id="aSocialField" style="display:${s.movement==='social'?'block':'none'};">
       <label>Number of boards</label>
@@ -321,7 +341,9 @@ window.adminUpdateCalc=function(){
   const swissField=document.getElementById('aSwissRoundsField');
   const teamField=document.getElementById('aTeamSettings');
   if(swissField)swissField.style.display=(mov==='swiss')?'block':'none';
-  if(teamField)teamField.style.display='none';
+  if(teamField)teamField.style.display=mov==='team'?'block':'none';
+  { const mh=document.getElementById('movHint'); if(mh){ if(mh.dataset.gen==null) mh.dataset.gen=mh.textContent; const L=v=>window.i18nText?i18nText(v):v;
+    mh.textContent=mov==='team'?L('Team Match: 2 teams, 2 or more pairs per team, two-table mirrored boards and IMP scoring.'):mh.dataset.gen; } }
   const socField=document.getElementById('aSocialField'); if(socField) socField.style.display=mov==='social'?'block':'none';
   const bprBox=document.getElementById('aBPR')?.closest('.field'); if(bprBox) bprBox.style.display=mov==='social'?'none':'';
   const playersEl=document.getElementById('aPlayers');
@@ -329,6 +351,11 @@ window.adminUpdateCalc=function(){
   if(mov==='social'){
     if(playersEl)playersEl.readOnly=false;
     tables=Math.floor(players/4); rounds=1;
+  }else if(mov==='team'){
+    // two teams of N pairs: N rounds (each pair meets each of the other team once), tables two by two (open and closed room)
+    const n=Math.max(2,Math.min(12,teamMatchPairCount()||2));
+    players=n*4; if(playersEl){ playersEl.value=players; playersEl.readOnly=true; }
+    tables=n%2?n-1:n; rounds=n;
   }else{
     if(playersEl)playersEl.readOnly=false;
     const phantom=players%4!==0;
@@ -340,7 +367,7 @@ window.adminUpdateCalc=function(){
   }
   const totalBoards=mov==='social'?(parseInt(document.getElementById('aSocBoards')?.value)||0):rounds*bpr;
   const hint=document.getElementById('calcHint'), bprHint=document.getElementById('bprHint');
-  if(hint)hint.textContent=mov==='social'?`→ ${tables} tables · ${tables*2} pairs`:`→ ${tables} table${tables!==1?'s':''}${players%4!==0?(mov==='howell'||mov==='barometer'?' + one pair sits out each round':' + phantom'):''}${mov==='barometer'||mov==='howell'&&(()=>{const pc=Math.floor(players/4)*2+(players%4!==0?1:0);return pc+pc%2;})()<=6?' · ⚠ every table plays the same boards each round: one copy of the boards per table':''}`;
+  if(hint)hint.textContent=mov==='team'?`→ 2 teams · ${players/4} pairs each · ${tables} tables${(players/4)%2?' · ⚠ an even number of pairs per team':''}`:mov==='social'?`→ ${tables} tables · ${tables*2} pairs`:`→ ${tables} table${tables!==1?'s':''}${players%4!==0?(mov==='howell'||mov==='barometer'?' + one pair sits out each round':' + phantom'):''}${mov==='barometer'||mov==='howell'&&(()=>{const pc=Math.floor(players/4)*2+(players%4!==0?1:0);return pc+pc%2;})()<=6?' · ⚠ every table plays the same boards each round: one copy of the boards per table':''}`;
   if(bprHint&&rounds>0)bprHint.textContent=`→ ${bpr} boards/round × ${rounds} rounds = ${totalBoards} total boards`;
   window._computedRounds=rounds;window._computedTotalBoards=totalBoards;
 };
@@ -366,7 +393,7 @@ window.adminSetup=async function(){
     window._socialBoards=nb;
   }else if(mov==='team'){
     const tm=teamMatchSettingsFromUI();
-    if(tm.pairsPerTeam<2||tm.pairsPerTeam>12){toast('❌ Team Match: 2-12 pairs per team');return;}
+    if(tm.pairsPerTeam<2||tm.pairsPerTeam>12||tm.pairsPerTeam%2){toast('❌ '+(window.i18nText?i18nText('Team Match: 2, 4, 6 … 12 pairs per team'):'Team Match: 2, 4, 6 … 12 pairs per team'));return;}
     players=tm.pairsPerTeam*4;pairCount=tm.pairsPerTeam*2;rounds=tm.pairsPerTeam;
     result=generateTeamMatch(tm.pairsPerTeam,bpr,tm.teamA,tm.teamB);
     tables=result.tableCount;

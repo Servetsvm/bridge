@@ -161,7 +161,7 @@ function pageHtml(withBar){
   const head=withBar?`<div class="rhead"><div><h1 class="rt">${L('Results')}</h1><a href="#" class="back" onclick="ccResultsIndex();return false;">${L('Back')}</a></div><div class="rtools"><button class="ic" title="${esc(L('Close'))}" onclick="ccResultsClose()">✕</button></div></div>`:'';
   return `<div class="ccr">${head}<h2 class="tt">${esc(s.name||L('Tournament'))} ${esc(date)}</h2>
     <div class="meta"><div>${L('Date')}: ${esc(date)}</div><div>${L('Club')}: ${esc(CLUB_NAME||'')}</div><div>${L('Boards')}: ${nums.length}, ${L('rounds')}: ${rounds}, ${L('pairs')}: ${ranking.length}</div></div>
-    ${rank}<div class="bhead"><h2>${L('Boards')}</h2><div class="pgn" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div><div class="bds">${boardsHtml}</div><div class="pgn pgn2" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div>`;
+    ${typeof teamScoreHtml==='function'?teamScoreHtml():''}${rank}<div class="bhead"><h2>${L('Boards')}</h2><div class="pgn" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div><div class="bds">${boardsHtml}</div><div class="pgn pgn2" data-prev="${esc(L('Previous'))}" data-next="${esc(L('Next'))}"></div></div>`;
 }
 /* the pages of boards (two on a wide screen, one on a phone); runs in the program and inside the saved page, so it
    uses nothing from the program */

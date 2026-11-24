@@ -21,6 +21,7 @@ function renderScreenPanel(){
           ${s.status==='finished'?'<button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button>':''}
         </div>
       </div>
+      ${typeof teamScoreHtml==='function'?teamScoreHtml():''}
       <div class="sb-tabs">
         <button class="sb-tab ${screenTab==='speed'?'active':''}" onclick="setScreenTab('speed',this)">🔀 <span>Pairings</span></button>
         <button class="sb-tab ${screenTab==='overall'?'active':''}" onclick="setScreenTab('overall',this)">🌐 Overall</button>
