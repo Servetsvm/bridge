@@ -350,6 +350,7 @@
     'At least 4 characters':'En az 4 karakter',
     'Password saved':'Şifre kaydedildi',
     "Team match":"Takım maçı",
+    "This table is taken":"Bu masa dolu",
     "Delete this tournament completely?":"Bu turnuva tamamen silinsin mi?",
     "Team match button on BridgePlay (members start a 2-table match)":"BridgePlay'de Takım maçı düğmesi (üyeler 2 masalık maç başlatır)",
     "Another tournament is being played at this club now.":"Bu kulüpte şu anda başka bir turnuva oynanıyor.",

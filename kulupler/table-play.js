@@ -99,6 +99,13 @@ window.bgPlayerEntry=async function(prefix){
 };
 // the four players at the chosen table, drawn as the table: North at the top, South at the bottom, West and East at the sides
 const BG_SEATS={N:'North',S:'South',E:'East',W:'West'};
+// a table someone else sat at this round (its lock is newer than the tournament's start): not this phone's player's
+window.bgTableTaken=async function(n){
+  try{ const [st,lk]=await Promise.all([DB.get('state'),DB.get('tableLocks')]); const s=st||{}, l=(lk||{})[s.currentRound+'_'+n], t0=Date.parse(s._startedAt||0)||0;
+    if(!l||((l.lockedAt)||0)<t0) return false;
+    const sv=bmSeatOf(CLUB_ID); return !(sv&&+sv.t===+n&&sv.sid&&sv.sid===s._startedAt);
+  }catch(e){ return false; }
+};
 window.bgPlayerNames=function(prefix,n){
   document.body.classList.add('bg-device');
   let pe=document.getElementById('playerEntry');
@@ -168,6 +175,7 @@ window.bgSeatOk=async function(k){
 // sign this phone in at that table (prefix + number); its names go to the pairs sitting there
 window.bgPlayerSit=async function(){
   const e=window._bgEntry; if(!e) return;
+  if(await bgTableTaken(e.n)){ toast('🔒 '+i18nText('This table is taken')); window._bgEntry=null; bgPlayerEntry(e.prefix); return; }
   try{ sessionStorage.setItem(BG_PENDING,JSON.stringify({t:e.n,...e.seats})); }catch(err){}
   window._bgEntry=null;
   document.getElementById('playerEntry')?.remove();

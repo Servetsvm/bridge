@@ -183,7 +183,7 @@ async function initClubGate(){
       if(roleParam==='screen') setTimeout(()=>doLogin(),50);
       // a player from BridgePlay's "Table No" (the club's table code prefix in the link): the players' names, then the table
       // a table number already chosen on the entry screen (&tn=3): straight to the players
-      const pp=params.get('p'), tn=+params.get('tn')||0; if(roleParam==='table'&&!tc&&/^\d{2}$/.test(pp||'')){ if(tn) bgPlayerNames(pp,tn); else bgPlayerEntry(pp); }
+      const pp=params.get('p'), tn=+params.get('tn')||0; if(roleParam==='table'&&!tc&&/^\d{2}$/.test(pp||'')){ if(tn&&!(await bgTableTaken(tn))) bgPlayerNames(pp,tn); else { if(tn) toast('🔒 '+i18nText('This table is taken')); bgPlayerEntry(pp); } }
       if(roleParam==='table'&&tn&&bgTestOn()&&isSuper()){ window._bgTestTable=tn; setTimeout(()=>doLogin(),50); }
       return;
     }
