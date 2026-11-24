@@ -495,7 +495,9 @@ window.doLogin=async function(){
     if(window._quickTeam){ window._quickTeam=false; const s0=getState();
       // a member (not the club's admin): only while no other tournament is running or being set up at the club
       if(!isClubAdmin()&&s0.status==='running'&&!s0._quickTeam||!isClubAdmin()&&s0.status==='setup'){ toast('⚠️ '+i18nText('Another tournament is being played at this club now.')); setTimeout(()=>location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)),1800); return; }
-      if(s0.status!=='running'){ try{ await quickTeamMatch(); window._quickMade=true; }catch(e){ toast('❌ '+(e&&e.message||e)); } } }
+      if(s0.status!=='running'){ try{ await quickTeamMatch(); window._quickMade=true;
+        // set up and started: straight to the club's tables (table numbers and TD), not the TD panel
+        location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)); return; }catch(e){ toast('❌ '+(e&&e.message||e)); } } }
     const st=getState();
     if(st&&st.status==='running'&&!new URLSearchParams(location.search).get('ot')&&!window._quickMade){
       refreshTopbar();

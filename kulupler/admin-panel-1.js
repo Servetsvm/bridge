@@ -461,7 +461,7 @@ window.adminStart=async function(){
   // the names come from the tables (each table enters its players), so the tournament starts without them
   s.currentRound=1;s.status='running';s._roundStartedAt=new Date().toISOString();setState(s);
   await Promise.all([DB.set('tableLocks',{}),DB.set('approvals',{}),DB.del('kicks'),DB.del('tdcalls')]);
-  setLive(true);
+  await setLive(true);   // listed before anyone looks for it (the quick team match opens its table list next)
   addLog('ok','Round 1 started','Tournament begins');
   toast('▶ Round 1 started!');refreshTopbar();renderAdminTab();
   adminSetupAutoRefresh();
