@@ -3,6 +3,7 @@
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Join requests, messages and invitations \u2014 in the background, and messages from the administrator even when the app is closed.": "Katılma istekleri, mesajlar ve davetler — uygulama arka plandayken; yöneticiden gelen mesajlar uygulama kapalıyken de.",
     "Notifications come even when the app is closed.": "Bildirimler uygulama kapalıyken de gelir.", "Notifications come, but this phone was not recognised as the administrator's.": "Bildirimler geliyor, ama bu telefon yöneticinin telefonu olarak tanınmadı.", "Notifications are blocked: allow them for BridgePlay in the phone's settings.": "Bildirimler engelli: telefonun ayarlarından BridgePlay için bildirimlere izin ver.", "This phone or browser cannot get notifications while the app is closed.": "Bu telefon ya da tarayıcı, uygulama kapalıyken bildirim alamıyor.", "Tap On above and allow notifications.": "Yukarıda Açık'a bas ve bildirimlere izin ver.", "Notifications for a closed app could not be turned on": "Uygulama kapalıyken bildirim açılamadı", "A test notification was sent: close the app and it comes in a few seconds.": "Deneme bildirimi gönderildi: uygulamayı kapat, birkaç saniye içinde gelir.",
     "Add to calendar": "Takvime ekle", "Calendar": "Takvim", "Phone calendar (.ics file)": "Telefonun takvimi (.ics dosyası)",
     "Tomorrow": "Yarın",
@@ -477,6 +478,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Join requests, messages and invitations \u2014 in the background, and messages from the administrator even when the app is closed.": "Forespørsler om å bli med, meldinger og invitasjoner — i bakgrunnen, og meldinger fra administratoren selv når appen er lukket.",
     "Notifications come even when the app is closed.": "Varsler kommer også når appen er lukket.", "Notifications come, but this phone was not recognised as the administrator's.": "Varsler kommer, men denne telefonen ble ikke gjenkjent som administratorens.", "Notifications are blocked: allow them for BridgePlay in the phone's settings.": "Varsler er blokkert: tillat dem for BridgePlay i telefonens innstillinger.", "This phone or browser cannot get notifications while the app is closed.": "Denne telefonen eller nettleseren kan ikke få varsler når appen er lukket.", "Tap On above and allow notifications.": "Trykk På over og tillat varsler.", "Notifications for a closed app could not be turned on": "Varsler for lukket app kunne ikke slås på", "A test notification was sent: close the app and it comes in a few seconds.": "Et testvarsel ble sendt: lukk appen, så kommer det om noen sekunder.",
     "Add to calendar": "Legg til i kalenderen", "Calendar": "Kalender", "Phone calendar (.ics file)": "Telefonens kalender (.ics-fil)",
     "Tomorrow": "I morgen",
