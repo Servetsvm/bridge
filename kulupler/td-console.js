@@ -171,7 +171,7 @@ function drawRun(){ TDC.arc=null;
   let tot=0,dn=0; const tiles=[], legend=new Set();
   for(let t=1;t<=s.tableCount;t++){ const i=tableInfo(t,s,B,A,calls,thr); tot+=i.n; dn+=i.d;
     const st=i.call?'call':i.done?'done':i.slow?'slow':i.pend?'pend':''; if(st&&st!=='done') legend.add(st);
-    tiles.push(`<button class="tdc-tile ${st}" ${qtMember()?'disabled style="opacity:1;cursor:default"':`onclick="tdcGo('table',{t:${t},r:${s.currentRound}})"`}><b>${t}</b><small>${i.call?'📣 TD':i.done?'✓':i.slow?'⚠️ '+i.d+'/'+i.n:i.d+'/'+i.n}</small><i>${num(i.m.ns)}–${num(i.m.ew)}</i></button>`); }
+    tiles.push(`<button class="tdc-tile ${st}" onclick="${qtMember()?`tdcSit(${t})`:`tdcGo('table',{t:${t},r:${s.currentRound}})`}"><b>${t}</b><small>${i.call?'📣 TD':i.done?'✓':i.slow?'⚠️ '+i.d+'/'+i.n:i.d+'/'+i.n}</small><i>${num(i.m.ns)}–${num(i.m.ew)}</i></button>`); }
   const all=tot>0&&dn>=tot, last=s.currentRound>=s.roundCount, social=s.movement==='social';
   const sub=`<div class="tdc-round"><b>${L('Round')} ${s.currentRound} / ${s.roundCount} · ${L((MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||'')}</b><span>${dn}/${tot} ${L('boards')}</span><div class="tdc-bar"><i style="width:${tot?Math.round(dn/tot*100):0}%"></i></div></div>`;
   const body=`<div class="tdc-tiles">${tiles.join('')}</div>
@@ -182,6 +182,8 @@ function drawRun(){ TDC.arc=null;
 }
 window.tdcReload=async()=>{ try{ await Promise.all(['state','boards','approvals','movements','pairs','tdcalls'].map(k=>DB.get(k))); }catch(e){} tdcDraw(); };
 // the TD button: the club's settings (its logo, its password, the tables' codes, the slow-table alarm, the links)
+// a member at a team match's TD: a table tapped is a table to sit at (its players' names, then its BridgeScore)
+window.tdcSit=t=>location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)+'&role=table&p=00&tn='+t);
 // the club's real TD at a team match a member runs: signs in with the club's password, then the full panel
 window.tdcPwLogin=function(){
   window._quickTeam=false; document.getElementById('app').style.display='none'; document.getElementById('loginScreen').style.display='flex';
