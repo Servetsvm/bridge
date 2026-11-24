@@ -56,7 +56,8 @@ jobs:
           [ -z "$GEMINI_KEY" ] || printf '%s' "$GEMINI_KEY" | npx --yes wrangler@4 secret put GEMINI_KEY
       - name: Check
         run: |
-          sleep 10
           echo "The Worker: $WORKER_URL"
           echo "### The robots' Worker: $WORKER_URL" >> "$GITHUB_STEP_SUMMARY"
-          curl -s "$WORKER_URL/push/key" | tee -a "$GITHUB_STEP_SUMMARY" | grep -q '"key"'
+          # a new workers.dev address takes a few minutes to be found on the internet: wait for it (a warning, not a failure)
+          for i in $(seq 1 30); do if curl -s "$WORKER_URL/push/key" | grep -q '"key"'; then echo "Notifications' key: OK" | tee -a "$GITHUB_STEP_SUMMARY"; exit 0; fi; sleep 10; done
+          echo "::warning::$WORKER_URL did not answer yet (a new address can take a few minutes)"

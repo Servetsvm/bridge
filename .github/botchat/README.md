@@ -21,7 +21,7 @@ until the next day.
    ```
 
    `deploy` prints the address, like `https://bridge-bots.<your-subdomain>.workers.dev`.
-3. Put that address in `js/app.js` as `BOT_AI` (now `https://bridge-bots.bridgetable.workers.dev/`), then build
+3. Put that address in `js/app.js` as `BOT_AI` (now `https://bridge-bots.bridgeplay.workers.dev/`), then build
    and publish the site as usual.
 
 ## Gemini (optional)

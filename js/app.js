@@ -3,7 +3,7 @@
 /* errors on a player's device are reported to the robots' Worker (/err): what went wrong, where, the version and the
    browser, never a name; at most a few a visit, and none from a test server on this computer */
 (() => {
-  const URL_ = 'https://bridge-bots.bridgetable.workers.dev/err', seen = new Set(); let left = 5, ver = '';
+  const URL_ = 'https://bridge-bots.bridgeplay.workers.dev/err', seen = new Set(); let left = 5, ver = '';
   try { caches.keys().then(k => { ver = (k.find(x => /^bridge-v\d+$/.test(x)) || '').replace('bridge-', ''); }).catch(() => {}); } catch (e) {}
   if (/^(localhost|127\.|\[::1\])/.test(location.hostname) || location.protocol === 'file:') return;
   const send = (msg, src, line, stack) => {
@@ -1316,7 +1316,7 @@ function botRule(to, text, named) {
   botSay(to, pick(['🙂', T("Let's keep playing!"), T('Hmm… let me think about the cards.')]));
 }
 // the robots' AI (a Cloudflare Worker, .github/botchat): it gets what everyone at the table sees, never a hand
-const BOT_AI = (() => { try { return localStorage.getItem('bridge-bot-ai') || ''; } catch (e) { return ''; } })() || 'https://bridge-bots.bridgetable.workers.dev/';   // the Worker's address (a test one can be set in localStorage)
+const BOT_AI = (() => { try { return localStorage.getItem('bridge-bot-ai') || ''; } catch (e) { return ''; } })() || 'https://bridge-bots.bridgeplay.workers.dev/';   // the Worker's address (a test one can be set in localStorage)
 const SEAT_EN = ['North', 'East', 'South', 'West'];
 function botTableState() {
   const g = G.play, st = { phase: G.phase === 'bid' ? 'bidding' : G.phase === 'play' ? 'play' : 'the board is over' };

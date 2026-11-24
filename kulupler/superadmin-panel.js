@@ -92,7 +92,7 @@ async function saSendClubToPlayer(c){
   if(!r.ok) throw new Error('HTTP '+r.status);
   try{ await fetch(root+'/destek/'+SA_REQ.k+'/ar.json'+q,{method:'PUT',body:JSON.stringify(now)}); }catch(e){}
   // the player's phone, even with BridgePlay closed (the robots' Worker; the review key kept on this device)
-  try{ const rk=localStorage.getItem('bridge-bot-review')||'', base=(localStorage.getItem('bridge-bot-ai')||'https://bridge-bots.bridgetable.workers.dev/').replace(/\/$/,'');
+  try{ const rk=localStorage.getItem('bridge-bot-review')||'', base=(localStorage.getItem('bridge-bot-ai')||'https://bridge-bots.bridgeplay.workers.dev/').replace(/\/$/,'');
     if(rk) fetch(base+'/push/send',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+rk},body:JSON.stringify({to:SA_REQ.k,kind:'clubopen',n:String(c.name).slice(0,40)})}).catch(()=>{}); }catch(e){}
   SA_REQ.done=true; return true;
 }

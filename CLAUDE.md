@@ -41,13 +41,18 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v651`, kulüpler `kulup-v169`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v652`, kulüpler `kulup-v170`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
 - Kulüp talebi akışı: ana sayfa kartı `#hClubAsk` → form → `Net.clubAsk` → `destek/<oyuncu>/m` (mesajda `kl`), otomatik teşekkür (`kl:1`).
   Admin mesajda "Kulübü aç" → `kulupler/?sa=1&nc=&nf=&for=&forn=` → süper yönetici paneli dolu gelir; kulüp açılınca
   oyuncuya `kd:{n,id,pw}` mesajı (`saSendClubToPlayer`). Firebase kuralı değişmedi.
+
+- **Robot sohbeti Worker'ı (2026-11-24'ten beri):** yeni Cloudflare hesabında, `https://bridge-bots.bridgeplay.workers.dev`
+  (eski `bridgetable` hesabına erişim kayboldu). GitHub Actions `.github/workflows/botchat.yml` yükler (elle ya da
+  `.github/botchat/**` değişince); repo secret `CLOUDFLARE_API_TOKEN` (Edit Cloudflare Workers şablonu), isteğe bağlı
+  `REVIEW_KEY`, `GEMINI_KEY`. D1 yok → sohbet kaydı/hata raporu tutulmuyor; bildirim abonelikleri KV `PUSH`'ta.
 
 ## Oturum günlüğü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)

@@ -1,5 +1,5 @@
 /* BridgePlay — offline cache. Bump VERSION after changing any file so phones pick up the new version. */
-const VERSION = 'bridge-v651';
+const VERSION = 'bridge-v652';
 const FILES = ['./', './index.html', './css/style.css', './js/dds.js', './js/core.js', './js/bidding.js', './js/play.js', './js/field.js', './js/storage.js', './js/photo.js', './js/app.js', './js/net.js', './js/clubswiss.js', './js/clubmirror.js', './js/clubtour.js', './js/social.js', './js/bidprac.js', './js/puzzles.json', './js/puzzles-play.json', './guide.html', './guide-en.html', './guide-no.html', './guide-es.html', './guide-fr.html', './guide-it.html', './guide-de.html', './guide-ru.html', './guide-pl.html', './guide-zh.html', './privacy.html', './manifest.webmanifest',
   // the texts of each language (index.html loads the visitor's one): without it the page stays empty offline
   ...['en', 'tr', 'no', 'es', 'fr', 'it', 'de', 'ru', 'pl', 'zh'].map(l => './js/lang/' + l + '.js'), './icons/icon-192.png', './icons/icon-512.png'];
@@ -36,7 +36,7 @@ function fromNet(e) {
 }
 /* a push from the robots' Worker (the app may be closed): the push itself carries nothing, so ask the Worker what it was
    about and show it in the phone's language. Opening it brings the app (its messages) to the front. */
-const PUSH_BASE = 'https://bridge-bots.bridgetable.workers.dev';
+const PUSH_BASE = 'https://bridge-bots.bridgeplay.workers.dev';
 const PUSH_TXT = {
   en: { msg: 'New message from {0}', club: 'New club request: {0}', reply: 'The administrator answered you', clubopen: 'Your club is open: {0}', any: 'Something new for you' },
   tr: { msg: '{0} sana yazdı', club: 'Yeni kulüp talebi: {0}', reply: 'Yönetici sana cevap verdi', clubopen: 'Kulübün açıldı: {0}', any: 'Senin için yeni bir şey var' },
