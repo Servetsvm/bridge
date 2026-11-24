@@ -10,7 +10,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: The key, asked as the site asks (with its Origin)
-        run: curl -s -i https://bridge-bots.bridgeplay.workers.dev/push/key -H 'Origin: https://servetsvm.github.io' | grep -iE '^HTTP|access-control-allow-origin|"key"' | cut -c1-120
+        run: |
+          curl -s -i https://bridge-bots.bridgeplay.workers.dev/push/key -H 'Origin: https://servetsvm.github.io' | grep -iE '^HTTP|access-control-allow-origin|"key"' | cut -c1-120
       - name: Send
         run: |
           R=$(curl -s -X POST https://bridge-bots.bridgeplay.workers.dev/push/send -H 'Origin: https://servetsvm.github.io' -H 'Content-Type: application/json' -d '{"to":"admin","kind":"msg","n":"Test"}')
