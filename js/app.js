@@ -4125,7 +4125,7 @@ async function pushSetup(force) {
     const j = await r.json().catch(() => ({}));
     SET.pushDay = day; SET.pushWho = who; Store.saveSettings(SET); save();
     return pushState(j.admin ? 'ok-admin' : Net.isAdmin() ? 'ok-notadmin' : 'ok');
-  } catch (e) { return pushState('err:' + String(e && e.name || e).slice(0, 30)); }
+  } catch (e) { return pushState('err:' + (String(e && e.name || e) + (e && e.message ? ': ' + e.message : '')).slice(0, 90)); }   // e.g. AbortError: the phone's push service refused
 }
 // Settings: the state of notifications to a closed app, and (the administrator) a test that comes back to this phone
 function pushStateShow() {
