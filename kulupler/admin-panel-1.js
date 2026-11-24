@@ -169,11 +169,11 @@ function teamMatchSettingsFromUI(){
    second B NS against A EW — so team A holds every hand once, and the IMPs come from the two tables' scores of each board.
    N rounds; round r turns the B pairs by r, so each A pair meets each B pair once. With an odd N one pair of each team
    sits out each round (in turn). */
-function generateTeamMatch(pairCount, boardsPerRound, teamAName, teamBName){
+function generateTeamMatch(pairCount, boardsPerRound, teamAName, teamBName, maxRounds){
   const movements={}, pairs={}, N=pairCount;
   for(let i=1;i<=N;i++)pairs['p'+i]={id:'p'+i,name:'Pair '+i,dir:'',startTable:0,isPhantom:false,team:'A',teamName:teamAName,teamPair:i};
   for(let i=1;i<=N;i++){const id='p'+(N+i);pairs[id]={id,name:'Pair '+(N+i),dir:'',startTable:0,isPhantom:false,team:'B',teamName:teamBName,teamPair:i};}
-  const active=N%2===0?N:N-1, rounds=N;
+  const active=N%2===0?N:N-1, rounds=Math.min(N,maxRounds||N);   // maxRounds 1: one match of all the boards (a quick team match)
   for(let r=0;r<rounds;r++){
     const boardStart=r*boardsPerRound+1,boardEnd=boardStart+boardsPerRound-1;
     const sitA=N%2?(r%N)+1:null, sitB=N%2?((r+1)%N)+1:null;
@@ -241,6 +241,18 @@ function teamScoreHtml(){
   const tm=calcTeamMatchIMP()||{impA:0,impB:0}, a=tm.impA||0, b=tm.impB||0;
   const box=(n,v,lead)=>`<div style="flex:1;min-width:130px;padding:12px 14px;border-radius:12px;background:${lead?'#1f5d36':'#f3f4f2'};color:${lead?'#fff':'#1b1b1b'};border:1px solid ${lead?'#174a2b':'#d9dee3'};text-align:center;"><div style="font-size:.85rem;font-weight:700;opacity:.85;">${cleanData(n)}</div><div style="font-size:1.8rem;font-weight:800;">${v} IMP</div></div>`;
   return `<div class="team-score" style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;">${box(s.teams.A.name,a,a>b)}${box(s.teams.B.name,b,b>a)}</div>`;
+}
+/* the quick team match (BridgePlay's Team match button, the club's admin): two teams of two pairs, two tables, boards
+   1–8 in one round — each table plays them in any order (a board the other table has open is shown busy) — set up and
+   started at once, no opening lead asked; its results are listed apart as a team match */
+async function quickTeamMatch(){
+  const box=document.createElement('div'); box.style.display='none'; box.id='qtForm';
+  box.innerHTML='<input id="aName"><select id="aMovement"><option value="team" selected>team</option></select><input id="aBPR" value="8"><input id="aPlayers" value="8"><input id="aTeamA" value="Team A"><input id="aTeamB" value="Team B"><input id="aTeamPairs" value="2">';
+  document.body.appendChild(box); window._teamOneRound=true;
+  try{ await adminSetup(); } finally{ box.remove(); window._teamOneRound=false; }
+  const s=getState(); if(s.status!=='setup'||s.movement!=='team') throw new Error('not set up');
+  s._quickTeam=true; s._noLead=true; s.name=s.name+' · '+(window.i18nText?i18nText('Team match'):'Team match'); setState(s);
+  await adminStart();
 }
 // ── Setup ──
 function renderSetup(){
@@ -399,7 +411,7 @@ window.adminSetup=async function(){
     const tm=teamMatchSettingsFromUI();
     if(tm.pairsPerTeam<2||tm.pairsPerTeam>12||tm.pairsPerTeam%2){toast('❌ '+(window.i18nText?i18nText('Team Match: 2, 4, 6 … 12 pairs per team'):'Team Match: 2, 4, 6 … 12 pairs per team'));return;}
     players=tm.pairsPerTeam*4;pairCount=tm.pairsPerTeam*2;rounds=tm.pairsPerTeam;
-    result=generateTeamMatch(tm.pairsPerTeam,bpr,tm.teamA,tm.teamB);
+    result=generateTeamMatch(tm.pairsPerTeam,bpr,tm.teamA,tm.teamB,window._teamOneRound?1:null); rounds=result.rounds;
     tables=result.tableCount;
     teams={A:{id:'A',name:tm.teamA,pairs:Object.keys(result.pairs).filter(id=>result.pairs[id].team==='A')},B:{id:'B',name:tm.teamB,pairs:Object.keys(result.pairs).filter(id=>result.pairs[id].team==='B')}};
   }else{

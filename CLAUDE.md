@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v660`, kulüpler `kulup-v175`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v661`, kulüpler `kulup-v176`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,12 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v660`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-24
+- Ana sayfadan **Online masa aç** ve **Sosyal Bridge** kutuları kaldırıldı (kod duruyor, yalnız kutular yok).
+- **Hızlı takım maçı:** kulüp sayfasında 🏆 Takım maçı → `?role=admin&setup=team&quick=team`; kulübün sahibi/süper için şifresiz
+  (`_quickTeam`, BridgePlay oturumu yeter) `quickTeamMatch()`: 2 takım × 2 çift, 2 masa, 1 tur, board 1–8, hemen başlar;
+  `s._noLead` (atak sorulmaz), `s._quickTeam`. Masalar 1–8 arası istediği board'u seçer; 2. masa 5'ten başlar, aynı maçın açık
+  board'u diğer masada 🔒 (`boardLocks` anahtarı `M1_<board>`). Sonuçlarda ayrı **🏆 Takım maçı** sekmesi (`IDXT`, `teamScoreOf`),
+  kulüp reytingine takım maçları girmez.
 - **Takım maçı** kulüplerde geri açıldı (BridgeScore → Kurulum → Hareket: Takım maçı; takım adları, takım başına 2/4/6… çift).
   `generateTeamMatch` düzeltildi (eskiden aynı çift iki masaya oturuyordu): maç başına 1. masa A(KG)–B(DB), 2. masa B(KG)–A(DB),
   aynı eller; N tur, her A çifti her B çiftiyle bir kez. Skor `calcTeamMatchIMP` (impA/impB brüt), `teamScoreHtml` sonuç sayfası

@@ -234,8 +234,11 @@ function renderTableDetail(tableNo){
   const approvals=getApprovals();
   // Find the next (first un-done) board to play
   // Social Bridge: a board another table is playing now (taken in the last 40 minutes and not finished there) is busy
-  const social=!!m.social, locks=social?(_cache['boardLocks']||{}):{}, busyAt=b=>{ const l=locks[b]; if(!l||+l.t===+tableNo||Date.now()-(l.at||0)>40*60e3) return 0; return boards[l.t+'_'+s.currentRound+'_'+b]?.status==='done'?0:+l.t; };
-  const nextBoard=boardList.find(bl=>!(bl.data&&bl.data.status==='done')&&!busyAt(bl.boardNo))||boardList.find(bl=>!(bl.data&&bl.data.status==='done'));
+  // A team match: the two tables of a match play the same boards — a board the other table has open is busy there too
+  // (its own key: match + board), and the second table starts half way through the boards, so the two do not meet
+  const social=!!m.social, team=!!m.teamMatch, lk=b=>team?(m.matchId||'M')+'_'+b:b, locks=social||team?(_cache['boardLocks']||{}):{}, busyAt=b=>{ const l=locks[lk(b)]; if(!l||+l.t===+tableNo||Date.now()-(l.at||0)>40*60e3) return 0; return boards[l.t+'_'+s.currentRound+'_'+b]?.status==='done'?0:+l.t; };
+  const order=team&&m.mirrorTable&&+m.mirrorTable<+tableNo?(()=>{ const h=Math.floor(boardList.length/2); return [...boardList.slice(h),...boardList.slice(0,h)]; })():boardList;
+  const nextBoard=order.find(bl=>!(bl.data&&bl.data.status==='done')&&!busyAt(bl.boardNo))||order.find(bl=>!(bl.data&&bl.data.status==='done'));
   const approvalPending=boardList.find(bl=>{
     const apk=tableNo+'_'+s.currentRound+'_'+bl.boardNo;
     const ap=approvals[apk];
@@ -371,7 +374,7 @@ function renderTableDetail(tableNo){
 function bmPollApprovals(tableNo){
   const s=getState();
   const m=getMovements()[s.currentRound+'_'+tableNo]||{};
-  if(m.social&&Date.now()-(window._bgLockT||0)>5000){ window._bgLockT=Date.now(); const was=JSON.stringify(_cache['boardLocks']||{}); Promise.all([DB.get('boardLocks'),DB.get('boards')]).then(()=>{ if(JSON.stringify(_cache['boardLocks']||{})!==was&&document.querySelector('.sbgrid')&&!document.getElementById('modalBg')?.classList.contains('open')) renderTableDetail(tableNo); }).catch(()=>{}); }
+  if((m.social||m.teamMatch)&&Date.now()-(window._bgLockT||0)>5000){ window._bgLockT=Date.now(); const was=JSON.stringify(_cache['boardLocks']||{}); Promise.all([DB.get('boardLocks'),DB.get('boards')]).then(()=>{ if(JSON.stringify(_cache['boardLocks']||{})!==was&&document.querySelector('.sbgrid')&&!document.getElementById('modalBg')?.classList.contains('open')) renderTableDetail(tableNo); }).catch(()=>{}); }
   const approvals=getApprovals();
   const boards=getBoards();
   let needRefresh=false;
@@ -739,9 +742,9 @@ window.savePairNames=function(nsId,ewId,tableNo){
 // ── Board Entry Form ──
 window.bmEnterBoard=function(boardNo){
   const m0=bmXM()[bmRound()+'_'+bmTableNo]||{};
-  if(m0.social&&bmTableNo&&!window._tdEdit){ (async()=>{ try{ const L=(await DB.get('boardLocks'))||{}, put=async(b,v)=>fetch(await fbUrl('/boardLocks/'+b+'.json'),{method:'PUT',body:JSON.stringify(v)});
-    for(const [b,l] of Object.entries(L)) if(l&&+l.t===+bmTableNo&&+b!==+boardNo) await put(b,null);
-    await put(boardNo,{t:bmTableNo,at:Date.now()}); const N={}; for(const [b,l] of Object.entries(L)) if(!(l&&+l.t===+bmTableNo)) N[b]=l; N[boardNo]={t:bmTableNo,at:Date.now()}; _cache['boardLocks']=N; }catch(e){} })(); }
+  if((m0.social||m0.teamMatch)&&bmTableNo&&!window._tdEdit){ const key=m0.teamMatch?(m0.matchId||'M')+'_'+boardNo:String(boardNo); (async()=>{ try{ const L=(await DB.get('boardLocks'))||{}, put=async(b,v)=>fetch(await fbUrl('/boardLocks/'+b+'.json'),{method:'PUT',body:JSON.stringify(v)});
+    for(const [b,l] of Object.entries(L)) if(l&&+l.t===+bmTableNo&&b!==key) await put(b,null);
+    await put(key,{t:bmTableNo,at:Date.now()}); const N={}; for(const [b,l] of Object.entries(L)) if(!(l&&+l.t===+bmTableNo)) N[b]=l; N[key]={t:bmTableNo,at:Date.now()}; _cache['boardLocks']=N; }catch(e){} })(); }
   const vuln=getVuln(boardNo);
   const key=bmTableNo+'_'+bmRound()+'_'+boardNo;
   const existing=bmXB()[key]||(window._tdEdit&&!bmArc()?getApprovals()[key]:null);   // the TD: a result still waiting for the OK is corrected too
@@ -836,6 +839,7 @@ const BM_STEPS = ['contract', 'decl', 'lead', 'tricks', 'confirm'];
 window.bmGo = function (d) {
   const f = boardForm; let i = BM_STEPS.indexOf(bmStepNo) + d;
   if (f.isPass || f.notPlayed) i = d > 0 ? BM_STEPS.length - 1 : 0;   // passed out: from the contract straight to the result
+  if (getState()._noLead && BM_STEPS[i] === 'lead') i += d > 0 ? 1 : -1;   // a team match: no opening lead asked
   bmStepNo = BM_STEPS[Math.max(0, Math.min(BM_STEPS.length - 1, i))]; bm3Draw();
 };
 // a key: the step's choice; a step with one choice goes on by itself
@@ -910,8 +914,8 @@ function setLeadRank(r){ boardForm.leadRank=r; bm3Mark('lr','lr'+r); updateLCD()
 // the scoring part of the BridgeScore screen, once the opening lead is complete (or PASS)
 function bm3ShowScore(){
   const f=boardForm, show=(id,on)=>{ const el=document.getElementById(id); if(!el) return; const was=el.style.display!=='none'; el.style.display=on?'':'none'; if(on&&!was) el.scrollIntoView({behavior:'smooth',block:'start'}); };
-  const contract=!f.isPass&&f.level&&f.suit&&f.declarer, lead=contract&&f.leadSuit&&f.leadRank;
-  show('bm3Lead',contract); show('bm3Res',lead);
+  const nl=getState()._noLead, contract=!f.isPass&&f.level&&f.suit&&f.declarer, lead=contract&&(nl||f.leadSuit&&f.leadRank);
+  show('bm3Lead',contract&&!nl); show('bm3Res',lead);
 }
 window.setRes=function(n){ boardForm.result=n; renderResTiles(); updateLCD(); updateScore(); };
 window.adjRes=function(n){ setRes(boardForm.result+n); };
@@ -966,7 +970,7 @@ window.saveBoardAndSendApproval=function(boardNo){
     boardData={contract:'PASS',nsScore:0,ewScore:0,level:null,suit:null,declarer:null,result:0,doubled:'',lead:'',vuln:boardForm.vuln,adjusted:false};
   } else {
     if(!boardForm.level||!boardForm.suit||!boardForm.declarer){toast('❌ Select level, suit and declarer');return;}
-    if(!boardForm.leadSuit||!boardForm.leadRank){toast('❌ Choose the opening lead');return;}   // every result is entered with its opening lead
+    if(!getState()._noLead&&(!boardForm.leadSuit||!boardForm.leadRank)){toast('❌ Choose the opening lead');return;}   // every result is entered with its opening lead
     const nsScore=calcScore(boardForm.level,boardForm.suit,boardForm.declarer,boardForm.result,boardForm.vuln,boardForm.doubled);
     const contract=boardForm.level+boardForm.suit+(boardForm.doubled||'')+' '+boardForm.declarer+(boardForm.result>0?' +'+boardForm.result:boardForm.result===0?' =':' '+boardForm.result);
     const lead=boardForm.leadSuit&&boardForm.leadRank?boardForm.leadSuit+boardForm.leadRank:'';

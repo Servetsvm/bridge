@@ -2494,3 +2494,11 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .pushst:empty{display:none}
 .pushst span{flex:1 1 200px}
 .clubrow .btn.clubteamb{background:var(--brass);color:var(--brass-ink);border-color:var(--brass)}
+/* the home page's ways to play: Clubs and Bidding practice side by side, the system tables' buttons on a row of their own
+   (the online table and Social Bridge tiles are gone, Nov 2026) */
+body.homev2 .h2tiles{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+body.homev2 .h2tiles .h2sys{grid-column:1/-1}
+/* a club opened: its name on one line, the next tournament under it (a long name broke beside it) */
+.clubsfs.one .clubname{display:grid;grid-template-columns:1fr;align-content:center;row-gap:4px}
+.clubsfs.one .clubname b{display:flex;align-items:center;gap:12px;min-width:0}
+.clubsfs.one .clubname small{font-size:15px}

@@ -204,7 +204,17 @@ window.ccResultsPage=async function(i){
   layerEl(); ccResultsDraw();
 };
 // the list of the club's results: a tab for each year, the months newest first, each tournament's date and name
-let IDXY=null;
+let IDXY=null, IDXT='res';   // the results' tab: the tournaments (res), or the team matches (team)
+// a team match's score from its archive: each board's IMPs to the team that won it (team A NS at the first table of each match)
+function teamScoreOf(a){
+  const s=a&&a.state||{}, mv=a&&a.movements||{}, B=a&&a.boards||{}; let A=0,Bs=0;
+  for(let r=1;r<=(s.roundCount||1);r++) for(let t=1;t<=(s.tableCount||0);t+=2){ const m1=mv[r+'_'+t]; if(!m1) continue;
+    for(let b=m1.boardStart;b<=m1.boardEnd;b++){ const d1=B[t+'_'+r+'_'+b], d2=B[(t+1)+'_'+r+'_'+b];
+      if(!d1||!d2||d1.status!=='done'||d2.status!=='done'||typeof d1.nsScore!=='number'||typeof d2.nsScore!=='number') continue;
+      const imp=scoreToIMP(d1.nsScore-d2.nsScore); if(imp>0) A+=imp; else Bs-=imp; } }
+  return {a:A,b:Bs,ta:(s.teams&&s.teams.A&&s.teams.A.name)||'A',tb:(s.teams&&s.teams.B&&s.teams.B.name)||'B'};
+}
+window.ccResultsTab=function(t){ IDXT=t; const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}${typeof RT_CSS!=='undefined'?RT_CSS:''}</style>${indexHtml()}`; };
 const IDX_CSS=`.ccr .ihead{display:flex;align-items:center;justify-content:center;gap:22px;background:#f1f1f1;padding:20px 10px;margin:4px 0 14px}
 .ccr .ihead span{flex:0 1 100px;height:5px;background:#f39c12;border-radius:2px}
 .ccr .ihead h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:2.3rem;letter-spacing:1px;text-transform:uppercase;color:#222}
@@ -221,14 +231,18 @@ const IDX_CSS=`.ccr .ihead{display:flex;align-items:center;justify-content:cente
 function indexHtml(){
   const L=v=>window.i18nText?i18nText(v):v;
   const loc={tr:'tr-TR',no:'nb-NO',es:'es-ES',fr:'fr-FR',it:'it-IT',de:'de-DE',ru:'ru-RU',pl:'pl-PL',zh:'zh-CN'}[(()=>{ try{ return localStorage.getItem('bricskor_language'); }catch(e){ return ''; } })()]||'en-GB';
-  const list=(getArchives()||[]).map((a,i)=>({i,name:(a.state&&a.state.name)||L('Tournament'),d:new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d.getTime()>0).sort((a,b)=>b.d-a.d);
+  // the team matches are listed apart (their own tab), with the teams' score
+  const all=(getArchives()||[]).map((a,i)=>({i,a,team:!!(a.state&&a.state.movement==='team'),name:(a.state&&a.state.name)||L('Tournament'),d:new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d.getTime()>0).sort((a,b)=>b.d-a.d);
+  const hasTeam=all.some(x=>x.team); if(IDXT==='team'&&!hasTeam) IDXT='res';
+  const list=all.filter(x=>IDXT==='team'?x.team:!x.team);
+  for(const x of list) if(x.team){ const t=teamScoreOf(x.a); x.name=`${t.ta} ${t.a} – ${t.b} ${t.tb}`; }
   const years=[...new Set(list.map(x=>x.d.getFullYear()))];
   if(!years.includes(IDXY)) IDXY=years[0];
   const months=[]; for(const x of list.filter(x=>x.d.getFullYear()===IDXY)){ const k=x.d.getMonth(); let m=months.find(m=>m.k===k); if(!m) months.push(m={k,t:x.d.toLocaleDateString(loc,{month:'long',year:'numeric'}),rows:[]}); m.rows.push(x); }
   const dd=d=>String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();
   return `<div class="ccr"><div class="bar"><button class="btn btn-ghost" onclick="ccResultsClose()">✕ ${L('Close')}</button></div>
     <div class="ihead"><span></span><h1>${L('Results')}</h1><span></span></div><div class="iclub">${esc(CLUB_NAME||'')}</div>
-    <div class="rtabs"><a class="on">📄 ${L('Results')}</a><a onclick="ccRatingPage()">🏅 ${L('Club rating')}</a></div>
+    <div class="rtabs"><a class="${IDXT==='res'?'on':''}" onclick="ccResultsTab('res')">📄 ${L('Results')}</a>${hasTeam?`<a class="${IDXT==='team'?'on':''}" onclick="ccResultsTab('team')">🏆 ${L('Team match')}</a>`:''}<a onclick="ccRatingPage()">🏅 ${L('Club rating')}</a></div>
     ${years.length?`<div class="ytabs">${years.map(y=>`<a class="${y===IDXY?'on':''}" onclick="ccResultsYear(${y})">${y}</a>`).join('')}</div>
     ${months.map(m=>`<div class="imon">${esc(m.t)}</div><div>${m.rows.map(x=>`<div class="ir" onclick="ccResultsPage(${x.i})"><span>${dd(x.d)}</span><a href="#" onclick="return false">${esc(x.name)}</a></div>`).join('')}</div>`).join('')}`:`<div class="inone">${L('No results yet.')}</div>`}</div>`;
 }
@@ -289,7 +303,7 @@ const RT_CSS=`.ccr .rtabs{display:flex;gap:6px;margin:0 0 12px}.ccr .rtabs a{pad
 .ccr .rtg td.n b{color:#1d5534;font-size:1.05rem}.ccr.pp .big{color:#1d5534}.ccr .up{color:#1f7a3d;font-weight:700}.ccr .dn{color:#c62828;font-weight:700}`;
 const rtKey=n=>String(n||'').trim().toLocaleLowerCase('tr').replace(/\s+/g,' ');
 function clubRating(){
-  const arc=(getArchives()||[]).map((a,i)=>({a,i,d:+new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d>0).sort((x,y)=>x.d-y.d);
+  const arc=(getArchives()||[]).map((a,i)=>({a,i,d:+new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d>0&&!(x.a.state&&x.a.state.movement==='team')).sort((x,y)=>x.d-y.d);   // the club rating: pair tournaments (not team matches)
   const R={};
   for(const {a,i,d} of arc){
     const mp=calcMP(a.boards||{},a.movements||{}), P=a.pairs||{};

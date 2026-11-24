@@ -1928,9 +1928,7 @@ function homeShell2() {
       </div>
       </div>
       <div class="h2tiles">
-        ${tile('id="hOpen" type="button"', '🌐', T('Open an online table'), T('Play with friends; robots take the empty seats.'))}
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
-        ${tile('id="sbOpen" type="button"', '🃏', T('Social Bridge'), T('Two teams, two rooms, real cards: the app scores IMPs and VPs.'))}
         ${tile('id="hBidPrac" type="button"', '🎯', T('Bidding practice'), T('Bid both hands, then see the best contract and the robots\' auction.'))}
         <div class="h2tile h2sys">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}">🤖 ${RT_SHORT[k] || esc(rtSysName(k))}</button>`).join('')}</div>
       </div>
@@ -3781,7 +3779,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'clubSuper') { closeOv(); openClubs('?sa=1'); return; }   // the super admin's sign-in (only he sees the button)
   if (t.dataset.clubplay) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubplay)); return; }
   if (t.dataset.clubres) { window.open(location.pathname + '?kulup=' + encodeURIComponent('?club=' + t.dataset.clubres + '&results=1'), '_blank'); return; }
-  if (t.dataset.clubteam) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubteam) + '&role=admin&setup=team'); return; }
+  if (t.dataset.clubteam) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubteam) + '&role=admin&setup=team&quick=team'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
   // the online team match: a new tournament of the Team match type, set up at once

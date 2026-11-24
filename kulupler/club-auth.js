@@ -160,6 +160,8 @@ async function initClubGate(){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
       if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
       if(roleParam==='admin') setTimeout(()=>document.getElementById('pwInput')?.focus(),100);
+      // BridgePlay's Team match button (quick=team): the club's own admin needs no password — the match is set up at once
+      if(roleParam==='admin'&&params.get('quick')==='team'&&isClubAdmin()){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(async()=>{ await doLogin();
         // back at a table that is no longer this phone's (a new tournament, new codes): the table is chosen again, no code asked
@@ -455,7 +457,7 @@ window.doLogin=async function(){
   if(loginBtn){loginBtn.disabled=true;loginBtn.textContent='Checking...';}
   let ok=false;
   const testT=role==='table'&&bgTestOn()&&isSuper()&&window._bgTestTable;   // the super admin at a test table: no code
-  try{ ok = testT ? true : await startSession(role, CLUB_ID, pw); }
+  try{ ok = testT ? true : role==='admin'&&window._quickTeam&&isClubAdmin() ? (await window.bridgeSession(), true) : await startSession(role, CLUB_ID, pw); }   // the club's own admin: his BridgePlay session is enough for the rules
   catch(e){ if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';} err.textContent='❌ '+e.message; return; }
   if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
   if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()&&/^\d{4}$/.test(String(pw).trim())?'❌ Wrong PIN':'❌ Wrong password';return;}
@@ -483,8 +485,10 @@ window.doLogin=async function(){
   document.getElementById('topbarRole').textContent=role==='admin'?'TD'+(tdName()?' · '+tdName():''):'Table';
 
   if(role==='admin'){
+    if(window._quickTeam){ window._quickTeam=false; const s0=getState();
+      if(s0.status!=='running'){ try{ await quickTeamMatch(); window._quickMade=true; }catch(e){ toast('❌ '+(e&&e.message||e)); } } }
     const st=getState();
-    if(st&&st.status==='running'&&!new URLSearchParams(location.search).get('ot')){
+    if(st&&st.status==='running'&&!new URLSearchParams(location.search).get('ot')&&!window._quickMade){
       refreshTopbar();
       document.getElementById('panelContent').innerHTML=`
         <div style="max-width:420px;margin:40px auto;padding:0 14px;">
