@@ -483,6 +483,8 @@ window.doLogin=async function(){
   try{ ok = testT ? true : (role==='admin'&&window._quickTeam&&me())||(role==='table'&&window._quickSeat&&me()) ? !!(await window.bridgeSession()) : await startSession(role, CLUB_ID, pw); }   // a quick team match: the BridgePlay session is enough for the rules
   catch(e){ if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';} err.textContent='❌ '+e.message; return; }
   if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
+  // the TD signed in with the club's password (not the quick team match's no-password way): the club's TD, full panel
+  if(ok&&role==='admin'&&!window._quickTeam) window._tdPw=true;
   if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()&&/^\d{4}$/.test(String(pw).trim())?'❌ Wrong PIN':'❌ Wrong password';return;}
   // the code says which table this is: prefix + table number (0003 = table 3)
   document.body.classList.toggle('bg-device',role==='table');   // a table: the BridgeScore look from here on
