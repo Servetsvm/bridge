@@ -4104,8 +4104,9 @@ async function pushSetup(force) {
       const raw = Uint8Array.from(atob(k.key.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((k.key.length + 3) % 4)), c => c.charCodeAt(0));
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
     }
-    let rk = ''; try { rk = Net.isAdmin() ? localStorage.getItem('bridge-bot-review') || '' : ''; } catch (e) {}
-    const r = await fetch(pushBase() + '/push/sub', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(rk ? { Authorization: 'Bearer ' + rk } : {}) }, body: JSON.stringify({ name: Net.fbKey(myNm()), sub: sub.toJSON() }) });
+    // the administrator's phone: proved by its database sign-in (the session with his name and PIN)
+    let auth = ''; if (Net.isAdmin()) { try { await Net.Cloud.session(myNm(), SET.pinH); } catch (e) {} const t = await Net.Cloud.idToken(); if (t) auth = 'Firebase ' + t; }
+    const r = await fetch(pushBase() + '/push/sub', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(auth ? { Authorization: auth } : {}) }, body: JSON.stringify({ name: Net.fbKey(myNm()), sub: sub.toJSON() }) });
     if (r.ok) { SET.pushDay = day; SET.pushWho = who; Store.saveSettings(SET); save(); }
   } catch (e) {}
 }
@@ -4115,9 +4116,9 @@ async function pushOff() {
     SET.pushDay = ''; Store.saveSettings(SET); save(); } catch (e) {}
 }
 // wake the phones of whom it concerns ('admin', or a player's name key); to a player only with the review key
-function pushSend(to, kind, n) {
-  try { let rk = ''; if (to !== 'admin') { try { rk = localStorage.getItem('bridge-bot-review') || ''; } catch (e) {} if (!rk) return; }
-    fetch(pushBase() + '/push/send', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(rk ? { Authorization: 'Bearer ' + rk } : {}) }, body: JSON.stringify({ to, kind, n: String(n || '').slice(0, 40) }) }).catch(() => {}); } catch (e) {}
+async function pushSend(to, kind, n) {
+  try { let auth = ''; if (to !== 'admin') { if (!Net.isAdmin()) return; const t = await Net.Cloud.idToken(); if (!t) return; auth = 'Firebase ' + t; }
+    fetch(pushBase() + '/push/send', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(auth ? { Authorization: auth } : {}) }, body: JSON.stringify({ to, kind, n: String(n || '').slice(0, 40) }) }).catch(() => {}); } catch (e) {}
 }
 function setNotify(on) {
   if (!on) { SET.notify = false; Store.saveSettings(SET); save(); pushOff(); showSettings(); return; }

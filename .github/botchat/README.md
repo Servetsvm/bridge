@@ -96,6 +96,7 @@ npx wrangler deploy
 ```
 
 Phones subscribe by themselves once notifications are on and allowed (Settings → Notifications when the app is in the
-background). The administrator's phone is marked as the administrator's with the review key kept on it (the same key as
-for the robots' chat review); a push to a player is only sent with that key. Until VAPID_JWK is set nothing changes:
+background). The administrator's phone is known by its database sign-in (Authorization: Firebase <id token>; the Worker reads
+that device's own session sess/<uid>/k, which only the right PIN can write, and checks the administrator's name); a push
+to a player is only sent for the administrator. Until VAPID_JWK is set nothing changes:
 the site goes on without these notifications.

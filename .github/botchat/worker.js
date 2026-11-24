@@ -234,6 +234,20 @@ async function vapidAuth(env, endpoint) {
   return 'vapid t=' + head + '.' + b64u(sig) + ', k=' + vapidPublic(j);
 }
 const PUSH_KINDS = ['msg', 'club', 'reply', 'clubopen'];
+/* the administrator, known without a separate key: the app sends its database sign-in (Authorization: Firebase <id token>);
+   the database lets a device read only its own session sess/<uid>, written only with the right PIN, so its name there
+   ("servet") proves it. The database checks the token itself. */
+const FB_DB = 'https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app';
+async function fbAdmin(env, auth) {
+  const t = String(auth || '').replace(/^Firebase\s+/i, '');
+  if (!/^[\w-]+\.[\w-]+\.[\w-]+$/.test(t)) return false;
+  try {
+    const p = JSON.parse(new TextDecoder().decode(unb64u(t.split('.')[1]))), uid = String(p.user_id || p.sub || '');
+    if (!/^[\w-]{6,128}$/.test(uid)) return false;
+    const r = await fetch((env.FB_DB || FB_DB) + '/sess/' + uid + '/k.json?auth=' + encodeURIComponent(t));
+    return r.ok && (await r.json()) === (env.ADMIN_NAME || 'servet');
+  } catch (e) { return false; }
+}
 /* the phones' subscriptions, kept in Workers KV (binding PUSH): sub:<1 admin|0>:<name>:<id> = { ep, name, admin, ts },
    ep:<id> = that key, last:<id> = { kind, n, t } (what the last push was about). id = a hash of the push address. */
 async function epId(ep) { const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ep)); return [...new Uint8Array(h)].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join(''); }
@@ -249,7 +263,8 @@ async function pushList(env, prefix) {
 }
 async function pushRoute(path, req, b, env, ctx, json) {
   if (!env.PUSH || !vapidJwk(env)) return json({ error: 'push not set up' }, 501);
-  const key = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, ''), admin = !!(env.REVIEW_KEY && sameKey(key, env.REVIEW_KEY));
+  const ah = req.headers.get('Authorization') || '', key = ah.replace(/^Bearer\s+/i, '');
+  const admin = !!(env.REVIEW_KEY && sameKey(key, env.REVIEW_KEY)) || (/^Firebase\s/i.test(ah) && await fbAdmin(env, ah));
   if (path === '/push/sub') {
     const name = clip(b && b.name, 40).toLowerCase(), sub = b && b.sub, ep = sub && clip(sub.endpoint, 600);
     if (!name || !ep || !/^https:\/\//.test(ep)) return json({ error: 'bad request' }, 400);

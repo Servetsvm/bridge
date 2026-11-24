@@ -651,6 +651,8 @@ const Net = (() => {
     patch: (path, v) => dbReq(path, { method: 'PATCH', body: JSON.stringify(v) }),
     // this device's database account (the hidden guest sign-in)
     async uid() { try { await Auth.token(); } catch (e) {} return Auth.uid; },
+    // this device's database sign-in (the robots' Worker checks the administrator with it)
+    async idToken() { try { await Auth.token(); } catch (e) {} return Auth.tok || ''; },
     uidNow: () => Auth.uid,
     // is the name registered? (only the name can be read, never the PIN)
     async exists(name) { return (await Cloud.get('users/' + fbKey(name) + '/name')) != null; },
