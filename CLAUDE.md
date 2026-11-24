@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v661`, kulüpler `kulup-v176`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v662`, kulüpler `kulup-v177`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,11 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v661`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-24
+- **Üye takım maçı:** BridgePlay'e giriş yapmış her üye (`me()`, `sess/<uid>/k` var) kulüpte başka turnuva yoksa 🏆 Takım maçını
+  şifresiz başlatır; Firebase kuralı: bm/{state,movements,pairs,boards,approvals,tableLocks,boardLocks,ready,kicks,tdcalls,logs,hands,dd}
+  üyeye yazılabilir yalnız `state.status !== 'running' || state._quickTeam`; `gate/live/<club>` aynı koşulla; `bm/teamArch/<id>` yalnız ekleme.
+  Live kaydında `q:1` → oyuncu masa kodu girmeden oturur (`window._quickSeat`). Bitince sonuç `teamArch`'a (archives'a değil);
+  sonuçlar sayfası `resArc()` ikisini birleştirir. Kurallar `.github/workflows/fb-rules.yml` (mode deploy) ile yüklendi.
 - Ana sayfadan **Online masa aç** ve **Sosyal Bridge** kutuları kaldırıldı (kod duruyor, yalnız kutular yok).
 - **Hızlı takım maçı:** kulüp sayfasında 🏆 Takım maçı → `?role=admin&setup=team&quick=team`; kulübün sahibi/süper için şifresiz
   (`_quickTeam`, BridgePlay oturumu yeter) `quickTeamMatch()`: 2 takım × 2 çift, 2 masa, 1 tur, board 1–8, hemen başlar;
