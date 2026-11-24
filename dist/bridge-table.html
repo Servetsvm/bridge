@@ -2542,6 +2542,9 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .clubinfo .cicalbox .btn{text-decoration:none;text-align:center}
 .ciPage .clubinfo .cical,.ciPage .clubinfo .cicalbox{margin-left:42px}
 .ciPage .cigreen .clubinfo .cical{background:#e8f1ff;color:#123;border-color:#b8cdf0;padding:12px;font-size:17px}
+.pushst{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:14px}
+.pushst:empty{display:none}
+.pushst span{flex:1 1 200px}
 
 </style>
 
@@ -5746,6 +5749,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
+    "Notifications come even when the app is closed.": "Bildirimler uygulama kapalıyken de gelir.", "Notifications come, but this phone was not recognised as the administrator's.": "Bildirimler geliyor, ama bu telefon yöneticinin telefonu olarak tanınmadı.", "Notifications are blocked: allow them for BridgePlay in the phone's settings.": "Bildirimler engelli: telefonun ayarlarından BridgePlay için bildirimlere izin ver.", "This phone or browser cannot get notifications while the app is closed.": "Bu telefon ya da tarayıcı, uygulama kapalıyken bildirim alamıyor.", "Tap On above and allow notifications.": "Yukarıda Açık'a bas ve bildirimlere izin ver.", "Notifications for a closed app could not be turned on": "Uygulama kapalıyken bildirim açılamadı", "A test notification was sent: close the app and it comes in a few seconds.": "Deneme bildirimi gönderildi: uygulamayı kapat, birkaç saniye içinde gelir.",
     "Add to calendar": "Takvime ekle", "Calendar": "Takvim", "Phone calendar (.ics file)": "Telefonun takvimi (.ics dosyası)",
     "Tomorrow": "Yarın",
     "Ready to play without internet (on a plane too)": "Uçakta da internetsiz oynamaya hazır", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Henüz internetsiz oynamaya hazır değil: uygulamayı internetteyken bir dakika açık tut.",
@@ -6219,6 +6223,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
+    "Notifications come even when the app is closed.": "Varsler kommer også når appen er lukket.", "Notifications come, but this phone was not recognised as the administrator's.": "Varsler kommer, men denne telefonen ble ikke gjenkjent som administratorens.", "Notifications are blocked: allow them for BridgePlay in the phone's settings.": "Varsler er blokkert: tillat dem for BridgePlay i telefonens innstillinger.", "This phone or browser cannot get notifications while the app is closed.": "Denne telefonen eller nettleseren kan ikke få varsler når appen er lukket.", "Tap On above and allow notifications.": "Trykk På over og tillat varsler.", "Notifications for a closed app could not be turned on": "Varsler for lukket app kunne ikke slås på", "A test notification was sent: close the app and it comes in a few seconds.": "Et testvarsel ble sendt: lukk appen, så kommer det om noen sekunder.",
     "Add to calendar": "Legg til i kalenderen", "Calendar": "Kalender", "Phone calendar (.ics file)": "Telefonens kalender (.ics-fil)",
     "Tomorrow": "I morgen",
     "Ready to play without internet (on a plane too)": "Klar til å spille uten internett (også på fly)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Ikke klar til å spille uten internett ennå: hold appen åpen med internett i et minutt.",
@@ -13934,7 +13939,8 @@ async function offReadyCheck() {
   el.textContent = ok ? '✈️ ' + T('Ready to play without internet (on a plane too)') + ' ✓' : '⏳ ' + T('Not ready to play without internet yet: keep the app open with internet for a minute.');
 }
 function showSettings() {
-  setTimeout(offReadyCheck, 0);
+  setTimeout(offReadyCheck, 0); setTimeout(pushStateShow, 0);
+  if (typeof Net !== 'undefined' && SET.notify !== false) setTimeout(() => pushSetup(true), 50);   // looked at again each time Settings opens
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
   openOv('set', `<h2>${T('Settings')}</h2>
@@ -13947,7 +13953,7 @@ function showSettings() {
    <div class="grp"><span>${T('Correct the robots')}</span>${seg('fixbot', [[1, T('On')], [0, T('Off')]], SET.fixBot ? 1 : 0)}<div class="muted">${T("When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.")}</div></div>
    <div class="grp"><span>${T('Play a forced card automatically')}</span>${seg('auto', [[1, T('On')], [0, T('Off')]], SET.auto ? 1 : 0)}</div>
    <div class="grp"><span>${T('Sound and buzz when it is your turn')}</span>${seg('alert', [['online', T('At online tables')], ['always', T('Always')], ['off', T('Off')]], SET.alert || 'online')}</div>
-   <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify !== false ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div></div>
+   <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify !== false ? 1 : 0)}<div class="muted">${T('Join requests, messages, invitations and your turn — while the app is open in the background. A closed app cannot be reached.')}</div><div class="pushst" id="pushSt"></div></div>
    <div class="grp"><span>${T('Table sounds')}</span>${seg('sfx', [[1, T('On')], [0, T('Off')]], SET.sfx ? 1 : 0)}</div>
    <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button>${typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn" id="sReset">${T('Delete score history')}</button>` : ''}</div>
    <div class="row2"><button class="btn" id="sLogout">🚪 ${T('Log out')} (${esc(myNm())})</button></div>
@@ -14469,6 +14475,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'hSupIn' || t.id === 'supBack') { showSupInbox(); return; }
   if (t.dataset.supdel) { const k = t.dataset.supdel, x = (ui.supList || []).find(y => y.k === k); askYes(T('Delete the conversation with {0}?', esc(x ? x.n : decodeURIComponent(k))), async () => { try { await Net.supDelete(k); } catch (e) { flash(T('Could not remove'), 2000); } showSupInbox(); }); return; }
   if (t.id === 'supSend') { sendSup(); return; }
+  if (t.id === 'pushTest') { pushTest(); return; }
   if (t.id === 'hClubAsk' || t.closest && t.closest('#hClubAsk')) { showClubAsk(); return; }
   if (t.id === 'clubAskSend') { sendClubAsk(); return; }
   if (t.dataset.kldel) {   // the administrator deletes a club request (with its automatic thank-you)
@@ -14846,23 +14853,54 @@ function notify(text) {
    subscribes under the player's name (the administrator's phone with the review key kept on it); off unsubscribes it.
    The push carries nothing: sw.js asks the Worker what it was about and shows it in the phone's language. */
 const pushBase = () => BOT_AI.replace(/\/$/, '');
+// how it went is kept (SET.pushSt) and shown in Settings: ok, ok-admin, unsupported, denied, ask, err:<why>
+function pushState(st) { if (SET.pushSt !== st) { SET.pushSt = st; Store.saveSettings(SET); save(); if (ui.overlay === 'set') pushStateShow(); } return st; }
 async function pushSetup(force) {
   try {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window) || Notification.permission !== 'granted' || SET.notify === false || !myNm()) return;
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return pushState('unsupported');
+    if (SET.notify === false || !myNm()) return;
+    if (Notification.permission === 'denied') return pushState('denied');
+    if (Notification.permission !== 'granted') return pushState('ask');
     const day = new Date().toISOString().slice(0, 10), who = Net.fbKey(myNm()) + (Net.isAdmin() ? ':a' : '');
     if (!force && SET.pushDay === day && SET.pushWho === who) return;   // once a day is enough (the subscription can change)
-    const reg = await navigator.serviceWorker.ready; if (!reg.pushManager) return;
+    const reg = await navigator.serviceWorker.ready; if (!reg.pushManager) return pushState('unsupported');
     let sub = await reg.pushManager.getSubscription();
     if (!sub) {
-      const k = await (await fetch(pushBase() + '/push/key')).json(); if (!k.key) return;
+      let k = {}; try { k = await (await fetch(pushBase() + '/push/key')).json(); } catch (e) { return pushState('err:server'); }
+      if (!k.key) return pushState('err:server');
       const raw = Uint8Array.from(atob(k.key.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((k.key.length + 3) % 4)), c => c.charCodeAt(0));
       sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
     }
     // the administrator's phone: proved by its database sign-in (the session with his name and PIN)
     let auth = ''; if (Net.isAdmin()) { try { await Net.Cloud.session(myNm(), SET.pinH); } catch (e) {} const t = await Net.Cloud.idToken(); if (t) auth = 'Firebase ' + t; }
     const r = await fetch(pushBase() + '/push/sub', { method: 'POST', headers: { 'Content-Type': 'application/json', ...(auth ? { Authorization: auth } : {}) }, body: JSON.stringify({ name: Net.fbKey(myNm()), sub: sub.toJSON() }) });
-    if (r.ok) { SET.pushDay = day; SET.pushWho = who; Store.saveSettings(SET); save(); }
-  } catch (e) {}
+    if (!r.ok) return pushState('err:' + r.status);
+    const j = await r.json().catch(() => ({}));
+    SET.pushDay = day; SET.pushWho = who; Store.saveSettings(SET); save();
+    return pushState(j.admin ? 'ok-admin' : Net.isAdmin() ? 'ok-notadmin' : 'ok');
+  } catch (e) { return pushState('err:' + String(e && e.name || e).slice(0, 30)); }
+}
+// Settings: the state of notifications to a closed app, and (the administrator) a test that comes back to this phone
+function pushStateShow() {
+  const el = $('pushSt'); if (!el) return;
+  const st = SET.pushSt || '', adm = typeof Net !== 'undefined' && Net.isAdmin();
+  const txt = SET.notify === false ? '' : st === 'ok' || st === 'ok-admin' ? '✅ ' + T('Notifications come even when the app is closed.') + (st === 'ok-admin' ? ' (' + T('Admin') + ')' : '')
+    : st === 'ok-notadmin' ? '⚠️ ' + T('Notifications come, but this phone was not recognised as the administrator\'s.')
+    : st === 'denied' ? '⚠️ ' + T('Notifications are blocked: allow them for BridgePlay in the phone\'s settings.')
+    : st === 'unsupported' ? 'ℹ️ ' + T('This phone or browser cannot get notifications while the app is closed.')
+    : st === 'ask' ? 'ℹ️ ' + T('Tap On above and allow notifications.')
+    : st.startsWith('err:') ? '⚠️ ' + T('Notifications for a closed app could not be turned on') + ' (' + st.slice(4) + ')' : '⏳ …';
+  el.innerHTML = txt ? `<span>${esc(txt)}</span>${adm ? `<button class="btn mini-btn" id="pushTest" type="button">🔔 ${T('Test')}</button>` : ''}` : '';
+}
+async function pushTest() {
+  const b = $('pushTest'); if (b) b.disabled = true;
+  SET.pushSt = ''; pushStateShow();
+  const st = await pushSetup(true);
+  if (st === 'ok-admin') {
+    try { await fetch(pushBase() + '/push/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: 'admin', kind: 'msg', n: 'Test' }) }); } catch (e) {}
+    flash('🔔 ' + T('A test notification was sent: close the app and it comes in a few seconds.'), 5000);
+  } else pushStateShow();
+  const b2 = $('pushTest'); if (b2) b2.disabled = false;
 }
 async function pushOff() {
   try { const reg = await navigator.serviceWorker.getRegistration(), sub = reg && reg.pushManager && await reg.pushManager.getSubscription();

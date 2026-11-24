@@ -2490,3 +2490,6 @@ body.homev2 .h2tile.h2sys .rtchip:hover{filter:brightness(1.05)}
 .clubinfo .cicalbox .btn{text-decoration:none;text-align:center}
 .ciPage .clubinfo .cical,.ciPage .clubinfo .cicalbox{margin-left:42px}
 .ciPage .cigreen .clubinfo .cical{background:#e8f1ff;color:#123;border-color:#b8cdf0;padding:12px;font-size:17px}
+.pushst{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:14px}
+.pushst:empty{display:none}
+.pushst span{flex:1 1 200px}
