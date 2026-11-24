@@ -162,7 +162,7 @@ async function initClubGate(){
       if(roleParam==='admin') setTimeout(()=>document.getElementById('pwInput')?.focus(),100);
       // BridgePlay's Team match button (quick=team): any signed-in member needs no password — the match is set up at once
       // (the rules let a member write the tournament only while no other one is running)
-      if(roleParam==='admin'&&params.get('quick')==='team'&&me()&&(isClubAdmin()||await clubTeamOn(id))){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
+      if(roleParam==='admin'&&params.get('quick')==='team'&&me()){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(async()=>{ await doLogin();
         // back at a table that is no longer this phone's (a new tournament, new codes): the table is chosen again, no code asked
