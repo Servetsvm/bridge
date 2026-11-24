@@ -12,8 +12,16 @@ MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
 # (gemini-flash-latest took over 9 s an answer in Nov 2026, the lite one about 1 s)
 GEMINI_MODEL = "gemini-flash-lite-latest"
 
-# the robots' chats (no player names, no cards), kept 90 days, for reviewing and improving the answers
-[[d1_databases]]
-binding = "DB"
-database_name = "bridge-botchat"
-database_id = "c2f75df4-949d-441d-b344-41509bc64da4"
+# the phones' subscriptions for notifications while the app is closed (Workers KV). The id is filled in by the
+# GitHub workflow (.github/workflows/botchat.yml), which makes the namespace the first time.
+[[kv_namespaces]]
+binding = "PUSH"
+id = "__PUSH_KV_ID__"
+
+# The robots' chats and the devices' error reports were kept in a D1 database on the first Cloudflare account (no longer
+# reachable, Nov 2026). Without the binding the Worker answers as before and keeps no log; to keep one again, make a D1
+# database (npx wrangler d1 create bridge-botchat; then schema.sql) and add:
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "bridge-botchat"
+# database_id = "<its id>"

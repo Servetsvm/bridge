@@ -234,42 +234,48 @@ async function vapidAuth(env, endpoint) {
   return 'vapid t=' + head + '.' + b64u(sig) + ', k=' + vapidPublic(j);
 }
 const PUSH_KINDS = ['msg', 'club', 'reply', 'clubopen'];
-// the push table is made by the Worker itself the first time (no separate database step); the same as in schema.sql
-let PUSH_TABLE = false;
-async function pushTable(env) {
-  if (PUSH_TABLE || !env.DB) return;
-  await env.DB.prepare('CREATE TABLE IF NOT EXISTS push (ep TEXT PRIMARY KEY, name TEXT NOT NULL, admin INTEGER NOT NULL DEFAULT 0, sub TEXT, ts INTEGER NOT NULL, lk TEXT, ln TEXT, lt INTEGER)').run();
-  await env.DB.prepare('CREATE INDEX IF NOT EXISTS push_name ON push (name)').run();
-  PUSH_TABLE = true;
+/* the phones' subscriptions, kept in Workers KV (binding PUSH): sub:<1 admin|0>:<name>:<id> = { ep, name, admin, ts },
+   ep:<id> = that key, last:<id> = { kind, n, t } (what the last push was about). id = a hash of the push address. */
+async function epId(ep) { const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ep)); return [...new Uint8Array(h)].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join(''); }
+const pushKey = (admin, name, id) => 'sub:' + (admin ? 1 : 0) + ':' + encodeURIComponent(name) + ':' + id;
+async function pushDel(env, ep) {
+  const id = await epId(ep), k = await env.PUSH.get('ep:' + id);
+  await Promise.all([k && env.PUSH.delete(k), env.PUSH.delete('ep:' + id), env.PUSH.delete('last:' + id)]);
+}
+async function pushList(env, prefix) {
+  const out = []; let cursor;
+  do { const r = await env.PUSH.list({ prefix, cursor }); for (const k of r.keys) out.push(k.name); cursor = r.list_complete ? null : r.cursor; } while (cursor && out.length < 1000);
+  return out;
 }
 async function pushRoute(path, req, b, env, ctx, json) {
-  if (!env.DB || !vapidJwk(env)) return json({ error: 'push not set up' }, 501);
-  await pushTable(env);
+  if (!env.PUSH || !vapidJwk(env)) return json({ error: 'push not set up' }, 501);
   const key = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, ''), admin = !!(env.REVIEW_KEY && sameKey(key, env.REVIEW_KEY));
   if (path === '/push/sub') {
     const name = clip(b && b.name, 40).toLowerCase(), sub = b && b.sub, ep = sub && clip(sub.endpoint, 600);
     if (!name || !ep || !/^https:\/\//.test(ep)) return json({ error: 'bad request' }, 400);
-    await env.DB.prepare('INSERT INTO push (ep, name, admin, sub, ts) VALUES (?, ?, ?, ?, ?) ON CONFLICT(ep) DO UPDATE SET name = excluded.name, admin = excluded.admin, sub = excluded.sub, ts = excluded.ts')
-      .bind(ep, name, admin ? 1 : 0, JSON.stringify({ endpoint: ep }), Date.now()).run();
+    const id = await epId(ep), old = await env.PUSH.get('ep:' + id), k = pushKey(admin, name, id);
+    if (old && old !== k) await env.PUSH.delete(old);   // the same phone under another name (or now the administrator's)
+    await env.PUSH.put(k, JSON.stringify({ ep, name, admin, ts: Date.now() }), { expirationTtl: 400 * 86400 });
+    await env.PUSH.put('ep:' + id, k, { expirationTtl: 400 * 86400 });
     return json({ ok: true, admin });
   }
-  if (path === '/push/unsub') { const ep = clip(b && b.ep, 600); if (ep) await env.DB.prepare('DELETE FROM push WHERE ep = ?').bind(ep).run(); return json({ ok: true }); }
+  if (path === '/push/unsub') { const ep = clip(b && b.ep, 600); if (ep) await pushDel(env, ep); return json({ ok: true }); }
   if (path === '/push/send') {
     const kind = PUSH_KINDS.includes(b && b.kind) ? b.kind : null, n = clip(b && b.n, 40), to = clip(b && b.to, 40).toLowerCase();
     if (!kind || !to) return json({ error: 'bad request' }, 400);
     // to the administrator: anyone (a player's message or club request); to a player: only the administrator
     if (to !== 'admin' && !admin) return json({ error: 'forbidden' }, 403);
-    const rows = (await (to === 'admin' ? env.DB.prepare('SELECT ep FROM push WHERE admin = 1') : env.DB.prepare('SELECT ep FROM push WHERE name = ? AND admin = 0').bind(to)).all()).results || [];
-    const now = Date.now();
-    ctx.waitUntil(Promise.all(rows.map(async r => {
+    const keys = await pushList(env, to === 'admin' ? 'sub:1:' : 'sub:0:' + encodeURIComponent(to) + ':');
+    ctx.waitUntil(Promise.all(keys.map(async k => {
       try {
-        await env.DB.prepare('UPDATE push SET lk = ?, ln = ?, lt = ? WHERE ep = ?').bind(kind, n, now, r.ep).run();
-        const res = await fetch(r.ep, { method: 'POST', headers: { Authorization: await vapidAuth(env, r.ep), TTL: '86400', Urgency: 'high', 'Content-Length': '0' } });
-        if (res.status === 404 || res.status === 410) await env.DB.prepare('DELETE FROM push WHERE ep = ?').bind(r.ep).run();   // the phone unsubscribed
+        const v = JSON.parse(await env.PUSH.get(k) || 'null'); if (!v || !v.ep) return;
+        await env.PUSH.put('last:' + k.split(':').pop(), JSON.stringify({ kind, n, t: Date.now() }), { expirationTtl: 86400 * 2 });
+        const res = await fetch(v.ep, { method: 'POST', headers: { Authorization: await vapidAuth(env, v.ep), TTL: '86400', Urgency: 'high', 'Content-Length': '0' } });
+        if (res.status === 404 || res.status === 410) await pushDel(env, v.ep);   // the phone unsubscribed
         else if (!res.ok) console.log('push', res.status, (await res.text()).slice(0, 200));
       } catch (e) { console.log('push threw', String(e)); }
     })));
-    return json({ ok: true, n: rows.length });
+    return json({ ok: true, n: keys.length });
   }
   return json({ error: 'not found' }, 404);
 }
@@ -288,10 +294,9 @@ export default {
     // push: the public key, and (for a phone's service worker) what its last push was about
     if (path === '/push/key' && req.method === 'GET') { const j = vapidJwk(env); return j ? json({ key: vapidPublic(j) }) : json({ error: 'push not set up' }, 501); }
     if (path === '/push/last' && req.method === 'GET') {
-      const ep = new URL(req.url).searchParams.get('ep') || ''; if (!env.DB || !ep) return json({});
-      await pushTable(env).catch(() => {});
-      const r = await env.DB.prepare('SELECT lk, ln, lt FROM push WHERE ep = ?').bind(ep.slice(0, 600)).first().catch(() => null);
-      return json(r && r.lk && Date.now() - r.lt < 864e5 ? { kind: r.lk, n: r.ln || '' } : {});
+      const ep = new URL(req.url).searchParams.get('ep') || ''; if (!env.PUSH || !ep) return json({});
+      const r = JSON.parse(await env.PUSH.get('last:' + await epId(ep.slice(0, 600))).catch(() => null) || 'null');
+      return json(r && r.kind && Date.now() - r.t < 864e5 ? { kind: r.kind, n: r.n || '' } : {});
     }
     if (req.method !== 'POST' || !ok) return json({ error: 'forbidden' }, 403);
     if (limited(req.headers.get('CF-Connecting-IP') || 'x')) return json({ error: 'slow down' }, 429);
