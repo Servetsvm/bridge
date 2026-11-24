@@ -510,8 +510,8 @@ window.doLogin=async function(){
 
   if(role==='admin'){
     if(window._quickTeam){ window._quickTeam=false; const s0=getState();
-      // a member (not the club's admin): only while no other tournament is running or being set up at the club
-      if(!isClubAdmin()&&s0.status==='running'&&!s0._quickTeam||!isClubAdmin()&&s0.status==='setup'){ toast('⚠️ '+i18nText('Another tournament is being played at this club now.')); setTimeout(()=>location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)),1800); return; }
+      // a member (not the club's admin): only while no other tournament is being played (one set up but never started is replaced)
+      if(!isClubAdmin()&&s0.status==='running'&&!s0._quickTeam){ toast('⚠️ '+i18nText('Another tournament is being played at this club now.')); setTimeout(()=>location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)),1800); return; }
       if(s0.status!=='running'){ try{ await quickTeamMatch(); window._quickMade=true;
         // set up and started: straight to the club's tables (table numbers and TD), not the TD panel — drawn here, without
         // loading the page again (a new load could miss the tournament for a moment and show the table code box)
