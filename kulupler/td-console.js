@@ -31,10 +31,13 @@ function tdcLive(){ if(role!=='admin'||!tdcOn()||!document.querySelector('.tdc')
 
 const num=x=>(x||'').replace(/[^0-9]/g,'')||'?';
 const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board'],['team','Team match','Two teams, the same boards at two tables, IMP']];
+// a member running a quick team match (not the club's admin): the tables, the score and Finish only — no club settings,
+// no menu, no new tournament, no old tournaments
+const qtMember=()=>role==='admin'&&!!getState()._quickTeam&&typeof isClubAdmin==='function'&&!isClubAdmin();
 function frame(title,body,actions,sub){
   const s=getState(), td=typeof tdName==='function'?tdName():'';
   document.getElementById('panelContent').innerHTML=`<div class="bm3 bm3w tdc"><div class="bm3-screen">
-    <div class="bm3-bar"><button class="td tdbtn" onclick="tdcClub()" title="${L('Club settings')}">🧑‍⚖️ TD ⚙️</button><div class="ev"><b>${cleanData(CLUB_NAME||'')}${td?' · '+cleanData(td):''}</b>${cleanData(title||'')}</div><span class="td" style="visibility:hidden" aria-hidden="true">🧑‍⚖️ TD ⚙️</span></div>
+    <div class="bm3-bar">${qtMember()?'<span class="td tdbtn">🧑‍⚖️ TD</span>':`<button class="td tdbtn" onclick="tdcClub()" title="${L('Club settings')}">🧑‍⚖️ TD ⚙️</button>`}<div class="ev"><b>${cleanData(CLUB_NAME||'')}${td?' · '+cleanData(td):''}</b>${cleanData(title||'')}</div><span class="td" style="visibility:hidden" aria-hidden="true">🧑‍⚖️ TD ⚙️</span></div>
     ${sub||''}
     <div class="bm3-body">${body}</div>
     <div class="bm3-actions">${actions||''}</div></div></div>`;
@@ -43,6 +46,10 @@ function frame(title,body,actions,sub){
 window.tdcGo=(v,o)=>{ Object.assign(TDC,{v},o||{}); tdcDraw(); tdcFill(false); };
 function tdcDraw(){
   const s=getState();
+  if(qtMember()){
+    if(s.status==='running'&&s.tableCount>0) return TDC.v==='table'&&TDC.t?drawTable():drawRun();
+    return frame(L('Team match'),`<div class="bm3-note" style="padding:16px 12px;text-align:center;font-size:1.05rem;">🏁 ${L('Tournament finished')}</div>`,`<button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button>`);
+  }
   if(TDC.v==='setup') return drawSetup();
   if(TDC.v==='table'&&TDC.t) return drawTable();
   if(TDC.v==='hist') return drawHist();
@@ -73,7 +80,7 @@ function playersHtml(){
 const MENU=[
   ['Tournament',[['tables','🃏','Tables'],['players','👥','Players'],['boards','📊','Boards']]],
   ['Log',[['log','📋','Log']]]];
-const menuHtml=()=>`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.flatMap(([g,items])=>items).map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}</select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
+const menuHtml=()=>qtMember()?`<div class="tdc-menu"><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>`:`<div class="bm3-step">${L('Menu')}</div><div class="tdc-menu"><select class="tdc-sel" onchange="tdcPick(this.value)"><option value="">— ${L('Choose')} —</option>${MENU.flatMap(([g,items])=>items).map(([k,i,n])=>`<option value="${k}"${TDC.tab===k?' selected':''}>${i} ${L(n)}</option>`).join('')}</select><button class="btn tdc-red" onclick="doLogout()">🚪 ${L('Log out')}</button></div>${TDC.tab?`<div id="adminContent" class="tdc-tab"></div>`:''}`;
 // the chosen section drawn into its box (the full panel's own content and buttons)
 function tdcFill(scroll){ const c=document.getElementById('adminContent'); if(!c||!TDC.tab) return; if(TDC.tab==='players'){ c.innerHTML=playersHtml(); } else if(TDC.tab==='log'){ c.innerHTML=resetHtml()+(typeof renderLog==='function'?renderLog():''); } else { adminTab=TDC.tab; _rat(); } if(scroll) c.scrollIntoView({behavior:'smooth',block:'start'}); }
 const ACTS={screen:()=>tdcScreen(),link:()=>bgShowPlayersLink(),results:()=>ccResultsPage(),hands:()=>adminImportHandsOpen(),auto:()=>adminAutoBoardsOpen(),stall:()=>tdcStall(),export:()=>adminExport(),import:()=>adminImportOpen(),reset:()=>tdcReset()};
@@ -175,7 +182,7 @@ function drawRun(){ TDC.arc=null;
 }
 window.tdcReload=async()=>{ try{ await Promise.all(['state','boards','approvals','movements','pairs','tdcalls'].map(k=>DB.get(k))); }catch(e){} tdcDraw(); };
 // the TD button: the club's settings (its logo, its password, the tables' codes, the slow-table alarm, the links)
-window.tdcClub=function(){
+window.tdcClub=function(){ if(qtMember()) return;
   const b=(ic,t,fn)=>`<button class="btn tdc-set" onclick="closeModal();${fn}">${ic} ${L(t)}</button>`;
   openModal('⚙️ '+L('Club settings'),`<div class="tdc-setlist">${[
     b('🎴','Club logo','clubLogoPick()'),

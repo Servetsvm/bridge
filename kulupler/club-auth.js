@@ -169,7 +169,7 @@ async function initClubGate(){
       // (the rules let a member write the tournament only while no other one is running)
       if(roleParam==='admin'&&params.get('quick')==='team'&&me()){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
       // a member's TD button of a quick team match being played: no password either (the rules let members run it)
-      else if(roleParam==='admin'&&me()&&!isClubAdmin()){ let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
+      else if(roleParam==='admin'&&me()){ let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
         if(st&&st.status==='running'&&st._quickTeam){ window._quickTeam=true; window._quickMade=true; setTimeout(()=>doLogin(),50); } }
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(async()=>{ await doLogin();
