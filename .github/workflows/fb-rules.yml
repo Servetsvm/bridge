@@ -1,0 +1,39 @@
+# The database's rules: Check compares the rules live in Firebase with firebase-rules.json in this repository (only
+# read); Deploy puts firebase-rules.json live (after the same check). Uses the repository secret FIREBASE_DB_SECRET.
+name: Firebase rules
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: check or deploy
+        required: true
+        default: check
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SECRET: ${{ secrets.FIREBASE_DB_SECRET }}
+      DB: https://bridgetable-89b1a-default-rtdb.europe-west1.firebasedatabase.app
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compare the live rules with firebase-rules.json
+        run: |
+          test -n "$SECRET" || { echo "No FIREBASE_DB_SECRET"; exit 1; }
+          curl -s "$DB/.settings/rules.json?auth=$SECRET" > live.json
+          node -e "
+            const fs=require('fs'); const strip=t=>t.replace(/^\s*\/\/.*$/gm,'');
+            let live; try{ live=JSON.parse(strip(fs.readFileSync('live.json','utf8'))); }catch(e){ console.log('live rules not JSON:', fs.readFileSync('live.json','utf8').slice(0,300)); process.exit(1); }
+            const repo=JSON.parse(fs.readFileSync('firebase-rules.json','utf8'));
+            const diff=[]; const walk=(a,b,p)=>{ const ks=new Set([...Object.keys(a||{}),...Object.keys(b||{})]); for(const k of ks){ const x=a&&a[k], y=b&&b[k];
+              if(x&&y&&typeof x==='object'&&typeof y==='object') walk(x,y,p+'/'+k); else if(JSON.stringify(x)!==JSON.stringify(y)) diff.push(p+'/'+k+(x===undefined?'  (only in the repository)':y===undefined?'  (only live)':'  (different)')); } };
+            walk(live,repo,'');
+            console.log(diff.length?diff.length+' differences:\n'+diff.join('\n'):'The live rules are the same as firebase-rules.json');
+            fs.writeFileSync('diffcount', String(diff.length));
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, '### Firebase rules\n'+(diff.length?diff.map(d=>'- '+d).join('\n'):'Same as firebase-rules.json')+'\n');
+          "
+      - name: Deploy firebase-rules.json
+        if: ${{ github.event.inputs.mode == 'deploy' }}
+        run: |
+          R=$(curl -s -X PUT "$DB/.settings/rules.json?auth=$SECRET" --data-binary @firebase-rules.json)
+          echo "$R"; echo "$R" | grep -q '"status":"ok"'
