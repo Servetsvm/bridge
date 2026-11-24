@@ -15522,7 +15522,7 @@ async function showClubs() {
     const [v, cl] = await Promise.all([Net.Cloud.get('gate/live').catch(() => null), Net.Cloud.get('gate/clubList').catch(() => null)]);
     // a club's running tournament: only a club in the list and switched on (a deleted club's entry may be left over); its name from the list
     const known = id => !cl || (cl[id] && cl[id].a !== false);
-    let live = Object.entries(v || {}).map(([club, t]) => ({ club, ...t, c: (cl && cl[club] && cl[club].n) || t.c })).filter(t => t && known(t.club) && /^\d{2}$/.test(t.p || '') && Date.now() - (t.ts || 0) < 24 * 3600e3).sort((a, b) => b.ts - a.ts);
+    let live = Object.entries(v || {}).map(([club, t]) => ({ club, ...t, c: (cl && cl[club] && cl[club].n) || t.c })).filter(t => t && known(t.club) && /^\d{2}$/.test(t.p || '') && Date.now() - (t.ts || 0) < (t.q ? 5 : 24) * 3600e3)   // a team match left unfinished: gone after 5 hours.sort((a, b) => b.ts - a.ts);
     // only a tournament that really runs (an entry left behind by a finished or new one is not)
     const runs = await Promise.all(live.map(t => Net.Cloud.get('gate/clubs/' + t.club + '/bm/state/status').catch(() => null)));
     live = live.filter((t, i) => runs[i] === 'running');

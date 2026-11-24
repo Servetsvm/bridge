@@ -558,6 +558,27 @@ async function bgAutoNextRound(){
   finally{ _bgAutoNexting=false; }
 }
 
+// a quick team match whose every board has been played at both tables: finished by the table that ends it (nobody needs to
+// press Finish) — its result goes to the club's team matches, it leaves the list of tournaments being played
+const quickArcId=s=>'q'+(Date.parse(s._startedAt||0)||Date.now());   // one id a match: two phones finishing at once add it once
+const quickDone=(B,s,mv)=>{ let total=0,done=0; for(let t=1;t<=(s.tableCount||0);t++){ const m=mv[s.currentRound+'_'+t]; if(!m) continue; for(let b=m.boardStart||1;b<=(m.boardEnd||0);b++){ total++; if((B[t+'_'+s.currentRound+'_'+b]||{}).status==='done') done++; } } return {total,done}; };
+let _bgQuickFinishing=false;
+async function bgQuickFinish(){
+  if(_bgQuickFinishing) return; _bgQuickFinishing=true;
+  try{
+    const s=await DB.get('state'); if(!s||s.status!=='running'||!s._quickTeam||s.currentRound<s.roundCount) return;
+    const B=await DB.get('boards')||{}, mv=await DB.get('movements')||{}, {total,done}=quickDone(B,s,mv);
+    if(!total||done<total) return;
+    s.status='finished'; s._finishedAt=new Date().toISOString(); await setState(s);
+    const rec={state:{...s},boards:B,pairs:await DB.get('pairs')||{},movements:mv,hands:_cache['hands']||[],dd:_cache['dd']||{},finished:s._finishedAt};
+    try{ await fetch(await fbUrl('/teamArch/'+quickArcId(s)+'.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)}); }catch(e){}
+    try{ await fetch(await fbRootUrl('/live/'+CLUB_ID+'.json'),{method:'DELETE'}); }catch(e){}
+    try{ await DB.set('tableLocks',{}); }catch(e){}
+    addLog('ok','Team match finished','');
+  }catch(e){ console.warn('quick finish',e); }
+  finally{ _bgQuickFinishing=false; }
+}
+
 function getNextRoundInfo(tableNo,currentRound,state,movements,pairs){
   const nextR=currentRound+1;
   if(nextR>state.roundCount)return null;

@@ -239,7 +239,7 @@ async function renderEntry(live){
 async function clubTeamOn(id){ try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/info/tm.json'),{cache:'no-store'}); return r.ok&&!!(await r.json()); }catch(e){ return false; } }
 async function liveTournaments(){
   try{ const r=await fetch(await fbRootUrl('/live.json')); const v=r.ok?await r.json():null;
-    return Object.entries(v||{}).map(([club,t])=>({club,...t})).filter(t=>t&&/^\d{2}$/.test(t.p||'')&&Date.now()-t.ts<24*3600e3).sort((a,b)=>b.ts-a.ts);
+    return Object.entries(v||{}).map(([club,t])=>({club,...t})).filter(t=>t&&/^\d{2}$/.test(t.p||'')&&Date.now()-t.ts<(t.q?5:24)*3600e3).sort((a,b)=>b.ts-a.ts);
   }catch(e){ return []; }
 }
 async function renderClubGate(live){

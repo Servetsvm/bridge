@@ -291,6 +291,7 @@ function renderTableDetail(tableNo){
   if(allDone)unlockTable(tableNo); // Remove lock — table finished
   window._bgEndOf=allDone&&s.currentRound<s.roundCount?s.currentRound:null;
   if(allDone&&s.currentRound<s.roundCount) bgAutoNextRound();
+  if(allDone&&s._quickTeam&&s.currentRound>=s.roundCount) bgQuickFinish();   // the team match ends by itself when both tables are done
   let actionHTML='';
   if(allDone){
     if(s.currentRound<s.roundCount){

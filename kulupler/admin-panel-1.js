@@ -721,8 +721,9 @@ window.adminFinish=async function(){
   setTableLocks({});   // the tables are free again
   const rec={state:{...s},boards:getBoards(),pairs:getPairs(),movements:getMovements(),hands:_cache['hands']||[],dd:_cache['dd']||{},finished:s._finishedAt};
   if(s._quickTeam){
-    // a quick team match (any member may start one): its own list, where a result is only ever added
-    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    // a quick team match (any member may start one): its own list, where a result is only ever added — and only when a
+    // board was played (a match set up and finished at once leaves nothing in the results)
+    const id=quickArcId(s); if(!quickDone(rec.boards||{},s,rec.movements||{}).done){ toast('🏁 '+i18nText('Tournament finished')); renderAdminTab(); return; }
     try{ await fetch(await fbUrl('/teamArch/'+id+'.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)}); _cache['teamArch']={...(_cache['teamArch']||{}),[id]:rec}; }catch(e){}
   } else {
     const arc=await archivesFresh();   // the newest copy: an older one could bring deleted tournaments back

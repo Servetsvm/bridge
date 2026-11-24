@@ -187,7 +187,8 @@ window.ccResultsClose=function(){ if(window._ccResultsOnly){ try{ const P=window
 let SRC=null;
 const KEYS=['state','pairs','boards','movements','hands','dd'];
 // the club's archive and the team matches its members played (kept apart: anyone signed in may add one, nobody may change one)
-const resArc=()=>(getArchives()||[]).concat(Object.values(_cache['teamArch']||{}).filter(a=>a&&a.state));
+// (a team match with no board played is left out: tried and stopped at once)
+const resArc=()=>(getArchives()||[]).concat(Object.values(_cache['teamArch']||{}).filter(a=>a&&a.state&&Object.values(a.boards||{}).some(b=>b&&b.status==='done')));
 function withSrc(fn){
   const a=SRC==null?null:resArc()[SRC]; if(!a) return fn();
   const keep={}; KEYS.forEach(k=>{ keep[k]=_cache[k]; }); _cache.state=a.state; _cache.pairs=a.pairs; _cache.boards=a.boards; _cache.movements=a.movements; _cache.hands=a.hands||[]; _cache.dd=a.dd||{};
