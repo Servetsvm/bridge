@@ -251,7 +251,7 @@ async function quickTeamMatch(){
   document.body.appendChild(box); window._teamOneRound=true;
   try{ await adminSetup(); } finally{ box.remove(); window._teamOneRound=false; }
   const s=getState(); if(s.status!=='setup'||s.movement!=='team') throw new Error('not set up');
-  s._quickTeam=true; s._noLead=true; s.name=s.name+' · '+(window.i18nText?i18nText('Team match'):'Team match'); setState(s);
+  s._quickTeam=true; s._noLead=true; s.name=s.name+' · '+(window.i18nText?i18nText('Team match'):'Team match'); await setState(s);
   await adminStart();
 }
 // ── Setup ──
@@ -484,7 +484,7 @@ async function setLive(on){
     const s=getState(), url=await fbRootUrl('/live/'+CLUB_ID+'.json');
     const p=await getTablePrefix();
     // the tables' codes go with it: a player's phone signs in at the table chosen without typing one
-    if(on){ try{ await saveTablePrefix(p); }catch(e){} let k={}; try{ k=tableKeys(await makeTableCodes(s.tableCount||0)); }catch(e){} await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p,ts:Date.now(),k})}); }
+    if(on){ try{ await saveTablePrefix(p); }catch(e){} let k={}; try{ k=tableKeys(await makeTableCodes(s.tableCount||0)); }catch(e){} await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p,ts:Date.now(),k,...(s._quickTeam?{q:1}:{})})}); }
     else await fetch(url,{method:'DELETE'});
   }catch(e){}
 }
@@ -719,9 +719,16 @@ window.adminFinish=async function(){
   setState(s);
   setLive(false);
   setTableLocks({});   // the tables are free again
-  const arc=await archivesFresh();   // the newest copy: an older one could bring deleted tournaments back
-  arc.unshift({state:{...s},boards:getBoards(),pairs:getPairs(),movements:getMovements(),hands:_cache['hands']||[],dd:_cache['dd']||{},finished:s._finishedAt});
-  setArchives(arc);
+  const rec={state:{...s},boards:getBoards(),pairs:getPairs(),movements:getMovements(),hands:_cache['hands']||[],dd:_cache['dd']||{},finished:s._finishedAt};
+  if(s._quickTeam){
+    // a quick team match (any member may start one): its own list, where a result is only ever added
+    const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    try{ await fetch(await fbUrl('/teamArch/'+id+'.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)}); _cache['teamArch']={...(_cache['teamArch']||{}),[id]:rec}; }catch(e){}
+  } else {
+    const arc=await archivesFresh();   // the newest copy: an older one could bring deleted tournaments back
+    arc.unshift(rec);
+    setArchives(arc);
+  }
   addLog('ok','Tournament finished & archived','');
   toast('🏁 Tournament finished!');
   renderAdminTab();

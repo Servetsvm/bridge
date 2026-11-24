@@ -186,8 +186,10 @@ window.ccResultsClose=function(){ if(window._ccResultsOnly){ try{ const P=window
 // which tournament the page shows: null = the current one, a number = that archive (0 = the last one finished)
 let SRC=null;
 const KEYS=['state','pairs','boards','movements','hands','dd'];
+// the club's archive and the team matches its members played (kept apart: anyone signed in may add one, nobody may change one)
+const resArc=()=>(getArchives()||[]).concat(Object.values(_cache['teamArch']||{}).filter(a=>a&&a.state));
 function withSrc(fn){
-  const a=SRC==null?null:(getArchives()||[])[SRC]; if(!a) return fn();
+  const a=SRC==null?null:resArc()[SRC]; if(!a) return fn();
   const keep={}; KEYS.forEach(k=>{ keep[k]=_cache[k]; }); _cache.state=a.state; _cache.pairs=a.pairs; _cache.boards=a.boards; _cache.movements=a.movements; _cache.hands=a.hands||[]; _cache.dd=a.dd||{};
   try{ return fn(); } finally { KEYS.forEach(k=>{ _cache[k]=keep[k]; }); }
 }
@@ -199,8 +201,8 @@ function ccResultsDraw(){
 }
 // one tournament's page: i = its place in the archive; nothing given: the tournament just finished (else the last one)
 window.ccResultsPage=async function(i){
-  try{ await Promise.all(['hands','dd','boards','pairs','movements','state','archives'].map(k=>DB.get(k))); }catch(e){}
-  SRC=i!=null?i:(getState().status==='finished'||!(getArchives()||[]).length?null:0);
+  try{ await Promise.all(['hands','dd','boards','pairs','movements','state','archives','teamArch'].map(k=>DB.get(k))); }catch(e){}
+  SRC=i!=null?i:(getState().status==='finished'||!resArc().length?null:0);
   layerEl(); ccResultsDraw();
 };
 // the list of the club's results: a tab for each year, the months newest first, each tournament's date and name
@@ -232,7 +234,7 @@ function indexHtml(){
   const L=v=>window.i18nText?i18nText(v):v;
   const loc={tr:'tr-TR',no:'nb-NO',es:'es-ES',fr:'fr-FR',it:'it-IT',de:'de-DE',ru:'ru-RU',pl:'pl-PL',zh:'zh-CN'}[(()=>{ try{ return localStorage.getItem('bricskor_language'); }catch(e){ return ''; } })()]||'en-GB';
   // the team matches are listed apart (their own tab), with the teams' score
-  const all=(getArchives()||[]).map((a,i)=>({i,a,team:!!(a.state&&a.state.movement==='team'),name:(a.state&&a.state.name)||L('Tournament'),d:new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d.getTime()>0).sort((a,b)=>b.d-a.d);
+  const all=resArc().map((a,i)=>({i,a,team:!!(a.state&&a.state.movement==='team'),name:(a.state&&a.state.name)||L('Tournament'),d:new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d.getTime()>0).sort((a,b)=>b.d-a.d);
   const hasTeam=all.some(x=>x.team); if(IDXT==='team'&&!hasTeam) IDXT='res';
   const list=all.filter(x=>IDXT==='team'?x.team:!x.team);
   for(const x of list) if(x.team){ const t=teamScoreOf(x.a); x.name=`${t.ta} ${t.a} – ${t.b} ${t.tb}`; }
@@ -248,7 +250,7 @@ function indexHtml(){
 }
 window.ccResultsYear=function(y){ IDXY=y; const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}${typeof RT_CSS!=='undefined'?RT_CSS:''}</style>${indexHtml()}`; };
 window.ccResultsIndex=async function(){
-  try{ await DB.get('archives'); }catch(e){}
+  try{ await Promise.all([DB.get('archives'),DB.get('teamArch')]); }catch(e){}
   const el=layerEl(); el.innerHTML=`<style>${CSS}${IDX_CSS}${typeof RT_CSS!=='undefined'?RT_CSS:''}</style>${indexHtml()}`; el.scrollTop=0;
 };
 // the movement: for each round, at each table the North-South and East-West pairs (number and names) and the boards;
@@ -303,7 +305,7 @@ const RT_CSS=`.ccr .rtabs{display:flex;gap:6px;margin:0 0 12px}.ccr .rtabs a{pad
 .ccr .rtg td.n b{color:#1d5534;font-size:1.05rem}.ccr.pp .big{color:#1d5534}.ccr .up{color:#1f7a3d;font-weight:700}.ccr .dn{color:#c62828;font-weight:700}`;
 const rtKey=n=>String(n||'').trim().toLocaleLowerCase('tr').replace(/\s+/g,' ');
 function clubRating(){
-  const arc=(getArchives()||[]).map((a,i)=>({a,i,d:+new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d>0&&!(x.a.state&&x.a.state.movement==='team')).sort((x,y)=>x.d-y.d);   // the club rating: pair tournaments (not team matches)
+  const arc=resArc().map((a,i)=>({a,i,d:+new Date(a.finished||(a.state&&a.state._finishedAt)||0)})).filter(x=>x.d>0&&!(x.a.state&&x.a.state.movement==='team')).sort((x,y)=>x.d-y.d);   // the club rating: pair tournaments (not team matches)
   const R={};
   for(const {a,i,d} of arc){
     const mp=calcMP(a.boards||{},a.movements||{}), P=a.pairs||{};

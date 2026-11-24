@@ -175,6 +175,8 @@ window.bgPlayerSit=async function(){
   const cl=document.getElementById('clubLinks'); if(cl) cl.style.display='none';
   // the table's code from the running tournament (no code to type); a club without codes: prefix + table number
   let lv=null; try{ const r=await fetch(await fbRootUrl('/live/'+CLUB_ID+'.json'),{cache:'no-store'}); lv=r.ok?await r.json():null; }catch(err){}
+  // a quick team match (a member started it): no codes, the player's BridgePlay session is enough
+  if(lv&&lv.q&&window.bridgeUser&&window.bridgeUser()){ window._quickSeat=e.n; const w=document.getElementById('pwWrap'); if(w) w.style.display='none'; await doLogin(); if(document.getElementById('app').style.display!=='flex'&&w) w.style.display='block'; return; }
   const code=lv&&lv.k?lv.k['t'+e.n]:lv?e.prefix+String(e.n).padStart(2,'0'):null;
   if(code){
     const inp=document.getElementById('pwInput'), w=document.getElementById('pwWrap'); inp.value=code; if(w) w.style.display='none';

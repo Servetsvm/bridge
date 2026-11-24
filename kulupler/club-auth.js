@@ -160,8 +160,9 @@ async function initClubGate(){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
       if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
       if(roleParam==='admin') setTimeout(()=>document.getElementById('pwInput')?.focus(),100);
-      // BridgePlay's Team match button (quick=team): the club's own admin needs no password — the match is set up at once
-      if(roleParam==='admin'&&params.get('quick')==='team'&&isClubAdmin()){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
+      // BridgePlay's Team match button (quick=team): any signed-in member needs no password — the match is set up at once
+      // (the rules let a member write the tournament only while no other one is running)
+      if(roleParam==='admin'&&params.get('quick')==='team'&&me()){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(async()=>{ await doLogin();
         // back at a table that is no longer this phone's (a new tournament, new codes): the table is chosen again, no code asked
@@ -457,13 +458,14 @@ window.doLogin=async function(){
   if(loginBtn){loginBtn.disabled=true;loginBtn.textContent='Checking...';}
   let ok=false;
   const testT=role==='table'&&bgTestOn()&&isSuper()&&window._bgTestTable;   // the super admin at a test table: no code
-  try{ ok = testT ? true : role==='admin'&&window._quickTeam&&isClubAdmin() ? (await window.bridgeSession(), true) : await startSession(role, CLUB_ID, pw); }   // the club's own admin: his BridgePlay session is enough for the rules
+  try{ ok = testT ? true : (role==='admin'&&window._quickTeam&&me())||(role==='table'&&window._quickSeat&&me()) ? !!(await window.bridgeSession()) : await startSession(role, CLUB_ID, pw); }   // a quick team match: the BridgePlay session is enough for the rules
   catch(e){ if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';} err.textContent='❌ '+e.message; return; }
   if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
   if(!ok){err.textContent=role==='table'?'❌ Wrong table code':isClubAdmin()&&/^\d{4}$/.test(String(pw).trim())?'❌ Wrong PIN':'❌ Wrong password';return;}
   // the code says which table this is: prefix + table number (0003 = table 3)
   document.body.classList.toggle('bg-device',role==='table');   // a table: the BridgeScore look from here on
-  if(role==='table'&&testT){ window.bmCodeTable=testT; window._bgTestTable=null; try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(testT)); }catch(e){} }
+  if(role==='table'&&window._quickSeat){ window.bmCodeTable=window._quickSeat; window._bgWantTable=null; window._quickSeat=null; }
+  else if(role==='table'&&testT){ window.bmCodeTable=testT; window._bgTestTable=null; try{ sessionStorage.setItem('bgTestMine:'+CLUB_ID,String(testT)); }catch(e){} }
   else if(role==='table'){
     const c=String(pw).trim(); window.bmCodePrefix=c.slice(0,2); window._bgCode=c;   // for Change table
     // the table's number: from its own code (the tables' codes), or prefix + number (a club without codes yet)
@@ -486,6 +488,8 @@ window.doLogin=async function(){
 
   if(role==='admin'){
     if(window._quickTeam){ window._quickTeam=false; const s0=getState();
+      // a member (not the club's admin): only while no other tournament is running or being set up at the club
+      if(!isClubAdmin()&&s0.status==='running'&&!s0._quickTeam||!isClubAdmin()&&s0.status==='setup'){ toast('⚠️ '+i18nText('Another tournament is being played at this club now.')); setTimeout(()=>location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)),1800); return; }
       if(s0.status!=='running'){ try{ await quickTeamMatch(); window._quickMade=true; }catch(e){ toast('❌ '+(e&&e.message||e)); } } }
     const st=getState();
     if(st&&st.status==='running'&&!new URLSearchParams(location.search).get('ot')&&!window._quickMade){
