@@ -4096,7 +4096,10 @@ function notify(text) {
 const pushBase = () => BOT_AI.replace(/\/$/, '');
 // how it went is kept (SET.pushSt) and shown in Settings: ok, ok-admin, unsupported, denied, ask, err:<why>
 function pushState(st) { if (SET.pushSt !== st) { SET.pushSt = st; Store.saveSettings(SET); save(); if (ui.overlay === 'set') pushStateShow(); } return st; }
-async function pushSetup(force) {
+// one at a time: Settings opening and Test pressed together would send the same subscription twice
+let pushBusy = null;
+function pushSetup(force) { if (!pushBusy) pushBusy = pushSetup1(force).finally(() => { pushBusy = null; }); return pushBusy; }
+async function pushSetup1(force) {
   try {
     if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return pushState('unsupported');
     if (SET.notify === false || !myNm()) return;

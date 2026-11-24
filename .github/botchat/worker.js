@@ -269,7 +269,8 @@ async function pushRoute(path, req, b, env, ctx, json) {
     const name = clip(b && b.name, 40).toLowerCase(), sub = b && b.sub, ep = sub && clip(sub.endpoint, 600);
     if (!name || !ep || !/^https:\/\//.test(ep)) return json({ error: 'bad request' }, 400);
     const id = await epId(ep), old = await env.PUSH.get('ep:' + id), k = pushKey(admin, name, id);
-    if (old && old !== k) await env.PUSH.delete(old);   // the same phone under another name (or now the administrator's)
+    if (old === k) return json({ ok: true, admin });   // already so (KV takes one write a second to a key: none needed)
+    if (old) await env.PUSH.delete(old);   // the same phone under another name (or now the administrator's)
     await env.PUSH.put(k, JSON.stringify({ ep, name, admin, ts: Date.now() }), { expirationTtl: 400 * 86400 });
     await env.PUSH.put('ep:' + id, k, { expirationTtl: 400 * 86400 });
     return json({ ok: true, admin });
@@ -319,7 +320,8 @@ export default {
     if (limited(req.headers.get('CF-Connecting-IP') || 'x')) return json({ error: 'slow down' }, 429);
     let b; try { b = await req.json(); } catch (e) { return json({ error: 'bad request' }, 400); }
     if (path === '/err') return takeError(b, env, ctx, json);
-    if (path.startsWith('/push/')) return pushRoute(path, req, b, env, ctx, json);
+    // (an error in it still answers with the site's headers, so the page sees why instead of "Failed to fetch")
+    if (path.startsWith('/push/')) { try { return await pushRoute(path, req, b, env, ctx, json); } catch (e) { console.log('push route', String(e)); return json({ error: String(e && e.message || e).slice(0, 120) }, 500); } }
     // the player's 👍 (1) or 👎 (-1) on an answer of the last day
     if (path === '/rate') {
       const id = String(b && b.id || ''), v = b && b.v === 1 ? 1 : b && b.v === -1 ? -1 : 0;
