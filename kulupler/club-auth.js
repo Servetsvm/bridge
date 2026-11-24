@@ -161,13 +161,16 @@ async function initClubGate(){
       if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
       if(roleParam==='admin') setTimeout(()=>document.getElementById('pwInput')?.focus(),100);
       // a quick team match being played here (its tables need no code): a member not asking for the TD goes to its table numbers
-      if(u&&roleParam!=='admin'&&roleParam!=='screen'&&!params.get('t')&&!params.get('qt')&&!params.get('p')){
+      if(roleParam!=='admin'&&roleParam!=='screen'&&!params.get('t')&&!params.get('qt')&&!params.get('p')){
         let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
         if(st&&st.status==='running'&&st._quickTeam){ selRole('table'); bgPlayerEntry('00'); return; }
       }
       // BridgePlay's Team match button (quick=team): any signed-in member needs no password — the match is set up at once
       // (the rules let a member write the tournament only while no other one is running)
       if(roleParam==='admin'&&params.get('quick')==='team'&&me()){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
+      // a member's TD button of a quick team match being played: no password either (the rules let members run it)
+      else if(roleParam==='admin'&&me()&&!isClubAdmin()){ let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
+        if(st&&st.status==='running'&&st._quickTeam){ window._quickTeam=true; window._quickMade=true; setTimeout(()=>doLogin(),50); } }
       // a table's own link carries its code (&t=0003): it signs in at once
       const tc=params.get('t'); if(roleParam==='table'&&/^\d{4}$/.test(tc||'')){ document.getElementById('pwInput').value=tc; setTimeout(async()=>{ await doLogin();
         // back at a table that is no longer this phone's (a new tournament, new codes): the table is chosen again, no code asked
@@ -205,12 +208,21 @@ window.clubAdminGo=async function(){
   if(await openClub(id, err)){ selRole('admin'); setTimeout(()=>document.getElementById('pwInput')?.focus(),100); }
 };
 // the entry screen of the tournaments running now: each with its table number keys, and Admin for its club's admin
+// the quick team match just started: the club's table list (its table numbers and TD) on this page
+async function quickEntry(){
+  try{ history.replaceState(null,'',location.pathname+'?club='+encodeURIComponent(CLUB_ID)); }catch(e){}
+  document.getElementById('app').style.display='none'; document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('loginForm').style.display='none';
+  const s=getState(), live=[{club:CLUB_ID,n:String(s.name||''),c:CLUB_NAME||'',tb:s.tableCount||2,p:'00',ts:Date.now(),q:1}];
+  await renderEntry(live);
+}
 async function renderEntry(live){
   document.body.classList.add('bg-device');   // the BridgeScore look from the entry screen on
   const g=document.getElementById('clubGate'); g.style.display='block';
   const box=document.getElementById('myClubsBox'); if(!box) return;
   const u=me(), go=(t,q)=>location.pathname+'?club='+encodeURIComponent(t.club)+q;
-  const own=await Promise.all(live.map(async t=>{ if(isSuper()) return true; const i=await checkClubExists(t.club); return !!(i&&u&&i.owner===u.key); }));
+  const own=await Promise.all(live.map(async t=>{ if(isSuper()||(t.q&&u)) return true;   // a quick team match: any member may run it (and finish it)
+    const i=await checkClubExists(t.club); return !!(i&&u&&i.owner===u.key); }));
   // the tables someone took this round are not offered
   const taken=await Promise.all(live.map(async t=>{ try{ const [st,lk]=await Promise.all(['state','tableLocks'].map(async k=>{ const r=await fetch(await fbRootUrl('/clubs/'+t.club+'/bm/'+k+'.json'),{cache:'no-store'}); return r.ok?await r.json():null; })); const r=st&&st.currentRound; const t0=Date.parse((st&&st._startedAt)||0)||0; return new Set(Object.keys(lk||{}).filter(k=>r&&k.startsWith(r+'_')&&((lk[k]&&lk[k].lockedAt)||0)>=t0).map(k=>+k.split('_')[1])); }catch(e){ return new Set(); } }));
   // each club by its name; its table numbers (and Admin) open when it is tapped
@@ -501,8 +513,9 @@ window.doLogin=async function(){
       // a member (not the club's admin): only while no other tournament is running or being set up at the club
       if(!isClubAdmin()&&s0.status==='running'&&!s0._quickTeam||!isClubAdmin()&&s0.status==='setup'){ toast('⚠️ '+i18nText('Another tournament is being played at this club now.')); setTimeout(()=>location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)),1800); return; }
       if(s0.status!=='running'){ try{ await quickTeamMatch(); window._quickMade=true;
-        // set up and started: straight to the club's tables (table numbers and TD), not the TD panel
-        location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)); return; }catch(e){ toast('❌ '+(e&&e.message||e)); } } }
+        // set up and started: straight to the club's tables (table numbers and TD), not the TD panel — drawn here, without
+        // loading the page again (a new load could miss the tournament for a moment and show the table code box)
+        await quickEntry(); return; }catch(e){ toast('❌ '+(e&&e.message||e)); } } }
     const st=getState();
     if(st&&st.status==='running'&&!new URLSearchParams(location.search).get('ot')&&!window._quickMade){
       refreshTopbar();

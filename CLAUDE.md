@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v667`, kulüpler `kulup-v181`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v668`, kulüpler `kulup-v182`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v667`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-24
+- Takım maçı kurulunca sayfa yeniden yüklenmiyor: `quickEntry()` masa listesini aynı sayfada çizer (yeniden yüklemede bazen kod
+  kutusu çıkıyordu). Hızlı takım maçında masa listesindeki TD her üyeye açık; üye `role=admin` → şifresiz (state `_quickTeam` running).
 - **Açılışta her zaman güncel sürüm:** app.js `updatefound` (açılıştan sonraki 20 sn içinde ya da sakin ekranda) → tam ekran
   "Güncelleniyor…" (`#updWait`), yeni SW devralınca hemen yeniden yüklenir; 20 sn'de bitmezse eski sürüm sürer, şerit önerir.
   Kulüp programı (kulupler/) zaten network-first.
