@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v686`, kulüpler `kulup-v197`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v687`, kulüpler `kulup-v198`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,11 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v686`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-25
+- **Kulüp programı canlı akış:** `DB.subscribe` artık Firebase SSE (EventSource; put/patch `_setPath`, `auth_revoked`→yeni token, kesilince
+  yeniden bağlanır, açılamazsa 4 sn/15 sn (gizli) yoklama). Eskiden her cihaz 8 anahtarı (üye listesi dahil) 2 sn'de bir indiriyordu.
+  **Çevrimdışı:** `setBoards/setApprovals/setTableLocks` → `DB.setDiff` (yalnız değişen kayıtlar PATCH; başka masanın skoru ezilmez);
+  kuyruk 8 sn'de bir + açılışta + ekrana dönünce denenir, "⏳ Bağlantı bekleniyor: n gönderilecek" (`#bmQueue`).
+  **Hareket rehberi:** tur sonu ekranında `bgMoveGuideHtml` (➜ Masa n / bu masada kal, KG/DB pusula, alınacak board'lar, bu masanın board'ları → Masa m).
 - **Unutulan turnuva (kullanıcının isteği):** `.github/workflows/close-stale.yml` 15 dk'da bir `.github/stale/close.js` (FIREBASE_DB_SECRET):
   1 saat skor yoksa başlatana (`state._by`, adminStart'ta; yoksa kulüp sahibi) `destek/<k>/m` yönetici mesajı (TR/NO/EN) + `_idleWarnAt`;
   30 dk sonra hâlâ skor yoksa turnuvayı bitirir, arşivler (hızlı → teamArch), live'ı siler (`_autoFinished:'idle'`). Elle çalıştırma: dry=1 yalnız yazdırır.

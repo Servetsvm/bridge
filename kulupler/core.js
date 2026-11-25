@@ -15,6 +15,7 @@ let CLUB_ID=null;   // resolved by initClubGate() before login is usable
 let CLUB_NAME=null; // human-readable club name, set once club info is loaded
 let FBURL=null;     // = FB_BASE + '/clubs/' + CLUB_ID + '/bm', set in setClub()
 const _cache={};
+const _known={};   // each key as this device last read or wrote it (what a diff write compares with)
 
 // ── Offline write queue ──
 // Each entry keeps the address without the sign-in token; a fresh token is added when it is sent
@@ -23,9 +24,9 @@ const _writeQueue=[];
 let _queueProcessing=false;
 const _bare=u=>String(u||'').replace(/\?auth=.*$/,'');
 async function _processQueue(){
-  if(_queueProcessing||!navigator.onLine||!_writeQueue.length)return;
-  _queueProcessing=true;
-  while(_writeQueue.length&&navigator.onLine){
+  if(_queueProcessing||!_writeQueue.length)return;   // (navigator.onLine is not trusted: a try tells)
+  _queueProcessing=true; if(_writeQueue.length) window._qWasLong=true;
+  while(_writeQueue.length){
     const {url,method,body}=_writeQueue[0];
     try{
       const token=await authToken();
@@ -35,14 +36,31 @@ async function _processQueue(){
       try{localStorage.setItem('bm_writeQueue',JSON.stringify(_writeQueue));}catch(e){}
     }catch(e){break;}
   }
-  _queueProcessing=false;
+  _queueProcessing=false; _queueBadge();
+  if(!_writeQueue.length&&window._qWasLong){ window._qWasLong=false; toast('✅ '+(window.i18nText?i18nText('Sent'):'Sent')); }
 }
 // Restore queue from localStorage on startup
 try{const q=JSON.parse(localStorage.getItem('bm_writeQueue')||'[]');if(Array.isArray(q))_writeQueue.push(...q.map(x=>({...x,url:_bare(x.url)})));}catch(e){}
 function _queue(url,method,body){
-  _writeQueue.push({url:_bare(url),method,body});
+  url=_bare(url);
+  // a whole value written again replaces the one still waiting (only the last counts)
+  if(method==='PUT'||method==='DELETE'){ for(let i=_writeQueue.length-1;i>=0;i--) if(_writeQueue[i].url===url&&_writeQueue[i].method!=='PATCH') _writeQueue.splice(i,1); }
+  _writeQueue.push({url,method,body});
   try{localStorage.setItem('bm_writeQueue',JSON.stringify(_writeQueue));}catch(e){}
+  _queueBadge();
 }
+// what is still waiting to be sent: shown on the screen until it has gone (scores entered without a connection)
+function _queueBadge(){
+  let el=document.getElementById('bmQueue');
+  if(!_writeQueue.length){ if(el) el.remove(); return; }
+  if(!el){ el=document.createElement('div'); el.id='bmQueue'; el.className='bm-queue'; document.body.appendChild(el); }
+  el.textContent='⏳ '+(window.i18nText?i18nText('Waiting for the connection: {0} to send').replace('{0}',_writeQueue.length):'Waiting for the connection: '+_writeQueue.length+' to send');
+}
+// sent again every few seconds while anything waits (a weak connection may never say it is back), on coming back to
+// the screen, and at the start (what a closed page left)
+setInterval(()=>{ if(_writeQueue.length) _processQueue(); },8000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible'&&_writeQueue.length) _processQueue(); });
+setTimeout(()=>{ _queueBadge(); _processQueue(); },1500);
 window.addEventListener('online',()=>{
   const b=document.getElementById('connBadge');
   if(b){b.style.background='var(--greendim)';b.style.color='var(--green)';b.textContent='🟢 Online';}
@@ -130,11 +148,11 @@ const DB={
   async get(k){
     try{const url=await fbUrl('/'+k+'.json');const r=await fetch(url,{cache:'no-store'});
       if(!r.ok)return _cache[k]||null;
-      let v=cleanData(await r.json());if(k==='hands'&&v)v=(Array.isArray(v)?v:Object.values(v)).filter(Boolean);_cache[k]=v;return v;
+      let v=cleanData(await r.json());if(k==='hands'&&v)v=(Array.isArray(v)?v:Object.values(v)).filter(Boolean);_cache[k]=v;_known[k]=v&&typeof v==='object'?JSON.parse(JSON.stringify(v)):v;return v;
     }catch(e){return _cache[k]||null;}
   },
   async set(k,v){
-    _cache[k]=v;
+    _cache[k]=v; _known[k]=v&&typeof v==='object'?JSON.parse(JSON.stringify(v)):v;
     const url=await fbUrl('/'+k+'.json');
     if(!navigator.onLine){_queue(url,'PUT',JSON.stringify(v));return;}
     try{
@@ -146,6 +164,21 @@ const DB={
       _queue(url,'PUT',JSON.stringify(v));
     }
   },
+  /* a map (boards, approvals, table locks) written as only what changed since this device last saw it: one PATCH with
+     the changed entries (null for one removed). Two tables saving at once, or a phone that was offline sending its
+     scores later, no longer write each other's over. An empty map clears it (PUT). */
+  async setDiff(k,v){
+    const prev=_known[k];
+    if(!v||typeof v!=='object'||!Object.keys(v).length||!prev||typeof prev!=='object') return this.set(k,v);
+    const d={}; for(const x of Object.keys(v)) if(JSON.stringify(v[x])!==JSON.stringify(prev[x])) d[x]=v[x]===undefined?null:v[x];
+    for(const x of Object.keys(prev)) if(!(x in v)) d[x]=null;
+    _cache[k]=v; _known[k]=JSON.parse(JSON.stringify(v));
+    if(!Object.keys(d).length) return;
+    const url=await fbUrl('/'+k+'.json'), body=JSON.stringify(d);
+    if(!navigator.onLine){ _queue(url,'PATCH',body); return; }
+    try{ const r=await fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body}); if(r.status===401) toast('❌ Not allowed — please log in again'); }
+    catch(e){ _queue(url,'PATCH',body); }
+  },
   async del(k){
     delete _cache[k];
     const url=await fbUrl('/'+k+'.json');
@@ -156,25 +189,64 @@ const DB={
     }
     catch(e){_queue(url,'DELETE',null);}
   },
+  /* live: one stream for each key (Firebase's own, server-sent events) — the value comes once, then only what changes;
+     every caller of the same key shares it. A stream that cannot be opened (an old browser, a refused one) falls back to
+     reading the key again every few seconds */
   subscribe(k,cb){
-    let last=undefined;
-    const poll=async()=>{
-      try{const url=await fbUrl('/'+k+'.json');const r=await fetch(url,{cache:'no-store'});
-        if(r.ok){let v=cleanData(await r.json());if(k==='hands'&&v)v=(Array.isArray(v)?v:Object.values(v)).filter(Boolean);const s=JSON.stringify(v);
-          if(s!==last){last=s;_cache[k]=v;cb(v);}
-        }
-      }catch(e){}
-      setTimeout(poll,2000);
-    };
-    poll();
+    const S=_streams[k]||(_streams[k]={cbs:[],last:undefined});
+    S.cbs.push(cb);
+    if(S.cbs.length>1){ if(S.last!==undefined) try{ cb(_cache[k]); }catch(e){} return; }
+    _streamOpen(k);
   }
 };
+const _streams={};
+const _emit=(k,v)=>{ const S=_streams[k]; v=cleanData(v); if(k==='hands'&&v)v=(Array.isArray(v)?v:Object.values(v)).filter(Boolean);
+  const j=JSON.stringify(v); if(j===S.last) return; S.last=j; _cache[k]=v; _known[k]=v&&typeof v==='object'?JSON.parse(j):v; S.cbs.forEach(f=>{ try{ f(v); }catch(e){ console.warn(e); } }); };
+// a change at a path (Firebase's "put"/"patch"): the value with that part replaced (null removes it)
+function _setPath(root,path,data){
+  const seg=String(path||'/').split('/').filter(Boolean);
+  if(!seg.length) return data;
+  const top=root&&typeof root==='object'?(Array.isArray(root)?root.slice():{...root}):{};
+  let o=top;
+  for(let i=0;i<seg.length-1;i++){ const c=o[seg[i]]; o[seg[i]]=c&&typeof c==='object'?(Array.isArray(c)?c.slice():{...c}):{}; o=o[seg[i]]; }
+  const last=seg[seg.length-1]; if(data===null) delete o[last]; else o[last]=data;
+  return top;
+}
+function _streamOpen(k){
+  const S=_streams[k]; if(S.poll) return;
+  if(typeof EventSource==='undefined'){ _pollStart(k); return; }
+  (async()=>{
+    let es, val=null, got=false;
+    try{ es=new EventSource(await fbUrl('/'+k+'.json')); }catch(e){ _pollStart(k); return; }
+    S.es=es;
+    const again=ms=>{ try{ es.close(); }catch(e){} if(S.es!==es) return; S.es=null; setTimeout(()=>_streamOpen(k),ms); };
+    es.addEventListener('put',e=>{ try{ const d=JSON.parse(e.data); val=_setPath(val,d.path,d.data); got=true; S.fails=0; _emit(k,val); }catch(x){} });
+    es.addEventListener('patch',e=>{ try{ const d=JSON.parse(e.data), base=d.path==='/'?'':d.path; for(const [kk,vv] of Object.entries(d.data||{})) val=_setPath(val,base+'/'+kk,vv); S.fails=0; _emit(k,val); }catch(x){} });
+    // the sign-in ran out (an hour): the stream again with a fresh one
+    es.addEventListener('auth_revoked',()=>again(300));
+    // refused (no right to read it, or the stream is not allowed): read it as before
+    es.addEventListener('cancel',()=>{ try{ es.close(); }catch(e){} S.es=null; _pollStart(k); });
+    // cut (the phone slept, the network went): opened again with a fresh sign-in; after repeated failures with nothing
+    // received, the old way
+    es.onerror=()=>{ S.fails=(S.fails||0)+1; if(!got&&S.fails>=4){ try{ es.close(); }catch(e){} S.es=null; _pollStart(k); return; } again(Math.min(30000,1500*S.fails)); };
+  })();
+}
+function _pollStart(k){
+  const S=_streams[k]; if(S.poll) return; S.poll=true;
+  const poll=async()=>{
+    try{ const r=await fetch(await fbUrl('/'+k+'.json'),{cache:'no-store'}); if(r.ok) _emit(k,await r.json()); }catch(e){}
+    setTimeout(poll,document.hidden?15000:4000);
+  };
+  poll();
+}
+// back on the screen (a phone that slept): the streams that were cut are opened at once
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState!=='visible') return; for(const k of Object.keys(_streams)){ const S=_streams[k]; if(!S.poll&&(!S.es||S.es.readyState===2)){ S.fails=0; _streamOpen(k); } } });
 const getState=()=>_cache['state']||{name:'Bridge Tournament',tableCount:0,boardsPerRound:3,totalBoards:0,roundCount:0,currentRound:0,status:'setup',movement:'mitchell',phantom:false,scoring:'MP'};
 const setState=s=>DB.set('state',s);
 const getPairs=()=>_cache['pairs']||{};
 const setPairs=p=>DB.set('pairs',p);
 const getBoards=()=>_cache['boards']||{};
-const setBoards=b=>DB.set('boards',b);
+const setBoards=b=>DB.setDiff('boards',b);   // only the boards that changed: another table's new score is never written over
 const getMovements=()=>_cache['movements']||{};
 const setMovements=m=>DB.set('movements',m);
 const getLogs=()=>_cache['logs']||[];
@@ -199,7 +271,7 @@ async function archiveChange(key,fn){
   return A.findIndex(a=>arcKey(a)===key);
 }
 const getApprovals=()=>_cache['approvals']||{};
-const setApprovals=a=>DB.set('approvals',a);
+const setApprovals=a=>DB.setDiff('approvals',a);
 
 async function preloadCache(){
   const keys=['state','pairs','boards','movements','logs','archives','approvals','tableLocks','playerdb','hands','dd'];

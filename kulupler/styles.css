@@ -802,3 +802,23 @@ body.screen-role #topbarRole{color:#4caf7d;border-color:rgba(76,175,125,.4)}
   .sb-rank td:nth-child(n+4) .pct-bar-bg{margin:0 auto}
   .sb-rank th{font-size:.6rem;letter-spacing:0;white-space:normal}
 }
+
+/* scores waiting for the connection */
+.bm-queue{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:9000;background:#7a5b0f;color:#fff6dc;padding:8px 16px;border-radius:999px;font-weight:700;font-size:.9rem;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+
+/* the movement guide at the end of a round */
+.mg{background:linear-gradient(160deg,#1f5d36,#174a2b);color:#fff;border-radius:16px;padding:16px;margin:12px 0;text-align:left;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.mg small{display:block;font-size:.8rem;opacity:.8}
+.mg b{font-size:1.5rem;line-height:1.15}
+.mg-to{display:flex;align-items:center;gap:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.2)}
+.mg-to b{font-size:2.3rem}
+.mg-arrow{font-size:3rem;line-height:1;color:#f4d27a;animation:mgpush 1.2s ease-in-out infinite}
+.mg-arrow.stay{animation:none}
+@keyframes mgpush{50%{transform:translateX(8px)}}
+.mg-row{display:flex;align-items:center;gap:14px;margin-top:12px}
+.mg-seat{width:54px;height:54px;display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.12);font-size:.72rem;font-weight:800;text-align:center;align-items:center}
+.mg-seat span{opacity:.45}.mg-seat span.on{opacity:1;color:#f4d27a}
+.mg-seat span:nth-child(1){grid-column:2;grid-row:1}.mg-seat span:nth-child(2){grid-column:1;grid-row:2}.mg-seat i{grid-column:2;grid-row:2;width:18px;height:18px;margin:auto;border-radius:4px;background:rgba(255,255,255,.3)}
+.mg-seat span:nth-child(4){grid-column:3;grid-row:2}.mg-seat span:nth-child(5){grid-column:2;grid-row:3}
+.mg-bd{width:54px;height:54px;flex-shrink:0;border-radius:10px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-size:1.8rem}
+.mg-pass{margin-top:12px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.2);font-size:.9rem}

@@ -2,7 +2,7 @@
 //  tableLocks: { "round_tableNo": { lockedAt } }
 // ══════════════════════════════════════════════════════
 const getTableLocks=()=>_cache['tableLocks']||{};
-const setTableLocks=l=>DB.set('tableLocks',l);
+const setTableLocks=l=>DB.setDiff('tableLocks',l);
 
 function tableLockKey(tableNo){
   return getState().currentRound+'_'+tableNo;
@@ -493,7 +493,7 @@ window.bmShowRoundOver=function(tableNo,rnd){
       <div class="round-over-screen">
         <div class="ro-badge">🔔</div>
         <div class="ro-title">Round ${cr} Complete</div>
-        <div class="ro-sub">Move instructions below</div>
+        ${bgMoveGuideHtml(tableNo,cr,nextR,curM,nsNextTable,ewNextTable)}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;">
           <div class="ro-move-card">
             <div class="ro-move-label">🔵 NS Pair</div>
@@ -507,7 +507,7 @@ window.bmShowRoundOver=function(tableNo,rnd){
           </div>
         </div>
         <div class="ro-move-card" style="margin-bottom:14px;">
-          <div class="ro-move-label">📋 Next Round ${nextR} — Boards</div>
+          <div class="ro-move-label">📋 ${(window.i18nText?i18nText('This table'):'This table')} · ${(window.i18nText?i18nText('Round'):'Round')} ${nextR} — ${(window.i18nText?i18nText('Boards'):'Boards')}</div>
           <div class="ro-move-boards">B${nextM.boardStart||'?'} – B${nextM.boardEnd||'?'}</div>
         </div>
         ${bgStandingsHtml()}
@@ -516,6 +516,24 @@ window.bmShowRoundOver=function(tableNo,rnd){
     </div>`;
 };
 
+/* the movement guide at the end of a round: for this device's pair, in large — where to go (an arrow and the table
+   number), which way to sit there, the boards to take; then where this table's boards go */
+function bgMoveGuideHtml(tableNo,cr,nextR,curM,nsNext,ewNext){
+  const L=window.i18nText?i18nText:x=>x, mv=getMovements(), mine=bmSide==='ew'?'ew':'ns', pid=curM[mine], to=mine==='ew'?ewNext:nsNext;
+  if(!to) return '';
+  const nm=mv[nextR+'_'+to]||{}, dir=nm.ns===pid?'ns':nm.ew===pid?'ew':mine, stay=to===tableNo;
+  const bds=nm.boardStart?(nm.boardEnd&&nm.boardEnd!==nm.boardStart?nm.boardStart+'–'+nm.boardEnd:String(nm.boardStart)):'?';
+  // this table's boards: the table that plays them next round
+  let bTo=null; if(curM.boardStart) for(const k in mv){ if(!k.startsWith(nextR+'_')) continue; const m=mv[k]; if(m.boardStart===curM.boardStart){ bTo=+k.split('_')[1]; break; } }
+  const cur=curM.boardStart?(curM.boardEnd&&curM.boardEnd!==curM.boardStart?curM.boardStart+'–'+curM.boardEnd:String(curM.boardStart)):'';
+  const seat=d=>`<div class="mg-seat"><span class="${d==='ns'?'on':''}">N</span><span class="${d==='ew'?'on':''}">W</span><i></i><span class="${d==='ew'?'on':''}">E</span><span class="${d==='ns'?'on':''}">S</span></div>`;
+  return `<div class="mg">
+    <div class="mg-to">${stay?`<div class="mg-arrow stay">⟲</div><div><small>${L('Stay at this table')}</small><b>${L('Table')} ${to}</b></div>`:`<div class="mg-arrow">➜</div><div><small>${L('Go to')}</small><b>${L('Table')} ${to}</b></div>`}</div>
+    <div class="mg-row">${seat(dir)}<div><small>${L('Sit')}</small><b>${dir==='ns'?L('North–South'):L('East–West')}</b></div></div>
+    <div class="mg-row"><div class="mg-bd">🂠</div><div><small>${L('Boards')}</small><b>${bds}</b></div></div>
+    ${bTo&&cur&&bTo!==tableNo?`<div class="mg-pass">📦 ${L('Boards')} ${cur} → ${L('Table')} ${bTo}</div>`:''}
+  </div>`;
+}
 // the standings after this round: every pair's matchpoints (%) and IMPs so far, best first
 function bgStandingsHtml(){
   const P=getPairs(), mp=calcMP(), L=(window.i18nText?i18nText:x=>x);
