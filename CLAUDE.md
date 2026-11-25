@@ -59,6 +59,7 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v683`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-25
+- GitHub Pages yayını (pages build and deployment) 25.11 öğleden sonra üst üste 500 hatası verdi (GitHub kesintisi): site v680'de kaldı; düzelince yeni bir commit yayını yeniden tetikler.
 - Kullanıcının sistem/konvansiyon tanımlarıyla karşılaştırıldı; farklı olanlar onun tanımına çekildi (motor + CONVS + CONV_T 9 dil):
   WJS 3-6, SJS 17+, Drury 9-11, Multi 5-10, Inverted Minors baraj 6-9, NMF 10+, SAYC/Acol 2 seviyesi yeni renk 10+.
   Ölçüm (12000 el her biri): SAYC +20, Acol −19, invMin +23, SJS +14, NMF −3, Drury −10, Multi 0, Muiderberg 6-10 −168 → kullanıcı onayıyla 5-10'a geri alındı.
