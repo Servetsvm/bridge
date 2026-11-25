@@ -484,7 +484,9 @@ window.adminStart=async function(){
   const s=getState();if(s.status!=='setup'){toast('Already started');return;}
   s._startedAt=new Date().toISOString();
   // the names come from the tables (each table enters its players), so the tournament starts without them
-  s.currentRound=1;s.status='running';s._roundStartedAt=new Date().toISOString();setState(s);
+  s.currentRound=1;s.status='running';s._roundStartedAt=new Date().toISOString();
+  { const u=window.bridgeUser&&window.bridgeUser(); s._by=u?u.key:''; }   // who started it: told when no score comes for an hour
+  setState(s);
   await Promise.all([DB.set('tableLocks',{}),DB.set('approvals',{}),DB.del('kicks'),DB.del('tdcalls')]);
   await setLive(true);   // listed before anyone looks for it (the quick team match opens its table list next)
   // this phone started it: BridgePlay reminds its player when no score has come for a while (and the TD may have forgotten to finish)

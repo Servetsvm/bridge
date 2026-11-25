@@ -1,0 +1,30 @@
+# A club tournament the TD forgot to finish (.github/stale/close.js): an hour without a score → a message to the player
+# who started it; half an hour later, still none → finished and its results archived. Every quarter of an hour; by hand
+# with dry = 1 it only prints what it would do.
+name: Close forgotten tournaments
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: 1 = only print, change nothing
+        required: false
+        default: '1'
+concurrency: close-stale
+permissions:
+  contents: read
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Message, then finish, the forgotten tournaments
+        env:
+          FIREBASE_DB_SECRET: ${{ secrets.FIREBASE_DB_SECRET }}
+          DRY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry == '1' && '1' || '' }}
+        run: node .github/stale/close.js

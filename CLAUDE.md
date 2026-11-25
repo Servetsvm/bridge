@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v685`, kulüpler `kulup-v196`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v686`, kulüpler `kulup-v197`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,9 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v685`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-25
+- **Unutulan turnuva (kullanıcının isteği):** `.github/workflows/close-stale.yml` 15 dk'da bir `.github/stale/close.js` (FIREBASE_DB_SECRET):
+  1 saat skor yoksa başlatana (`state._by`, adminStart'ta; yoksa kulüp sahibi) `destek/<k>/m` yönetici mesajı (TR/NO/EN) + `_idleWarnAt`;
+  30 dk sonra hâlâ skor yoksa turnuvayı bitirir, arşivler (hızlı → teamArch), live'ı siler (`_autoFinished:'idle'`). Elle çalıştırma: dry=1 yalnız yazdırır.
 - Ekran: sıralama telefonda tam sayfa ve ekrana sığar (`.sb-scroll`/`.sb-rank`, yön ve çift no sütunu gizli); "● Canlı" rozeti
   BridgePlay'in Kulüpler çubuğunda (`postMessage {bpLive}` → `#cvLive`); Masalar'da yalnız oynanan board numaraları (skor yok).
   Turnuvayı başlatan telefon (`localStorage bp_myTourn`, adminStart) 20 dk skor girilmezse "Turnuva bitti mi?" sorar
@@ -67,8 +70,7 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v685`, kulü
   Sonuçlar artık uygulama içinde (`openClubs('?club=..&results=1')`, eskiden yeni sekme). Masalar sekmesinde masanın oynadığı
   board'lar + KG skoru (`.tc-played`). Son turun bütün board'ları (oynamış her masada) bitince son skoru giren masa turnuvayı
   kapatıp arşivler (`bgQuickFinish` artık hızlı olmayan turnuvalar için de; `_autoFinished`). Yönetici → Tüm oyuncular: ✉️ herkese /
-  işaretlenenlere mesaj (`playersMsg`, `Net.supReply`). **Yarım:** unutulan (3 saat skorsuz) turnuvayı sunucuda kapatan zamanlanmış
-  görev (`.github/stale/close.js` + workflow, FIREBASE_DB_SECRET) yazılacaktı — canlı veritabanına otomatik yazdığı için kullanıcı onayı bekliyor.
+  işaretlenenlere mesaj (`playersMsg`, `Net.supReply`). Unutulan turnuva görevi kullanıcı onayıyla eklendi (yukarıda).
 - GitHub Pages yayını (pages build and deployment) 25.11 öğleden sonra üst üste 500 hatası verdi (GitHub kesintisi): site v680'de kaldı; düzelince yeni bir commit yayını yeniden tetikler.
 - Kullanıcının sistem/konvansiyon tanımlarıyla karşılaştırıldı; farklı olanlar onun tanımına çekildi (motor + CONVS + CONV_T 9 dil):
   WJS 3-6, SJS 17+, Drury 9-11, Multi 5-10, Inverted Minors baraj 6-9, NMF 10+, SAYC/Acol 2 seviyesi yeni renk 10+.
