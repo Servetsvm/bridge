@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v679`, kulüpler `kulup-v193`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v680`, kulüpler `kulup-v194`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,8 +59,9 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v679`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-25
+- TD BridgeScore: "Başlamaya hazır" ve oynanan turnuva ekranında altta 🗑 (tam yetkili TD) → tek soru, siler ve yeni turnuva kurulumuna geçer (`tdcResetNow`).
 - **Hızlı Sosyal Bridge:** kulüp kartında 🤝 Sosyal Bridge (kulüp bilgisi `bm/info/sb:1` açıksa) → `?role=admin&quick=social` →
-  `quickSocialPick()` (oyuncu 8–40, board 8–36) → `quickSocialGo()`; takım maçının bütün altyapısını kullanır (`_quickTeam` bayrağı
+  `quickSocialPick()` (oyuncu 8–40, board 8–36; varsayılan 12/12) → `quickSocialGo()`; takım maçının bütün altyapısını kullanır (`_quickTeam` bayrağı
   + `_quickKind:'social'`: şifresiz, kodsuz masa, kilit, geri dönüş, bitince `teamArch`). BridgeScore takım maçıyla aynı: atak sorulmaz (`_noLead`).
 
 ### 2026-11-24

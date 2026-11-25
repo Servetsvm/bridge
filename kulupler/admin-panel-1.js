@@ -247,7 +247,7 @@ function teamScoreHtml(){
    started at once, no opening lead asked; its results are listed apart as a team match */
 /* the quick Social Bridge (BridgePlay's Social Bridge button, any member): the players and the boards chosen on one
    screen, then set up and started at once like the quick team match (no password, tables without codes, ends by itself) */
-let _qsW={pl:8,nb:16};
+let _qsW={pl:12,nb:12};
 window.quickSocialPick=function(){
   const L=v=>window.i18nText?i18nText(v):v, PL=[8,12,16,20,24,28,32,36,40], NB=[8,12,16,20,24,28,32,36];
   const key=(v,on,fn)=>`<button class="bm3-key${on?' on':''}" style="${on?'background:#1f5d36;color:#fff;border-color:#1f5d36;':''}" onclick="${fn}">${v}</button>`;

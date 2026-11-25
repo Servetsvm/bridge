@@ -71,7 +71,7 @@ function drawHome(){ TDC.arc=null;
   const sum=`<div class="bm3-sum"><div><span>${L('Tournament')}</span><b>${cleanData(s.name||'')}</b></div><div><span>${L('Movement')}</span><b>${L(mv)}</b></div><div><span>${L('Tables')}</span><b>${s.tableCount||'—'}</b></div><div><span>${L('Rounds')}</span><b>${s.roundCount||'—'}</b></div><div><span>${L('Boards')}</span><b>${s.totalBoards||'—'}</b></div></div>`;
   const body=`<div class="bm3-step">⏳ ${L('Ready to start')}</div>${sum}
     ${handsHtml()}${menuHtml()}`;
-  frame(L('Ready to start'),body,`<button class="bm3-cancel" onclick="tdcSetupStart()">↺</button><button class="bm3-ok" onclick="tdcStart()">▶ ${L('Start round 1')}</button>`);
+  frame(L('Ready to start'),body,`<button class="bm3-cancel tdc-red" onclick="tdcResetNow()" title="${L('Delete')}">🗑</button><button class="bm3-cancel" onclick="tdcSetupStart()">↺</button><button class="bm3-ok" onclick="tdcStart()">▶ ${L('Start round 1')}</button>`);   // the tournament set up: deleted from here at once (one question)
 }
 // the players as on the BridgeScore: each table a card (its pairs); tapped, its four seats round the table
 function playersHtml(){
@@ -94,7 +94,7 @@ window.tdcPick=function(v){
   TDC.tab=v||null; tdcDraw(); tdcFill(true); };
 // Reset deletes the tournament: asked twice
 window.tdcReset=function(){ TDC.tab=null; tdcGo('reset'); };
-window.tdcResetNow=async function(){ await adminReset(true); TDC.tab='log'; TDC.v='home'; tdcDraw(); };
+window.tdcResetNow=async function(){ const had=getState().status; await adminReset(true); if(getState().status===had&&had) return; TDC.tab=null; TDC.v='home'; TDC.w=null; tdcDraw(); };   // deleted: straight to a new tournament's setup
 window.tdcResetOld=async function(i){ const a0=getArchives()[i]; if(!a0) return; await adminDeleteArchive(i); tdcDraw(); };
 // the hands: before round 1 (on the ready screen) and from the menu
 const handsHtml=()=>{ const h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>`; };
@@ -181,7 +181,7 @@ function drawRun(){ TDC.arc=null;
     ${legend.size?`<div class="tdc-legend">${[['pend','⏳','Waiting for OK'],['slow','⚠️','Slow'],['call','📣','Calls the TD']].filter(x=>legend.has(x[0])).map(([c,i,n])=>`<span class="${c}">${i} ${L(n)}</span>`).join('')}</div>`:''}
     ${menuHtml()}`;
   const next=last||social?`<button class="bm3-ok${all?'':' tdc-dim'}" onclick="tdcFinish()">🏁 ${L('Finish the tournament')}</button>`:`<span class="tdc-auto">${L('The next round starts by itself when every table has finished.')}</span>`;
-  frame(cleanData(s.name||'')+' · '+L((MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||''),body,`<button class="bm3-cancel" onclick="tdcReload()">↻</button>`+next,sub);
+  frame(cleanData(s.name||'')+' · '+L((MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||''),body,(qtMember()?'':`<button class="bm3-cancel tdc-red" onclick="tdcResetNow()" title="${L('Delete')}">🗑</button>`)+`<button class="bm3-cancel" onclick="tdcReload()">↻</button>`+next,sub);
 }
 window.tdcReload=async()=>{ try{ await Promise.all(['state','boards','approvals','movements','pairs','tdcalls','tableLocks'].map(k=>DB.get(k))); }catch(e){} tdcDraw(); };
 // the TD button: the club's settings (its logo, its password, the tables' codes, the slow-table alarm, the links)
