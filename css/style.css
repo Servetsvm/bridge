@@ -2511,3 +2511,8 @@ body.homev2 .h2tiles .h2sys{grid-column:1/-1}
 #updWait{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(14,40,28,.92);color:#f4e6b8;font:600 20px/1.4 var(--f-ui,system-ui);text-align:center}
 #updWait .updspin{font-size:44px;animation:updspin 1.2s linear infinite;margin-bottom:8px}
 @keyframes updspin{to{transform:rotate(360deg)}}
+
+/* the clubs' Live screen: its badge beside Clubs */
+#cvLive{margin-left:auto;align-self:center;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;border:1px solid rgba(76,175,125,.5);color:#6fd39a;font-weight:700;font-size:15px}
+#cvLive i{width:8px;height:8px;border-radius:50%;background:#4caf7d;animation:cvlp 1.5s infinite}
+@keyframes cvlp{50%{opacity:.35}}

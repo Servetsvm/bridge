@@ -787,3 +787,18 @@ body.screen-role #topbarRole{color:#4caf7d;border-color:rgba(76,175,125,.4)}
 .tc-played{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:6px;font-size:.72rem;color:var(--text3)}
 .tc-played b{display:inline-flex;gap:3px;align-items:baseline;padding:2px 7px;border-radius:8px;background:var(--greendim);color:var(--text);font-weight:700}
 .tc-played b i{font-style:normal;font-weight:500;font-size:.66rem;color:var(--text2)}
+
+/* the standings: the whole page on a phone (no box of its own, nothing wider than the screen); on a big screen a box that
+   scrolls by itself */
+.sb-scroll{max-height:60vh;overflow-y:auto;scroll-behavior:smooth}
+@media (max-width:900px){
+  .sb-scroll{max-height:none;overflow:visible}
+  .sb-rank{table-layout:fixed;width:100%}
+  .sb-rank th,.sb-rank td{padding:8px 4px}
+  .sb-rank th:first-child,.sb-rank td:first-child{width:38px}
+  .sb-rank .c-dir,.sb-rank .c-id{display:none}
+  .sb-rank .c-name{word-break:break-word}
+  .sb-rank th:nth-child(n+4),.sb-rank td:nth-child(n+4){width:58px;text-align:center}
+  .sb-rank td:nth-child(n+4) .pct-bar-bg{margin:0 auto}
+  .sb-rank th{font-size:.6rem;letter-spacing:0;white-space:normal}
+}

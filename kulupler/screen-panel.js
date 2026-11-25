@@ -144,15 +144,15 @@ function renderSbTab(allRows){
   if(getState().status!=='finished'&&role!=='screen'&&role!=='admin')return`<div class="empty-state"><div class="empty-icon">🔒</div>The results appear when the director finishes the tournament.</div>`;
   const data=screenTab==='ns'?allRows.filter(r=>r.dir==='NS'):screenTab==='ew'?allRows.filter(r=>r.dir==='EW'):allRows;
   if(!data.length)return`<div class="empty-state"><div class="empty-icon">♠</div>No scores entered yet</div>`;
-  return`<div id="sbScrollWrap" style="max-height:60vh;overflow-y:auto;scroll-behavior:smooth;"><table class="sb-table">
-    <thead><tr><th>#</th><th>Pair / Player</th><th>Dir</th>${scoringShows().mp?'<th>MP</th><th>Score %</th>':''}${scoringShows().imp?'<th>IMP</th>':''}<th>Boards</th></tr></thead>
+  return`<div id="sbScrollWrap" class="sb-scroll"><table class="sb-table sb-rank">
+    <thead><tr><th>#</th><th>Pair / Player</th><th class="c-dir">Dir</th>${scoringShows().mp?'<th>MP</th><th>Score %</th>':''}${scoringShows().imp?'<th>IMP</th>':''}<th>Boards</th></tr></thead>
     <tbody>${data.map((r,i)=>{
       const rk=i+1;const rc=rk===1?'r1':rk===2?'r2':rk===3?'r3':'rn';
       const pc=r.pct>=60?'mp-high':r.pct>=45?'mp-mid':'mp-low';
       return`<tr>
         <td><span class="rank-badge ${rc}">${rk}</span></td>
-        <td><div style="font-weight:600;">${r.name}</div><div style="font-size:0.72rem;color:var(--text3);">${r.id}</div></td>
-        <td><span style="font-size:0.72rem;color:${r.dir==='NS'?'var(--blue)':'var(--gold)'};">${r.dir}</span></td>
+        <td class="c-name"><div style="font-weight:600;">${r.dir==='NS'?'🔵':'🟡'} ${r.name}</div><div class="c-id" style="font-size:0.72rem;color:var(--text3);">${r.id}</div></td>
+        <td class="c-dir"><span style="font-size:0.72rem;color:${r.dir==='NS'?'var(--blue)':'var(--gold)'};">${r.dir}</span></td>
         ${scoringShows().mp?`<td><span class="mp-pill ${pc}">${r.mp}</span></td>
         <td><div style="font-size:0.82rem;font-weight:600;">${r.pct}%</div><div class="pct-bar-bg"><div class="pct-bar" style="width:${r.pct}%"></div></div></td>`:''}${scoringShows().imp?`<td style="font-weight:700;">${fmtImp(r.imp)}</td>`:''}
         <td style="color:var(--text3);font-size:0.78rem;">${r.boards}</td>
@@ -204,9 +204,9 @@ function renderTablesTab(){
         <div style="color:var(--gold);">🟡 ${ew.name}${ew.isPhantom?' 👻':''}</div>
       </div>
       <div style="font-size:0.7rem;color:var(--text3);">Boards ${m.boardStart||'?'}–${m.boardEnd||'?'}</div>
-      ${(()=>{ // the boards this table has played: each number with North-South's score
+      ${(()=>{ // the boards this table has played (their numbers only, no scores)
         const L=v=>window.i18nText?i18nText(v):v, pl=[]; for(let b=m.boardStart||1;b<=(m.boardEnd||3);b++){ const d=boards[t+'_'+s.currentRound+'_'+b]; if(d&&d.status==='done') pl.push([b,d]); }
-        return pl.length?`<div class="tc-played"><span>${L('Played')}:</span> ${pl.map(([b,d])=>`<b title="${typeof d.nsScore==='number'?'NS '+d.nsScore:''}">${b}${typeof d.nsScore==='number'?`<i>${d.nsScore>0?'+':''}${d.nsScore}</i>`:''}</b>`).join('')}</div>`:''; })()}
+        return pl.length?`<div class="tc-played"><span>${L('Played')}:</span> ${pl.map(([b])=>`<b>${b}</b>`).join('')}</div>`:''; })()}
       ${isStalled?`<div style="margin-top:6px;font-size:0.68rem;color:var(--red);font-weight:600;">⚠️ ${Math.floor(stalledMap[t])} min without a score</div>`:''}
       ${isLocked&&role==='admin'?`<button onclick="adminForceUnlock(${t})" style="margin-top:6px;font-size:0.65rem;background:none;border:none;color:var(--text3);cursor:pointer;text-decoration:underline;">Force Unlock</button>`:''}
     </div>`;

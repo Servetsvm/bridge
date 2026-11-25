@@ -3713,6 +3713,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.id === 'plMsg') { playersMsg(); return; }
+  if (t.id === 'mtGo') { myTournSnooze(); closeOv(); return; }
+  if (t.id === 'mtFin') { myTournSnooze(); const x = ui.myTourn; closeOv(); if (x) openClubs('?club=' + encodeURIComponent(x.club) + '&role=admin'); return; }
   if (t.id === 'pmGo') { playersMsgGo(); return; }
   if (t.id === 'pmBack') { showPlayers(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
@@ -4770,6 +4772,33 @@ async function showClubs() {
 }
 /* Clubs: the club tournaments (in kulupler/, once BridgeGate) open here, full screen above the home page, under a bar with
    Home; the phone's Back closes them too. q: the club address's query (?club=…&role=table…), or '' for the clubs' page */
+/* the tournament this phone started (BridgeScore → Start, a team match, a Social Bridge): when no score has come for
+   20 minutes, its player is asked whether it is over — Finish opens the TD; it is asked again 20 minutes later */
+async function myTournCheck() {
+  let x = null; try { x = JSON.parse(localStorage.getItem('bp_myTourn') || 'null'); } catch (e) {}
+  if (!x || !x.club || typeof Net === 'undefined' || !Net.Cloud || !Net.Cloud.on) return;
+  if (x.k && myNm() && Net.nameKey && encodeURIComponent(Net.nameKey(myNm())).replace(/\./g, '%2E') !== x.k && Net.nameKey(myNm()) !== x.k) return;   // another player on this phone
+  if (ui.overlay || (G && !G.rtv && ['bid', 'play'].includes(G.phase))) return;   // not in the middle of something
+  if (Date.now() < (x.snooze || 0)) return;
+  const base = 'gate/clubs/' + x.club + '/bm/';
+  const st = await Net.Cloud.get(base + 'state').catch(() => null);
+  if (!st || st.status !== 'running' || st._startedAt !== x.sid) { try { localStorage.removeItem('bp_myTourn'); } catch (e) {} return; }
+  const B = await Net.Cloud.get(base + 'boards').catch(() => null) || {};
+  let last = Math.max(Date.parse(st._roundStartedAt || 0) || 0, Date.parse(st._startedAt || 0) || 0);
+  for (const d of Object.values(B)) if (d && d.time) last = Math.max(last, Date.parse(d.time) || 0);
+  if (Date.now() - last < 20 * 60e3) return;
+  const mins = Math.round((Date.now() - last) / 60e3);
+  ui.myTourn = x;
+  openOv('mytourn', `<h2>⏰ ${esc(x.n || T('Clubs'))}</h2><div class="muted">${T('No score has been entered for {0} minutes. Is the tournament over?', mins)}</div>
+    <div class="row2"><button class="btn gold" id="mtFin">🏁 ${T('Finish the tournament')}</button><button class="btn" id="mtGo">${T('It goes on')}</button></div>`);
+}
+setTimeout(() => myTournCheck(), 15000); setInterval(() => myTournCheck(), 3 * 60e3);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(() => myTournCheck(), 3000); });
+const myTournSnooze = () => { const x = ui.myTourn; if (!x) return; x.snooze = Date.now() + 20 * 60e3; try { localStorage.setItem('bp_myTourn', JSON.stringify(x)); } catch (e) {} };
+// the clubs program's screen (live standings) puts its Live badge in this bar, beside Clubs
+window.addEventListener('message', e => { if (e.source !== ($('cvFrame') || {}).contentWindow || !e.data || typeof e.data.bpLive !== 'string') return;
+  const bar = document.querySelector('#clubView .cvbar'); if (!bar) return; let b = $('cvLive'); if (!b) { b = document.createElement('span'); b.id = 'cvLive'; bar.appendChild(b); }
+  b.innerHTML = `<i></i>${esc(e.data.bpLive.slice(0, 20))}`; });
 function openClubs(q) {
   let v = $('clubView');
   if (!v) {
@@ -4780,6 +4809,7 @@ function openClubs(q) {
     // the Clubs list again (the clubs program closes)
     v.querySelector('#cvClubs').addEventListener('click', () => { if (history.state && history.state.clubs) history.back(); else closeClubs(); setTimeout(() => { ui.overlay = null; showClubs(); }, 60); });
   }
+  { const lv = $('cvLive'); if (lv) lv.remove(); }   // a new page in the frame: its own badge, if any
   const p = new URLSearchParams(String(q || '').replace(/^\?/, '')); p.set('embed', '1'); p.set('lang', SET.lang || 'en');   // the clubs program in BridgePlay's language
   const fr = document.createElement('iframe'); fr.id = 'cvFrame'; fr.title = T('Clubs'); fr.src = 'kulupler/index.html?' + p.toString();   // a new frame: its first page adds no step to Back
   $('cvFrame').replaceWith(fr);
@@ -4788,7 +4818,7 @@ function openClubs(q) {
 }
 // the clubs program's club picture: back to the Clubs page with that club open
 window.openClubCard = id => { closeClubs(); ui.clubOpen = id || null; showClubs(); };
-function closeClubs() { const v = $('clubView'); if (!v || v.hidden) return; v.hidden = true; $('cvFrame').replaceWith(Object.assign(document.createElement('iframe'), { id: 'cvFrame' })); document.body.classList.remove('clubsopen'); if (typeof needGate === 'function' && needGate()) showGate(); }
+function closeClubs() { const v = $('clubView'); if (!v || v.hidden) return; v.hidden = true; { const lv = $('cvLive'); if (lv) lv.remove(); } $('cvFrame').replaceWith(Object.assign(document.createElement('iframe'), { id: 'cvFrame' })); document.body.classList.remove('clubsopen'); if (typeof needGate === 'function' && needGate()) showGate(); }
 window.addEventListener('popstate', () => { if (!(history.state && history.state.clubs)) closeClubs(); });
 /* the administrator deletes score history: the players listed (himself too), the ticked ones' boards removed */
 async function showWipe() {

@@ -2564,6 +2564,11 @@ body.homev2 .h2tiles .h2sys{grid-column:1/-1}
 #updWait .updspin{font-size:44px;animation:updspin 1.2s linear infinite;margin-bottom:8px}
 @keyframes updspin{to{transform:rotate(360deg)}}
 
+/* the clubs' Live screen: its badge beside Clubs */
+#cvLive{margin-left:auto;align-self:center;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;border:1px solid rgba(76,175,125,.5);color:#6fd39a;font-weight:700;font-size:15px}
+#cvLive i{width:8px;height:8px;border-radius:50%;background:#4caf7d;animation:cvlp 1.5s infinite}
+@keyframes cvlp{50%{opacity:.35}}
+
 </style>
 
 <noscript><h1>BridgePlay — free online bridge</h1><p>Play bridge online for free: against the robots or with friends, measure your level, compete on the same boards, practise conventions.</p><ul><li><a href="en/" hreflang="en">English: Free online bridge</a> · <a href="guide-en.html">guide</a></li><li><a href="tr/" hreflang="tr">Türkçe: Ücretsiz online briç</a> · <a href="guide.html">guide</a></li><li><a href="no/" hreflang="nb">Norsk: Gratis bridge på nett</a> · <a href="guide-no.html">guide</a></li><li><a href="es/" hreflang="es">Español: Bridge online gratis</a> · <a href="guide-es.html">guide</a></li><li><a href="fr/" hreflang="fr">Français: Bridge en ligne gratuit</a> · <a href="guide-fr.html">guide</a></li><li><a href="it/" hreflang="it">Italiano: Bridge online gratis</a> · <a href="guide-it.html">guide</a></li><li><a href="de/" hreflang="de">Deutsch: Kostenlos Bridge online</a> · <a href="guide-de.html">guide</a></li><li><a href="ru/" hreflang="ru">Русский: Бесплатный онлайн-бридж</a> · <a href="guide-ru.html">guide</a></li><li><a href="pl/" hreflang="pl">Polski: Darmowy brydż online</a> · <a href="guide-pl.html">guide</a></li><li><a href="zh/" hreflang="zh">中文: 免费在线桥牌</a> · <a href="guide-zh.html">guide</a></li></ul></noscript>
@@ -5797,7 +5802,7 @@ const I18N = {
     "Add to calendar": "Takvime ekle", "Calendar": "Takvim", "Phone calendar (.ics file)": "Telefonun takvimi (.ics dosyası)",
     "Tomorrow": "Yarın",
     "Ready to play without internet (on a plane too)": "Uçakta da internetsiz oynamaya hazır", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Henüz internetsiz oynamaya hazır değil: uygulamayı internetteyken bir dakika açık tut.",
-    "A new version is ready": "Yeni sürüm hazır", "Message to the ticked ({0})": "İşaretlenenlere mesaj ({0})", "Message to everyone ({0})": "Herkese mesaj ({0})", "Each player finds it in their messages from the administrator, and can answer there.": "Her oyuncu bunu yöneticiden gelen mesajlarında görür ve oradan cevap verebilir.", "Your message…": "Mesajınız…", "Write a message first.": "Önce bir mesaj yazın.", "Sending…": "Gönderiliyor…", "Sent to {0} players": "{0} oyuncuya gönderildi", "Updating…": "Güncelleniyor…", "Reload": "Yenile",
+    "A new version is ready": "Yeni sürüm hazır", "No score has been entered for {0} minutes. Is the tournament over?": "{0} dakikadır skor girilmedi. Turnuva bitti mi?", "Finish the tournament": "Turnuvayı bitir", "It goes on": "Devam ediyor", "Message to the ticked ({0})": "İşaretlenenlere mesaj ({0})", "Message to everyone ({0})": "Herkese mesaj ({0})", "Each player finds it in their messages from the administrator, and can answer there.": "Her oyuncu bunu yöneticiden gelen mesajlarında görür ve oradan cevap verebilir.", "Your message…": "Mesajınız…", "Write a message first.": "Önce bir mesaj yazın.", "Sending…": "Gönderiliyor…", "Sent to {0} players": "{0} oyuncuya gönderildi", "Updating…": "Güncelleniyor…", "Reload": "Yenile",
     "Every day": "Her gün", "Weekdays": "Hafta içi", "Weekend": "Hafta sonu", "Individual": "Bireysel", "Beginners": "Yeni başlayanlar",
     "Tournament days": "Turnuva günleri",
     "Club info": "Kulüp bilgisi",
@@ -6272,7 +6277,7 @@ const I18N = {
     "Add to calendar": "Legg til i kalenderen", "Calendar": "Kalender", "Phone calendar (.ics file)": "Telefonens kalender (.ics-fil)",
     "Tomorrow": "I morgen",
     "Ready to play without internet (on a plane too)": "Klar til å spille uten internett (også på fly)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Ikke klar til å spille uten internett ennå: hold appen åpen med internett i et minutt.",
-    "A new version is ready": "En ny versjon er klar", "Message to the ticked ({0})": "Melding til de avkryssede ({0})", "Message to everyone ({0})": "Melding til alle ({0})", "Each player finds it in their messages from the administrator, and can answer there.": "Hver spiller finner den i meldingene fra administratoren og kan svare der.", "Your message…": "Din melding…", "Write a message first.": "Skriv en melding først.", "Sending…": "Sender…", "Sent to {0} players": "Sendt til {0} spillere", "Updating…": "Oppdaterer…", "Reload": "Last inn på nytt",
+    "A new version is ready": "En ny versjon er klar", "No score has been entered for {0} minutes. Is the tournament over?": "Det er ikke lagt inn noen score på {0} minutter. Er turneringen ferdig?", "Finish the tournament": "Avslutt turneringen", "It goes on": "Den fortsetter", "Message to the ticked ({0})": "Melding til de avkryssede ({0})", "Message to everyone ({0})": "Melding til alle ({0})", "Each player finds it in their messages from the administrator, and can answer there.": "Hver spiller finner den i meldingene fra administratoren og kan svare der.", "Your message…": "Din melding…", "Write a message first.": "Skriv en melding først.", "Sending…": "Sender…", "Sent to {0} players": "Sendt til {0} spillere", "Updating…": "Oppdaterer…", "Reload": "Last inn på nytt",
     "Every day": "Hver dag", "Weekdays": "Ukedager", "Weekend": "Helg", "Individual": "Individuell", "Beginners": "Nybegynnere",
     "Tournament days": "Turneringsdager",
     "Club info": "Klubbinfo",
@@ -14532,6 +14537,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
   if (t.id === 'plMsg') { playersMsg(); return; }
+  if (t.id === 'mtGo') { myTournSnooze(); closeOv(); return; }
+  if (t.id === 'mtFin') { myTournSnooze(); const x = ui.myTourn; closeOv(); if (x) openClubs('?club=' + encodeURIComponent(x.club) + '&role=admin'); return; }
   if (t.id === 'pmGo') { playersMsgGo(); return; }
   if (t.id === 'pmBack') { showPlayers(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
@@ -15589,6 +15596,33 @@ async function showClubs() {
 }
 /* Clubs: the club tournaments (in kulupler/, once BridgeGate) open here, full screen above the home page, under a bar with
    Home; the phone's Back closes them too. q: the club address's query (?club=…&role=table…), or '' for the clubs' page */
+/* the tournament this phone started (BridgeScore → Start, a team match, a Social Bridge): when no score has come for
+   20 minutes, its player is asked whether it is over — Finish opens the TD; it is asked again 20 minutes later */
+async function myTournCheck() {
+  let x = null; try { x = JSON.parse(localStorage.getItem('bp_myTourn') || 'null'); } catch (e) {}
+  if (!x || !x.club || typeof Net === 'undefined' || !Net.Cloud || !Net.Cloud.on) return;
+  if (x.k && myNm() && Net.nameKey && encodeURIComponent(Net.nameKey(myNm())).replace(/\./g, '%2E') !== x.k && Net.nameKey(myNm()) !== x.k) return;   // another player on this phone
+  if (ui.overlay || (G && !G.rtv && ['bid', 'play'].includes(G.phase))) return;   // not in the middle of something
+  if (Date.now() < (x.snooze || 0)) return;
+  const base = 'gate/clubs/' + x.club + '/bm/';
+  const st = await Net.Cloud.get(base + 'state').catch(() => null);
+  if (!st || st.status !== 'running' || st._startedAt !== x.sid) { try { localStorage.removeItem('bp_myTourn'); } catch (e) {} return; }
+  const B = await Net.Cloud.get(base + 'boards').catch(() => null) || {};
+  let last = Math.max(Date.parse(st._roundStartedAt || 0) || 0, Date.parse(st._startedAt || 0) || 0);
+  for (const d of Object.values(B)) if (d && d.time) last = Math.max(last, Date.parse(d.time) || 0);
+  if (Date.now() - last < 20 * 60e3) return;
+  const mins = Math.round((Date.now() - last) / 60e3);
+  ui.myTourn = x;
+  openOv('mytourn', `<h2>⏰ ${esc(x.n || T('Clubs'))}</h2><div class="muted">${T('No score has been entered for {0} minutes. Is the tournament over?', mins)}</div>
+    <div class="row2"><button class="btn gold" id="mtFin">🏁 ${T('Finish the tournament')}</button><button class="btn" id="mtGo">${T('It goes on')}</button></div>`);
+}
+setTimeout(() => myTournCheck(), 15000); setInterval(() => myTournCheck(), 3 * 60e3);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(() => myTournCheck(), 3000); });
+const myTournSnooze = () => { const x = ui.myTourn; if (!x) return; x.snooze = Date.now() + 20 * 60e3; try { localStorage.setItem('bp_myTourn', JSON.stringify(x)); } catch (e) {} };
+// the clubs program's screen (live standings) puts its Live badge in this bar, beside Clubs
+window.addEventListener('message', e => { if (e.source !== ($('cvFrame') || {}).contentWindow || !e.data || typeof e.data.bpLive !== 'string') return;
+  const bar = document.querySelector('#clubView .cvbar'); if (!bar) return; let b = $('cvLive'); if (!b) { b = document.createElement('span'); b.id = 'cvLive'; bar.appendChild(b); }
+  b.innerHTML = `<i></i>${esc(e.data.bpLive.slice(0, 20))}`; });
 function openClubs(q) {
   let v = $('clubView');
   if (!v) {
@@ -15599,6 +15633,7 @@ function openClubs(q) {
     // the Clubs list again (the clubs program closes)
     v.querySelector('#cvClubs').addEventListener('click', () => { if (history.state && history.state.clubs) history.back(); else closeClubs(); setTimeout(() => { ui.overlay = null; showClubs(); }, 60); });
   }
+  { const lv = $('cvLive'); if (lv) lv.remove(); }   // a new page in the frame: its own badge, if any
   const p = new URLSearchParams(String(q || '').replace(/^\?/, '')); p.set('embed', '1'); p.set('lang', SET.lang || 'en');   // the clubs program in BridgePlay's language
   const fr = document.createElement('iframe'); fr.id = 'cvFrame'; fr.title = T('Clubs'); fr.src = 'kulupler/index.html?' + p.toString();   // a new frame: its first page adds no step to Back
   $('cvFrame').replaceWith(fr);
@@ -15607,7 +15642,7 @@ function openClubs(q) {
 }
 // the clubs program's club picture: back to the Clubs page with that club open
 window.openClubCard = id => { closeClubs(); ui.clubOpen = id || null; showClubs(); };
-function closeClubs() { const v = $('clubView'); if (!v || v.hidden) return; v.hidden = true; $('cvFrame').replaceWith(Object.assign(document.createElement('iframe'), { id: 'cvFrame' })); document.body.classList.remove('clubsopen'); if (typeof needGate === 'function' && needGate()) showGate(); }
+function closeClubs() { const v = $('clubView'); if (!v || v.hidden) return; v.hidden = true; { const lv = $('cvLive'); if (lv) lv.remove(); } $('cvFrame').replaceWith(Object.assign(document.createElement('iframe'), { id: 'cvFrame' })); document.body.classList.remove('clubsopen'); if (typeof needGate === 'function' && needGate()) showGate(); }
 window.addEventListener('popstate', () => { if (!(history.state && history.state.clubs)) closeClubs(); });
 /* the administrator deletes score history: the players listed (himself too), the ticked ones' boards removed */
 async function showWipe() {

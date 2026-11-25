@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v684`, kulüpler `kulup-v195`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v685`, kulüpler `kulup-v196`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,10 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v684`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-25
+- Ekran: sıralama telefonda tam sayfa ve ekrana sığar (`.sb-scroll`/`.sb-rank`, yön ve çift no sütunu gizli); "● Canlı" rozeti
+  BridgePlay'in Kulüpler çubuğunda (`postMessage {bpLive}` → `#cvLive`); Masalar'da yalnız oynanan board numaraları (skor yok).
+  Turnuvayı başlatan telefon (`localStorage bp_myTourn`, adminStart) 20 dk skor girilmezse "Turnuva bitti mi?" sorar
+  (`myTournCheck`, 3 dk'da bir; 🏁 TD'yi açar, "Devam ediyor" 20 dk erteler). Yalnız BridgePlay açıkken çalışır.
 - Ekran (role=screen): üstte yalnız kulüp + "● Canlı" rozeti + tur; çevrimiçi/dil/tema/çıkış ve 🏆 başlık yok (`body.screen-role`).
   Sonuçlar artık uygulama içinde (`openClubs('?club=..&results=1')`, eskiden yeni sekme). Masalar sekmesinde masanın oynadığı
   board'lar + KG skoru (`.tc-played`). Son turun bütün board'ları (oynamış her masada) bitince son skoru giren masa turnuvayı

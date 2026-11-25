@@ -487,6 +487,8 @@ window.adminStart=async function(){
   s.currentRound=1;s.status='running';s._roundStartedAt=new Date().toISOString();setState(s);
   await Promise.all([DB.set('tableLocks',{}),DB.set('approvals',{}),DB.del('kicks'),DB.del('tdcalls')]);
   await setLive(true);   // listed before anyone looks for it (the quick team match opens its table list next)
+  // this phone started it: BridgePlay reminds its player when no score has come for a while (and the TD may have forgotten to finish)
+  if(!bgTestOn()) try{ const u=window.bridgeUser&&window.bridgeUser(); localStorage.setItem('bp_myTourn',JSON.stringify({club:CLUB_ID,sid:s._startedAt,n:String(CLUB_NAME||'').slice(0,40),k:u?u.key:''})); }catch(e){}
   addLog('ok','Round 1 started','Tournament begins');
   toast('▶ Round 1 started!');refreshTopbar();renderAdminTab();
   adminSetupAutoRefresh();

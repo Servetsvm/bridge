@@ -469,7 +469,9 @@ window.doLogin=async function(){
     document.getElementById('loginScreen').style.display='none';
     document.getElementById('app').style.display='flex';
     // the screen: no sign-in tools (online, language, theme, logout) — its badge says it is live
-    document.body.classList.add('screen-role'); document.getElementById('topbarRole').innerHTML='<span class="live-dot" style="display:inline-block;margin-right:5px;"></span>'+(window.i18nText?i18nText('Live'):'Live');
+    document.body.classList.add('screen-role'); document.getElementById('topbarRole').style.display='none';
+    // the Live badge goes up to BridgePlay's own bar, beside Clubs
+    try{ window.parent.postMessage({bpLive:window.i18nText?i18nText('Live'):'Live'},'*'); }catch(e){}
     await preloadCache();
     refreshTopbar();renderPanel();
     DB.subscribe('state',(val)=>{_cache['state']=val;refreshTopbar();renderScreenPanel();});
