@@ -350,6 +350,7 @@
     'At least 4 characters':'En az 4 karakter',
     'Password saved':'Şifre kaydedildi',
     "Team match":"Takım maçı",
+    "Played":"Oynanan",
     "Social Bridge button on BridgePlay (members choose the players and the boards)":"BridgePlay'de Sosyal Bridge düğmesi (üyeler oyuncu ve board sayısını seçer)",
     "This table is taken":"Bu masa dolu",
     "Delete this tournament completely?":"Bu turnuva tamamen silinsin mi?",

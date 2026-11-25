@@ -14,13 +14,7 @@ function renderScreenPanel(){
   const pairCount=Object.values(pairs).filter(p=>!p.isPhantom).length;
   document.getElementById('panelContent').innerHTML=`
     <div class="scoreboard">
-      <div class="sb-header">
-        <div class="sb-title">🏆 ${s.name}</div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <span class="live-pill"><div class="live-dot"></div>Live</span>
-          ${s.status==='finished'?'<button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button>':''}
-        </div>
-      </div>
+      ${s.status==='finished'?'<div class="sb-header"><div></div><button class="btn btn-gold btn-sm" onclick="ccResultsPage()">📄 Results page</button></div>':''}
       ${typeof teamScoreHtml==='function'?teamScoreHtml():''}
       <div class="sb-tabs">
         <button class="sb-tab ${screenTab==='speed'?'active':''}" onclick="setScreenTab('speed',this)">🔀 <span>Pairings</span></button>
@@ -210,6 +204,9 @@ function renderTablesTab(){
         <div style="color:var(--gold);">🟡 ${ew.name}${ew.isPhantom?' 👻':''}</div>
       </div>
       <div style="font-size:0.7rem;color:var(--text3);">Boards ${m.boardStart||'?'}–${m.boardEnd||'?'}</div>
+      ${(()=>{ // the boards this table has played: each number with North-South's score
+        const L=v=>window.i18nText?i18nText(v):v, pl=[]; for(let b=m.boardStart||1;b<=(m.boardEnd||3);b++){ const d=boards[t+'_'+s.currentRound+'_'+b]; if(d&&d.status==='done') pl.push([b,d]); }
+        return pl.length?`<div class="tc-played"><span>${L('Played')}:</span> ${pl.map(([b,d])=>`<b title="${typeof d.nsScore==='number'?'NS '+d.nsScore:''}">${b}${typeof d.nsScore==='number'?`<i>${d.nsScore>0?'+':''}${d.nsScore}</i>`:''}</b>`).join('')}</div>`:''; })()}
       ${isStalled?`<div style="margin-top:6px;font-size:0.68rem;color:var(--red);font-weight:600;">⚠️ ${Math.floor(stalledMap[t])} min without a score</div>`:''}
       ${isLocked&&role==='admin'?`<button onclick="adminForceUnlock(${t})" style="margin-top:6px;font-size:0.65rem;background:none;border:none;color:var(--text3);cursor:pointer;text-decoration:underline;">Force Unlock</button>`:''}
     </div>`;

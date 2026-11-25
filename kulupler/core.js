@@ -566,15 +566,19 @@ let _bgQuickFinishing=false;
 async function bgQuickFinish(){
   if(_bgQuickFinishing) return; _bgQuickFinishing=true;
   try{
-    const s=await DB.get('state'); if(!s||s.status!=='running'||!s._quickTeam||s.currentRound<s.roundCount) return;
-    const B=await DB.get('boards')||{}, mv=await DB.get('movements')||{}, {total,done}=quickDone(B,s,mv);
+    const s=await DB.get('state'); if(!s||s.status!=='running'||s.online||s.currentRound<s.roundCount) return;
+    if(!s._quickTeam&&typeof bgTestOn==='function'&&bgTestOn()) return;
+    // every board played at every table that has played (a table nobody sat at is left out): the tournament is over
+    const B=await DB.get('boards')||{}, mv=await DB.get('movements')||{}; let total=0,done=0;
+    for(let t=1;t<=(s.tableCount||0);t++){ const m=mv[s.currentRound+'_'+t]; if(!m) continue; let n=0,d=0; for(let b=m.boardStart||1;b<=(m.boardEnd||0);b++){ n++; if((B[t+'_'+s.currentRound+'_'+b]||{}).status==='done') d++; } if(d){ total+=n; done+=d; } }
     if(!total||done<total) return;
     s.status='finished'; s._finishedAt=new Date().toISOString(); await setState(s);
     const rec={state:{...s},boards:B,pairs:await DB.get('pairs')||{},movements:mv,hands:_cache['hands']||[],dd:_cache['dd']||{},finished:s._finishedAt};
-    try{ await fetch(await fbUrl('/teamArch/'+quickArcId(s)+'.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)}); }catch(e){}
+    if(s._quickTeam){ try{ await fetch(await fbUrl('/teamArch/'+quickArcId(s)+'.json'),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)}); }catch(e){} }
+    else { s._autoFinished=1; const arc=await archivesFresh(); if(!arc.some(a=>a&&a.state&&a.state._startedAt===s._startedAt)){ arc.unshift(rec); await setArchives(arc); } }   // a club tournament: its archive, as the TD's Finish
     try{ await fetch(await fbRootUrl('/live/'+CLUB_ID+'.json'),{method:'DELETE'}); }catch(e){}
     try{ await DB.set('tableLocks',{}); }catch(e){}
-    addLog('ok','Team match finished','');
+    addLog('ok',s._quickTeam?'Team match finished':'Tournament finished by itself (every board played)','');
   }catch(e){ console.warn('quick finish',e); }
   finally{ _bgQuickFinishing=false; }
 }

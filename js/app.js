@@ -3712,6 +3712,9 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'admTog') { const N = Net; openOv('adm', `<h2>👑 ${T('Admin')}</h2><div class="admmenu"><button class="btn" data-stats="1">📊 ${T('Visitor statistics')}</button><button class="btn" id="admPlayers">👥 ${T('All players')}</button><button class="btn" id="hSupIn">📨 ${T('Messages')}${N.supNew ? ` <b class="supc">${N.supNew}</b>` : ''}</button><button class="btn" id="hConvReq">📥 ${T('Convention requests')}${N.cvNew ? ` <b class="supc">${N.cvNew}</b>` : ''}</button><button class="btn" id="hRoboErr">🤖 ${T('Robot mistakes')}</button><button class="btn" id="admBotChat">💬 ${T('Robots\' chats')}</button><button class="btn" id="admErrs">🐞 ${T('Errors on devices')}</button><button class="btn" id="admUse">📈 ${T('Usage and limits')}</button><button class="btn" id="admLearned">🤖 ${T('What the robots learned')}</button><button class="btn" id="hLearn">📈 ${T('Learning report')}${ui.learnNew ? ` <b class="supc">${ui.learnNew}</b>` : ''}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   if (t.id === 'admPlayers') { ui.plList = null; ui.plSel = new Set(); ui.plQ = ''; ui.plFocus = 0; showPlayers(); return; }
   if (t.id === 'plDel') { playersDelete(); return; }
+  if (t.id === 'plMsg') { playersMsg(); return; }
+  if (t.id === 'pmGo') { playersMsgGo(); return; }
+  if (t.id === 'pmBack') { showPlayers(); return; }
   if (t.dataset.plpin) { ev_.preventDefault(); playerPin(t.dataset.plpin); return; }
   if (t.dataset.plmsg) { ev_.preventDefault(); ui.supNm = t.dataset.plmsg; showSupThread(Net.fbKey(t.dataset.plmsg)); return; }
   if (t.id === 'ppGo') { playerPinGo(); return; }
@@ -3785,7 +3788,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.clubscr) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubscr) + '&role=screen'); return; }
   if (t.id === 'clubSuper') { closeOv(); openClubs('?sa=1'); return; }   // the super admin's sign-in (only he sees the button)
   if (t.dataset.clubplay) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubplay)); return; }
-  if (t.dataset.clubres) { window.open(location.pathname + '?kulup=' + encodeURIComponent('?club=' + t.dataset.clubres + '&results=1'), '_blank'); return; }
+  if (t.dataset.clubres) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubres) + '&results=1'); return; }   // inside the app, as the screen
   if (t.dataset.clubteam) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubteam) + '&role=admin&setup=team&quick=team'); return; }
   if (t.dataset.clubsocial) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubsocial) + '&role=admin&quick=social'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
@@ -4829,8 +4832,29 @@ async function showPlayers() {
     <input id="plQ" class="tok wide" placeholder="🔍 ${T('Search a name…')}" value="${esc(ui.plQ || '')}">
     <div class="pllist">${rows || `<div class="muted">${T('Nobody yet.')}</div>`}</div>
     <div class="muted">${T('Removing a name deletes it for good with its results, settings, logins and messages; the name becomes free again.')}</div>
+    <button class="btn new" id="plMsg">✉️ ${sel.size ? T('Message to the ticked ({0})', sel.size) : T('Message to everyone ({0})', L.filter(x => !x.me).length)}</button>
     <div class="row2"><button class="btn bad" id="plDel" ${sel.size ? '' : 'disabled'}>🗑 ${T('Remove the ticked ({0})', sel.size)}</button><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
   const i = $('plQ'); if (i && ui.plFocus) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+}
+// the administrator writes to every player (or the ticked ones): the message lands in each one's messages with the
+// administrator (as a reply), with a notification on the phone
+function playersMsg() {
+  const sel = ui.plSel || new Set(), to = (ui.plList || []).filter(x => !x.me && (!sel.size || sel.has(x.k)));
+  if (!to.length) return;
+  openOv('plmsg', `<h2>✉️ ${sel.size ? T('Message to the ticked ({0})', to.length) : T('Message to everyone ({0})', to.length)}</h2>
+    <div class="muted">${T('Each player finds it in their messages from the administrator, and can answer there.')}</div>
+    <textarea id="pmTxt" class="tok wide" rows="5" maxlength="1000" placeholder="${T('Your message…')}" style="width:100%;box-sizing:border-box;"></textarea>
+    <div class="err" id="pmErr"></div>
+    <div class="row2"><button class="btn new" id="pmGo">✉️ ${T('Send')}</button><button class="btn" id="pmBack">${T('Cancel')}</button></div>`);
+  setTimeout(() => { const a = $('pmTxt'); if (a) a.focus(); }, 60);
+}
+async function playersMsgGo() {
+  const txt = ($('pmTxt') ? $('pmTxt').value : '').trim(); if (!txt) { const e = $('pmErr'); if (e) e.textContent = T('Write a message first.'); return; }
+  const sel = ui.plSel || new Set(), to = (ui.plList || []).filter(x => !x.me && (!sel.size || sel.has(x.k)));
+  openOv('plmsg', `<h2>✉️ ${T('Sending…')}</h2><div class="muted" id="pmProg">0 / ${to.length}</div>`);
+  let ok = 0;
+  for (const x of to) { try { await Net.supReply(x.k, txt, x.name); ok++; } catch (e) {} const p = $('pmProg'); if (p) p.textContent = ok + ' / ' + to.length; }
+  ui.plSel = new Set(); flash('✉️ ' + T('Sent to {0} players', ok), 3000); showPlayers();
 }
 // a new PIN for a player who forgot theirs: typed here by the administrator, who tells it to the player
 function playerPin(k) {

@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v683`, kulüpler `kulup-v194`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v684`, kulüpler `kulup-v195`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,12 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v683`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-25
+- Ekran (role=screen): üstte yalnız kulüp + "● Canlı" rozeti + tur; çevrimiçi/dil/tema/çıkış ve 🏆 başlık yok (`body.screen-role`).
+  Sonuçlar artık uygulama içinde (`openClubs('?club=..&results=1')`, eskiden yeni sekme). Masalar sekmesinde masanın oynadığı
+  board'lar + KG skoru (`.tc-played`). Son turun bütün board'ları (oynamış her masada) bitince son skoru giren masa turnuvayı
+  kapatıp arşivler (`bgQuickFinish` artık hızlı olmayan turnuvalar için de; `_autoFinished`). Yönetici → Tüm oyuncular: ✉️ herkese /
+  işaretlenenlere mesaj (`playersMsg`, `Net.supReply`). **Yarım:** unutulan (3 saat skorsuz) turnuvayı sunucuda kapatan zamanlanmış
+  görev (`.github/stale/close.js` + workflow, FIREBASE_DB_SECRET) yazılacaktı — canlı veritabanına otomatik yazdığı için kullanıcı onayı bekliyor.
 - GitHub Pages yayını (pages build and deployment) 25.11 öğleden sonra üst üste 500 hatası verdi (GitHub kesintisi): site v680'de kaldı; düzelince yeni bir commit yayını yeniden tetikler.
 - Kullanıcının sistem/konvansiyon tanımlarıyla karşılaştırıldı; farklı olanlar onun tanımına çekildi (motor + CONVS + CONV_T 9 dil):
   WJS 3-6, SJS 17+, Drury 9-11, Multi 5-10, Inverted Minors baraj 6-9, NMF 10+, SAYC/Acol 2 seviyesi yeni renk 10+.

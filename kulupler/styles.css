@@ -780,3 +780,10 @@ body.bg-device #panelContent > .bm3.tdc .bm3-bar{display:grid}
 /* the TD console's team match: the two teams' names */
 .tdc-teams{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px}
 .tdc-in{flex:1;min-width:0;min-height:48px;padding:0 12px;border:1px solid #c5d8ca;border-radius:10px;background:#fff;color:#1b1b1b;font:700 1rem 'DM Sans',sans-serif;box-sizing:border-box}
+
+/* the screen (results on a TV or a phone): only the club, the live badge and the round on top */
+body.screen-role .topbar-right{display:none!important}
+body.screen-role #topbarRole{color:#4caf7d;border-color:rgba(76,175,125,.4)}
+.tc-played{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:6px;font-size:.72rem;color:var(--text3)}
+.tc-played b{display:inline-flex;gap:3px;align-items:baseline;padding:2px 7px;border-radius:8px;background:var(--greendim);color:var(--text);font-weight:700}
+.tc-played b i{font-style:normal;font-weight:500;font-size:.66rem;color:var(--text2)}
