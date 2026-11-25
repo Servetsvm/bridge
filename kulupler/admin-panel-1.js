@@ -265,7 +265,8 @@ window.quickSocialGo=async function(){
   document.body.appendChild(box);
   try{ await adminSetup(); } finally{ box.remove(); }
   const s=getState(); if(s.status!=='setup'||s.movement!=='social'){ toast('❌'); return; }
-  s._quickTeam=true; s._quickKind='social'; s.name=s.name+' · '+(window.i18nText?i18nText('Social Bridge'):'Social Bridge'); await setState(s);
+  s._quickTeam=true; s._quickKind='social'; s._noLead=true;   // the tables' BridgeScore as in the team match: no opening lead asked
+   s.name=s.name+' · '+(window.i18nText?i18nText('Social Bridge'):'Social Bridge'); await setState(s);
   await adminStart(); window._quickMade=true;
   if(typeof quickEntry==='function') await quickEntry();
 };
