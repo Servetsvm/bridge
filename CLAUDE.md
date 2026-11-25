@@ -25,6 +25,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 | `tools/smoke/` | headless Chrome ile bir el oynatan smoke test |
 | `tools/og/og.mjs` | paylaşım görselleri (icons/og-*.png) |
 | `firebase-rules.json` | veritabanı kuralları |
+| `yeni/` | **yeni BridgePlay (beta)**: `app/net.js` (giriş, canlı akış, çevrimdışı kuyruk), `ui.js`, `i18n.js`, `score.js`, `clubs.js`, `play.js`, `main.js`; motor `../js/*` aynen |
 
 ## Kurallar / alışkanlıklar
 - **Her zaman `main`'e gönder** (kullanıcının kalıcı izni, 2026-11-22): site GitHub Pages'te `main`'den yayınlanır.
@@ -59,6 +60,13 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v688`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-25
+- **Yeni BridgePlay beta** (`/yeni/`, kullanıcının kararıyla sıfırdan; ad BridgePlay, fotoğraftan el kalır, el sonu koçu/geri alma/el geçmişi/Haftam,
+  QR, ses, otomatik kulüp algılama, WhatsApp ile oturma, kamera, grafik/rozet, bildirim, mağaza YOK). Aynı Firebase ve hesaplar
+  (eski programdaki giriş `bridge-table-name` + `bric-masasi-v2.SET.pinH` otomatik devralınır; `sess/<uid>` PIN kontrolü aynı).
+  Kulüp verisi aynı yollarda (eski/yeni birlikte çalışır). Yapılan: giriş/kayıt, ana sayfa, ayarlar (dil TR/NO/EN, tema, büyük yazı),
+  kulüp listesi, kulüp sayfası + bilgi, canlı Ekran (SSE), sonuçlar + board seyahat kartı, robotlarla oyna (6 sistem, teklif kutusu,
+  açıklama, 💡 öneri, kart oyunu, DD karşılaştırma, fotoğraftan el). **Sıradaki:** kulüpte masa/skor girişi ve TD (şimdilik eski programa link),
+  online masa/lobi/sohbet, diğer 7 dil, puan/reyting kaydı.
 - Kulüp programından **kamerayla dağıtma** kaldırıldı (cardcam.js'in kamera kısmı, TD 'Kamerayla dağıt' düğmesi, kulupler'de photo.js); DD analizi kalıyor. BridgePlay'deki 'fotoğraftan el oku' duruyor (sorulacak).
 - **Kulüp programı canlı akış:** `DB.subscribe` artık Firebase SSE (EventSource; put/patch `_setPath`, `auth_revoked`→yeni token, kesilince
   yeniden bağlanır, açılamazsa 4 sn/15 sn (gizli) yoklama). Eskiden her cihaz 8 anahtarı (üye listesi dahil) 2 sn'de bir indiriyordu.
