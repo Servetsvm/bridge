@@ -302,14 +302,14 @@ function cands(x) {
     };
     const threes = () => { if (pos < 3) for (const s of [3, 2, 1, 0]) add(B(3, s), h => h.len[s] >= 7 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2, { min: 5, max: 10, len: { [s]: 7 }, cv: 'pre', t: 'Preempt: 7+ ' + SUIT[s] + ', 5-10 HCP', tag: 'pre' }); };
     // Muiderberg: 2♥/2♠ = five of the major and four or more of a minor, 5-10 (in place of the weak two in the majors)
-    const muider = h => s => h.len[s] === 5 && Math.max(h.len[0], h.len[1]) >= 4 && h.hcp >= 6 && h.hcp <= 10 && h.top5(s) >= 1;
+    const muider = h => s => h.len[s] === 5 && Math.max(h.len[0], h.len[1]) >= 4 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 1;
     // Multi 2♦ (weak): a weak two in either major, six cards, 5-11 (the natural systems whose 2♦ is free)
     const multiOn = C.multi && !['sef', 'claude', 'precision', 'polish'].includes(sk);
     const weakTwo6 = s => h => h.len[s] === 6 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2 && h.len[otherMajor(s)] < 4;
     const weakTwos = suits => {
       if (pos >= 3) return;
       if (multiOn) add(B(2, 1), h => weakTwo6(2)(h) || weakTwo6(3)(h), { min: 5, max: 10, tag: 'multi', cv: 'multi', t: 'Multi 2♦: a weak two (six cards) in ♥ or ♠, 5-10 HCP' });
-      if (C.muider) for (const s of [3, 2]) add(B(2, s), h => muider(h)(s), { min: 6, max: 10, len: { [s]: 5 }, tag: 'muider', cv: 'muider', t: 'Muiderberg: five ' + SUIT[s] + ' and a 4+ card minor, 6-10 HCP' });
+      if (C.muider) for (const s of [3, 2]) add(B(2, s), h => muider(h)(s), { min: 5, max: 10, len: { [s]: 5 }, tag: 'muider', cv: 'muider', t: 'Muiderberg: five ' + SUIT[s] + ' and a 4+ card minor, 5-10 HCP' });
       suits = suits.filter(s => !(s === 1 && multiOn) && !(s >= 2 && (C.muider || multiOn)));
       _weakTwos(suits);
     };

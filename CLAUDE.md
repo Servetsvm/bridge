@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v682`, kulüpler `kulup-v194`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v683`, kulüpler `kulup-v194`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -60,8 +60,8 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v682`, kulü
 
 ### 2026-11-25
 - Kullanıcının sistem/konvansiyon tanımlarıyla karşılaştırıldı; farklı olanlar onun tanımına çekildi (motor + CONVS + CONV_T 9 dil):
-  WJS 3-6, SJS 17+, Drury 9-11, Muiderberg 6-10, Multi 5-10, Inverted Minors baraj 6-9, NMF 10+, SAYC/Acol 2 seviyesi yeni renk 10+.
-  Ölçüm (12000 el her biri): SAYC +20, Acol −19, invMin +23, SJS +14, NMF −3, Drury −10, Multi 0, **Muiderberg −168** (geri almak önerildi).
+  WJS 3-6, SJS 17+, Drury 9-11, Multi 5-10, Inverted Minors baraj 6-9, NMF 10+, SAYC/Acol 2 seviyesi yeni renk 10+.
+  Ölçüm (12000 el her biri): SAYC +20, Acol −19, invMin +23, SJS +14, NMF −3, Drury −10, Multi 0, Muiderberg 6-10 −168 → kullanıcı onayıyla 5-10'a geri alındı.
   Claude Sistemi/Kontrası ve Multi'nin "güçlü dengeli" seçeneği kullanıcının metnine göre değiştirilmedi.
 - **Forsing 1NT** ayrı konvansiyon (`fnt`, core.js CONVS; 2/1'de açık, SAYC/Acol/diğerlerinde kapalı; eski kayıtlı kartta `fnt` yoksa
   2/1'i izler). bidding.js: `suitResponses` 1NT 6-11 (2/1 ile 6-12), 3'lü 10-11 doğrudan 3M değil önce 1NT; cevapçının ikinci teklifi
