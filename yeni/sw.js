@@ -1,7 +1,7 @@
 /* BridgePlay (new) — works without a connection: its files are kept on the phone; a new VERSION brings the new ones. */
-const VERSION = 'bp2-v1';
+const VERSION = 'bp2-v2';
 const FILES = ['./', './index.html', './manifest.webmanifest', './css/app.css', './app/main.js', './app/net.js', './app/i18n.js', './app/ui.js',
-  './app/score.js', './app/clubs.js', './app/play.js', '../js/dds.js', '../js/core.js', '../js/bidding.js', '../js/play.js', '../js/photo.js',
+  './app/score.js', './app/clubs.js', './app/play.js', './app/tourn.js', './app/table.js', './app/td.js', '../js/dds.js', '../js/core.js', '../js/bidding.js', '../js/play.js', '../js/photo.js',
   '../icons/icon-192.png', '../icons/icon-512.png'];
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(VERSION).then(c => Promise.all(FILES.map(f => c.add(new Request(f, { cache: 'reload' })).catch(() => {}))))); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('bp2-') && k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

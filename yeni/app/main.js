@@ -5,6 +5,8 @@ import { page, go, esc, $, toast, sheet, closeSheet, redraw } from './ui.js';
 import { me, loadMe, saveMe, signOut, session, register, pinHash, onQueue, queued, flush } from './net.js';
 import './clubs.js';
 import './play.js';
+import './table.js';
+import './td.js';
 
 // ---- the look: theme and large text (kept on the phone) ----
 const pref = (k, d) => { try { return localStorage.getItem('bp2-' + k) || d; } catch (e) { return d; } };

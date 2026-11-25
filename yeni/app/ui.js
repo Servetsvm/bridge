@@ -40,15 +40,15 @@ export function toast(msg, ms = 2200) {
   el.textContent = msg; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), ms);
 }
 // ---- a sheet from the bottom (closed by its ✕, by tapping outside, or by Back) ----
-export function sheet(html, onOpen) {
+export function sheet(html, onOpen, onClose) {
   closeSheet();
   const w = document.createElement('div'); w.id = 'sheet';
   w.innerHTML = `<div class="sh-bg" data-shclose></div><div class="sh"><button class="sh-x" data-shclose aria-label="${T('Close')}">✕</button>${html}</div>`;
-  document.body.appendChild(w); requestAnimationFrame(() => w.classList.add('on'));
+  w._onClose = onClose; document.body.appendChild(w); requestAnimationFrame(() => w.classList.add('on'));
   if (onOpen) onOpen(w);
   return w;
 }
-export function closeSheet() { const w = $('#sheet'); if (w) w.remove(); }
+export function closeSheet() { const w = $('#sheet'); if (w) { w.remove(); if (w._onClose) try { w._onClose(); } catch (e) {} } }
 document.addEventListener('click', e => { if (e.target.closest('[data-shclose]')) closeSheet(); });
 
 // ---- suits ----

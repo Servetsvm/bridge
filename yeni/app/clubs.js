@@ -4,6 +4,8 @@ import { T, lang } from './i18n.js';
 import { page, go, esc, $, redraw, sheet, SUITS, suitHtml } from './ui.js';
 import { listen, tryGet, me, session } from './net.js';
 import { standings, teamScore } from './score.js';
+import { seatOf } from './table.js';
+import { startQuick } from './td.js';
 
 const C = id => 'gate/clubs/' + id;
 let cache = { list: null, at: 0 };
@@ -68,7 +70,7 @@ function nextHtml(info) {
 // ---- a club's page ----
 page('club', id => {
   const c = (cache.list || []).find(x => x.id === id) || { id, name: id };
-  const old = '../?kulup=' + encodeURIComponent('?club=' + id);
+  const sv = seatOf(id);
   return {
     title: c.name,
     html: `<div class="chead">${logoHtml(id, c.logo)}<div><h2>${esc(c.name)}</h2>${c.live ? `<span class="live"><i></i>${esc(c.live.n || T('Live'))}</span>` : `<div class="muted">${T('No tournament at this club now.')}</div>`}</div></div>
@@ -76,13 +78,19 @@ page('club', id => {
         ${c.live ? `<button class="btn green wide" data-live="${esc(id)}">● ${T('Live')}</button>` : ''}
         <button class="btn" data-results="${esc(id)}">📄 ${T('Results')}</button>
         ${c.info && infoHtml(c.info) ? `<button class="btn" data-info="${esc(id)}">ℹ️ ${T('Club info')}</button>` : `<span></span>`}
-        <a class="btn wide" href="${old}">🧑‍⚖️ ${T('TD')} · 🪑 ${T('Table')} <small class="muted">(${T('The old BridgePlay')})</small></a>
+        ${c.live ? `<button class="btn gold wide" data-seat="${esc(id)}">🪑 ${T('Sit at a table')}${sv ? ' · ' + T('Table') + ' ' + sv.t : ''}</button>` : ''}
+        ${!c.live && c.info && c.info.tm ? `<button class="btn wide" data-quick="team|${esc(id)}">🏆 ${T('Team match')}</button>` : ''}
+        ${!c.live && c.info && c.info.sb ? `<button class="btn wide" data-quick="social|${esc(id)}">🤝 ${T('Social Bridge')}</button>` : ''}
+        <button class="btn wide ghost" data-td="${esc(id)}">🧑‍⚖️ ${T('TD')}</button>
       </div>`,
   };
 });
 document.addEventListener('click', e => {
   const l = e.target.closest('[data-live]'); if (l) return go('live', l.dataset.live);
   const r = e.target.closest('[data-results]'); if (r) return go('results', r.dataset.results);
+  const st = e.target.closest('[data-seat]'); if (st) return go('seat', st.dataset.seat);
+  const td = e.target.closest('[data-td]'); if (td) return go('td', td.dataset.td);
+  const q = e.target.closest('[data-quick]'); if (q) { const [k, cid] = q.dataset.quick.split('|'), c = (cache.list || []).find(x => x.id === cid); return startQuick(cid, c ? c.name : cid, k).then(() => { cache.at = 0; }); }
   const i = e.target.closest('[data-info]'); if (i) { const c = (cache.list || []).find(x => x.id === i.dataset.info); if (c) sheet(`<h2>ℹ️ ${esc(c.name)}</h2>${infoHtml(c.info)}`); }
 });
 

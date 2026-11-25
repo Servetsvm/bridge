@@ -81,6 +81,8 @@ setInterval(flush, 8000);
 addEventListener('online', flush);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') flush(); });
 export const put = (p, v) => write('PUT', p, v);
+/* sent now or not at all (a sign-in, a check): true when the database took it */
+export async function sendNow(m, p, v) { try { await send(m, p, v === undefined ? null : JSON.stringify(v)); return true; } catch (e) { return false; } }
 export const patch = (p, v) => write('PATCH', p, v);
 export const del = p => write('DELETE', p);
 
