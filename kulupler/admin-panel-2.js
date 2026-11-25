@@ -880,7 +880,7 @@ function renderHandsAnalysis(){
     <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">
       <button class="btn btn-blue btn-sm" onclick="adminImportHandsOpen()">🃏 Load hand file</button>
       <button class="btn btn-gold btn-sm" onclick="adminAutoBoardsOpen()">🎲 Make the boards automatically</button>
-      ${hands.length?`<button class="btn btn-gold btn-sm" onclick="startDDAnalysis(true)">🧮 Analyse again</button><button class="btn btn-green btn-sm" onclick="ccDealStart()">📷 Deal with the camera</button>`:''}
+      ${hands.length?`<button class="btn btn-gold btn-sm" onclick="startDDAnalysis(true)">🧮 Analyse again</button>`:''}
       <span id="ddProgress" style="font-size:0.75rem;color:var(--text3);">${hands.length?(_ddRunning?'⏳ ':'')+done+' / '+hands.length+' analysed':''}</span>
     </div>`;
   if(!hands.length)return `<div class="card">${head}<div style="font-size:0.8rem;color:var(--text3);">Load the file from your dealing machine (Dealer4 .dlm, Duplimate .dup/.bri/.dge) or a PBN / LIN file: every board then shows its hands, what each player can make and the par score.</div></div>`;

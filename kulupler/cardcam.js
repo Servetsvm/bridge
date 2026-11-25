@@ -40,7 +40,6 @@ function layer(html){
   el.style.background=''; el.innerHTML=html; el.hidden=false; return el;
 }
 function closeLayer(){
-  stopCam();
   const el=document.getElementById('ccLayer'); if(el){ el.hidden=true; el.innerHTML=''; }
 }
 window.ccClose=closeLayer;
@@ -52,80 +51,7 @@ function gridHtml(on,off,act){
   return `<div class="cc-grid">${[3,2,1,0].map(s=>`<div class="cc-row"><span class="cc-sym${s===1||s===2?' cc-red':''}">${SYM[s]}</span>${[12,11,10,9,8,7,6,5,4,3,2,1,0].map(r=>{const c=s*13+r;return `<button class="cc-c${on.has(c)?' on':''}" ${off.has(c)?'disabled':''} onclick="${act}(${c})">${RK[r]==='T'?'10':RK[r]}</button>`;}).join('')}</div>`).join('')}</div>`;
 }
 
-// ---- the camera ----
-let cam=null, camTimer=null;
-async function startCam(video){
-  stopCam();
-  cam=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}},audio:false});
-  video.srcObject=cam; await video.play().catch(()=>{});
-}
-function stopCam(){
-  if(camTimer){ clearInterval(camTimer); camTimer=null; }
-  if(cam){ cam.getTracks().forEach(t=>t.stop()); cam=null; }
-}
-
-// ══════ 1. Deal with the camera ══════
-let D=null;   // { list: the boards, i, placed: Set, last }
-window.ccDealStart=async function(){
-  const list=handsList().slice().sort((a,b)=>(+a.board||0)-(+b.board||0)).map(h=>({board:h.board,hands:dealCards(h.deal)})).filter(x=>x.hands&&x.hands.every(h=>h.length===13));
-  if(!list.length){ toast('❌ Load the hand file first'); return; }
-  if(typeof Photo==='undefined'||!Photo.readCardsCanvas){ toast('❌ The card reader is not loaded'); return; }
-  D={list,i:0,placed:new Set(),last:null,shown:null,manual:false};
-  dealDraw();
-  const v=document.getElementById('ccVideo');
-  try{ await startCam(v); }catch(e){ D.manual=true; dealDraw(); toast('📷 The camera could not be opened: tap the cards'); return; }
-  const cv=document.createElement('canvas');
-  camTimer=setInterval(()=>{
-    if(!D||!v.videoWidth) return;
-    const sc=Math.min(1,960/v.videoWidth); cv.width=Math.round(v.videoWidth*sc); cv.height=Math.round(v.videoHeight*sc);
-    cv.getContext('2d').drawImage(v,0,0,cv.width,cv.height);
-    let got=[]; try{ got=Photo.readCardsCanvas(cv).filter(x=>x.d<60).sort((a,b)=>a.d-b.d); }catch(e){}
-    const c=got.length?got[0].c:null;
-    if(c==null){ D.last=null; return; }
-    if(D.placed.has(c)){ if(D.shown!==c){ D.shown=c; dealInfo(c,true); } D.last=null; return; }
-    if(D.last===c){ D.last=null; dealPlace(c); } else D.last=c;   // the same card in two frames running: sure
-  },350);
-};
-function seatOf(c){ const b=D.list[D.i]; return b.hands.findIndex(h=>h.includes(c)); }
-function dealPlace(c){
-  if(!D||D.placed.has(c)) return;
-  D.placed.add(c); D.shown=c;
-  const s=seatOf(c);
-  try{ navigator.vibrate&&navigator.vibrate(60); }catch(e){}
-  say(seatWord(s));
-  dealInfo(c,false);
-  if(D.placed.size===52){ say(seatWord(s)); setTimeout(()=>{ if(D&&D.placed.size===52) dealDraw(); },900); }
-}
-window.ccDealTap=function(c){ if(!D) return; if(D.placed.has(c)){ D.placed.delete(c); dealDraw(); return; } dealPlace(c); dealDraw(); };
-window.ccDealMove=function(d){ if(!D) return; const n=D.i+d; if(n<0||n>=D.list.length) return; D.i=n; D.placed=new Set(); D.last=null; D.shown=null; dealDraw(); };
-window.ccDealManual=function(){ if(!D) return; D.manual=!D.manual; dealDraw(); };
-function counts(){ const b=D.list[D.i], n=[0,0,0,0]; for(const c of D.placed) n[b.hands.findIndex(h=>h.includes(c))]++; return n; }
-function dealInfo(c,again){
-  const el=document.getElementById('ccBig'); if(!el) return;
-  const s=seatOf(c);
-  el.style.background=SEAT_COL[s];
-  el.innerHTML=`<div class="cc-card${red(c)?' cc-red':''}">${cName(c)}</div><div class="cc-seat">${seatWord(s)}</div>${again?'<div class="cc-again">✓</div>':''}`;
-  const n=counts(), cnt=document.getElementById('ccCnt');
-  if(cnt) cnt.innerHTML=[0,1,2,3].map(k=>`<span style="color:${SEAT_COL[k]}">${seatWord(k)} <b>${n[k]}</b>/13</span>`).join('');
-  const g=document.getElementById('ccGridBox'); if(g&&D.manual) g.innerHTML=gridHtml(D.placed,new Set(),'ccDealTap');
-}
-function dealDraw(){
-  const b=D.list[D.i], n=counts(), all=D.placed.size===52;
-  const keep=document.getElementById('ccVideo');
-  const html=`<div class="cc-top"><button class="btn btn-ghost btn-sm" onclick="ccClose()">✕</button><b class="cc-title">Board <span>${esc(b.board)}</span></b>
-      <span class="cc-nav"><button class="btn btn-ghost btn-sm" onclick="ccDealMove(-1)" ${D.i?'':'disabled'}>◀</button><button class="btn btn-ghost btn-sm" onclick="ccDealMove(1)" ${D.i<D.list.length-1?'':'disabled'}>▶</button></span></div>
-    <div class="cc-cnt" id="ccCnt">${[0,1,2,3].map(k=>`<span style="color:${SEAT_COL[k]}">${seatWord(k)} <b>${n[k]}</b>/13</span>`).join('')}</div>
-    ${all?`<div class="cc-done">✅ <span>Board complete</span> <b>${esc(b.board)}</b>${D.i<D.list.length-1?`<button class="btn btn-gold" onclick="ccDealMove(1)">▶ <span>Next board</span></button>`:''}</div>`:''}
-    <div class="cc-big" id="ccBig"><div class="cc-hint">Show a card to the camera, its corner in view</div></div>
-    <div class="cc-vbox"></div>
-    <div class="cc-foot"><button class="btn btn-ghost btn-sm" onclick="ccDealManual()">${D.manual?'📷 Camera':'👆 Tap the cards'}</button></div>
-    <div id="ccGridBox">${D.manual?gridHtml(D.placed,new Set(),'ccDealTap'):''}</div>`;
-  layer(`<div class="cc-wrap">${html}</div>`);
-  const box=document.querySelector('#ccLayer .cc-vbox');
-  const v=keep||Object.assign(document.createElement('video'),{id:'ccVideo',muted:true,playsInline:true});
-  v.setAttribute('playsinline',''); box.appendChild(v); if(keep&&cam) v.play().catch(()=>{});
-  if(D.shown!=null&&!all) dealInfo(D.shown,true);
-}
+// (dealing with the camera was removed on 2026-11-25: the hand file is enough)
 
 // ══════ 3. Double dummy after a board ══════
 function ccAnalyse(board,h,done){

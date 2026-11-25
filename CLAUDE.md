@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v687`, kulüpler `kulup-v198`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v688`, kulüpler `kulup-v199`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,7 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v687`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-25
+- Kulüp programından **kamerayla dağıtma** kaldırıldı (cardcam.js'in kamera kısmı, TD 'Kamerayla dağıt' düğmesi, kulupler'de photo.js); DD analizi kalıyor. BridgePlay'deki 'fotoğraftan el oku' duruyor (sorulacak).
 - **Kulüp programı canlı akış:** `DB.subscribe` artık Firebase SSE (EventSource; put/patch `_setPath`, `auth_revoked`→yeni token, kesilince
   yeniden bağlanır, açılamazsa 4 sn/15 sn (gizli) yoklama). Eskiden her cihaz 8 anahtarı (üye listesi dahil) 2 sn'de bir indiriyordu.
   **Çevrimdışı:** `setBoards/setApprovals/setTableLocks` → `DB.setDiff` (yalnız değişen kayıtlar PATCH; başka masanın skoru ezilmez);
