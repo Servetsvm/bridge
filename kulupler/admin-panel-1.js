@@ -245,6 +245,30 @@ function teamScoreHtml(){
 /* the quick team match (BridgePlay's Team match button, the club's admin): two teams of two pairs, two tables, boards
    1–8 in one round — each table plays them in any order (a board the other table has open is shown busy) — set up and
    started at once, no opening lead asked; its results are listed apart as a team match */
+/* the quick Social Bridge (BridgePlay's Social Bridge button, any member): the players and the boards chosen on one
+   screen, then set up and started at once like the quick team match (no password, tables without codes, ends by itself) */
+let _qsW={pl:8,nb:16};
+window.quickSocialPick=function(){
+  const L=v=>window.i18nText?i18nText(v):v, PL=[8,12,16,20,24,28,32,36,40], NB=[8,12,16,20,24,28,32,36];
+  const key=(v,on,fn)=>`<button class="bm3-key${on?' on':''}" style="${on?'background:#1f5d36;color:#fff;border-color:#1f5d36;':''}" onclick="${fn}">${v}</button>`;
+  document.getElementById('panelContent').innerHTML=`<div class="bm3 bm3w tdc"><div class="bm3-screen">
+    <div class="bm3-bar"><span class="td tdbtn">🤝</span><div class="ev"><b>${cleanData(CLUB_NAME||'')}</b>${L('Social Bridge')}</div><span class="td" style="visibility:hidden">🤝</span></div>
+    <div class="bm3-body"><div class="bm3-step">${L('Number of players')}</div><div class="bm3-keys k5">${PL.map(v=>key(v,_qsW.pl===v,`_qsSet('pl',${v})`)).join('')}</div>
+    <div class="bm3-step">${L('Number of boards')}</div><div class="bm3-keys k4">${NB.map(v=>key(v,_qsW.nb===v,`_qsSet('nb',${v})`)).join('')}</div>
+    <div class="bm3-note" style="padding:10px 12px;text-align:center;font-size:1.05rem;"><b>${_qsW.pl/4}</b> ${L('tables')} · <b>${_qsW.nb}</b> ${L('boards')}</div></div>
+    <div class="bm3-actions"><button class="bm3-cancel" onclick="location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID))">✕</button><button class="bm3-ok" onclick="quickSocialGo()">▶ ${L('Start now')}</button></div></div></div>`;
+};
+window._qsSet=(k,v)=>{ _qsW[k]=v; quickSocialPick(); };
+window.quickSocialGo=async function(){
+  const box=document.createElement('div'); box.style.display='none'; box.id='qsForm';
+  box.innerHTML=`<input id="aName"><select id="aMovement"><option value="social" selected>social</option></select><input id="aBPR" value="3"><input id="aPlayers" value="${_qsW.pl}"><input id="aSocBoards" value="${_qsW.nb}">`;
+  document.body.appendChild(box);
+  try{ await adminSetup(); } finally{ box.remove(); }
+  const s=getState(); if(s.status!=='setup'||s.movement!=='social'){ toast('❌'); return; }
+  s._quickTeam=true; s._quickKind='social'; s.name=s.name+' · '+(window.i18nText?i18nText('Social Bridge'):'Social Bridge'); await setState(s);
+  await adminStart(); window._quickMade=true;
+  if(typeof quickEntry==='function') await quickEntry();
+};
 async function quickTeamMatch(){
   const box=document.createElement('div'); box.style.display='none'; box.id='qtForm';
   box.innerHTML='<input id="aName"><select id="aMovement"><option value="team" selected>team</option></select><input id="aBPR" value="8"><input id="aPlayers" value="8"><input id="aTeamA" value="Team A"><input id="aTeamB" value="Team B"><input id="aTeamPairs" value="2">';

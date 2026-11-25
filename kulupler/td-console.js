@@ -215,7 +215,8 @@ window.tdcInfo=async function(){
     <div class="field"><label>${L('Contact person')}</label><input id="tdcKp" maxlength="60" value="${v(x.kp)}"></div>
     <div class="field"><label>${L('Phone number')}</label><input id="tdcTel" type="tel" maxlength="25" placeholder="+47 …" value="${v(x.tel)}"></div>
     <div class="field"><label>📅 ${L('Tournament days')}</label><div id="tdcSch"></div><button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" onclick="tdcSchAdd()">➕ ${L('Add a day')}</button></div>
-    <label style="display:flex;gap:10px;align-items:center;font-size:0.95rem;margin-top:6px;cursor:pointer;"><input type="checkbox" id="tdcTm" ${x.tm?'checked':''} style="width:22px;height:22px;"> 🏆 ${L('Team match button on BridgePlay (members start a 2-table match)')}</label>`,
+    <label style="display:flex;gap:10px;align-items:center;font-size:0.95rem;margin-top:6px;cursor:pointer;"><input type="checkbox" id="tdcTm" ${x.tm?'checked':''} style="width:22px;height:22px;"> 🏆 ${L('Team match button on BridgePlay (members start a 2-table match)')}</label>
+    <label style="display:flex;gap:10px;align-items:center;font-size:0.95rem;margin-top:6px;cursor:pointer;"><input type="checkbox" id="tdcSb" ${x.sb?'checked':''} style="width:22px;height:22px;"> 🤝 ${L('Social Bridge button on BridgePlay (members choose the players and the boards)')}</label>`,
     `<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcInfoSave()">${L('Save')}</button>`);
   (Array.isArray(x.sch)?x.sch:[]).forEach(r=>tdcSchAdd(r));
 };
@@ -242,10 +243,11 @@ window.tdcInfoSave=async function(){
     .filter(r=>TDC_DAYS.includes(r.d)&&/^\d\d:\d\d$/.test(r.t)).map(r=>{ const o={d:r.d,t:r.t}; if(TDC_KINDS.includes(r.k)&&r.k) o.k=r.k; if(r.n) o.n=r.n; return o; })
     .sort((a,b)=>ord(a.d)-ord(b.d)||a.t.localeCompare(b.t)).slice(0,7);
   if(sch.length) x.sch=sch;
-  if(document.getElementById('tdcTm')?.checked) x.tm=1;   // the Team match button on BridgePlay's club page: only when the admin turns it on
+  if(document.getElementById('tdcTm')?.checked) x.tm=1;
+  if(document.getElementById('tdcSb')?.checked) x.sb=1;   // the Social Bridge button, the same way   // the Team match button on BridgePlay's club page: only when the admin turns it on
   if(x.tel&&!/^[+\d][\d\s\-()]{4,}$/.test(x.tel)){ toast('❌ '+L('Phone number')+'?'); return; }
   try{
-    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),x.adr||x.kp||x.tel||x.sch||x.tm?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
+    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),x.adr||x.kp||x.tel||x.sch||x.tm||x.sb?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
     if(!r.ok) throw new Error(String(r.status));
   }catch(e){ toast('❌ '+L('Not saved — please log in again')); return; }
   closeModal(); toast('✅ '+L('Saved'));
@@ -319,7 +321,7 @@ function resetHtml(){
     <div class="bm3-step">${L('Old tournaments')}</div>
     ${A.length?`<div class="tdc-hist">${A.map((a,i)=>`<div class="tdc-hrow tdc-resrow"><b>${cleanData((a.state&&a.state.name)||L('Tournament'))}</b><span>${dd(a.finished)} · ${(a.state&&a.state.tableCount)||0} ${L('tables')}</span><button class="btn tdc-red" onclick="tdcResetOld(${i})">🗑 ${L('Delete')}</button></div>`).join('')}</div>`:`<div class="bm3-note" style="padding:0 12px">${L('No archived tournaments')}</div>`}
     ${(()=>{ const T=Object.entries(_cache['teamArch']||{}).filter(([,a])=>a&&a.state).sort((x,y)=>String(y[1].finished||'').localeCompare(String(x[1].finished||'')));
-      return T.length?`<div class="bm3-step">🏆 ${L('Team match')}</div><div class="tdc-hist">${T.map(([id,a])=>{ const sc=typeof window.teamScoreOf==='function'?window.teamScoreOf(a):null;
+      return T.length?`<div class="bm3-step">🏆 ${L('Team match')} · 🤝 ${L('Social Bridge')}</div><div class="tdc-hist">${T.map(([id,a])=>{ const sc=a.state.movement==='team'&&typeof window.teamScoreOf==='function'?window.teamScoreOf(a):null;
         return `<div class="tdc-hrow tdc-resrow"><b>${sc?cleanData(sc.ta)+' '+sc.a+' – '+sc.b+' '+cleanData(sc.tb):cleanData(a.state.name||L('Team match'))}</b><span>${dd(a.finished)}</span><button class="btn tdc-red" onclick="tdcDelTeam('${String(id).replace(/[^A-Za-z0-9_-]/g,'')}')">🗑 ${L('Delete')}</button></div>`; }).join('')}</div>`:''; })()}
     <div class="bm3-step">${L('Log')}</div>`;
 }

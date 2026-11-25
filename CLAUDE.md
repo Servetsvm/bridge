@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v677`, kulüpler `kulup-v191`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v678`, kulüpler `kulup-v192`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -57,6 +57,11 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v677`, kulü
 
 ## Oturum günlüğü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
+
+### 2026-11-25
+- **Hızlı Sosyal Bridge:** kulüp kartında 🤝 Sosyal Bridge (kulüp bilgisi `bm/info/sb:1` açıksa) → `?role=admin&quick=social` →
+  `quickSocialPick()` (oyuncu 8–40, board 8–36) → `quickSocialGo()`; takım maçının bütün altyapısını kullanır (`_quickTeam` bayrağı
+  + `_quickKind:'social'`: şifresiz, kodsuz masa, kilit, geri dönüş, bitince `teamArch`). Atak sorulur (yalnız takım maçında sorulmaz).
 
 ### 2026-11-24
 - TD → Menü → Kayıtlar: "🏆 Takım maçı" listesi, her sonuç 🗑 ile silinir (`tdcDelTeam`, yalnız kulüp yöneticisi; kural bm .write).

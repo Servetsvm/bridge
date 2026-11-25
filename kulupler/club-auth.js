@@ -168,7 +168,7 @@ async function initClubGate(){
       }
       // BridgePlay's Team match button (quick=team): any signed-in member needs no password — the match is set up at once
       // (the rules let a member write the tournament only while no other one is running)
-      if(roleParam==='admin'&&params.get('quick')==='team'&&me()){ window._quickTeam=true; setTimeout(()=>doLogin(),50); }
+      if(roleParam==='admin'&&(params.get('quick')==='team'||params.get('quick')==='social')&&me()){ window._quickTeam=true; window._quickKind=params.get('quick'); setTimeout(()=>doLogin(),50); }
       // a member's TD button of a quick team match being played: no password either (the rules let members run it)
       else if(roleParam==='admin'&&me()){ let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
         if(st&&st.status==='running'&&st._quickTeam){ window._quickTeam=true; window._quickMade=true; setTimeout(()=>doLogin(),50); } }
@@ -515,6 +515,7 @@ window.doLogin=async function(){
     if(window._quickTeam){ window._quickTeam=false; const s0=getState();
       // a member (not the club's admin): only while no other tournament is being played (one set up but never started is replaced)
       if(!isClubAdmin()&&s0.status==='running'&&!s0._quickTeam){ toast('⚠️ '+i18nText('Another tournament is being played at this club now.')); setTimeout(()=>location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)),1800); return; }
+      if(s0.status!=='running'&&window._quickKind==='social'){ refreshTopbar(); quickSocialPick(); return; }   // Social Bridge: the players and the boards first
       if(s0.status!=='running'){ try{ await quickTeamMatch(); window._quickMade=true;
         // set up and started: straight to the club's tables (table numbers and TD), not the TD panel — drawn here, without
         // loading the page again (a new load could miss the tournament for a moment and show the table code box)

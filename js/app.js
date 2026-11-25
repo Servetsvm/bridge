@@ -3785,6 +3785,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.clubplay) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubplay)); return; }
   if (t.dataset.clubres) { window.open(location.pathname + '?kulup=' + encodeURIComponent('?club=' + t.dataset.clubres + '&results=1'), '_blank'); return; }
   if (t.dataset.clubteam) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubteam) + '&role=admin&setup=team&quick=team'); return; }
+  if (t.dataset.clubsocial) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubsocial) + '&role=admin&quick=social'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
   // the online team match: a new tournament of the Team match type, set up at once
@@ -4732,6 +4733,7 @@ async function showClubs() {
         // the club's info (address, contact person, phone): a button under the tools, the card opens under it
         // a team match: only when the club's admin turned its button on (Club info → Team match button)
         + (t.tb || !((ui.clubInfo || {})[t.club] || {}).tm ? '' : `<button class="btn clubinfob clubteamb" data-clubteam="${esc(t.club)}">🏆 ${T('Team match')}</button>`)
+        + (t.tb || !((ui.clubInfo || {})[t.club] || {}).sb ? '' : `<button class="btn clubinfob clubteamb" data-clubsocial="${esc(t.club)}">🤝 ${T('Social Bridge')}</button>`)   // Social Bridge: the same way, when the club's admin turned it on
         + (clubInfoHtml((ui.clubInfo || {})[t.club]) ? `<button class="btn clubinfob" data-clubinfo="${esc(t.club)}" data-clubname="${esc(t.c || t.club)}">ℹ️ ${T('Club info')}</button>` : '')) + `</div>`).join('');
     openOv('clubs', `<div class="clubsfs ${ui.clubOpen ? 'one' : 'list'}" style="--n:${Math.max(1, shown.length)}"><div class="row2 clubstop">${ui.clubOpen ? `<button class="btn" data-clubopen="${esc(ui.clubOpen)}">‹ ${T('Clubs')}</button>` : ''}<button class="btn" id="oClose">${T('Close')}</button></div>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}${!ui.clubOpen && typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn clubsa" id="clubSuper">🛡️ ${T('Super admin')}</button>` : ''}</div>`);
