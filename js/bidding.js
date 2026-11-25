@@ -661,6 +661,23 @@ function cands(x) {
       const nm = os === 0 ? 1 : 0, om = otherMajor(ms);
       add(B(2, nm), h => h.hcp >= 11 && (h.len[ms] >= 5 || h.len[om] >= 4), { min: 11, tag: 'nmf', ms, cv: 'nmf', t: 'New Minor Forcing: asking for 3-card ' + SUIT[ms] + ' support or four ' + SUIT[om], f: 1 });
     }
+    // after our Forcing 1NT and opener's forced two-level rebid (not a reverse): place the contract or invite
+    // (6-9: pass with a fit for opener's second suit, a long suit of my own to play, else preference to 2 of the major;
+    // 10-11: three-card limit raise to three of the major, a raise of opener's suit, or 2NT)
+    if ((my[0].m || {}).tag === 'nt1f' && rhoPass && isNum(r2) && LV(r2) === 2 && r2s < 4 && !(r2s !== os && r2s > os)) {
+      const top = Math.min(11, (my[0].m || {}).max || 11), M = os, fit2 = r2s !== M ? r2s : -1;   // an invitation is 10-11 (with 12, game)
+      add(B(4, M), h => h.len[M] >= 3 && h.sup(M) >= top + 1, { min: top, len: { [M]: 3 }, cv: 'fnt', t: 'Game: three-card support' });
+      add(B(3, M), h => h.len[M] >= (r2s === M ? 2 : 3) && h.sup(M) >= 10 && h.sup(M) <= 11, { min: 10, max: top, len: { [M]: r2s === M ? 2 : 3 }, cv: 'fnt', t: r2s === M ? 'Invitation: ' + SUIT[M] + ' support, 10-' + top : 'Three-card limit raise, invitational: 10-' + top });
+      if (fit2 >= 0) add(B(3, fit2), h => h.len[fit2] >= (fit2 >= 2 ? 4 : 5) && (fit2 >= 2 ? h.sup(fit2) >= 10 && h.sup(fit2) <= 11 : h.hcp >= 10 && h.hcp <= 11) && h.len[M] <= 2, { min: 10, max: top, len: { [fit2]: 4 }, cv: 'fnt', t: 'Invitation: 4+ ' + SUIT[fit2] + ' support, 10-' + top });
+      if (r2s !== M) for (const z of [3, 2, 1, 0]) if (z !== M && z !== r2s) {   // (over a rebid six-card major: pass, not a suit of my own)
+        const lv = B(2, z) > r2 ? 2 : 3;
+        if (lv === 2 || z < 2) add(B(lv, z), h => h.len[z] >= 6 && h.hcp <= 9 && h.len[M] <= 2 && !(fit2 >= 0 && h.len[fit2] >= 4), { max: 9, len: { [z]: 6 }, cv: 'fnt', t: 'To play: 6+ ' + SUIT[z] + ', weak' });
+      }
+      add(B(2, 4), h => h.hcp >= 10 && h.hcp <= 11 && h.len[M] <= 2 && h.semi, { min: 10, max: top, cv: 'fnt', t: 'Invitation: 10-' + top + ', no fit' });
+      if (fit2 >= 0) add('P', h => h.hcp <= 9 && h.len[fit2] >= (fit2 >= 2 ? 4 : 3) && h.len[fit2] > h.len[M], { max: 9, cv: 'fnt', t: 'Pass: ' + SUIT[fit2] + ' fit, weak' });
+      if (r2s === M) add('P', h => h.hcp <= 9, { max: 9, cv: 'fnt', t: 'Pass: weak' });
+      else if (B(2, M) > r2) add(B(2, M), h => h.hcp <= 9 && h.len[M] >= 2, { max: 9, len: { [M]: 2 }, cv: 'fnt', t: 'Preference: ' + SUIT[M] + ' (two cards), 6-9' });
+    }
     if (C.fsf && r2s < 4 && r2s !== os && r2s !== ms && ms < 4) {
       const fourth = [0, 1, 2, 3].find(s => s !== os && s !== ms && s !== r2s);
       const lvl = ST(r2) < fourth ? LV(r2) : LV(r2) + 1;
@@ -848,6 +865,10 @@ function ntResponses(x, add, lv, own) {
 function suitResponses(x, add, o, os) {
   const C = x.C, maj = os >= 2, rhoX = x.rhoCall === 'X', un = !x.passed;
   const two1 = C.twoOverOne && un;
+  // Forcing 1NT (its own convention; a card saved before it existed follows 2/1, as it did): over 1♥/1♠ by an unpassed
+  // hand, 1NT is forcing one round, 6-11 (6-12 with 2/1, where a two-level new suit needs 12); a three-card limit raise
+  // goes through it (1NT, then a jump to three of the major)
+  const fntOn = 'fnt' in C ? !!C.fnt : !!C.twoOverOne, fnt = maj && fntOn && un, fntMax = two1 ? 12 : 11;
   // a strong jump shift (19+, a good suit) comes before the ordinary new-suit responses that the same hand also fits
   if (C.sjs && un && !rhoX) for (const s of [1, 2, 3]) {
     if (s <= os) continue;
@@ -872,7 +893,7 @@ function suitResponses(x, add, o, os) {
     }
     if (os === 2) add(B(1, 3), h => h.len[3] >= 4 && h.hcp >= 6, { min: 6, len: { 3: 4 }, t: '4+ ♠, 6+ HCP', f: 1 });
     if (x.sys.maj5) add(B(2, os), h => h.len[os] >= 3 && h.sup(os) >= 6 && h.sup(os) <= 9, { min: 6, max: 9, len: { [os]: 3 }, t: 'Single raise: 3-card support, 6-9 points' });   // a 4-card major (Acol) needs four
-    if (!C.bergen && x.sys.maj5) add(B(3, os), h => h.len[os] === 3 && h.sup(os) >= 10 && h.sup(os) <= 12, { min: 10, max: 12, len: { [os]: 3 }, t: 'Limit raise: 3-card support, 10-12 points' });
+    if (!C.bergen && x.sys.maj5 && !fnt) add(B(3, os), h => h.len[os] === 3 && h.sup(os) >= 10 && h.sup(os) <= 12, { min: 10, max: 12, len: { [os]: 3 }, t: 'Limit raise: 3-card support, 10-12 points' });
   } else {
     if (C.invMin && un && !rhoX) {
       add(B(2, os), h => h.len[os] >= (os === 0 ? 5 : 4) && h.hcp >= 10 && h.len[2] < 4 && h.len[3] < 4, { min: 10, len: { [os]: 4 }, tag: "inv", cv: "invMin", t: "Inverted minor: 10+ points, 4+ support, no 4-card major, forcing", f: 1 });
@@ -886,13 +907,15 @@ function suitResponses(x, add, o, os) {
     if (s <= os) continue;
     add(B(2, s), h => h.len[s] >= 6 && h.hcp <= 5 && h.top5(s) >= 1, { max: 5, len: { [s]: 6 }, tag: 'wjs', cv: 'wjs', t: 'Weak jump shift: 6+ ' + SUIT[s] + ', 0-5 HCP' });
   }
-  if (maj && two1) add(B(1, 4), h => h.hcp >= 6 && h.hcp <= 12 && h.len[os] <= 3 && !(h.len[os] === 3 && h.sup(os) <= 9), { min: 6, max: 12, tag: 'nt1f', cv: 'twoOverOne', t: 'Forcing 1NT: 6-12 HCP', f: 1 });
+  if (fnt) add(B(1, 4), h => h.hcp >= 6 && h.hcp <= fntMax && h.len[os] <= 3 && !(h.len[os] === 3 && h.sup(os) <= 9), { min: 6, max: fntMax, tag: 'nt1f', cv: 'fnt', t: 'Forcing 1NT: 6-' + fntMax + ' HCP, forcing one round', f: 1 });
   else add(B(1, 4), h => h.hcp >= 6 && h.hcp <= 10 && !(maj && h.len[os] >= 3), { min: 6, max: 10, t: '6-10 HCP, no fit' });
   for (const s of [3, 2, 1, 0]) {
     if (s === os || B(1, s) > o) continue;
     const need = (os === 3 && s === 2) ? 5 : 4;
-    add(B(2, s), h => h.hcp >= (two1 ? 12 : 11) && h.len[s] >= need && h.len[s] >= Math.max(...[0, 1, 2, 3].filter(u => u !== os).map(u => h.len[u])),
-      two1 ? { min: 12, len: { [s]: need }, cv: 'twoOverOne', t: '2/1: ' + need + '+ ' + SUIT[s] + ', 12+ HCP, game forcing', f: 1, gf: 1 } : { min: 11, len: { [s]: need }, t: 'New suit: ' + need + '+ ' + SUIT[s] + ', 11+ HCP', f: 1 });
+    // a passed hand (Forcing 1NT played): a two-level new suit is 9-11 and not forcing — the passed hand's 1NT is not forcing either
+    const ph = x.passed && fntOn && maj;
+    add(B(2, s), h => h.hcp >= (two1 ? 12 : ph ? 9 : 11) && (!ph || h.hcp <= 11) && h.len[s] >= need && h.len[s] >= Math.max(...[0, 1, 2, 3].filter(u => u !== os).map(u => h.len[u])),
+      two1 ? { min: 12, len: { [s]: need }, cv: 'twoOverOne', t: '2/1: ' + need + '+ ' + SUIT[s] + ', 12+ HCP, game forcing', f: 1, gf: 1 } : ph ? { min: 9, max: 11, len: { [s]: need }, cv: 'fnt', t: 'Passed hand: ' + need + '+ ' + SUIT[s] + ', 9-11 HCP, not forcing' } : { min: 11, len: { [s]: need }, t: 'New suit: ' + need + '+ ' + SUIT[s] + ', 11+ HCP', f: 1 });
   }
   if (!maj && !(C.invMin && un && !rhoX)) {
     add(B(2, 4), h => h.bal && h.hcp >= 13 && h.hcp <= 15 && h.len[2] < 4 && h.len[3] < 4, { min: 13, max: 15, t: 'Balanced 13-15 HCP, game forcing', f: 1, gf: 1 });
@@ -1064,7 +1087,7 @@ function openerRebid(x, add, o, resp) {
     for (let s = 0; s < os; s++) add(B(2, s), h => h.len[s] >= 4 && h.hcp <= 18, { min: 11, max: 18, len: { [s]: 4 }, t: 'Second suit: 4+ ' + SUIT[s] });
     for (let s = os + 1; s <= 3; s++) add(B(2, s), h => h.len[s] >= 4 && h.hcp >= 17, { min: 17, len: { [s]: 4 }, t: 'Reverse: 17+ HCP', f: 1 });
     if (forcing) {
-      for (const s of [0, 1]) if (s !== os) add(B(2, s), h => h.len[s] >= 3, { min: 11, max: 15, len: { [s]: 3 }, cv: 'twoOverOne', t: 'Reply to forcing 1NT: three-card ' + SUIT[s] });
+      for (const s of [0, 1]) if (s !== os) add(B(2, s), h => h.len[s] >= 3, { min: 11, max: 17, len: { [s]: 3 }, cv: 'fnt', t: 'Forcing 1NT reply: 3+ ' + SUIT[s] });
       add(B(2, os), () => true, { len: { [os]: 5 }, t: 'Five ' + SUIT[os] + ', minimum' });
     } else add('P', () => true, { max: 15, t: 'Minimum: pass' });
     return true;

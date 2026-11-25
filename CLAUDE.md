@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v680`, kulüpler `kulup-v194`.
+_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v681`, kulüpler `kulup-v194`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,10 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v680`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-25
+- **Forsing 1NT** ayrı konvansiyon (`fnt`, core.js CONVS; 2/1'de açık, SAYC/Acol/diğerlerinde kapalı; eski kayıtlı kartta `fnt` yoksa
+  2/1'i izler). bidding.js: `suitResponses` 1NT 6-11 (2/1 ile 6-12), 3'lü 10-11 doğrudan 3M değil önce 1NT; cevapçının ikinci teklifi
+  (`tag 'nt1f'` → 3M davet / zayıf uzun renk oynamak için / ikinci renge uyumla pas / 2M tercih / 2NT 10-11); pas geçmiş elin 2 seviyesi
+  yeni rengi 9-11 forsingsiz. Test: eski/yeni motor DD karşılaştırması 24000 el, 113 kontrat değişti, +136 IMP; SAYC 0 değişiklik.
 - TD BridgeScore: "Başlamaya hazır" ve oynanan turnuva ekranında altta 🗑 (tam yetkili TD) → tek soru, siler ve yeni turnuva kurulumuna geçer (`tdcResetNow`).
 - **Hızlı Sosyal Bridge:** kulüp kartında 🤝 Sosyal Bridge (kulüp bilgisi `bm/info/sb:1` açıksa) → `?role=admin&quick=social` →
   `quickSocialPick()` (oyuncu 8–40, board 8–36; varsayılan 12/12) → `quickSocialGo()`; takım maçının bütün altyapısını kullanır (`_quickTeam` bayrağı
