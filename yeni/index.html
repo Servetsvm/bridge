@@ -1,28 +1,6 @@
-<!doctype html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b1812">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BridgePlay">
-<title>BridgePlay</title>
-<meta name="description" content="BridgePlay — bridge with robots, clubs and friends, on your phone.">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="../icons/icon-192.png">
-<link rel="apple-touch-icon" href="../icons/icon-192.png">
-<link rel="stylesheet" href="css/app.css">
-</head>
-<body>
-<header id="bar"></header>
-<main id="main"><div class="center"><span class="spin"></span></div></main>
-<!-- the robots' brain: the first BridgePlay's engine, unchanged (bidding, play, the double-dummy solver), and the reader of a deal in a picture -->
-<script src="../js/dds.js"></script>
-<script src="../js/core.js"></script>
-<script src="../js/bidding.js"></script>
-<script src="../js/play.js"></script>
-<script src="../js/photo.js"></script>
-<script type="module" src="app/main.js"></script>
-</body>
-</html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BridgePlay</title>
+<script>
+/* the trial "new BridgePlay" is gone: its kept copy is removed from the phone and BridgePlay opens */
+(async()=>{try{if(navigator.serviceWorker){for(const r of await navigator.serviceWorker.getRegistrations())if(r.scope.includes('/yeni/'))await r.unregister();}
+if(window.caches){for(const k of await caches.keys())if(k.startsWith('bp2-'))await caches.delete(k);}}catch(e){}location.replace('../');})();
+</script></head><body style="background:#0f2a1d"></body></html>
