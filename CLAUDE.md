@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v689`, kulüpler `kulup-v199`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v690`, kulüpler `kulup-v199`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -71,6 +71,13 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v689`, kulü
   DD ölçümü (scratchpad fnt/cmp2.js: aynı motor, konvansiyon kapalı/açık): Flannery +314, Gazilli +161, Walsh +121, Minorwood +74,
   Landy +72 (2/1'de Capp yerine +170), Voidwood +48, Baron +44 (4 yollu yerine −8), Ghestem +19 (Michaels yerine −97), Jordan −37, Kokish −110.
   CONV_T 9 dil, BID_PH 15 yeni ifade, ROBOT_LEARNED v689.
+- **Bütün konvansiyonlar ölçüldü** (cmp2.js her biri açık/kapalı 20000 el; cmpold.js = HEAD motoruna karşı). Düzeltmeler (v690):
+  RKCB belirsiz cevap (0/3, 1/4, 2+Q=5) yüksek okunur `mine+alt<=total`; koz kızı yüzünden 5'te durma yalnız cevap kızı reddettiyse ve
+  uyum 8'liyse; grand: tüm anahtar + kız + 8'li uyum + est≥34 + HCP≥31; Inverted Minors 3m baraj artırmasına açıcı pas (18+ 3NT, 5m);
+  Ogust cevabından sonra soran yapay cevabı pas geçmez (19+ normal şlem yolu); Gambling 3NT pası bir minörde de stoper ister.
+  HEAD'e karşı 240000 el: 2/1 +864, SAYC +319, Acol +911, SEF +793, Precision +634, Polish +807 = +4328 IMP.
+  Hâlâ kaybettirenler (değiştirilmedi, kullanıcıya önerildi): SJS (WJS'e göre −211 / SAYC −136), Kokish −110, Forsing 1NT −87 (2/1'in parçası).
+  Denenip geri alınan: NT oyununda uzun rengi puana saymak (SAYC −320).
 
 ### 2026-11-25
 - **Yeni BridgePlay beta** (`/yeni/`, kullanıcının kararıyla sıfırdan; ad BridgePlay, fotoğraftan el kalır, el sonu koçu/geri alma/el geçmişi/Haftam,

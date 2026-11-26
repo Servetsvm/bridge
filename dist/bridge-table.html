@@ -2883,22 +2883,28 @@ function cands(x) {
     const t = mm.trump, P = pInfo(x), vd = mm.void, total = vd != null ? 4 : mm.rkc ? 5 : 4;
     const count = h => {
       const mine = mm.rkc ? h.kc(t) - (vd != null && h.has(vd, 12) ? 1 : 0) : h.aces; let k = pm.kc;
-      const alt = k === 0 ? (mm.rkc ? 3 : 4) : (k === 1 && mm.rkc ? 4 : k);
-      if (alt !== k && mine + alt <= total && P.min >= 15) k = alt;
+      const alt = k === 0 ? (mm.rkc ? 3 : 4) : k === 1 && mm.rkc ? 4 : k === 2 && mm.rkc ? 5 : k;
+      // the higher reading whenever it fits (the asker has room for it): measured double dummy, this finds far more of the
+      // slams than it loses by going one too high (+1300 IMP in 60000 deals); 1♣–1♥–1♠–4♥–4NT–5♦ with three key cards: 7♥
+      if (alt !== k && mine + alt <= total) k = alt;
       return mine + k;
     };
     const est = h => h.sup(t) + P.min + 2;
+    // (a grand slam also with a trump fit, every key card and the queen and 31+ HCP between us: partner's minimum is often
+    // more than the auction showed — 1♣–2♥–3♣–4NT–5♥ with ♥AKQJ972 opposite ♣A86532 ♦AKQ4: 7♥)
     // a grand slam: every key card, the trump queen known (RKCB) and the points for thirteen tricks (33+ HCP together);
     // without them the small slam (1♦–1♥–3♦–4NT–5♥ with ♦A7 and the queen missing: 6♦, not 7♦)
     const queen = h => !mm.rkc || t >= 4 || h.has(t, 10) || !!pm.q;
     // a grand slam needs a trump suit worth the name: eight cards together, or a solid seven of my own (♥AKQJ87 opposite
     // a void: not 7♥); a small slam a six-card suit at least, else it is played in notrump
     const fitOK = h => t >= 4 || h.len[t] + P.len[t] >= 8 || (h.len[t] >= 7 && h.top5(t) >= 4), fit6 = h => t >= 4 || h.len[t] + P.len[t] >= 8 || h.len[t] >= 6;
-    add(B(7, t), h => count(h) === total && est(h) >= 36 && h.hcp + P.min >= 33 && queen(h) && fitOK(h), { t: 'Grand slam: we hold every key card' });
+    add(B(7, t), h => count(h) === total && queen(h) && fitOK(h) && ((est(h) >= 36 && h.hcp + P.min >= 33) || (t < 4 && h.len[t] + P.len[t] >= 8 && est(h) >= 34 && h.hcp + P.min >= 31)), { t: 'Grand slam: we hold every key card' });
     if (t < 4) add(B(6, 4), h => count(h) >= total - 1 && !fit6(h), { t: 'Small slam in notrump: no trump fit' });
     // a key card and the trump queen both missing (the queen shown missing by the answer, or not shown and only an
     // eight-card fit): two losers, so five (1♥–2♦–2♥–4NT–5♥ with ♥A9843 and one ace out: 5♥)
-    const qOut = h => t < 4 && mm.rkc && !h.has(t, 10) && (pm.kc === 2 ? !pm.q : h.len[t] + P.len[t] <= 8);
+    // (only when the answer itself denied the queen and the fit is eight cards: with nine the queen often drops, and
+    // an answer that said nothing about it is no reason to stop — 1♦–1♥–2♥–4NT–5♣–6♥ made, 5♥ lost 13 IMP)
+    const qOut = h => t < 4 && mm.rkc && !h.has(t, 10) && pm.kc === 2 && !pm.q && h.len[t] + P.len[t] <= 8;
     add(B(6, t), h => count(h) >= total - 1 && !(count(h) === total - 1 && qOut(h)), { t: 'Small slam: at most one key card missing' });
     add('P', () => pLast.call === B(5, t), { t: 'Two key cards missing: stop at the five level' });
     add(B(5, t), () => true, { t: 'Two key cards missing: sign off at the five level', tag: 'stop' });
@@ -2975,6 +2981,19 @@ function cands(x) {
   /* Gambling 3NT: pass or correct */
   if (pJust && pm.tag === 'poc') { add(B(4, 1), h => h.len[1] >= 7, { t: 'My long suit is diamonds' }); add('P', () => true, { t: 'My long suit is clubs' }); return L; }
   /* Ogust reply by the weak-two opener */
+  // the asker after the Ogust answer: never passes the artificial reply — game opposite a maximum (or a minimum and a
+  // big hand with a fit), 3NT opposite a solid suit or without a fit but with stoppers, else three of partner's suit
+  if (pJust && rhoPass && myLast && mm.tag === 'ogust' && pm.cv === 'ogust') {
+    // (a hand with slam chances, 19+, goes on as usual: key cards, slam)
+    const s = ST(opening.call), mx = pLast.call === B(3, 2) || pLast.call === B(3, 3), solid = pLast.call === B(3, 4), G = s < 2 ? 5 : 4, sm = h => h.hcp <= 18;
+    const stops = h => [0, 1, 2, 3].filter(u => u !== s).every(u => h.stop(u));
+    if (solid) { add('P', h => sm(h) && stops(h), { t: 'Pass: 3NT with the solid suit' }); add(B(G, s), sm, { t: 'Game in partner\'s suit' }); return L; }
+    add(B(3, 4), h => sm(h) && (s < 2 || h.len[s] <= 1) && h.hcp >= (mx ? 15 : 17) && stops(h), { t: '3NT' });
+    add(B(G, s), h => sm(h) && h.len[s] >= 2 && (mx ? h.hcp >= 15 : h.hcp >= 17), { t: 'Game in partner\'s suit' });
+    add(B(3, s), h => sm(h) && B(3, s) > pLast.call, { t: 'Partscore in partner\'s suit' });
+    add(B(4, s), h => sm(h) && s >= 2, { t: 'Partner\'s suit' });
+    if (L.length) return L;
+  }
   if (pJust && rhoPass && pm.tag === 'ogust' && myLast && mm.tag === 'weak') {
     const s = ST(myLast.call), good = h => h.has(s, 12) + h.has(s, 11) + h.has(s, 10) >= 2;
     add(B(3, 4), h => h.has(s, 12) && h.has(s, 11) && h.has(s, 10), { cv: 'ogust', t: 'Ogust: solid suit (AKQ)' });
@@ -3396,7 +3415,7 @@ function cands(x) {
       return L;
     }
     if (opening.m && opening.m.tag === 'gamb' && rhoPass) {
-      add('P', h => [2, 3].every(s => h.stop(s)) && h.aces >= 1, { t: 'Pass: the other suits are stopped' });
+      add('P', h => [2, 3].every(s => h.stop(s)) && (h.stop(0) || h.stop(1)) && h.aces >= 1, { t: 'Pass: the other suits are stopped' });
       add(B(4, 0), () => true, { tag: 'poc', cv: 'gamb', t: 'Pass or correct: play in your minor' });
       return L;
     }
@@ -3544,6 +3563,14 @@ function cands(x) {
     return L;
   }
 
+  /* ===== Inverted Minors: opener after the preemptive raise (1♣–3♣, 6-9): pass unless strong ===== */
+  if (!oppOpened && opening.seat === x.seat && my.length === 1 && pa.length === 1 && pJust && rhoPass && pm.cv === 'invMin' && pLast.call === B(3, ST(opening.call))) {
+    const os = ST(opening.call);
+    add(B(3, 4), h => h.hcp >= 18 && [0, 1, 2, 3].filter(s => s !== os).every(s => h.stop(s) || h.len[s] >= 4), { min: 18, t: 'Strong and stoppers: 3NT opposite the weak raise' });
+    add(B(5, os), h => h.hcp >= 19 || (h.hcp >= 17 && h.len[os] >= 6), { min: 17, t: 'Game in the minor: strong opener' });
+    add('P', () => true, { t: 'Pass: partner\'s raise is weak (6-9)' });
+    return L;
+  }
   /* ===== Jordan 2NT: opener signs off in three of the major with a minimum, else game ===== */
   if (!oppOpened && opening.seat === x.seat && my.length === 1 && pa.length === 1 && pm.tag === 'jordan' && pJust) {
     const os = ST(opening.call);
@@ -13996,6 +14023,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 690, tr: 'Bütün konvansiyonlarımı çift ölü elle tek tek ölçtüm (her biri 20.000 el, açık/kapalı) ve kaybettiren yerleri düzelttim. RKCB’de “0 ya da 3”, “1 ya da 4” cevaplarını artık mümkünse yüksek okuyorum, “2 + koz kızı” 5 anahtar kart da olabilir; koz kızı eksik diye 9’lu uyumla 5’te durmuyorum. Bütün anahtar kartlar ve koz kızı varsa, 8’li uyum ve 31+ puanla grand şlem diyorum. Inverted Minors’ta ortağın zayıf 3♣/3♦ artırmasına normal açışla pas geçiyorum. Ogust cevabından sonra yapay 3♣/3♦’ü pas geçmiyorum. Gambling 3NT’ye pas için bir minörde de stoper istiyorum. Toplam: altı sistemde 240.000 elde +4328 IMP.', en: 'I measured each of my conventions double dummy (20,000 deals each, on and off) and fixed where they lost. After RKCB I read “0 or 3” and “1 or 4” as the higher number when it fits, and “2 + the queen” can be 5 key cards; I no longer stop in five for a missing trump queen with a nine-card fit. With every key card and the queen, an eight-card fit and 31+ HCP I bid the grand slam. Over partner’s weak inverted-minor raise (1♣–3♣) I pass with a normal opening. After the Ogust answer I never pass the artificial 3♣/3♦. Passing a Gambling 3NT needs a minor stopped too. In all: +4328 IMP in 240,000 deals over the six systems.' },
   { v: 689, tr: 'Kartıma 10 yeni konvansiyon eklendi; hepsi kapalı gelir, işaretlersen ben de onlara göre oynarım: Flannery 2♦ (+314 IMP), Voidwood (+48), Minorwood (+74), Walsh (+121), Gazilli (+161), Landy (+72; 2/1’de Cappelletti’nin yerine +170), Ghestem (+19; Michaels’ın yerine −97), Baron (+44; 4 yollu transferlerin yerine −8), Jordan 2NT (−37) ve Kokish (−110). Sayılar çift ölü elle, her biri 15.000–100.000 elde. Claude sistemi kaldırıldı.', en: 'Ten new conventions on my card; all start switched off, and when you tick one I play it too: Flannery 2♦ (+314 IMP), Voidwood (+48), Minorwood (+74), Walsh (+121), Gazilli (+161), Landy (+72; in place of Cappelletti in 2/1 +170), Ghestem (+19; in place of Michaels −97), Baron (+44; in place of 4-way transfers −8), Jordan 2NT (−37) and Kokish (−110). Double dummy, 15,000–100,000 deals each. The Claude system is gone.' },
   { v: 682, tr: 'Konvansiyon kartımın aralıkları senin tanımlarına göre değişti: Weak Jump Shift 3-6 puan (0-5 değil), Strong Jump Shift 17+ (19+ değil), Drury 9-11 (10-12 değil), Multi 2♦ 5-10 (5-11 değil), Inverted Minors baraj artırması 6-9 (0-9 değil), New Minor Forcing 10+ (11+ değil); SAYC ve Acol’da 2 seviyesinde yeni renk 10+ (11+ değil).', en: 'My convention card follows your definitions now: Weak Jump Shift 3-6 HCP (was 0-5), Strong Jump Shift 17+ (was 19+), Drury 9-11 (was 10-12), Multi 2♦ 5-10 (was 5-11), Inverted Minors preemptive raise 6-9 (was 0-9), New Minor Forcing 10+ (was 11+); in SAYC and Acol a two-level new suit is 10+ (was 11+).' },
   { v: 681, tr: 'Forsing 1NT artık kendi konvansiyonum (Ayarlar → konvansiyonlar, 2/1’de açık). 1♥/1♠’ye pas geçmemiş elle 1NT bir tur forsing: 3’lü fit ve 10-11 puanla önce 1NT, sonra majörü 3’e sıçrayarak davet ediyorum; zayıf ve uzun kendi rengimle ikinci turda o rengi oynamak için söylüyorum; açıcının ikinci rengine uyumla pas, yoksa iki kartla majöre tercih. Pas geçmiş elimin 1NT’si forsing değil, iki seviyesindeki yeni rengim 9-11 ve forsing değil. 24000 elde 113 kontrat değişti, toplam +136 IMP.', en: 'Forcing 1NT is now a convention of its own (Settings → conventions, on in 2/1). Over 1♥/1♠ an unpassed hand’s 1NT is forcing one round: a three-card limit raise (10-11) bids 1NT, then jumps to three of the major; a weak hand with a long suit of its own bids it next, to play; with a fit for opener’s second suit I pass, otherwise I give preference to the major with two cards. A passed hand’s 1NT is not forcing and its two-level new suit is 9-11, not forcing. 24000 deals: 113 contracts changed, +136 IMP.' },
@@ -15700,7 +15728,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-26T21:28:26Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-26T21:58:37Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-20000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {

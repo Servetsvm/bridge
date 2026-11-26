@@ -98,22 +98,28 @@ function cands(x) {
     const t = mm.trump, P = pInfo(x), vd = mm.void, total = vd != null ? 4 : mm.rkc ? 5 : 4;
     const count = h => {
       const mine = mm.rkc ? h.kc(t) - (vd != null && h.has(vd, 12) ? 1 : 0) : h.aces; let k = pm.kc;
-      const alt = k === 0 ? (mm.rkc ? 3 : 4) : (k === 1 && mm.rkc ? 4 : k);
-      if (alt !== k && mine + alt <= total && P.min >= 15) k = alt;
+      const alt = k === 0 ? (mm.rkc ? 3 : 4) : k === 1 && mm.rkc ? 4 : k === 2 && mm.rkc ? 5 : k;
+      // the higher reading whenever it fits (the asker has room for it): measured double dummy, this finds far more of the
+      // slams than it loses by going one too high (+1300 IMP in 60000 deals); 1♣–1♥–1♠–4♥–4NT–5♦ with three key cards: 7♥
+      if (alt !== k && mine + alt <= total) k = alt;
       return mine + k;
     };
     const est = h => h.sup(t) + P.min + 2;
+    // (a grand slam also with a trump fit, every key card and the queen and 31+ HCP between us: partner's minimum is often
+    // more than the auction showed — 1♣–2♥–3♣–4NT–5♥ with ♥AKQJ972 opposite ♣A86532 ♦AKQ4: 7♥)
     // a grand slam: every key card, the trump queen known (RKCB) and the points for thirteen tricks (33+ HCP together);
     // without them the small slam (1♦–1♥–3♦–4NT–5♥ with ♦A7 and the queen missing: 6♦, not 7♦)
     const queen = h => !mm.rkc || t >= 4 || h.has(t, 10) || !!pm.q;
     // a grand slam needs a trump suit worth the name: eight cards together, or a solid seven of my own (♥AKQJ87 opposite
     // a void: not 7♥); a small slam a six-card suit at least, else it is played in notrump
     const fitOK = h => t >= 4 || h.len[t] + P.len[t] >= 8 || (h.len[t] >= 7 && h.top5(t) >= 4), fit6 = h => t >= 4 || h.len[t] + P.len[t] >= 8 || h.len[t] >= 6;
-    add(B(7, t), h => count(h) === total && est(h) >= 36 && h.hcp + P.min >= 33 && queen(h) && fitOK(h), { t: 'Grand slam: we hold every key card' });
+    add(B(7, t), h => count(h) === total && queen(h) && fitOK(h) && ((est(h) >= 36 && h.hcp + P.min >= 33) || (t < 4 && h.len[t] + P.len[t] >= 8 && est(h) >= 34 && h.hcp + P.min >= 31)), { t: 'Grand slam: we hold every key card' });
     if (t < 4) add(B(6, 4), h => count(h) >= total - 1 && !fit6(h), { t: 'Small slam in notrump: no trump fit' });
     // a key card and the trump queen both missing (the queen shown missing by the answer, or not shown and only an
     // eight-card fit): two losers, so five (1♥–2♦–2♥–4NT–5♥ with ♥A9843 and one ace out: 5♥)
-    const qOut = h => t < 4 && mm.rkc && !h.has(t, 10) && (pm.kc === 2 ? !pm.q : h.len[t] + P.len[t] <= 8);
+    // (only when the answer itself denied the queen and the fit is eight cards: with nine the queen often drops, and
+    // an answer that said nothing about it is no reason to stop — 1♦–1♥–2♥–4NT–5♣–6♥ made, 5♥ lost 13 IMP)
+    const qOut = h => t < 4 && mm.rkc && !h.has(t, 10) && pm.kc === 2 && !pm.q && h.len[t] + P.len[t] <= 8;
     add(B(6, t), h => count(h) >= total - 1 && !(count(h) === total - 1 && qOut(h)), { t: 'Small slam: at most one key card missing' });
     add('P', () => pLast.call === B(5, t), { t: 'Two key cards missing: stop at the five level' });
     add(B(5, t), () => true, { t: 'Two key cards missing: sign off at the five level', tag: 'stop' });
@@ -190,6 +196,19 @@ function cands(x) {
   /* Gambling 3NT: pass or correct */
   if (pJust && pm.tag === 'poc') { add(B(4, 1), h => h.len[1] >= 7, { t: 'My long suit is diamonds' }); add('P', () => true, { t: 'My long suit is clubs' }); return L; }
   /* Ogust reply by the weak-two opener */
+  // the asker after the Ogust answer: never passes the artificial reply — game opposite a maximum (or a minimum and a
+  // big hand with a fit), 3NT opposite a solid suit or without a fit but with stoppers, else three of partner's suit
+  if (pJust && rhoPass && myLast && mm.tag === 'ogust' && pm.cv === 'ogust') {
+    // (a hand with slam chances, 19+, goes on as usual: key cards, slam)
+    const s = ST(opening.call), mx = pLast.call === B(3, 2) || pLast.call === B(3, 3), solid = pLast.call === B(3, 4), G = s < 2 ? 5 : 4, sm = h => h.hcp <= 18;
+    const stops = h => [0, 1, 2, 3].filter(u => u !== s).every(u => h.stop(u));
+    if (solid) { add('P', h => sm(h) && stops(h), { t: 'Pass: 3NT with the solid suit' }); add(B(G, s), sm, { t: 'Game in partner\'s suit' }); return L; }
+    add(B(3, 4), h => sm(h) && (s < 2 || h.len[s] <= 1) && h.hcp >= (mx ? 15 : 17) && stops(h), { t: '3NT' });
+    add(B(G, s), h => sm(h) && h.len[s] >= 2 && (mx ? h.hcp >= 15 : h.hcp >= 17), { t: 'Game in partner\'s suit' });
+    add(B(3, s), h => sm(h) && B(3, s) > pLast.call, { t: 'Partscore in partner\'s suit' });
+    add(B(4, s), h => sm(h) && s >= 2, { t: 'Partner\'s suit' });
+    if (L.length) return L;
+  }
   if (pJust && rhoPass && pm.tag === 'ogust' && myLast && mm.tag === 'weak') {
     const s = ST(myLast.call), good = h => h.has(s, 12) + h.has(s, 11) + h.has(s, 10) >= 2;
     add(B(3, 4), h => h.has(s, 12) && h.has(s, 11) && h.has(s, 10), { cv: 'ogust', t: 'Ogust: solid suit (AKQ)' });
@@ -611,7 +630,7 @@ function cands(x) {
       return L;
     }
     if (opening.m && opening.m.tag === 'gamb' && rhoPass) {
-      add('P', h => [2, 3].every(s => h.stop(s)) && h.aces >= 1, { t: 'Pass: the other suits are stopped' });
+      add('P', h => [2, 3].every(s => h.stop(s)) && (h.stop(0) || h.stop(1)) && h.aces >= 1, { t: 'Pass: the other suits are stopped' });
       add(B(4, 0), () => true, { tag: 'poc', cv: 'gamb', t: 'Pass or correct: play in your minor' });
       return L;
     }
@@ -759,6 +778,14 @@ function cands(x) {
     return L;
   }
 
+  /* ===== Inverted Minors: opener after the preemptive raise (1♣–3♣, 6-9): pass unless strong ===== */
+  if (!oppOpened && opening.seat === x.seat && my.length === 1 && pa.length === 1 && pJust && rhoPass && pm.cv === 'invMin' && pLast.call === B(3, ST(opening.call))) {
+    const os = ST(opening.call);
+    add(B(3, 4), h => h.hcp >= 18 && [0, 1, 2, 3].filter(s => s !== os).every(s => h.stop(s) || h.len[s] >= 4), { min: 18, t: 'Strong and stoppers: 3NT opposite the weak raise' });
+    add(B(5, os), h => h.hcp >= 19 || (h.hcp >= 17 && h.len[os] >= 6), { min: 17, t: 'Game in the minor: strong opener' });
+    add('P', () => true, { t: 'Pass: partner\'s raise is weak (6-9)' });
+    return L;
+  }
   /* ===== Jordan 2NT: opener signs off in three of the major with a minimum, else game ===== */
   if (!oppOpened && opening.seat === x.seat && my.length === 1 && pa.length === 1 && pm.tag === 'jordan' && pJust) {
     const os = ST(opening.call);
