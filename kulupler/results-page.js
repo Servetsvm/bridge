@@ -36,11 +36,12 @@ function diagram(hd,board){
 }
 function ddHtml(a){
   if(!a||!a.t) return '';
-  const row=(d,L)=>`<tr><th>${L}</th>${[3,2,1,0,4].map(st=>{ const n=a.t[d][st]; return `<td>${n==null?'':n}</td>`; }).join('')}</tr>`;
-  const same=(x,y)=>a.t[x]&&a.t[y]&&a.t[x].every((n,i)=>n===a.t[y][i]);
+  // the level each player makes as declarer (tricks − 6; – = not even one), as in BridgePlay: NT first, every seat
+  const row=(d,L)=>`<tr><th>${L}</th>${[4,3,2,1,0].map(st=>{ const n=a.t[d]?a.t[d][st]:null; return `<td>${n==null?'':n>=7?n-6:'–'}</td>`; }).join('')}</tr>`;
   const p=a.par||{}, SY=['♣','♦','♥','♠','NT'];
-  const best=p.level?`${p.level}${SY[p.strain]||''}${p.dbl===2?'XX':p.dbl?'X':''} ${p.decl||''} ${p.tricks!=null?p.tricks:''} ${p.score!=null?p.score:''}`:(p.text||'');
-  return `<div class="par">${suitHtml(best)}</div><table class="dd"><tr><th></th><th>♠</th><th class="r">♥</th><th class="r">♦</th><th>♣</th><th>NT</th></tr>${same(0,2)?row(0,'NS'):row(0,'N')+row(2,'S')}${same(1,3)?row(1,'EW'):row(1,'E')+row(3,'W')}</table>`;
+  const over=p.level&&p.tricks!=null?p.tricks-6-p.level:null;
+  const best=p.level?`${p.level}${SY[p.strain]||''}${p.dbl===2?'XX':p.dbl?'X':''} ${p.decl||''} ${over==null?'':over>0?'+'+over:over===0?'=':over} ${p.score!=null?p.score:''}`:(p.text||'');
+  return `<div class="par">${suitHtml(best)}</div><table class="dd"><tr><th></th><th>NT</th><th>♠</th><th class="r">♥</th><th class="r">♦</th><th>♣</th></tr>${[[0,'N'],[2,'S'],[1,'E'],[3,'W']].map(([d,L])=>row(d,L)).join('')}</table>`;
 }
 
 // everything the page shows, from the tournament as it stands

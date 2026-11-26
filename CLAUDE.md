@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v690`, kulüpler `kulup-v199`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v690`, kulüpler `kulup-v200`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -78,6 +78,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v690`, kulü
   HEAD'e karşı 240000 el: 2/1 +864, SAYC +319, Acol +911, SEF +793, Precision +634, Polish +807 = +4328 IMP.
   Hâlâ kaybettirenler (değiştirilmedi, kullanıcıya önerildi): SJS (WJS'e göre −211 / SAYC −136), Kokish −110, Forsing 1NT −87 (2/1'in parçası).
   Denenip geri alınan: NT oyununda uzun rengi puana saymak (SAYC −320).
+- Kulüp sonuçları (`kulupler/results-page.js` ddHtml): double dummy artık löve sayısı değil seviye (löve−6, '–'), NT ♠ ♥ ♦ ♣, K/G/D/B dört satır,
+  par satırı '4♥ E +1 −450' (ana uygulamanın `ddTabHtml` gibi). kulup-v200.
 
 ### 2026-11-25
 - **Yeni BridgePlay beta** (`/yeni/`, kullanıcının kararıyla sıfırdan; ad BridgePlay, fotoğraftan el kalır, el sonu koçu/geri alma/el geçmişi/Haftam,
