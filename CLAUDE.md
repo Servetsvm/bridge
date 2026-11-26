@@ -25,7 +25,6 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 | `tools/smoke/` | headless Chrome ile bir el oynatan smoke test |
 | `tools/og/og.mjs` | paylaşım görselleri (icons/og-*.png) |
 | `firebase-rules.json` | veritabanı kuralları |
-| `yeni/` | yalnız yönlendirme: denenen "yeni BridgePlay" 26.11'de kullanıcının kararıyla silindi (index.html eskiye yollar, sw.js kendini kaldırır) |
 
 ## Kurallar / alışkanlıklar
 - **Her zaman `main`'e gönder** (kullanıcının kalıcı izni, 2026-11-22): site GitHub Pages'te `main`'den yayınlanır.
@@ -61,7 +60,7 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v688`, kulü
 
 ### 2026-11-26
 - **Yeni BridgePlay (/yeni/) silindi**: kullanıcı görünüşü, kullanımı, eksikleri ve fikrin kendisini beğenmedi; eski programla devam.
-  Kod git geçmişinde (son hali commit a40f456). `yeni/` artık yalnız yönlendirme + kendini silen sw.js. Eski program hiç değişmedi.
+  Kod git geçmişinde (son hali commit a40f456). `yeni/` klasörü de tamamen silindi (kimse kullanmamıştı). Eski program hiç değişmedi.
   Ders: büyük yeniden yazım yerine eski programı adım adım iyileştir; büyük işe başlamadan küçük bir örnek ekranı göster, onay al.
 
 ### 2026-11-25

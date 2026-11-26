@@ -1,6 +1,0 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BridgePlay</title>
-<script>
-/* the trial "new BridgePlay" is gone: its kept copy is removed from the phone and BridgePlay opens */
-(async()=>{try{if(navigator.serviceWorker){for(const r of await navigator.serviceWorker.getRegistrations())if(r.scope.includes('/yeni/'))await r.unregister();}
-if(window.caches){for(const k of await caches.keys())if(k.startsWith('bp2-'))await caches.delete(k);}}catch(e){}location.replace('../');})();
-</script></head><body style="background:#0f2a1d"></body></html>
