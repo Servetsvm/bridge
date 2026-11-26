@@ -25,7 +25,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 | `tools/smoke/` | headless Chrome ile bir el oynatan smoke test |
 | `tools/og/og.mjs` | paylaşım görselleri (icons/og-*.png) |
 | `firebase-rules.json` | veritabanı kuralları |
-| `yeni/` | **yeni BridgePlay (beta)**: `app/net.js` (giriş, canlı akış, çevrimdışı kuyruk), `ui.js`, `i18n.js`, `score.js`, `clubs.js`, `play.js`, `main.js`; motor `../js/*` aynen |
+| `yeni/` | **yeni BridgePlay (beta)** — https://servetsvm.github.io/bridge/yeni/ : `app/net.js` (giriş, canlı akış, çevrimdışı kuyruk), `ui.js`, `i18n.js`, `score.js`, `clubs.js`, `play.js`, `tourn.js`/`table.js`/`td.js`/`movements.js` (kulüp masası, TD), `main.js`; motor `../js/*` aynen |
 
 ## Kurallar / alışkanlıklar
 - **Her zaman `main`'e gönder** (kullanıcının kalıcı izni, 2026-11-22): site GitHub Pages'te `main`'den yayınlanır.
@@ -71,7 +71,10 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v688`, kulü
   `bp2-seat`; hızlı maçta kodsuz, yoksa `gate/live.k`/önek ile `tsess`), 4 isim → pairs, board listesi (canlı), tek sayfada skor
   (seviye/renk/X/oynayan/sonuç/atak; eski kayıt biçimi, PATCH), sosyal/takımda `boardLocks`, tur sonu hareket rehberi, bütün masalar
   bitince sonraki tur / son turda otomatik bitiş + arşiv. TD: sahibi şifresiz, diğerleri kulüp şifresi (`csess`); hızlı Takım maçı /
-  Sosyal Bridge (`quickStart`), masa boşalt, board düzelt/ADJ/oynanmadı/sil, sonraki tur, bitir, sil. Mitchell/Howell kurulumu hâlâ eski programda (link).
+  Sosyal Bridge (`quickStart`), masa boşalt, board düzelt/ADJ/oynanmadı/sil, sonraki tur, bitir, sil.
+- BridgePlay beta (`bp2-v3`, 26.11): TD → Yeni turnuva (Mitchell/Howell/Barometre; `movements.js` = kulupler/core.js üreteçleri, `clubStart`,
+  masa kodları `secret/tcodes` + live.k), 🔑 Masa kodları; 10 dil (i18n.js); Online masa/lobi/sohbet kutusu şimdilik eski BridgePlay'i açar (`../`).
+  **Sıradaki:** online masa/lobi/sohbet'i yeni programa yazmak, İsviçre (Swiss) hareketi, robot oyunu puan kaydı.
 - Kulüp programından **kamerayla dağıtma** kaldırıldı (cardcam.js'in kamera kısmı, TD 'Kamerayla dağıt' düğmesi, kulupler'de photo.js); DD analizi kalıyor. BridgePlay'deki 'fotoğraftan el oku' duruyor (sorulacak).
 - **Kulüp programı canlı akış:** `DB.subscribe` artık Firebase SSE (EventSource; put/patch `_setPath`, `auth_revoked`→yeni token, kesilince
   yeniden bağlanır, açılamazsa 4 sn/15 sn (gizli) yoklama). Eskiden her cihaz 8 anahtarı (üye listesi dahil) 2 sn'de bir indiriyordu.

@@ -2,6 +2,7 @@
    the end of a tournament (its archive), the quick team match and Social Bridge. The data is the first BridgePlay's
    (gate/clubs/<id>/bm/…, the same records), so both programs work on the same tournament. */
 import { get, tryGet, put, patch, del, sendNow, me, myKey } from './net.js';
+import { generateMitchell, generateHowell } from './movements.js';
 
 export const C = id => 'gate/clubs/' + id;
 export const BM = id => C(id) + '/bm';
@@ -144,6 +145,43 @@ export async function quickStart(club, clubName, kind, { players = 12, boards = 
   await sendNow('PUT', 'gate/live/' + club, { n: String(s.name).slice(0, 40), c: String(clubName || club).slice(0, 40), tb: tables, p: '00', ts: Date.now(), k: {}, q: 1 });
   try { localStorage.setItem('bp_myTourn', JSON.stringify({ club, sid: at, n: String(clubName || '').slice(0, 40), k: myKey() })); } catch (e) {}
   return 'ok';
+}
+
+// ---- a club tournament (the TD): Mitchell, Howell or Barometer, started at once; each table gets its own code ----
+export function plan(mov, players, bpr) {
+  const tables = Math.floor(players / 4), phantom = players % 4 !== 0;
+  if (tables < 2) return null;
+  if (mov === 'mitchell') { const r = generateMitchell(tables, bpr, phantom); return { ...r, tables: r.tableCount, phantom }; }
+  const pc = tables * 2 + (phantom ? 1 : 0), rounds = pc % 2 ? pc : pc - 1, total = rounds * bpr;
+  const r = generateHowell(tables, bpr, total, phantom, mov === 'barometer');
+  return { ...r, tables, totalBoards: total, phantom };
+}
+export async function clubStart(club, clubName, { mov, players, bpr }) {
+  const old = (await tryGet(BM(club) + '/state')) || {};
+  if (old.status === 'running') return 'busy';
+  const r = plan(mov, players, bpr); if (!r) return 'denied';
+  const W = (k, v) => sendNow('PUT', BM(club) + '/' + k, v);
+  if (!await W('movements', r.movements) || !await W('pairs', r.pairs)) return 'denied';
+  await Promise.all([W('boards', {}), W('approvals', {}), W('tableLocks', {}), W('boardLocks', {}), W('ready', {}), W('hands', []), W('dd', {}), sendNow('DELETE', BM(club) + '/kicks'), sendNow('DELETE', BM(club) + '/tdcalls')]);
+  const at = new Date().toISOString(), s = { ...old };
+  for (const k of ['teams', '_teamPairs', '_teamAName', '_teamBName', '_teamScoring', '_quickTeam', '_quickKind', '_noLead', '_finishedAt', '_autoFinished', '_idleWarnAt', 'online']) delete s[k];
+  Object.assign(s, { name: stamp(), tableCount: r.tables, boardsPerRound: bpr, totalBoards: r.totalBoards, roundCount: r.rounds, phantom: r.phantom, movement: mov, scoring: 'BOTH', _setupPlayers: players,
+    status: 'running', currentRound: 1, _startedAt: at, _roundStartedAt: at, _by: myKey() });
+  if (!await W('state', s)) return 'denied';
+  const codes = await tableCodes(club, r.tables), k = {}; for (const [c, t] of Object.entries(codes)) k['t' + t] = c;
+  const p = (await tryGet(C(club) + '/secret/tprefix')) || '00';
+  await sendNow('PUT', 'gate/live/' + club, { n: String(s.name).slice(0, 40), c: String(clubName || club).slice(0, 40), tb: r.tables, p: /^\d\d$/.test(p) ? p : '00', ts: Date.now(), k });
+  try { localStorage.setItem('bp_myTourn', JSON.stringify({ club, sid: at, n: String(clubName || '').slice(0, 40), k: myKey() })); } catch (e) {}
+  return 'ok';
+}
+/* the tables' codes (4 digits, all different): the club's own when there are as many as tables, else new ones */
+export async function tableCodes(club, n, fresh) {
+  const old = (await tryGet(C(club) + '/secret/tcodes')) || {};
+  if (!fresh && Object.keys(old).length === n) return old;
+  const codes = {}, used = new Set(), x = new Uint32Array(1);
+  for (let t = 1; t <= n; t++) { let c; do { crypto.getRandomValues(x); c = String(1000 + x[0] % 9000); } while (used.has(c)); used.add(c); codes[c] = t; }
+  await sendNow('PUT', C(club) + '/secret/tcodes', codes);
+  return codes;
 }
 
 // ---- where everyone goes next round: each pair's next table, and where this table's boards go ----

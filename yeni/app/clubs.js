@@ -1,7 +1,7 @@
 /* BridgePlay (new) — Clubs: the list (the ones playing now first), a club's page, its live screen, its results and info.
    The club data is the same as the first BridgePlay's (gate/clubs/<id>/…), so both programs see the same clubs. */
 import { T, lang } from './i18n.js';
-import { page, go, esc, $, redraw, sheet, SUITS, suitHtml } from './ui.js';
+import { page, go, esc, $, redraw, sheet, SUITS, suitHtml, current } from './ui.js';
 import { listen, tryGet, me, session } from './net.js';
 import { standings, teamScore } from './score.js';
 import { seatOf } from './table.js';
@@ -83,6 +83,8 @@ page('club', id => {
         ${!c.live && c.info && c.info.sb ? `<button class="btn wide" data-quick="social|${esc(id)}">🤝 ${T('Social Bridge')}</button>` : ''}
         <button class="btn wide ghost" data-td="${esc(id)}">🧑‍⚖️ ${T('TD')}</button>
       </div>`,
+    // the list may be a minute old: looked at again, drawn again when a tournament started or ended meanwhile
+    after: () => { const was = !!c.live; loadList(true).then(L => { const n = L.find(x => x.id === id); if (n && !!n.live !== was && current().name === 'club' && current().arg === id) redraw(); }).catch(() => {}); },
   };
 });
 document.addEventListener('click', e => {

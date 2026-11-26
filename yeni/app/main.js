@@ -52,7 +52,7 @@ page('home', () => ({
     <div class="tiles">
       <button class="tile primary" data-go="robots"><span class="ic">🤖</span><span><b>${T('Play with robots')}</b><small>SAYC · 2/1 · Acol · SEF · Precision · Polish</small></span></button>
       <button class="tile" data-go="clubs"><span class="ic">🏛</span><span><b>${T('Clubs')}</b><small>${T('Live')} · ${T('Results')} · ${T('Club info')}</small></span></button>
-      <button class="tile soon" data-soon><span class="ic">🌐</span><span><b>${T('Online table')} · ${T('Lobby')}</b><small>${T('Coming soon')}</small></span></button>
+      <a class="tile" href="../"><span class="ic">🌐</span><span><b>${T('Online table')} · ${T('Lobby')} · ${T('Chat')}</b><small>${T('In the old BridgePlay for now (the same name and PIN)')}</small></span></a>
     </div>
     <div class="beta">🧪 ${T('Beta: the new BridgePlay. Your name, PIN and results are the same as in BridgePlay.')}<br><a href="../">${T('The old BridgePlay')}</a></div>`,
 }));

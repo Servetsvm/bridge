@@ -4,7 +4,7 @@
 import { T } from './i18n.js';
 import { page, go, esc, $, toast, sheet, closeSheet, redraw } from './ui.js';
 import { get, tryGet, del, patch, sendNow, listen, session, uid, myKey } from './net.js';
-import { BM, C, tableBoards, progress, finish, wipe, quickStart } from './tourn.js';
+import { BM, C, tableBoards, progress, finish, wipe, quickStart, clubStart, plan } from './tourn.js';
 import { entry } from './table.js';
 
 const okKey = club => 'bp2-td-' + club;
@@ -64,7 +64,7 @@ page('td', club => {
     if (s.status !== 'running') {
       el.innerHTML = `<div class="card"><h2>🧑‍⚖️ ${T('TD')}</h2><div class="muted">${T('No tournament at this club now.')}</div></div>
         <div class="actions"><button class="btn gold wide" data-q="team">🏆 ${T('Team match')}</button><button class="btn gold wide" data-q="social">🤝 ${T('Social Bridge')}</button>
-        <a class="btn wide" href="../?kulup=${encodeURIComponent('?club=' + club + '&role=admin')}">⚙️ ${T('Other tournaments (Mitchell, Howell…)')} <small class="muted">(${T('The old BridgePlay')})</small></a>
+        <button class="btn green wide" data-new>▶ ${T('New tournament')} <small>(Mitchell · Howell · ${T('Barometer')})</small></button>
         ${s.status === 'setup' && s.tableCount ? `<button class="btn ghost wide" data-del>🗑 ${T('Delete the tournament set up')}</button>` : ''}</div>`;
       return;
     }
@@ -79,6 +79,7 @@ page('td', club => {
       <div class="list">${h}</div>
       <div class="actions" style="margin-top:14px">
         ${r < (s.roundCount || 1) ? `<button class="btn wide" data-next>⏭ ${T('Next round')}</button>` : ''}
+        ${s._quickTeam ? '' : `<button class="btn wide" data-codes>🔑 ${T('Table codes')}</button>`}
         <button class="btn green wide" data-fin>🏁 ${T('Finish the tournament')}</button>
         <button class="btn ghost wide" data-del>🗑 ${T('Delete the tournament')}</button></div>`;
   }
@@ -123,6 +124,39 @@ document.addEventListener('click', async e => {
     if (!confirm(T('Start round {0}? Tables still playing keep their scores.', s.currentRound + 1))) return;
     await patch(BM(tdClub) + '/state', { currentRound: s.currentRound + 1, _roundStartedAt: new Date().toISOString() }); toast('⏭');
   }
+  if (e.target.closest('[data-new]')) return newTourn(tdClub, cur.name);
+  if (e.target.closest('[data-codes]')) {
+    const L = await tryGet('gate/live/' + tdClub), k = (L && L.k) || {}, n = Object.keys(k).length;
+    sheet(`<h2>🔑 ${T('Table codes')}</h2><div class="muted">${T('Each table types its code when it sits down.')}</div><div class="tkeys" style="margin-top:12px">${Array.from({ length: n }, (_, i) => `<div class="tcode"><small>${T('Table')} ${i + 1}</small><b>${esc(k['t' + (i + 1)] || '—')}</b></div>`).join('')}</div>`);
+    return;
+  }
   if (e.target.closest('[data-fin]')) { if (!confirm(T('Finish the tournament and put it in the results?'))) return; if (await finish(tdClub)) { toast('🏁 ' + T('Tournament finished')); go('results', tdClub, true); } }
   if (e.target.closest('[data-del]')) { if (!confirm(T('Delete this tournament completely?'))) return; await wipe(tdClub); toast('🗑 ' + T('Deleted')); }
 });
+
+// ---- a new club tournament: the movement, the players, the boards a round; what it makes shown before the start ----
+function newTourn(club, name) {
+  const w = { mov: 'mitchell', pl: 16, bpr: 3 };
+  const PL = [8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 40, 44, 48];
+  const body = () => {
+    const r = plan(w.mov, w.pl, w.bpr);
+    return `<h2>▶ ${T('New tournament')}</h2>
+      <div class="step">${T('Movement')}</div><div class="krow k3">${[['mitchell', 'Mitchell'], ['howell', 'Howell'], ['barometer', T('Barometer')]].map(([k, n]) => `<button class="key${w.mov === k ? ' on' : ''}" data-mv="${k}">${n}</button>`).join('')}</div>
+      <div class="muted" style="margin:0 2px 8px">${w.mov === 'mitchell' ? T('NS stay at their table, EW move; the boards go round.') : w.mov === 'howell' ? T('Every pair meets every other pair; everyone moves.') : T('Like Howell, but every table plays the same boards each round.')}</div>
+      <div class="step">${T('Number of players')}</div><div class="krow k5">${PL.map(v => `<button class="key${v === w.pl ? ' on' : ''}" data-pl="${v}">${v}</button>`).join('')}</div>
+      <div class="step">${T('Boards a round')}</div><div class="krow k8">${[1, 2, 3, 4, 5, 6, 7, 8].map(v => `<button class="key${v === w.bpr ? ' on' : ''}" data-bp="${v}">${v}</button>`).join('')}</div>
+      <div class="lcd"><div><b>${r ? `${r.tables} ${T('Tables').toLowerCase()} · ${r.rounds} ${T('rounds')} · ${r.totalBoards} ${T('Boards').toLowerCase()}` : '—'}</b>${r && r.phantom ? `<small>👻 ${T('One pair sits out each round')}</small>` : ''}</div></div>
+      <button class="btn green" id="ntGo"${r ? '' : ' disabled'}>▶ ${T('Start now')}</button>`;
+  };
+  sheet(`<div id="ntBox">${body()}</div>`, sh => sh.addEventListener('click', async e => {
+    const a = e.target.closest('[data-mv]'), b = e.target.closest('[data-pl]'), c = e.target.closest('[data-bp]');
+    if (a) w.mov = a.dataset.mv; if (b) w.pl = +b.dataset.pl; if (c) w.bpr = +c.dataset.bp;
+    if (a || b || c) { sh.querySelector('#ntBox').innerHTML = body(); return; }
+    if (e.target.closest('#ntGo')) {
+      e.target.disabled = true;
+      const r = await clubStart(club, name, { mov: w.mov, players: w.pl, bpr: w.bpr });
+      closeSheet();
+      toast(r === 'ok' ? '▶ ' + T('Started') : r === 'busy' ? '⏳ ' + T('A tournament is being played at this club.') : '❌ ' + T('Not allowed.'));
+    }
+  }));
+}

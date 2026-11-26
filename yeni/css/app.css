@@ -227,3 +227,4 @@ small.turn{color:var(--gold)!important;font-weight:800}
 .key{min-height:46px;border-radius:11px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-weight:800;font-size:1.05rem;padding:4px}
 .key.on{background:var(--gold);color:#2a1f05;border-color:var(--gold2)}.key.on .su{color:inherit}
 .step{font-size:.78rem;font-weight:700;color:var(--text3);margin:4px 2px}
+.tcode{display:flex;flex-direction:column;align-items:center;padding:10px;border-radius:14px;background:var(--card2)}.tcode small{color:var(--text3)}.tcode b{font-size:1.5rem;letter-spacing:2px}
