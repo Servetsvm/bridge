@@ -82,7 +82,7 @@ const fmtSigned = v => (v > 0 ? '+' : '') + v;
 
 function sideCards() {
   // our side (you and your robot partner) bids our system; the opponents the same, or SAYC
-  const ours = { conv: { ...SET.conv }, agg: 0, sys: SET.sys || 'twoone' }, opp = SET.opp === 'claude' ? { conv: { ...E.sysOf('claude').conv }, agg: 0, sys: 'claude' } : SET.opp === 'same' ? { conv: { ...SET.conv }, agg: 0, sys: SET.sys || 'twoone' } : { conv: { ...E.SAYC }, agg: 0, sys: 'sayc' };
+  const ours = { conv: { ...SET.conv }, agg: 0, sys: SET.sys || 'twoone' }, opp = SET.opp === 'same' ? { conv: { ...SET.conv }, agg: 0, sys: SET.sys || 'twoone' } : { conv: { ...E.SAYC }, agg: 0, sys: 'sayc' };
   const c = [null, null]; c[sideOf(U())] = ours; c[1 - sideOf(U())] = opp;
   // at an online table the other side bids the system of the player sitting there (their robot partner too)
   if (typeof Net !== 'undefined' && online() && !guest()) {
@@ -1859,11 +1859,11 @@ function acctLoad(k) {
 /* ---- practise a convention: the heart of the home page. Pick one and the robots deal hands where our side uses
    it (freshDeal looks for them); every call can be tapped to see what it means. ---- */
 const PRAC_GROUPS = [
-  ['After 1NT', ['stayman', 'puppet', 'fourWay', 'minorTr', 'smolen', 'texas', 'texasInt', 'leb']],
-  ['Major openings', ['j2nt', 'bergen', 'splinter', 'drury']],
-  ['Slam bidding', ['rkc', 'rkc0314', 'gerber']],
-  ['When they bid', ['capp', 'dont', 'michaels', 'supx', 'respx']],
-  ['Responses and more', ['twoOverOne', 'invMin', 'wjs', 'sjs', 'nmf', 'fsf', 'ogust', 'gamb']],
+  ['After 1NT', ['stayman', 'puppet', 'fourWay', 'minorTr', 'smolen', 'texas', 'texasInt', 'leb', 'baron']],
+  ['Major openings', ['j2nt', 'bergen', 'splinter', 'drury', 'jordan', 'gazilli', 'flannery']],
+  ['Slam bidding', ['rkc', 'rkc0314', 'gerber', 'minorwood', 'voidwood']],
+  ['When they bid', ['capp', 'dont', 'landy', 'michaels', 'ghestem', 'supx', 'respx']],
+  ['Responses and more', ['twoOverOne', 'invMin', 'walsh', 'wjs', 'sjs', 'nmf', 'fsf', 'ogust', 'gamb', 'kokish']],
 ];
 // the same choice as in Settings, on the home page: the convention the next deals are dealt for
 function pracHtml() {
@@ -1896,14 +1896,14 @@ function togglePractice(k, add) {
   if (!pracKnown(k)) return;
   const c = E.CONVS.find(y => y.k === k) || { k };
   let L = pracList().filter(x => x !== k);
-  if (add) { L.push(k); if (c.n) SET.conv[k] = true; if (c.x) { SET.conv[c.x] = false; L = L.filter(x => x !== c.x); } }
+  if (add) { L.push(k); if (c.n) SET.conv[k] = true; for (const o of E.convOff(k)) { SET.conv[o] = false; L = L.filter(x => x !== o); } }
   SET.practice = L.join(','); Store.saveSettings(SET); save();
 }
 // the convention to practise ('' = off): it goes on our card (and the one it replaces off); games started from now on use it
 function setPractice(k) {
   const c = k && E.CONVS.find(y => y.k === k);
   SET.practice = c ? k : '';
-  if (c) { SET.conv[k] = true; if (c.x) SET.conv[c.x] = false; }
+  if (c) { SET.conv[k] = true; E.convOff(k).forEach(o => { SET.conv[o] = false; }); }
   Store.saveSettings(SET); save();
   flash(c ? '📚 ' + T('Practising {0}: the next deals use it', c.n) : T('Practice ended — normal random deals'), 2200);
 }
@@ -1930,7 +1930,7 @@ function homeShell2() {
       <div class="h2tiles">
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="hBidPrac" type="button"', '🎯', T('Bidding practice'), T('Bid both hands, then see the best contract and the robots\' auction.'))}
-        <div class="h2tile h2sys">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button>`).join('')}</div>
+        <div class="h2tile h2sys">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button>`).join('')}</div>
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
@@ -2374,7 +2374,7 @@ function loginsTxt(n) { for (const s of [10000, 5000, 1000, 500, 100, 50]) if (n
 // a title from the boards played
 function titleOf(n) { return n >= 5000 ? 'Grandmaster' : n >= 2000 ? 'Master' : n >= 500 ? 'Strategist' : n >= 100 ? 'Player' : 'Newcomer'; }
 // the convention card in one line: system, notrump range and the conventions switched on (short names)
-const CONV_SHORT = { rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', puppet: 'Puppet Stayman', fourWay: '4-way transfers', minorTr: 'Minor Transfer', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
+const CONV_SHORT = { flannery: 'Flannery', voidwood: 'Voidwood', ghestem: 'Ghestem', jordan: 'Jordan 2NT', landy: 'Landy', minorwood: 'Minorwood', kokish: 'Kokish', walsh: 'Walsh', baron: 'Baron', gazilli: 'Gazilli', rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', puppet: 'Puppet Stayman', fourWay: '4-way transfers', minorTr: 'Minor Transfer', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
 function convLine(p) {
   if (p.cline && p.cline.trim()) return esc(p.cline.trim());   // the player wrote it themselves
   const y = p.sys && p.sys !== 'none' ? E.sysOf(p.sys) : null;
@@ -2847,6 +2847,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 689, tr: 'Kartıma 10 yeni konvansiyon eklendi; hepsi kapalı gelir, işaretlersen ben de onlara göre oynarım: Flannery 2♦ (+314 IMP), Voidwood (+48), Minorwood (+74), Walsh (+121), Gazilli (+161), Landy (+72; 2/1’de Cappelletti’nin yerine +170), Ghestem (+19; Michaels’ın yerine −97), Baron (+44; 4 yollu transferlerin yerine −8), Jordan 2NT (−37) ve Kokish (−110). Sayılar çift ölü elle, her biri 15.000–100.000 elde. Claude sistemi kaldırıldı.', en: 'Ten new conventions on my card; all start switched off, and when you tick one I play it too: Flannery 2♦ (+314 IMP), Voidwood (+48), Minorwood (+74), Walsh (+121), Gazilli (+161), Landy (+72; in place of Cappelletti in 2/1 +170), Ghestem (+19; in place of Michaels −97), Baron (+44; in place of 4-way transfers −8), Jordan 2NT (−37) and Kokish (−110). Double dummy, 15,000–100,000 deals each. The Claude system is gone.' },
   { v: 682, tr: 'Konvansiyon kartımın aralıkları senin tanımlarına göre değişti: Weak Jump Shift 3-6 puan (0-5 değil), Strong Jump Shift 17+ (19+ değil), Drury 9-11 (10-12 değil), Multi 2♦ 5-10 (5-11 değil), Inverted Minors baraj artırması 6-9 (0-9 değil), New Minor Forcing 10+ (11+ değil); SAYC ve Acol’da 2 seviyesinde yeni renk 10+ (11+ değil).', en: 'My convention card follows your definitions now: Weak Jump Shift 3-6 HCP (was 0-5), Strong Jump Shift 17+ (was 19+), Drury 9-11 (was 10-12), Multi 2♦ 5-10 (was 5-11), Inverted Minors preemptive raise 6-9 (was 0-9), New Minor Forcing 10+ (was 11+); in SAYC and Acol a two-level new suit is 10+ (was 11+).' },
   { v: 681, tr: 'Forsing 1NT artık kendi konvansiyonum (Ayarlar → konvansiyonlar, 2/1’de açık). 1♥/1♠’ye pas geçmemiş elle 1NT bir tur forsing: 3’lü fit ve 10-11 puanla önce 1NT, sonra majörü 3’e sıçrayarak davet ediyorum; zayıf ve uzun kendi rengimle ikinci turda o rengi oynamak için söylüyorum; açıcının ikinci rengine uyumla pas, yoksa iki kartla majöre tercih. Pas geçmiş elimin 1NT’si forsing değil, iki seviyesindeki yeni rengim 9-11 ve forsing değil. 24000 elde 113 kontrat değişti, toplam +136 IMP.', en: 'Forcing 1NT is now a convention of its own (Settings → conventions, on in 2/1). Over 1♥/1♠ an unpassed hand’s 1NT is forcing one round: a three-card limit raise (10-11) bids 1NT, then jumps to three of the major; a weak hand with a long suit of its own bids it next, to play; with a fit for opener’s second suit I pass, otherwise I give preference to the major with two cards. A passed hand’s 1NT is not forcing and its two-level new suit is 9-11, not forcing. 24000 deals: 113 contracts changed, +136 IMP.' },
   { v: 620, tr: 'RKCB’den sonra koz damını da sayıyorum. Bir as eksikken koz damı da yoksa (cevap damın olmadığını söylediyse ya da söylemediyse ve uyum yalnız 8 kartsa) iki kaybedenim var demektir: 6’ya çıkmıyorum, 5’te duruyorum. 1♥–2♦–2♥–4SA–5♥ ile ♥A9843 ve bir as dışarıdayken: 6♥ değil 5♥. Batan şelemlerin üçte biri böyleydi. 6000 elde 24 kontrat değişti, toplam +52 IMP.', en: 'After RKCB I count the trump queen too. With a key card missing and no trump queen (the answer showed it missing, or did not show it and the fit is only eight cards) there are two losers: not 6 but 5. 1♥–2♦–2♥–4NT–5♥ with ♥A9843 and an ace out: 5♥, not 6♥. A third of the slams that went down were like that. On 6000 deals 24 contracts changed, +52 IMP in all.' },
@@ -2937,10 +2938,10 @@ async function robotCardFor(g, t) {
    time, each with its start time, on the robots-data branch); every watcher sees each call and card at its time, so
    all see the same moment. A player can take a robot's seat: the next boards with those robots, on their device ---- */
 const RT_URL = 'https://raw.githubusercontent.com/Servetsvm/bridge/robots-data/';
-const RT_KEYS = ['claude', 'sayc', 'twoone', 'acol', 'sef', 'precision', 'polish'];
+const RT_KEYS = ['sayc', 'twoone', 'acol', 'sef', 'precision', 'polish'];
 const RT = { all: {}, data: null, cur: 'sayc', at: 0, busy: null, tab: 'live', sel: null, view: null, timer: null };
 const rtSysName = k => T(RT_SYS[k] || k);   // a system's name in the player's language
-const RT_SYS = { twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club', claude: 'Claude System' };
+const RT_SYS = { twoone: '2/1 Game Force', sayc: 'SAYC', acol: 'Acol', sef: 'French Standard', precision: 'Precision Club', polish: 'Polish Club' };
 const rtGet = f => fetch(RT_URL + f + '?t=' + Math.floor(Date.now() / 120e3), { cache: 'no-store' }).then(r => r.ok ? r.json() : null).catch(() => null);
 function rtLoad(force) {
   if (RT.busy) return RT.busy;
@@ -3152,23 +3153,12 @@ function rtSitPick() {
     <div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtsit="${s}">${SEAT[s]}<small>${esc(rtName(s))}</small></button>`).join('')}</div>
     <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
-// the Claude system's window: play it now (your system becomes Claude's, a new deal), watch its robots' table (once its
-// boards are ready), or read how it works
-function claudeOv() {
-  const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en', ready = !!(RT.all && RT.all.claude && RT.all.claude.boards && RT.all.claude.boards.length);
-  openOv('claude', `<h2>✨ ${T('Claude system')}</h2>
-    <div class="big">${T("The AI Claude's own system: its conventions are kept only when they win over thousands of deals. Watch the robots play it.")}</div>
-    <div class="grp"><span>${T('What is played')}</span>${esc(E.sysOf('claude').d)}</div>
-    <div class="row2"><button class="btn gold" id="clDuel">⚔️ ${T('Challenge Claude: your system against the Claude system')}</button></div>
-    <div class="row2"><button class="btn new" id="clPlay">▶ ${T('Play the Claude system')}</button><button class="btn" id="clWatch" ${ready ? '' : 'disabled'}>👁 ${ready ? T('Watch the robots play it') : T('The robots\' table is being prepared…')}</button></div>
-    <div class="row2"><a class="btn" href="${art}/learn/claude-system.html" target="_blank" rel="noopener">📖 ${T('How it works')}</a><button class="btn" id="oClose">${T('Close')}</button></div>`);
-}
 // the home page's card: the six tables (their systems' names)
 // the systems' short names, for a phone (the whole name stays in the tooltip)
 const RT_SHORT = { sayc: 'SAYC', twoone: '2/1', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' };
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🤖 ${T('System table')}</b></div><div class="rtrows">${RT_KEYS.filter(k => k !== 'claude').map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
+  return `<div class="rtgo"><b>🤖 ${T('System table')}</b></div><div class="rtrows">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
 }
 // the robots' tables (about 2 MB) are fetched only where their card is shown (a wide screen): a phone hides it,
 // and its system buttons fetch them when tapped
@@ -3188,7 +3178,7 @@ function showSettings() {
   setTimeout(offReadyCheck, 0); setTimeout(pushStateShow, 0);
   if (typeof Net !== 'undefined' && SET.notify !== false) setTimeout(() => pushSetup(true), 50);   // looked at again each time Settings opens
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
-  const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${c.x ? `<em class="xo">${T('replaces')} ${E.CONVS.find(y => y.k === c.x).n}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
+  const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${E.convOff(c.k).length ? `<em class="xo">${T('replaces')} ${E.convOff(c.k).map(k => E.CONVS.find(y => y.k === k).n).join(', ')}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
   openOv('set', `<h2>${T('Settings')}</h2>
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
    <div id="offReady" class="offready muted"></div>
@@ -3601,7 +3591,7 @@ document.addEventListener('change', e => {
   if (t.dataset.conv) {
     const k = t.dataset.conv, c = E.CONVS.find(y => y.k === k);
     SET.conv[k] = t.checked;
-    if (t.checked && c && c.x) SET.conv[c.x] = false;
+    if (t.checked && c) E.convOff(c.k).forEach(o => { SET.conv[o] = false; });
     if (!t.checked && pracList().includes(k)) SET.practice = pracList().filter(x => x !== k).join(',');   // taken off the card: no longer practised
     Store.saveSettings(SET); save(); if (ui.overlay === "set") showSettings(); else if (ui.overlay === 'cardconv') { render(); showCardConv(); } else render();
   }
@@ -3624,7 +3614,7 @@ document.addEventListener('change', e => {
   if (t.dataset.pdsys) { setSys(t.dataset.pdsys); Store.saveSettings(SET); save(); if (ui.pracDrop !== 'conv') ui.pracDrop = null; render(); flash(E.sysOf(SET.sys).n + ' — ' + T('your robot partner bids it too'), 2400); return; }
   if (t.dataset.pdconv) { togglePractice(t.dataset.pdconv, t.checked); render(); return; }
   if (t.dataset.pdoff) { SET.practice = ''; Store.saveSettings(SET); save(); render(); return; }
-  if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c && c.x) SET.conv[c.x] = false; } Store.saveSettings(SET); save(); showSettings(); }
+  if (t.id === "sPractice") { SET.practice = t.value; if (t.value) { SET.conv[t.value] = true; const c = E.CONVS.find(y => y.k === t.value); if (c) E.convOff(c.k).forEach(o => { SET.conv[o] = false; }); } Store.saveSettings(SET); save(); showSettings(); }
 });
 document.addEventListener('click', ev_ => {
   // the ☰ menu closes after any tap outside its button (a menu item still does its job)
@@ -3752,12 +3742,6 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bConvGo') { ui.hsec = 'conv'; render(); const p = $('hSec'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }   // the player's convention card
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   // the robots' table: open it, its tabs, a call's meaning, a board played before
-  if (t.dataset.rtk === 'claude' && t.dataset.rtopen) { claudeOv(); return; }   // the Claude system: try it yourself, watch the robots, read how it works
-  if (t.id === 'clPlay') { setSys('claude'); Store.saveSettings(SET); closeOv(); ui.saved = null; Net.st.soloPub = true; resume(); flash('✨ ' + T('You play the Claude system — the robots too'), 2600); return; }
-  if (t.id === 'clWatch') { closeOv(); rtWatch('claude'); return; }
-  if (t.id === 'clDuel') { { const el = $('hRobot'); if (el) setTimeout(() => { el.innerHTML = rtCardHtml(); }, 0); } SET.opp = 'claude'; SET.clInv = new Date().toDateString(); Store.saveSettings(SET); closeOv(); ui.saved = null; Net.st.soloPub = true; resume(); flash('⚔️ ' + T('Your system against Claude\'s: the opponents bid the Claude system'), 3000); return; }
-  if (t.id === 'clDuelEnd') { SET.opp = 'same'; Store.saveSettings(SET); render(); { const el = $('hRobot'); if (el) el.innerHTML = rtCardHtml(); } flash(T('The opponents bid your system again'), 2000); return; }
-  if (t.id === 'clLater') { SET.clInv = new Date().toDateString(); Store.saveSettings(SET); render(); return; }
   if (t.dataset.rtk) { if (t.dataset.rtopen) rtWatch(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
   if (t.dataset.rtwatch) { rtWatch(RT.cur); return; }
   if (t.id === 'bRtAgain') { rtAgain(); return; }
@@ -4053,14 +4037,15 @@ function ddsReady() {
 }
 function start(data) {
   load(data && data.G ? data : null);
-  if (SET.opp === 'claude') { SET.opp = 'same'; Store.saveSettings(SET); }   // no Claude challenge on the home page any more
+  // the Claude system is gone (2026-11-26): a card that played it (or played against it) goes to 2/1
+  if (SET.opp === 'claude' || SET.sys === 'claude') { if (SET.opp === 'claude') SET.opp = 'same'; if (SET.sys === 'claude') setSys('twoone'); Store.saveSettings(SET); save(); }
   Field.init();
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
   // an unfinished board (bidding or play) waits for "Play with robots" to carry on
   ui.saved = G && G.id !== 'idle' && (G.phase === 'bid' || G.phase === 'play') && !pracList().length ? G : null;   // practising a convention: Start, not Continue
   G = idleG(); render();
   { const sq = new URLSearchParams(location.search), kq = sq.get('kulup'), ks = sq.get('sys'), kf = sq.get('feedback');
-    if (ks && E.SYSTEMS.some(y => y.k === ks)) { setSys(ks); Store.saveSettings(SET); }   // a link that chooses the system (the Claude system's article: Try it)
+    if (ks && E.SYSTEMS.some(y => y.k === ks)) { setSys(ks); Store.saveSettings(SET); }   // a link that chooses the system 
     if (ks || kf) { try { history.replaceState(null, '', location.pathname); } catch (e) {} }
     if (kq != null) { try { history.replaceState(null, '', location.pathname); } catch (e) {} openClubs(kq); }
     const go = () => { if (typeof Net === "undefined") { setTimeout(go, 50); return; } if (kq != null) return; if (needGate()) { if (kf) ui.fbLater = kf; showGate(); } else if (kf) fbOpen(kf); else checkSharedDeal(); }; setTimeout(go, 0); }   // once net.js is loaded too
@@ -4429,8 +4414,8 @@ function supMsgsHtml(m, mine) {
 }
 const supBox = (id, ph) => `<textarea id="${id}" class="tok wide" rows="3" maxlength="1000" placeholder="${ph}"></textarea>`;
 // the player: their messages to the administrator and the answers
-// feedback asked for by a link (the Claude system's article): the message window with its first words
-async function fbOpen(k) { ui.supKind = k; await showSup(); const t = $('supTxt'); if (t && !t.value) { t.value = (k === 'claude' ? T('Claude system') : k) + ': '; t.focus(); } }
+// feedback asked for by a link: the message window with its first words
+async function fbOpen(k) { ui.supKind = k; await showSup(); const t = $('supTxt'); if (t && !t.value) { t.value = k + ': '; t.focus(); } }
 async function showSup() {
   openOv('sup', `<h2>✉️ ${T('Write to the administrator')}</h2><div class="muted">⏳ ${T('Loading…')}</div>`);
   let th = null, err = '';
@@ -4447,7 +4432,7 @@ async function showSup() {
 async function sendSup() {
   const t = ($('supTxt') && $('supTxt').value || '').trim();
   if (t.length < 2) { flash(T('Write your message…'), 1800); return; }
-  const kind = ui.supKind || (t.startsWith(T('Claude system')) ? 'claude' : ''); ui.supKind = null;
+  const kind = ui.supKind || ''; ui.supKind = null;
   try { await Net.supSend(t, kind); await showSup(); }
   catch (e) { flash(e.message === 'offline' ? T('No internet connection — try again later.') : T('Could not send — sign in with your name and PIN first.'), 3000); }
 }
@@ -4566,7 +4551,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-25T16:03:41Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-26T21:28:26Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-20000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {
@@ -4942,13 +4927,11 @@ function statActHtml(a) {
 const VIS_N = { chatgpt: '🤖 ChatGPT', perplexity: '🤖 Perplexity', claude: '🤖 Claude.ai', gemini: '🤖 Gemini', copilot: '🤖 Copilot', google: '🔎 Google', bing: '🔎 Bing', yandex: '🔎 Yandex', duckduckgo: '🔎 DuckDuckGo', yahoo: '🔎 Yahoo', ecosia: '🔎 Ecosia', facebook: '📘 Facebook', instagram: '📷 Instagram', x: '𝕏 X', whatsapp: '💬 WhatsApp', github: '🐙 GitHub', askim: '🏛 Askim BK', other: '🔗 ', direct: '🏠 ' };
 function statVisHtml(V) {
   if (!V) return '';
-  const art = Object.entries(V.by).filter(([k]) => k.startsWith('cl') && k !== 'claude').map(([k, v]) => [k.slice(2), v]).sort((a, b) => b[1][0] - a[1][0]), artN = art.reduce((a, x) => a + x[1][0], 0);
   V = { ...V, by: Object.fromEntries(Object.entries(V.by).filter(([k]) => !(k.startsWith('cl') && k !== 'claude'))) };
   const L = Object.entries(V.by).sort((a, b) => (b[0] === 'google') - (a[0] === 'google') || b[1][0] - a[1][0]), max = Math.max(1, ...L.map(x => x[1][0]));
   const nm = k => k === 'other' ? VIS_N.other + T('Other sites') : k === 'direct' ? VIS_N.direct + T('Direct (app, bookmark, typed)') : VIS_N[k] || esc(k);
   return `<h3>🧭 ${T('Where they came from')}</h3>${L.length ? `<table class="res stats">${L.map(([k, v]) => `<tr><td>${nm(k)}</td><td class="n"><b>${v[0]}</b>${v[1] ? ` <small>(${T('{0} new', v[1])})</small>` : ''}</td><td class="sbar"><i style="width:${Math.round(v[0] / max * 100)}%"></i></td></tr>`).join('')}</table>` : `<div class="muted">${T('Nobody yet.')}</div>`}
-    <div class="muted">${T('Every device once a day, guests too; new = its first visit. Counted from {0}.', '13.11.2026')}</div>
-    <h3>📰 ${T('The Claude system\'s article')}: ${artN}</h3>${art.length ? `<table class="res stats">${art.map(([k, v]) => `<tr><td>${nm(k)}</td><td class="n"><b>${v[0]}</b>${v[1] ? ` <small>(${T('{0} new', v[1])})</small>` : ''}</td></tr>`).join('')}</table>` : `<div class="muted">${T('Nobody yet.')}</div>`}<div class="muted">${T('Readers of the article (each device once a day) and where they came from; their messages come to you as messages from players.')}</div>`;
+    <div class="muted">${T('Every device once a day, guests too; new = its first visit. Counted from {0}.', '13.11.2026')}</div>`;
 }
 async function showStats() {
   if (!Net.isAdmin()) return;

@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v688`, kulüpler `kulup-v199`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v689`, kulüpler `kulup-v199`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -62,6 +62,15 @@ _(2026-11-22 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v688`, kulü
 - **Yeni BridgePlay (/yeni/) silindi**: kullanıcı görünüşü, kullanımı, eksikleri ve fikrin kendisini beğenmedi; eski programla devam.
   Kod git geçmişinde (son hali commit a40f456). `yeni/` klasörü de tamamen silindi (kimse kullanmamıştı). Eski program hiç değişmedi.
   Ders: büyük yeniden yazım yerine eski programı adım adım iyileştir; büyük işe başlamadan küçük bir örnek ekranı göster, onay al.
+- **Claude sistemi silindi** (SYSTEMS 'claude', CONVS 'claudex', bidding.js kontrası, app.js Claude penceresi/robot masası/meydan okuma,
+  {en,tr,no}/learn/claude-system.html, sitemap, index.html bağlantıları, robots.js). Kayıtlı `SET.sys/opp === 'claude'` → 2/1 (`start()`).
+- **10 yeni konvansiyon** (hepsi `off`, kullanıcı işaretleyince robotlar oynar; kullanıcı Walsh ve Baron için yaygın şekli seçti):
+  Flannery (`flan`, xs multi), Voidwood/Minorwood (anahtar kart cevapları artık sorunun 4 basamak üstü: `stp(k)`, `pm.void`),
+  Ghestem (`gh`, xs michaels), Jordan 2NT, Landy (`landy`, xs capp+dont), Kokish (`kok`/`kokr`, virt2N 2♣-2♦-2♥-2♠-2NT'yi de 2NT açışı sayar),
+  Walsh, Baron (1NT-2♠/2NT-3♠, xs fourWay+minorTr), Gazilli (`gaz`/`gazr`). Yeni `xs` (birden çok dışlama) + `E.convOff(k)`.
+  DD ölçümü (scratchpad fnt/cmp2.js: aynı motor, konvansiyon kapalı/açık): Flannery +314, Gazilli +161, Walsh +121, Minorwood +74,
+  Landy +72 (2/1'de Capp yerine +170), Voidwood +48, Baron +44 (4 yollu yerine −8), Ghestem +19 (Michaels yerine −97), Jordan −37, Kokish −110.
+  CONV_T 9 dil, BID_PH 15 yeni ifade, ROBOT_LEARNED v689.
 
 ### 2026-11-25
 - **Yeni BridgePlay beta** (`/yeni/`, kullanıcının kararıyla sıfırdan; ad BridgePlay, fotoğraftan el kalır, el sonu koçu/geri alma/el geçmişi/Haftam,
