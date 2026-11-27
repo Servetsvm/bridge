@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v704`, kulüpler `kulup-v211`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v705`, kulüpler `kulup-v211`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v704`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Ana sayfada sarı sistem düğmesi (🤖 SAYC…) de artık 🌐 Online gibi kart seçimi + oturma açar (`data-rtopen` → `rtOnline`); robot
+  sistem masasını izleme ana sayfadan kalktı (`rtWatch` başka yerden çağrılmıyor). v705.
 - **GitHub kulüp robotu** (`.github/clubs/runner.js`, 5 dk'da bir) açık akşamın kimsenin oturmadığı masalarını da oynuyor ve akşamı
   kulübe kopyalıyordu (akşam kendi kendine "Tamamlandı", silince geri geliyordu). Artık koltukları uygular (`ctSeatsApply`), `ctIdle`
   masaları oynamaz/beklemez; silinmiş akşamı kopyalamaz. TD silince `bm/otGone/<tid>` (kural: üye yazar) → ne TD sayfası (`otMirror`)

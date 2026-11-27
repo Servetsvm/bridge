@@ -3778,7 +3778,8 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bConvGo') { ui.hsec = 'conv'; render(); const p = $('hSec'); if (p) p.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }   // the player's convention card
   if (t.id === 'hRoboErr') { showRoboErrs(); return; }
   // the robots' table: open it, its tabs, a call's meaning, a board played before
-  if (t.dataset.rtk) { if (t.dataset.rtopen) rtWatch(t.dataset.rtk); else { rtPick(t.dataset.rtk); rtDraw(); } return; }
+  if (t.dataset.rtk) { if (t.dataset.rtopen) rtOnline(t.dataset.rtk);   // a system's button on the home page: choose the card, then sit (as 🌐 Online)
+    else { rtPick(t.dataset.rtk); rtDraw(); } return; }
   if (t.dataset.rtwatch) { rtWatch(RT.cur); return; }
   if (t.id === 'bRtAgain') { rtAgain(); return; }
   if (t.id === 'bRtNext') { rtNext(); return; }
