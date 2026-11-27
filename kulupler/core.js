@@ -92,6 +92,11 @@ async function fbUrl(path){
   return FBURL+path+(token?('?auth='+token):'');
 }
 // Root-level (club-independent) requests: /clubs/*, /superadmin/*, /sess/*
+// fetch that gives up after ms (a read that never answers shows a warning instead of nothing)
+async function fetchT(url,opts={},ms=12000){
+  const c=new AbortController(), t=setTimeout(()=>c.abort(),ms);
+  try{ return await fetch(url,{...opts,signal:c.signal}); }catch(e){ throw (e&&e.name==='AbortError')?new Error('timeout'):e; }finally{ clearTimeout(t); }
+}
 async function fbRootUrl(path){
   const token=await authToken();
   return FB_BASE+path+(token?('?auth='+token):'');
@@ -212,9 +217,13 @@ function _setPath(root,path,data){
   const last=seg[seg.length-1]; if(data===null) delete o[last]; else o[last]=data;
   return top;
 }
+// a phone opens at most 6 connections at once to one address, and every open stream holds one for good: with 8 streams no
+// other read or save got through (the club info / logo windows never opened). So only these few are streams; the
+// other keys are read again every few seconds
+const _LIVE={state:1,boards:1,tdcalls:1};
 function _streamOpen(k){
   const S=_streams[k]; if(S.poll) return;
-  if(typeof EventSource==='undefined'){ _pollStart(k); return; }
+  if(typeof EventSource==='undefined'||!_LIVE[k]){ _pollStart(k); return; }
   (async()=>{
     let es, val=null, got=false;
     try{ es=new EventSource(await fbUrl('/'+k+'.json')); }catch(e){ _pollStart(k); return; }
@@ -235,7 +244,7 @@ function _pollStart(k){
   const S=_streams[k]; if(S.poll) return; S.poll=true;
   const poll=async()=>{
     try{ const r=await fetch(await fbUrl('/'+k+'.json'),{cache:'no-store'}); if(r.ok) _emit(k,await r.json()); }catch(e){}
-    setTimeout(poll,document.hidden?15000:4000);
+    setTimeout(poll,k==='playerdb'?60000:document.hidden?15000:_LIVE[k]?4000:5000);
   };
   poll();
 }

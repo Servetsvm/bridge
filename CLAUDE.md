@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v693`, kulüpler `kulup-v207`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v693`, kulüpler `kulup-v208`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,9 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v693`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- **Kulüp bilgisi / logosu açılmıyordu** (TD şifresiyle, her kulüpte): kulüp programı 8 canlı akış (EventSource) açıyordu; telefon bir adrese en çok 6
+  bağlantı açar → okuma isteği hiç cevap almıyordu. Artık yalnız `state`, `boards`, `tdcalls` akış (`_LIVE`, core.js), diğerleri 5 sn'de bir okunur
+  (playerdb 60 sn). Bilgi/logo okuması 12 sn'de cevap gelmezse uyarı (`fetchT`). kulup-v208.
 - **Masa kodu kalktı** (kullanıcının kararı): BridgePlay'e girmiş üye her turnuvada kodsuz oturur (`bgPlayerSit` → `_quickSeat`,
   club-auth 167 koşulu `_quickTeam||me()`, setLive her zaman `q:1`). TD → Kulüp ayarları'ndan 🔢 Masa kodları ve 🔗 Oyuncu bağlantısı
   kaldırıldı (sonra 📺 Ekran da, kulup-v205; BridgePlay kulüp kartındaki 📺 Ekran düğmesi duruyor). Firebase kuralı: bm/{state,movements,pairs,boards,approvals,tableLocks,boardLocks,ready,kicks,tdcalls,logs,hands,dd,archives,playerdb}

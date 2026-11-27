@@ -207,7 +207,7 @@ window.tdcClub=function(){ if(qtMember()) return;
 // Kept in the club's own data (gate/clubs/<id>/bm/info), like the logo
 window.tdcInfo=async function(){
   // read first: a read that fails (no connection, the sign-in run out) opens no empty form — saved, it would wipe the info
-  let x={}; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); x=(await r.json())||{}; }catch(e){ toast('❌ '+L('Could not read the club info — check the connection and try again')+' ('+String(e&&e.message||e).slice(0,40)+')',6000); return; }
+  let x={}; try{ const r=await fetchT(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); x=(await r.json())||{}; }catch(e){ toast('❌ '+L('Could not read the club info — check the connection and try again')+' ('+String(e&&e.message||e).slice(0,40)+')',6000); return; }
   window._tdcInfoHad=!!(x.adr||x.kp||x.tel||(x.sch&&x.sch.length)||x.tm||x.sb||x.ol);
   const v=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
   openModal('ℹ️ '+L('Club info'),`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${L('Shown on BridgePlay\'s Clubs page: players open the address in their maps, and call or send an SMS to the number.')}</div>
