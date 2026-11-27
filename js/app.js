@@ -3179,6 +3179,7 @@ function rtOnline(k) {
 function rtOnSit(s) {
   SET.rtNames = null; SET.seat = s; Store.saveSettings(SET); save();
   closeOv(); ui.saved = null; Net.st.soloPub = true; resume();
+  setTimeout(() => { try { Net.Cloud.beat(); } catch (e) {} }, 1500);   // the others see the table now, not in a minute
 }
 // 🪑 Sit down on the system table's bar: the four seats with their robots' names
 function rtSitPick() {

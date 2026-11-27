@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v702`, kulüpler `kulup-v209`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v703`, kulüpler `kulup-v209`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,9 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v702`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Açık masa başka telefonda görünmüyordu: masalar PeerJS odalarıyla aranıyor, mobil ağda çoğu zaman ulaşılamıyor. Artık dakikalık
+  `online/<ad>` kaydı `tbi {k,pub,ph,b,ct,n}` taşır; `tablesHtml` doğrudan bulunamayan masaları bundan aynı ayrıntıyla çizer (katıl düğmesi
+  yalnız açık + oda no varsa). Online'da oturunca hemen `Cloud.beat()`, Listeyi yenile de okur. v703.
 - Açık masalar (`Net.tablesHtml`, önce örnek resim gösterildi, onaylandı): masada ne oynandığı — 🌐 online / 🤖 robotlarla, el no,
   "Deklarasyon sürüyor" ya da "Kontrat: 4♠ Doğu, löve 7/13" (tableInfo `ct`), sistem + açık konvansiyonlar (prof.sys/conv, 6'dan fazlası +n),
   oyuncular yönleriyle. v702.

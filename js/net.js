@@ -516,7 +516,12 @@ const Net = (() => {
   function tablesHtml() {
     // tables in play are listed: online tables, and players at a board with robots (not someone on the home page)
     // not your own name at a board on another of your devices (it is you; you are here)
-    const L = st.tables && st.tables.filter(t => listed(t) && (t.online || nameKey(t.host || "") !== nameKey(myName() || "")));
+    let L = st.tables && st.tables.filter(t => listed(t) && (t.online || nameKey(t.host || "") !== nameKey(myName() || "")));
+    // a player at the robots the direct lines did not reach (a phone network often blocks them): from the online list, drawn the same way
+    { const have = new Set((L || []).flatMap(t => [t.host, ...Object.values(t.names || {})]).filter(Boolean).map(nameKey));
+      const C = (st.cloud && Cloud.on && st.cloud.on || []).filter(x => x.at === 'robots' && x.tbi && x.name && nameKey(x.name) !== nameKey(myName()) && !have.has(nameKey(x.name)))
+        .map(x => ({ k: x.tbi.k || 0, host: x.name, names: x.tbi.n || {}, pub: !!x.tbi.pub, phase: x.tbi.ph, board: x.tbi.b, ct: x.tbi.ct, prof: x.p || {}, pc: x.pc, pcl: x.pcl, solo: 1, cl: 1 }));
+      if (C.length) L = [...(L || []), ...C]; }
     // each table is one line: open (🔓, an online table anyone may ask to join, or a player at the robots who chose
     // "open to others") or closed (🔒), whose table it is and what is played there, the players, and the buttons
     const pn = n => nameKey(n) === nameKey(myName()) ? `<b class="pname" data-who="${esc(n)}">${esc(n)}</b>` : `<b class="pname" data-pm="${esc(n)}" title="${T('Private message')}">${esc(n)}</b>`;
@@ -537,7 +542,7 @@ const Net = (() => {
       const sysLine = sysN ? `<small class="ttour">🤖 ${esc(sysN)}${cvT ? ' · 📚 ' + esc(cvT) : ''}</small>` : '';
       const ct = Array.isArray(t.ct) ? t.ct : null, where = t.phase === 'bid' ? T('Auction in progress') : ct ? `${T('Contract')}: ${ct[0]}${['♣', '♦', '♥', '♠', 'NT'][ct[1]] || ''}${ct[2] === 2 ? 'XX' : ct[2] ? 'X' : ''} ${typeof SEAT !== 'undefined' ? SEAT[ct[3]] : T(seatN[ct[3]] || '')}, ${T('tricks')} ${ct[4]}/${ct[5]}` : '';
       const state = `${t.online ? '🌐 ' + T('online') : t.champ ? '🏆 ' + T('in the championship') : t.pc ? pcText(t) : '🤖 ' + T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${where && !tp ? ' · ' + where : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}`;
-      const btns = t.champ ? '' : (tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`) + (t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : '');
+      const btns = t.champ || (t.cl && !(t.pub && t.k)) ? '' : (tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`) + (t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : '');
       return line(open, T("{0}'s table", esc(t.host)), state, people, tinfo + sysLine, btns);
     }).join('');
     // the players the online list has at a board with robots, whose table the direct lines have not found
@@ -692,7 +697,8 @@ const Net = (() => {
         // taken out of the lobby by the administrator (online/<name>/kick): stay out until the player comes back
         try { const kk = await Cloud.get('online/' + fbKey(name) + '/kick'); if (kk && kk > kickSeen()) { setKickSeen(kk); kickedOut(); return; } } catch (e) {}
         const pc = w === 'robots' && typeof pracList === 'function' && pracList().length ? 1 : 0;   // practising conventions
-        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof(), pc, ...(pc ? { pcl: pracList().join(',') } : {}), ...(w === 'table' ? { tb: { n: Object.values(st.names || {}).filter(Boolean).map(v => String(v).slice(0, 20)).sort().join(', ').slice(0, 90), pv: st.priv ? 1 : 0 } } : {}) });
+        const ti = w === 'robots' ? tableInfo() : null;
+        await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof(), pc, ...(ti ? { tbi: { k: ti.k || 0, pub: ti.pub ? 1 : 0, ph: ti.phase || '', b: ti.board || 0, ct: ti.ct || null, n: ti.names || {} } } : {}), ...(pc ? { pcl: pracList().join(',') } : {}), ...(w === 'table' ? { tb: { n: Object.values(st.names || {}).filter(Boolean).map(v => String(v).slice(0, 20)).sort().join(', ').slice(0, 90), pv: st.priv ? 1 : 0 } } : {}) });
         if (st.cloudFail) { st.cloudFail = 0; render(); }
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()), ...(SET.act && SET.act.d === today() ? { a: actOut() } : {}) }); st.loggedDay = today(); st.prSent = ''; }
         if (!st.leAt || Date.now() - st.leAt > 5 * 60e3) { st.leAt = Date.now(); Cloud.put('logins/' + today() + '/' + fbKey(name) + '/le', st.leAt).catch(() => {}); }
@@ -1962,7 +1968,7 @@ const Net = (() => {
         setName((n && n.value.trim()) || myName() || 'Host');
         closeOv(); if (typeof ui !== 'undefined') ui.saved = null; if (!st.on) host(false); else panel(); break;   // the table opens at once
       }
-      case 'nFind': findTables(); break;
+      case 'nFind': findTables(); Cloud.beat(); break;
       case 'nCancel': st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} closeOv(); break;
       case 'nStop': {
         // during a board with other players: hand the table to one of them, or close it for everyone
