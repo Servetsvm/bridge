@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v729`, kulüpler `kulup-v216`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v730`, kulüpler `kulup-v216`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,9 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v729`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Online Takım maçı tek telefona bağlı değil: masadaki her telefon, 3,5 sn oynamayan robotu oynatır (`ctStuck`, ctPoll `t.bk`); her hamle `a/<n>`'e
+  bir kez yazılır (kural `!data.exists()`), ikinci kopya reddedilip `ctRebuild`. Test (iki sanal telefon, sahte DB): Emin'in uygulaması kapanınca
+  Nora'nın telefonu oyunu durmadan sürdürdü. Gerçek sunucu (telefonsuz) yok: GitHub 5 dk'da bir, Cloudflare ücretsizde CPU sınırı → önerilmedi. v730.
 - Online Takım maçı yavaştı / robot son kartı oynamıyordu: robotları en küçük anahtarlı oturan oyuncunun cihazı oynatır (`ctRunner`); o ayrılınca
   diğerleri 90+20 sn beklerdi. Artık `ctLeave` hb'yi 0 yazar (hemen devralınır), CT_AWAY 45 sn, beat 12 sn, ctPoll 8 sn takılınca hb'yi yeniden okur. v729.
 - Online Takım maçında uygulaması kapanan/ayrılan oyuncu (2 dk beat yok) artık masada adıyla görünmez: masada robotun adı (`seatName` → `ctSeatsOf` `bn`),

@@ -18931,7 +18931,8 @@ function ctWho(seat) {
 }
 const ctControls = seat => !(CT.tbl && CT.tbl.watch) && ctWho(seat) === ctMe();
 // a robot seat played on this device: the runner's, and your own seat while the robot finishes your board
-const ctRobotHere = seat => !(CT.tbl && CT.tbl.watch) && ctWho(seat) === 'robot' && (ctRunner() === ctMe() || (ctBack() && ctSeatKey(seat) === ctMe()));
+const ctStuck = () => { const t = CT.tbl; return !!(t && t.stAt && Date.now() - t.stAt > 3500); };   // the robots' device has not moved for a while
+const ctRobotHere = seat => !(CT.tbl && CT.tbl.watch) && ctWho(seat) === 'robot' && (ctRunner() === ctMe() || ctStuck() || (ctBack() && ctSeatKey(seat) === ctMe()));   // any phone at the table plays a waiting robot (each action is written once, a second copy is refused)
 // the board the robot finished for you is over: your seat again
 function ctBackCheck() {
   const t = CT.tbl; if (!t || t.waitI == null || ctBack()) return;
@@ -18988,7 +18989,8 @@ async function ctPoll() {
     if (moved) { save(); render(); tick(); }
     ctBackCheck();
     // nothing moved for a while although a robot (here) is to play or a full trick waits: the table is nudged on
-    const st = ctStep(); if (st !== t.st) { t.st = st; t.stAt = Date.now(); }
+    const st = ctStep(); if (st !== t.st) { t.st = st; t.stAt = Date.now(); t.bk = 0; }
+    else if (ctStuck() && !t.bk && ((G.phase === 'play' && G.play && ctWho(G.play.turn) === 'robot') || (G.phase === 'bid' && ctWho(bidTurn()) === 'robot'))) { t.bk = 1; tick(); }   // not moved for 3.5 s: this phone plays the robot
     else if (Date.now() - (t.stAt || 0) > 6000 && G.phase === 'play' && G.play && (G.play.trick.length === 4 || ctRobotHere(G.play.turn))) { t.stAt = Date.now(); tick(); }
     else if (Date.now() - (t.stAt || 0) > 6000 && G.phase === 'bid' && ctRobotHere(bidTurn())) { t.stAt = Date.now(); tick(); }
     else if (Date.now() - (t.stAt || 0) > 8000 && Date.now() - (t.hbAt || 0) > 8000) { t.hbAt = Date.now(); Net.Cloud.get(t.p + '/hb').then(h => { if (CT.tbl === t && h) { t.hb = h; tick(); } }).catch(() => {}); }   // stuck: is the device playing the robots still here?
