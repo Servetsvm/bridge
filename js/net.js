@@ -575,7 +575,8 @@ const Net = (() => {
       return `<div class="otour"><div><b>🏆 ${esc(t.name)}</b><small>${k} · ${T('{0} boards', t.n)} · ${T('{0} players', players)} · ${t.state === 'setup' ? T('Registering') : T('Running')}</small><small class="tby">${tourBy(t)}</small></div><div class="otb">${btn}${isAdmin() || isMine(t) ? `<button class="btn tdel" data-tdel="${t.id}" title="${T("Close")}">✕</button>` : ""}</div></div>`;
     }).join('');
     const empty = !rows && !tours ? `<div class="muted">${T('No other tables are open right now.')}</div>` : '';
-    return `<div class="tables">${tours ? `<div class="otours">${tours}</div>` : ''}${rows}${empty}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
+    const b = st.beatSt, bst = b ? `<div class="muted" style="font-size:11px;opacity:.7">🔌 ${new Date(b.at).toTimeString().slice(0, 5)} ${b.s === 'ok' ? '✓' : '⚠️ ' + esc(b.s)}</div>` : '';
+    return `<div class="tables">${tours ? `<div class="otours">${tours}</div>` : ''}${rows}${empty}${bst}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
   }
   /* ---- lobby chat: everyone with the app open can talk; each message goes along every lobby line ---- */
   const lclearTs = () => { try { return +localStorage.getItem('bridge-lobby-cleared') || 0; } catch (e) { return 0; } };
@@ -683,14 +684,15 @@ const Net = (() => {
     },
     // this device says it is here (every minute): in the lobby or at a table; the first time each day it also logs in
     async beat() {
-      const name = myName(); if (st.out || !Cloud.on || !name || !SET.pinH) return;
+      const name = myName(), bs = v => { st.beatSt = { at: Date.now(), s: v }; };   // how the last try went (shown small under Open tables)
+      if (st.out || !Cloud.on || !name || !SET.pinH) { bs(st.out ? 'out' : !Cloud.on ? 'offline' : !name ? 'noname' : 'nopin'); return; }
       const w = st.on ? 'table' : G && !G.watch && (G.phase === 'bid' || G.phase === 'play' || G.phase === 'done') ? (G.champ ? 'champ' : 'robots') : 'lobby';   // watching the robots is not playing; a finished board on the screen is still at the table
       try {
         // a name no longer in the database was removed by the administrator: this device signs out (it used to take
         // the name again, for names chosen before the database existed; they are all in it now)
-        if (!(await Cloud.exists(name))) { if (typeof nameRemoved === 'function' && !st.on) nameRemoved(name); return; }
+        if (!(await Cloud.exists(name))) { bs('noname-db'); if (typeof nameRemoved === 'function' && !st.on) nameRemoved(name); return; }
         if (!(await Cloud.session(name, SET.pinH))) {
-          if (st.claimed) return;   // was signed in already: a passing error, not a wrong PIN
+          if (st.claimed) { bs('session'); st.sess = null; return; }   // was signed in already: a passing error, not a wrong PIN (tried again next time)
           { SET.pinH = null; Store.saveSettings(SET); save(); ui.gateErr = T('This name is registered with another PIN. If it is yours, enter your PIN.'); showGate(); return; }
         }
         st.claimed = true;
@@ -699,6 +701,7 @@ const Net = (() => {
         const pc = w === 'robots' && typeof pracList === 'function' && pracList().length ? 1 : 0;   // practising conventions
         const ti = w === 'robots' ? tableInfo() : null;
         await Cloud.put('online/' + fbKey(name), { name, ts: Date.now(), at: w, p: prof(), pc, ...(ti ? { tbi: { k: ti.k || 0, pub: ti.pub ? 1 : 0, ph: ti.phase || '', b: ti.board || 0, ct: ti.ct || null, n: ti.names || {} } } : {}), ...(pc ? { pcl: pracList().join(',') } : {}), ...(w === 'table' ? { tb: { n: Object.values(st.names || {}).filter(Boolean).map(v => String(v).slice(0, 20)).sort().join(', ').slice(0, 90), pv: st.priv ? 1 : 0 } } : {}) });
+        bs('ok');
         if (st.cloudFail) { st.cloudFail = 0; render(); }
         if (st.loggedDay !== today()) { await Cloud.put('logins/' + today() + '/' + fbKey(name), { name, ts: Date.now(), ...(await ipTag()), ...(SET.act && SET.act.d === today() ? { a: actOut() } : {}) }); st.loggedDay = today(); st.prSent = ''; }
         if (!st.leAt || Date.now() - st.leAt > 5 * 60e3) { st.leAt = Date.now(); Cloud.put('logins/' + today() + '/' + fbKey(name) + '/le', st.leAt).catch(() => {}); }
@@ -710,7 +713,7 @@ const Net = (() => {
         st.cloud = { on: Object.values(on || {}).filter(x => x && Date.now() - x.ts < 3 * 60e3), users: users ? Object.keys(users).length : null, names: users ? Object.values(users).filter(u => u && u.name).map(u => String(u.name).slice(0, 20)) : null, logins: logins ? new Set(Object.values(logins).map(x => (x && x.ip) || 'n:' + nameKey(x && x.name))).size : null };   // one per internet address
         for (const x of Object.values(on || {})) if (x && x.name && x.p && Date.now() - x.ts < 7 * 864e5) noteSeen(x.name, cleanProf(x.p, true));
         renderL();
-      } catch (e) { st.cloudFail = (st.cloudFail || 0) + 1; if (st.cloudFail === 2) render(); }   // the database cannot be reached (a blocker, or no connection): the home page says so
+      } catch (e) { bs('err ' + String(e && e.message || e).slice(0, 40)); st.cloudFail = (st.cloudFail || 0) + 1; if (st.cloudFail === 2) render(); }   // the database cannot be reached (a blocker, or no connection): the home page says so
     },
   };
   /* today's logins are counted once per internet address (several names from the same place count once), and the

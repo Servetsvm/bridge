@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v705`, kulüpler `kulup-v211`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v706`, kulüpler `kulup-v211`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,9 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v705`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Nora'nın tableti 18:33'ten beri `online/nora` yazmıyor (Emin'in telefonu yazıyor, `tbi` dolu). Kod tablet boyutunda çalışıyor (mock);
+  neden bilinmiyor. Açık masalar'ın altında küçük durum satırı `🔌 ss:dd ✓ / ⚠️ <neden>` (`st.beatSt`: out/offline/nopin/session/err…);
+  oturum hatası artık kalıcı sessiz değil (`st.sess = null`, sonra yeniden dener). Bu oturumda ortam `bridge` (Firebase okuma izni). v706.
 - Ana sayfada sarı sistem düğmesi (🤖 SAYC…) de artık 🌐 Online gibi kart seçimi + oturma açar (`data-rtopen` → `rtOnline`); robot
   sistem masasını izleme ana sayfadan kalktı (`rtWatch` başka yerden çağrılmıyor). v705.
 - **GitHub kulüp robotu** (`.github/clubs/runner.js`, 5 dk'da bir) açık akşamın kimsenin oturmadığı masalarını da oynuyor ve akşamı
