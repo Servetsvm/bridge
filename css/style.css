@@ -2552,3 +2552,7 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .ctqkey.on{background:#1f5d36;border-color:#1f5d36;color:#fff}
 .ctqsum{text-align:center;font-size:18px;padding:12px;border-radius:12px;background:rgba(31,93,54,.1)}
 .ctqact{margin-top:auto;display:grid;grid-template-columns:1fr 3fr;gap:10px}.ctqact .btn{min-height:64px;font-size:20px}
+/* an open evening's tables (the seats to sit down): full page */
+#ov:has(.sheet[data-ov="ctour"] .ctseats){padding:0}
+.sheet[data-ov="ctour"]:has(.ctseats){width:100%;max-width:none;height:100%;max-height:none;border-radius:0;box-sizing:border-box;padding:24px max(16px,calc((100% - 760px)/2)) 24px;overflow:auto}
+.sheet[data-ov="ctour"]:has(.ctseats) .ctseat{min-height:70px}
