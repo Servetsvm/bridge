@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v698`, kulüpler `kulup-v208`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v699`, kulüpler `kulup-v209`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,12 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v698`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- **Kimsenin olmadığı masa oynanmaz** (kullanıcının isteği): (1) Kulüp açık online turnuvasında hiç oyuncu oturmamış masa (`ctIdle`: plan
+  açık + masadaki dört koltukta anahtar yok) robotlarca oynanmaz, tur onu beklemez (`ctCurRound`, `ctTablesOf`); hiç kimse yoksa akşam
+  bekler. Oturmuş ama sonra ayrılmış oyuncuların masasını robotlar bitirir (tur donmasın diye). kulupler `otRobots` da koltukları uygular.
+  (2) Robot sistem masaları (`robots.yml`) artık yalnız son 3 saatte bakılan sistemleri oynar: 🤖 düğmesi `rtw/<sistem> = zaman` yazar
+  (`rtWant`, 20 dk'da bir; kural `rtw/$sys` herkese okunur, girişli yazar), `want` işi jq ile seçer; elle/push çalıştırma hepsini oynar.
+  Matristen eski 'claude' çıkarıldı. Bakılmayan masada "Bu masada kimse yoktu… bir saat içinde" uyarısı. v699 / kulup-v209.
 - Robot partner deklarer olunca eli robot oynar, oyuncu yalnız yalancı (`userControls`: decl === pd(U()) → false; test: partnerin
   deklarer olduğu el kendiliğinden bitti). Masadan kalkınca (`goHome`) el artık saklanmaz → hep "▶ Başla" (konvansiyon seçimi açılır). v698.
 - 🌐 Online artık hiçbir şey indirmez (eskiden ~2 MB live-*.json): pencere hemen açılır, basılan sistem kartın temel sistemi olur,

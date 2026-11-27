@@ -3105,12 +3105,18 @@ function rtGameOf(b, t) {
   }
   return { id: 'rt-' + b.sys + '-' + b.n, board: b.bn, dealer: b.dealer, deal: b.d, auction, phase: bidding ? 'bid' : 'play', play, result: null, claimed: false, field: null, tour: null, cards, watch: true, rtv: { k: b.sys, b, done: P.done } };
 }
+// the robots' tables are played only while someone looks at them: a tap tells the robots (at most every 20 minutes)
+function rtWant(k) {
+  try { const at = (SET.rtw || {})[k] || 0; if (!k || Date.now() - at < 20 * 60e3 || typeof Net === 'undefined' || !Net.Cloud) return;
+    Net.Cloud.put('rtw/' + k, Date.now()).then(() => { SET.rtw = { ...(SET.rtw || {}), [k]: Date.now() }; Store.saveSettings(SET); }).catch(() => {}); } catch (e) {}
+}
 function rtWatch(k) {
   if (online()) { flash(T('Online') + ' ●', 1500); return; }
   if (k) rtPick(k);
+  rtWant(RT.cur);
   rtLoad().then(() => {
     rtPick(RT.cur);
-    const now = Date.now(), x = rtCur(now); if (!x) { flash(T('The robots will be back soon.'), 2500); return; }
+    const now = Date.now(), x = rtCur(now); if (!x) { flash(T('Nobody was at this table, so the robots stopped. They start again within an hour.'), 4500); return; }
     // an unfinished board of your own is kept (Play offline carries on with it)
     if (G && !G.rtv && (G.phase === 'bid' || G.phase === 'play')) ui.saved = G;
     clearTimeout(timer); closeOv();

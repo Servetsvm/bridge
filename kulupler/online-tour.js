@@ -372,11 +372,11 @@ async function otRobots() {
         if (!run || !run.plan || Date.now() - +d > 6 * 3600e3 || +d > Date.now()) continue;
         const base = '/' + id + '/run/' + d, get = async q => { const r = await fetch(await otUrl(base + q), { cache: 'no-store' }); return r.ok ? r.json() : null; };
         if (await get('/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
-        const tmap = await get('/t') || {}, plan = P.ctFill(run.plan, tmap), r = P.ctCurRound(plan, tmap); if (r < 0) continue;
+        const tmap = await get('/t') || {}, plan = P.ctFill(P.ctSeatsApply ? P.ctSeatsApply(run.plan, run.seats) : run.plan, tmap), r = P.ctCurRound(plan, tmap); if (r < 0) continue;
         const hb = await get('/hb') || {};
         if (t.info.wait && !hb[t.info.wait]) continue;   // Servet's test: nothing played before he sits down
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {
-          if (!P.ctTableEmpty(plan, r, ti, hb)) continue;
+          if (!P.ctTableEmpty(plan, r, ti, hb) || (P.ctIdle && P.ctIdle(plan, r, ti))) continue;   // an open evening's table nobody sits at: not played
           const tb = tmap[r + '_' + ti] || {}, st = P.ctHeadStep(plan, r, tb.a, tb.res, ti); if (!st) continue;
           const q = base + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
           if (await get(q.slice(base.length)) != null) continue;   // written meanwhile by another app: the next look reads it

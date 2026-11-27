@@ -680,7 +680,7 @@ function ctScore(x, over) {
 }
 // a board is over when every table of its round has played it (all the tables of a round play the same boards):
 // until then its results, hands and double dummy are not shown, so nobody sees a board still being played elsewhere
-const ctTablesOf = (P, bn) => { const out = []; P.rounds.forEach((tb, r) => tb.forEach((_, ti) => { if (ctBoards(P, r, ti).includes(+bn)) out.push(r + '_' + ti); })); return out; };
+const ctTablesOf = (P, bn) => { const out = []; P.rounds.forEach((tb, r) => tb.forEach((_, ti) => { if (ctBoards(P, r, ti).includes(+bn) && !ctIdle(P, r, ti)) out.push(r + '_' + ti); })); return out; };   // a table nobody sat at is not waited for
 function ctBoardOver(x, bn) { const L = ctTablesOf(x.plan, bn); return L.length > 0 && L.every(k => !!(((x.run.t || {})[k] || {}).res || {})[bn]); }
 const ctBoardLeft = (x, bn) => { const L = ctTablesOf(x.plan, bn); return [L.filter(k => !!(((x.run.t || {})[k] || {}).res || {})[bn]).length, L.length]; };
 // the club's online rating, from every evening in turn
@@ -820,8 +820,13 @@ function ctPlayHtml(plan, r, list, bn, ti) {
    result; the same list every app reads, so a player who comes back is at the same point ---- */
 const ctList_ = l => Array.isArray(l) ? l : Object.keys(l || {}).sort((a, b) => a - b).map(k => l[k]);
 // the round being played: the first one with a table not finished
+// an open evening's table where no player sits (only robots): not played, and the round does not wait for it
+function ctIdle(plan, r, ti) { return !!(plan.pairs || []).some(p => p && p.open) && ctSeatsOf(plan, r, ti).every(s => !s.k); }
 function ctCurRound(plan, tmap) {
-  for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.values(((tmap || {})[r + '_' + ti] || {}).res || {}).filter(Boolean).length < plan.bpr)) return r;
+  for (let r = 0; r < plan.rounds.length; r++) {
+    const T = plan.rounds[r].map((x, ti) => ti).filter(ti => !ctIdle(plan, r, ti));
+    if (!T.length || T.some(ti => Object.values(((tmap || {})[r + '_' + ti] || {}).res || {}).filter(Boolean).length < plan.bpr)) return r;   // nobody at any table: the evening waits
+  }
   return -1;
 }
 // nobody of this table here (their app in the last 90 seconds)
@@ -859,7 +864,7 @@ async function ctHeadMine() {
       const ti = plan.rounds[r].findIndex(([a, b]) => a === pi || b === pi); if (ti < 0) continue;
       const hb = await Net.Cloud.get(p + '/hb') || {};
       if (x.i && x.i.wait && !hb[x.i.wait]) continue;   // Servet's test: nothing played before he sits down
-      if (!ctTableEmpty(plan, r, ti, hb)) continue;
+      if (!ctTableEmpty(plan, r, ti, hb) || ctIdle(plan, r, ti)) continue;
       const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res, ti);
       if (!st) continue;
       if (st.res) await Net.Cloud.put(p + '/t/' + r + '_' + ti + '/res/' + st.res, st.v);
@@ -884,7 +889,7 @@ async function ctHeadTest() {
     const hb = await Net.Cloud.get(p + '/hb') || {}, mine = CT.tbl && !CT.tbl.watch ? CT.tbl.ti : -1;
     for (let ti = 0; ti < plan.rounds[r].length; ti++) {
       if (ti === mine && CT.tbl && CT.tbl.r === r) continue;   // my own table: I play it
-      if (!ctTableEmpty(plan, r, ti, hb)) continue;
+      if (!ctTableEmpty(plan, r, ti, hb) || ctIdle(plan, r, ti)) continue;
       const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res, ti); if (!st) continue;
       const q = p + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
       if (await Net.Cloud.get(q) != null) continue;   // another app was quicker
