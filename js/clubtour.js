@@ -631,7 +631,7 @@ setTimeout(() => { if (typeof ui !== 'undefined' && ui.saved && ui.saved.ct) ui.
 
 document.addEventListener('click', e => {
   const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek],[data-ctsit],[data-ctrobot],[data-ctskip],[data-ctopen]'); if (!t) return;
-  if (t.dataset.ctopen) { ctTakeSeat(t.dataset.ctopen); return; }
+  if (t.dataset.ctopen) { if ((typeof Net !== 'undefined' && Net.st.on) || (CT.tbl && !CT.tbl.watch && CT.tbl.key !== t.dataset.ctopen.split('|').slice(0, 2).join('|'))) { flash(T('You are already sitting at a table: leave it first.'), 3000); return; } ctTakeSeat(t.dataset.ctopen); return; }
   if (t.dataset.ctrobot) { ctRegister(t.dataset.ctrobot, true); return; }
   if (t.dataset.ctsit) { ctSit(t.dataset.ctsit); return; }
   if (t.dataset.ctskip && CT.waiting) { const w = CT.waiting; CT.waiting = null; clearInterval(CT.waitT); closeOv(); ctSit(w.key, w.next); return; }

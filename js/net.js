@@ -1983,6 +1983,8 @@ const Net = (() => {
     if (t.dataset.reqlater) { reqLater(t.dataset.reqlater); return; }
     if (t.dataset.tjoin) { const id = t.dataset.tjoin; if (!st.tours[id]) { flash(T('This tournament has not reached you yet — try again in a moment'), 2500); findTables(); return; } closeOv(); playTour(id); return; }
     // Sit down at an open table: first as the player's partner or as an opponent, then seated at once
+    // already at a table (an online one, or a club evening's): no second table
+    if ((t.dataset.jsit || t.dataset.jsw) && (st.on || (typeof CT !== 'undefined' && CT.tbl && !CT.tbl.watch))) { flash(T('You are already sitting at a table: leave it first.'), 3000); return; }
     if (t.dataset.jsit) { const k = t.dataset.jsit, tb = (st.tables || []).find(x => x.k === +k), h = tb ? tb.host : '';
       openOv('net', `<h2>🪑 ${T('Sit down')}${h ? ' · ' + esc(h) : ''}</h2><div class="row2"><button class="btn gold" data-jsw="${k}|partner">🤝 ${T('Partner')}</button><button class="btn" data-jsw="${k}|opp">⚔️ ${T('Opponent')}</button></div><div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`); return; }
     if (t.dataset.jsw) { const [k, w] = t.dataset.jsw.split('|'), tb = (st.tables || []).find(x => x.k === +k); st.offer = tb || null; st.msg = ''; st.want = w; st.sitNow = true; showJoin('room-' + k); join('room-' + k, myName() || 'Guest', w); return; }
