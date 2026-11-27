@@ -164,7 +164,7 @@ async function initClubGate(){
       // a quick team match being played here (its tables need no code): a member not asking for the TD goes to its table numbers
       if(roleParam!=='admin'&&roleParam!=='screen'&&!params.get('t')&&!params.get('qt')&&!params.get('p')){
         let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
-        if(st&&st.status==='running'&&st._quickTeam){ selRole('table'); bgPlayerEntry('00'); return; }
+        if(st&&st.status==='running'&&(st._quickTeam||me())){ selRole('table'); bgPlayerEntry('00'); return; }   // any tournament: a signed-in member needs no code
       }
       // BridgePlay's Team match button (quick=team): any signed-in member needs no password — the match is set up at once
       // (the rules let a member write the tournament only while no other one is running)

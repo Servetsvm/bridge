@@ -396,48 +396,54 @@
             ".read": "auth != null",
             ".write": "(auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' && root.child('gate').child('superpw').child('h').exists() && root.child('gate').child('ssess').child(auth.uid).child('h').val() === root.child('gate').child('superpw').child('h').val()) || (auth != null && root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val()) || (auth != null && root.child('gate').child('tsess').child(auth.uid).child('club').val() === $club && root.child('gate').child('tsess').child(auth.uid).child('code').isString() && ((root.child('gate').child('clubs').child($club).child('secret').child('tcodes').exists() && root.child('gate').child('clubs').child($club).child('secret').child('tcodes').child(root.child('gate').child('tsess').child(auth.uid).child('code').val()).exists()) || (!root.child('gate').child('clubs').child($club).child('secret').child('tcodes').exists() && root.child('gate').child('clubs').child($club).child('secret').child('tprefix').isString() && root.child('gate').child('tsess').child(auth.uid).child('code').val().beginsWith(root.child('gate').child('clubs').child($club).child('secret').child('tprefix').val())))) || (auth != null && root.child('gate').child('csess').child(auth.uid).child('club').val() === $club && root.child('gate').child('csess').child(auth.uid).child('pw').val() === root.child('gate').child('clubs').child($club).child('secret').child('pw').val())",
             "state": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "movements": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "pairs": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "boards": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "approvals": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "tableLocks": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "boardLocks": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "ready": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "kicks": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "tdcalls": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "logs": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "hands": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "dd": {
-              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && (root.child('gate').child('clubs').child($club).child('bm').child('state').child('status').val() !== 'running' || root.child('gate').child('clubs').child($club).child('bm').child('state').child('_quickTeam').val() === true)"
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             },
             "teamArch": {
               "$id": {
                 ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && !data.exists()"
               }
+            },
+            "archives": {
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
+            },
+            "playerdb": {
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             }
           }
         }

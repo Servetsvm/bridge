@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v690`, kulüpler `kulup-v200`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v690`, kulüpler `kulup-v201`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -57,6 +57,17 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v690`, kulü
 
 ## Oturum günlüğü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
+
+### 2026-11-27
+- **Masa kodu kalktı** (kullanıcının kararı): BridgePlay'e girmiş üye her turnuvada kodsuz oturur (`bgPlayerSit` → `_quickSeat`,
+  club-auth 167 koşulu `_quickTeam||me()`, setLive her zaman `q:1`). TD → Kulüp ayarları'ndan 🔢 Masa kodları ve 🔗 Oyuncu bağlantısı
+  kaldırıldı. Firebase kuralı: bm/{state,movements,pairs,boards,approvals,tableLocks,boardLocks,ready,kicks,tdcalls,logs,hands,dd,archives,playerdb}
+  her üyeye yazılabilir (eskiden yalnız turnuva yokken/hızlı maçta). Bedeli: giriş yapmış herhangi bir üye bir kulübün skorlarını
+  teknik olarak değiştirebilir (kullanıcıya söylendi). bm/info ve bm/logo yalnız sahip/TD'de kaldı. kulup-v201.
+- Kullanıcı kulüp bilgisi + logosunun kaybolduğunu söyledi; kodda bunları silen yol bulunamadı (td-console tdcInfoSave boş formda
+  DELETE eder; logo seçicide "yok" DELETE eder). Hangi kulüp olduğu soruldu.
+- **Sıradaki (onay bekliyor):** kulüp sayfasında 🌐 Online düğmesi → turnuva hemen başlar, boş koltuklara robot, sonradan gelen robotun
+  yerine oturur (mevcut online sistem kayıtlı çiftlerle çalışıyor: kulupler/online-tour.js + js/clubtour.js).
 
 ### 2026-11-26
 - **Yeni BridgePlay (/yeni/) silindi**: kullanıcı görünüşü, kullanımı, eksikleri ve fikrin kendisini beğenmedi; eski programla devam.

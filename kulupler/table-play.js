@@ -186,7 +186,9 @@ window.bgPlayerSit=async function(){
   let lv=null; try{ const r=await fetch(await fbRootUrl('/live/'+CLUB_ID+'.json'),{cache:'no-store'}); lv=r.ok?await r.json():null; }catch(err){}
   // a quick team match (a member started it): no codes, the player's BridgePlay session is enough
   const sq=getState(); if(!(lv&&lv.q)&&sq&&sq._quickTeam&&sq.status==='running') lv={...(lv||{}),q:1};   // a quick team match whose listing has no mark (or none at all): no code either
-  if(lv&&lv.q&&window.bridgeUser&&window.bridgeUser()){ window._quickSeat=e.n; const w=document.getElementById('pwWrap'); if(w) w.style.display='none'; await doLogin(); if(document.getElementById('app').style.display!=='flex'&&w) w.style.display='block'; return; }
+  // a member signed in to BridgePlay sits without a code (every tournament since 2026-11-27); a phone with nobody signed in
+  // still uses the table's code
+  if(window.bridgeUser&&window.bridgeUser()){ window._quickSeat=e.n; const w=document.getElementById('pwWrap'); if(w) w.style.display='none'; await doLogin(); if(document.getElementById('app').style.display!=='flex'&&w) w.style.display='block'; return; }
   const code=lv&&lv.k?lv.k['t'+e.n]:lv?e.prefix+String(e.n).padStart(2,'0'):null;
   if(code){
     const inp=document.getElementById('pwInput'), w=document.getElementById('pwWrap'); inp.value=code; if(w) w.style.display='none';

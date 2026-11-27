@@ -184,7 +184,8 @@ function drawRun(){ TDC.arc=null;
   frame(cleanData(s.name||'')+' · '+L((MOVS.find(m=>m[0]===s.movement)||[])[1]||s.movement||''),body,(qtMember()?'':`<button class="bm3-cancel tdc-red" onclick="tdcResetNow()" title="${L('Delete')}">🗑</button>`)+`<button class="bm3-cancel" onclick="tdcReload()">↻</button>`+next,sub);
 }
 window.tdcReload=async()=>{ try{ await Promise.all(['state','boards','approvals','movements','pairs','tdcalls','tableLocks'].map(k=>DB.get(k))); }catch(e){} tdcDraw(); };
-// the TD button: the club's settings (its logo, its password, the tables' codes, the slow-table alarm, the links)
+// the TD button: the club's settings (its logo, its info, its password, the slow-table alarm, the screen); no table codes or
+// players' link any more (2026-11-27): a member signed in to BridgePlay sits at a table without a code
 // a member at a team match's TD: a table tapped is a table to sit at (its players' names, then its BridgeScore)
 const tdcTaken=(s,t)=>{ const l=(_cache['tableLocks']||{})[s.currentRound+'_'+t], t0=Date.parse(s._startedAt||0)||0; if(!l||(l.lockedAt||0)<t0) return false; const sv=bmSeatOf(CLUB_ID); return !(sv&&+sv.t===+t&&sv.sid===s._startedAt); };
 window.tdcSit=t=>location.replace(location.pathname+'?club='+encodeURIComponent(CLUB_ID)+'&role=table&p=00&tn='+t);
@@ -200,9 +201,7 @@ window.tdcClub=function(){ if(qtMember()) return;
     b('🎴','Club logo','clubLogoPick()'),
     b('ℹ️','Club info','tdcInfo()'),
     b('🔑','Club password','tdcPw()'),
-    b('🔢','Table codes','showTableCodes()'),
     b('⚠️','Slow table','tdcStall()'),
-    b('🔗','Players\' link','bgShowPlayersLink()'),
     b('📺','Screen','tdcScreen()')].join('')}</div>`,`<button class="btn btn-ghost" onclick="closeModal()">${L('Close')}</button>`);
 };
 // the club's info for BridgePlay's Clubs page: address (players open it in their maps), contact person, phone (call / SMS).

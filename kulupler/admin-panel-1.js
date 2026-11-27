@@ -513,7 +513,7 @@ async function setLive(on){
     const s=getState(), url=await fbRootUrl('/live/'+CLUB_ID+'.json');
     const p=await getTablePrefix();
     // the tables' codes go with it: a player's phone signs in at the table chosen without typing one
-    if(on){ try{ await saveTablePrefix(p); }catch(e){} let k={}; try{ k=tableKeys(await makeTableCodes(s.tableCount||0)); }catch(e){} await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p,ts:Date.now(),k,...(s._quickTeam?{q:1}:{})})}); }
+    if(on){ try{ await saveTablePrefix(p); }catch(e){} let k={}; try{ k=tableKeys(await makeTableCodes(s.tableCount||0)); }catch(e){} await fetch(url,{method:'PUT',body:JSON.stringify({n:String(s.name||'').slice(0,40),c:String(CLUB_NAME||'').slice(0,40),tb:s.tableCount||0,p,ts:Date.now(),k,q:1})}); }
     else await fetch(url,{method:'DELETE'});
   }catch(e){}
 }
