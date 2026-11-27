@@ -393,6 +393,7 @@ async function otRobots() {
         if (await get('/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
         const tmap = await get('/t') || {}, plan = P.ctFill(P.ctSeatsApply ? P.ctSeatsApply(run.plan, run.seats) : run.plan, tmap), r = P.ctCurRound(plan, tmap); if (r < 0) continue;
         const hb = await get('/hb') || {};
+        for (const k of Object.keys(await get('/kick') || {})) delete hb[k];   // a player taken off the table: the robots play the seat
         if (t.info.wait && !hb[t.info.wait]) continue;   // Servet's test: nothing played before he sits down
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {
           if (!P.ctTableEmpty(plan, r, ti, hb) || (P.ctIdle && P.ctIdle(plan, r, ti))) continue;   // an open evening's table nobody sits at: not played

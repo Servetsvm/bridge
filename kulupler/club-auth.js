@@ -690,7 +690,7 @@ function refreshTopbar(){
   const lb=document.getElementById('topbarLink'); if(lb) lb.style.display=role==='admin'&&!!CLUB_ID&&s.status==='running'&&!bgTestOn()?'':'none';
   // a table's device bar: the club and the tournament, the table and the round
   const bar=document.getElementById('bmDevBar');
-  const MV={mitchell:'Mitchell',howell:'Howell',barometer:'Barometer',swiss:'Swiss',social:'Social Bridge',team:'Team match'}, mvn=s.movement&&MV[s.movement]?(window.i18nText?i18nText(MV[s.movement]):MV[s.movement]):'';
+  const MV={mitchell:'Mitchell',howell:'Howell',barometer:'Barometer',swiss:'Swiss',social:'Team match',team:'Team match'}, mvn=s.movement&&MV[s.movement]?(window.i18nText?i18nText(MV[s.movement]):MV[s.movement]):'';
   if(bar) bar.innerHTML=`<button type="button" class="td bg-toclub" onclick="bgToClubs()" title="${window.i18nText?i18nText('Clubs'):'Clubs'}">🏛</button><div class="ev"><b>${cleanData(CLUB_NAME||'')}${s.name?' · '+cleanData(s.name):''}${mvn?' · '+mvn:''}</b>${bmTableNo?'Table '+bmTableNo:''}${bmTableNo&&s.currentRound?' – ':''}${s.currentRound?'Round '+s.currentRound:''}</div>${typeof bmBarBtns==='function'?bmBarBtns():''}`;
 }
 

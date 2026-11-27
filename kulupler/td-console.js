@@ -30,7 +30,7 @@ if(_tcs) window.tdCallsShow=function(v){ _tcs(v); tdcLive(); };
 function tdcLive(){ if(role!=='admin'||!tdcOn()||!document.querySelector('.tdc')) return; if(document.getElementById('modalBg')?.classList.contains('open')) return; { const ae=document.activeElement, t=document.querySelector('.tdc'); if(ae&&t&&t.contains(ae)&&/^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return; } if(['run','table','home','arc'].includes(TDC.v)) tdcDraw(); }
 
 const num=x=>(x||'').replace(/[^0-9]/g,'')||'?';
-const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board'],['team','Team match','Two teams, the same boards at two tables, IMP']];
+const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Team match','Pairs stay; any free board'],['team','Team match','Two teams, the same boards at two tables, IMP']];
 // a member running a quick team match (not the club's admin): the tables, the score and Finish only — no club settings,
 // no menu, no new tournament, no old tournaments
 const qtMember=()=>role==='admin'&&!window._tdPw&&!!getState()._quickTeam&&typeof isClubAdmin==='function'&&!isClubAdmin();
@@ -330,7 +330,7 @@ function resetHtml(){
     <div class="bm3-step">${L('Old tournaments')}</div>
     ${A.length?`<div class="tdc-hist">${A.map((a,i)=>`<div class="tdc-hrow tdc-resrow"><b>${cleanData((a.state&&a.state.name)||L('Tournament'))}</b><span>${dd(a.finished)} · ${(a.state&&a.state.tableCount)||0} ${L('tables')}</span><button class="btn tdc-red" onclick="tdcResetOld(${i})">🗑 ${L('Delete')}</button></div>`).join('')}</div>`:`<div class="bm3-note" style="padding:0 12px">${L('No archived tournaments')}</div>`}
     ${(()=>{ const T=Object.entries(_cache['teamArch']||{}).filter(([,a])=>a&&a.state).sort((x,y)=>String(y[1].finished||'').localeCompare(String(x[1].finished||'')));
-      return T.length?`<div class="bm3-step">🏆 ${L('Team match')} · 🤝 ${L('Social Bridge')}</div><div class="tdc-hist">${T.map(([id,a])=>{ const sc=a.state.movement==='team'&&typeof window.teamScoreOf==='function'?window.teamScoreOf(a):null;
+      return T.length?`<div class="bm3-step">🏆 ${L('Team match')}</div><div class="tdc-hist">${T.map(([id,a])=>{ const sc=a.state.movement==='team'&&typeof window.teamScoreOf==='function'?window.teamScoreOf(a):null;
         return `<div class="tdc-hrow tdc-resrow"><b>${sc?cleanData(sc.ta)+' '+sc.a+' – '+sc.b+' '+cleanData(sc.tb):cleanData(a.state.name||L('Team match'))}</b><span>${dd(a.finished)}</span><button class="btn tdc-red" onclick="tdcDelTeam('${String(id).replace(/[^A-Za-z0-9_-]/g,'')}')">🗑 ${L('Delete')}</button></div>`; }).join('')}</div>`:''; })()}
     <div class="bm3-step">${L('Log')}</div>`;
 }

@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v718`, kulüpler `kulup-v215`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v719`, kulüpler `kulup-v216`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,12 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v718`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- **Takım Maçı** (kullanıcının isteği): kulüp kartında 🤝 Sosyal Bridge + 🏆 Takım maçı yerine tek **🏆 Takım Maçı** (`data-clubtm`, tm ya da sb açıksa)
+  → 🏛 Kulüpte (eski Sosyal Bridge akışı `quick=social`, adı "Takım maçı"; çiftler sıralaması, teamArch → sonuçlar + reyting zaten dahil)
+  ya da 🌐 Online (`ctQuickPick`/`ctQuickStart`, clubtour.js): her üye başlatır (kural: `ot/$club/$tid/info` üye yaratabilir open:true ise),
+  Howell açık akşam, boş koltukta isimli robot (`ctBotNm`, plan.seed), koltuk seçicide boş koltuk "🪑 Otur"; koltuk kaydı oyuncunun sys/conv'u →
+  çiftin robotu onun kartıyla (`ctSeatsApply` p.sys/p.conv, `ctCardsOf`; runner.js aynı). Masadaki herkes ✕ ile çıkarır (`ctKick` →
+  `run/<d>/kick/<k>`; çıkarılanın uygulaması masadan çıkar, koltuğu ona kalır, robot hemen oynar; yeniden oturunca kick silinir). v719 / kulup-v216.
 - Robot ortak deklarer + oyuncu yalancıyken robotun claim'i oyuncuya sorulmuyor, hemen uygulanıyor (`robotClaim`: offline ve kendi taraf).
   Rakip robotun claim sorusunda "Robotlar" yerine robotun adı ("Leyla son 2 lövenin hepsini claim ediyor", 10 dil). v718.
 - Dolu masa (4 insan): Açık masalar'da ve sistem penceresinde "🔒 ad · Dolu · 👁 İzle" (Otur yok); İzle doğrudan katılır (`data-jw` → join

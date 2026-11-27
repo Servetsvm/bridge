@@ -28,7 +28,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
 
 // as js/clubtour.js has them
 function ctCardOf(sys, conv) { const k = E.sysOf(sys).k, c = { ...E.sysOf(k).conv }; for (const x of conv || []) c[x] = true; return { conv: c, agg: 0, sys: k }; }
-function ctCardsOf(plan, r, ti) { const t = r != null && plan.rounds[r] && plan.rounds[r][ti], P = t ? [plan.pairs[t[0]], plan.pairs[t[1]]] : []; return [0, 1].map(k => P[k] && P[k].sys ? ctCardOf(P[k].sys, []) : ctCardOf(plan.sys, plan.conv)); }
+function ctCardsOf(plan, r, ti) { const t = r != null && plan.rounds[r] && plan.rounds[r][ti], P = t ? [plan.pairs[t[0]], plan.pairs[t[1]]] : []; return [0, 1].map(k => P[k] && P[k].sys ? ctCardOf(P[k].sys, P[k].conv || []) : ctCardOf(plan.sys, plan.conv)); }
 const ctSetOf = (plan, r, ti) => ti != null && plan.bs && plan.bs[r] && plan.bs[r][ti] != null && plan.bs[r][ti] >= 0 ? plan.bs[r][ti] : r;
 const ctBoards = (plan, r, ti) => { const s = ctSetOf(plan, r, ti); return [...Array(plan.bpr).keys()].map(i => s * plan.bpr + i + 1); };
 function ctPbnDeal(str) { const m = /^([NESW]):\s*(.+)$/.exec(String(str || '').trim()); if (!m) return null; const first = 'NESW'.indexOf(m[1]), hs = m[2].trim().split(/\s+/); if (hs.length !== 4) return null; const out = [[], [], [], []], RK = '23456789TJQKA'; hs.forEach((h, k) => { const ss = h.split('.'); if (ss.length !== 4) return; ss.forEach((cs, j) => { for (const ch of cs.toUpperCase().replace('10', 'T')) { const r = RK.indexOf(ch); if (r >= 0) out[(first + k) % 4].push((3 - j) * 13 + r); } }); }); return out.every(h => h.length === 13) ? out.map(h => h.sort((a, b) => b - a)) : null; }
@@ -39,7 +39,7 @@ const ctList_ = l => Array.isArray(l) ? l : Object.keys(l || {}).sort((a, b) => 
 function ctSeatsApply(plan, seats) {
   if (!plan || !seats) return plan;
   const P = plan.pairs.map(p => ({ ...p }));
-  for (const [id, v] of Object.entries(seats)) { const m = /^(\d+)_([ab])$/.exec(id), p = m && P[+m[1]]; if (!p || !v || !v.k) continue; p[m[2]] = String(v.n || '').slice(0, 20); p['k' + m[2]] = v.k; }
+  for (const [id, v] of Object.entries(seats)) { const m = /^(\d+)_([ab])$/.exec(id), p = m && P[+m[1]]; if (!p || !v || !v.k) continue; p[m[2]] = String(v.n || '').slice(0, 20); p['k' + m[2]] = v.k; if (typeof v.sys === 'string' && !p.sys) { p.sys = v.sys.slice(0, 12); p.conv = Array.isArray(v.conv) ? v.conv.slice(0, 80) : []; } }
   return { ...plan, pairs: P };
 }
 // an open evening's table where no player sits: not played, and the round does not wait for it
@@ -127,6 +127,7 @@ async function evenings() {
         if (await get(x.p + '/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
         const tmap = await get(x.p + '/t') || {}, seats = await get(x.p + '/seats'), plan = ctFill(ctSeatsApply(x.plan, seats), tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
         const hb = await get(x.p + '/hb') || {};
+        for (const k of Object.keys(await get(x.p + '/kick') || {})) delete hb[k];   // a player taken off the table: the robots play the seat
         if (x.info && x.info.wait && !hb[x.info.wait]) continue;   // Servet's test: nothing played before he sits down
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {
           if (!ctTableEmpty(plan, r, ti, hb) || ctIdle(plan, r, ti)) continue;   // a table nobody sat at: not played

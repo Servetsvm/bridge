@@ -525,7 +525,8 @@
         "$tid": {
           ".write": "auth != null && ((auth != null && root.child('sess').child(auth.uid).child('k').val() === 'servet' && root.child('gate').child('superpw').child('h').exists() && root.child('gate').child('ssess').child(auth.uid).child('h').val() === root.child('gate').child('superpw').child('h').val()) || (auth != null && root.child('gate').child('clubs').child($club).child('info').child('owner').val() === root.child('sess').child(auth.uid).child('k').val()) || (auth != null && root.child('gate').child('csess').child(auth.uid).child('club').val() === $club && root.child('gate').child('csess').child(auth.uid).child('pw').val() === root.child('gate').child('clubs').child($club).child('secret').child('pw').val()))",
           "info": {
-            ".validate": "newData.hasChildren(['n', 'at']) && newData.child('n').isString() && newData.child('n').val().length <= 60 && newData.child('at').isNumber()"
+            ".validate": "newData.hasChildren(['n', 'at']) && newData.child('n').isString() && newData.child('n').val().length <= 60 && newData.child('at').isNumber()",
+            ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && !data.exists() && newData.child('open').val() === true"
           },
           "pairs": {
             "$pid": {
@@ -572,6 +573,12 @@
                 "$s": {
                   ".write": "auth != null && root.child('ot').child($club).child($tid).child('info').child('open').val() === true && root.child('sess').child(auth.uid).child('k').exists() && (!newData.exists() ? data.child('k').val() === root.child('sess').child(auth.uid).child('k').val() : newData.child('k').val() === root.child('sess').child(auth.uid).child('k').val() && (!data.exists() || data.child('k').val() === root.child('sess').child(auth.uid).child('k').val() || root.child('ot').child($club).child($tid).child('run').child($occ).child('hb').child(data.child('k').val()).val() < now - 600000))",
                   ".validate": "!newData.exists() || (newData.hasChildren(['n', 'k', 'ts']) && newData.child('n').isString() && newData.child('n').val().length <= 20 && newData.child('k').isString() && newData.child('ts').isNumber())"
+                }
+              },
+              "kick": {
+                "$k": {
+                  ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && root.child('ot').child($club).child($tid).child('info').child('open').val() === true",
+                  ".validate": "!newData.exists() || newData.isNumber()"
                 }
               }
             }

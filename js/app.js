@@ -1487,7 +1487,7 @@ function auctionTable(auction, phaseBid, rv) {
   setTimeout(() => { if (!rv) ui.aucSeen = aucKey; }, 0);
   const cols = [3, 0, 1, 2], board = rv ? rv.board : G.board, me = rv ? rv.seat : U(), sel = rv ? rv.sel : ui.lastExpl;
   const turnS = !rv && phaseBid && G && G.phase === 'bid' ? bidTurn() : -1;
-  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}${s === turnS ? ' turn' : ''}">${SEAT[s]}${rv ? '' : `<small>${esc(seatName(s))}</small>`}${!rv && online() && !guest() && Net.st.names[s] && s !== meSeat() ? `<button class="kickx" data-kickask="${s}" title="${T('Remove')}">✕</button>` : ''}</th>`).join('') + '</tr></thead><tbody><tr>';
+  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}${s === turnS ? ' turn' : ''}">${SEAT[s]}${rv ? '' : `<small>${esc(seatName(s))}</small>`}${!rv && online() && !guest() && Net.st.names[s] && s !== meSeat() ? `<button class="kickx" data-kickask="${s}" title="${T('Remove')}">✕</button>` : ''}${!rv && G && G.ct && typeof CT !== 'undefined' && CT.tbl && CT.tbl.plan0 && !CT.tbl.watch && CT.tbl.seats && CT.tbl.seats[s] && CT.tbl.seats[s].k && s !== U() && !(CT.tbl.kick || {})[CT.tbl.seats[s].k] ? `<button class="kickx" data-ctkick="${esc(CT.tbl.seats[s].k)}" title="${T('Remove')}">✕</button>` : ''}</th>`).join('') + '</tr></thead><tbody><tr>';
   let col = cols.indexOf(rv ? rv.dealer : G.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
   auction.forEach((e, i) => { o += `<td><span class="c${i === sel ? " sel" : ""}${!rv && i === auction.length - 1 && G && G.phase === "bid" && ui.aucSeen !== G.id + ":" + auction.length ? " newc" : ""}${e.m && e.m.cv ? ' cvb' : ''}${e.al ? ' alrt' : ''}" ${rv ? 'data-ri' : 'data-ai'}="${i}">${callHtml(e.call)}${e.al ? '!' : ''}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
   if (phaseBid) o += '<td>?</td>';
@@ -3816,6 +3816,8 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.clubplay) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubplay)); return; }
   if (t.dataset.clubres) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubres) + '&results=1'); return; }   // inside the app, as the screen
   if (t.dataset.clubteam) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubteam) + '&role=admin&setup=team&quick=team'); return; }
+  if (t.dataset.clubtm) { const c = t.dataset.clubtm; openOv('ctq', `<h2>🏆 ${T('Team match')}</h2><div class="row2"><button class="btn gold" data-clubsocial="${esc(c)}">🏛 ${T('At the club')}</button><button class="btn new" data-clubtmon="${esc(c)}">🌐 ${T('Online')}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.dataset.clubtmon) { if (typeof ctQuickPick === 'function') ctQuickPick(t.dataset.clubtmon); return; }
   if (t.dataset.clubsocial) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubsocial) + '&role=admin&quick=social'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
   if (t.dataset.clubonline) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubonline) + '&role=admin&online=1'); return; }
@@ -4769,8 +4771,7 @@ async function showClubs() {
         // the club's info (address, contact person, phone): a button under the tools, the card opens under it
         // a team match: only when the club's admin turned its button on (Club info → Team match button)
         + (t.tb || otLive(t.club) || !((ui.clubInfo || {})[t.club] || {}).ol ? '' : `<button class="btn clubinfob clubteamb" data-clubonline="${esc(t.club)}">🌐 ${T('Online')}</button>`)   // only when the TD turned it on (Club info → Online button); pressing it asks for the TD (the owner goes straight in)
-        + (t.tb || !((ui.clubInfo || {})[t.club] || {}).tm ? '' : `<button class="btn clubinfob clubteamb" data-clubteam="${esc(t.club)}">🏆 ${T('Team match')}</button>`)
-        + (t.tb || !((ui.clubInfo || {})[t.club] || {}).sb ? '' : `<button class="btn clubinfob clubteamb" data-clubsocial="${esc(t.club)}">🤝 ${T('Social Bridge')}</button>`)   // Social Bridge: the same way, when the club's admin turned it on
+        + (t.tb || !(((ui.clubInfo || {})[t.club] || {}).tm || ((ui.clubInfo || {})[t.club] || {}).sb) ? '' : `<button class="btn clubinfob clubteamb" data-clubtm="${esc(t.club)}">🏆 ${T('Team match')}</button>`)   // one Team match: at the club (scores at the tables) or online (in BridgePlay)   // Social Bridge: the same way, when the club's admin turned it on
         + (clubInfoHtml((ui.clubInfo || {})[t.club]) ? `<button class="btn clubinfob" data-clubinfo="${esc(t.club)}" data-clubname="${esc(t.c || t.club)}">ℹ️ ${T('Club info')}</button>` : '')) + `</div>`).join('');
     openOv('clubs', `<div class="clubsfs ${ui.clubOpen ? 'one' : 'list'}" style="--n:${Math.max(1, shown.length)}"><div class="row2 clubstop">${ui.clubOpen ? `<button class="btn" data-clubopen="${esc(ui.clubOpen)}">‹ ${T('Clubs')}</button>` : ''}<button class="btn" id="oClose">${T('Close')}</button></div>
       ${ui.clubLive == null ? `<div class="muted">${T('Loading…')}</div>` : rows || `<div class="muted">${T('No clubs yet.')}</div>`}${!ui.clubOpen && typeof Net !== 'undefined' && Net.isAdmin() ? `<button class="btn clubsa" id="clubSuper">🛡️ ${T('Super admin')}</button>` : ''}</div>`);
