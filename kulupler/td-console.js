@@ -94,7 +94,7 @@ window.tdcPick=function(v){
   TDC.tab=v||null; tdcDraw(); tdcFill(true); };
 // Reset deletes the tournament: asked twice
 window.tdcReset=function(){ TDC.tab=null; tdcGo('reset'); };
-window.tdcResetNow=async function(){ const had=getState().status; await adminReset(true); if(getState().status===had&&had) return; TDC.tab=null; TDC.v='home'; TDC.w=null; tdcDraw(); };   // deleted: straight to a new tournament's setup
+window.tdcResetNow=async function(){ if(!await adminReset(true)) return; TDC.tab=null; const c=document.getElementById('adminContent'); if(c) c.remove(); TDC.v='home'; TDC.w=null; tdcDraw(); };   // deleted: straight to a new tournament's setup
 window.tdcResetOld=async function(i){ const a0=getArchives()[i]; if(!a0) return; await adminDeleteArchive(i); tdcDraw(); };
 // the hands: before round 1 (on the ready screen) and from the menu
 const handsHtml=()=>{ const h=(_cache['hands']||[]).length; return `<div class="bm3-step">${L('Hands')}${h?' · '+h+' '+L('boards'):''}</div><div class="tdc-tools"><button class="btn" onclick="adminImportHandsOpen()">🃏 ${L('Load hand file')}</button><button class="btn" onclick="adminAutoBoardsOpen()">🎲 ${L('Make the boards automatically')}</button></div>`; };
@@ -324,7 +324,7 @@ window.tdcFree=async t=>{ await adminKickTable(t); tdcDraw(); };
 // the tournament now and the old tournaments, each with its own delete (shown at the top of Log)
 function resetHtml(){
   if(Date.now()-(TDC.resAt||0)>3000){ TDC.resAt=Date.now(); Promise.all([archivesFresh(),DB.get('teamArch')]).then(()=>{ if(TDC.tab==='log') tdcFill(false); }); }
-  const s=getState(), A=getArchives()||[], now=s&&s.status&&s.status!=='none'&&(s.tableCount>0||s.name);
+  const s=getState(), A=getArchives()||[], now=s&&(s.status==='running'||s.status==='finished'||(s.status==='setup'&&s.roundCount>0));   // a tournament really set up (not the empty default)
   return `<div class="bm3-step">${L('The tournament now')}</div>
     ${now?`<div class="tdc-hist"><div class="tdc-hrow tdc-resrow"><b>${cleanData(s.name||'')}</b><span>${s.status==='running'?'🟢 '+L('Running'):s.status==='finished'?'🏁 '+L('Finished'):'⏳ '+L('Ready to start')}</span><button class="btn tdc-red" onclick="tdcResetNow()">🗑 ${L('Delete')}</button></div></div>`:`<div class="bm3-note" style="padding:0 12px">${L('No tournament now')}</div>`}
     <div class="bm3-step">${L('Old tournaments')}</div>

@@ -839,7 +839,7 @@ function applyImport(data){
 }
 // one: the BridgeScore's Delete — one question, then the tournament is gone at once (no backup asked)
 window.adminReset=async function(one){
-  if(one){ if(!await confirmDialog(i18nText('Delete this tournament completely?'),{title:'🗑 '+i18nText('Delete'),confirmLabel:i18nText('Delete'),cancelLabel:i18nText('Cancel')})) return; }
+  if(one){ if(!await confirmDialog(i18nText('Delete this tournament completely?'),{title:'🗑 '+i18nText('Delete'),confirmLabel:i18nText('Delete'),cancelLabel:i18nText('Cancel')})) return false; }
   else if(!await confirmDialog('DELETE ALL DATA?\n\nThis will erase the current tournament.\nPlayer Registry will NOT be deleted.\n\nContinue?',{title:'Reset Tournament',confirmLabel:'Delete Everything'}))return;
   // Offer player data backup before reset
   const players=PlayerDB.getAll();
@@ -855,7 +855,9 @@ window.adminReset=async function(one){
   await Promise.all(['state','pairs','boards','movements','logs','approvals','hands','dd','ready','kicks','tdcalls','tableLocks','boardLocks'].map(k=>DB.del(k)));
   setLive(false);
   Object.keys(_cache).filter(k=>k!=='playerdb').forEach(k=>delete _cache[k]);
-  toast(one?'🗑 '+i18nText('Deleted'):'🗑 Reset complete — Player Registry preserved');refreshTopbar();renderAdminTab();
+  toast(one?'🗑 '+i18nText('Deleted'):'🗑 Reset complete — Player Registry preserved');refreshTopbar();
+  if(!(typeof tdcOn==='function'&&tdcOn()&&!bgTestOn())) renderAdminTab();   // the TD console redraws itself (no old setup form under its menu)
+  return true;
 };
 
 // ── Player Database (shared via Firebase — all devices see same name pool) ──
