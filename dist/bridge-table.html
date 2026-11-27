@@ -12101,7 +12101,10 @@ function userControls(seat) {
   if (G && G.ct) return ctControls(seat);   // a club table: your seat, and dummy when you are declarer
   if (ui.fixSeat != null && G.play && G.phase === 'play' && G.play.turn === ui.fixSeat && seat === ui.fixSeat) return true;   // correcting a robot's card
   if (!G.play) return seat === U();
-  return seat === U() || (sideOf(G.play.contract.decl) === sideOf(U()) && sideOf(seat) === sideOf(U()));
+  // your robot partner declares: the robot plays its hand and yours (you are dummy); you declare: your hand and dummy
+  const d = G.play.contract.decl;
+  if (d === pd(U())) return false;
+  return seat === U() || (d === U() && seat === pd(U()));
 }
 function playCard(seat, c) {
   const g = G.play;
@@ -13663,10 +13666,8 @@ function showOpenChoice() {
 function goHome() {
   if (G && G.ct) { ctLeave(); G = idleG(); closeOv(); save(); render(); return; }   // a club table goes on without you (the card brings you back)
   if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
-  // an unfinished board is kept: "Play with robots" carries on from where it was
-  clearTimeout(timer); ui.saved = G && !G.rtv && (G.phase === 'bid' || G.phase === 'play') ? G : G && G.rtv ? ui.saved : null;
-  // practising a convention: the board is not kept — the home page offers Start (a new board for the convention), not Continue
-  if (ui.saved === G && pracList().length) ui.saved = null;
+  // leaving the table ends the board: the home page offers Start (choose a convention, then a new board), not Continue
+  clearTimeout(timer); ui.saved = null;
   G = idleG(); closeOv(); save(); render();
   if (typeof Net !== "undefined" && Net.shareInfo) Net.shareInfo();   // the lobby sees you are back on the home page
 }
