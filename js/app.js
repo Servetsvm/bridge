@@ -1934,7 +1934,7 @@ function homeShell2() {
       <div class="h2tiles">
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="hBidPrac" type="button"', '🧩', T('Puzzle'), `${T('Problem of the day')} · ${T('Bidding practice')}<span id="hPuzzle"></span>`)}
-        <div class="h2tile h2sys">${RT_KEYS.map(k => `<div class="rtcell"><button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button><button class="rton" data-rton="${k}">🌐 ${T('Online')}</button></div>`).join('')}</div>
+        <div class="h2tile h2sys"><button class="rtonbar" data-rton="${RT_KEYS.includes(SET.sys) ? SET.sys : 'twoone'}">🌐 ${T('Online')}</button>${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button>`).join('')}</div>
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
@@ -3194,7 +3194,7 @@ function rtSitPick() {
 const RT_SHORT = { sayc: 'SAYC', twoone: '2/1', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' };
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<div class="rtgo"><b>🤖 ${T('System table')}</b></div><div class="rtrows">${RT_KEYS.map(k => `<div class="rtcell"><button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button><button class="rton" data-rton="${k}">🌐 ${T('Online')}</button></div>`).join('')}</div>`;
+  return `<button class="rtonbar" data-rton="${RT_KEYS.includes(SET.sys) ? SET.sys : 'twoone'}">🌐 ${T('Online')}</button><div class="rtrows">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
 }
 // the robots' tables (about 2 MB) are fetched only where their card is shown (a wide screen): a phone hides it,
 // and its system buttons fetch them when tapped
