@@ -18908,7 +18908,7 @@ function ctSeatsOf(plan, r, ti) {
 }
 const ctBoards = (plan, r, ti) => { const s = ctSetOf(plan, r, ti); return [...Array(plan.bpr).keys()].map(i => s * plan.bpr + i + 1); };
 // who decides a seat now: its player (present), else the robots of the runner's device; dummy goes with declarer
-function ctPresent(k) { const t = CT.tbl; return !!k && (k === ctMe() || (t && t.hb && !(t.kick && t.kick[k]) && Date.now() - (+t.hb[k] || 0) < CT_AWAY)); }
+function ctPresent(k) { const t = CT.tbl; return !!k && (k === ctMe() || (t && t.hb && !(t.kick && t.kick[k] && t.kick[k] > (+t.hb[k] || 0) - 30e3) && Date.now() - (+t.hb[k] || 0) < CT_AWAY)); }   // a removal counts until the player is back (beating again)
 function ctRunner() { const t = CT.tbl; if (!t) return ''; const ks = t.seats.map(s => s.k).filter(ctPresent).sort(); return ks[0] || ctMe(); }
 function ctSeatKey(seat) {
   const t = CT.tbl; if (!t || !G) return '';
@@ -18992,7 +18992,7 @@ async function ctBeat() {
   ctSlowCheck();
   try { await Net.Cloud.put(t.p + '/hb/' + Net.fbKey(myNm()), Date.now()); t.hb = await Net.Cloud.get(t.p + '/hb') || {}; } catch (e) {}
   try { t.kick = await Net.Cloud.get(t.p + '/kick') || {}; } catch (e) {}
-  if (t.kick && t.kick[ctMe()] && !t.watch) { flash('🚪 ' + T('You were taken off the table: a robot plays your seat. Sit down again to come back.'), 5000); if (typeof goHome === 'function') goHome(); else ctLeave(); return; }
+  if (t.kick && t.kick[ctMe()] > (t.sitAt || 0) && !t.watch) { /* taken off after sitting down (an older removal does not count) */ flash('🚪 ' + T('You were taken off the table: a robot plays your seat. Sit down again to come back.'), 5000); if (typeof goHome === 'function') goHome(); else ctLeave(); return; }
   if (t.plan0) try { t.plan = ctFill(ctSeatsApply(t.plan0, await Net.Cloud.get(t.p + '/seats')), await Net.Cloud.get(t.p + '/t')); t.seats = ctSeatsOf(t.plan, t.r, t.ti); } catch (e) {}   // an open evening: who sits where now
   if (ctBack()) flash('⏳ ' + T('Wait: the robot is finishing this board for you. You take your seat when it is over.'), 4000);
   ctMyScore();
@@ -19012,6 +19012,7 @@ async function ctSit(key, r0) {
   const seats = ctSeatsOf(x.plan, s.r, s.ti), seat = seats.findIndex(q => q.k === ctMe());
   clearInterval(CT.pollT); clearInterval(CT.beatT);
   CT.tbl = { key, id: x.id, d: x.d, p: ctRunP(x), plan: x.plan, plan0: x.i.open ? x.plan0 : null, r: s.r, ti: s.ti, tid: s.r + '_' + s.ti, seats, seat, boards: ctBoards(x.plan, s.r, s.ti), n: 0, hb: {}, name: x.i.n, rounds: x.plan.nr || x.plan.rounds.length };
+  CT.tbl.sitAt = Date.now(); if (x.i.open) Net.Cloud.put(ctRunP(x) + '/kick/' + ctMe(), null).catch(() => {});   // sitting down again: an earlier removal is over
   try { localStorage.setItem('ct-r-' + x.id + x.d, String(s.r)); } catch (e) {}
   CT.sc = null; closeOv();
   let hb0 = 0; try { hb0 = +(await Net.Cloud.get(CT.tbl.p + '/hb/' + Net.fbKey(myNm()))) || 0; } catch (e) {}
