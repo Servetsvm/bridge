@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v719`, kulüpler `kulup-v216`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v720`, kulüpler `kulup-v216`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,7 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v719`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Takım maçı seçimi (Kulüpte / Online) ve online kurulum penceresi tam sayfa (`.sheet[data-ov="ctq"]`, büyük düğmeler `.ctqbig`). v720.
 - **Takım Maçı** (kullanıcının isteği): kulüp kartında 🤝 Sosyal Bridge + 🏆 Takım maçı yerine tek **🏆 Takım Maçı** (`data-clubtm`, tm ya da sb açıksa)
   → 🏛 Kulüpte (eski Sosyal Bridge akışı `quick=social`, adı "Takım maçı"; çiftler sıralaması, teamArch → sonuçlar + reyting zaten dahil)
   ya da 🌐 Online (`ctQuickPick`/`ctQuickStart`, clubtour.js): her üye başlatır (kural: `ot/$club/$tid/info` üye yaratabilir open:true ise),

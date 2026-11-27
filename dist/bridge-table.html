@@ -2592,6 +2592,13 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .rtcard .rtonbar{margin:12px 14px 8px;width:calc(100% - 28px)}
 .rtonbar{font-weight:600;font-size:15px;padding:7px 8px;min-height:0;cursor:default;text-align:center}
 .rtonbar:hover{filter:none}
+/* the Team match choice (at the club / online) and its online setup: full page, like a club's page */
+#ov:has(.sheet[data-ov="ctq"]){padding:0}
+.sheet[data-ov="ctq"]{width:100%;max-width:none;height:100%;max-height:none;border-radius:0;box-sizing:border-box;padding:24px max(16px,calc((100% - 760px)/2)) 24px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.sheet[data-ov="ctq"] h2{font-size:clamp(24px,7vw,36px)}
+.sheet[data-ov="ctq"] .row2 .btn{min-height:64px;font-size:20px}
+.sheet[data-ov="ctq"] .ctqbig{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px}
+.sheet[data-ov="ctq"] .ctqbig .btn{min-height:110px;font-size:26px;width:100%}
 
 </style>
 
@@ -15041,7 +15048,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.clubplay) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubplay)); return; }
   if (t.dataset.clubres) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubres) + '&results=1'); return; }   // inside the app, as the screen
   if (t.dataset.clubteam) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubteam) + '&role=admin&setup=team&quick=team'); return; }
-  if (t.dataset.clubtm) { const c = t.dataset.clubtm; openOv('ctq', `<h2>🏆 ${T('Team match')}</h2><div class="row2"><button class="btn gold" data-clubsocial="${esc(c)}">🏛 ${T('At the club')}</button><button class="btn new" data-clubtmon="${esc(c)}">🌐 ${T('Online')}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.dataset.clubtm) { const c = t.dataset.clubtm; openOv('ctq', `<h2>🏆 ${T('Team match')}</h2><div class="ctqbig"><button class="btn gold" data-clubsocial="${esc(c)}">🏛 ${T('At the club')}</button><button class="btn new" data-clubtmon="${esc(c)}">🌐 ${T('Online')}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   if (t.dataset.clubtmon) { if (typeof ctQuickPick === 'function') ctQuickPick(t.dataset.clubtmon); return; }
   if (t.dataset.clubsocial) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubsocial) + '&role=admin&quick=social'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }

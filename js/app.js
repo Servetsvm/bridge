@@ -3816,7 +3816,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.clubplay) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubplay)); return; }
   if (t.dataset.clubres) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubres) + '&results=1'); return; }   // inside the app, as the screen
   if (t.dataset.clubteam) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubteam) + '&role=admin&setup=team&quick=team'); return; }
-  if (t.dataset.clubtm) { const c = t.dataset.clubtm; openOv('ctq', `<h2>🏆 ${T('Team match')}</h2><div class="row2"><button class="btn gold" data-clubsocial="${esc(c)}">🏛 ${T('At the club')}</button><button class="btn new" data-clubtmon="${esc(c)}">🌐 ${T('Online')}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
+  if (t.dataset.clubtm) { const c = t.dataset.clubtm; openOv('ctq', `<h2>🏆 ${T('Team match')}</h2><div class="ctqbig"><button class="btn gold" data-clubsocial="${esc(c)}">🏛 ${T('At the club')}</button><button class="btn new" data-clubtmon="${esc(c)}">🌐 ${T('Online')}</button></div><div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`); return; }
   if (t.dataset.clubtmon) { if (typeof ctQuickPick === 'function') ctQuickPick(t.dataset.clubtmon); return; }
   if (t.dataset.clubsocial) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubsocial) + '&role=admin&quick=social'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
