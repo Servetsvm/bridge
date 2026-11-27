@@ -1486,7 +1486,7 @@ function auctionTable(auction, phaseBid, rv) {
   setTimeout(() => { if (!rv) ui.aucSeen = aucKey; }, 0);
   const cols = [3, 0, 1, 2], board = rv ? rv.board : G.board, me = rv ? rv.seat : U(), sel = rv ? rv.sel : ui.lastExpl;
   const turnS = !rv && phaseBid && G && G.phase === 'bid' ? bidTurn() : -1;
-  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}${s === turnS ? ' turn' : ''}">${SEAT[s]}${rv ? '' : `<small>${esc(seatName(s))}</small>`}</th>`).join('') + '</tr></thead><tbody><tr>';
+  let o = '<table><thead><tr>' + cols.map(s => `<th class="${vulOf(board, s) ? 'v' : ''} ${s === me ? 'me' : ''}${s === turnS ? ' turn' : ''}">${SEAT[s]}${rv ? '' : `<small>${esc(seatName(s))}</small>`}${!rv && online() && !guest() && Net.st.names[s] && s !== meSeat() ? `<button class="kickx" data-kickask="${s}" title="${T('Remove')}">✕</button>` : ''}</th>`).join('') + '</tr></thead><tbody><tr>';
   let col = cols.indexOf(rv ? rv.dealer : G.dealer); for (let i = 0; i < col; i++) o += '<td></td>';
   auction.forEach((e, i) => { o += `<td><span class="c${i === sel ? " sel" : ""}${!rv && i === auction.length - 1 && G && G.phase === "bid" && ui.aucSeen !== G.id + ":" + auction.length ? " newc" : ""}${e.m && e.m.cv ? ' cvb' : ''}${e.al ? ' alrt' : ''}" ${rv ? 'data-ri' : 'data-ai'}="${i}">${callHtml(e.call)}${e.al ? '!' : ''}</span></td>`; col++; if (col === 4) { o += '</tr><tr>'; col = 0; } });
   if (phaseBid) o += '<td>?</td>';

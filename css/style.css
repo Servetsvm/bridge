@@ -2534,3 +2534,4 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .rtcard .rton:hover{filter:brightness(1.1)}
 .kickx{width:28px;height:28px;line-height:26px;font-size:16px;font-weight:800;background:#c62828;color:#fff;border:2px solid #fff;margin-left:6px;box-shadow:0 1px 3px rgba(0,0,0,.35)}
 .kickx:hover{background:#e53935}
+.auction th .kickx{display:block;margin:4px auto 0}

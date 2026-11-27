@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v711`, kulüpler `kulup-v211`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v712`, kulüpler `kulup-v211`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v711`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Masa sahibi, deklarasyon tablosunun başlığında misafir oyuncunun adının altında kırmızı ✕ görür (`auctionTable`, `data-kickask`);
+  telefonda deklarasyon sırasında oyuncu etiketleri görünmediği için çıkarma düğmesi yoktu. v712.
 - Online masada her tarafın robotu o taraftaki oyuncunun kartıyla oynar ve açıklar (`sideCards`: karşı tarafta oturan insanın kartı).
   Yeni: kart `st.psys` (oyuncunun gerçek sys/conv'u, cardV'den bağımsız); biri oturunca deklarasyon sürüyorsa `G.cards` hemen yenilenir. v711.
 - Açık online masaya (gizli değil, turnuva/şampiyona değil) her istek artık sormadan oturur (`sit` bayrağı şart değil; eski sürümlerden gelen
