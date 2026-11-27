@@ -57,8 +57,22 @@ function virt2N(x) {
   return null;
 }
 
+// their 1NT opening doubled by us (15-17 balanced: "I have a 1NT opening too"), they pass since: our side bids on as if the
+// doubler had opened 1NT (Stayman, transfers…); the doubled 1NT becomes a pass in the copy
+function virtNT(x) {
+  const a = x.auc, i = a.findIndex(e => isNum(e.call)); if (i < 0) return null;
+  const o = a[i]; if (o.call !== B(1, 4) || sideOf(o.seat) === sideOf(x.seat)) return null;
+  const j = a.findIndex((e, k) => k > i && e.call !== 'P'); if (j < 0) return null;
+  const X = a[j]; if (X.call !== 'X' || sideOf(X.seat) !== sideOf(x.seat) || !(X.m && X.m.tag === 'ntX')) return null;
+  if (!a.slice(j + 1).every(e => sideOf(e.seat) === sideOf(x.seat) || e.call === 'P')) return null;
+  const v = a.map((e, k) => k === i ? { seat: e.seat, call: 'P', m: { t: 'Pass' } } : k === j ? { seat: e.seat, call: B(1, 4), m: { min: 15, max: 17, len: BAL, cv: 'nt1', tag: 'nt1', t: 'Balanced, 15-17 HCP' } } : e);
+  const cfg = { conv: x.C, agg: x.agg, sys: x.sys && x.sys.k }, c = ctxOf(v, x.seat, [cfg, cfg]);
+  c.ntShift = 0;   // the double is 15-17 whatever the system's own 1NT
+  return c;
+}
 function cands(x) {
   const v = virt2N(x); if (v) return cands(v);
+  const vn = virtNT(x); if (vn) return cands(vn);
   const L = []; const add = (call, test, m) => L.push({ call, test, m: m || {} });
   const { auc, p, my, pa, opening, st, C } = x;
   const pLast = pa.length ? pa[pa.length - 1] : null, myLast = my.length ? my[my.length - 1] : null;
@@ -456,6 +470,8 @@ function cands(x) {
     const d = bal4 && LV(ob) <= 2 ? 3 : 0;
     const cheap = s => (ST(ob) < s ? LV(ob) : LV(ob) + 1);
     if (os === 4) {
+      if (ob === B(1, 4) && LV(ob) === 1 && x.oppBids.length === 1 && !(C.dont && !C.capp && !C.landy && !bal4))
+        add('X', h => h.bal && h.hcp >= 15 && h.hcp <= 17, { min: 15, max: 17, len: BAL, tag: 'ntX', t: 'I have a 1NT opening too: balanced, 15-17 HCP (go on as after my 1NT)' });
       // Landy: 2♣ = both majors (5-4 or longer), 8+ (in place of Cappelletti's and DONT's 2♣); the rest stays natural
       if (C.landy && ob === B(1, 4) && x.oppBids.length === 1 && !bal4) {
         add(B(2, 0), h => h.len[2] >= 4 && h.len[3] >= 4 && Math.max(h.len[2], h.len[3]) >= 5 && h.hcp >= 8, { min: 8, len: { 2: 4, 3: 4 }, tag: 'landy', cv: 'landy', t: 'Landy 2♣: both majors (5-4 or longer), 8+ HCP' });
@@ -470,7 +486,6 @@ function cands(x) {
         return L;
       }
       if (C.capp && !C.landy && ob === B(1, 4) && x.oppBids.length === 1 && !bal4) {
-        add('X', h => h.hcp >= 15, { min: 15, tag: 'cappX', cv: 'capp', t: 'Cappelletti: penalty double, 15+ HCP' });
         add(B(2, 4), h => h.len[0] >= 5 && h.len[1] >= 5 && h.hcp >= 8, { min: 8, len: { 0: 5, 1: 5 }, tag: 'capp2N', cv: 'capp', t: 'Cappelletti: both minors (5-5)' });
         add(B(2, 1), h => h.len[2] >= 4 && h.len[3] >= 4 && Math.max(h.len[2], h.len[3]) >= 5 && h.hcp >= 8, { min: 8, len: { 2: 4, 3: 4 }, tag: 'cappM', cv: 'capp', t: 'Cappelletti: both majors (5-4 or longer)' });
         add(B(2, 2), h => h.len[2] >= 5 && Math.max(h.len[0], h.len[1]) >= 4 && h.hcp >= 8, { min: 8, len: { 2: 5 }, tag: 'cappH', cv: 'capp', t: 'Cappelletti: 5+ ♥ and a 4+ minor' });
@@ -505,7 +520,7 @@ function cands(x) {
       const lw = unbid.slice().sort((a, b) => a - b).slice(0, 2);
       add(B(2, 4), h => h.len[lw[0]] >= 5 && h.len[lw[1]] >= 5 && h.hcp >= 7, { min: 7, len: { [lw[0]]: 5, [lw[1]]: 5 }, tag: 'unusual', suits: lw, cv: 'michaels', t: 'Unusual 2NT: ' + SUIT[lw[0]] + ' and ' + SUIT[lw[1]] + ' (5-5)' });
     }
-    if (LV(ob) === 1) add(B(1, 4), h => h.bal && h.hcp >= 15 - d && h.hcp <= 18 && h.stop(os), { min: 15 - d, max: 18, len: BAL, t: 'Balanced 15-18 HCP with a stopper in their suit', tag: 'nt1' });
+    if (LV(ob) === 1) add(B(1, 4), h => h.bal && h.hcp >= 15 - d && h.hcp <= 17 && h.stop(os), { min: 15 - d, max: 17, len: BAL, t: 'Balanced 15-17 HCP with a stopper in their suit', tag: 'nt1' });
     if (!art) add('X', h => h.hcp >= 17, { min: 17, cv: 'takeout', strong: 1, t: 'Takeout double: 12+ HCP, support for the unbid suits' });   // a strong hand doubles first: said as any takeout double (12+), its 17+ shows when the doubler bids again (the robots' own reading is unchanged)
     for (const s of [3, 2, 1, 0]) {
       if (x.oppSuits.includes(s)) continue; const l = cheap(s);
@@ -1497,7 +1512,10 @@ function explainCall(auc, seat, call, cards) {
     if (isNum(call) && mine.length === 1 && mine[0].call === 'X' && xi >= 0 && !auc.slice(0, xi).some(e => e.seat === (seat + 2) % 4 && isNum(e.call)) && auc.slice(0, xi).some(e => sideOf(e.seat) !== sideOf(seat) && isNum(e.call))
       && pb.length === 1 && !(known && (known.m.tag || known.m.cv)) && !auc.some(e => sideOf(e.seat) !== sideOf(seat) && isNum(e.call) && ST(e.call) === ST(pb[0].call) && auc.indexOf(e) < xi)) {
       const st = ST(call), raise = st === ST(pb[0].call);
-      return { min: st === 4 ? 18 : 17, ...(st < 4 && !raise ? { len: { [st]: 5 } } : {}), t: raise ? 'After my takeout double: raise, 17+ HCP' : st === 4 ? 'After my takeout double: balanced, 18+ HCP' : 'After my takeout double: strong hand, 17+ HCP, 5+ ' + SUIT[st] };
+      // notrump after the double: above a 1NT overcall (15-17), below the 2♣ opening (22+): the cheapest 18-19, a jump 20-21
+      const ntJump = st === 4 && LV(call) > (auc.filter(e => isNum(e.call)).length ? (() => { const l = auc.filter(e => isNum(e.call)).slice(-1)[0].call; return ST(l) < 4 ? LV(l) : LV(l) + 1; })() : 1);
+      if (st === 4) return ntJump ? { min: 20, max: 21, len: BAL, t: 'After my takeout double: balanced, 20-21 HCP' } : { min: 18, max: 19, len: BAL, t: 'After my takeout double: balanced, 18-19 HCP' };
+      return { min: 17, ...(!raise ? { len: { [st]: 5 } } : {}), t: raise ? 'After my takeout double: raise, 17+ HCP' : 'After my takeout double: strong hand, 17+ HCP, 5+ ' + SUIT[st] };
     } }
   // 4♣ right after partner's natural 1NT, 2NT or 3NT, no suit agreed: asks for aces, on any card, in any
   // sequence (1♣–1♥–2NT–3NT–4♣). The robots only answer it: they start Gerber in the cases cands() lists

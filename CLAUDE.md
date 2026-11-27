@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v714`, kulüpler `kulup-v211`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v715`, kulüpler `kulup-v211`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,11 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v714`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Kullanıcının sistemi (v715, ROBOT_LEARNED 715): 1 seviyesinde renk açışına 1SA araya 15-17 (eskiden 15-18). Rakibin 1SA'sına X
+  (doğrudan ya da 4. el; DONT'ta değil) = `tag 'ntX'` "bende de 1SA açışı var" 15-17 dengeli; `virtNT(x)`: rakip yalnız pas geçtikçe
+  açık artırma 1SA bizim açmışız gibi kopyalanır (ntShift 0) → Stayman/transfer/cevaplar. Cappelletti ceza kontrası (cappX) kalktı;
+  4. elde Cappelletti zaten yoktu (`!bal4`). Kontrdan sonra 1SA 18-19, atlamalı 2SA 20-21 (explainCall).
+  DD (cmpold, HEAD'e karşı, 6 sistem × 20000 el × 2 deste): +359 ve +226 = +585 IMP (yalnız 15-17 değişikliği −206 idi).
 - Çıkış kontrü: güçlü X (17+) da "Takeout double: 12+ HCP…" diye açıklanır (`strong:1`, robotun kendi `min:17` okuması aynı → 20000 el
   SAYC/2/1 0 kontrat farkı; min 12 denendi: −128/−116 IMP, geri alındı). Oyuncunun X'i takeout (12+) okunur (eskiden ilk aday 17+).
   Kontr edenin ortağın basit cevabından sonraki teklifi `explainCall`'da "After my takeout double: … 17+" (SA 18+); BID_PH 10 dil. ROBOT_LEARNED v714.
