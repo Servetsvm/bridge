@@ -292,7 +292,7 @@ function ctRemind() {
    player; a robot pair's seats, and the seats of a player away for more than 90 seconds, are played by the robots on
    the device of the first player present at the table (another takes over when that one goes). A player counts as
    present while their app writes run/<start>/hb/<player> (every 20 seconds, at any table of the evening). */
-const CT_AWAY = 90e3;
+const CT_AWAY = 45e3;   // no heartbeat for this long: gone, a robot plays the seat (another device takes over the robots)
 CT.tbl = null;
 const ctRunP = x => ctPath(x, '/run/' + x.d);
 function ctCardOf(sys, conv) { const k = E.sysOf(sys).k, c = { ...E.sysOf(k).conv }; for (const x of conv || []) c[x] = true; return { conv: c, agg: 0, sys: k }; }
@@ -384,6 +384,7 @@ async function ctPoll() {
     const st = ctStep(); if (st !== t.st) { t.st = st; t.stAt = Date.now(); }
     else if (Date.now() - (t.stAt || 0) > 6000 && G.phase === 'play' && G.play && (G.play.trick.length === 4 || ctRobotHere(G.play.turn))) { t.stAt = Date.now(); tick(); }
     else if (Date.now() - (t.stAt || 0) > 6000 && G.phase === 'bid' && ctRobotHere(bidTurn())) { t.stAt = Date.now(); tick(); }
+    else if (Date.now() - (t.stAt || 0) > 8000 && Date.now() - (t.hbAt || 0) > 8000) { t.hbAt = Date.now(); Net.Cloud.get(t.p + '/hb').then(h => { if (CT.tbl === t && h) { t.hb = h; tick(); } }).catch(() => {}); }   // stuck: is the device playing the robots still here?
   } catch (e) {}
 }
 async function ctBeat() {
@@ -419,9 +420,9 @@ async function ctSit(key, r0) {
   await ctBeat(); await ctRebuild();
   const t = CT.tbl;
   if (t && away && G && G.ct && G.phase !== 'done' && t.n > 0 && (G.auction.length || G.play)) {
-    t.waitI = G.ct.i; flash('⏳ ' + T('Wait: the robot is finishing this board for you. You take your seat when it is over.'), 5000); tick(); return CT.pollT = setInterval(ctPoll, 1500), CT.beatT = setInterval(ctBeat, 20e3);
+    t.waitI = G.ct.i; flash('⏳ ' + T('Wait: the robot is finishing this board for you. You take your seat when it is over.'), 5000); tick(); return CT.pollT = setInterval(ctPoll, 1500), CT.beatT = setInterval(ctBeat, 12e3);
   }
-  CT.pollT = setInterval(ctPoll, 1500); CT.beatT = setInterval(ctBeat, 20e3);
+  CT.pollT = setInterval(ctPoll, 1500); CT.beatT = setInterval(ctBeat, 12e3);
   flash('🪑 ' + T('Round {0} · table {1}', s.r + 1, s.ti + 1), 2500);
 }
 /* Servet's online test with the BridgeScore (the test tournament's "I use the BridgeScore"): after each board at his table
@@ -599,7 +600,7 @@ async function ctWaitRound(t, next) {
   ctLeave(); G = idleG(); save(); render();
   CT.waiting = { key, next, since: Date.now(), p, plan, r, k: 0 };
   const beat = () => Net.Cloud.put(p + '/hb/' + Net.fbKey(myNm()), Date.now()).catch(() => {});   // still here: the next table waits for you
-  beat(); clearInterval(CT.waitT);
+  setTimeout(beat, 1500); clearInterval(CT.waitT);   // after ctLeave's 0
   const check = async () => {
     const w = CT.waiting; if (!w) { clearInterval(CT.waitT); return; }
     const left = await ctTablesLeft(p, plan, r);
@@ -626,7 +627,7 @@ async function ctSlowCheck() {
 }
 // back to the home page from a club table: the table goes on (the robots take the seat after 90 seconds); the card
 // offers to sit down again
-function ctLeave() { clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = null; }
+function ctLeave() { const t = CT.tbl; if (t && t.p && !t.watch && typeof myNm === 'function' && myNm()) Net.Cloud.put(t.p + '/hb/' + Net.fbKey(myNm()), 0).catch(() => {}); /* gone now: another device plays the robots at once */ clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = null; }
 // a game kept from before a reload: the table is read again from the database (not the copy on this device)
 setTimeout(() => { if (typeof ui !== 'undefined' && ui.saved && ui.saved.ct) ui.saved = null; if (typeof G !== 'undefined' && G && G.ct && !CT.tbl) { CT.resume = { key: G.ct.key, r: G.ct.r, id: G.id }; G = null; if (typeof render === 'function') render(); } }, 500);
 
