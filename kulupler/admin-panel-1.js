@@ -849,6 +849,8 @@ window.adminReset=async function(one){
       await new Promise(r=>setTimeout(r,500));
     }
   }
+  // an online evening shown at the club: its online tournament goes too (else its copy came back here)
+  { const o=(getState()||{}).online; if(o&&o.tid&&typeof otPut==='function'){ try{ await otPut('/'+o.tid,undefined,'DELETE'); }catch(e){} try{ if(typeof OT!=='undefined'){ OT.edit=null; if(OT.list) delete OT.list[o.tid]; } }catch(e){} } }
   await Promise.all(['state','pairs','boards','movements','logs','approvals','hands','dd','ready','kicks','tdcalls','tableLocks','boardLocks'].map(k=>DB.del(k)));
   setLive(false);
   Object.keys(_cache).filter(k=>k!=='playerdb').forEach(k=>delete _cache[k]);
