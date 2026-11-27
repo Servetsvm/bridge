@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v701`, kulüpler `kulup-v209`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v702`, kulüpler `kulup-v209`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,9 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v701`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Açık masalar (`Net.tablesHtml`, önce örnek resim gösterildi, onaylandı): masada ne oynandığı — 🌐 online / 🤖 robotlarla, el no,
+  "Deklarasyon sürüyor" ya da "Kontrat: 4♠ Doğu, löve 7/13" (tableInfo `ct`), sistem + açık konvansiyonlar (prof.sys/conv, 6'dan fazlası +n),
+  oyuncular yönleriyle. v702.
 - **Kimsenin olmadığı masa oynanmaz** (kullanıcının isteği): (1) Kulüp açık online turnuvasında hiç oyuncu oturmamış masa (`ctIdle`: plan
   açık + masadaki dört koltukta anahtar yok) robotlarca oynanmaz, tur onu beklemez (`ctCurRound`, `ctTablesOf`); hiç kimse yoksa akşam
   bekler. Oturmuş ama sonra ayrılmış oyuncuların masasını robotlar bitirir (tur donmasın diye). kulupler `otRobots` da koltukları uygular.

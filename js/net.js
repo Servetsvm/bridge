@@ -99,7 +99,7 @@ const Net = (() => {
   }
   // what the lobby sees of this table
   function tableInfo() {
-    return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? (G.watch ? 'idle' : G.phase) : null, board: G ? G.board : 0,
+    return { t: 'info', k: st.slot ? st.slot.k : 0, away: Object.keys(st.away || {}).map(Number), host: (st.host ? st.names[SET.seat] : '') || myName() || 'Player', names: st.host ? st.names : { [SET.seat]: myName() || 'Player' }, online: st.host, busy: st.guest, phase: G ? (G.watch ? 'idle' : G.phase) : null, board: G ? G.board : 0, ct: G && G.phase === 'play' && G.play && G.play.contract ? (c => [c.level, c.strain, c.dbl || 0, c.decl, G.play.tricks[sideOf(c.decl)], G.play.tricks[0] + G.play.tricks[1]])(G.play.contract) : null,
       prof: prof(), profs: st.host ? st.profs || {} : {}, watchers: st.watch ? st.watch.size : 0, priv: !!(st.host && st.priv), tour: st.host && st.tour ? st.tour : null, pub: !st.host && !!st.soloPub && !(G && G.champ), champ: G && G.champ && (G.phase === 'bid' || G.phase === 'play') ? 1 : 0, solo: !st.host && !st.guest, tplay: tplay(), pc: !st.host && !st.guest && typeof pracList === 'function' && pracList().length ? 1 : 0, pcl: !st.host && !st.guest && typeof pracList === 'function' ? pracList().join(',') : '' };
   }
   // an individual tournament board played here: shown on this table in the lobby, and others can join the tournament
@@ -529,10 +529,16 @@ const Net = (() => {
       const tinfo = tp ? `<small class="ttour">🏆 ${esc(String(tp.name || '').slice(0, 40))} · ${T('board {0}', (+tp.b || 0) + '/' + (+tp.n || 0))}</small>`
         : tt ? `<small class="ttour">🏆 ${esc(tt.name)} · ${T('Table {0}', (+t.tour.ti || 0) + 1)}</small>` : '';
       const open = t.online ? !t.priv : !!(t.pub || tp);
-      const state = `${t.online ? T('online') : t.champ ? '🏆 ' + T('in the championship') : t.pc ? pcText(t) : T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}`;
-      const people = (humans.length ? humans.map(pn).join(', ') : pn(t.host)) + (robots > 0 && humans.length ? ` + ${robots} ${T('Robot')}` : '');
+      // who sits where, the system and conventions played, and where the board is (the auction or the contract and tricks)
+      const seatN = ['North', 'East', 'South', 'West'], hs = [0, 1, 2, 3].filter(x => nm[x]);
+      const people = (hs.length ? hs.map(x => `${pn(nm[x])} (${typeof SEAT !== 'undefined' ? SEAT[x] : T(seatN[x])})`).join(', ') : pn(t.host)) + (robots > 0 && hs.length ? ` + ${robots} ${T('Robot')}` : '');
+      const pf = t.prof || {}, sysN = pf.sys && typeof E !== 'undefined' && E.sysOf ? String(E.sysOf(pf.sys).n || '').replace(/ \(.*\)/, '') : '';
+      const cv = typeof E !== 'undefined' && E.CONVS ? E.CONVS.filter(c => (pf.conv || {})[c.k]).map(c => c.n) : [], cvT = cv.length > 6 ? cv.slice(0, 6).join(', ') + ` +${cv.length - 6}` : cv.join(', ');
+      const sysLine = sysN ? `<small class="ttour">🤖 ${esc(sysN)}${cvT ? ' · 📚 ' + esc(cvT) : ''}</small>` : '';
+      const ct = Array.isArray(t.ct) ? t.ct : null, where = t.phase === 'bid' ? T('Auction in progress') : ct ? `${T('Contract')}: ${ct[0]}${['♣', '♦', '♥', '♠', 'NT'][ct[1]] || ''}${ct[2] === 2 ? 'XX' : ct[2] ? 'X' : ''} ${typeof SEAT !== 'undefined' ? SEAT[ct[3]] : T(seatN[ct[3]] || '')}, ${T('tricks')} ${ct[4]}/${ct[5]}` : '';
+      const state = `${t.online ? '🌐 ' + T('online') : t.champ ? '🏆 ' + T('in the championship') : t.pc ? pcText(t) : '🤖 ' + T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${where && !tp ? ' · ' + where : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}`;
       const btns = t.champ ? '' : (tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`) + (t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : '');
-      return line(open, T("{0}'s table", esc(t.host)), state, people, tinfo, btns);
+      return line(open, T("{0}'s table", esc(t.host)), state, people, tinfo + sysLine, btns);
     }).join('');
     // the players the online list has at a board with robots, whose table the direct lines have not found
     const seen = new Set((L || []).flatMap(t => [t.host, ...Object.values(t.names || {})]).filter(Boolean).map(nameKey));
