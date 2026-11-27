@@ -548,7 +548,9 @@ const Net = (() => {
       // four people there: full — watch it; a free seat: sit down
       const full = [0, 1, 2, 3].every(x => nm[x]);
       if (full) return `<div class="otour otbl cl"><div><b>🔒 ${pn(t.host)}</b><small>${T('Full')}</small></div><div class="otb">${t.k && !t.priv && !t.champ ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : ''}</div></div>`;
-      return `<div class="otour otbl ${open ? 'op' : 'cl'}"><div><b>${open ? '🔓' : '🔒'} ${pn(t.host)}</b></div><div class="otb">${open && t.k && !t.champ ? `<button class="btn gold" data-jsit="${t.k}">🪑 ${T('Sit down')}</button>` : ''}</div></div>`;
+      // a robot's seat free (not a private table, a championship or a tournament board): anyone sits down there
+      const sit = t.k && !t.priv && !t.champ && !tp;
+      return `<div class="otour otbl ${sit ? 'op' : 'cl'}"><div><b>${sit ? '🔓' : '🔒'} ${pn(t.host)}</b></div><div class="otb">${sit ? `<button class="btn gold" data-jsit="${t.k}">🪑 ${T('Sit down')}</button>` : ''}</div></div>`;
     }).join('');
     // the players the online list has at a board with robots, whose table the direct lines have not found
     const seen = new Set((L || []).flatMap(t => [t.host, ...Object.values(t.names || {})]).filter(Boolean).map(nameKey));
@@ -1508,8 +1510,8 @@ const Net = (() => {
         // a request answered recently (also before a page refresh) is not asked again: declined stays declined,
         // "later" waits quietly in the Online panel
         // an open table: whoever comes sits down at once, nobody is asked (the first player can remove them with ✕)
-        if (d.want === 'watch' && !st.priv && !(G && G.champ) && !st.tour && (st.host || (!st.guest && st.soloPub))) { if (!st.host) becomeHost(); if (st.host) { addWatcher(conn, d); return; } }
-        if (d.want !== 'watch' && !(G && G.champ) && !st.tour && ((st.host && !st.priv) || (!st.host && !st.guest && st.soloPub))) {
+        if (d.want === 'watch' && !st.priv && !(G && G.champ) && !(G && G.tour) && !st.tour && (st.host || !st.guest)) { if (!st.host) becomeHost(); if (st.host) { addWatcher(conn, d); return; } }
+        if (d.want !== 'watch' && !(G && G.champ) && !(G && G.tour) && !st.tour && ((st.host && !st.priv) || (!st.host && !st.guest))) {
           if (!st.host) becomeHost();
           if (st.host) { seatPlayer(conn, d, null); flash(T('{0} sat down at your table (✕ by the name removes them)', String(d.name || 'Guest').slice(0, 20)), 4000); return; }
         }

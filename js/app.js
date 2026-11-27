@@ -3168,7 +3168,7 @@ function rtFullHere(k) { try { const me = String(myNm() || '').toLowerCase(); re
 function rtOthers(k) {
   if (typeof Net === 'undefined') return '';
   const me = String(myNm() || '').toLowerCase();
-  const L = (Net.st.tables || []).filter(t => !t.priv && !t.busy && (t.online || t.pub) && ((t.prof || {}).sys || 'twoone') === k && String(t.host || '').toLowerCase() !== me);
+  const L = (Net.st.tables || []).filter(t => !t.priv && !t.busy && t.k && !t.champ && ((t.prof || {}).sys || 'twoone') === k && String(t.host || '').toLowerCase() !== me);
   const full = t => [0, 1, 2, 3].every(x => (t.names || {})[x]);
   return L.length ? `<div class="grp"><span>👥 ${T('Players at this system now')}</span>${L.map(t => full(t) ? `<div class="row2"><b>🔒 ${esc(t.host)} · ${T('Full')}</b><button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button></div>` : `<div class="row2"><b>${esc(t.host)}</b><button class="btn gold" data-jsit="${t.k}">🪑 ${T('Sit down')}</button></div>`).join('')}</div>` : '';
 }
