@@ -1432,7 +1432,7 @@ function renderBar() {
     $('bar').innerHTML = `<div class="vulbox" title="Board ${b.bn}" style="border-color:${topbot ? 'var(--vul)' : '#f4f4f0'} ${lr ? 'var(--vul)' : '#f4f4f0'}">${b.bn}<span class="dl" style="${dst}">D</span></div>
      ${conBox()}
      <div class="box rtsys"><b>🔴 ${esc(rtSysName(b.sys))}</b></div>
-     ${typeof Net !== 'undefined' ? (n => `<button class="btn hbtn narrowonly${n ? ' gold' : ''}" id="bChat" title="${T('Chat')}"><b aria-hidden="true">💬</b><small>${T('Chat')}</small>${n ? `<span class="cbn">${n}</span>` : ''}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ''}<button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn gold hbtn" id="bRtList" title="${T('Tables')}"><b aria-hidden="true">📊</b><small>${T('Tables')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
+     ${typeof Net !== 'undefined' ? (n => `<button class="btn hbtn narrowonly${n ? ' gold' : ''}" id="bChat" title="${T('Chat')}"><b aria-hidden="true">💬</b><small>${T('Chat')}</small>${n ? `<span class="cbn">${n}</span>` : ''}</button>`)((Net.st.unread || 0) + (Net.st.lunread || 0)) : ''}<button class="btn hbtn" id="bHome" title="${T('Home')}"><b aria-hidden="true">🏠</b><small>${T('Home')}</small></button><button class="btn new hbtn" id="bRtSit" title="${T('Sit down')}"><b aria-hidden="true">🪑</b><small>${T('Sit down')}</small></button>`;
     return; }
   const g = G.play;
   const canClaim = !G.ct && G.phase === "play" && !g.trick.length && claimSeat() != null && g.hands[g.turn].length <= 8 && g.hands[g.turn].length > 0;
@@ -3151,6 +3151,13 @@ function rtSit(s) {
 }
 // 🌐 Online under a system's button: first your own convention card (the robots, your partner too, play it), then a seat
 // at that system's table, which the robots play all the time
+// the players at a board in this system who let others join: join one of them (their robots fill the other seats)
+function rtOthers(k) {
+  if (typeof Net === 'undefined') return '';
+  const me = String(myNm() || '').toLowerCase();
+  const L = (Net.st.tables || []).filter(t => !t.priv && !t.busy && (t.online || t.pub) && ((t.prof || {}).sys || 'twoone') === k && String(t.host || '').toLowerCase() !== me);
+  return L.length ? `<div class="grp"><span>👥 ${T('Players at this system now')}</span>${L.map(t => `<div class="row2"><b>${esc(t.host)}</b><button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button></div>`).join('')}</div>` : '';
+}
 function rtOnline(k) {
   if (online()) { flash(T('Online') + ' ●', 1500); return; }
   if (k) ui.rtOn = k;
@@ -3159,7 +3166,7 @@ function rtOnline(k) {
     if (!b) { flash(T('The robots will be back soon.'), 2500); return; }
     openOv('rton', `<h2>🌐 ${T('Online')} · ${esc(rtSysName(ui.rtOn))}</h2>
       <div class="muted">${T('First choose your convention card: the robots, your partner too, play it. Then take a seat.')}</div>
-      ${convCardHtml()}
+      ${convCardHtml()}${rtOthers(ui.rtOn)}
       <div class="grp"><span>🪑 ${T('Sit down')}</span><div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtsit="${s}">${SEAT[s]}<small>${esc(rtName(s))}</small></button>`).join('')}</div></div>
       <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
   });
