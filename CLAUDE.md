@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v703`, kulüpler `kulup-v210`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v704`, kulüpler `kulup-v210`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,7 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v703`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Tablet/PC'de (geniş ekran `#hRobot` Sistem masası kartı) de her sistemin altında 🌐 Online; kart artık 2 MB live dosyasını beklemeden çizilir. v704.
 - TD konsolunda online akşamı 🗑 ile silmek yalnız kulüpteki kopyayı siliyordu, online turnuva (`ot/<kulüp>/<id>`) kalıyordu → geri geliyordu.
   `adminReset` artık `state.online.tid` varsa online turnuvayı da siler (tek tuş + bir onay). kulup-v210.
 - Açık masa başka telefonda görünmüyordu: masalar PeerJS odalarıyla aranıyor, mobil ağda çoğu zaman ulaşılamıyor. Artık dakikalık
