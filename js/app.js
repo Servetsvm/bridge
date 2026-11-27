@@ -3161,11 +3161,14 @@ function rtSit(s) {
 // 🌐 Online under a system's button: first your own convention card (the robots, your partner too, play it), then a seat
 // at that system's table, which the robots play all the time
 // the players at a board in this system who let others join: join one of them (their robots fill the other seats)
+// a table of this system with four people at it (the next player opens a new one)
+function rtFullHere(k) { try { const me = String(myNm() || '').toLowerCase(); return (Net.st.tables || []).some(t => !t.priv && ((t.prof || {}).sys || 'twoone') === k && String(t.host || '').toLowerCase() !== me && [0, 1, 2, 3].every(x => (t.names || {})[x])); } catch (e) { return false; } }
 function rtOthers(k) {
   if (typeof Net === 'undefined') return '';
   const me = String(myNm() || '').toLowerCase();
   const L = (Net.st.tables || []).filter(t => !t.priv && !t.busy && (t.online || t.pub) && ((t.prof || {}).sys || 'twoone') === k && String(t.host || '').toLowerCase() !== me);
-  return L.length ? `<div class="grp"><span>👥 ${T('Players at this system now')}</span>${L.map(t => `<div class="row2"><b>${esc(t.host)}</b><button class="btn gold" data-jsit="${t.k}">🪑 ${T('Sit down')}</button></div>`).join('')}</div>` : '';
+  const full = t => [0, 1, 2, 3].every(x => (t.names || {})[x]);
+  return L.length ? `<div class="grp"><span>👥 ${T('Players at this system now')}</span>${L.map(t => full(t) ? `<div class="row2"><b>🔒 ${esc(t.host)} · ${T('Full')}</b><button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button></div>` : `<div class="row2"><b>${esc(t.host)}</b><button class="btn gold" data-jsit="${t.k}">🪑 ${T('Sit down')}</button></div>`).join('')}</div>` : '';
 }
 function rtOnline(k) {
   if (online()) { flash(T('Online') + ' ●', 1500); return; }
@@ -3174,7 +3177,7 @@ function rtOnline(k) {
   openOv('rton', `<h2>🌐 ${T('Online')} · ${esc(rtSysName(ui.rtOn))}</h2>
     <div class="muted">${T('First choose your convention card: the robots, your partner too, play it. Then take a seat.')}</div>
     ${convCardHtml(true)}${rtOthers(ui.rtOn)}
-    <div class="row2"><button class="btn gold" data-rtonsit="2">🪑 ${T('Sit down')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+    <div class="row2"><button class="btn gold" data-rtonsit="2">🪑 ${rtFullHere(ui.rtOn) ? T('Open a new table') : T('Sit down')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 // a seat taken: the boards start now, with robots in the other seats (they play this player's card); the table is open to others
 function rtOnSit(s) {
