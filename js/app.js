@@ -4727,7 +4727,7 @@ async function showClubs() {
         (x => `<div class="row4 clubtools ct4"><button class="btn" data-clubadmin="${esc(t.club)}">🧑‍⚖️ ${T('TD')}</button>` + (x ? `<button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button>` : `<button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button>`) + `<button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button><button class="btn" data-clubres="${esc(t.club)}">📄 ${T('Results')}</button></div>`)(otLive(t.club))
         // the club's info (address, contact person, phone): a button under the tools, the card opens under it
         // a team match: only when the club's admin turned its button on (Club info → Team match button)
-        + (t.tb || otLive(t.club) ? '' : `<button class="btn clubinfob clubteamb" data-clubonline="${esc(t.club)}">🌐 ${T('Online')}</button>`)   // the director starts an online evening at once: robots in the empty seats
+        + (t.tb || otLive(t.club) || !((ui.myClubs || {})[t.club] || Net.isAdmin()) ? '' : `<button class="btn clubinfob clubteamb" data-clubonline="${esc(t.club)}">🌐 ${T('Online')}</button>`)   // the club's director (its owner) only: starts an online evening at once, robots in the empty seats
         + (t.tb || !((ui.clubInfo || {})[t.club] || {}).tm ? '' : `<button class="btn clubinfob clubteamb" data-clubteam="${esc(t.club)}">🏆 ${T('Team match')}</button>`)
         + (t.tb || !((ui.clubInfo || {})[t.club] || {}).sb ? '' : `<button class="btn clubinfob clubteamb" data-clubsocial="${esc(t.club)}">🤝 ${T('Social Bridge')}</button>`)   // Social Bridge: the same way, when the club's admin turned it on
         + (clubInfoHtml((ui.clubInfo || {})[t.club]) ? `<button class="btn clubinfob" data-clubinfo="${esc(t.club)}" data-clubname="${esc(t.c || t.club)}">ℹ️ ${T('Club info')}</button>` : '')) + `</div>`).join('');
@@ -4756,6 +4756,8 @@ async function showClubs() {
     // each club's info (address, contact person, phone), set by the club's admin
     const inf = await Promise.all(ui.clubLive.map(t => Net.Cloud.get('gate/clubs/' + t.club + '/bm/info').catch(() => null)));
     ui.clubInfo = {}; ui.clubLive.forEach((t, i) => { if (inf[i] && typeof inf[i] === 'object') ui.clubInfo[t.club] = inf[i]; });
+    // the clubs this player directs (their owner): only they see the 🌐 Online button
+    try { ui.myClubs = myNm() ? (await Net.Cloud.get('gate/owners/' + Net.fbKey(myNm()))) || {} : {}; } catch (e) { ui.myClubs = {}; }
     if (ui.overlay === 'clubs') draw();   // the next tournament under each club's name, and the info button
   }
 }
