@@ -114,7 +114,7 @@ function bpShow() {
       <details><summary>${T('Tricks double dummy')}</summary><table class="bpauc"><tr><th></th>${st.map(x => `<th>${x}</th>`).join('')}</tr>${[0, 1].map(i => `<tr><th>${T(i ? 'South' : 'North')}</th>${d.tab.map(r => `<td>${r[i]}</td>`).join('')}</tr>`).join('')}</table></details>
       <div class="muted">${T('This session: {0} deals, {1} IMP', BP.n, fmtSigned(BP.imp))}</div>`;
   }
-  openOv('bp', `<h2>🎯 ${T('Bidding practice')}</h2>${body}<div class="row2">${BP.done ? `<button class="btn gold" data-bp="next">▶ ${T('Next deal')}</button>` : `<button class="btn" data-bp="skip">↻ ${T('New deal')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+  openOv('bp', `<h2>🧩 ${T('Puzzle')}</h2>${pzTabs('bp')}${body}<div class="row2">${BP.done ? `<button class="btn gold" data-bp="next">▶ ${T('Next deal')}</button>` : `<button class="btn" data-bp="skip">↻ ${T('New deal')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-bp]'); if (!b) return;

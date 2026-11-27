@@ -2524,3 +2524,4 @@ body.homev2 .h2tiles .h2sys{grid-column:1/-1}
 button.ctseat.free{background:#1f6a40;border-color:#174f31;color:#fff;cursor:pointer}
 button.ctseat.free small{opacity:.85}
 .ctseat.me{background:#f0cf7a;border-color:#8a6a1c;color:#2a1f05}
+.pztabs{display:flex;gap:6px;margin:0 0 10px}.pztabs .btn{flex:1;font-size:.85rem;padding:7px 6px}

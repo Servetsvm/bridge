@@ -2576,6 +2576,7 @@ body.homev2 .h2tiles .h2sys{grid-column:1/-1}
 button.ctseat.free{background:#1f6a40;border-color:#174f31;color:#fff;cursor:pointer}
 button.ctseat.free small{opacity:.85}
 .ctseat.me{background:#f0cf7a;border-color:#8a6a1c;color:#2a1f05}
+.pztabs{display:flex;gap:6px;margin:0 0 10px}.pztabs .btn{flex:1;font-size:.85rem;padding:7px 6px}
 
 </style>
 
@@ -13114,7 +13115,7 @@ function homeShell2() {
       <span id="hInst"></span><button class="hico" id="bTheme" title="${T("Day / night")}" aria-label="${T("Day / night")}"></button><button class="hico" id="bRes" title="${T('Results')}" aria-label="${T('Results')}">🕘</button><button class="hico" id="bHelp" title="${T('Help')}" aria-label="${T('Help')}">?</button><button class="hico" id="bSet" title="${T('Settings')}" aria-label="${T('Settings')}">⚙︎</button><button class="hico hwa" id="bShareApp" title="${T('Send the app')}" aria-label="${T('Send the app')}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 4 3.5 1.5.6 2 .7 2.8.6.4-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z"/></svg></button></div></header>
   <div class="hgrid">
     <section class="hmain"><div class="h2cola"><div id="hPend"></div>
-      <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2mid"><div class="h2chips" id="hMe"></div><button class="hpz" id="hPuzzle"></button><span id="hAdm"></span></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
+      <div class="h2me"><button id="hNameBtn" class="h2name" title="${T('Edit my card')}"></button><div class="h2mid"><div class="h2chips" id="hMe"></div><span id="hAdm"></span></div><button class="hstats" id="hStats" title="${T('Your rating')}"></button></div>
       <div class="h2pr"><div class="h2play">
         <button class="h2fan h2fango" id="bGoFan" aria-hidden="true" tabindex="-1">${fan}</button>
         <div class="h2ptx"><h2><button class="h2ptitle" id="bGoTitle">${T('Play offline')}</button></h2><p id="hGoSub"></p><div class="h2btns"><button class="btn h2go" id="bGo"><span id="hGo"></span></button><button class="btn h2go h2conv" id="bConvGo">📋 ${T('My convention card')}</button></div></div>
@@ -13122,7 +13123,7 @@ function homeShell2() {
       </div>
       <div class="h2tiles">
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
-        ${tile('id="hBidPrac" type="button"', '🎯', T('Bidding practice'), T('Bid both hands, then see the best contract and the robots\' auction.'))}
+        ${tile('id="hBidPrac" type="button"', '🧩', T('Puzzle'), `${T('Problem of the day')} · ${T('Bidding practice')}<span id="hPuzzle"></span>`)}
         <div class="h2tile h2sys">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button>`).join('')}</div>
       </div>
       </div><div class="h2colb">
@@ -13186,7 +13187,7 @@ function renderHome() {
     } else set("hDaily", "");
   }
   { const pzS = pzState(), pzP = pzProg(), wait = pzS.day === 'p' + pzP.i && pzS.ok === false && !pzLive();   // the puzzle: its rating; ⏳ while the next waits
-    set("hPuzzle", `${wait ? "⏳" : pzS.day === 'p' + pzP.i && pzS.ok ? "✅" : "🧩"} ${T("Puzzle")}${pzP.t ? " " + Math.round(pzP.r) : ""}`); }
+    set("hPuzzle", pzP.t || wait || pzS.ok ? ` · ${wait ? "⏳" : pzS.day === 'p' + pzP.i && pzS.ok ? "✅" : "🧩"}${pzP.t ? " " + Math.round(pzP.r) : ""}` : ""); }
 
   const per = Store.periods(HIST)[0];
   set("bTheme", document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙");   // day / night at the top
@@ -13763,7 +13764,7 @@ function showPlayPuzzle(pz) {
       `;
   }
   res += pzProgHtml(!!done);
-  openOv('puzzle', `<h2>🧩 ${T('Puzzle')}</h2>
+  openOv('puzzle', `<h2>🧩 ${T('Puzzle')}</h2>${pzTabs('pz')}
     <div class="big">${T('Make the contract: you have one chance.')}</div>
     <div class="pzline">${T('Contract')}: <b>${con}</b> · ${T('Declarer')}: ${SEAT[me]} · ${T('The opening lead: {0}', SEAT[ld] + ' ' + RTXT[R(pz.lead)] + symHtml(S(pz.lead)))}</div>
     <div class="pzbox"><div class="pzpair"><small>${T('Dummy')} (${SEAT[dm]})</small>${pzHand(pz.deal[dm])}<small>${T('You')} (${SEAT[me]})</small>${pzHand(pz.deal[me])}</div>
@@ -13882,6 +13883,10 @@ function pzHard(kind, deal, hcp, k, cards) {
 }
 function pzQuestion(k) { return T(k === 'open' ? 'What do you open?' : k === 'answer' ? 'Partner opened. What do you answer?' : k === 'lead' ? 'What do you lead?' : 'What do you bid?'); }
 function pzHand(h) { return `<div class="pzhand">${[3, 2, 1, 0].map(s => `<div>${symHtml(s)} ${E.desc(E.inSuit(h, s)).map(c => RTXT[R(c)]).join(' ') || '—'}</div>`).join('')}<small>${ev(h).hcp} HCP</small></div>`; }
+// the Puzzle window: the problem of the day and the bidding practice, one tab each
+function pzTabs(on) { return `<div class="pztabs"><button class="btn${on === 'pz' ? ' gold' : ''}" data-pztab="pz">🧩 ${T('Problem of the day')}</button><button class="btn${on === 'bp' ? ' gold' : ''}" data-pztab="bp">🎯 ${T('Bidding practice')}</button></div>`; }
+document.addEventListener('click', ev => { const b = ev.target.closest('[data-pztab]'); if (!b) return;
+  if (b.dataset.pztab === 'pz') { ui.pzSel = null; showPuzzle(); } else if (typeof bpShow === 'function') { if (BP.deal) bpShow(); else bpNew(); } });
 function showPuzzle() {
   if (pzWait()) { pzLoad(); return; }
   { const p0 = pzToday(); if (p0 && p0.kind === 'play') { showPlayPuzzle(p0); return; } }
@@ -13921,7 +13926,7 @@ function showPuzzle() {
     if (done.ok != null) res += /^p\d+$/.test(pz.day) ? pzProgHtml(true) : `<div class="muted">🔥 ${T('Days in a row: {0}', st.streak || 0)}</div>`;
   }
   else if (/^p\d+$/.test(pz.day)) res += pzProgHtml(false);
-  openOv('puzzle', `<h2>🧩 ${T('Puzzle')}</h2><div class="big">${pzQuestion(pz.kind)}</div>${pz.vals ? `<div class="muted">${T('Only one lead beats this contract.')} · ${esc(E.sysOf('twoone').n)}</div>` : ''}
+  openOv('puzzle', `<h2>🧩 ${T('Puzzle')}</h2>${pzTabs('pz')}<div class="big">${pzQuestion(pz.kind)}</div>${pz.vals ? `<div class="muted">${T('Only one lead beats this contract.')} · ${esc(E.sysOf('twoone').n)}</div>` : ''}
     <div class="pzbox">${pzHand(pz.deal[2])}${auc}</div>${ctl}${res}
     ${typeof Net !== 'undefined' && Net.isAdmin() && /^p\d+$/.test(pz.day) ? `<div class="row2"><button class="btn mini-btn" id="pzReset">🔄 ${T('Reset my puzzle rating')}</button></div>` : ''}
     <div class="row2"><button class="btn gold" id="oClose">${T('Close')}</button></div>`);
@@ -13968,7 +13973,6 @@ document.addEventListener('click', e => {
   const b = e.target.closest('[data-pzb]'); if (b) { pzAnswer(b.dataset.pzb); return; }
   const c = e.target.closest('[data-pzc]'); if (c) { pzAnswer(+c.dataset.pzc); return; }
   const pi = e.target.closest('[data-pzi]'); if (pi) { const i = +pi.dataset.pzi; ui.pzSel = ui.pzSel === i ? null : i; showPuzzle(); return; }
-  if (e.target.closest('#hPuzzle')) { ui.pzSel = null; showPuzzle(); }
   if (e.target.closest('#pzNext')) { const p = pzProg(); p.i++; pzProgSave(p); pzSave({}); ui.pz = null; ui.pzSel = null; showPuzzle(); }
 });
 // the practice review of a board: per convention ✓ when every call where it came up was the system's, else ✗
@@ -14942,7 +14946,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bRtNext') { rtNext(); return; }
   if (t.id === 'bRtSit') { rtSitPick(); return; }
   if (t.id === 'tFileOff') { const tr = Net.st.tours[ui.tsetId]; if (tr) { tr.deals = []; showTourSetup(tr.id); } return; }
-  if (t.id === 'hBidPrac' && typeof bpNew === 'function') { bpNew(); return; }
+  if (t.id === 'hBidPrac') { ui.pzSel = null; showPuzzle(); return; }
   if (t.id === 'bTblScore') { Net.panel(); return; }
   if (t.id === 'bRtList') { rtOpen(G && G.rtv ? G.rtv.k : RT.cur); return; }
   if (t.dataset.rtsit != null) { rtSit(+t.dataset.rtsit); return; }
@@ -20393,7 +20397,7 @@ function bpShow() {
       <details><summary>${T('Tricks double dummy')}</summary><table class="bpauc"><tr><th></th>${st.map(x => `<th>${x}</th>`).join('')}</tr>${[0, 1].map(i => `<tr><th>${T(i ? 'South' : 'North')}</th>${d.tab.map(r => `<td>${r[i]}</td>`).join('')}</tr>`).join('')}</table></details>
       <div class="muted">${T('This session: {0} deals, {1} IMP', BP.n, fmtSigned(BP.imp))}</div>`;
   }
-  openOv('bp', `<h2>🎯 ${T('Bidding practice')}</h2>${body}<div class="row2">${BP.done ? `<button class="btn gold" data-bp="next">▶ ${T('Next deal')}</button>` : `<button class="btn" data-bp="skip">↻ ${T('New deal')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
+  openOv('bp', `<h2>🧩 ${T('Puzzle')}</h2>${pzTabs('bp')}${body}<div class="row2">${BP.done ? `<button class="btn gold" data-bp="next">▶ ${T('Next deal')}</button>` : `<button class="btn" data-bp="skip">↻ ${T('New deal')}</button>`}<button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-bp]'); if (!b) return;
