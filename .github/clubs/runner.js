@@ -107,6 +107,7 @@ async function evenings() {
     if (Date.now() - +d > LIVE) { WHY.old++; continue; }
     const plan = ctSeatsApply(run.plan, run.seats);
     if (ctCurRound(ctFill(plan, run.t), run.t) < 0) { WHY.finished++; continue; }   // finished (or an open evening nobody sits at)
+    if (t.info && t.info.lobby && !run.go) continue;   // a Team match still in its lobby: not started
     out.push({ p: 'ot/' + club + '/' + tid + '/run/' + d, plan, name: (t.info && t.info.n) || tid, club, tid, d: +d, info: t.info || {} });
   } }
   return out;

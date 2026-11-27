@@ -580,6 +580,10 @@
                   ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && root.child('ot').child($club).child($tid).child('info').child('open').val() === true",
                   ".validate": "!newData.exists() || newData.isNumber()"
                 }
+              },
+              "go": {
+                ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists() && !data.exists() && root.child('ot').child($club).child($tid).child('info').child('open').val() === true",
+                ".validate": "newData.isNumber()"
               }
             }
           }

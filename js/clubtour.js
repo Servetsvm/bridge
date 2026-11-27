@@ -35,6 +35,9 @@ function ctList() {
   return out.sort((a, b) => a.d - b.d);
 }
 const ctMe = () => Net.ruleKey(myNm() || '');
+// a Team match waits in its lobby until the one who opened it starts it: the players sit down, the opener sees who has, empty seats get robots
+const ctLobby = x => !!(x && x.i && x.i.lobby && !(x.run && x.run.go));
+const ctOpener = x => !!(x && x.i && (x.i.byk ? x.i.byk === ctMe() : Net.ruleKey(x.i.by || '') === ctMe()));
 /* an open evening (🌐 Online, started at once by the club's director): no registration — every pair of the plan starts
    empty (the robots play it) and a player takes an empty seat (run/<d>/seats/<pair>_<a|b> = { n, k, ts }); the seat stays
    theirs, and a seat whose player has been away for 10 minutes is free again. The plan's pairs with the seats on them: */
@@ -255,12 +258,36 @@ function ctShowOpen(key, x, err) {
     if (k && k === me) return `<div class="ctseat me"><small>${label}</small><b>${esc(n)}</b></div>`;
     if (k && !away(k)) return `<div class="ctseat"><small>${label}</small><b>${esc(n)}</b></div>`;
     return pi >= 0 ? `<div class="ctseat free"><small>${label}</small><b>${T('Free seat')}</b></div>` : `<button class="ctseat free" data-ctopen="${esc(key + '|' + pIdx + '|' + (w ? 'b' : 'a') + '|' + r)}"><small>${label}</small><b>🪑 ${T('Sit down')}</b></button>`; };
+  const lobby = ctLobby(x), opener = ctOpener(x), nSit = P.pairs.reduce((n, p) => n + (p.ka && !away(p.ka) ? 1 : 0) + (p.kb && !away(p.kb) ? 1 : 0), 0);
+  if (lobby) ctLobbyWatch(key, pi >= 0); else ctLobbyWatch(null);
   const tables = P.rounds[r].map(([a, b], ti) => `<div class="grp"><span>${T('Table {0}', ti + 1)}</span><div class="ctseats">${seat(ti, a, 1, SEAT[0])}${seat(ti, b, 0, SEAT[1])}${seat(ti, a, 0, SEAT[2])}${seat(ti, b, 1, SEAT[3])}</div></div>`).join('');
   openOv('ctour', `<h2>🏛 ${esc(x.i.cn || x.club)} <span class="ctonl">🟢 Online</span></h2><div class="big">${esc(x.i.n)}</div>
-    <div class="muted">${T('Round {0} of {1}', r + 1, P.nr || P.rounds.length)} · ${T('Empty seats are played by robots: tap one to take it.')}</div>
-    ${pi >= 0 ? `<div class="row2"><button class="btn new" data-ctsit="${esc(key)}">🪑 ${T('Sit down at your table')}</button></div>` : ''}
+    <div class="muted">${lobby ? '⏳ ' + T('Not started yet') : T('Round {0} of {1}', r + 1, P.nr || P.rounds.length) + ' · ' + T('Empty seats are played by robots: tap one to take it.')}</div>
+    ${lobby ? `<div class="ctlobby">${T('{0} of {1} players are sitting.', nSit, P.pairs.length * 2)} ${opener ? T('Start when everyone is here: the empty seats get robots, and anyone who comes later takes a robot\'s seat.') : T('{0} starts the game. Sit down and wait here.', esc(x.i.by || ''))}</div>
+      ${opener ? `<div class="row2"><button class="btn new ctgo" data-ctgo="${esc(key)}">▶ ${T('Start the tournament')}</button></div>` : pi >= 0 ? `<div class="ctlobby ok">✅ ${T('You are sitting. The game starts by itself when it is started.')}</div>` : ''}`
+    : pi >= 0 ? `<div class="row2"><button class="btn new" data-ctsit="${esc(key)}">🪑 ${T('Sit down at your table')}</button></div>` : ''}
     ${tables}${err ? `<div class="err">${esc(err)}</div>` : ''}
     <div class="row2"><button class="btn gold" data-ctresopen="${esc(key)}" data-cttab="pair">🔀 ${T('Pairings')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+// the lobby is read again every 4 s (and a seated player says they are still here); when it is started, the seated go to their table
+function ctLobbyWatch(key, seated) {
+  if (CT.lobbyKey === key && (!key || CT.lobbyT)) { CT.lobbySeated = seated; return; }
+  clearInterval(CT.lobbyT); CT.lobbyT = null; CT.lobbyKey = key; CT.lobbySeated = seated; if (!key) return;
+  const tick = async () => {
+    if (ui.overlay !== 'ctour' || CT.lobbyKey !== key) { clearInterval(CT.lobbyT); CT.lobbyT = null; CT.lobbyKey = null; return; }
+    let x = ctFind(key);
+    if (x && CT.lobbySeated) Net.Cloud.put(ctRunP(x) + '/hb/' + Net.fbKey(myNm()), Date.now()).catch(() => {});
+    await ctLoad(true); x = ctFind(key); if (!x || ui.overlay !== 'ctour' || CT.lobbyKey !== key) return;
+    if (!ctLobby(x)) { clearInterval(CT.lobbyT); CT.lobbyT = null; CT.lobbyKey = null; if (ctMyPair(x.plan) >= 0) { closeOv(); ctSit(key); } else ctShowOpen(key, x); return; }
+    ctShowOpen(key, x);
+  };
+  CT.lobbyT = setInterval(tick, 4000);
+}
+async function ctGo(key) {
+  const x = ctFind(key); if (!x) return;
+  try { await ctSession(); await Net.Cloud.put(ctRunP(x) + '/go', Date.now()); } catch (e) { flash('❌ ' + T('Could not start'), 3000); return; }
+  await ctLoad(true); const y = ctFind(key); if (!y) return;
+  if (ctMyPair(y.plan) >= 0) { closeOv(); ctSit(key); } else ctShowOpen(key, y);
 }
 // a free seat taken: written as this player's (the database lets a seat be taken while it is empty, or its player has
 // been away for 10 minutes), then the table of the round
@@ -270,6 +297,7 @@ async function ctTakeSeat(v) {
     await ctSession();
     const p = ctRunP(x) + '/seats/' + pIdx + '_' + w, cur = await Net.Cloud.get(p), hb = await Net.Cloud.get(ctRunP(x) + '/hb') || {};
     if (cur && cur.k && cur.k !== ctMe() && Date.now() - (+hb[cur.k] || 0) < 120e3) { await ctLoad(true); return ctShow(key, T('Someone has just taken this seat.')); }
+    Net.Cloud.put(ctRunP(x) + '/hb/' + Net.fbKey(myNm()), Date.now()).catch(() => {});   // here now (the lobby shows you sitting)
     await Net.Cloud.put(p, { n: String(myNm()).slice(0, 20), k: ctMe(), ts: Date.now(), sys: SET.sys || 'twoone', conv: Object.keys(SET.conv || {}).filter(c => SET.conv[c]) });
     Net.Cloud.put(ctRunP(x) + '/kick/' + ctMe(), null).catch(() => {});
   } catch (e) { return ctShow(key, T('Could not send — sign in with your name and PIN first.')); }
@@ -307,7 +335,8 @@ function ctSeatsOf(plan, r, ti) {
 }
 const ctBoards = (plan, r, ti) => { const s = ctSetOf(plan, r, ti); return [...Array(plan.bpr).keys()].map(i => s * plan.bpr + i + 1); };
 // who decides a seat now: its player (present), else the robots of the runner's device; dummy goes with declarer
-function ctPresent(k) { const t = CT.tbl; return !!k && (k === ctMe() || (t && t.hb && !(t.kick && t.kick[k] && t.kick[k] > (+t.hb[k] || 0) - 30e3) && Date.now() - (+t.hb[k] || 0) < CT_AWAY)); }   // a removal counts until the player is back (beating again)
+function ctPresent(k) { const t = CT.tbl; if (k && k !== ctMe() && t && t.force && Date.now() - (t.force[k] || 0) < 90e3) return false;   // "robot plays" pressed: this player's seat is the robot's for 90 s
+  return !!k && (k === ctMe() || (t && t.hb && !(t.kick && t.kick[k] && t.kick[k] > (+t.hb[k] || 0) - 30e3) && Date.now() - (+t.hb[k] || 0) < CT_AWAY)); }   // a removal counts until the player is back (beating again)
 function ctRunner() { const t = CT.tbl; if (!t) return ''; const ks = t.seats.map(s => s.k).filter(ctPresent).sort(); return ks[0] || ctMe(); }
 function ctSeatKey(seat) {
   const t = CT.tbl; if (!t || !G) return '';
@@ -386,8 +415,20 @@ async function ctPoll() {
     else if (ctStuck() && !t.bk && ((G.phase === 'play' && G.play && ctWho(G.play.turn) === 'robot') || (G.phase === 'bid' && ctWho(bidTurn()) === 'robot'))) { t.bk = 1; tick(); }   // not moved for 3.5 s: this phone plays the robot
     else if (Date.now() - (t.stAt || 0) > 6000 && G.phase === 'play' && G.play && (G.play.trick.length === 4 || ctRobotHere(G.play.turn))) { t.stAt = Date.now(); tick(); }
     else if (Date.now() - (t.stAt || 0) > 6000 && G.phase === 'bid' && ctRobotHere(bidTurn())) { t.stAt = Date.now(); tick(); }
-    else if (Date.now() - (t.stAt || 0) > 8000 && Date.now() - (t.hbAt || 0) > 8000) { t.hbAt = Date.now(); Net.Cloud.get(t.p + '/hb').then(h => { if (CT.tbl === t && h) { t.hb = h; tick(); } }).catch(() => {}); }   // stuck: is the device playing the robots still here?
+    ctForceBtn(t);
+    if (Date.now() - (t.stAt || 0) > 8000 && Date.now() - (t.hbAt || 0) > 8000) { t.hbAt = Date.now(); Net.Cloud.get(t.p + '/hb').then(h => { if (CT.tbl === t && h) { t.hb = h; tick(); } }).catch(() => {}); }   // stuck: is the device playing the robots still here?
   } catch (e) {}
+}
+// another player has not moved for 25 s: anyone at the table may let the robot play that seat (a phone gone quiet, a player away)
+function ctForceBtn(t) {
+  let b = document.getElementById('ctForce'); const turn = !G || !G.ct || t.watch ? null : G.phase === 'bid' ? bidTurn() : G.phase === 'play' && G.play && G.play.trick.length < 4 ? G.play.turn : null;
+  const k = turn == null ? '' : ctSeatKey(turn), who = turn == null ? '' : ctWho(turn);
+  const show = k && who === k && k !== ctMe() && Date.now() - (t.stAt || Date.now()) > 25e3;
+  if (!show) { if (b) b.remove(); return; }
+  if (!b) { b = document.createElement('button'); b.id = 'ctForce'; b.className = 'btn gold ctforce'; document.body.appendChild(b); }
+  const n = (t.seats.find(s => s.k === k) || {}).n || '';
+  b.textContent = '🤖 ' + T('{0} is not playing: let the robot play', n);
+  b.onclick = () => { t.force = t.force || {}; t.force[k] = Date.now(); t.stAt = Date.now(); b.remove(); tick(); };
 }
 async function ctBeat() {
   const t = CT.tbl; if (!t) return;
@@ -404,6 +445,7 @@ async function ctBeat() {
 // a table after a drop or another device
 async function ctSit(key, r0) {
   const x = ctFind(key); if (!x || !x.plan) return;
+  if (ctLobby(x)) { ctShowOpen(key, x); return; }   // not started yet: the lobby
   const pi = ctMyPair(x.plan); if (pi < 0) return;
   const S = ctSched(x.plan, pi), r = r0 != null ? r0 : +(localStorage.getItem('ct-r-' + x.id + x.d) || 0);
   let s = S.find(q => q.r === r);
@@ -634,7 +676,8 @@ function ctLeave() { const t = CT.tbl; if (t && t.p && !t.watch && typeof myNm =
 setTimeout(() => { if (typeof ui !== 'undefined' && ui.saved && ui.saved.ct) ui.saved = null; if (typeof G !== 'undefined' && G && G.ct && !CT.tbl) { CT.resume = { key: G.ct.key, r: G.ct.r, id: G.id }; G = null; if (typeof render === 'function') render(); } }, 500);
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek],[data-ctsit],[data-ctrobot],[data-ctskip],[data-ctopen]'); if (!t) return;
+  const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek],[data-ctsit],[data-ctrobot],[data-ctskip],[data-ctopen],[data-ctgo]'); if (!t) return;
+  if (t.dataset.ctgo) { ctGo(t.dataset.ctgo); return; }
   if (t.dataset.ctopen) { if ((typeof Net !== 'undefined' && Net.st.on) || (CT.tbl && !CT.tbl.watch && CT.tbl.key !== t.dataset.ctopen.split('|').slice(0, 2).join('|'))) { flash(T('You are already sitting at a table: leave it first.'), 3000); return; } ctTakeSeat(t.dataset.ctopen); return; }
   if (t.dataset.ctrobot) { ctRegister(t.dataset.ctrobot, true); return; }
   if (t.dataset.ctsit) { ctSit(t.dataset.ctsit); return; }
@@ -863,7 +906,7 @@ CT.headBusy = false;
 async function ctHeadMine() {
   if (CT.headBusy || !myNm() || document.hidden) return;
   if (CT.tbl || CT.waiting) return;   // at a table (or waiting for the next one): that is enough for this app
-  const L = ctList().filter(x => x.plan && x.d <= Date.now() && Date.now() - x.d < 6 * 3600e3);
+  const L = ctList().filter(x => x.plan && !ctLobby(x) && x.d <= Date.now() && Date.now() - x.d < 6 * 3600e3);   // a lobby is not played
   CT.headBusy = true;
   try {
     for (const x of L) {
@@ -959,14 +1002,14 @@ window.ctQuickPick = function (club, np, nb) {
     <div class="grp"><span>${T('Number of players')}</span><div class="ctqkeys k5">${[8, 12, 16, 20, 24, 28, 32, 36, 40].map(v => k(v, q.np === v, 'np|' + v)).join('')}</div></div>
     <div class="grp"><span>${T('Number of boards')}</span><div class="ctqkeys k4">${[8, 12, 16, 20, 24, 28, 32, 36].map(v => k(v, q.nb === v, 'nb|' + v)).join('')}</div></div>
     <div class="ctqsum"><b>${c.tables}</b> ${T('tables')} · <b>${c.b}</b> ${T('boards')}</div>
-    <div class="ctqact"><button class="btn" id="oClose">✕</button><button class="btn new" data-ctq="go">▶ ${T('Start now')}</button></div>`);
+    <div class="ctqact"><button class="btn" id="oClose">✕</button><button class="btn new" data-ctq="go">🪑 ${T('Open the tables')}</button></div>`);
 };
 async function ctQuickStart() {
   const q = ui.ctq; if (!q) return;
   try { await ctSession(); } catch (e) { flash(T('Could not send — sign in with your name and PIN first.'), 3000); return; }
   const c = ctqPlan(q), at = Date.now() - 1000, id = Date.now().toString(36);
   const cl = ((ui.clubLive || []).find(c => c.club === q.club) || {});
-  const info = { n: T('Team match'), at, b: c.b, bpr: c.bpr, np: q.np, sc: 'both', sys: SET.sys || 'twoone', conv: [], mov: 'howell', rep: 0, watch: 1, open: true, tm: 1,
+  const info = { n: T('Team match'), at, b: c.b, bpr: c.bpr, np: q.np, sc: 'both', sys: SET.sys || 'twoone', conv: [], mov: 'howell', rep: 0, watch: 1, open: true, tm: 1, lobby: 1, byk: ctMe(),
     st: 'reg', cn: String(cl.c || cl.name || q.club).slice(0, 40), by: String(myNm()).slice(0, 20), ts: Date.now() };
   try {
     await Net.Cloud.put('ot/' + encodeURIComponent(q.club) + '/' + id + '/info', info);

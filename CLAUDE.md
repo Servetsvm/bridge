@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v735`, kulüpler `kulup-v216`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v736`, kulüpler `kulup-v217`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,11 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v735`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- **Takım maçı bekleme odası:** online Takım maçı "🪑 Masaları aç" ile kurulur (`info.lobby:1, byk`), oyun başlamaz: koltuklar alınır, oturan 4 sn'de bir hb yazar,
+  herkes "n/m kişi oturdu" görür; açan kişi "▶ Turnuvayı başlat" (`ctGo` → `run/<d>/go`, kural: üye, bir kez) → oturanlar masaya geçer, boşlarda robot,
+  sonradan gelen robotun yerine oturur. Lobide hiçbir şey oynanmaz (`ctLobby`: ctSit, ctHeadMine, runner.js, kulupler otRobots). Test (sahte DB, iki telefon) geçti.
+  **Takılma çaresi:** başka oyuncu 25 sn oynamazsa masadakilere "🤖 X oynamıyor: robot oynasın" (`ctForceBtn`, `t.force[k]` 90 sn ctPresent false). Takılmanın asıl
+  nedeni bulunamadı (canlı veri okunamadı). 10 dil. v736 / kulup-v217.
 - Online masada (net.js `owner`) robot deklarer olunca yalancıyı insan oynamak zorundaydı (`at(d) || at(dm)`): artık robot deklarer iki eli de oynar
   (`at(d) || 'robot'`). Çevrimdışı (v698, `userControls`) ve kulüp akşamı (`ctSeatKey` yalancı→deklarer) zaten böyleydi; online masa unutulmuştu. v735.
 - Online Takım maçında masa değişikliği yok (kullanıcı): `ctqPlan` artık tek tur (bpr = el sayısı, R 1) — her masa kendi oyuncularıyla bütün elleri

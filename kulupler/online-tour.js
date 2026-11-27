@@ -389,6 +389,7 @@ async function otRobots() {
       if (!t || !t.info) continue;
       for (const [d, run] of Object.entries(t.run || {})) {
         if (!run || !run.plan || Date.now() - +d > 6 * 3600e3 || +d > Date.now()) continue;
+        if (t.info.lobby && !run.go) continue;   // a Team match still in its lobby: not started
         const base = '/' + id + '/run/' + d, get = async q => { const r = await fetch(await otUrl(base + q), { cache: 'no-store' }); return r.ok ? r.json() : null; };
         if (await get('/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
         const tmap = await get('/t') || {}, plan = P.ctFill(P.ctSeatsApply ? P.ctSeatsApply(run.plan, run.seats) : run.plan, tmap), r = P.ctCurRound(plan, tmap); if (r < 0) continue;

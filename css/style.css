@@ -2563,3 +2563,8 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .hcard.ctcard.ctlive span{font-size:18px;color:#d9f7e3}
 .hcard.ctcard.ctlive em{font-style:normal;font-size:22px;font-weight:800;background:#f5c542;color:#14301d;border-radius:12px;padding:8px 22px;margin-top:4px}
 @keyframes ctlivePulse{0%,100%{box-shadow:0 4px 14px rgba(20,83,45,.35)}50%{box-shadow:0 0 0 6px rgba(245,197,66,.45)}}
+/* the Team match lobby and the "let the robot play" button */
+.ctlobby{background:#fff7d6;border:2px solid #e3b23c;border-radius:12px;padding:12px 14px;font-size:18px;line-height:1.35;margin:8px 0;color:#3a2c00}
+.ctlobby.ok{background:#e4f6e8;border-color:#2f8a4a;color:#14401f}
+.btn.ctgo{min-height:72px;font-size:24px;font-weight:800;width:100%}
+.ctforce{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;font-size:18px;padding:14px 18px;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.35)}
