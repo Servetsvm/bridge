@@ -207,7 +207,9 @@ window.tdcClub=function(){ if(qtMember()) return;
 // the club's info for BridgePlay's Clubs page: address (players open it in their maps), contact person, phone (call / SMS).
 // Kept in the club's own data (gate/clubs/<id>/bm/info), like the logo
 window.tdcInfo=async function(){
-  let x={}; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),{cache:'no-store'}); x=(r.ok&&await r.json())||{}; }catch(e){}
+  // read first: a read that fails (no connection, the sign-in run out) opens no empty form — saved, it would wipe the info
+  let x={}; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),{cache:'no-store'}); if(!r.ok) throw new Error(r.status); x=(await r.json())||{}; }catch(e){ toast('❌ '+L('Could not read the club info — check the connection and try again')); return; }
+  window._tdcInfoHad=!!(x.adr||x.kp||x.tel||(x.sch&&x.sch.length)||x.tm||x.sb);
   const v=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
   openModal('ℹ️ '+L('Club info'),`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${L('Shown on BridgePlay\'s Clubs page: players open the address in their maps, and call or send an SMS to the number.')}</div>
     <div class="field"><label>${L('Address')}</label><textarea id="tdcAdr" rows="2" maxlength="150" style="width:100%;box-sizing:border-box;">${v(x.adr)}</textarea></div>
@@ -246,7 +248,9 @@ window.tdcInfoSave=async function(){
   if(document.getElementById('tdcSb')?.checked) x.sb=1;   // the Social Bridge button, the same way   // the Team match button on BridgePlay's club page: only when the admin turns it on
   if(x.tel&&!/^[+\d][\d\s\-()]{4,}$/.test(x.tel)){ toast('❌ '+L('Phone number')+'?'); return; }
   try{
-    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),x.adr||x.kp||x.tel||x.sch||x.tm||x.sb?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
+    const empty=!(x.adr||x.kp||x.tel||x.sch||x.tm||x.sb);
+    if(empty&&window._tdcInfoHad&&!await confirmDialog(L('Delete all the club info?'),{title:'🗑 '+L('Delete'),confirmLabel:L('Delete'),cancelLabel:L('Cancel')})) return;   // an emptied form wipes the info only when asked
+    const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),!empty?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
     if(!r.ok) throw new Error(String(r.status));
   }catch(e){ toast('❌ '+L('Not saved — please log in again')); return; }
   closeModal(); toast('✅ '+L('Saved'));

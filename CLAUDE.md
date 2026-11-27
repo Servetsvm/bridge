@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v691`, kulüpler `kulup-v202`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v691`, kulüpler `kulup-v203`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -64,6 +64,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v691`, kulü
   kaldırıldı. Firebase kuralı: bm/{state,movements,pairs,boards,approvals,tableLocks,boardLocks,ready,kicks,tdcalls,logs,hands,dd,archives,playerdb}
   her üyeye yazılabilir (eskiden yalnız turnuva yokken/hızlı maçta). Bedeli: giriş yapmış herhangi bir üye bir kulübün skorlarını
   teknik olarak değiştirebilir (kullanıcıya söylendi). bm/info ve bm/logo yalnız sahip/TD'de kaldı. kulup-v201.
+- Kulüp bilgisi/logosu boş geliyor (kullanıcı, 27.11): okuma başarısız olunca pencere boş açılıyor, boş formu Kaydet bilgiyi DELETE ediyordu
+  (olası silinme yolu). Artık okuma hatasında pencere açılmaz (uyarı), dolu bilgi boşaltılınca önce sorulur (`_tdcInfoHad`). kulup-v203.
 - Kullanıcı kulüp bilgisi + logosunun kaybolduğunu söyledi; kodda bunları silen yol bulunamadı (td-console tdcInfoSave boş formda
   DELETE eder; logo seçicide "yok" DELETE eder). Hangi kulüp olduğu soruldu.
 - **🌐 Online, hemen başlayan açık turnuva** (v691/kulup-v202): BridgePlay kulüp kartında turnuva yokken `data-clubonline` →
