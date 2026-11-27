@@ -2609,6 +2609,12 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .sheet[data-ov="ctour"]:has(.ctseats){width:100%;max-width:none;height:100%;max-height:none;border-radius:0;box-sizing:border-box;padding:24px max(16px,calc((100% - 760px)/2)) 24px;overflow:auto}
 .sheet[data-ov="ctour"]:has(.ctseats) .ctseat{min-height:70px}
 .sheet[data-ov="ctour"] [data-ctsit]{min-height:72px;font-size:24px;font-weight:800;width:100%}
+/* the club's running online evening: a big, unmistakable card */
+.hcard.ctcard.ctlive{display:flex;width:100%;box-sizing:border-box;flex-direction:column;align-items:center;gap:6px;padding:18px 14px;background:linear-gradient(180deg,#1f6b3a,#14532d);border:3px solid #f5c542;color:#fff;box-shadow:0 4px 14px rgba(20,83,45,.35);animation:ctlivePulse 2s ease-in-out infinite}
+.hcard.ctcard.ctlive b{font-size:28px;line-height:1.15;color:#fff}
+.hcard.ctcard.ctlive span{font-size:18px;color:#d9f7e3}
+.hcard.ctcard.ctlive em{font-style:normal;font-size:22px;font-weight:800;background:#f5c542;color:#14301d;border-radius:12px;padding:8px 22px;margin-top:4px}
+@keyframes ctlivePulse{0%,100%{box-shadow:0 4px 14px rgba(20,83,45,.35)}50%{box-shadow:0 0 0 6px rgba(245,197,66,.45)}}
 
 </style>
 
@@ -13711,7 +13717,7 @@ function showOpenChoice() {
 }
 // back to the home page from a board played alone (the board is kept for Continue)
 function goHome() {
-  if (G && G.ct) { ctLeave(); G = idleG(); closeOv(); save(); render(); return; }   // a club table goes on without you (the card brings you back)
+  if (G && G.ct) { try { const t = CT.tbl; if (t && t.plan0 && t.p) { const pi = ctMyPair(t.plan), me = ctMe(); if (pi >= 0) { const pr = t.plan.pairs[pi]; Net.Cloud.put(t.p + '/seats/' + pi + '_' + (pr.ka === me ? 'a' : 'b'), null).catch(() => {}); } } } catch (e) {} /* leaving frees my seat: a robot takes it */ ctLeave(); G = idleG(); closeOv(); save(); render(); return; }   // a club table goes on without you (the card brings you back)
   if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
   // leaving the table ends the board: the home page offers Start (choose a convention, then a new board), not Continue
   clearTimeout(timer); ui.saved = null;
@@ -15996,7 +16002,7 @@ async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];
     const otOf = c => typeof ctList === 'function' ? [ctFirst(ctList().filter(x => x.club === c && !x.i.test))].filter(Boolean) : [];   // one evening a club
-    const otCard = x => x.i.open && x.plan ? `<button class="hcard ctcard reg" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>🟢 ${T('Being played now')} · 🪑 ${T('Sit down')} ›</span></button>`
+    const otCard = x => x.i.open && x.plan ? `<button class="hcard ctcard reg ctlive" data-ct="${esc(x.club + '|' + x.id)}"><b>🏆 ${esc(x.i.n)}</b><span>🟢 ${T('Being played now')}</span><em>🪑 ${T('Sit down')} ›</em></button>`
       : `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`;
     const otRows = c => otOf(c).map(otCard).join('');
     const otLive = c => otOf(c).find(x => x.plan);   // an online evening being played: the club's tournament now

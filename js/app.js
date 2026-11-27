@@ -2469,7 +2469,7 @@ function showOpenChoice() {
 }
 // back to the home page from a board played alone (the board is kept for Continue)
 function goHome() {
-  if (G && G.ct) { ctLeave(); G = idleG(); closeOv(); save(); render(); return; }   // a club table goes on without you (the card brings you back)
+  if (G && G.ct) { try { const t = CT.tbl; if (t && t.plan0 && t.p) { const pi = ctMyPair(t.plan), me = ctMe(); if (pi >= 0) { const pr = t.plan.pairs[pi]; Net.Cloud.put(t.p + '/seats/' + pi + '_' + (pr.ka === me ? 'a' : 'b'), null).catch(() => {}); } } } catch (e) {} /* leaving frees my seat: a robot takes it */ ctLeave(); G = idleG(); closeOv(); save(); render(); return; }   // a club table goes on without you (the card brings you back)
   if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
   // leaving the table ends the board: the home page offers Start (choose a convention, then a new board), not Continue
   clearTimeout(timer); ui.saved = null;
@@ -4754,7 +4754,7 @@ async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];
     const otOf = c => typeof ctList === 'function' ? [ctFirst(ctList().filter(x => x.club === c && !x.i.test))].filter(Boolean) : [];   // one evening a club
-    const otCard = x => x.i.open && x.plan ? `<button class="hcard ctcard reg" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>🟢 ${T('Being played now')} · 🪑 ${T('Sit down')} ›</span></button>`
+    const otCard = x => x.i.open && x.plan ? `<button class="hcard ctcard reg ctlive" data-ct="${esc(x.club + '|' + x.id)}"><b>🏆 ${esc(x.i.n)}</b><span>🟢 ${T('Being played now')}</span><em>🪑 ${T('Sit down')} ›</em></button>`
       : `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`;
     const otRows = c => otOf(c).map(otCard).join('');
     const otLive = c => otOf(c).find(x => x.plan);   // an online evening being played: the club's tournament now
