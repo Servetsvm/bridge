@@ -10,6 +10,7 @@
   const SUPPORTED=LANGS.map(l=>l[0]);
 
   const TR={
+    "Online button on BridgePlay (the TD starts an online tournament at once, robots in the empty seats)":"BridgePlay'de Online düğmesi (TD online turnuvayı hemen başlatır, boş koltuklarda robotlar)",
     "Could not read the club info — check the connection and try again":"Kulüp bilgisi okunamadı — bağlantıyı kontrol edip tekrar deneyin","Could not read the club logo — check the connection and try again":"Kulüp logosu okunamadı — bağlantıyı kontrol edip tekrar deneyin","Delete all the club info?":"Kulüp bilgisinin tamamı silinsin mi?",
     "Start now — empty seats are played by robots":"Hemen başlat — boş koltuklarda robotlar oynar","No registration: the players sit down in BridgePlay (Clubs → this club → 🌐 Online); a player who comes later takes a robot's seat.":"Kayıt yok: oyuncular BridgePlay'de oturur (Kulüpler → bu kulüp → 🌐 Online); sonradan gelen oyuncu robotun koltuğuna oturur.",
     "Start a test tournament with robots now?":"Robotlarla bir test turnuvası şimdi başlasın mı?",

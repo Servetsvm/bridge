@@ -209,7 +209,7 @@ window.tdcClub=function(){ if(qtMember()) return;
 window.tdcInfo=async function(){
   // read first: a read that fails (no connection, the sign-in run out) opens no empty form — saved, it would wipe the info
   let x={}; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),{cache:'no-store'}); if(!r.ok) throw new Error(r.status); x=(await r.json())||{}; }catch(e){ toast('❌ '+L('Could not read the club info — check the connection and try again')); return; }
-  window._tdcInfoHad=!!(x.adr||x.kp||x.tel||(x.sch&&x.sch.length)||x.tm||x.sb);
+  window._tdcInfoHad=!!(x.adr||x.kp||x.tel||(x.sch&&x.sch.length)||x.tm||x.sb||x.ol);
   const v=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
   openModal('ℹ️ '+L('Club info'),`<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${L('Shown on BridgePlay\'s Clubs page: players open the address in their maps, and call or send an SMS to the number.')}</div>
     <div class="field"><label>${L('Address')}</label><textarea id="tdcAdr" rows="2" maxlength="150" style="width:100%;box-sizing:border-box;">${v(x.adr)}</textarea></div>
@@ -217,7 +217,8 @@ window.tdcInfo=async function(){
     <div class="field"><label>${L('Phone number')}</label><input id="tdcTel" type="tel" maxlength="25" placeholder="+47 …" value="${v(x.tel)}"></div>
     <div class="field"><label>📅 ${L('Tournament days')}</label><div id="tdcSch"></div><button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px;" onclick="tdcSchAdd()">➕ ${L('Add a day')}</button></div>
     <label style="display:flex;gap:10px;align-items:center;font-size:0.95rem;margin-top:6px;cursor:pointer;"><input type="checkbox" id="tdcTm" ${x.tm?'checked':''} style="width:22px;height:22px;"> 🏆 ${L('Team match button on BridgePlay (members start a 2-table match)')}</label>
-    <label style="display:flex;gap:10px;align-items:center;font-size:0.95rem;margin-top:6px;cursor:pointer;"><input type="checkbox" id="tdcSb" ${x.sb?'checked':''} style="width:22px;height:22px;"> 🤝 ${L('Social Bridge button on BridgePlay (members choose the players and the boards)')}</label>`,
+    <label style="display:flex;gap:10px;align-items:center;font-size:0.95rem;margin-top:6px;cursor:pointer;"><input type="checkbox" id="tdcSb" ${x.sb?'checked':''} style="width:22px;height:22px;"> 🤝 ${L('Social Bridge button on BridgePlay (members choose the players and the boards)')}</label>
+    <label style="display:flex;gap:10px;align-items:center;font-size:0.95rem;margin-top:6px;cursor:pointer;"><input type="checkbox" id="tdcOl" ${x.ol?'checked':''} style="width:22px;height:22px;"> 🌐 ${L('Online button on BridgePlay (the TD starts an online tournament at once, robots in the empty seats)')}</label>`,
     `<button class="btn btn-ghost" onclick="closeModal()">${L('Cancel')}</button><button class="btn btn-gold" onclick="tdcInfoSave()">${L('Save')}</button>`);
   (Array.isArray(x.sch)?x.sch:[]).forEach(r=>tdcSchAdd(r));
 };
@@ -245,10 +246,11 @@ window.tdcInfoSave=async function(){
     .sort((a,b)=>ord(a.d)-ord(b.d)||a.t.localeCompare(b.t)).slice(0,7);
   if(sch.length) x.sch=sch;
   if(document.getElementById('tdcTm')?.checked) x.tm=1;
-  if(document.getElementById('tdcSb')?.checked) x.sb=1;   // the Social Bridge button, the same way   // the Team match button on BridgePlay's club page: only when the admin turns it on
+  if(document.getElementById('tdcSb')?.checked) x.sb=1;
+  if(document.getElementById('tdcOl')?.checked) x.ol=1;   // the 🌐 Online button on BridgePlay's club card: only when the TD turns it on   // the Social Bridge button, the same way   // the Team match button on BridgePlay's club page: only when the admin turns it on
   if(x.tel&&!/^[+\d][\d\s\-()]{4,}$/.test(x.tel)){ toast('❌ '+L('Phone number')+'?'); return; }
   try{
-    const empty=!(x.adr||x.kp||x.tel||x.sch||x.tm||x.sb);
+    const empty=!(x.adr||x.kp||x.tel||x.sch||x.tm||x.sb||x.ol);
     if(empty&&window._tdcInfoHad&&!await confirmDialog(L('Delete all the club info?'),{title:'🗑 '+L('Delete'),confirmLabel:L('Delete'),cancelLabel:L('Cancel')})) return;   // an emptied form wipes the info only when asked
     const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/info.json'),!empty?{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(x)}:{method:'DELETE'});
     if(!r.ok) throw new Error(String(r.status));
