@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v708`, kulüpler `kulup-v211`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v709`, kulüpler `kulup-v211`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v708`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Sayfa yenilenince eski masaya otomatik dönüş (`autoRejoin`, `bridge-last-table`) "Host'un kabul etmesi bekleniyor" penceresini açıp
+  bırakıyordu. Artık sessiz: pencere açmaz, `sit:1` ile (açık masa hemen oturtur), 15 sn'de oturamazsa vazgeçer ve masayı unutur. v709.
 - Kullanıcının listesi (v708): Ayarlar'dan Yön, Deklarasyon açıklamaları, Robotları düzelt, Zorunlu kartı oyna ve "uçakta internetsiz" satırı kalktı;
   her açılışta `SET.seat=2, auto=true, expl=true, fixBot=false` (start + acctLoad). Online penceresi: yön sormaz (yalnız 🪑 Otur → Güney),
   WhatsApp/SMS yok (`convCardHtml(true)`). Açık masalar'da 🔌 saat satırı gösterilmez. Otur → önce 🤝 Ortak / ⚔️ Rakip (`data-jsw`).

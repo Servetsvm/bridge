@@ -1637,14 +1637,14 @@ const Net = (() => {
     // so the host is not asked again for a request already answered, but a new request of yours is always asked
     let rq = null; try { rq = localStorage.getItem("bridge-req-id"); } catch (e) {}
     if (!(retry || auto) || !rq) { rq = Date.now().toString(36) + Math.random().toString(36).slice(2, 7); try { localStorage.setItem("bridge-req-id", rq); } catch (e) {} }
-    if (!retry) { st.msg = T("Connecting to table {0}…", code); showJoin(code); }
+    if (!retry && !auto) { st.msg = T("Connecting to table {0}…", code); showJoin(code); }   // coming back after a refresh: nothing pops up
     try {
       await loadLib();
       const peer = await new Promise((res, rej) => { const p = new Peer(PEER_OPT); p.on('open', () => res(p)); p.on('error', e => rej(new Error('Could not reach the connection service (' + (e.type || 'error') + ').'))); });
       const conn = peer.connect(PREFIX + code, { reliable: true });
       st.joinPeer = peer;
       let welcomed = false, failed = false, waiting = false;
-      const fail = msg => { if (welcomed || failed) return; failed = true; try { peer.destroy(); } catch (e) {} if (retry) { retry(false); return; } forgetTable(); st.msg = msg; showJoin(code); };
+      const fail = msg => { if (welcomed || failed) return; failed = true; try { peer.destroy(); } catch (e) {} if (retry) { retry(false); return; } forgetTable(); if (auto) { st.msg = ''; st.waiting = false; return; } st.msg = msg; showJoin(code); };
       setTimeout(() => { if (!welcomed && !waiting) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
       peer.on('error', e => { if (e.type === 'peer-unavailable') fail('That table is not open any more.'); });
       peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
@@ -1668,7 +1668,7 @@ const Net = (() => {
         else if (d.t === "askdone") { if (st.askId === d.id) askClose(); }
         else if (d.t === "nudge") nudged(+d.s || 0);
         else if (d.t === "movedeclined") flash('The host did not agree to the move', 2500);
-        else if (d.t === "wait") { waiting = true; st.waiting = true; st.msg = 'Waiting for the host to accept you…'; showJoin(code); }
+        else if (d.t === "wait") { waiting = true; st.waiting = true; st.msg = 'Waiting for the host to accept you…'; if (!auto) showJoin(code); }
         else if (d.t === "nametaken") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = T("The name {0} is already used at this table. Choose another name.", name); showJoin(code); }
         else if (d.t === "declined") { waiting = false; st.waiting = false; failed = true; try { peer.destroy(); } catch (e) {} st.msg = 'The host did not accept the request.'; showJoin(code); }
         else if (d.t === "kick") { st.rejoin = null; if (st.guest) leave('The host removed you from the table.'); else { st.msg = 'The host removed you from this table.'; showJoin(code); } }
@@ -1691,9 +1691,11 @@ const Net = (() => {
     let t = null; try { t = JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch (e) {}
     if (!t || !t.code) return;
     if (Date.now() - t.ts > 10 * 60000) { forgetTable(); return; }   // the host keeps a seat for 10 minutes
-    st.want = t.watch ? 'watch' : t.want || 'partner'; st.offer = null;
+    st.want = t.watch ? 'watch' : t.want || 'partner'; st.offer = null; st.sitNow = true;   // an open table seats you back at once
     flash(T('Going back to your table…'), 2500);
     join(t.code, t.name, st.want, undefined, true);
+    // that table is not there any more (or waits for its host to answer): give up quietly, the table is forgotten
+    setTimeout(() => { if (st.on || !st.waiting) return; st.waiting = false; st.msg = ''; try { st.joinPeer && st.joinPeer.destroy(); } catch (e) {} forgetTable(); if (typeof ui !== 'undefined' && ui.overlay === 'net') closeOv(); render(); }, 15000);
   }
   // the connection dropped: keep the table on screen and try to get back in for two minutes
   /* the host's app is gone and did not come back: the players left keep their table. The first of them (by seat)
