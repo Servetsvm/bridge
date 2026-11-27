@@ -2590,6 +2590,8 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .rtonbar{display:block;width:100%;grid-column:1/-1;border:1px solid #155e2e;background:linear-gradient(180deg,#2a8a4a,#1f7a3d);color:#fff;border-radius:10px;font:800 18px/1 var(--f-ui,inherit);letter-spacing:.4px;padding:12px 8px;min-height:46px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 rgba(0,0,0,.18)}
 .rtonbar:hover{filter:brightness(1.08)}
 .rtcard .rtonbar{margin:12px 14px 8px;width:calc(100% - 28px)}
+.rtonbar{font-weight:600;font-size:15px;padding:7px 8px;min-height:0;cursor:default;text-align:center}
+.rtonbar:hover{filter:none}
 
 </style>
 
@@ -3313,7 +3315,7 @@ function cands(x) {
       add(B(2, 4), h => h.len[lw[0]] >= 5 && h.len[lw[1]] >= 5 && h.hcp >= 7, { min: 7, len: { [lw[0]]: 5, [lw[1]]: 5 }, tag: 'unusual', suits: lw, cv: 'michaels', t: 'Unusual 2NT: ' + SUIT[lw[0]] + ' and ' + SUIT[lw[1]] + ' (5-5)' });
     }
     if (LV(ob) === 1) add(B(1, 4), h => h.bal && h.hcp >= 15 - d && h.hcp <= 18 && h.stop(os), { min: 15 - d, max: 18, len: BAL, t: 'Balanced 15-18 HCP with a stopper in their suit', tag: 'nt1' });
-    if (!art) add('X', h => h.hcp >= 17, { min: 17, cv: 'takeout', t: 'Strong hand: 17+ HCP' });
+    if (!art) add('X', h => h.hcp >= 17, { min: 17, cv: 'takeout', strong: 1, t: 'Takeout double: 12+ HCP, support for the unbid suits' });   // a strong hand doubles first: said as any takeout double (12+), its 17+ shows when the doubler bids again (the robots' own reading is unchanged)
     for (const s of [3, 2, 1, 0]) {
       if (x.oppSuits.includes(s)) continue; const l = cheap(s);
       if (l + 1 <= 3) add(B(l + 1, s), h => !bal4 && h.len[s] >= 6 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2, { min: 5, max: 10, len: { [s]: 6 }, t: 'Weak jump overcall: 6+ ' + SUIT[s] + ', 5-10 HCP' });
@@ -4295,7 +4297,17 @@ function aiBid(auc, seat, hand, cards) {
 }
 function explainCall(auc, seat, call, cards) {
   const x = ctxOf(auc, seat, cards);
-  const known = cands(x).find(c => c.call === call);
+  const all = cands(x).filter(c => c.call === call);
+  let known = all[0];
+  if (call === 'X' && known && known.m.strong) known = all.find(c => !c.m.strong) || known;
+  // the doubler bids again after a takeout double and partner's simple answer: a strong hand, 17+
+  { const mine = auc.filter(e => e.seat === seat && e.call !== 'P'), pb = auc.filter(e => e.seat === (seat + 2) % 4 && isNum(e.call));
+    const xi = auc.findIndex(e => e.seat === seat && e.call === 'X');
+    if (isNum(call) && mine.length === 1 && mine[0].call === 'X' && xi >= 0 && !auc.slice(0, xi).some(e => e.seat === (seat + 2) % 4 && isNum(e.call)) && auc.slice(0, xi).some(e => sideOf(e.seat) !== sideOf(seat) && isNum(e.call))
+      && pb.length === 1 && !(known && (known.m.tag || known.m.cv)) && !auc.some(e => sideOf(e.seat) !== sideOf(seat) && isNum(e.call) && ST(e.call) === ST(pb[0].call) && auc.indexOf(e) < xi)) {
+      const st = ST(call), raise = st === ST(pb[0].call);
+      return { min: st === 4 ? 18 : 17, ...(st < 4 && !raise ? { len: { [st]: 5 } } : {}), t: raise ? 'After my takeout double: raise, 17+ HCP' : st === 4 ? 'After my takeout double: balanced, 18+ HCP' : 'After my takeout double: strong hand, 17+ HCP, 5+ ' + SUIT[st] };
+    } }
   // 4♣ right after partner's natural 1NT, 2NT or 3NT, no suit agreed: asks for aces, on any card, in any
   // sequence (1♣–1♥–2NT–3NT–4♣). The robots only answer it: they start Gerber in the cases cands() lists
   if (call === B(4, 0) && !(known && (known.m.tag || known.m.cv))) {   // a convention of the list keeps its meaning; a plain natural 4♣ does not
@@ -10962,6 +10974,7 @@ const SYS_T = {
 /* the robots' bid explanations are built in English; BID_PH turns their phrases into the chosen language
    (columns: en tr no es fr it de ru pl zh; longer phrases are matched first, case is kept on the first letter) */
 const BID_PH = [
+  ["after my takeout double", "çıkış kontrumdan sonra", "etter min opplysningsdobling", "tras mi doblo informativo", "après mon contre d’appel", "dopo il mio contro informativo", "nach meinem Informationskontra", "после моей вызывной контры", "po mojej kontrze wywołującej", "在我的技术性加倍之后"],
   ["a void in", "… şikan:", "renons i", "fallo en", "chicane à", "vuoto a", "Chicane in", "ренонс в", "renons w", "缺门："],
   ["asking for key cards outside it", "dışındaki anahtar kartları soruyor", "spør etter nøkkelkort utenom den", "pregunta por las cartas clave fuera de él", "demande les clés en dehors", "chiede le carte chiave fuori di esso", "fragt nach Schlüsselkarten außerhalb", "спрашивает ключевые карты вне её", "pyta o wartości kluczowe poza nim", "询问该花色以外的关键张"],
   ["the two lowest", "en düşük iki renk", "de to laveste", "los dos más bajos", "les deux plus basses", "i due più bassi", "die zwei niedrigsten", "две младшие", "dwa najniższe", "两门最低"],
@@ -13141,7 +13154,7 @@ function homeShell2() {
       <div class="h2tiles">
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="hBidPrac" type="button"', '🧩', T('Puzzle'), `${T('Problem of the day')} · ${T('Bidding practice')}<span id="hPuzzle"></span>`)}
-        <div class="h2tile h2sys"><button class="rtonbar" data-rton="${RT_KEYS.includes(SET.sys) ? SET.sys : 'twoone'}">🌐 ${T('Online')}</button>${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button>`).join('')}</div>
+        <div class="h2tile h2sys"><div class="rtonbar">🌐 ${T('Online')}</div>${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button>`).join('')}</div>
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
@@ -14059,6 +14072,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 714, tr: 'Çıkış kontrunu artık her sistemde “12+ puan, konuşulmamış renklere destek” diye açıklıyorum; senin kontrunu da öyle okuyorum (eskiden 17+ sanıyordum ve fazla yüksek çıkıyordum). Kontrdan sonra kontr eden tekrar konuşursa (yeni renk, SA ya da ortağın rengine artırma) bu 17+ puanlık güçlü el demektir. Kendi tekliflerim değişmedi: 20.000 elde (SAYC, 2/1) 0 kontrat farkı.' },
   { v: 690, tr: 'Bütün konvansiyonlarımı çift ölü elle tek tek ölçtüm (her biri 20.000 el, açık/kapalı) ve kaybettiren yerleri düzelttim. RKCB’de “0 ya da 3”, “1 ya da 4” cevaplarını artık mümkünse yüksek okuyorum, “2 + koz kızı” 5 anahtar kart da olabilir; koz kızı eksik diye 9’lu uyumla 5’te durmuyorum. Bütün anahtar kartlar ve koz kızı varsa, 8’li uyum ve 31+ puanla grand şlem diyorum. Inverted Minors’ta ortağın zayıf 3♣/3♦ artırmasına normal açışla pas geçiyorum. Ogust cevabından sonra yapay 3♣/3♦’ü pas geçmiyorum. Gambling 3NT’ye pas için bir minörde de stoper istiyorum. Toplam: altı sistemde 240.000 elde +4328 IMP.', en: 'I measured each of my conventions double dummy (20,000 deals each, on and off) and fixed where they lost. After RKCB I read “0 or 3” and “1 or 4” as the higher number when it fits, and “2 + the queen” can be 5 key cards; I no longer stop in five for a missing trump queen with a nine-card fit. With every key card and the queen, an eight-card fit and 31+ HCP I bid the grand slam. Over partner’s weak inverted-minor raise (1♣–3♣) I pass with a normal opening. After the Ogust answer I never pass the artificial 3♣/3♦. Passing a Gambling 3NT needs a minor stopped too. In all: +4328 IMP in 240,000 deals over the six systems.' },
   { v: 689, tr: 'Kartıma 10 yeni konvansiyon eklendi; hepsi kapalı gelir, işaretlersen ben de onlara göre oynarım: Flannery 2♦ (+314 IMP), Voidwood (+48), Minorwood (+74), Walsh (+121), Gazilli (+161), Landy (+72; 2/1’de Cappelletti’nin yerine +170), Ghestem (+19; Michaels’ın yerine −97), Baron (+44; 4 yollu transferlerin yerine −8), Jordan 2NT (−37) ve Kokish (−110). Sayılar çift ölü elle, her biri 15.000–100.000 elde. Claude sistemi kaldırıldı.', en: 'Ten new conventions on my card; all start switched off, and when you tick one I play it too: Flannery 2♦ (+314 IMP), Voidwood (+48), Minorwood (+74), Walsh (+121), Gazilli (+161), Landy (+72; in place of Cappelletti in 2/1 +170), Ghestem (+19; in place of Michaels −97), Baron (+44; in place of 4-way transfers −8), Jordan 2NT (−37) and Kokish (−110). Double dummy, 15,000–100,000 deals each. The Claude system is gone.' },
   { v: 682, tr: 'Konvansiyon kartımın aralıkları senin tanımlarına göre değişti: Weak Jump Shift 3-6 puan (0-5 değil), Strong Jump Shift 17+ (19+ değil), Drury 9-11 (10-12 değil), Multi 2♦ 5-10 (5-11 değil), Inverted Minors baraj artırması 6-9 (0-9 değil), New Minor Forcing 10+ (11+ değil); SAYC ve Acol’da 2 seviyesinde yeni renk 10+ (11+ değil).', en: 'My convention card follows your definitions now: Weak Jump Shift 3-6 HCP (was 0-5), Strong Jump Shift 17+ (was 19+), Drury 9-11 (was 10-12), Multi 2♦ 5-10 (was 5-11), Inverted Minors preemptive raise 6-9 (was 0-9), New Minor Forcing 10+ (was 11+); in SAYC and Acol a two-level new suit is 10+ (was 11+).' },
@@ -14401,7 +14415,7 @@ function rtSitPick() {
 const RT_SHORT = { sayc: 'SAYC', twoone: '2/1', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' };
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<button class="rtonbar" data-rton="${RT_KEYS.includes(SET.sys) ? SET.sys : 'twoone'}">🌐 ${T('Online')}</button><div class="rtrows">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
+  return `<div class="rtonbar">🌐 ${T('Online')}</div><div class="rtrows">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
 }
 // the robots' tables (about 2 MB) are fetched only where their card is shown (a wide screen): a phone hides it,
 // and its system buttons fetch them when tapped
@@ -15795,7 +15809,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-26T21:58:37Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-27T17:45:00Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-20000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {

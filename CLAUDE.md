@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v713`, kulüpler `kulup-v211`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v714`, kulüpler `kulup-v211`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,10 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v713`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Çıkış kontrü: güçlü X (17+) da "Takeout double: 12+ HCP…" diye açıklanır (`strong:1`, robotun kendi `min:17` okuması aynı → 20000 el
+  SAYC/2/1 0 kontrat farkı; min 12 denendi: −128/−116 IMP, geri alındı). Oyuncunun X'i takeout (12+) okunur (eskiden ilk aday 17+).
+  Kontr edenin ortağın basit cevabından sonraki teklifi `explainCall`'da "After my takeout double: … 17+" (SA 18+); BID_PH 10 dil. ROBOT_LEARNED v714.
+  Online şeridi ince ve düğme değil (yalnız başlık); sistem adları açar. v714.
 - Sistem düğmelerinin altındaki altı 🌐 Online kalktı; üstte tek, tam genişlikte yeşil **🌐 Online** (`.rtonbar`, kartın sistemiyle
   `rtOnline`); telefon kutusu ve tablet Sistem masası kartı (başlık yerine). Sarı düğmeler o sistemle aynı pencereyi açar. v713.
 - Masa sahibi, deklarasyon tablosunun başlığında misafir oyuncunun adının altında kırmızı ✕ görür (`auctionTable`, `data-kickask`);

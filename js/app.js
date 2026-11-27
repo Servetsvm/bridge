@@ -1934,7 +1934,7 @@ function homeShell2() {
       <div class="h2tiles">
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="hBidPrac" type="button"', '🧩', T('Puzzle'), `${T('Problem of the day')} · ${T('Bidding practice')}<span id="hPuzzle"></span>`)}
-        <div class="h2tile h2sys"><button class="rtonbar" data-rton="${RT_KEYS.includes(SET.sys) ? SET.sys : 'twoone'}">🌐 ${T('Online')}</button>${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button>`).join('')}</div>
+        <div class="h2tile h2sys"><div class="rtonbar">🌐 ${T('Online')}</div>${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button>`).join('')}</div>
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
@@ -2852,6 +2852,7 @@ function showAuction() {
 // never at online tables or in tournaments: there the robots bid and play only by the convention cards
 // what the robots have newly learned: Servet is told once, when he opens the app after the update
 const ROBOT_LEARNED = [
+  { v: 714, tr: 'Çıkış kontrunu artık her sistemde “12+ puan, konuşulmamış renklere destek” diye açıklıyorum; senin kontrunu da öyle okuyorum (eskiden 17+ sanıyordum ve fazla yüksek çıkıyordum). Kontrdan sonra kontr eden tekrar konuşursa (yeni renk, SA ya da ortağın rengine artırma) bu 17+ puanlık güçlü el demektir. Kendi tekliflerim değişmedi: 20.000 elde (SAYC, 2/1) 0 kontrat farkı.' },
   { v: 690, tr: 'Bütün konvansiyonlarımı çift ölü elle tek tek ölçtüm (her biri 20.000 el, açık/kapalı) ve kaybettiren yerleri düzelttim. RKCB’de “0 ya da 3”, “1 ya da 4” cevaplarını artık mümkünse yüksek okuyorum, “2 + koz kızı” 5 anahtar kart da olabilir; koz kızı eksik diye 9’lu uyumla 5’te durmuyorum. Bütün anahtar kartlar ve koz kızı varsa, 8’li uyum ve 31+ puanla grand şlem diyorum. Inverted Minors’ta ortağın zayıf 3♣/3♦ artırmasına normal açışla pas geçiyorum. Ogust cevabından sonra yapay 3♣/3♦’ü pas geçmiyorum. Gambling 3NT’ye pas için bir minörde de stoper istiyorum. Toplam: altı sistemde 240.000 elde +4328 IMP.', en: 'I measured each of my conventions double dummy (20,000 deals each, on and off) and fixed where they lost. After RKCB I read “0 or 3” and “1 or 4” as the higher number when it fits, and “2 + the queen” can be 5 key cards; I no longer stop in five for a missing trump queen with a nine-card fit. With every key card and the queen, an eight-card fit and 31+ HCP I bid the grand slam. Over partner’s weak inverted-minor raise (1♣–3♣) I pass with a normal opening. After the Ogust answer I never pass the artificial 3♣/3♦. Passing a Gambling 3NT needs a minor stopped too. In all: +4328 IMP in 240,000 deals over the six systems.' },
   { v: 689, tr: 'Kartıma 10 yeni konvansiyon eklendi; hepsi kapalı gelir, işaretlersen ben de onlara göre oynarım: Flannery 2♦ (+314 IMP), Voidwood (+48), Minorwood (+74), Walsh (+121), Gazilli (+161), Landy (+72; 2/1’de Cappelletti’nin yerine +170), Ghestem (+19; Michaels’ın yerine −97), Baron (+44; 4 yollu transferlerin yerine −8), Jordan 2NT (−37) ve Kokish (−110). Sayılar çift ölü elle, her biri 15.000–100.000 elde. Claude sistemi kaldırıldı.', en: 'Ten new conventions on my card; all start switched off, and when you tick one I play it too: Flannery 2♦ (+314 IMP), Voidwood (+48), Minorwood (+74), Walsh (+121), Gazilli (+161), Landy (+72; in place of Cappelletti in 2/1 +170), Ghestem (+19; in place of Michaels −97), Baron (+44; in place of 4-way transfers −8), Jordan 2NT (−37) and Kokish (−110). Double dummy, 15,000–100,000 deals each. The Claude system is gone.' },
   { v: 682, tr: 'Konvansiyon kartımın aralıkları senin tanımlarına göre değişti: Weak Jump Shift 3-6 puan (0-5 değil), Strong Jump Shift 17+ (19+ değil), Drury 9-11 (10-12 değil), Multi 2♦ 5-10 (5-11 değil), Inverted Minors baraj artırması 6-9 (0-9 değil), New Minor Forcing 10+ (11+ değil); SAYC ve Acol’da 2 seviyesinde yeni renk 10+ (11+ değil).', en: 'My convention card follows your definitions now: Weak Jump Shift 3-6 HCP (was 0-5), Strong Jump Shift 17+ (was 19+), Drury 9-11 (was 10-12), Multi 2♦ 5-10 (was 5-11), Inverted Minors preemptive raise 6-9 (was 0-9), New Minor Forcing 10+ (was 11+); in SAYC and Acol a two-level new suit is 10+ (was 11+).' },
@@ -3194,7 +3195,7 @@ function rtSitPick() {
 const RT_SHORT = { sayc: 'SAYC', twoone: '2/1', acol: 'Acol', sef: 'SEF', precision: 'Precision', polish: 'Polish' };
 function rtCardHtml() {
   const art = ['tr', 'no'].includes(SET.lang) ? SET.lang : 'en';
-  return `<button class="rtonbar" data-rton="${RT_KEYS.includes(SET.sys) ? SET.sys : 'twoone'}">🌐 ${T('Online')}</button><div class="rtrows">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
+  return `<div class="rtonbar">🌐 ${T('Online')}</div><div class="rtrows">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><span class="rtfull">${esc(rtSysName(k))}</span><span class="rtshort">${RT_SHORT[k] || esc(rtSysName(k))}</span></button>`).join('')}</div>`;
 }
 // the robots' tables (about 2 MB) are fetched only where their card is shown (a wide screen): a phone hides it,
 // and its system buttons fetch them when tapped
@@ -4588,7 +4589,7 @@ async function showRoboErrs0() {
 // ones; Remove, Fixed and Delete all hide them on this device
 const RT_HIDE = 'bridge-rt-hide';
 // the last robot fix (set with each one): the mistakes played before it leave the list by themselves
-const ROBOT_FIX_AT = Date.parse('2026-11-26T21:58:37Z');
+const ROBOT_FIX_AT = Date.parse('2026-11-27T17:45:00Z');
 const rtHidden = () => { try { return new Set(JSON.parse(localStorage.getItem(RT_HIDE) || '[]')); } catch (e) { return new Set(); } };
 function rtHide(path) { const h = rtHidden(); h.add(path); try { localStorage.setItem(RT_HIDE, JSON.stringify([...h].slice(-20000))); } catch (e) {} return Promise.resolve(); }
 async function rtErrs() {

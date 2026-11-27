@@ -4890,6 +4890,7 @@ const SYS_T = {
 /* the robots' bid explanations are built in English; BID_PH turns their phrases into the chosen language
    (columns: en tr no es fr it de ru pl zh; longer phrases are matched first, case is kept on the first letter) */
 const BID_PH = [
+  ["after my takeout double", "çıkış kontrumdan sonra", "etter min opplysningsdobling", "tras mi doblo informativo", "après mon contre d’appel", "dopo il mio contro informativo", "nach meinem Informationskontra", "после моей вызывной контры", "po mojej kontrze wywołującej", "在我的技术性加倍之后"],
   ["a void in", "… şikan:", "renons i", "fallo en", "chicane à", "vuoto a", "Chicane in", "ренонс в", "renons w", "缺门："],
   ["asking for key cards outside it", "dışındaki anahtar kartları soruyor", "spør etter nøkkelkort utenom den", "pregunta por las cartas clave fuera de él", "demande les clés en dehors", "chiede le carte chiave fuori di esso", "fragt nach Schlüsselkarten außerhalb", "спрашивает ключевые карты вне её", "pyta o wartości kluczowe poza nim", "询问该花色以外的关键张"],
   ["the two lowest", "en düşük iki renk", "de to laveste", "los dos más bajos", "les deux plus basses", "i due più bassi", "die zwei niedrigsten", "две младшие", "dwa najniższe", "两门最低"],

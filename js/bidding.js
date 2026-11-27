@@ -506,7 +506,7 @@ function cands(x) {
       add(B(2, 4), h => h.len[lw[0]] >= 5 && h.len[lw[1]] >= 5 && h.hcp >= 7, { min: 7, len: { [lw[0]]: 5, [lw[1]]: 5 }, tag: 'unusual', suits: lw, cv: 'michaels', t: 'Unusual 2NT: ' + SUIT[lw[0]] + ' and ' + SUIT[lw[1]] + ' (5-5)' });
     }
     if (LV(ob) === 1) add(B(1, 4), h => h.bal && h.hcp >= 15 - d && h.hcp <= 18 && h.stop(os), { min: 15 - d, max: 18, len: BAL, t: 'Balanced 15-18 HCP with a stopper in their suit', tag: 'nt1' });
-    if (!art) add('X', h => h.hcp >= 17, { min: 17, cv: 'takeout', t: 'Strong hand: 17+ HCP' });
+    if (!art) add('X', h => h.hcp >= 17, { min: 17, cv: 'takeout', strong: 1, t: 'Takeout double: 12+ HCP, support for the unbid suits' });   // a strong hand doubles first: said as any takeout double (12+), its 17+ shows when the doubler bids again (the robots' own reading is unchanged)
     for (const s of [3, 2, 1, 0]) {
       if (x.oppSuits.includes(s)) continue; const l = cheap(s);
       if (l + 1 <= 3) add(B(l + 1, s), h => !bal4 && h.len[s] >= 6 && h.hcp >= 5 && h.hcp <= 10 && h.top5(s) >= 2, { min: 5, max: 10, len: { [s]: 6 }, t: 'Weak jump overcall: 6+ ' + SUIT[s] + ', 5-10 HCP' });
@@ -1488,7 +1488,17 @@ function aiBid(auc, seat, hand, cards) {
 }
 function explainCall(auc, seat, call, cards) {
   const x = ctxOf(auc, seat, cards);
-  const known = cands(x).find(c => c.call === call);
+  const all = cands(x).filter(c => c.call === call);
+  let known = all[0];
+  if (call === 'X' && known && known.m.strong) known = all.find(c => !c.m.strong) || known;
+  // the doubler bids again after a takeout double and partner's simple answer: a strong hand, 17+
+  { const mine = auc.filter(e => e.seat === seat && e.call !== 'P'), pb = auc.filter(e => e.seat === (seat + 2) % 4 && isNum(e.call));
+    const xi = auc.findIndex(e => e.seat === seat && e.call === 'X');
+    if (isNum(call) && mine.length === 1 && mine[0].call === 'X' && xi >= 0 && !auc.slice(0, xi).some(e => e.seat === (seat + 2) % 4 && isNum(e.call)) && auc.slice(0, xi).some(e => sideOf(e.seat) !== sideOf(seat) && isNum(e.call))
+      && pb.length === 1 && !(known && (known.m.tag || known.m.cv)) && !auc.some(e => sideOf(e.seat) !== sideOf(seat) && isNum(e.call) && ST(e.call) === ST(pb[0].call) && auc.indexOf(e) < xi)) {
+      const st = ST(call), raise = st === ST(pb[0].call);
+      return { min: st === 4 ? 18 : 17, ...(st < 4 && !raise ? { len: { [st]: 5 } } : {}), t: raise ? 'After my takeout double: raise, 17+ HCP' : st === 4 ? 'After my takeout double: balanced, 18+ HCP' : 'After my takeout double: strong hand, 17+ HCP, 5+ ' + SUIT[st] };
+    } }
   // 4♣ right after partner's natural 1NT, 2NT or 3NT, no suit agreed: asks for aces, on any card, in any
   // sequence (1♣–1♥–2NT–3NT–4♣). The robots only answer it: they start Gerber in the cases cands() lists
   if (call === B(4, 0) && !(known && (known.m.tag || known.m.cv))) {   // a convention of the list keeps its meaning; a plain natural 4♣ does not

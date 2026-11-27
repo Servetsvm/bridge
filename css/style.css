@@ -2538,3 +2538,5 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .rtonbar{display:block;width:100%;grid-column:1/-1;border:1px solid #155e2e;background:linear-gradient(180deg,#2a8a4a,#1f7a3d);color:#fff;border-radius:10px;font:800 18px/1 var(--f-ui,inherit);letter-spacing:.4px;padding:12px 8px;min-height:46px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 0 rgba(0,0,0,.18)}
 .rtonbar:hover{filter:brightness(1.08)}
 .rtcard .rtonbar{margin:12px 14px 8px;width:calc(100% - 28px)}
+.rtonbar{font-weight:600;font-size:15px;padding:7px 8px;min-height:0;cursor:default;text-align:center}
+.rtonbar:hover{filter:none}
