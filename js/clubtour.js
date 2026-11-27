@@ -949,8 +949,8 @@ window.ctKick = function (k) {
 // 🏆 Team match online (from the club's card): any member starts it now — an open evening, robots in the empty seats,
 // each pair's robot partner bids its player's card; then the seats to sit down
 // the players and the boards (as at the club's Team match), then Start now
-const ctqPlan = q => { const pc = Math.floor(q.np / 2) + (Math.floor(q.np / 2) % 2), r0 = Math.max(1, pc - 1), fit = [...Array(8).keys()].map(i => i + 1).filter(b => q.nb % b === 0).sort((a, b) => Math.abs(q.nb / a - r0) - Math.abs(q.nb / b - r0) || b - a)[0];   // exactly the boards chosen: the number of rounds nearest a full Howell
-  const bpr = fit || Math.max(1, Math.min(8, Math.round(q.nb / r0))), R = Math.max(1, Math.round(q.nb / bpr)); return { bpr, R, b: R * bpr, tables: Math.ceil(q.np / 4) }; };
+// a Team match: one round, every table keeps its players and plays all the boards (the same boards at every table, compared)
+const ctqPlan = q => ({ bpr: q.nb, R: 1, b: q.nb, tables: Math.ceil(q.np / 4) });
 window.ctQuickPick = function (club, np, nb) {
   const old = ui.ctq && ui.ctq.club === club ? ui.ctq : null;
   ui.ctq = { club, np: np || (old ? old.np : 8), nb: nb || (old ? old.nb : 12) };
