@@ -484,8 +484,9 @@ async function otMirror() {
   const P = otP(); if (OT.mirBusy || !P || !P.ctMirror || typeof role === 'undefined' || role !== 'admin' || !CLUB_ID) return;
   await otFresh(); if (!OT.list) return;
   let best = null;
-  if (typeof bgTestOn === 'function' && bgTestOn()) return;   // the test page: its own test tournament at the club, not the online one
-  for (const [id, t] of Object.entries(OT.list)) for (const [d, run] of Object.entries((t && t.run) || {})) if (run && run.plan && +d <= Date.now() && Date.now() - +d < 8 * 3600e3) { const test = !!(t && t.info && t.info.test); if (!best || (best.test && !test) || (best.test === test && +d > best.d)) best = { id, d: +d, t, run, test }; }
+  if (typeof bgTestOn === 'function' && bgTestOn()) return;
+  const gone = await DB.get('otGone') || {};   // evenings the director deleted: never copied again   // the test page: its own test tournament at the club, not the online one
+  for (const [id, t] of Object.entries(OT.list)) for (const [d, run] of Object.entries((t && t.run) || {})) if (!gone[id] && run && run.plan && +d <= Date.now() && Date.now() - +d < 8 * 3600e3) { const test = !!(t && t.info && t.info.test); if (!best || (best.test && !test) || (best.test === test && +d > best.d)) best = { id, d: +d, t, run, test }; }
   if (!best) return;
   OT.mirBusy = true;
   try {

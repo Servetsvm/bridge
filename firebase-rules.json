@@ -444,6 +444,9 @@
             },
             "playerdb": {
               ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
+            },
+            "otGone": {
+              ".write": "auth != null && root.child('sess').child(auth.uid).child('k').exists()"
             }
           }
         }

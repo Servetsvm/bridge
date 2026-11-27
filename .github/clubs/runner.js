@@ -35,8 +35,20 @@ function ctPbnDeal(str) { const m = /^([NESW]):\s*(.+)$/.exec(String(str || '').
 function ctDeal(plan, board) { const f = plan.deals && ctPbnDeal(plan.deals[board - 1]); if (f) return f; E.seed(((plan.seed >>> 0) + board * 7919) >>> 0 || 1); const d = E.shuffle([...Array(52).keys()]); E.seed(null); return [0, 1, 2, 3].map(s => d.slice(s * 13, s * 13 + 13).sort((a, b) => b - a)); }
 function ctSeatKeys(plan, r, ti) { const [ns, ew] = plan.rounds[r][ti], A = plan.pairs[ns], B = plan.pairs[ew], k = (p, w) => p.robot ? '' : (w ? p.kb : p.ka) || ''; return [k(A, 1), k(B, 0), k(A, 0), k(B, 1)]; }
 const ctList_ = l => Array.isArray(l) ? l : Object.keys(l || {}).sort((a, b) => a - b).map(k => l[k]);
+// the seats players took in an open evening (run/seats), on the plan's empty pairs
+function ctSeatsApply(plan, seats) {
+  if (!plan || !seats) return plan;
+  const P = plan.pairs.map(p => ({ ...p }));
+  for (const [id, v] of Object.entries(seats)) { const m = /^(\d+)_([ab])$/.exec(id), p = m && P[+m[1]]; if (!p || !v || !v.k) continue; p[m[2]] = String(v.n || '').slice(0, 20); p['k' + m[2]] = v.k; }
+  return { ...plan, pairs: P };
+}
+// an open evening's table where no player sits: not played, and the round does not wait for it
+const ctIdle = (plan, r, ti) => !!(plan.pairs || []).some(p => p && p.open) && ctSeatKeys(plan, r, ti).every(k => !k);
 function ctCurRound(plan, tmap) {
-  for (let r = 0; r < plan.rounds.length; r++) if (plan.rounds[r].some((x, ti) => Object.values(((tmap || {})[r + '_' + ti] || {}).res || {}).filter(Boolean).length < plan.bpr)) return r;
+  for (let r = 0; r < plan.rounds.length; r++) {
+    const T = plan.rounds[r].map((x, ti) => ti).filter(ti => !ctIdle(plan, r, ti));
+    if (!T.length || T.some(ti => Object.values(((tmap || {})[r + '_' + ti] || {}).res || {}).filter(Boolean).length < plan.bpr)) return r;
+  }
   return -1;
 }
 const ctTableEmpty = (plan, r, ti, hb) => ctSeatKeys(plan, r, ti).every(k => !k || Date.now() - (+(hb || {})[k] || 0) > AWAY);
@@ -61,6 +73,8 @@ function ctHeadStep(plan, r, list, res, ti) {
 
 // the evening as the club's own tournament (as the director's Clubs page does it): pairs, tables, boards, hands, archive
 async function mirror(x, L) {
+  if (await get(x.p + '/plan/bpr') == null) return;   // deleted meanwhile
+  if ((await get('gate/clubs/' + x.club + '/bm/otGone/' + x.tid))) return;   // the director deleted it at the club: never copied again
   const bm = 'gate/clubs/' + x.club + '/bm', tmap = await get(x.p + '/t') || {}, plan = ctFill(x.plan, tmap);
   const M = ctx.window.CTMIR.build(E, plan, x.info, tmap, x.d, x.tid), s = await get(bm + '/state') || {};
   const mine = !!(s.online && s.online.tid === x.tid && +s.online.d === x.d);
@@ -91,8 +105,9 @@ async function evenings() {
     if (!run || !run.plan) { WHY.noTables++; continue; }
     if (+d > Date.now()) { WHY.coming++; continue; }
     if (Date.now() - +d > LIVE) { WHY.old++; continue; }
-    if (ctCurRound(ctFill(run.plan, run.t), run.t) < 0) { WHY.finished++; continue; }   // finished
-    out.push({ p: 'ot/' + club + '/' + tid + '/run/' + d, plan: run.plan, name: (t.info && t.info.n) || tid, club, tid, d: +d, info: t.info || {} });
+    const plan = ctSeatsApply(run.plan, run.seats);
+    if (ctCurRound(ctFill(plan, run.t), run.t) < 0) { WHY.finished++; continue; }   // finished (or an open evening nobody sits at)
+    out.push({ p: 'ot/' + club + '/' + tid + '/run/' + d, plan, name: (t.info && t.info.n) || tid, club, tid, d: +d, info: t.info || {} });
   } }
   return out;
 }
@@ -110,11 +125,11 @@ async function evenings() {
     for (const x of L) {
       try {
         if (await get(x.p + '/plan/bpr') == null) continue;   // deleted meanwhile: nothing written
-        const tmap = await get(x.p + '/t') || {}, plan = ctFill(x.plan, tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
+        const tmap = await get(x.p + '/t') || {}, seats = await get(x.p + '/seats'), plan = ctFill(ctSeatsApply(x.plan, seats), tmap), r = ctCurRound(plan, tmap); if (r < 0) continue;
         const hb = await get(x.p + '/hb') || {};
         if (x.info && x.info.wait && !hb[x.info.wait]) continue;   // Servet's test: nothing played before he sits down
         for (let ti = 0; ti < plan.rounds[r].length; ti++) {
-          if (!ctTableEmpty(plan, r, ti, hb)) continue;
+          if (!ctTableEmpty(plan, r, ti, hb) || ctIdle(plan, r, ti)) continue;   // a table nobody sat at: not played
           const tb = tmap[r + '_' + ti] || {}, st = ctHeadStep(plan, r, tb.a, tb.res, ti); if (!st) continue;
           const q = x.p + '/t/' + r + '_' + ti + (st.res ? '/res/' + st.res : '/a/' + st.n);
           if (await get(q) != null) continue;   // an app was quicker
