@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v717`, kulüpler `kulup-v215`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v718`, kulüpler `kulup-v215`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v717`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Robot ortak deklarer + oyuncu yalancıyken robotun claim'i oyuncuya sorulmuyor, hemen uygulanıyor (`robotClaim`: offline ve kendi taraf).
+  Rakip robotun claim sorusunda "Robotlar" yerine robotun adı ("Leyla son 2 lövenin hepsini claim ediyor", 10 dil). v718.
 - Dolu masa (4 insan): Açık masalar'da ve sistem penceresinde "🔒 ad · Dolu · 👁 İzle" (Otur yok); İzle doğrudan katılır (`data-jw` → join
   watch), açık masa izleyiciyi sormadan alır (`addWatcher`). O sistemde dolu masa varsa pencere düğmesi "🪑 Yeni masa aç" (`rtFullHere`). v717.
 - Minör Transfer (`minorTr`) sistemden tamamen silindi (CONVS, bidding, pratik, CONV_T 9 dil; Baron xs yalnız fourWay). Varsayılan kartlarda

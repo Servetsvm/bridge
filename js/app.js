@@ -1092,9 +1092,11 @@ async function robotClaim(g, seat) {
   const side = sideOf(seat), left = tricksLeft();
   const v = E.ddFull(g.hands, g.leader, side, g.trump, 1e6);
   if (v !== left) return false;
+  // your robot partner claims while you are dummy: nothing of yours to agree to, it is taken at once
+  if (!online() && side === sideOf(U())) { applyClaim(side, left); return true; }
   const owners = online() ? agreeOwners(side) : ['host'];
   if (!owners.length) return false;
-  const ok = await Net.askOwners(owners, { kind: 'rclaim', who: T('Robots'), n: left, left, hands: g.hands });
+  const ok = await Net.askOwners(owners, { kind: 'rclaim', who: seatName(seat), n: left, left, hands: g.hands });
   if (!G || G.play !== g || G.phase !== 'play') return true;
   if (online()) Net.note(ok ? T('The robots claimed the last {0} tricks — accepted', left) : T('The robots claimed the last {0} tricks — play goes on', left));
   if (ok) applyClaim(side, left); else tick();
@@ -1112,7 +1114,7 @@ async function requestUndo(owner, name, seat) {
 // the text of a question to the other side (claim, robot claim, undo)
 function askText(a) {
   if (a.kind === 'claim') return T('{0} claims {1} of the last {2} tricks', a.who, a.n, a.left);
-  if (a.kind === 'rclaim') return T('The robots claim all of the last {0} tricks', a.left);
+  if (a.kind === 'rclaim') return a.who ? T('{0} claims all of the last {1} tricks', a.who, a.left) : T('The robots claim all of the last {0} tricks', a.left);
   if (a.kind === 'nd') return T('{0} asks for a new deal', a.who);
   return T('{0} wants to take back their last {1}', a.who, T(a.what || 'move'));
 }
