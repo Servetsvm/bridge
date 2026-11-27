@@ -86,8 +86,9 @@ function sideCards() {
   const c = [null, null]; c[sideOf(U())] = ours; c[1 - sideOf(U())] = opp;
   // at an online table the other side bids the system of the player sitting there (their robot partner too)
   if (typeof Net !== 'undefined' && online() && !guest()) {
-    const side = 1 - sideOf(U()), s = [0, 1, 2, 3].find(x => sideOf(x) === side && Net.st.seats[x] && Net.st.seats[x] !== 'host' && Net.st.profs && Net.st.profs[x] && Net.st.profs[x].sys);
-    if (s != null) { const p = Net.st.profs[s]; c[side] = { conv: { ...(p.conv || E.sysOf(p.sys).conv) }, agg: 0, sys: p.sys }; }
+    const card = x => (Net.st.psys && Net.st.psys[x]) || (Net.st.profs && Net.st.profs[x]) || null;
+    const side = 1 - sideOf(U()), s = [0, 1, 2, 3].find(x => sideOf(x) === side && Net.st.seats[x] && Net.st.seats[x] !== 'host' && card(x) && card(x).sys && E.SYSTEMS.some(y => y.k === card(x).sys));
+    if (s != null) { const p = card(s); c[side] = { conv: { ...(p.conv || E.sysOf(p.sys).conv) }, agg: 0, sys: p.sys }; }
   }
   return c;
 }

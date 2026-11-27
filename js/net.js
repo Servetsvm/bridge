@@ -1364,6 +1364,10 @@ const Net = (() => {
     if (d.tok) { for (const k in toks) if (toks[k] === d.tok) delete toks[k]; toks[s] = d.tok; }
     st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
     (st.profs || (st.profs = {}))[s] = cleanProf(d.prof, true);
+    // the card this player bids (whatever the card's age): what their robot partner plays
+    (st.psys || (st.psys = {}))[s] = d.prof && typeof d.prof.sys === 'string' ? { sys: d.prof.sys.slice(0, 12), conv: d.prof.conv && typeof d.prof.conv === 'object' ? Object.fromEntries(E.CONVS.map(c => [c.k, !!d.prof.conv[c.k]])) : null } : null;
+    // the newcomer's side bids their own card from now on (their robot partner too): at once if the board is still being bid
+    if (G && (G.phase === 'bid' || G.phase === 'lobby') && typeof sideCards === 'function') G.cards = sideCards();
     conn.send({ t: 'welcome', seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
     addChat(null, st.names[s] + (back != null ? ' is back' : ' joined as ' + SEAT[s]));
     ping();

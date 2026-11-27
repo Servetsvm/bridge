@@ -11289,8 +11289,9 @@ function sideCards() {
   const c = [null, null]; c[sideOf(U())] = ours; c[1 - sideOf(U())] = opp;
   // at an online table the other side bids the system of the player sitting there (their robot partner too)
   if (typeof Net !== 'undefined' && online() && !guest()) {
-    const side = 1 - sideOf(U()), s = [0, 1, 2, 3].find(x => sideOf(x) === side && Net.st.seats[x] && Net.st.seats[x] !== 'host' && Net.st.profs && Net.st.profs[x] && Net.st.profs[x].sys);
-    if (s != null) { const p = Net.st.profs[s]; c[side] = { conv: { ...(p.conv || E.sysOf(p.sys).conv) }, agg: 0, sys: p.sys }; }
+    const card = x => (Net.st.psys && Net.st.psys[x]) || (Net.st.profs && Net.st.profs[x]) || null;
+    const side = 1 - sideOf(U()), s = [0, 1, 2, 3].find(x => sideOf(x) === side && Net.st.seats[x] && Net.st.seats[x] !== 'host' && card(x) && card(x).sys && E.SYSTEMS.some(y => y.k === card(x).sys));
+    if (s != null) { const p = card(s); c[side] = { conv: { ...(p.conv || E.sysOf(p.sys).conv) }, agg: 0, sys: p.sys }; }
   }
   return c;
 }
@@ -17727,6 +17728,10 @@ const Net = (() => {
     if (d.tok) { for (const k in toks) if (toks[k] === d.tok) delete toks[k]; toks[s] = d.tok; }
     st.seats[s] = conn.peer; st.names[s] = String(d.name || 'Guest').slice(0, 20); st.conns.set(conn.peer, conn);
     (st.profs || (st.profs = {}))[s] = cleanProf(d.prof, true);
+    // the card this player bids (whatever the card's age): what their robot partner plays
+    (st.psys || (st.psys = {}))[s] = d.prof && typeof d.prof.sys === 'string' ? { sys: d.prof.sys.slice(0, 12), conv: d.prof.conv && typeof d.prof.conv === 'object' ? Object.fromEntries(E.CONVS.map(c => [c.k, !!d.prof.conv[c.k]])) : null } : null;
+    // the newcomer's side bids their own card from now on (their robot partner too): at once if the board is still being bid
+    if (G && (G.phase === 'bid' || G.phase === 'lobby') && typeof sideCards === 'function') G.cards = sideCards();
     conn.send({ t: 'welcome', seat: s, id: conn.peer, code: st.code, chat: st.chat.slice(-50) });
     addChat(null, st.names[s] + (back != null ? ' is back' : ' joined as ' + SEAT[s]));
     ping();
