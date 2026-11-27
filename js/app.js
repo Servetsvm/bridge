@@ -1208,7 +1208,7 @@ function seatName(seat) {
   if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
   // a robots' table's seat taken: the robots keep their names (while the system stays that table's)
   if (!online() && SET.rtNames && SET.rtNames.sys === SET.sys && SET.rtNames.n[seat]) return SET.rtNames.n[seat];
-  return online() && Net.st.names[seat] ? Net.st.names[seat] : online() ? T('Robot') : botName(seat);
+  return online() && Net.st.names[seat] ? Net.st.names[seat] : online() ? (Net.st.botNames || {})[seat] || T('Robot') : botName(seat);
 }
 // the robots of a game at home get people's first names (mostly from the player's language, some from elsewhere), the same
 // three all day and new ones the next day, so the table feels like one with people at it
@@ -1852,7 +1852,7 @@ function acctStash(k) {
 function acctLoad(k) {
   let a = null; try { a = k && JSON.parse(localStorage.getItem(acctKey(k)) || 'null'); } catch (e) {}
   const dev = {}; for (const x of DEVICE_SET) if (SET[x] !== undefined) dev[x] = SET[x];
-  SET = Object.assign({ style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } }, a ? a.set : {}, dev);
+  SET = Object.assign({ style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } }, a ? a.set : {}, dev); Object.assign(SET, { seat: 2, auto: true, expl: true, fixBot: false });
   HIST = a ? a.hist || [] : []; BOARD = a ? a.board || 0 : 0; G = idleG(); ui.saved = a && !pracList().length ? a.saved || null : null;   // practising a convention: a new board (Start), never Continue
   seasonStart();   // a player put away before the season: their old boards are kept aside too
   for (const x of ACCT_LS) { try { if (a && a.ls && a.ls[x] != null) localStorage.setItem(x, a.ls[x]); else localStorage.removeItem(x); } catch (e) {} }
@@ -1953,13 +1953,13 @@ function homeSection(k) {
   return '';
 }
 // our card: every convention with a switch; tap a name for its description
-function convCardHtml() {
+function convCardHtml(noShare) {
   // first the base system (your robot partner bids it too), then the conventions within it
   const cur = E.sysOf(SET.sys);
   return `<div class="grp"><span>${T('Base system')}</span><div class="seg sysseg" data-seg="sys">${E.SYSTEMS.map(s => `<button data-v="${s.k}" class="${sysIs(s.k) ? 'on' : ''}">${esc(s.n.replace(/ \(.*\)/, ''))}</button>`).join('')}</div>
     <div class="muted">${SET.sys === 'none' ? T('No base system chosen yet.') : symText(cur.d)}</div></div>
     <div class="grp"><span>${T('Conventions')}</span><div class="convs">${E.CONVS.map(c => `<label class="cvchip${SET.conv[c.k] ? ' on' : ''}" title="${esc(c.d)}"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}>${esc(c.n)}</label>`).join('')}</div></div>
-    <div class="row2"><button class="btn new" id="convWa">📲 ${T('Send on WhatsApp')}</button><button class="btn sms" id="convSms">${ICON_SMS} SMS</button></div>`;
+    ${noShare ? '' : `<div class="row2"><button class="btn new" id="convWa">📲 ${T('Send on WhatsApp')}</button><button class="btn sms" id="convSms">${ICON_SMS} SMS</button></div>`}`;
 }
 // the convention card as a message: the system and the names of the conventions switched on (no descriptions)
 // the message that sends the app to someone
@@ -3171,9 +3171,8 @@ function rtOnline(k) {
   // nothing is loaded or played until a seat is taken
   openOv('rton', `<h2>🌐 ${T('Online')} · ${esc(rtSysName(ui.rtOn))}</h2>
     <div class="muted">${T('First choose your convention card: the robots, your partner too, play it. Then take a seat.')}</div>
-    ${convCardHtml()}${rtOthers(ui.rtOn)}
-    <div class="grp"><span>🪑 ${T('Sit down')}</span><div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtonsit="${s}">${SEAT[s]}</button>`).join('')}</div></div>
-    <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+    ${convCardHtml(true)}${rtOthers(ui.rtOn)}
+    <div class="row2"><button class="btn gold" data-rtonsit="2">🪑 ${T('Sit down')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 // a seat taken: the boards start now, with robots in the other seats (they play this player's card); the table is open to others
 function rtOnSit(s) {
@@ -3211,19 +3210,14 @@ async function offReadyCheck() {
   el.textContent = ok ? '✈️ ' + T('Ready to play without internet (on a plane too)') + ' ✓' : '⏳ ' + T('Not ready to play without internet yet: keep the app open with internet for a minute.');
 }
 function showSettings() {
-  setTimeout(offReadyCheck, 0); setTimeout(pushStateShow, 0);
+  setTimeout(pushStateShow, 0);
   if (typeof Net !== 'undefined' && SET.notify !== false) setTimeout(() => pushSetup(true), 50);   // looked at again each time Settings opens
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${E.convOff(c.k).length ? `<em class="xo">${T('replaces')} ${E.convOff(c.k).map(k => E.CONVS.find(y => y.k === k).n).join(', ')}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
   openOv('set', `<h2>${T('Settings')}</h2>
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
-   <div id="offReady" class="offready muted"></div>
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
    <div class="grp"><span>🃏 ${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button><div class="muted">${T('A PBN or LIN file, a hand record or a photo. A deal you enter is practice, not scored.')}</div></div>
-   <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
-   <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
-   <div class="grp"><span>${T('Correct the robots')}</span>${seg('fixbot', [[1, T('On')], [0, T('Off')]], SET.fixBot ? 1 : 0)}<div class="muted">${T("When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.")}</div></div>
-   <div class="grp"><span>${T('Play a forced card automatically')}</span>${seg('auto', [[1, T('On')], [0, T('Off')]], SET.auto ? 1 : 0)}</div>
    <div class="grp"><span>${T('Sound and buzz when it is your turn')}</span>${seg('alert', [['online', T('At online tables')], ['always', T('Always')], ['off', T('Off')]], SET.alert || 'online')}</div>
    <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify !== false ? 1 : 0)}<div class="muted">${T('Join requests, messages and invitations — in the background, and messages from the administrator even when the app is closed.')}</div><div class="pushst" id="pushSt"></div></div>
    <div class="grp"><span>${T('Table sounds')}</span>${seg('sfx', [[1, T('On')], [0, T('Off')]], SET.sfx ? 1 : 0)}</div>
@@ -4078,6 +4072,8 @@ function ddsReady() {
 function start(data) {
   load(data && data.G ? data : null);
   // the Claude system is gone (2026-11-26): a card that played it (or played against it) goes to 2/1
+  // no longer choices in Settings: you sit South, a forced card is played for you, a call's meaning is always shown, robots are not corrected
+  Object.assign(SET, { seat: 2, auto: true, expl: true, fixBot: false });
   if (SET.opp === 'claude' || SET.sys === 'claude') { if (SET.opp === 'claude') SET.opp = 'same'; if (SET.sys === 'claude') setSys('twoone'); Store.saveSettings(SET); save(); }
   Field.init();
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)

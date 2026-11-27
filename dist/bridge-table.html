@@ -2584,6 +2584,8 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .rtcard .rtcell{display:flex;flex-direction:column;gap:4px;min-width:0}
 .rtcard .rton{border:1px solid #1f7a3d;background:#1f7a3d;color:#fff;border-radius:8px;font:700 12.5px/1 var(--f-ui,inherit);padding:6px 8px;cursor:pointer}
 .rtcard .rton:hover{filter:brightness(1.1)}
+.kickx{width:28px;height:28px;line-height:26px;font-size:16px;font-weight:800;background:#c62828;color:#fff;border:2px solid #fff;margin-left:6px;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.kickx:hover{background:#e53935}
 
 </style>
 
@@ -6069,7 +6071,7 @@ const Photo = (() => {
 /* ---- language: the screens are written in English; T() gives the Turkish, Norwegian, Spanish or French text ({0} = a value) ---- */
 const I18N = {
   tr: {
-    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Önce konvansiyon kartını seç: robotlar (partnerin de) onunla oynar. Sonra bir koltuğa otur.", "Players at this system now": "Şu an bu sistemde oynayanlar", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Bu masada kimse yoktu, robotlar durdu. Bir saat içinde yeniden başlarlar.", "Auction in progress": "Deklarasyon sürüyor", "{0} sat down at your table (✕ by the name removes them)": "{0} masana oturdu (isminin yanındaki ✕ ile çıkarabilirsin)", "Being played now": "Şu anda oynanıyor", "Round {0} of {1}": "Tur {0} / {1}", "Empty seats are played by robots: tap one to take it.": "Boş koltuklarda robotlar oynuyor: oturmak için birine dokun.", "Someone has just taken this seat.": "Bu koltuğa az önce başkası oturdu.",
+    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Önce konvansiyon kartını seç: robotlar (partnerin de) onunla oynar. Sonra bir koltuğa otur.", "Players at this system now": "Şu an bu sistemde oynayanlar", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Bu masada kimse yoktu, robotlar durdu. Bir saat içinde yeniden başlarlar.", "Auction in progress": "Deklarasyon sürüyor", "{0} sat down at your table (✕ by the name removes them)": "{0} masana oturdu (isminin yanındaki ✕ ile çıkarabilirsin)", "Partner": "Ortak", "Opponent": "Rakip", "Being played now": "Şu anda oynanıyor", "Round {0} of {1}": "Tur {0} / {1}", "Empty seats are played by robots: tap one to take it.": "Boş koltuklarda robotlar oynuyor: oturmak için birine dokun.", "Someone has just taken this seat.": "Bu koltuğa az önce başkası oturdu.",
     "Join requests, messages and invitations \u2014 in the background, and messages from the administrator even when the app is closed.": "Katılma istekleri, mesajlar ve davetler — uygulama arka plandayken; yöneticiden gelen mesajlar uygulama kapalıyken de.",
     "Notifications come even when the app is closed.": "Bildirimler uygulama kapalıyken de gelir.", "Notifications come, but this phone was not recognised as the administrator's.": "Bildirimler geliyor, ama bu telefon yöneticinin telefonu olarak tanınmadı.", "Notifications are blocked: allow them for BridgePlay in the phone's settings.": "Bildirimler engelli: telefonun ayarlarından BridgePlay için bildirimlere izin ver.", "This phone or browser cannot get notifications while the app is closed.": "Bu telefon ya da tarayıcı, uygulama kapalıyken bildirim alamıyor.", "Tap On above and allow notifications.": "Yukarıda Açık'a bas ve bildirimlere izin ver.", "Notifications for a closed app could not be turned on": "Uygulama kapalıyken bildirim açılamadı", "A test notification was sent: close the app and it comes in a few seconds.": "Deneme bildirimi gönderildi: uygulamayı kapat, birkaç saniye içinde gelir.",
     "Add to calendar": "Takvime ekle", "Calendar": "Takvim", "Phone calendar (.ics file)": "Telefonun takvimi (.ics dosyası)",
@@ -6545,7 +6547,7 @@ const I18N = {
     "Pick at least one player": "En az bir oyuncu seç", "Invitations sent": "Davetler gönderildi", "The tournament has started": "Turnuva başladı", "This tournament has not started yet": "Bu turnuva henüz başlamadı",
   },
   no: {
-    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Velg først konvensjonskortet ditt: robotene, også makkeren din, spiller det. Sett deg så ved bordet.", "Players at this system now": "Spillere i dette systemet nå", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Ingen var ved dette bordet, så robotene stoppet. De starter igjen innen en time.", "Auction in progress": "Meldingene pågår", "tricks": "stikk", "{0} sat down at your table (✕ by the name removes them)": "{0} satte seg ved bordet ditt (✕ ved navnet fjerner hen)", "Being played now": "Spilles nå", "Round {0} of {1}": "Runde {0} av {1}", "Empty seats are played by robots: tap one to take it.": "Tomme seter spilles av roboter: trykk på ett for å ta det.", "Someone has just taken this seat.": "Noen har akkurat tatt dette setet.",
+    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Velg først konvensjonskortet ditt: robotene, også makkeren din, spiller det. Sett deg så ved bordet.", "Players at this system now": "Spillere i dette systemet nå", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Ingen var ved dette bordet, så robotene stoppet. De starter igjen innen en time.", "Auction in progress": "Meldingene pågår", "tricks": "stikk", "{0} sat down at your table (✕ by the name removes them)": "{0} satte seg ved bordet ditt (✕ ved navnet fjerner hen)", "Partner": "Makker", "Opponent": "Motspiller", "Being played now": "Spilles nå", "Round {0} of {1}": "Runde {0} av {1}", "Empty seats are played by robots: tap one to take it.": "Tomme seter spilles av roboter: trykk på ett for å ta det.", "Someone has just taken this seat.": "Noen har akkurat tatt dette setet.",
     "Join requests, messages and invitations \u2014 in the background, and messages from the administrator even when the app is closed.": "Forespørsler om å bli med, meldinger og invitasjoner — i bakgrunnen, og meldinger fra administratoren selv når appen er lukket.",
     "Notifications come even when the app is closed.": "Varsler kommer også når appen er lukket.", "Notifications come, but this phone was not recognised as the administrator's.": "Varsler kommer, men denne telefonen ble ikke gjenkjent som administratorens.", "Notifications are blocked: allow them for BridgePlay in the phone's settings.": "Varsler er blokkert: tillat dem for BridgePlay i telefonens innstillinger.", "This phone or browser cannot get notifications while the app is closed.": "Denne telefonen eller nettleseren kan ikke få varsler når appen er lukket.", "Tap On above and allow notifications.": "Trykk På over og tillat varsler.", "Notifications for a closed app could not be turned on": "Varsler for lukket app kunne ikke slås på", "A test notification was sent: close the app and it comes in a few seconds.": "Et testvarsel ble sendt: lukk appen, så kommer det om noen sekunder.",
     "Add to calendar": "Legg til i kalenderen", "Calendar": "Kalender", "Phone calendar (.ics file)": "Telefonens kalender (.ics-fil)",
@@ -7018,7 +7020,7 @@ const I18N = {
     "Pick at least one player": "Velg minst én spiller", "Invitations sent": "Invitasjonene er sendt", "The tournament has started": "Turneringen har startet", "This tournament has not started yet": "Denne turneringen har ikke startet ennå",
   },
   es: {
-    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Elige primero tu tarjeta de convenciones: los robots, también tu compañero, la juegan. Luego siéntate.", "Players at this system now": "Jugadores en este sistema ahora", "Nobody was at this table, so the robots stopped. They start again within an hour.": "No había nadie en esta mesa y los robots pararon. Vuelven a empezar en menos de una hora.", "Auction in progress": "Subasta en curso", "tricks": "bazas", "{0} sat down at your table (✕ by the name removes them)": "{0} se sentó a tu mesa (✕ junto al nombre lo saca)", "Being played now": "Jugándose ahora", "Round {0} of {1}": "Ronda {0} de {1}", "Empty seats are played by robots: tap one to take it.": "Los asientos vacíos los juegan robots: toca uno para ocuparlo.", "Someone has just taken this seat.": "Alguien acaba de ocupar este asiento.",
+    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Elige primero tu tarjeta de convenciones: los robots, también tu compañero, la juegan. Luego siéntate.", "Players at this system now": "Jugadores en este sistema ahora", "Nobody was at this table, so the robots stopped. They start again within an hour.": "No había nadie en esta mesa y los robots pararon. Vuelven a empezar en menos de una hora.", "Auction in progress": "Subasta en curso", "tricks": "bazas", "{0} sat down at your table (✕ by the name removes them)": "{0} se sentó a tu mesa (✕ junto al nombre lo saca)", "Partner": "Compañero", "Opponent": "Rival", "Being played now": "Jugándose ahora", "Round {0} of {1}": "Ronda {0} de {1}", "Empty seats are played by robots: tap one to take it.": "Los asientos vacíos los juegan robots: toca uno para ocuparlo.", "Someone has just taken this seat.": "Alguien acaba de ocupar este asiento.",
     "Add to calendar": "Añadir al calendario", "Calendar": "Calendar", "Phone calendar (.ics file)": "Calendario del teléfono (archivo .ics)",
     "Tomorrow": "Mañana",
     "Ready to play without internet (on a plane too)": "Listo para jugar sin internet (también en el avión)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Aún no está listo para jugar sin internet: deja la app abierta con internet un minuto.",
@@ -7504,7 +7506,7 @@ const I18N = {
     "Start the tournament": "Empezar el torneo", "Cancel the tournament": "Cancelar el torneo", "Pick at least one player": "Elige al menos un jugador", "Invitations sent": "Invitaciones enviadas", "The tournament has started": "El torneo ha empezado", "This tournament has not started yet": "Este torneo aún no ha empezado",
   },
   fr: {
-    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Choisis d'abord ta carte de conventions : les robots, ton partenaire aussi, la jouent. Puis assieds-toi.", "Players at this system now": "Joueurs dans ce système maintenant", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Personne n'était à cette table, les robots se sont arrêtés. Ils reprennent dans l'heure.", "Auction in progress": "Enchères en cours", "tricks": "plis", "{0} sat down at your table (✕ by the name removes them)": "{0} s'est assis à ta table (✕ près du nom le retire)", "Being played now": "En cours", "Round {0} of {1}": "Tour {0} sur {1}", "Empty seats are played by robots: tap one to take it.": "Les places vides sont jouées par des robots : touchez-en une pour la prendre.", "Someone has just taken this seat.": "Quelqu’un vient de prendre cette place.",
+    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Choisis d'abord ta carte de conventions : les robots, ton partenaire aussi, la jouent. Puis assieds-toi.", "Players at this system now": "Joueurs dans ce système maintenant", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Personne n'était à cette table, les robots se sont arrêtés. Ils reprennent dans l'heure.", "Auction in progress": "Enchères en cours", "tricks": "plis", "{0} sat down at your table (✕ by the name removes them)": "{0} s'est assis à ta table (✕ près du nom le retire)", "Partner": "Partenaire", "Opponent": "Adversaire", "Being played now": "En cours", "Round {0} of {1}": "Tour {0} sur {1}", "Empty seats are played by robots: tap one to take it.": "Les places vides sont jouées par des robots : touchez-en une pour la prendre.", "Someone has just taken this seat.": "Quelqu’un vient de prendre cette place.",
     "Add to calendar": "Ajouter au calendrier", "Calendar": "Agenda", "Phone calendar (.ics file)": "Calendrier du téléphone (fichier .ics)",
     "Tomorrow": "Demain",
     "Ready to play without internet (on a plane too)": "Prêt à jouer sans internet (en avion aussi)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Pas encore prêt à jouer sans internet : laissez l’app ouverte avec internet une minute.",
@@ -7990,7 +7992,7 @@ const I18N = {
     "Start the tournament": "Lancer le tournoi", "Cancel the tournament": "Annuler le tournoi", "Pick at least one player": "Choisissez au moins un joueur", "Invitations sent": "Invitations envoyées", "The tournament has started": "Le tournoi a commencé", "This tournament has not started yet": "Ce tournoi n’a pas encore commencé",
   },
   it: {
-    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Scegli prima la tua carta delle convenzioni: i robot, anche il compagno, la giocano. Poi siediti.", "Players at this system now": "Giocatori in questo sistema ora", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Nessuno era a questo tavolo, i robot si sono fermati. Ripartono entro un'ora.", "Auction in progress": "Licita in corso", "tricks": "prese", "{0} sat down at your table (✕ by the name removes them)": "{0} si è seduto al tuo tavolo (✕ accanto al nome lo toglie)", "Being played now": "In corso", "Round {0} of {1}": "Turno {0} di {1}", "Empty seats are played by robots: tap one to take it.": "I posti vuoti li giocano i robot: tocca un posto per prenderlo.", "Someone has just taken this seat.": "Qualcuno ha appena preso questo posto.",
+    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Scegli prima la tua carta delle convenzioni: i robot, anche il compagno, la giocano. Poi siediti.", "Players at this system now": "Giocatori in questo sistema ora", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Nessuno era a questo tavolo, i robot si sono fermati. Ripartono entro un'ora.", "Auction in progress": "Licita in corso", "tricks": "prese", "{0} sat down at your table (✕ by the name removes them)": "{0} si è seduto al tuo tavolo (✕ accanto al nome lo toglie)", "Partner": "Compagno", "Opponent": "Avversario", "Being played now": "In corso", "Round {0} of {1}": "Turno {0} di {1}", "Empty seats are played by robots: tap one to take it.": "I posti vuoti li giocano i robot: tocca un posto per prenderlo.", "Someone has just taken this seat.": "Qualcuno ha appena preso questo posto.",
     "Add to calendar": "Aggiungi al calendario", "Calendar": "Calendar", "Phone calendar (.ics file)": "Calendario del telefono (file .ics)",
     "Tomorrow": "Domani",
     "Ready to play without internet (on a plane too)": "Pronto per giocare senza internet (anche in aereo)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Non ancora pronto per giocare senza internet: tieni l’app aperta con internet per un minuto.",
@@ -8476,7 +8478,7 @@ const I18N = {
     "Start the tournament": "Avvia il torneo", "Cancel the tournament": "Annulla il torneo", "Pick at least one player": "Scegli almeno un giocatore", "Invitations sent": "Inviti inviati", "The tournament has started": "Il torneo è iniziato", "This tournament has not started yet": "Questo torneo non è ancora iniziato",
   },
   de: {
-    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Wähle zuerst deine Konventionskarte: die Roboter, auch dein Partner, spielen sie. Dann setz dich.", "Players at this system now": "Spieler in diesem System jetzt", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Niemand war an diesem Tisch, die Roboter haben aufgehört. Sie fangen innerhalb einer Stunde wieder an.", "Auction in progress": "Reizung läuft", "tricks": "Stiche", "{0} sat down at your table (✕ by the name removes them)": "{0} hat sich an deinen Tisch gesetzt (✕ beim Namen entfernt ihn)", "Being played now": "Wird gerade gespielt", "Round {0} of {1}": "Runde {0} von {1}", "Empty seats are played by robots: tap one to take it.": "Leere Plätze spielen Roboter: tippe auf einen, um ihn zu nehmen.", "Someone has just taken this seat.": "Jemand hat diesen Platz gerade genommen.",
+    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Wähle zuerst deine Konventionskarte: die Roboter, auch dein Partner, spielen sie. Dann setz dich.", "Players at this system now": "Spieler in diesem System jetzt", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Niemand war an diesem Tisch, die Roboter haben aufgehört. Sie fangen innerhalb einer Stunde wieder an.", "Auction in progress": "Reizung läuft", "tricks": "Stiche", "{0} sat down at your table (✕ by the name removes them)": "{0} hat sich an deinen Tisch gesetzt (✕ beim Namen entfernt ihn)", "Partner": "Partner", "Opponent": "Gegner", "Being played now": "Wird gerade gespielt", "Round {0} of {1}": "Runde {0} von {1}", "Empty seats are played by robots: tap one to take it.": "Leere Plätze spielen Roboter: tippe auf einen, um ihn zu nehmen.", "Someone has just taken this seat.": "Jemand hat diesen Platz gerade genommen.",
     "Add to calendar": "Zum Kalender hinzufügen", "Calendar": "Kalender", "Phone calendar (.ics file)": "Kalender des Telefons (.ics-Datei)",
     "Tomorrow": "Morgen",
     "Ready to play without internet (on a plane too)": "Bereit zum Spielen ohne Internet (auch im Flugzeug)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Noch nicht bereit ohne Internet: lass die App eine Minute mit Internet geöffnet.",
@@ -8962,7 +8964,7 @@ const I18N = {
     "Start the tournament": "Turnier starten", "Cancel the tournament": "Turnier absagen", "Pick at least one player": "Wähle mindestens einen Spieler", "Invitations sent": "Einladungen gesendet", "The tournament has started": "Das Turnier hat begonnen", "This tournament has not started yet": "Dieses Turnier hat noch nicht begonnen",
   },
   ru: {
-    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Сначала выбери свою конвенционную карту: роботы, и партнёр тоже, играют по ней. Потом садись.", "Players at this system now": "Сейчас играют в этой системе", "Nobody was at this table, so the robots stopped. They start again within an hour.": "За этим столом никого не было, роботы остановились. Они снова начнут в течение часа.", "Auction in progress": "Идёт торговля", "tricks": "взятки", "{0} sat down at your table (✕ by the name removes them)": "{0} сел за твой стол (✕ рядом с именем убирает)", "Being played now": "Идёт сейчас", "Round {0} of {1}": "Тур {0} из {1}", "Empty seats are played by robots: tap one to take it.": "На пустых местах играют роботы: нажмите на место, чтобы занять его.", "Someone has just taken this seat.": "Это место только что заняли.",
+    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Сначала выбери свою конвенционную карту: роботы, и партнёр тоже, играют по ней. Потом садись.", "Players at this system now": "Сейчас играют в этой системе", "Nobody was at this table, so the robots stopped. They start again within an hour.": "За этим столом никого не было, роботы остановились. Они снова начнут в течение часа.", "Auction in progress": "Идёт торговля", "tricks": "взятки", "{0} sat down at your table (✕ by the name removes them)": "{0} сел за твой стол (✕ рядом с именем убирает)", "Partner": "Партнёр", "Opponent": "Соперник", "Being played now": "Идёт сейчас", "Round {0} of {1}": "Тур {0} из {1}", "Empty seats are played by robots: tap one to take it.": "На пустых местах играют роботы: нажмите на место, чтобы занять его.", "Someone has just taken this seat.": "Это место только что заняли.",
     "Add to calendar": "Добавить в календарь", "Calendar": "Календарь", "Phone calendar (.ics file)": "Календарь телефона (файл .ics)",
     "Tomorrow": "Завтра",
     "Ready to play without internet (on a plane too)": "Готово к игре без интернета (и в самолёте)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Пока не готово к игре без интернета: подержите приложение открытым с интернетом минуту.",
@@ -9448,7 +9450,7 @@ const I18N = {
     "Start the tournament": "Начать турнир", "Cancel the tournament": "Отменить турнир", "Pick at least one player": "Выберите хотя бы одного игрока", "Invitations sent": "Приглашения отправлены", "The tournament has started": "Турнир начался", "This tournament has not started yet": "Этот турнир ещё не начался",
   },
   pl: {
-    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Najpierw wybierz swoją kartę konwencyjną: roboty, także partner, grają według niej. Potem usiądź.", "Players at this system now": "Gracze w tym systemie teraz", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Nikogo nie było przy tym stole, roboty przestały. Zaczną znowu w ciągu godziny.", "Auction in progress": "Licytacja trwa", "tricks": "lewy", "{0} sat down at your table (✕ by the name removes them)": "{0} usiadł przy twoim stole (✕ przy imieniu usuwa)", "Being played now": "Trwa teraz", "Round {0} of {1}": "Runda {0} z {1}", "Empty seats are played by robots: tap one to take it.": "Na pustych miejscach grają roboty: dotknij miejsca, aby je zająć.", "Someone has just taken this seat.": "Ktoś właśnie zajął to miejsce.",
+    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "Najpierw wybierz swoją kartę konwencyjną: roboty, także partner, grają według niej. Potem usiądź.", "Players at this system now": "Gracze w tym systemie teraz", "Nobody was at this table, so the robots stopped. They start again within an hour.": "Nikogo nie było przy tym stole, roboty przestały. Zaczną znowu w ciągu godziny.", "Auction in progress": "Licytacja trwa", "tricks": "lewy", "{0} sat down at your table (✕ by the name removes them)": "{0} usiadł przy twoim stole (✕ przy imieniu usuwa)", "Partner": "Partner", "Opponent": "Przeciwnik", "Being played now": "Trwa teraz", "Round {0} of {1}": "Runda {0} z {1}", "Empty seats are played by robots: tap one to take it.": "Na pustych miejscach grają roboty: dotknij miejsca, aby je zająć.", "Someone has just taken this seat.": "Ktoś właśnie zajął to miejsce.",
     "Add to calendar": "Dodaj do kalendarza", "Calendar": "Kalendarz", "Phone calendar (.ics file)": "Kalendarz telefonu (plik .ics)",
     "Tomorrow": "Jutro",
     "Ready to play without internet (on a plane too)": "Gotowe do gry bez internetu (także w samolocie)", "Not ready to play without internet yet: keep the app open with internet for a minute.": "Jeszcze nie gotowe do gry bez internetu: zostaw aplikację otwartą z internetem na minutę.",
@@ -9934,7 +9936,7 @@ const I18N = {
     "Start the tournament": "Rozpocznij turniej", "Cancel the tournament": "Odwołaj turniej", "Pick at least one player": "Wybierz co najmniej jednego gracza", "Invitations sent": "Zaproszenia wysłane", "The tournament has started": "Turniej się rozpoczął", "This tournament has not started yet": "Ten turniej jeszcze się nie rozpoczął",
   },
   zh: {
-    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "先选择你的约定卡：机器人（包括搭档）按它叫牌。然后入座。", "Players at this system now": "正在使用此体系的玩家", "Nobody was at this table, so the robots stopped. They start again within an hour.": "这张桌子没人，机器人已停止。一小时内会重新开始。", "Auction in progress": "叫牌进行中", "tricks": "墩", "{0} sat down at your table (✕ by the name removes them)": "{0} 坐到了你的桌子（名字旁的 ✕ 可移除）", "Being played now": "正在进行", "Round {0} of {1}": "第 {0} 轮，共 {1} 轮", "Empty seats are played by robots: tap one to take it.": "空座位由机器人打：点一个座位坐下。", "Someone has just taken this seat.": "刚刚有人坐了这个座位。",
+    "First choose your convention card: the robots, your partner too, play it. Then take a seat.": "先选择你的约定卡：机器人（包括搭档）按它叫牌。然后入座。", "Players at this system now": "正在使用此体系的玩家", "Nobody was at this table, so the robots stopped. They start again within an hour.": "这张桌子没人，机器人已停止。一小时内会重新开始。", "Auction in progress": "叫牌进行中", "tricks": "墩", "{0} sat down at your table (✕ by the name removes them)": "{0} 坐到了你的桌子（名字旁的 ✕ 可移除）", "Partner": "搭档", "Opponent": "对手", "Being played now": "正在进行", "Round {0} of {1}": "第 {0} 轮，共 {1} 轮", "Empty seats are played by robots: tap one to take it.": "空座位由机器人打：点一个座位坐下。", "Someone has just taken this seat.": "刚刚有人坐了这个座位。",
     "Add to calendar": "添加到日历", "Calendar": "日历", "Phone calendar (.ics file)": "手机日历（.ics 文件）",
     "Tomorrow": "明天",
     "Ready to play without internet (on a plane too)": "可离线游戏（飞机上也可以）", "Not ready to play without internet yet: keep the app open with internet for a minute.": "尚不能离线游戏：请在联网状态下让应用打开一分钟。",
@@ -12409,7 +12411,7 @@ function seatName(seat) {
   if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
   // a robots' table's seat taken: the robots keep their names (while the system stays that table's)
   if (!online() && SET.rtNames && SET.rtNames.sys === SET.sys && SET.rtNames.n[seat]) return SET.rtNames.n[seat];
-  return online() && Net.st.names[seat] ? Net.st.names[seat] : online() ? T('Robot') : botName(seat);
+  return online() && Net.st.names[seat] ? Net.st.names[seat] : online() ? (Net.st.botNames || {})[seat] || T('Robot') : botName(seat);
 }
 // the robots of a game at home get people's first names (mostly from the player's language, some from elsewhere), the same
 // three all day and new ones the next day, so the table feels like one with people at it
@@ -13053,7 +13055,7 @@ function acctStash(k) {
 function acctLoad(k) {
   let a = null; try { a = k && JSON.parse(localStorage.getItem(acctKey(k)) || 'null'); } catch (e) {}
   const dev = {}; for (const x of DEVICE_SET) if (SET[x] !== undefined) dev[x] = SET[x];
-  SET = Object.assign({ style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } }, a ? a.set : {}, dev);
+  SET = Object.assign({ style: "classic", seat: 2, speed: 1, expl: true, auto: true, mode: 'IMP', opp: 'same', sfx: true, conv: { ...E.ALL_ON } }, a ? a.set : {}, dev); Object.assign(SET, { seat: 2, auto: true, expl: true, fixBot: false });
   HIST = a ? a.hist || [] : []; BOARD = a ? a.board || 0 : 0; G = idleG(); ui.saved = a && !pracList().length ? a.saved || null : null;   // practising a convention: a new board (Start), never Continue
   seasonStart();   // a player put away before the season: their old boards are kept aside too
   for (const x of ACCT_LS) { try { if (a && a.ls && a.ls[x] != null) localStorage.setItem(x, a.ls[x]); else localStorage.removeItem(x); } catch (e) {} }
@@ -13154,13 +13156,13 @@ function homeSection(k) {
   return '';
 }
 // our card: every convention with a switch; tap a name for its description
-function convCardHtml() {
+function convCardHtml(noShare) {
   // first the base system (your robot partner bids it too), then the conventions within it
   const cur = E.sysOf(SET.sys);
   return `<div class="grp"><span>${T('Base system')}</span><div class="seg sysseg" data-seg="sys">${E.SYSTEMS.map(s => `<button data-v="${s.k}" class="${sysIs(s.k) ? 'on' : ''}">${esc(s.n.replace(/ \(.*\)/, ''))}</button>`).join('')}</div>
     <div class="muted">${SET.sys === 'none' ? T('No base system chosen yet.') : symText(cur.d)}</div></div>
     <div class="grp"><span>${T('Conventions')}</span><div class="convs">${E.CONVS.map(c => `<label class="cvchip${SET.conv[c.k] ? ' on' : ''}" title="${esc(c.d)}"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}>${esc(c.n)}</label>`).join('')}</div></div>
-    <div class="row2"><button class="btn new" id="convWa">📲 ${T('Send on WhatsApp')}</button><button class="btn sms" id="convSms">${ICON_SMS} SMS</button></div>`;
+    ${noShare ? '' : `<div class="row2"><button class="btn new" id="convWa">📲 ${T('Send on WhatsApp')}</button><button class="btn sms" id="convSms">${ICON_SMS} SMS</button></div>`}`;
 }
 // the convention card as a message: the system and the names of the conventions switched on (no descriptions)
 // the message that sends the app to someone
@@ -14372,9 +14374,8 @@ function rtOnline(k) {
   // nothing is loaded or played until a seat is taken
   openOv('rton', `<h2>🌐 ${T('Online')} · ${esc(rtSysName(ui.rtOn))}</h2>
     <div class="muted">${T('First choose your convention card: the robots, your partner too, play it. Then take a seat.')}</div>
-    ${convCardHtml()}${rtOthers(ui.rtOn)}
-    <div class="grp"><span>🪑 ${T('Sit down')}</span><div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtonsit="${s}">${SEAT[s]}</button>`).join('')}</div></div>
-    <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+    ${convCardHtml(true)}${rtOthers(ui.rtOn)}
+    <div class="row2"><button class="btn gold" data-rtonsit="2">🪑 ${T('Sit down')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
 }
 // a seat taken: the boards start now, with robots in the other seats (they play this player's card); the table is open to others
 function rtOnSit(s) {
@@ -14412,19 +14413,14 @@ async function offReadyCheck() {
   el.textContent = ok ? '✈️ ' + T('Ready to play without internet (on a plane too)') + ' ✓' : '⏳ ' + T('Not ready to play without internet yet: keep the app open with internet for a minute.');
 }
 function showSettings() {
-  setTimeout(offReadyCheck, 0); setTimeout(pushStateShow, 0);
+  setTimeout(pushStateShow, 0);
   if (typeof Net !== 'undefined' && SET.notify !== false) setTimeout(() => pushSetup(true), 50);   // looked at again each time Settings opens
   const seg = (name, opts, cur) => `<div class="seg" data-seg="${name}">${opts.map(([v, l]) => `<button data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${l}</button>`).join('')}</div>`;
   const convs = E.CONVS.map(c => `<label class="cvrow"><input type="checkbox" data-conv="${c.k}" ${SET.conv[c.k] ? 'checked' : ''}><span><b>${c.n}</b>${E.convOff(c.k).length ? `<em class="xo">${T('replaces')} ${E.convOff(c.k).map(k => E.CONVS.find(y => y.k === k).n).join(', ')}</em>` : ''}<small>${symText(c.d)}</small></span></label>`).join('');
   openOv('set', `<h2>${T('Settings')}</h2>
    <button class="btn gold guide" id="bHelp2">📘 ${T('User guide')}</button>
-   <div id="offReady" class="offready muted"></div>
    <div class="grp"><span>${T('Practice a convention')}</span><select id="sPractice" class="sel"><option value="">${T('Off — normal random deals')}</option>${E.CONVS.map(c => `<option value="${c.k}" ${pracList()[0] === c.k ? 'selected' : ''}>${c.n}</option>`).join('')}</select><div class="muted">${T('New deals are chosen so that you (or your partner) get to use this convention. It is switched on in your card automatically.')}</div></div>
    <div class="grp"><span>🃏 ${T('Play a specific deal')}</span><button class="btn" id="sDeal">${T('Enter a deal (from a photo or a hand record)')}</button><div class="muted">${T('A PBN or LIN file, a hand record or a photo. A deal you enter is practice, not scored.')}</div></div>
-   <div class="grp"><span>${T('Your seat')}</span>${seg('seat', [0, 1, 2, 3].map(s => [s, SEAT[s]]), SET.seat)}</div>
-   <div class="grp"><span>${T('Bid explanations')}</span>${seg('expl', [[1, T('Show')], [0, T('Hide')]], SET.expl ? 1 : 0)}</div>
-   <div class="grp"><span>${T('Correct the robots')}</span>${seg('fixbot', [[1, T('On')], [0, T('Off')]], SET.fixBot ? 1 : 0)}<div class="muted">${T("When a robot plays a wrong card, ↩ 🤖 takes it back and you play the card it should have played. Your corrections are sent to improve the robots.")}</div></div>
-   <div class="grp"><span>${T('Play a forced card automatically')}</span>${seg('auto', [[1, T('On')], [0, T('Off')]], SET.auto ? 1 : 0)}</div>
    <div class="grp"><span>${T('Sound and buzz when it is your turn')}</span>${seg('alert', [['online', T('At online tables')], ['always', T('Always')], ['off', T('Off')]], SET.alert || 'online')}</div>
    <div class="grp"><span>${T('Notifications when the app is in the background')}</span>${seg('notify', [[1, T('On')], [0, T('Off')]], SET.notify !== false ? 1 : 0)}<div class="muted">${T('Join requests, messages and invitations — in the background, and messages from the administrator even when the app is closed.')}</div><div class="pushst" id="pushSt"></div></div>
    <div class="grp"><span>${T('Table sounds')}</span>${seg('sfx', [[1, T('On')], [0, T('Off')]], SET.sfx ? 1 : 0)}</div>
@@ -15279,6 +15275,8 @@ function ddsReady() {
 function start(data) {
   load(data && data.G ? data : null);
   // the Claude system is gone (2026-11-26): a card that played it (or played against it) goes to 2/1
+  // no longer choices in Settings: you sit South, a forced card is played for you, a call's meaning is always shown, robots are not corrected
+  Object.assign(SET, { seat: 2, auto: true, expl: true, fixBot: false });
   if (SET.opp === 'claude' || SET.sys === 'claude') { if (SET.opp === 'claude') SET.opp = 'same'; if (SET.sys === 'claude') setSys('twoone'); Store.saveSettings(SET); save(); }
   Field.init();
   // the app opens on a quiet start screen: nothing is dealt until you press Start (a board in progress is kept for it)
@@ -16421,7 +16419,7 @@ const Net = (() => {
       v.deal[s] = v.deal[s].map(() => -1);
       if (v.play) v.play.hands[s] = v.play.hands[s].map(() => -1);
     }
-    v.ctl = [0, 1, 2, 3].map(owner); v.names = st.names; v.away = Object.keys(st.away || {}).map(Number); v.score = st.score; v.profs = st.profs || {};
+    v.ctl = [0, 1, 2, 3].map(owner); v.names = st.names; v.bots = st.botNames || {}; v.away = Object.keys(st.away || {}).map(Number); v.score = st.score; v.profs = st.profs || {};
     v.watchers = [...(st.watch || new Map()).values()].map(w => w.name);
     // where each player's own table opens: if the host disappears, the players left move to the first of them
     v.ks = Object.fromEntries([0, 1, 2, 3].map(s => [s, st.seats[s] === 'host' ? (st.slot ? st.slot.k : 0) : (st.ks || {})[(st.toks || {})[s]] || 0]));
@@ -16943,7 +16941,7 @@ const Net = (() => {
     }).join('');
     const empty = !rows && !tours ? `<div class="muted">${T('No other tables are open right now.')}</div>` : '';
     const b = st.beatSt, bst = b ? `<div class="muted" style="font-size:11px;opacity:.7">🔌 ${new Date(b.at).toTimeString().slice(0, 5)} ${b.s === 'ok' ? '✓' : '⚠️ ' + esc(b.s)}</div>` : '';
-    return `<div class="tables">${tours ? `<div class="otours">${tours}</div>` : ''}${rows}${empty}${bst}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
+    return `<div class="tables">${tours ? `<div class="otours">${tours}</div>` : ''}${rows}${empty}<button class="btn" id="nFind" ${st.finding ? 'disabled' : ''}>${st.finding ? T('Looking for tables…') : L ? T('Refresh the list') : T('Show open tables')}</button></div>`;
   }
   /* ---- lobby chat: everyone with the app open can talk; each message goes along every lobby line ---- */
   const lclearTs = () => { try { return +localStorage.getItem('bridge-lobby-cleared') || 0; } catch (e) { return 0; } };
@@ -17669,6 +17667,9 @@ const Net = (() => {
   function becomeHost() {
     if (st.host || !st.slot) return !!st.host;
     const ms = typeof U === 'function' ? U() : SET.seat;   // the seat you play now (in a tournament, the seat you chose there)
+    // the robots keep the names they had at this player's table (until a person takes their seat)
+    let bots = {}; try { if (typeof seatName === 'function') for (const q of [0, 1, 2, 3]) if (q !== ms) bots[q] = seatName(q); } catch (e) {}
+    st.botNames = bots;
     Object.assign(st, { peer: st.slot.peer, on: true, host: true, guest: false, me: 'host', code: 'room-' + st.slot.k, seats: { [ms]: 'host' }, names: { [ms]: myName() || 'Host' }, msg: '' });
     wakeOn(); ping(); st.score = { ns: 0, ew: 0, n: 0 }; st.asks = {}; st.profs = { [ms]: prof() }; st.watch = new Map();
     if (!G || G.phase === 'idle') { clearTimeout(timer); G = lobbyG(); }
@@ -18122,7 +18123,7 @@ const Net = (() => {
   function applyState(v) {
     clearTimeout(timer);
     if (v.phase !== "done") HIST = HIST.filter(h => !(h.id === v.id && h.online)); // a finished board was taken back
-    st.ctl = v.ctl; st.names = v.names || {}; st.away = Object.fromEntries((Array.isArray(v.away) ? v.away : []).map(s => [+s, {}])); st.score = v.score || null;
+    st.ctl = v.ctl; st.names = v.names || {}; st.botNames = v.bots || {}; st.away = Object.fromEntries((Array.isArray(v.away) ? v.away : []).map(s => [+s, {}])); st.score = v.score || null;
     touchTable();
     G = v;
     if (G.phase === 'done' && G.result) {
@@ -18331,7 +18332,10 @@ const Net = (() => {
     if (t.dataset.mvd) { moveAnswer(t.dataset.mvd, false); return; }
     if (t.dataset.reqlater) { reqLater(t.dataset.reqlater); return; }
     if (t.dataset.tjoin) { const id = t.dataset.tjoin; if (!st.tours[id]) { flash(T('This tournament has not reached you yet — try again in a moment'), 2500); findTables(); return; } closeOv(); playTour(id); return; }
-    if (t.dataset.jsit) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jsit); st.offer = tb || null; st.msg = ''; st.want = 'any'; st.sitNow = true; showJoin('room-' + t.dataset.jsit); join('room-' + t.dataset.jsit, myName() || 'Guest', 'any'); return; }
+    // Sit down at an open table: first as the player's partner or as an opponent, then seated at once
+    if (t.dataset.jsit) { const k = t.dataset.jsit, tb = (st.tables || []).find(x => x.k === +k), h = tb ? tb.host : '';
+      openOv('net', `<h2>🪑 ${T('Sit down')}${h ? ' · ' + esc(h) : ''}</h2><div class="row2"><button class="btn gold" data-jsw="${k}|partner">🤝 ${T('Partner')}</button><button class="btn" data-jsw="${k}|opp">⚔️ ${T('Opponent')}</button></div><div class="row2"><button class="btn" id="oClose">${T('Cancel')}</button></div>`); return; }
+    if (t.dataset.jsw) { const [k, w] = t.dataset.jsw.split('|'), tb = (st.tables || []).find(x => x.k === +k); st.offer = tb || null; st.msg = ''; st.want = w; st.sitNow = true; showJoin('room-' + k); join('room-' + k, myName() || 'Guest', w); return; }
     if (t.dataset.jt) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jt); st.offer = tb || null; st.msg = ''; st.sitNow = false; showJoin('room-' + t.dataset.jt); return; }
     if (t.dataset.jw) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jw); st.offer = tb || null; st.msg = ''; st.want = 'watch'; showJoin('room-' + t.dataset.jw); return; }
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }

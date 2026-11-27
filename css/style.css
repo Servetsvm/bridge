@@ -2532,3 +2532,5 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .rtcard .rtcell{display:flex;flex-direction:column;gap:4px;min-width:0}
 .rtcard .rton{border:1px solid #1f7a3d;background:#1f7a3d;color:#fff;border-radius:8px;font:700 12.5px/1 var(--f-ui,inherit);padding:6px 8px;cursor:pointer}
 .rtcard .rton:hover{filter:brightness(1.1)}
+.kickx{width:28px;height:28px;line-height:26px;font-size:16px;font-weight:800;background:#c62828;color:#fff;border:2px solid #fff;margin-left:6px;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.kickx:hover{background:#e53935}
