@@ -183,6 +183,25 @@ window.otStartOpen = async function () {
     toast('▶ ' + otL('Started')); OT.list = null; renderAdminTab(); if (P.ctLoad) P.ctLoad(true);
   } catch (e) { toast('❌ Could not start'); } finally { OT.busy = false; }
 };
+// the TD console's Online (from home): an open evening that starts now, robots in the empty seats (the TD's own system)
+window.otStartQuick = async function (o) {
+  if (OT.busy) return false;
+  const P = otP(); if (!P || !P.ctMakePlan) { toast('❌ Open it from BridgePlay (Clubs)'); return false; }
+  if (!await otAsk(otL('Start the tournament now?'))) return false;
+  let sys = 'sayc'; try { const pr = P.Net && P.Net.prof && P.Net.prof(); if (pr && pr.sys) sys = pr.sys; } catch (e) {}
+  const M = OT.meta || { systems: [] }, sysN = ((M.systems.find(x => x.k === sys) || {}).n || sys).replace(/ \(.*\)$/, '');
+  const bpr = Math.min(8, Math.max(1, +o.bpr || 3)), b = Math.max(bpr, +o.b || bpr * 6), np = Math.min(120, Math.max(4, +o.np || 8));
+  const at = Date.now() - 1000, id = Date.now().toString(36);
+  const info = { n: ('Online · ' + sysN).slice(0, 60), at, b, bpr, np, sc: 'both', sys, conv: [], mov: 'howell', rep: 0, watch: 1, open: true,
+    st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: Date.now() };
+  OT.busy = true;
+  try {
+    await otPut('/' + id + '/info', info);
+    const plan = P.ctMakePlan({ id, d: at, i: info, pairs: [] });
+    if (plan) await otPut('/' + id + '/run/' + at, plan, 'PATCH');
+    toast('▶ ' + otL('Started')); OT.list = null; if (P.ctLoad) P.ctLoad(true); return true;
+  } catch (e) { toast('❌ Could not start'); return false; } finally { OT.busy = false; }
+};
 window.otStartNow = async function (id) {
   const t = (OT.list || {})[id]; if (!t || !await otAsk(otL('Start the tournament now?'))) return;
   const old = otNext(t.info), nw = Date.now() - 1000, P = otP();

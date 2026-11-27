@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v715`, kulüpler `kulup-v211`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v715`, kulüpler `kulup-v212`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,10 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v715`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Kulüp programı eski sekmeli paneli (BridgeScore/Kurulum/Oyuncular… + "Kulüpte / Online (evden)") artık açılmaz (yalnız Servet'in test sayfası
+  `bgTestOn`): `setupOnline` gelirse TD konsolu "Yeni turnuva" Hareket = **Online (evden)** seçili açılır (`window._tdcOnline`, MOVS 'online').
+  Turnuvayı oluştur → `otStartQuick` (açık akşam hemen başlar, Howell, TD'nin kendi sistemi, boş koltukta robot). Planlı/kayıtlı online turnuva
+  formu artık ekranda yok. kulup-v212.
 - Kullanıcının sistemi (v715, ROBOT_LEARNED 715): 1 seviyesinde renk açışına 1SA araya 15-17 (eskiden 15-18). Rakibin 1SA'sına X
   (doğrudan ya da 4. el; DONT'ta değil) = `tag 'ntX'` "bende de 1SA açışı var" 15-17 dengeli; `virtNT(x)`: rakip yalnız pas geçtikçe
   açık artırma 1SA bizim açmışız gibi kopyalanır (ntShift 0) → Stayman/transfer/cevaplar. Cappelletti ceza kontrası (cappX) kalktı;

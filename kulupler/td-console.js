@@ -14,7 +14,7 @@ window.tdcSet=on=>{ try{ localStorage.setItem('bg_tdc2',on?'1':'0'); }catch(e){}
 // the full panel and its tabs come only when chosen; the TD's screen is drawn again when the tournament changes
 const _rap=window.renderAdminPanel||renderAdminPanel;
 renderAdminPanel=window.renderAdminPanel=function(){
-  if(role==='admin'&&tdcOn()&&!bgTestOn()&&!(typeof setupOnline!=='undefined'&&setupOnline)) return tdcDraw();
+  if(role==='admin'&&tdcOn()&&!bgTestOn()){ if(typeof setupOnline!=='undefined'&&setupOnline){ setupOnline=false; window._tdcOnline=1; TDC.w=null; if(typeof tdcInitW==='function'){ tdcInitW(); TDC.v='setup'; } } return tdcDraw(); }
   _rap();
   const tabs=document.querySelector('.admin-tabs');
   if(tabs&&!document.getElementById('tdcBack')){ const b=document.createElement('button'); b.id='tdcBack'; b.className='admin-tab'; b.textContent='📱 BridgeScore'; b.onclick=()=>tdcSet(true); tabs.prepend(b); }
@@ -30,7 +30,7 @@ if(_tcs) window.tdCallsShow=function(v){ _tcs(v); tdcLive(); };
 function tdcLive(){ if(role!=='admin'||!tdcOn()||!document.querySelector('.tdc')) return; if(document.getElementById('modalBg')?.classList.contains('open')) return; { const ae=document.activeElement, t=document.querySelector('.tdc'); if(ae&&t&&t.contains(ae)&&/^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return; } if(['run','table','home','arc'].includes(TDC.v)) tdcDraw(); }
 
 const num=x=>(x||'').replace(/[^0-9]/g,'')||'?';
-const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board'],['team','Team match','Two teams, the same boards at two tables, IMP']];
+const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board'],['team','Team match','Two teams, the same boards at two tables, IMP'],['online','Online (from home)','Played in BridgePlay, starts now; robots in the empty seats']];
 // a member running a quick team match (not the club's admin): the tables, the score and Finish only — no club settings,
 // no menu, no new tournament, no old tournaments
 const qtMember=()=>role==='admin'&&!window._tdPw&&!!getState()._quickTeam&&typeof isClubAdmin==='function'&&!isClubAdmin();
@@ -104,7 +104,7 @@ window.tdcStart=async function(){ await adminStart(); TDC.v='run'; tdcDraw(); };
 
 // ── the setup on one screen: the movement, the players, the boards (and the Swiss rounds), then Create ──
 window.tdcInitW=function(){ const s=getState(), teamLink=new URLSearchParams(location.search).get('setup')==='team'&&s.status!=='running';   // from BridgePlay's Team match button
-  TDC.w={ta:s._teamAName||'Team A',tb:s._teamBName||'Team B',tpp:+s._teamPairs||2,mov:teamLink?'team':s.movement&&s.movement!=='team'?s.movement:'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
+  TDC.w={ta:s._teamAName||'Team A',tb:s._teamBName||'Team B',tpp:+s._teamPairs||2,mov:teamLink?'team':window._tdcOnline?'online':s.movement&&s.movement!=='team'?s.movement:'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
 window.tdcSetupStart=function(){ tdcInitW(); TDC.v='setup'; tdcDraw(); };
 function calc(w){
   if(w.mov==='team'){ const n=+w.tpp||2; return {tables:n,ph:false,pc:n*2,rounds:n,total:n*(+w.bpr||0)}; }   // two teams of n pairs: n tables (two a match), n rounds
@@ -152,6 +152,7 @@ function drawSetup(fin){
 // the same setup as the full panel's form: its boxes, filled in out of sight
 window.tdcCreate=async function(){
   const w=TDC.w; if(!w) return;
+  if(w.mov==='online'){ const c=calc(w); if(typeof otStartQuick==='function'&&await otStartQuick({np:+w.players||8,bpr:+w.bpr||3,b:c.total})){ window._tdcOnline=0; TDC.w=null; TDC.v='home'; } tdcDraw(); return; }
   if(TDC.tab){ TDC.tab=null; const c=document.getElementById('adminContent'); if(c) c.remove(); }
   const box=document.createElement('div'); box.style.display='none'; box.id='tdcForm';
   box.innerHTML=`<input id="aName"><select id="aMovement"><option value="${w.mov}" selected>${w.mov}</option></select><input id="aBPR" value="${w.bpr}"><input id="aPlayers" value="${+w.players||0}"><input id="aSocBoards" value="${+w.soc||0}"><input id="aSwissRounds" value="${+w.swr||0}"><input id="aTeamA"><input id="aTeamB"><input id="aTeamPairs" value="${+w.tpp||2}">`;

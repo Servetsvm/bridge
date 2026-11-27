@@ -192,6 +192,7 @@
     "Barometer — every table plays the same boards each round, then the pairs move":"Barometre — her turda tüm masalar aynı board’ları oynar, sonra çiftler hareket eder",
     "At the club":"Kulüpte",
     "Online (from home)":"Online (evden)",
+    "Played in BridgePlay, starts now; robots in the empty seats":"BridgePlay'de oynanır, hemen başlar; boş koltuklarda robotlar",
     "Spectator mode: players may watch the tables":"Seyirci modu: oyuncular masaları izleyebilir",
     "Create the online tournament":"Online turnuvayı oluştur",
     "Live":"Canlı",
