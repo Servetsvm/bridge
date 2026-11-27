@@ -1500,7 +1500,8 @@ const Net = (() => {
         if (st.priv && st.host && !inv && d.want === 'watch') { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
         // a request answered recently (also before a page refresh) is not asked again: declined stays declined,
         // "later" waits quietly in the Online panel
-        if (d.sit && d.want !== 'watch' && !(G && G.champ) && ((st.host && !st.priv) || (!st.host && !st.guest && st.soloPub))) {
+        // an open table: whoever comes sits down at once, nobody is asked (the first player can remove them with ✕)
+        if (d.want !== 'watch' && !(G && G.champ) && !st.tour && ((st.host && !st.priv) || (!st.host && !st.guest && st.soloPub))) {
           if (!st.host) becomeHost();
           if (st.host) { seatPlayer(conn, d, null); flash(T('{0} sat down at your table (✕ by the name removes them)', String(d.name || 'Guest').slice(0, 20)), 4000); return; }
         }
@@ -1939,7 +1940,7 @@ const Net = (() => {
     }
     openOv('net', `<h2>${T('Play online')}</h2>
       ${pendHtml()}
-      <div class="muted">${T('Open your own online table (players ask to join and you accept them), or ask to join one of the tables below.')}${st.slot ? '' : ' (' + T('connecting…') + ')'}</div>
+      <div class="muted">${T('Open your own online table (players sit down at once; you can remove one with ✕), or sit down at one of the tables below.')}${st.slot ? '' : ' (' + T('connecting…') + ')'}</div>
       <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" readonly value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Open tables')}</span>${tablesHtml()}</div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
@@ -1950,7 +1951,7 @@ const Net = (() => {
     st.joinCode = code;
     const offer = st.offer && 'room-' + st.offer.k === code ? st.offer : null;
     openOv('net', `<h2>${offer ? T("Join {0}'s table", esc(offer.host)) : T('Join table {0}', esc(code))}</h2>
-      ${offer ? `<div class="muted">${[0, 1, 2, 3].map(s => SEAT[s] + ': ' + esc((offer.names || {})[s] || T('Robot'))).join(' · ')}. ${T('{0} decides whether you can sit.', esc(offer.host))}</div>` : ''}
+      ${offer ? `<div class="muted">${[0, 1, 2, 3].map(s => SEAT[s] + ': ' + esc((offer.names || {})[s] || T('Robot'))).join(' · ')}. ${T('You sit down at once.')}</div>` : ''}
       <div class="grp"><span>${T('Your name')}</span><input class="tok wide" id="nName" maxlength="20" readonly value="${esc(myName())}" placeholder="${T('Your name')}"></div>
       <div class="grp"><span>${T('Sit as')}</span><div class="seg2">${[['partner', T("The host's partner")], ['opp', T('An opponent')], ['any', T('Any free seat')], ['watch', '👁 ' + T('Watch')]].map(([v, l]) => `<button data-want="${v}" class="${st.want === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       ${st.msg ? `<div class="${/…$/.test(st.msg) ? 'okmsg' : 'err'}">${esc(T(st.msg))}</div>` : ''}
