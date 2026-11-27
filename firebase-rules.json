@@ -548,13 +548,13 @@
                 "$tbl": {
                   "a": {
                     "$n": {
-                      ".write": "auth != null && !data.exists() && root.child('ot').child($club).child($tid).child('run').child($occ).child('m').child($tbl).child(root.child('sess').child(auth.uid).child('k').val()).exists()",
+                      ".write": "auth != null && !data.exists() && (root.child('ot').child($club).child($tid).child('run').child($occ).child('m').child($tbl).child(root.child('sess').child(auth.uid).child('k').val()).exists() || (root.child('ot').child($club).child($tid).child('info').child('open').val() === true && root.child('sess').child(auth.uid).child('k').exists()))",
                       ".validate": "newData.hasChildren(['s']) && newData.child('s').isNumber()"
                     }
                   },
                   "res": {
                     "$b": {
-                      ".write": "auth != null && root.child('ot').child($club).child($tid).child('run').child($occ).child('m').child($tbl).child(root.child('sess').child(auth.uid).child('k').val()).exists()"
+                      ".write": "auth != null && (root.child('ot').child($club).child($tid).child('run').child($occ).child('m').child($tbl).child(root.child('sess').child(auth.uid).child('k').val()).exists() || (root.child('ot').child($club).child($tid).child('info').child('open').val() === true && root.child('sess').child(auth.uid).child('k').exists()))"
                     }
                   }
                 }
@@ -563,6 +563,12 @@
                 "$k": {
                   ".write": "auth != null && root.child('sess').child(auth.uid).child('k').val() === $k",
                   ".validate": "newData.isNumber()"
+                }
+              },
+              "seats": {
+                "$s": {
+                  ".write": "auth != null && root.child('ot').child($club).child($tid).child('info').child('open').val() === true && root.child('sess').child(auth.uid).child('k').exists() && (!newData.exists() ? data.child('k').val() === root.child('sess').child(auth.uid).child('k').val() : newData.child('k').val() === root.child('sess').child(auth.uid).child('k').val() && (!data.exists() || data.child('k').val() === root.child('sess').child(auth.uid).child('k').val() || root.child('ot').child($club).child($tid).child('run').child($occ).child('hb').child(data.child('k').val()).val() < now - 600000))",
+                  ".validate": "!newData.exists() || (newData.hasChildren(['n', 'k', 'ts']) && newData.child('n').isString() && newData.child('n').val().length <= 20 && newData.child('k').isString() && newData.child('ts').isNumber())"
                 }
               }
             }

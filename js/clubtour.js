@@ -30,11 +30,20 @@ function ctList() {
     const pairs = Object.entries(t.pairs || {}).filter(([, p]) => p && p.d === d).map(([pid, p]) => ({ pid, ...p }));
     const seek = Object.entries(t.seek || {}).filter(([, p]) => p && p.d === d).map(([k, p]) => ({ k, ...p }));
     const run = (t.run || {})[d] || null;
-    out.push({ club, id, i: t.info, d, pairs, seek, run, plan: run && run.plan ? ctFill(run.plan, run.t) : null });
+    out.push({ club, id, i: t.info, d, pairs, seek, run, plan0: run && run.plan || null, plan: run && run.plan ? ctFill(ctSeatsApply(run.plan, run.seats), run.t) : null });
   }
   return out.sort((a, b) => a.d - b.d);
 }
 const ctMe = () => Net.ruleKey(myNm() || '');
+/* an open evening (🌐 Online, started at once by the club's director): no registration — every pair of the plan starts
+   empty (the robots play it) and a player takes an empty seat (run/<d>/seats/<pair>_<a|b> = { n, k, ts }); the seat stays
+   theirs, and a seat whose player has been away for 10 minutes is free again. The plan's pairs with the seats on them: */
+function ctSeatsApply(plan, seats) {
+  if (!plan || !seats) return plan;
+  const P = plan.pairs.map(p => ({ ...p }));
+  for (const [id, v] of Object.entries(seats)) { const m = /^(\d+)_([ab])$/.exec(id), p = m && P[+m[1]]; if (!p || !v || !v.k) continue; p[m[2]] = String(v.n || '').slice(0, 20); p['k' + m[2]] = v.k; }
+  return { ...plan, pairs: P };
+}
 const ctMine = x => x.pairs.find(p => p.ka === ctMe() || p.kb === ctMe());
 /* the plan of the evening, made once when the start time has come (by the first app of a registered player that sees
    it; the database keeps only the first): the pairs in the order they registered (an odd number gets a robot pair), and
@@ -111,6 +120,8 @@ function ctBoardSets(rounds, n, seed) {
 const ctSetOf = (plan, r, ti) => ti != null && plan.bs && plan.bs[r] && plan.bs[r][ti] != null && plan.bs[r][ti] >= 0 ? plan.bs[r][ti] : r;
 function ctMakePlan(x) {
   const P = x.pairs.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0) || String(a.pid).localeCompare(String(b.pid))).map(p => ({ a: p.a, b: p.b, ka: p.ka, kb: p.kb, ...(p.sys ? { sys: p.sys } : {}) }));
+  // an open evening: as many empty pairs as the players asked for (an even number), the players sit down later
+  if (x.i && x.i.open) { P.length = 0; const n0 = Math.max(2, Math.ceil((+x.i.np || 8) / 2)); for (let k = 0; k < n0 + (n0 % 2); k++) P.push({ a: '', b: '', ka: '', kb: '', open: 1 }); }
   if (P.length < 1) return null;   // one pair plays the robot pair
   if (P.length % 2) P.push({ a: 'Robot', b: 'Robot', ka: '', kb: '', robot: 1 });
   const n = P.length, R = Math.max(1, Math.floor((+x.i.b || 18) / (+x.i.bpr || 3)));   // after everyone has met everyone the circle goes on (the same opponents, other boards)
@@ -159,7 +170,7 @@ function ctSched(plan, pi) {
   return out;
 }
 const ctMyPair = plan => { const me = ctMe(); return me ? plan.pairs.findIndex(p => p.ka === me || p.kb === me) : -1; };   // a robot's empty key is nobody's
-const ctPairTxt = p => p.robot ? '🤖 ' + T('Robot pair') : esc(p.a) + ' – ' + esc(p.b);
+const ctPairTxt = p => p.robot || (!p.ka && !p.kb && !p.a && !p.b) ? '🤖 ' + T('Robot pair') : esc(p.a || '🤖') + ' – ' + esc(p.b || '🤖');
 // the home page card: each tournament coming up, its countdown and whether you are registered
 // a club's evening to show: the one being played, else the soonest
 const ctFirst = L => L.slice().sort((a, b) => (b.d <= Date.now()) - (a.d <= Date.now()) || a.d - b.d)[0];
@@ -169,6 +180,7 @@ function ctCardHtml() {
   return L.slice(0, 3).map(x => {
     const mine = ctMine(x), seeking = x.seek.some(s => s.k === ctMe()), started = x.d <= Date.now();
     if (started && !x.plan) ctEnsurePlan(x);
+    if (x.i.open && x.plan) return `<button class="hcard ctcard short reg" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} <span class="ctonl">🟢 Online</span> ${T('Sit down')}<i class="ctmore">›</i></b></button>`;
     return `<button class="hcard ctcard short${mine ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🏛 ${esc(x.i.cn || x.club)} <span class="ctonl">Online</span><i class="ctmore">›</i></b></button>`;
   }).join('');
 }
@@ -177,6 +189,7 @@ const ctFind = key => { const [club, id] = String(key).split('|'); return ctList
 // the tournament's window: what is played, the pairs, and register / look for a partner / cancel
 function ctShow(key, err) {
   const x = ctFind(key); if (!x) { closeOv(); return; }
+  if (x.i.open && x.plan) return ctShowOpen(key, x, err);
   const i = x.i, mine = ctMine(x), seeking = x.seek.some(s => s.k === ctMe());
   const convs = (i.conv || []).map(k => typeof pracName === 'function' ? pracName(k) : k).join(', ');
   const sys = E.sysOf(i.sys) ? E.sysOf(i.sys).n : i.sys;
@@ -234,6 +247,33 @@ function ctPlanHtml(x) {
   const res = `<div class="row2"><button class="btn gold" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button></div>`;
   return sit + mineH + all + res + `<div class="muted">${T('{0} rounds of {1} boards; every table of a round plays the same boards.', P.nr || P.rounds.length, P.bpr)}${P.mov === 'swiss' ? ' ' + T('Swiss: each next round is made from the standings when every table has finished.') : ''}</div>`;
 }
+// an open evening: this round's tables, each seat its player or an empty seat (the robot plays it) to sit down at
+function ctShowOpen(key, x, err) {
+  const P = x.plan, r = Math.max(0, ctCurRound(P, x.run && x.run.t)), hb = (x.run && x.run.hb) || {}, me = ctMe(), pi = ctMyPair(P);
+  const away = k => !k || Date.now() - (+hb[k] || 0) > 600e3;
+  const seat = (ti, pIdx, w, label) => { const p = P.pairs[pIdx], k = w ? p.kb : p.ka, n = w ? p.b : p.a;
+    if (k && k === me) return `<div class="ctseat me"><small>${label}</small><b>${esc(n)}</b></div>`;
+    if (k && !away(k)) return `<div class="ctseat"><small>${label}</small><b>${esc(n)}</b></div>`;
+    return pi >= 0 ? `<div class="ctseat free"><small>${label}</small><b>🤖 ${T('Robot')}</b></div>` : `<button class="ctseat free" data-ctopen="${esc(key + '|' + pIdx + '|' + (w ? 'b' : 'a') + '|' + r)}"><small>${label}</small><b>🤖 → 🪑 ${T('Sit down')}</b></button>`; };
+  const tables = P.rounds[r].map(([a, b], ti) => `<div class="grp"><span>${T('Table {0}', ti + 1)}</span><div class="ctseats">${seat(ti, a, 1, SEAT[0])}${seat(ti, b, 0, SEAT[1])}${seat(ti, a, 0, SEAT[2])}${seat(ti, b, 1, SEAT[3])}</div></div>`).join('');
+  openOv('ctour', `<h2>🏛 ${esc(x.i.cn || x.club)} <span class="ctonl">🟢 Online</span></h2><div class="big">${esc(x.i.n)}</div>
+    <div class="muted">${T('Round {0} of {1}', r + 1, P.nr || P.rounds.length)} · ${T('Empty seats are played by robots: tap one to take it.')}</div>
+    ${pi >= 0 ? `<div class="row2"><button class="btn new" data-ctsit="${esc(key)}">🪑 ${T('Sit down at your table')}</button></div>` : ''}
+    ${tables}${err ? `<div class="err">${esc(err)}</div>` : ''}
+    <div class="row2"><button class="btn gold" data-ctresopen="${esc(key)}" data-cttab="pair">🔀 ${T('Pairings')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+// a free seat taken: written as this player's (the database lets a seat be taken while it is empty, or its player has
+// been away for 10 minutes), then the table of the round
+async function ctTakeSeat(v) {
+  const [club, id, pIdx, w, r] = v.split('|'), key = club + '|' + id, x = ctFind(key); if (!x) return;
+  try {
+    await ctSession();
+    const p = ctRunP(x) + '/seats/' + pIdx + '_' + w, cur = await Net.Cloud.get(p), hb = await Net.Cloud.get(ctRunP(x) + '/hb') || {};
+    if (cur && cur.k && cur.k !== ctMe() && Date.now() - (+hb[cur.k] || 0) < 600e3) { await ctLoad(true); return ctShow(key, T('Someone has just taken this seat.')); }
+    await Net.Cloud.put(p, { n: String(myNm()).slice(0, 20), k: ctMe(), ts: Date.now() });
+  } catch (e) { return ctShow(key, T('Could not send — sign in with your name and PIN first.')); }
+  await ctLoad(true); ctSit(key, +r);
+}
 // 15 minutes before the start a registered player is told (once), on any screen
 function ctRemind() {
   for (const x of ctList()) {
@@ -259,7 +299,7 @@ function ctCardsOf(plan, r, ti) { const t = r != null && plan.rounds[r] && plan.
 // the four seats of a table: the North-South pair's first player South, the partner North; East-West: first East
 function ctSeatsOf(plan, r, ti) {
   const [ns, ew] = plan.rounds[r][ti], A = plan.pairs[ns], B = plan.pairs[ew];
-  const s = (p, w) => p.robot ? { n: T('Robot'), k: '' } : { n: w ? p.b : p.a, k: w ? p.kb : p.ka };
+  const s = (p, w) => p.robot ? { n: T('Robot'), k: '' } : { n: (w ? p.b : p.a) || '🤖 ' + T('Robot'), k: w ? p.kb : p.ka };   // an empty seat of an open evening: the robot
   return [s(A, 1), s(B, 0), s(A, 0), s(B, 1)];
 }
 const ctBoards = (plan, r, ti) => { const s = ctSetOf(plan, r, ti); return [...Array(plan.bpr).keys()].map(i => s * plan.bpr + i + 1); };
@@ -347,6 +387,7 @@ async function ctBeat() {
   const t = CT.tbl; if (!t) return;
   ctSlowCheck();
   try { await Net.Cloud.put(t.p + '/hb/' + Net.fbKey(myNm()), Date.now()); t.hb = await Net.Cloud.get(t.p + '/hb') || {}; } catch (e) {}
+  if (t.plan0) try { t.plan = ctFill(ctSeatsApply(t.plan0, await Net.Cloud.get(t.p + '/seats')), await Net.Cloud.get(t.p + '/t')); t.seats = ctSeatsOf(t.plan, t.r, t.ti); } catch (e) {}   // an open evening: who sits where now
   if (ctBack()) flash('⏳ ' + T('Wait: the robot is finishing this board for you. You take your seat when it is over.'), 4000);
   ctMyScore();
   if (G && G.ct) tick();   // a player gone (or back): the robots take the seat (or give it back)
@@ -364,7 +405,7 @@ async function ctSit(key, r0) {
   try { await ctSession(); } catch (e) { flash(T('Could not send — sign in with your name and PIN first.'), 2500); return; }
   const seats = ctSeatsOf(x.plan, s.r, s.ti), seat = seats.findIndex(q => q.k === ctMe());
   clearInterval(CT.pollT); clearInterval(CT.beatT);
-  CT.tbl = { key, id: x.id, d: x.d, p: ctRunP(x), plan: x.plan, r: s.r, ti: s.ti, tid: s.r + '_' + s.ti, seats, seat, boards: ctBoards(x.plan, s.r, s.ti), n: 0, hb: {}, name: x.i.n, rounds: x.plan.nr || x.plan.rounds.length };
+  CT.tbl = { key, id: x.id, d: x.d, p: ctRunP(x), plan: x.plan, plan0: x.i.open ? x.plan0 : null, r: s.r, ti: s.ti, tid: s.r + '_' + s.ti, seats, seat, boards: ctBoards(x.plan, s.r, s.ti), n: 0, hb: {}, name: x.i.n, rounds: x.plan.nr || x.plan.rounds.length };
   try { localStorage.setItem('ct-r-' + x.id + x.d, String(s.r)); } catch (e) {}
   CT.sc = null; closeOv();
   let hb0 = 0; try { hb0 = +(await Net.Cloud.get(CT.tbl.p + '/hb/' + Net.fbKey(myNm()))) || 0; } catch (e) {}
@@ -584,7 +625,8 @@ function ctLeave() { clearInterval(CT.pollT); clearInterval(CT.beatT); CT.tbl = 
 setTimeout(() => { if (typeof ui !== 'undefined' && ui.saved && ui.saved.ct) ui.saved = null; if (typeof G !== 'undefined' && G && G.ct && !CT.tbl) { CT.resume = { key: G.ct.key, r: G.ct.r, id: G.id }; G = null; if (typeof render === 'function') render(); } }, 500);
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek],[data-ctsit],[data-ctrobot],[data-ctskip]'); if (!t) return;
+  const t = e.target.closest('[data-ct],[data-ctreg],[data-ctcancel],[data-ctseek],[data-ctsit],[data-ctrobot],[data-ctskip],[data-ctopen]'); if (!t) return;
+  if (t.dataset.ctopen) { ctTakeSeat(t.dataset.ctopen); return; }
   if (t.dataset.ctrobot) { ctRegister(t.dataset.ctrobot, true); return; }
   if (t.dataset.ctsit) { ctSit(t.dataset.ctsit); return; }
   if (t.dataset.ctskip && CT.waiting) { const w = CT.waiting; CT.waiting = null; clearInterval(CT.waitT); closeOv(); ctSit(w.key, w.next); return; }
@@ -610,7 +652,7 @@ function ctRuns(club) {
   for (const [c, L] of Object.entries(CT.all || {})) {
     if (club && c !== club) continue;
     for (const [id, t] of Object.entries(L || {})) for (const [d, run] of Object.entries((t && t.run) || {})) {
-      if (run && run.plan) out.push({ club: c, id, d: +d, i: t.info || {}, plan: ctFill(run.plan, run.t), run });
+      if (run && run.plan) out.push({ club: c, id, d: +d, i: t.info || {}, plan: ctFill(ctSeatsApply(run.plan, run.seats), run.t), run });   // an open evening: the names of who sat
     }
   }
   return out.sort((a, b) => b.d - a.d);
@@ -834,7 +876,7 @@ CT.testBusy = false;
 async function ctHeadTest() {
   if (CT.testBusy || !myNm() || document.hidden) return;
   const t = CT.tbl || CT.waiting; if (!t || !t.key) return;
-  const x = ctFind(t.key); if (!x || !x.i || !x.i.test || !x.plan) return;
+  const x = ctFind(t.key); if (!x || !x.i || !(x.i.test || x.i.open) || !x.plan) return;
   CT.testBusy = true;
   try {
     const p = ctRunP(x); if (await Net.Cloud.get(p + '/plan/bpr') == null) return;   // deleted meanwhile

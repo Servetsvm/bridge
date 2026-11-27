@@ -2516,3 +2516,11 @@ body.homev2 .h2tiles .h2sys{grid-column:1/-1}
 #cvLive{margin-left:auto;align-self:center;display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;border:1px solid rgba(76,175,125,.5);color:#6fd39a;font-weight:700;font-size:15px}
 #cvLive i{width:8px;height:8px;border-radius:50%;background:#4caf7d;animation:cvlp 1.5s infinite}
 @keyframes cvlp{50%{opacity:.35}}
+/* an open online evening (🌐 Online): each table's four seats, an empty one (the robot plays it) to tap and take */
+.ctseats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+.ctseat{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;border-radius:10px;border:1px solid rgba(0,0,0,.15);background:rgba(0,0,0,.04);color:inherit;font:inherit;text-align:left;min-height:52px}
+.ctseat small{font-size:.72rem;opacity:.7;text-transform:uppercase;letter-spacing:.5px}
+.ctseat b{font-size:.95rem}
+button.ctseat.free{background:#1f6a40;border-color:#174f31;color:#fff;cursor:pointer}
+button.ctseat.free small{opacity:.85}
+.ctseat.me{background:#f0cf7a;border-color:#8a6a1c;color:#2a1f05}

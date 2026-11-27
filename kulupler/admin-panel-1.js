@@ -7,6 +7,8 @@ let adminTab='setup';
 function renderAdminPanel(){
   const otq=new URLSearchParams(location.search).get('ot');
   if(otq&&!window._otOpened&&typeof OT!=='undefined'){ window._otOpened=1; adminTab='setup'; setupOnline=true; OT.edit=otq; }
+  // BridgePlay's 🌐 Online button on the club's card: the online setup at once (its ▶ Start now starts it with robots in the seats)
+  if(new URLSearchParams(location.search).get('online')==='1'&&!window._otOpened&&typeof OT!=='undefined'){ window._otOpened=1; adminTab='setup'; setupOnline=true; OT.edit=null; }
   // the test page (Clubs → Test → Beykoz → Admin): only the online test with robots (cards played in BridgePlay)
   if(bgTestOn()){ document.getElementById('panelContent').innerHTML=`<div class="admin-wrap"><div id="adminContent">${typeof otTestCard==='function'?otTestCard():''}</div></div>`; return; }
   document.getElementById('panelContent').innerHTML=`

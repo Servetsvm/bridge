@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v690`, kulüpler `kulup-v201`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v691`, kulüpler `kulup-v202`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -66,8 +66,13 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v690`, kulü
   teknik olarak değiştirebilir (kullanıcıya söylendi). bm/info ve bm/logo yalnız sahip/TD'de kaldı. kulup-v201.
 - Kullanıcı kulüp bilgisi + logosunun kaybolduğunu söyledi; kodda bunları silen yol bulunamadı (td-console tdcInfoSave boş formda
   DELETE eder; logo seçicide "yok" DELETE eder). Hangi kulüp olduğu soruldu.
-- **Sıradaki (onay bekliyor):** kulüp sayfasında 🌐 Online düğmesi → turnuva hemen başlar, boş koltuklara robot, sonradan gelen robotun
-  yerine oturur (mevcut online sistem kayıtlı çiftlerle çalışıyor: kulupler/online-tour.js + js/clubtour.js).
+- **🌐 Online, hemen başlayan açık turnuva** (v691/kulup-v202): BridgePlay kulüp kartında turnuva yokken `data-clubonline` →
+  kulupler `?role=admin&online=1` (setupOnline) → formda "▶ Hemen başlat — boş koltuklarda robotlar oynar" (`otStartOpen`: info.open=true,
+  plan `ctMakePlan` open dalı: np/2 (çift) boş çift, kayıt yok). Oyuncu: kulüp kartı/ana sayfa kartı → `ctShowOpen` (bu turun masaları,
+  koltuk adı ya da 🤖 → 🪑 Otur) → `ctTakeSeat` `run/<d>/seats/<çift>_<a|b> = {n,k,ts}` → `ctSit`. Plan her yerde `ctSeatsApply(plan, seats)`
+  ile okunur (ctList, sonuçlar, kulupler canlı/ayna). Boş koltuk = robot (ctPresent), boş masaları oturan oyuncuların uygulaması oynar
+  (`ctHeadTest` artık `i.test || i.open`). Masadayken `ctBeat` koltukları yeniden okur (sonradan gelen robotun yerini alır).
+  Kurallar: ot run t/a, t/res açık turnuvada her üyeye; seats: boşsa, kendininse ya da sahibi 10 dk yoksa (hb). Test: iki oyunculu mock (Nora G, sonra Emin K).
 
 ### 2026-11-26
 - **Yeni BridgePlay (/yeni/) silindi**: kullanıcı görünüşü, kullanımı, eksikleri ve fikrin kendisini beğenmedi; eski programla devam.

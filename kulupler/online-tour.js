@@ -62,6 +62,8 @@ function otFormHtml(M, ed) {
       <label style="display:block;margin:6px 0;"><input id="otRep" type="checkbox" onchange="otPreview()"> 🔁 <span>Every week at this time</span></label>
       <label style="display:block;margin:6px 0;"><input id="otWatch" type="checkbox" checked> 👁 <span>Spectator mode: players may watch the tables</span></label>
       <div id="otPrev" class="card" style="margin:8px 0;background:var(--bg3,rgba(0,0,0,.05));"></div>
+      ${ed ? '' : `<button class="btn btn-green btn-full" style="margin-top:6px;" onclick="otStartOpen()">▶ <span>Start now — empty seats are played by robots</span></button>
+      <div style="font-size:0.72rem;color:var(--text3);margin:4px 0 8px;">No registration: the players sit down in BridgePlay (Clubs → this club → 🌐 Online); a player who comes later takes a robot's seat.</div>`}
       <button class="btn btn-gold btn-full" style="margin-top:6px;" onclick="otSave()">${ed ? '💾 <span>Save the changes</span>' : '🚀 <span>Create Tournament</span>'}</button>`;
 }
 // the form read: what the tournament will be called and how it is played
@@ -111,10 +113,10 @@ function otSetupCard() {
 }
 // the state of an evening: each round's tables with the boards finished there
 function otLiveHtml(t, d) {
-  const run = t.run && t.run[d], P = run && run.plan && (otP() ? otP().ctFill(run.plan, run.t) : run.plan); if (!P) return '';
+  const run = t.run && t.run[d], P = run && run.plan && (otP() ? otP().ctFill(otP().ctSeatsApply ? otP().ctSeatsApply(run.plan, run.seats) : run.plan, run.t) : run.plan); if (!P) return '';
   const T_ = run.t || {}, done = (r, ti) => Object.values((T_[r + '_' + ti] || {}).res || {}).filter(Boolean).length;
   const cur = P.rounds.findIndex((tb, r) => tb.some((x, ti) => done(r, ti) < P.bpr));
-  const pn = p => p.robot ? '🤖' : cleanData(p.a) + ' – ' + cleanData(p.b);
+  const pn = p => p.robot ? '🤖' : cleanData(p.a || '🤖') + ' – ' + cleanData(p.b || '🤖');   // an open evening's empty seat: the robot
   return `<div style="margin-top:6px;font-size:0.8rem;"><b>🟢 <span>Live</span></b> · ${cur < 0 ? '🏁 <span>Finished</span>' : '<span>Round</span> ' + (cur + 1) + '/' + P.rounds.length}
     ${P.rounds.map((tb, r) => r < Math.max(0, cur) - 1 || (cur >= 0 && r > cur) ? '' : `<div style="margin-top:4px;"><span>Round</span> ${r + 1}: ${tb.map(([a, b], ti) => { const n = done(r, ti); return `<span style="display:inline-block;margin:2px 6px 2px 0;padding:2px 6px;border-radius:6px;background:${n >= P.bpr ? 'rgba(31,122,46,.18)' : 'rgba(212,160,23,.2)'};"><span>Table</span> ${ti + 1}: ${pn(P.pairs[a])} / ${pn(P.pairs[b])} · ${n}/${P.bpr}</span>`; }).join('')}</div>`).join('')}</div>`;
 }
@@ -162,6 +164,25 @@ window.otSave = async function () {
   } catch (e) { toast('❌ Could not save'); } finally { OT.busy = false; }
 };
 // start now: the start is set to now and the evening's plan is made at once (from the pairs registered)
+/* 🌐 Online started at once (2026-11-27): no registration — the plan's pairs start empty (robots), the players sit down in
+   BridgePlay and take the robots' seats; the evening is the club's like any online one (results, the club's tabs) */
+window.otStartOpen = async function () {
+  if (OT.busy) return;
+  const f = otRead(), P = otP();
+  if (f.deals && f.deals.length < f.b) { toast('❌ ' + otL('The hand file has fewer boards than the tournament')); return; }
+  if (!P || !P.ctMakePlan) { toast('❌ Open it from BridgePlay (Clubs)'); return; }
+  if (!await otAsk(otL('Start the tournament now?'))) return;
+  const at = Date.now() - 1000, id = Date.now().toString(36);
+  const info = { ...(f.deals ? { deals: f.deals.slice(0, f.b) } : {}), n: f.n, at, b: f.b, bpr: f.bpr, np: f.np, sc: f.sc, sys: f.sys, conv: f.conv, mov: f.mov, rep: 0, watch: f.watch, open: true,
+    st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: Date.now() };
+  OT.busy = true;
+  try {
+    await otPut('/' + id + '/info', info);
+    const plan = P.ctMakePlan({ id, d: at, i: info, pairs: [] });
+    if (plan) await otPut('/' + id + '/run/' + at, plan, 'PATCH');
+    toast('▶ ' + otL('Started')); OT.list = null; renderAdminTab(); if (P.ctLoad) P.ctLoad(true);
+  } catch (e) { toast('❌ Could not start'); } finally { OT.busy = false; }
+};
 window.otStartNow = async function (id) {
   const t = (OT.list || {})[id]; if (!t || !await otAsk(otL('Start the tournament now?'))) return;
   const old = otNext(t.info), nw = Date.now() - 1000, P = otP();
@@ -274,7 +295,7 @@ function otEvenings() {
   const out = [];
   for (const [id, t] of Object.entries(OT.list || {})) {
     if (!t || !t.info) continue;
-    for (const [d, run] of Object.entries(t.run || {})) if (run && run.plan) out.push({ id, d: +d, i: t.info, plan: otP() ? otP().ctFill(run.plan, run.t) : run.plan, run, t });
+    for (const [d, run] of Object.entries(t.run || {})) if (run && run.plan) out.push({ id, d: +d, i: t.info, plan: otP() ? otP().ctFill(otP().ctSeatsApply ? otP().ctSeatsApply(run.plan, run.seats) : run.plan, run.t) : run.plan, run, t });   // an open evening: who sits where
   }
   return out.sort((a, b) => b.d - a.d);
 }
@@ -282,7 +303,7 @@ function otComing() {
   const L = Object.entries(OT.list || {}).filter(([, t]) => t && t.info).map(([id, t]) => ({ id, t, i: t.info, d: otNext(t.info) })).filter(x => !(x.t.run && x.t.run[x.d]) && x.d - Date.now() < 14 * 864e5 && x.d + 4 * 3600e3 > Date.now());
   return L.sort((a, b) => a.d - b.d)[0] || null;
 }
-const otPn = p => p.robot ? '🤖 Robot' : cleanData(p.a) + ' – ' + cleanData(p.b);
+const otPn = p => p.robot ? '🤖 Robot' : cleanData(p.a || '🤖') + ' – ' + cleanData(p.b || '🤖');
 let otCss = false;
 function otStyle() {   // the hands and the double dummy table as BridgePlay draws them
   if (otCss) return; otCss = true;
@@ -469,7 +490,7 @@ async function otMirror() {
   OT.mirBusy = true;
   try {
     const base = '/' + best.id + '/run/' + best.d, r = await fetch(await otUrl(base + '/t'), { cache: 'no-store' }), tmap = r.ok ? (await r.json()) || {} : {};
-    const plan = P.ctFill(best.run.plan, tmap), M = P.ctMirror(plan, best.t.info || {}, tmap, best.d, best.id); if (!M) return;
+    const plan = P.ctFill(P.ctSeatsApply ? P.ctSeatsApply(best.run.plan, best.run.seats) : best.run.plan, tmap), M = P.ctMirror(plan, best.t.info || {}, tmap, best.d, best.id); if (!M) return;
     const s = await DB.get('state') || {}, mine = !!(s.online && s.online.tid === best.id && +s.online.d === best.d);
     if (!mine && s.status === 'running') {
       if (!s.online) return;   // a tournament at the club is being played

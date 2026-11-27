@@ -3779,6 +3779,7 @@ document.addEventListener('click', ev_ => {
   if (t.dataset.clubteam) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubteam) + '&role=admin&setup=team&quick=team'); return; }
   if (t.dataset.clubsocial) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubsocial) + '&role=admin&quick=social'); return; }
   if (t.dataset.clubadmin) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubadmin) + '&role=admin'); return; }
+  if (t.dataset.clubonline) { closeOv(); openClubs('?club=' + encodeURIComponent(t.dataset.clubonline) + '&role=admin&online=1'); return; }
   if (t.dataset.clubtn) { const [c, p, n] = t.dataset.clubtn.split('|'); closeOv(); openClubs('?club=' + encodeURIComponent(c) + '&role=table&p=' + p + '&tn=' + n); return; }
   // the online team match: a new tournament of the Team match type, set up at once
   if (t.id === 'olTeam') {
@@ -4710,7 +4711,8 @@ async function showClubs() {
   const draw = () => {
     const L = ui.clubLive || [];
     const otOf = c => typeof ctList === 'function' ? [ctFirst(ctList().filter(x => x.club === c && !x.i.test))].filter(Boolean) : [];   // one evening a club
-    const otCard = x => `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`;
+    const otCard = x => x.i.open && x.plan ? `<button class="hcard ctcard reg" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>🟢 ${T('Being played now')} · 🪑 ${T('Sit down')} ›</span></button>`
+      : `<button class="hcard ctcard${ctMine(x) ? ' reg' : ''}" data-ct="${esc(x.club + '|' + x.id)}"><b>🌐 ${esc(x.i.n)}</b><span>${esc(ctWhen(x.d))}${x.i.rep ? ' · 🔁' : ''} · ${x.d <= Date.now() ? '🟢 ' + T('Started') : '⏳ ' + ctLeft(x.d)} · ${T('{0} pairs', x.pairs.length)}</span></button>`;
     const otRows = c => otOf(c).map(otCard).join('');
     const otLive = c => otOf(c).find(x => x.plan);   // an online evening being played: the club's tournament now
     const shown = ui.clubOpen ? L.filter(t => t.club === ui.clubOpen) : L;   // a club tapped: only that club, full screen
@@ -4725,6 +4727,7 @@ async function showClubs() {
         (x => `<div class="row4 clubtools ct4"><button class="btn" data-clubadmin="${esc(t.club)}">🧑‍⚖️ ${T('TD')}</button>` + (x ? `<button class="btn" data-ctresopen="${esc(x.club + '|' + x.id)}" data-cttab="pair">🔀 ${T('Pairings')}</button>` : `<button class="btn" data-clubmov="${esc(t.club)}">🔀 ${T('Movement')}</button>`) + `<button class="btn" data-clubscr="${esc(t.club)}">📺 ${T('Screen')}</button><button class="btn" data-clubres="${esc(t.club)}">📄 ${T('Results')}</button></div>`)(otLive(t.club))
         // the club's info (address, contact person, phone): a button under the tools, the card opens under it
         // a team match: only when the club's admin turned its button on (Club info → Team match button)
+        + (t.tb || otLive(t.club) ? '' : `<button class="btn clubinfob clubteamb" data-clubonline="${esc(t.club)}">🌐 ${T('Online')}</button>`)   // the director starts an online evening at once: robots in the empty seats
         + (t.tb || !((ui.clubInfo || {})[t.club] || {}).tm ? '' : `<button class="btn clubinfob clubteamb" data-clubteam="${esc(t.club)}">🏆 ${T('Team match')}</button>`)
         + (t.tb || !((ui.clubInfo || {})[t.club] || {}).sb ? '' : `<button class="btn clubinfob clubteamb" data-clubsocial="${esc(t.club)}">🤝 ${T('Social Bridge')}</button>`)   // Social Bridge: the same way, when the club's admin turned it on
         + (clubInfoHtml((ui.clubInfo || {})[t.club]) ? `<button class="btn clubinfob" data-clubinfo="${esc(t.club)}" data-clubname="${esc(t.c || t.club)}">ℹ️ ${T('Club info')}</button>` : '')) + `</div>`).join('');
