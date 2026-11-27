@@ -974,7 +974,7 @@ window.clubLogoPick=async function(){
   if(!CLUB_ID) return;
   const t=s=>window.i18nText?i18nText(s):s;
   // read first: a read that fails shows no empty picker (as if the club had no logo)
-  let cur=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/logo.json'),{cache:'no-store'}); if(!r.ok) throw new Error(r.status); cur=await r.json(); }catch(e){ toast('❌ '+t('Could not read the club logo — check the connection and try again')); return; }
+  let cur=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+CLUB_ID+'/bm/logo.json'),{cache:'no-store'}); if(!r.ok) throw new Error('HTTP '+r.status); cur=await r.json(); }catch(e){ toast('❌ '+t('Could not read the club logo — check the connection and try again')+' ('+String(e&&e.message||e).slice(0,40)+')',6000); return; }
   const grid=['S','H','D','C'].map(su=>`<div class="clogo-row">${[...LOGO_RK].map(rk=>`<button class="clogo-btn${cur===rk+su?' on':''}" onclick="clubLogoSave('${rk+su}')">${clubLogoHtml(rk+su)}</button>`).join('')}</div>`).join('');
   openModal(t('Club logo'), `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:10px;">${t("Choose a card: it is shown before your club's name in BridgePlay's Clubs.")}</div><div class="clogo-up">${LOGO_IMG.test(cur||'')?`<span class="clogo-cur">${clubLogoHtml(cur)}</span>`:''}<label class="btn">📷 ${t('Upload a picture')}<input type="file" accept="image/*" style="display:none" onchange="clubLogoFile(this)"></label><span>${t('or choose a card:')}</span></div><div class="clogo-grid">${grid}</div>`,
     `<button class="btn" onclick="clubLogoSave(null)">${t('Default')}</button><button class="btn btn-gold" onclick="closeModal()">${t('Close')}</button>`);
