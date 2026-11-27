@@ -16466,7 +16466,7 @@ const Net = (() => {
     if (st.guest) return st.ctl ? st.ctl[seat] : 'robot';
     // a player whose connection dropped keeps the seat, but a robot plays it until they are back
     const at = s => (st.seats[s] && !(st.away && st.away[s]) ? st.seats[s] : null);
-    if (G && G.phase === 'play' && G.play) { const d = G.play.contract.decl, dm = G.play.dummy; if (seat === d || seat === dm) return at(d) || at(dm) || 'robot'; }
+    if (G && G.phase === 'play' && G.play) { const d = G.play.contract.decl, dm = G.play.dummy; if (seat === d || seat === dm) return at(d) || 'robot'; }   // declarer's player plays both hands; a robot declarer plays dummy too (the human dummy only watches)
     return at(seat) || 'robot';
   }
   /* the state a player may see: hidden hands become face-down placeholders */

@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v734`, kulüpler `kulup-v216`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v735`, kulüpler `kulup-v216`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v734`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Online masada (net.js `owner`) robot deklarer olunca yalancıyı insan oynamak zorundaydı (`at(d) || at(dm)`): artık robot deklarer iki eli de oynar
+  (`at(d) || 'robot'`). Çevrimdışı (v698, `userControls`) ve kulüp akşamı (`ctSeatKey` yalancı→deklarer) zaten böyleydi; online masa unutulmuştu. v735.
 - Online Takım maçında masa değişikliği yok (kullanıcı): `ctqPlan` artık tek tur (bpr = el sayısı, R 1) — her masa kendi oyuncularıyla bütün elleri
   oynar, her masada aynı eller (karşılaştırılır), "Diğer masalar bekleniyor" beklemesi yok. Önceden kurulmuş akşamlar eski planla sürer. v734.
 - v727'deki "masadan kalkınca koltuğu sil" geri alındı (kalkan kişi kendi masasını kaybedip başka masaya oturabiliyordu). Koltuk kalır, `ctLeave` hb=0 yazar:
