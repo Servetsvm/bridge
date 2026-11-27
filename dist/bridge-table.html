@@ -15285,6 +15285,7 @@ function shareDeal(deal, board) {
 // the app was opened from a shared deal: offer to play it (the link is taken out of the address)
 /* the welcome: what the site is for, in a few lines. Shown once, on a player's first visit (after the name and PIN); not over a shared deal, an invitation or a board in play. */
 function welcome() {
+  if (ui.overlay === 'instask' || (!INST_ASKED && installAsk())) { setTimeout(welcome, 1500); return; }   // the install question first, then the welcome
   if (SET.welNo || (SET.welN || 0) >= 1 || ui.welDone || ui.overlay || (G && G.phase !== 'idle')) return;
   ui.welDone = 1; SET.welN = (SET.welN || 0) + 1; Store.saveSettings(SET);
   openOv('welcome', `<h2 class="welh">♠<i>♥</i><i>♦</i>♣ ${T('Welcome to BridgePlay')}</h2>
@@ -16359,11 +16360,16 @@ function instHtml() {
    its own */
 var INST_ASKED = false;
 function installAsk() {
-  if (INST_ASKED || !/[?&]install=1/.test(location.search) || isStandalone() || needGate()) return;
-  INST_ASKED = true;
+  // everyone who opens the link in the browser (not the installed app) is asked first: once, then again after 3 days if "Not now"
+  const link = /[?&]install=1/.test(location.search), mobile = isIOS() || /android/i.test(navigator.userAgent);
+  if (INST_ASKED || isStandalone() || SET.instNo || window.top !== window || (!link && !mobile && !INST)) return false;
+  if (!link && SET.instAt && Date.now() - SET.instAt < 3 * 864e5) return false;
+  if (needGate() || ui.overlay) { if (!ui.instRetry) { ui.instRetry = 1; setTimeout(() => { ui.instRetry = 0; installAsk(); }, 3000); } return false; }   // after the name and PIN, and not over another window
+  INST_ASKED = true; SET.instAt = Date.now(); Store.saveSettings(SET);
   openOv('instask', `<h2>📲 BridgePlay</h2><div class="big">${T('Install BridgePlay on your phone as an app?')}</div>
     <div class="muted">${T('Then it opens like any app, from your home screen.')}</div>
     <div class="row2"><button class="btn new" id="instGo">📲 ${T('Install')}</button><button class="btn" id="oClose">${T('Not now')}</button></div>`);
+  return true;
 }
 setTimeout(installAsk, 1500);
 /* once for every player (October 2026): the base system and the conventions are emptied and each player makes their
