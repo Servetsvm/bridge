@@ -30,7 +30,7 @@ if(_tcs) window.tdCallsShow=function(v){ _tcs(v); tdcLive(); };
 function tdcLive(){ if(role!=='admin'||!tdcOn()||!document.querySelector('.tdc')) return; if(document.getElementById('modalBg')?.classList.contains('open')) return; { const ae=document.activeElement, t=document.querySelector('.tdc'); if(ae&&t&&t.contains(ae)&&/^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return; } if(['run','table','home','arc'].includes(TDC.v)) tdcDraw(); }
 
 const num=x=>(x||'').replace(/[^0-9]/g,'')||'?';
-const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board'],['team','Team match','Two teams, the same boards at two tables, IMP'],['online','Online (from home)','Played in BridgePlay, starts now; robots in the empty seats']];
+const MOVS=[['mitchell','Mitchell','NS fixed, EW moves'],['howell','Howell','All pairs move'],['barometer','Barometer','Every table the same boards'],['swiss','Swiss','Pairings by the standings'],['social','Social Bridge','Pairs stay; any free board'],['team','Team match','Two teams, the same boards at two tables, IMP']];
 // a member running a quick team match (not the club's admin): the tables, the score and Finish only — no club settings,
 // no menu, no new tournament, no old tournaments
 const qtMember=()=>role==='admin'&&!window._tdPw&&!!getState()._quickTeam&&typeof isClubAdmin==='function'&&!isClubAdmin();
@@ -104,7 +104,7 @@ window.tdcStart=async function(){ await adminStart(); TDC.v='run'; tdcDraw(); };
 
 // ── the setup on one screen: the movement, the players, the boards (and the Swiss rounds), then Create ──
 window.tdcInitW=function(){ const s=getState(), teamLink=new URLSearchParams(location.search).get('setup')==='team'&&s.status!=='running';   // from BridgePlay's Team match button
-  TDC.w={ta:s._teamAName||'Team A',tb:s._teamBName||'Team B',tpp:+s._teamPairs||2,mov:teamLink?'team':window._tdcOnline?'online':s.movement&&s.movement!=='team'?s.movement:'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
+  TDC.w={ta:s._teamAName||'Team A',tb:s._teamBName||'Team B',tpp:+s._teamPairs||2,where:window._tdcOnline?'online':'club',mov:teamLink?'team':s.movement&&s.movement!=='team'?s.movement:'mitchell',players:+s._setupPlayers||16,bpr:s.boardsPerRound&&s.movement!=='social'?s.boardsPerRound:3,soc:s.movement==='social'?+s.totalBoards||24:24,swr:+s._setupSwissRounds||7}; };
 window.tdcSetupStart=function(){ tdcInitW(); TDC.v='setup'; tdcDraw(); };
 function calc(w){
   if(w.mov==='team'){ const n=+w.tpp||2; return {tables:n,ph:false,pc:n*2,rounds:n,total:n*(+w.bpr||0)}; }   // two teams of n pairs: n tables (two a match), n rounds
@@ -137,8 +137,10 @@ function drawSetup(fin){
   if(!TDC.w) tdcInitW();
   const w=TDC.w, again=TDC.v==='setup', fs=getState().status==='finished';
   const body=`${fs&&!again?`<div class="tdc-finrow">🏁 ${L('Tournament finished')} <button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>`:''}
+    <div class="bm3-keys k2 tdc-where">${[['club','🏛 '+L('At the club')],['online','🌐 '+L('Online (from home)')]].map(([k,n])=>`<button class="bm3-key${(w.where||'club')===k?' active':''}" onclick="tdcWhere('${k}')">${n}</button>`).join('')}</div>
+    ${w.where==='online'?`<div class="bm3-note" style="padding:0 2px 6px">${L('Played in BridgePlay, starts now; robots in the empty seats')}</div>`:''}
     <div class="bm3-step">${L('Movement')}</div>
-    <div class="tdc-pick"><select class="tdc-sel" onchange="tdcSet1('mov',this.value)">${MOVS.filter(m=>m[0]!=='team'||w.mov==='team').map(([k,n,d])=>`<option value="${k}"${w.mov===k?' selected':''}>${L(n)} — ${L(d)}</option>`).join('')}</select></div>
+    <div class="tdc-pick"><select class="tdc-sel" onchange="tdcSet1('mov',this.value)">${MOVS.filter(m=>(m[0]!=='team'||w.mov==='team')&&(w.where!=='online'||['mitchell','howell','barometer','swiss'].includes(m[0]))).map(([k,n,d])=>`<option value="${k}"${w.mov===k?' selected':''}>${L(n)} — ${L(d)}</option>`).join('')}</select></div>
     ${w.mov==='team'?`<div class="bm3-step">${L('Teams')}</div><div class="tdc-teams"><input class="tdc-in" maxlength="30" value="${cleanData(w.ta)}" oninput="TDC.w.ta=this.value;tdcSumNow()" placeholder="Team A"><input class="tdc-in" maxlength="30" value="${cleanData(w.tb)}" oninput="TDC.w.tb=this.value;tdcSumNow()" placeholder="Team B"></div>
       <div class="bm3-step">${L('Pairs per team')}</div><div class="bm3-keys k4">${[2,4,6,8].map(n=>`<button class="bm3-key${+w.tpp===n?' active':''}" onclick="tdcSet1('tpp',${n})">${n}</button>`).join('')}</div>`
     :`<div class="bm3-step">${L('Number of players')}</div>${stepper('players',[8,12,16,20,24,28,32])}`}
@@ -150,9 +152,11 @@ function drawSetup(fin){
   frame(again?L('Set up again'):L('New tournament'),body,(again?`<button class="bm3-cancel" onclick="TDC.v='home';TDC.w=null;tdcDraw()">‹ ${L('Back')}</button>`:'<span></span>')+`<button class="bm3-ok" id="tdcCreateBtn" onclick="tdcCreate()"${setupErr()?' disabled':''}>🚀 ${L('Create the tournament')}</button>`);
 }
 // the same setup as the full panel's form: its boxes, filled in out of sight
+// at the club or online (from home): the movements both have; online keeps only those an online evening plays
+window.tdcWhere=function(k){ const w=TDC.w; if(!w) return; w.where=k; if(k==='online'&&!['mitchell','howell','barometer','swiss'].includes(w.mov)) w.mov='howell'; tdcDraw(); };
 window.tdcCreate=async function(){
   const w=TDC.w; if(!w) return;
-  if(w.mov==='online'){ const c=calc(w); if(typeof otStartQuick==='function'&&await otStartQuick({np:+w.players||8,bpr:+w.bpr||3,b:c.total})){ window._tdcOnline=0; TDC.w=null; TDC.v='home'; } tdcDraw(); return; }
+  if(w.where==='online'){ const c=calc(w); if(typeof otStartQuick==='function'&&await otStartQuick({np:+w.players||8,bpr:+w.bpr||3,b:c.total,mov:w.mov})){ window._tdcOnline=0; TDC.w=null; TDC.v='home'; } tdcDraw(); return; }
   if(TDC.tab){ TDC.tab=null; const c=document.getElementById('adminContent'); if(c) c.remove(); }
   const box=document.createElement('div'); box.style.display='none'; box.id='tdcForm';
   box.innerHTML=`<input id="aName"><select id="aMovement"><option value="${w.mov}" selected>${w.mov}</option></select><input id="aBPR" value="${w.bpr}"><input id="aPlayers" value="${+w.players||0}"><input id="aSocBoards" value="${+w.soc||0}"><input id="aSwissRounds" value="${+w.swr||0}"><input id="aTeamA"><input id="aTeamB"><input id="aTeamPairs" value="${+w.tpp||2}">`;

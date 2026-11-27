@@ -192,7 +192,7 @@ window.otStartQuick = async function (o) {
   const M = OT.meta || { systems: [] }, sysN = ((M.systems.find(x => x.k === sys) || {}).n || sys).replace(/ \(.*\)$/, '');
   const bpr = Math.min(8, Math.max(1, +o.bpr || 3)), b = Math.max(bpr, +o.b || bpr * 6), np = Math.min(120, Math.max(4, +o.np || 8));
   const at = Date.now() - 1000, id = Date.now().toString(36);
-  const info = { n: ('Online · ' + sysN).slice(0, 60), at, b, bpr, np, sc: 'both', sys, conv: [], mov: 'howell', rep: 0, watch: 1, open: true,
+  const info = { n: ('Online · ' + sysN).slice(0, 60), at, b, bpr, np, sc: 'both', sys, conv: [], mov: OT_MOV[o.mov] ? o.mov : 'howell', rep: 0, watch: 1, open: true,
     st: 'reg', cn: String(CLUB_NAME || '').slice(0, 40), by: String((me() || {}).name || '').slice(0, 20), ts: Date.now() };
   OT.busy = true;
   try {
