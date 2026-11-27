@@ -14,7 +14,7 @@ window.tdcSet=on=>{ try{ localStorage.setItem('bg_tdc2',on?'1':'0'); }catch(e){}
 // the full panel and its tabs come only when chosen; the TD's screen is drawn again when the tournament changes
 const _rap=window.renderAdminPanel||renderAdminPanel;
 renderAdminPanel=window.renderAdminPanel=function(){
-  if(role==='admin'&&tdcOn()&&!bgTestOn()){ if(typeof setupOnline!=='undefined'&&setupOnline){ setupOnline=false; window._tdcOnline=1; TDC.w=null; if(typeof tdcInitW==='function'){ tdcInitW(); TDC.v='setup'; } } return tdcDraw(); }
+  if(role==='admin'&&tdcOn()&&!bgTestOn()){ if(typeof setupOnline!=='undefined'&&setupOnline){ setupOnline=false; window._tdcOnline=1; TDC.w=null; if(typeof tdcInitW==='function'){ tdcInitW(); TDC.v='home'; } } return tdcDraw(); }
   _rap();
   const tabs=document.querySelector('.admin-tabs');
   if(tabs&&!document.getElementById('tdcBack')){ const b=document.createElement('button'); b.id='tdcBack'; b.className='admin-tab'; b.textContent='📱 BridgeScore'; b.onclick=()=>tdcSet(true); tabs.prepend(b); }
@@ -135,7 +135,7 @@ function sumHtml(){ const w=TDC.w, c=calc(w), e=setupErr();
   return `<div id="tdcSum" class="tdc-sumline${e?' bad':''}">${e?'⚠️ '+cleanData(e):`${w.mov==='team'?`<b>${cleanData(w.ta)}</b> – <b>${cleanData(w.tb)}</b> · `:''}<b>${c.tables}</b> ${L('tables')}${c.ph?' + 👻':''} · <b>${c.rounds}</b> ${L('rounds')} · <b>${c.total}</b> ${L('boards')}`}</div>`; }
 function drawSetup(fin){
   if(!TDC.w) tdcInitW();
-  const w=TDC.w, again=TDC.v==='setup', fs=getState().status==='finished';
+  const w=TDC.w, again=false, fs=getState().status==='finished';   // set up again looks the same as a new one: the menu and Exit, no Back
   const body=`${fs&&!again?`<div class="tdc-finrow">🏁 ${L('Tournament finished')} <button class="btn" onclick="ccResultsPage()">📄 ${L('Results')}</button></div>`:''}
     <div class="bm3-keys k2 tdc-where">${[['club','🏛 '+L('At the club')],['online','🌐 '+L('Online (from home)')]].map(([k,n])=>`<button class="bm3-key${(w.where||'club')===k?' active':''}" onclick="tdcWhere('${k}')">${n}</button>`).join('')}</div>
     ${w.where==='online'?`<div class="bm3-note" style="padding:0 2px 6px">${L('Played in BridgePlay, starts now; robots in the empty seats')}</div>`:''}
