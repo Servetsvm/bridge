@@ -571,7 +571,7 @@
               },
               "seats": {
                 "$s": {
-                  ".write": "auth != null && root.child('ot').child($club).child($tid).child('info').child('open').val() === true && root.child('sess').child(auth.uid).child('k').exists() && (!newData.exists() ? data.child('k').val() === root.child('sess').child(auth.uid).child('k').val() : newData.child('k').val() === root.child('sess').child(auth.uid).child('k').val() && (!data.exists() || data.child('k').val() === root.child('sess').child(auth.uid).child('k').val() || root.child('ot').child($club).child($tid).child('run').child($occ).child('hb').child(data.child('k').val()).val() < now - 600000))",
+                  ".write": "auth != null && root.child('ot').child($club).child($tid).child('info').child('open').val() === true && root.child('sess').child(auth.uid).child('k').exists() && (!newData.exists() ? data.child('k').val() === root.child('sess').child(auth.uid).child('k').val() : newData.child('k').val() === root.child('sess').child(auth.uid).child('k').val() && (!data.exists() || data.child('k').val() === root.child('sess').child(auth.uid).child('k').val() || root.child('ot').child($club).child($tid).child('run').child($occ).child('hb').child(data.child('k').val()).val() < now - 120000))",
                   ".validate": "!newData.exists() || (newData.hasChildren(['n', 'k', 'ts']) && newData.child('n').isString() && newData.child('n').val().length <= 20 && newData.child('k').isString() && newData.child('ts').isNumber())"
                 }
               },

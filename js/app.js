@@ -1205,7 +1205,7 @@ function vHand(seat) {
 }
 // the name of the player at a seat (you, a player at an online table, or a robot)
 function seatName(seat) {
-  if (G && G.ct) return seat === U() ? (myNm() || T('You')) : G.ct.seats[seat];
+  if (G && G.ct) { if (seat === U()) return myNm() || T('You'); const t = CT.tbl, s = t && t.plan0 && t.seats && t.seats[seat]; return s && s.k && !ctPresent(s.k) && s.bn ? s.bn : G.ct.seats[seat]; }   // an open evening: a player who has gone shows as the robot playing for them
   if (G && G.rtv) return rtName(seat, RT.all[G.rtv.k]);
   if (seat === meSeat()) return (online() && Net.st.names[U()]) || myNm() || T('You');
   // a robots' table's seat taken: the robots keep their names (while the system stays that table's)

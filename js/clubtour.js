@@ -250,7 +250,7 @@ function ctPlanHtml(x) {
 // an open evening: this round's tables, each seat its player or an empty seat (the robot plays it) to sit down at
 function ctShowOpen(key, x, err) {
   const P = x.plan, r = Math.max(0, ctCurRound(P, x.run && x.run.t)), hb = (x.run && x.run.hb) || {}, me = ctMe(), pi = ctMyPair(P);
-  const away = k => !k || Date.now() - (+hb[k] || 0) > 600e3;
+  const away = k => !k || Date.now() - (+hb[k] || 0) > 120e3;   // gone for 2 minutes: the seat is free (a robot plays it)
   const seat = (ti, pIdx, w, label) => { const p = P.pairs[pIdx], k = w ? p.kb : p.ka, n = w ? p.b : p.a;
     if (k && k === me) return `<div class="ctseat me"><small>${label}</small><b>${esc(n)}</b></div>`;
     if (k && !away(k)) return `<div class="ctseat"><small>${label}</small><b>${esc(n)}</b></div>`;
@@ -269,7 +269,7 @@ async function ctTakeSeat(v) {
   try {
     await ctSession();
     const p = ctRunP(x) + '/seats/' + pIdx + '_' + w, cur = await Net.Cloud.get(p), hb = await Net.Cloud.get(ctRunP(x) + '/hb') || {};
-    if (cur && cur.k && cur.k !== ctMe() && Date.now() - (+hb[cur.k] || 0) < 600e3) { await ctLoad(true); return ctShow(key, T('Someone has just taken this seat.')); }
+    if (cur && cur.k && cur.k !== ctMe() && Date.now() - (+hb[cur.k] || 0) < 120e3) { await ctLoad(true); return ctShow(key, T('Someone has just taken this seat.')); }
     await Net.Cloud.put(p, { n: String(myNm()).slice(0, 20), k: ctMe(), ts: Date.now(), sys: SET.sys || 'twoone', conv: Object.keys(SET.conv || {}).filter(c => SET.conv[c]) });
     Net.Cloud.put(ctRunP(x) + '/kick/' + ctMe(), null).catch(() => {});
   } catch (e) { return ctShow(key, T('Could not send — sign in with your name and PIN first.')); }
@@ -302,7 +302,7 @@ function ctCardsOf(plan, r, ti) { const t = r != null && plan.rounds[r] && plan.
 function ctBotNm(plan, pi, w) { const L = (typeof BOT_NAMES !== 'undefined' && (BOT_NAMES[SET.lang] || BOT_NAMES.en)) || ['Robot']; return L[((plan.seed >>> 0) + pi * 2 + (w ? 1 : 0) * 7) % L.length]; }
 function ctSeatsOf(plan, r, ti) {
   const [ns, ew] = plan.rounds[r][ti], A = plan.pairs[ns], B = plan.pairs[ew];
-  const s = (p, w) => p.robot ? { n: T('Robot'), k: '' } : { n: (w ? p.b : p.a) || ctBotNm(plan, plan.pairs.indexOf(p), w), k: w ? p.kb : p.ka };   // an empty seat of an open evening: a robot with a name
+  const s = (p, w) => p.robot ? { n: T('Robot'), k: '' } : { n: (w ? p.b : p.a) || ctBotNm(plan, plan.pairs.indexOf(p), w), k: w ? p.kb : p.ka, bn: ctBotNm(plan, plan.pairs.indexOf(p), w) };   // an empty seat of an open evening: a robot with a name
   return [s(A, 1), s(B, 0), s(A, 0), s(B, 1)];
 }
 const ctBoards = (plan, r, ti) => { const s = ctSetOf(plan, r, ti); return [...Array(plan.bpr).keys()].map(i => s * plan.bpr + i + 1); };
