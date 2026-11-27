@@ -161,6 +161,9 @@ async function initClubGate(){
       CLUB_INFO=info; setClub(id); showLoginForm(info.name);
       if(roleParam&&['table','screen','admin'].includes(roleParam)) selRole(roleParam);
       if(roleParam==='admin') setTimeout(()=>document.getElementById('pwInput')?.focus(),100);
+      // BridgePlay's 🌐 Online button pressed by the club's owner (signed in to BridgePlay): straight to the online setup, no PIN asked
+      if(roleParam==='admin'&&params.get('online')==='1'&&typeof setSetupOnline==='function'){ setupOnline=true; window._otOpened=1; if(typeof OT!=='undefined') OT.edit=null; }   // the TD (owner or with the password) lands on the online setup
+      if(roleParam==='admin'&&params.get('online')==='1'&&ownClub&&me()){ window._ownerAuto=true; setTimeout(()=>doLogin(),50); }
       // a quick team match being played here (its tables need no code): a member not asking for the TD goes to its table numbers
       if(roleParam!=='admin'&&roleParam!=='screen'&&!params.get('t')&&!params.get('qt')&&!params.get('p')){
         let st=null; try{ const r=await fetch(await fbRootUrl('/clubs/'+id+'/bm/state.json'),{cache:'no-store'}); st=r.ok?await r.json():null; }catch(e){}
@@ -484,7 +487,7 @@ window.doLogin=async function(){
   if(loginBtn){loginBtn.disabled=true;loginBtn.textContent='Checking...';}
   let ok=false;
   const testT=role==='table'&&bgTestOn()&&isSuper()&&window._bgTestTable;   // the super admin at a test table: no code
-  try{ ok = testT ? true : (role==='admin'&&window._quickTeam&&me())||(role==='table'&&window._quickSeat&&me()) ? !!(await window.bridgeSession()) : await startSession(role, CLUB_ID, pw); }   // a quick team match: the BridgePlay session is enough for the rules
+  try{ ok = testT ? true : (role==='admin'&&window._quickTeam&&me())||(role==='admin'&&window._ownerAuto&&isClubAdmin()&&me())||(role==='table'&&window._quickSeat&&me()) ? !!(await window.bridgeSession()) : await startSession(role, CLUB_ID, pw); }   // a quick team match: the BridgePlay session is enough for the rules
   catch(e){ if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';} err.textContent='❌ '+e.message; return; }
   if(loginBtn){loginBtn.disabled=false;loginBtn.textContent='Login';}
   // the TD signed in with the club's password (not the quick team match's no-password way): the club's TD, full panel

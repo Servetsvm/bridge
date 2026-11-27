@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v693`, kulüpler `kulup-v205`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v693`, kulüpler `kulup-v206`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -75,7 +75,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v693`, kulü
   ile okunur (ctList, sonuçlar, kulupler canlı/ayna). Boş koltuk = robot (ctPresent), boş masaları oturan oyuncuların uygulaması oynar
   (`ctHeadTest` artık `i.test || i.open`). Masadayken `ctBeat` koltukları yeniden okur (sonradan gelen robotun yerini alır).
   🌐 Online düğmesi yalnız TD kulüp ayarlarından açarsa görünür: TD → Kulüp bilgisi → "BridgePlay'de Online düğmesi" (`bm/info/ol:1`, v693);
-  basan sahip doğrudan girer, diğerlerine TD girişi (kulüp şifresi) sorulur.
+  basan sahip PIN'siz doğrudan online kuruluma girer (`_ownerAuto` → bridgeSession, `setupOnline=true` club-auth'ta, kulup-v206),
+  diğerlerine TD girişi (kulüp şifresi) sorulur, sonra yine online kurulum açılır.
   Kurallar: ot run t/a, t/res açık turnuvada her üyeye; seats: boşsa, kendininse ya da sahibi 10 dk yoksa (hb). Test: iki oyunculu mock (Nora G, sonra Emin K).
 
 ### 2026-11-26
