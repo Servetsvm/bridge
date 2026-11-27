@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v732`, kulüpler `kulup-v216`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v733`, kulüpler `kulup-v216`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v732`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- v727'deki "masadan kalkınca koltuğu sil" geri alındı (kalkan kişi kendi masasını kaybedip başka masaya oturabiliyordu). Koltuk kalır, `ctLeave` hb=0 yazar:
+  başkaları orada robotun adını ve boş koltuğu görür (2 dk sonra oturabilir), kalkan kişi kulüpte "🪑 Masana otur" ile döner, başka koltuk seçemez. v733.
 - Siteyi tarayıcıda açan herkese (telefon; PC'de yalnız Chrome kurulum sunarsa) giriş sonrası ilk iş "📲 Uygulama olarak kurulsun mu?" (`installAsk`,
   eskiden yalnız `?install=1`); "Şimdi değil" → 3 gün sonra yeniden (`SET.instAt`), kurulunca/uygulamada hiç. Hoş geldin ve kart penceresi ondan sonra. v732.
 - Online Takım maçı kurulumu: seçilen el sayısı tam oynanır (`ctqPlan`: el sayısını tam bölen tur başına el 1–8, tur sayısı tam Howell'e en yakın;

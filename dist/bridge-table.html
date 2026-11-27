@@ -13717,7 +13717,7 @@ function showOpenChoice() {
 }
 // back to the home page from a board played alone (the board is kept for Continue)
 function goHome() {
-  if (G && G.ct) { try { const t = CT.tbl; if (t && t.plan0 && t.p) { const pi = ctMyPair(t.plan), me = ctMe(); if (pi >= 0) { const pr = t.plan.pairs[pi]; Net.Cloud.put(t.p + '/seats/' + pi + '_' + (pr.ka === me ? 'a' : 'b'), null).catch(() => {}); } } } catch (e) {} /* leaving frees my seat: a robot takes it */ ctLeave(); G = idleG(); closeOv(); save(); render(); return; }   // a club table goes on without you (the card brings you back)
+  if (G && G.ct) { /* the seat stays yours ("Sit down at your table" brings you back); ctLeave marks you gone, so the others see a robot there */ ctLeave(); G = idleG(); closeOv(); save(); render(); return; }   // a club table goes on without you (the card brings you back)
   if (online()) { flash(T('Online') + ' ●', 1200); Net.panel(); return; }
   // leaving the table ends the board: the home page offers Start (choose a convention, then a new board), not Continue
   clearTimeout(timer); ui.saved = null;
