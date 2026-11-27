@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v694`, kulüpler `kulup-v208`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v695`, kulüpler `kulup-v208`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,9 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v694`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Ana sayfa: kulübün açık online turnuvası artık Açık masalar'da değil, yalnız Kulüpler içinde (`ctCardHtml` ana sayfadan çıktı).
+  Her sistem düğmesinin altında **🌐 Online** (`data-rton` → `rtOnline(k)`): önce konvansiyon kartı (`convCardHtml`, sistem/konvansiyon
+  değişince pencere yeniden çizilir), sonra o sistemin sürekli robot masasında koltuk (`rtSit`; robotlar oyuncunun kartıyla oynar). v695.
 - Ana sayfa: üstteki 🧩 Bulmaca düğmesi kalktı; 🎯 Teklif alıştırması kutusu artık **🧩 Bulmaca** (puan/✅ alt satırında, `#hPuzzle`).
   Basınca Günün problemi açılır; pencerenin üstünde iki sekme (`pzTabs`: 🧩 Günün problemi / 🎯 Teklif alıştırması). v694.
 - **Kulüp bilgisi / logosu açılmıyordu** (TD şifresiyle, her kulüpte): kulüp programı 8 canlı akış (EventSource) açıyordu; telefon bir adrese en çok 6

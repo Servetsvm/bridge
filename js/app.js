@@ -1930,7 +1930,7 @@ function homeShell2() {
       <div class="h2tiles">
         ${tile('id="hClubs" type="button"', '🏛', T('Clubs'), T('Club tournaments with movements and results.'))}
         ${tile('id="hBidPrac" type="button"', '🧩', T('Puzzle'), `${T('Problem of the day')} · ${T('Bidding practice')}<span id="hPuzzle"></span>`)}
-        <div class="h2tile h2sys">${RT_KEYS.map(k => `<button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button>`).join('')}</div>
+        <div class="h2tile h2sys">${RT_KEYS.map(k => `<div class="rtcell"><button class="rtchip" data-rtk="${k}" data-rtopen="1" title="${esc(rtSysName(k))}"><i class="rtemo">🤖</i><b>${RT_SHORT[k] || esc(rtSysName(k))}</b></button><button class="rton" data-rton="${k}">🌐 ${T('Online')}</button></div>`).join('')}</div>
       </div>
       </div><div class="h2colb">
       <div class="hcard prac" id="hPrac"></div>
@@ -2017,7 +2017,7 @@ function renderHome() {
     const admN = (N.supNew || 0) + (N.cvNew || 0) + (ui.learnNew || 0);
     set('hAdm', N.isAdmin() ? `<button class="hadmb" id="admTog" title="${T('Admin')}">👑${admN ? `<b class="supc">${admN}</b>` : ''}</button>` : '');
     set('hPend', bad + sup + kln + cvn + (N.pendHtml() ? `<div class="hcard">${N.pendHtml()}</div>` : ''));
-    set('hTables', (typeof ctCardHtml === 'function' ? ctCardHtml() : '') + N.tablesHtml());
+    set('hTables', N.tablesHtml());   // a club's online tournament is shown in the club (Clubs), not here
     if (set('hChat', N.lchatHtml())) { const c = $('hChat'); c.scrollTop = c.scrollHeight; }
     if (set('pChat', N.lchatHtml())) { const c = $('pChat'); c.scrollTop = c.scrollHeight; }
     set('hCount', T('{0} in the lobby', N.lobbyCount())); set('pCount', T('{0} in the lobby', N.lobbyCount()));
@@ -3149,6 +3149,21 @@ function rtSit(s) {
     closeOv(); ui.saved = null; Net.st.soloPub = true; resume();
   });
 }
+// 🌐 Online under a system's button: first your own convention card (the robots, your partner too, play it), then a seat
+// at that system's table, which the robots play all the time
+function rtOnline(k) {
+  if (online()) { flash(T('Online') + ' ●', 1500); return; }
+  if (k) ui.rtOn = k;
+  rtLoad().then(() => {
+    rtPick(ui.rtOn); const x = rtCur(Date.now()), b = x && (x.b || x.wait);
+    if (!b) { flash(T('The robots will be back soon.'), 2500); return; }
+    openOv('rton', `<h2>🌐 ${T('Online')} · ${esc(rtSysName(ui.rtOn))}</h2>
+      <div class="muted">${T('First choose your convention card: the robots, your partner too, play it. Then take a seat.')}</div>
+      ${convCardHtml()}
+      <div class="grp"><span>🪑 ${T('Sit down')}</span><div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtsit="${s}">${SEAT[s]}<small>${esc(rtName(s))}</small></button>`).join('')}</div></div>
+      <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+  });
+}
 // 🪑 Sit down on the system table's bar: the four seats with their robots' names
 function rtSitPick() {
   const x = rtCur(Date.now()), b = x && (x.b || x.wait); if (!b) return;
@@ -3597,7 +3612,7 @@ document.addEventListener('change', e => {
     SET.conv[k] = t.checked;
     if (t.checked && c) E.convOff(c.k).forEach(o => { SET.conv[o] = false; });
     if (!t.checked && pracList().includes(k)) SET.practice = pracList().filter(x => x !== k).join(',');   // taken off the card: no longer practised
-    Store.saveSettings(SET); save(); if (ui.overlay === "set") showSettings(); else if (ui.overlay === 'cardconv') { render(); showCardConv(); } else render();
+    Store.saveSettings(SET); save(); if (ui.overlay === "set") showSettings(); else if (ui.overlay === 'cardconv') { render(); showCardConv(); } else if (ui.overlay === 'rton') rtOnline(); else render();
   }
   if (t.dataset.tinv != null && ui.tsel) { if (t.checked) ui.tsel.names.add(t.dataset.tinv); else ui.tsel.names.delete(t.dataset.tinv); return; }
   // your own player card: level, country and a few words, sent with your profile
@@ -3751,6 +3766,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bRtAgain') { rtAgain(); return; }
   if (t.id === 'bRtNext') { rtNext(); return; }
   if (t.id === 'bRtSit') { rtSitPick(); return; }
+  if (t.dataset.rton) { rtOnline(t.dataset.rton); return; }
   if (t.id === 'tFileOff') { const tr = Net.st.tours[ui.tsetId]; if (tr) { tr.deals = []; showTourSetup(tr.id); } return; }
   if (t.id === 'hBidPrac') { ui.pzSel = null; showPuzzle(); return; }
   if (t.id === 'bTblScore') { Net.panel(); return; }
@@ -3832,7 +3848,7 @@ document.addEventListener('click', ev_ => {
   if (t.closest('.seg') && ui.overlay !== 'sb') {   // social bridge handles its own (social.js)
     const seg = t.closest('.seg').dataset.seg, v = t.dataset.v;
     if (seg === 'lang') { SET.lang = v; SET.langAuto = false; applyLang(); Store.saveSettings(SET); save(); render(); return; }
-    if (seg === 'sys') { setSys(v); Store.saveSettings(SET); save(); if (ui.overlay === 'set') showSettings(); else render(); flash(E.sysOf(v).n + ' — ' + T('from the next deal'), 2200); return; }
+    if (seg === 'sys') { setSys(v); Store.saveSettings(SET); save(); if (ui.overlay === 'set') showSettings(); else if (ui.overlay === 'rton') rtOnline(); else render(); flash(E.sysOf(v).n + ' — ' + T('from the next deal'), 2200); return; }
     if (ui.overlay === 'tsetup' && ['tn', 'tformat', 'ttables', 'tscoring', 'thours', 'tkind', 'tclub'].includes(seg)) {
       readTourSeats(); const t = Net.st.tours[ui.tsetId]; if (!t) return;
       // a tournament type fills in the options at once (they can still be changed one by one)
