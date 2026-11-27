@@ -3163,7 +3163,7 @@ function rtOthers(k) {
   if (typeof Net === 'undefined') return '';
   const me = String(myNm() || '').toLowerCase();
   const L = (Net.st.tables || []).filter(t => !t.priv && !t.busy && (t.online || t.pub) && ((t.prof || {}).sys || 'twoone') === k && String(t.host || '').toLowerCase() !== me);
-  return L.length ? `<div class="grp"><span>👥 ${T('Players at this system now')}</span>${L.map(t => `<div class="row2"><b>${esc(t.host)}</b><button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button></div>`).join('')}</div>` : '';
+  return L.length ? `<div class="grp"><span>👥 ${T('Players at this system now')}</span>${L.map(t => `<div class="row2"><b>${esc(t.host)}</b><button class="btn gold" data-jsit="${t.k}">🪑 ${T('Sit down')}</button></div>`).join('')}</div>` : '';
 }
 function rtOnline(k) {
   if (online()) { flash(T('Online') + ' ●', 1500); return; }

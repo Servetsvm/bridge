@@ -543,7 +543,9 @@ const Net = (() => {
       const ct = Array.isArray(t.ct) ? t.ct : null, where = t.phase === 'bid' ? T('Auction in progress') : ct ? `${T('Contract')}: ${ct[0]}${['♣', '♦', '♥', '♠', 'NT'][ct[1]] || ''}${ct[2] === 2 ? 'XX' : ct[2] ? 'X' : ''} ${typeof SEAT !== 'undefined' ? SEAT[ct[3]] : T(seatN[ct[3]] || '')}, ${T('tricks')} ${ct[4]}/${ct[5]}` : '';
       const state = `${t.online ? '🌐 ' + T('online') : t.champ ? '🏆 ' + T('in the championship') : t.pc ? pcText(t) : '🤖 ' + T('playing with robots')}${t.phase === 'lobby' ? ' · ' + T('waiting to start') : t.board && t.phase !== 'idle' && !tp ? ' · ' + T('board {0}', t.board) : ''}${where && !tp ? ' · ' + where : ''}${t.watchers ? ' · 👁 ' + t.watchers : ''}`;
       const btns = t.champ || (t.cl && !(t.pub && t.k)) ? '' : (tp ? `<button class="btn new" data-tjoin="${esc(String(tp.id))}">🏆 ${T('Join the tournament')}</button>` : `<button class="btn gold" data-jt="${t.k}">${T('Ask to join')}</button>`) + (t.online && !t.priv ? `<button class="btn" data-jw="${t.k}">👁 ${T('Watch')}</button>` : '');
-      return line(open, T("{0}'s table", esc(t.host)), state, people, tinfo + sysLine, btns);
+      // only who plays there, and Sit down (an open table: you sit at once; a closed one: its name alone)
+      if (tp) return line(open, T("{0}'s table", esc(t.host)), state, people, tinfo, btns);
+      return `<div class="otour otbl ${open ? 'op' : 'cl'}"><div><b>${open ? '🔓' : '🔒'} ${pn(t.host)}</b></div><div class="otb">${open && t.k && !t.champ ? `<button class="btn gold" data-jsit="${t.k}">🪑 ${T('Sit down')}</button>` : ''}</div></div>`;
     }).join('');
     // the players the online list has at a board with robots, whose table the direct lines have not found
     const seen = new Set((L || []).flatMap(t => [t.host, ...Object.values(t.names || {})]).filter(Boolean).map(nameKey));
@@ -1495,6 +1497,10 @@ const Net = (() => {
         if (st.priv && st.host && !inv && d.want === 'watch') { try { conn.send({ t: 'declined' }); } catch (e) {} return; }
         // a request answered recently (also before a page refresh) is not asked again: declined stays declined,
         // "later" waits quietly in the Online panel
+        if (d.sit && d.want !== 'watch' && !(G && G.champ) && ((st.host && !st.priv) || (!st.host && !st.guest && st.soloPub))) {
+          if (!st.host) becomeHost();
+          if (st.host) { seatPlayer(conn, d, null); flash(T('{0} sat down at your table (✕ by the name removes them)', String(d.name || 'Guest').slice(0, 20)), 4000); return; }
+        }
         const mu = reqMute(d.rq ? "rq:" + d.rq : d.name);
         if (mu === 'no') { try { conn.send({ t: 'declined' }); } catch (e) {} setTimeout(() => { try { conn.close(); } catch (e) {} }, 500); return; }
         (st.pending || (st.pending = {}))[conn.peer] = { conn, d, quiet: mu === 'later' };
@@ -1639,7 +1645,7 @@ const Net = (() => {
       setTimeout(() => { if (!welcomed && !waiting) fail('The table could not be reached. Check the link, and that the host still has the app open. Some mobile networks block direct connections — try Wi-Fi.'); }, retry ? 8000 : 15000);
       peer.on('error', e => { if (e.type === 'peer-unavailable') fail('That table is not open any more.'); });
       peer.on('disconnected', () => { try { if (!peer.destroyed) peer.reconnect(); } catch (e) {} });
-      conn.on('open', () => conn.send({ t: 'hello', name, want, rq, tok: devTok(), prof: prof(), seat: retry ? st.seat : undefined, k: st.slot ? st.slot.k : undefined }));
+      conn.on('open', () => conn.send({ t: 'hello', name, want, rq, sit: st.sitNow ? 1 : undefined, tok: devTok(), prof: prof(), seat: retry ? st.seat : undefined, k: st.slot ? st.slot.k : undefined }));
       conn.on('data', d => {
         if (!d) return;
         st.lastHost = Date.now();
@@ -1960,7 +1966,8 @@ const Net = (() => {
     if (t.dataset.mvd) { moveAnswer(t.dataset.mvd, false); return; }
     if (t.dataset.reqlater) { reqLater(t.dataset.reqlater); return; }
     if (t.dataset.tjoin) { const id = t.dataset.tjoin; if (!st.tours[id]) { flash(T('This tournament has not reached you yet — try again in a moment'), 2500); findTables(); return; } closeOv(); playTour(id); return; }
-    if (t.dataset.jt) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jt); st.offer = tb || null; st.msg = ''; showJoin('room-' + t.dataset.jt); return; }
+    if (t.dataset.jsit) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jsit); st.offer = tb || null; st.msg = ''; st.want = 'any'; st.sitNow = true; showJoin('room-' + t.dataset.jsit); join('room-' + t.dataset.jsit, myName() || 'Guest', 'any'); return; }
+    if (t.dataset.jt) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jt); st.offer = tb || null; st.msg = ''; st.sitNow = false; showJoin('room-' + t.dataset.jt); return; }
     if (t.dataset.jw) { const tb = (st.tables || []).find(x => x.k === +t.dataset.jw); st.offer = tb || null; st.msg = ''; st.want = 'watch'; showJoin('room-' + t.dataset.jw); return; }
     if (t.dataset.want) { st.want = t.dataset.want; const n = document.getElementById('nName'); if (n) setName(n.value.trim()); showJoin(st.joinCode); return; }
     switch (t.id) {
@@ -1989,7 +1996,7 @@ const Net = (() => {
       case 'nRstQ': send({ t: 'rsreq' }); flash(T('Ask to reset the score') + ' ✓', 1500); break;
       case 'nNdQ': askNewDeal(); closeOv(); break;
       case 'nCopy': { const L = link(); (navigator.clipboard ? navigator.clipboard.writeText(L) : Promise.reject()).then(() => flash('Link copied', 1200)).catch(() => { const i = document.getElementById('nLink'); if (i) { i.select(); } }); break; }
-      case 'nJoin': { const n = document.getElementById('nName'); const name = (n && n.value.trim()) || 'Guest'; st.msg = ''; join(st.joinCode, name, st.want); break; }
+      case 'nJoin': { st.sitNow = false; const n = document.getElementById('nName'); const name = (n && n.value.trim()) || 'Guest'; st.msg = ''; join(st.joinCode, name, st.want); break; }
     }
   });
   document.addEventListener("keydown", ev => { if (ev.key === "Enter" && ev.target && ev.target.id === "nMsg") { ev.preventDefault(); const i = ev.target; if (i.value.trim()) { sendChat(i.value); st.draft = ""; i.value = ""; } } });
