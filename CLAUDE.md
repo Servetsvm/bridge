@@ -60,7 +60,7 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v706`, kulü
 
 ### 2026-11-27
 - Nora'nın tableti 18:33'ten beri `online/nora` yazmıyor (Emin'in telefonu yazıyor, `tbi` dolu). Kod tablet boyutunda çalışıyor (mock);
-  neden bilinmiyor. Açık masalar'ın altında küçük durum satırı `🔌 ss:dd ✓ / ⚠️ <neden>` (`st.beatSt`: out/offline/nopin/session/err…);
+  neden bilinmiyor; v706 (oturum hatasında yeniden deneme) sonrası tablet yeniden yazdı, iki cihaz birbirinin masasını gördü (kullanıcı onayladı). Açık masalar'ın altında küçük durum satırı `🔌 ss:dd ✓ / ⚠️ <neden>` (`st.beatSt`: out/offline/nopin/session/err…);
   oturum hatası artık kalıcı sessiz değil (`st.sess = null`, sonra yeniden dener). Bu oturumda ortam `bridge` (Firebase okuma izni). v706.
 - Ana sayfada sarı sistem düğmesi (🤖 SAYC…) de artık 🌐 Online gibi kart seçimi + oturma açar (`data-rtopen` → `rtOnline`); robot
   sistem masasını izleme ana sayfadan kalktı (`rtWatch` başka yerden çağrılmıyor). v705.
