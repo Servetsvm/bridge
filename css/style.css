@@ -2556,3 +2556,4 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 #ov:has(.sheet[data-ov="ctour"] .ctseats){padding:0}
 .sheet[data-ov="ctour"]:has(.ctseats){width:100%;max-width:none;height:100%;max-height:none;border-radius:0;box-sizing:border-box;padding:24px max(16px,calc((100% - 760px)/2)) 24px;overflow:auto}
 .sheet[data-ov="ctour"]:has(.ctseats) .ctseat{min-height:70px}
+.sheet[data-ov="ctour"] [data-ctsit]{min-height:72px;font-size:24px;font-weight:800;width:100%}
