@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v693`, kulüpler `kulup-v204`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v693`, kulüpler `kulup-v205`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -61,7 +61,7 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v693`, kulü
 ### 2026-11-27
 - **Masa kodu kalktı** (kullanıcının kararı): BridgePlay'e girmiş üye her turnuvada kodsuz oturur (`bgPlayerSit` → `_quickSeat`,
   club-auth 167 koşulu `_quickTeam||me()`, setLive her zaman `q:1`). TD → Kulüp ayarları'ndan 🔢 Masa kodları ve 🔗 Oyuncu bağlantısı
-  kaldırıldı. Firebase kuralı: bm/{state,movements,pairs,boards,approvals,tableLocks,boardLocks,ready,kicks,tdcalls,logs,hands,dd,archives,playerdb}
+  kaldırıldı (sonra 📺 Ekran da, kulup-v205; BridgePlay kulüp kartındaki 📺 Ekran düğmesi duruyor). Firebase kuralı: bm/{state,movements,pairs,boards,approvals,tableLocks,boardLocks,ready,kicks,tdcalls,logs,hands,dd,archives,playerdb}
   her üyeye yazılabilir (eskiden yalnız turnuva yokken/hızlı maçta). Bedeli: giriş yapmış herhangi bir üye bir kulübün skorlarını
   teknik olarak değiştirebilir (kullanıcıya söylendi). bm/info ve bm/logo yalnız sahip/TD'de kaldı. kulup-v201.
 - Kulüp bilgisi/logosu boş geliyor (kullanıcı, 27.11): okuma başarısız olunca pencere boş açılıyor, boş formu Kaydet bilgiyi DELETE ediyordu
