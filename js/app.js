@@ -1884,7 +1884,7 @@ function pracHtml() {
       ${off.length ? `<div class="pdh">${T('Not in your system')}</div>${off.map(c => item('data-pdconv', c.k, esc(c.n), sel.includes(c.k))).join('')}` : ''}
       <div class="pdh">${T('On defence: discards')}</div>${CARD_KEYS.map(k => item('data-pdconv', k, esc(pracName(k)), sel.includes(k))).join('')}
       <button class="btn gold pddone" id="pdDone">${T('Done')}</button></div>` : '';
-  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Start')}</button><button class="btn mini-btn prx" id="pdClose" title="${T('Close')}">✕</button></div></div>
+  return `<div class="prtop"><div class="prhd"><h2 class="prtitle">📚 ${T('Practise conventions')}</h2><button class="btn prplay" id="pdPlay">▶ ${T('Start')}</button><button class="btn mini-btn prx" id="pdClose">${T('Close')}</button></div></div>
     <div class="prrow2">
       <div class="prf"><button class="prdrop sys" id="pdSys" aria-expanded="${ui.pracDrop === 'sys'}">${T('Base system')} <i>▾</i></button><div class="prval">${SET.sys === 'none' ? '—' : esc(sysName(cur.k))}</div>${sysPanel}</div>
       <div class="prf"><button class="prdrop${sel.length ? ' on' : ''}" id="pdConv" aria-expanded="${ui.pracDrop === 'conv'}">${T('Practice a convention')} <i>▾</i></button><div class="prval">${sel.length ? esc(pracNames()) : T('Off — normal random deals')}</div>${convPanel}</div>
