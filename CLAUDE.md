@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v715`, kulüpler `kulup-v215`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v716`, kulüpler `kulup-v215`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v715`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- Minör Transfer (`minorTr`) sistemden tamamen silindi (CONVS, bidding, pratik, CONV_T 9 dil; Baron xs yalnız fourWay). Varsayılan kartlarda
+  robot farkı 0 (8000 el × 3 sistem). `udca` adı: EN "Upside-down signals (UDCA)", TR "Ters işaretler (UDCA)", NO "Lavt som styrke (UDCA)" + 6 dil. v716.
 - Kayıtlar'da kurulmamış varsayılan durum ("Briç Turnuvası · Başlamaya hazır") "Şu anki turnuva" sanılıyordu → artık yalnız gerçek turnuva
   (running/finished/setup+roundCount). Sil sonrası eski kurulum formu (`renderAdminTab`) menünün altına çiziliyordu → TD konsolunda çizilmez,
   `adminReset` true döner, `tdcResetNow` her onayda TD'yi yeniden çizer. kulup-v215.

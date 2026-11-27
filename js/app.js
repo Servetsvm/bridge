@@ -731,7 +731,6 @@ const PRAC_GEN = {
   puppet: () => [['open', h => { const l = lensOf(h), p = hcpOf(h); return p >= 20 && p <= 21 && balOf(l) && l[0] <= 5 && l[1] <= 5 && (l[2] >= 4 || l[3] >= 4); }, null, l => balOf(l) && l[0] <= 5 && l[1] <= 5 && (l[2] >= 4 || l[3] >= 4)],
     ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 5 && p <= 10 && l[2] <= 4 && l[3] <= 4 && (l[2] >= 3 || l[3] >= 3) && l[0] <= 5 && l[1] <= 5; }]],
   // Minor Transfer: a 1NT opening, a weak responder with a six-card minor
-  minorTr: () => [['open', ntOpen()], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p <= 7 && (l[0] >= 6 || l[1] >= 6) && l[2] <= 3 && l[3] <= 3; }, null, l => (l[0] >= 6 || l[1] >= 6) && l[2] <= 3 && l[3] <= 3]],
   smolen: () => [['open', ntOpen(true)], ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 10 && p <= 14 && ((l[2] === 4 && l[3] === 5) || (l[2] === 5 && l[3] === 4)); }]],
   texasInt: () => [['open', ntOpen()], ['lho', h => { const l = lensOf(h), p = hcpOf(h); return p >= 9 && p <= 14 && (l[0] >= 6 || l[1] >= 6) && l[2] <= 2 && l[3] <= 2; }],
     ['resp', h => { const l = lensOf(h), p = hcpOf(h); return p >= 8 && p <= 13 && (l[2] >= 6 || l[3] >= 6); }]],
@@ -1863,7 +1862,7 @@ function acctLoad(k) {
 /* ---- practise a convention: the heart of the home page. Pick one and the robots deal hands where our side uses
    it (freshDeal looks for them); every call can be tapped to see what it means. ---- */
 const PRAC_GROUPS = [
-  ['After 1NT', ['stayman', 'puppet', 'fourWay', 'minorTr', 'smolen', 'texas', 'texasInt', 'leb', 'baron']],
+  ['After 1NT', ['stayman', 'puppet', 'fourWay', 'smolen', 'texas', 'texasInt', 'leb', 'baron']],
   ['Major openings', ['j2nt', 'bergen', 'splinter', 'drury', 'jordan', 'gazilli', 'flannery']],
   ['Slam bidding', ['rkc', 'rkc0314', 'gerber', 'minorwood', 'voidwood']],
   ['When they bid', ['capp', 'dont', 'landy', 'michaels', 'ghestem', 'supx', 'respx']],
@@ -2378,7 +2377,7 @@ function loginsTxt(n) { for (const s of [10000, 5000, 1000, 500, 100, 50]) if (n
 // a title from the boards played
 function titleOf(n) { return n >= 5000 ? 'Grandmaster' : n >= 2000 ? 'Master' : n >= 500 ? 'Strategist' : n >= 100 ? 'Player' : 'Newcomer'; }
 // the convention card in one line: system, notrump range and the conventions switched on (short names)
-const CONV_SHORT = { flannery: 'Flannery', voidwood: 'Voidwood', ghestem: 'Ghestem', jordan: 'Jordan 2NT', landy: 'Landy', minorwood: 'Minorwood', kokish: 'Kokish', walsh: 'Walsh', baron: 'Baron', gazilli: 'Gazilli', rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', puppet: 'Puppet Stayman', fourWay: '4-way transfers', minorTr: 'Minor Transfer', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
+const CONV_SHORT = { flannery: 'Flannery', voidwood: 'Voidwood', ghestem: 'Ghestem', jordan: 'Jordan 2NT', landy: 'Landy', minorwood: 'Minorwood', kokish: 'Kokish', walsh: 'Walsh', baron: 'Baron', gazilli: 'Gazilli', rkc: 'RKCB 1430', rkc0314: 'RKCB 0314', gerber: 'Gerber', bergen: 'Bergen', capp: 'Capp', j2nt: 'Jacoby 2NT', wjs: 'WJS', stayman: 'Stayman', puppet: 'Puppet Stayman', fourWay: '4-way transfers', smolen: 'Smolen', michaels: 'Michaels', splinter: 'Splinter', texas: 'Texas', texasInt: 'Texas over interference', leb: 'Lebensohl', lav: 'Lavinthal', roman: 'Roman discards', invMin: 'Inverted minors', drury: 'Drury', nmf: 'NMF', fsf: '4th suit forcing', ogust: 'Ogust', supx: 'Support X', respx: 'Responsive X', sjs: 'Strong jump shifts', dont: 'DONT', gamb: 'Gambling 3NT' };
 function convLine(p) {
   if (p.cline && p.cline.trim()) return esc(p.cline.trim());   // the player wrote it themselves
   const y = p.sys && p.sys !== 'none' ? E.sysOf(p.sys) : null;
