@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v696`, kulüpler `kulup-v208`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v697`, kulüpler `kulup-v208`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -59,6 +59,8 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v696`, kulü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
 
 ### 2026-11-27
+- 🌐 Online artık hiçbir şey indirmez (eskiden ~2 MB live-*.json): pencere hemen açılır, basılan sistem kartın temel sistemi olur,
+  koltuk seçilince (`rtOnSit`) oyun başlar (robot adları varsayılan, masa açık `soloPub`). v697.
 - Sistem masası izleme ekranında 📊 Masalar düğmesi kalktı. 🌐 Online penceresinde o sistemde oynayıp başkalarını kabul eden
   oyuncular "Katılmak iste" ile (`rtOthers`, Net.st.tables, host'un prof.sys'i). Oturan oyuncunun masası zaten Açık masalar'da açık (soloPub). v696.
 - Ana sayfa: kulübün açık online turnuvası artık Açık masalar'da değil, yalnız Kulüpler içinde (`ctCardHtml` ana sayfadan çıktı).

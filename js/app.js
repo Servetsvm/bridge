@@ -3160,16 +3160,18 @@ function rtOthers(k) {
 }
 function rtOnline(k) {
   if (online()) { flash(T('Online') + ' ●', 1500); return; }
-  if (k) ui.rtOn = k;
-  rtLoad().then(() => {
-    rtPick(ui.rtOn); const x = rtCur(Date.now()), b = x && (x.b || x.wait);
-    if (!b) { flash(T('The robots will be back soon.'), 2500); return; }
-    openOv('rton', `<h2>🌐 ${T('Online')} · ${esc(rtSysName(ui.rtOn))}</h2>
-      <div class="muted">${T('First choose your convention card: the robots, your partner too, play it. Then take a seat.')}</div>
-      ${convCardHtml()}${rtOthers(ui.rtOn)}
-      <div class="grp"><span>🪑 ${T('Sit down')}</span><div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtsit="${s}">${SEAT[s]}<small>${esc(rtName(s))}</small></button>`).join('')}</div></div>
-      <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
-  });
+  if (k) { ui.rtOn = k; if (!sysIs(k)) { setSys(k); Store.saveSettings(SET); save(); } }   // the system tapped is the card's base system (it can be changed here)
+  // nothing is loaded or played until a seat is taken
+  openOv('rton', `<h2>🌐 ${T('Online')} · ${esc(rtSysName(ui.rtOn))}</h2>
+    <div class="muted">${T('First choose your convention card: the robots, your partner too, play it. Then take a seat.')}</div>
+    ${convCardHtml()}${rtOthers(ui.rtOn)}
+    <div class="grp"><span>🪑 ${T('Sit down')}</span><div class="rtseats">${[2, 3, 0, 1].map(s => `<button class="btn gold" data-rtonsit="${s}">${SEAT[s]}</button>`).join('')}</div></div>
+    <div class="row2"><button class="btn" id="oClose">${T('Close')}</button></div>`);
+}
+// a seat taken: the boards start now, with robots in the other seats (they play this player's card); the table is open to others
+function rtOnSit(s) {
+  SET.rtNames = null; SET.seat = s; Store.saveSettings(SET); save();
+  closeOv(); ui.saved = null; Net.st.soloPub = true; resume();
 }
 // 🪑 Sit down on the system table's bar: the four seats with their robots' names
 function rtSitPick() {
@@ -3774,6 +3776,7 @@ document.addEventListener('click', ev_ => {
   if (t.id === 'bRtNext') { rtNext(); return; }
   if (t.id === 'bRtSit') { rtSitPick(); return; }
   if (t.dataset.rton) { rtOnline(t.dataset.rton); return; }
+  if (t.dataset.rtonsit != null) { rtOnSit(+t.dataset.rtonsit); return; }
   if (t.id === 'tFileOff') { const tr = Net.st.tours[ui.tsetId]; if (tr) { tr.deals = []; showTourSetup(tr.id); } return; }
   if (t.id === 'hBidPrac') { ui.pzSel = null; showPuzzle(); return; }
   if (t.id === 'bTblScore') { Net.panel(); return; }
