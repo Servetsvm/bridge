@@ -944,21 +944,24 @@ window.ctKick = function (k) {
 };
 // 🏆 Team match online (from the club's card): any member starts it now — an open evening, robots in the empty seats,
 // each pair's robot partner bids its player's card; then the seats to sit down
-window.ctQuickPick = function (club, np, bpr) {
-  ui.ctq = { club, np: np || (ui.ctq && ui.ctq.club === club ? ui.ctq.np : 8), bpr: bpr || (ui.ctq && ui.ctq.club === club ? ui.ctq.bpr : 3) };
-  const q = ui.ctq, k = (v, on, a) => `<button class="btn${on ? ' gold' : ''}" data-ctq="${a}">${v}</button>`, pc = Math.floor(q.np / 2) + (Math.floor(q.np / 2) % 2), rounds = Math.max(1, pc - 1);
+// the players and the boards (as at the club's Team match), then Start now
+const ctqPlan = q => { const pc = Math.floor(q.np / 2) + (Math.floor(q.np / 2) % 2), r0 = Math.max(1, pc - 1), bpr = Math.max(1, Math.min(8, Math.round(q.nb / r0))), R = Math.max(1, Math.round(q.nb / bpr)); return { bpr, R, b: R * bpr, tables: Math.ceil(q.np / 4) }; };
+window.ctQuickPick = function (club, np, nb) {
+  const old = ui.ctq && ui.ctq.club === club ? ui.ctq : null;
+  ui.ctq = { club, np: np || (old ? old.np : 8), nb: nb || (old ? old.nb : 12) };
+  const q = ui.ctq, c = ctqPlan(q), k = (v, on, a) => `<button class="ctqkey${on ? ' on' : ''}" data-ctq="${a}">${v}</button>`;
   openOv('ctq', `<h2>🏆 ${T('Team match')} · 🌐 ${T('Online')}</h2><div class="muted">${T('Played in BridgePlay, starts now; robots in the empty seats')}</div>
-    <div class="grp"><span>${T('Number of players')}</span><div class="row2">${[4, 8, 12, 16, 20, 24].map(v => k(v, q.np === v, 'np|' + v)).join('')}</div></div>
-    <div class="grp"><span>${T('Boards per round')}</span><div class="row2">${[2, 3, 4].map(v => k(v, q.bpr === v, 'bpr|' + v)).join('')}</div></div>
-    <div class="muted">${Math.ceil(q.np / 4)} ${T('tables')} · ${rounds * q.bpr} ${T('boards')}</div>
-    <div class="row2"><button class="btn new" data-ctq="go">▶ ${T('Start now')}</button><button class="btn" id="oClose">${T('Close')}</button></div>`);
+    <div class="grp"><span>${T('Number of players')}</span><div class="ctqkeys k5">${[8, 12, 16, 20, 24, 28, 32, 36, 40].map(v => k(v, q.np === v, 'np|' + v)).join('')}</div></div>
+    <div class="grp"><span>${T('Number of boards')}</span><div class="ctqkeys k4">${[8, 12, 16, 20, 24, 28, 32, 36].map(v => k(v, q.nb === v, 'nb|' + v)).join('')}</div></div>
+    <div class="ctqsum"><b>${c.tables}</b> ${T('tables')} · <b>${c.b}</b> ${T('boards')}</div>
+    <div class="ctqact"><button class="btn" id="oClose">✕</button><button class="btn new" data-ctq="go">▶ ${T('Start now')}</button></div>`);
 };
 async function ctQuickStart() {
   const q = ui.ctq; if (!q) return;
   try { await ctSession(); } catch (e) { flash(T('Could not send — sign in with your name and PIN first.'), 3000); return; }
-  const pc = Math.floor(q.np / 2) + (Math.floor(q.np / 2) % 2), rounds = Math.max(1, pc - 1), at = Date.now() - 1000, id = Date.now().toString(36);
+  const c = ctqPlan(q), at = Date.now() - 1000, id = Date.now().toString(36);
   const cl = ((ui.clubLive || []).find(c => c.club === q.club) || {});
-  const info = { n: T('Team match'), at, b: rounds * q.bpr, bpr: q.bpr, np: q.np, sc: 'both', sys: SET.sys || 'twoone', conv: [], mov: 'howell', rep: 0, watch: 1, open: true, tm: 1,
+  const info = { n: T('Team match'), at, b: c.b, bpr: c.bpr, np: q.np, sc: 'both', sys: SET.sys || 'twoone', conv: [], mov: 'howell', rep: 0, watch: 1, open: true, tm: 1,
     st: 'reg', cn: String(cl.c || cl.name || q.club).slice(0, 40), by: String(myNm()).slice(0, 20), ts: Date.now() };
   try {
     await Net.Cloud.put('ot/' + encodeURIComponent(q.club) + '/' + id + '/info', info);
@@ -972,5 +975,5 @@ document.addEventListener('click', ev => {
   const b = ev.target.closest('[data-ctq],[data-ctkick]'); if (!b) return;
   if (b.dataset.ctkick) { ctKick(b.dataset.ctkick); return; }
   const [k, v] = b.dataset.ctq.split('|'); if (k === 'go') { ctQuickStart(); return; }
-  ctQuickPick(ui.ctq.club, k === 'np' ? +v : ui.ctq.np, k === 'bpr' ? +v : ui.ctq.bpr);
+  ctQuickPick(ui.ctq.club, k === 'np' ? +v : ui.ctq.np, k === 'nb' ? +v : ui.ctq.nb);
 });

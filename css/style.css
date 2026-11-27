@@ -2547,3 +2547,8 @@ body.homev2 .h2tile.h2sys .rton:hover{filter:brightness(1.1)}
 .sheet[data-ov="ctq"] .row2 .btn{min-height:64px;font-size:20px}
 .sheet[data-ov="ctq"] .ctqbig{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px}
 .sheet[data-ov="ctq"] .ctqbig .btn{min-height:110px;font-size:26px;width:100%}
+.ctqkeys{display:grid;gap:8px}.ctqkeys.k5{grid-template-columns:repeat(5,1fr)}.ctqkeys.k4{grid-template-columns:repeat(4,1fr)}
+.ctqkey{min-height:58px;border-radius:12px;border:1px solid rgba(127,127,127,.35);background:#fff;color:#1b2a20;font:800 20px/1 var(--f-ui,inherit);cursor:pointer}
+.ctqkey.on{background:#1f5d36;border-color:#1f5d36;color:#fff}
+.ctqsum{text-align:center;font-size:18px;padding:12px;border-radius:12px;background:rgba(31,93,54,.1)}
+.ctqact{margin-top:auto;display:grid;grid-template-columns:1fr 3fr;gap:10px}.ctqact .btn{min-height:64px;font-size:20px}
