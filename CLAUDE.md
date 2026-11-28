@@ -41,7 +41,7 @@ IMP/MP. PWA (kurulabilir, çevrimdışı) + tek dosya sürüm `dist/bridge-table
 - `lessons.json` (robot öğrenme kitabı) 2026-11-08'de durduruldu; değiştirme.
 
 ## Kaldığımız yer
-_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v736`, kulüpler `kulup-v217`.
+_(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v737`, kulüpler `kulup-v217`.
 - Kulüp programının sürümü ayrı: `kulupler/service-worker.js` → `CACHE_NAME` (kulupler/ değişince artır).
 - Kulüp adı 4 yerde tutulur: `gate/clubs/<id>/info/name`, `gate/clubList/<id>/n`, `gate/owners/<sahip>/<id>`, `gate/live/<id>/c`.
 
@@ -57,6 +57,11 @@ _(2026-11-26 itibarıyla)_ Yarım iş yok. Sürümler: site `bridge-v736`, kulü
 
 ## Oturum günlüğü
 (En yeni en üstte. Her oturumda 2–5 satır: ne yapıldı, ne yarım kaldı, sıradaki fikirler.)
+
+### 2026-11-28
+- **Takım maçı takılmasının nedeni bulundu** (iki sanal telefon, sahte DB, uzun oyun): el bitince sonraki el yalnız "Sonraki el" ile başlıyordu;
+  sonuç ekranında kalan oyuncunun sırası (ya da ilk teklif) gelince bütün masa bekliyordu. Artık `ctPoll`: sonuç 10 sn gösterilir, sonra sonraki el
+  kendiliğinden (`t.doneAt`, BridgeScore testi `ctBmOn` hariç, son el hariç). `ctSeatKey` geçersiz koltukta '' döner. Test: kimse basmadan 2 el art arda. v737.
 
 ### 2026-11-27
 - **Takım maçı bekleme odası:** online Takım maçı "🪑 Masaları aç" ile kurulur (`info.lobby:1, byk`), oyun başlamaz: koltuklar alınır, oturan 4 sn'de bir hb yazar,

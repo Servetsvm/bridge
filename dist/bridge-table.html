@@ -19032,7 +19032,7 @@ function ctSeatKey(seat) {
   const t = CT.tbl; if (!t || !G) return '';
   let s = seat;
   if (G.play && G.phase === 'play') { const c = G.play.contract, dummy = (c.decl + 2) % 4; if (s === dummy) s = c.decl; }
-  return t.seats[s].k;
+  return (t.seats[s] || {}).k || '';
 }
 const ctBack = () => { const t = CT.tbl; return !!(t && t.waitI != null && G && G.ct && G.ct.i === t.waitI && G.phase !== 'done'); };
 function ctWho(seat) {
@@ -19093,6 +19093,8 @@ async function ctRebuild() {
 // what the others did since: applied in order
 async function ctPoll() {
   const t = CT.tbl; if (!t || t.busy || !G || !G.ct) return;
+  // a board over: its result is shown 10 s, then the next board starts by itself (a phone left on the result screen held the whole table)
+  if (G.phase === 'done' && !t.watch && !ctBmOn() && G.ct.i + 1 < t.boards.length) { if (!t.doneAt || t.doneI !== G.ct.i) { t.doneAt = Date.now(); t.doneI = G.ct.i; } else if (Date.now() - t.doneAt > 10e3) { t.doneAt = 0; if (ui.overlay) closeOv(); ctGoNext(); return; } }
   try {
     const raw = await Net.Cloud.get(t.p + '/t/' + t.tid + '/a'), L = Array.isArray(raw) ? raw : Object.keys(raw || {}).sort((a, b) => a - b).map(k => raw[k]);
     if (L.length < t.n) { if (!t.wait) ctRebuild(); return; }   // our own last action may still be on its way
